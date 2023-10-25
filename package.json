@@ -32,7 +32,7 @@
     "type-check": "turbo run type-check"
   },
   "devDependencies": {
-    "@changesets/cli": "2.26.1",
+    "@changesets/cli": "2.26.2",
     "@commitlint/cli": "17.6.1",
     "@lottiefiles/commitlint-config": "2.0.0",
     "@lottiefiles/eslint-plugin": "3.0.0",
