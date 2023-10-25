@@ -1,0 +1,40 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "globalDependencies": ["tsconfig.build.json", "tsconfig.dev.json", "tsconfig.json"],
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "stats:eslint": {
+      "outputs": []
+    },
+    "stats:ts": {
+      "outputs": []
+    },
+    "test": {
+      "cache": false,
+      "dependsOn": ["build"],
+      "outputs": []
+    },
+    "test:coverage": {
+      "cache": false,
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"]
+    },
+    "type-check": {
+      "cache": false
+    },
+    "lint": {
+      "cache": false,
+      "outputs": []
+    },
+    "update-releases": {
+      "dependsOn": ["^update-releases"]
+    },
+    "clean": {},
+    "dev": {
+      "cache": false
+    }
+  }
+}

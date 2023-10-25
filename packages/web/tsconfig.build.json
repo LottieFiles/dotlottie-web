@@ -1,0 +1,16 @@
+{
+  // Extend from the build config
+  "extends": "../../tsconfig.build.json",
+
+  // Compiler options
+  "compilerOptions": {
+    // Compiled output JS and source maps output directory
+    "outDir": "./dist",
+
+    // Source root directory
+    "rootDir": "./src"
+  },
+
+  // Files included in compilation
+  "include": ["./src"]
+}

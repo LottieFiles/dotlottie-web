@@ -1,0 +1,37 @@
+name: 'Close stale issues'
+on:
+  schedule:
+    - cron: '30 1 * * *'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          # Idle number of days before marking an issue/pr as stale.
+          days-before-stale: 60
+          # Idle number of days before closing an stale issue/pr.
+          # Set to -1 to never automatically close stale issues.
+          days-before-close: -1
+          # Message to post on the stale issue.
+          stale-issue-message:
+            'This issue has been automatically marked as stale because it has not had recent activity. It will be closed
+            in 7 days if no further activity occurs.'
+          # Label to apply on the stale issue
+          stale-issue-label: 'stale'
+          # Labels on an issue exempted from being marked as stale.
+          # Set to #wip for work-in-progress:
+          exempt-issue-labels: 'wip'
+          # Message to post on the stale pr.
+          stale-pr-message:
+            'This rull request has been automatically marked as stale because it has not had recent activity. It will be
+            closed in 7 days if no further activity occurs.'
+          # Label to apply on the stale pr.
+          stale-pr-label: 'stale'
+          # Labels on a pr exempted from being marked as stale.
+          # Set to #wip for work-in-progress:
+          exempt-pr-labels: 'wip'
+          # Whether to remove stale label from issue/pr on updates or comments.
+          remove-stale-when-updated: true

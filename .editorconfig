@@ -1,0 +1,44 @@
+root = true
+
+# General rules
+[*]
+charset = utf-8
+end_of_line = lf
+
+# JSON
+[*.json]
+indent_size = 2
+indent_style = space
+tab_width = 2
+
+# HTML
+[*.html]
+indent_size = 4
+indent_style = tab
+tab_width = 4
+
+# Markdown
+[*.md]
+insert_final_newline = false
+trim_trailing_whitespace = false
+
+# Patch diffs
+[*.patch]
+insert_final_newline = false
+trim_trailing_whitespace = false
+
+# Typescript
+[*.{ts,tsx}]
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+max_line_length = 120
+quote_type = single
+tab_width = 2
+
+# Yaml
+[*.{yaml,yml}]
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+tab_width = 2

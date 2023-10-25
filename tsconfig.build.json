@@ -1,0 +1,31 @@
+{
+  // Extend from the org config
+  "extends": "@lottiefiles/tsconfig",
+
+  "compilerOptions": {
+    // Target ES version
+    "target": "ESNext",
+
+    // Target module system
+    "module": "ESNext"
+  },
+
+  "exclude": [
+    // Exclude node_modules
+    "**/node_modules",
+
+    // Exclude tests and snapshots
+    "**/test",
+    "**/*.test.ts",
+    "**/__fixtures__",
+    "**/__mocks__",
+    "**/__snapshots__",
+    "**/__tests__",
+    "**/coverage",
+
+    // Exclude builds
+    "**/build",
+    "**/dist",
+    "**/artifacts"
+  ]
+}

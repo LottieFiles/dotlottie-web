@@ -1,0 +1,33 @@
+# Build artifacts
+build/
+dist/
+artifacts/
+
+# Changelog
+CHANGELOG.md
+
+# IDE related
+.idea/
+.history/
+
+# Markdown (let remark handle it)
+*.md
+
+# Package management
+node_modules/
+.yarn/
+.pnp.*
+pnpm-lock.yaml
+
+# Testing
+__fixtures__
+__snapshots__
+coverage/
+reports/
+
+# Temporary or local data
+temp/
+tmp/
+
+# Renderer releases
+releases/

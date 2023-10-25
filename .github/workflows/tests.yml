@@ -1,0 +1,47 @@
+name: Run tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  tests:
+    name: Tests
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ['18']
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 7.x
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          cache: 'pnpm'
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run linting
+        run: pnpm build
+
+      - name: Run linting
+        run: pnpm lint:prod
+
+      - name: Run formatting
+        run: pnpm format
+
+      - name: Run testing
+        run: pnpm test

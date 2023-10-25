@@ -1,0 +1,45 @@
+# Build outputs
+build/
+dist/
+artifacts/
+
+# Changelog
+.changeset/config.json
+CHANGELOG.md
+
+# IDE related
+.idea/
+.history/
+
+# Package management
+node_modules/
+.yarn/
+.pnp.*
+
+# Testing
+coverage/
+__snapshots__
+__fixtures__
+
+# Temporary or local data
+temp/
+tmp/
+
+# Clinic profiling
+.clinic
+
+# Misc files to ignroe
+.eslintrc.cjs
+
+# NextJS
+.next/
+next-env.d.ts
+
+# Exclude from ignore
+!.github
+!.vscode,
+
+# Ignore renderer releases
+releases/
+
+bin/

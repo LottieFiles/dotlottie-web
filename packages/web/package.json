@@ -1,0 +1,59 @@
+{
+  "name": "@lottiefiles/dotlottie-web",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Lottie and DotLottie player for the web",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LottieFiles/dotlottie-web.git",
+    "directory": "packages/dotlottie-web"
+  },
+  "homepage": "https://github.com/LottieFiles/dotlottie-web#readme",
+  "bugs": "https://github.com/LottieFiles/dotlottie-web/issues",
+  "author": "LottieFiles",
+  "contributors": [
+    "Abdelrahman Ashraf <a.theashraf@gmail.com>"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./*": "./dist/*.js"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/*"
+      ]
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "dotlottie",
+    "thorvg",
+    "lottie"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:wasm": "./build_wasm.sh",
+    "build:wasm:docker": "./docker_build_wasm.sh",
+    "dev": "tsup --watch",
+    "lint": "eslint --fix .",
+    "stats:eslint": "cross-env TIMING=1 eslint .",
+    "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "cross-env": "7.0.3",
+    "esbuild-plugin-wasm": "^1.1.0",
+    "tsup": "7.2.0",
+    "typescript": "5.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
