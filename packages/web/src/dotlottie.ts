@@ -67,7 +67,9 @@ export class DotLottie {
     const response = await fetch(src);
 
     if (response.ok) {
-      this.loadData(await response.arrayBuffer());
+      const buffer = await response.arrayBuffer();
+
+      this.loadData(buffer);
     } else {
       console.error(`Failed to fetch ${src}`);
     }
@@ -165,7 +167,7 @@ export class DotLottie {
   }
 
   public loadData(data: ArrayBuffer): void {
-    if (!this._renderer?.load(new Int8Array(data), 'lottie', this._canvas.width, this._canvas.height)) {
+    if (!this._renderer?.load(new Int8Array(data), this._canvas.width, this._canvas.height)) {
       console.error(`Unable to load an image. Error: ${this._renderer?.error()}`);
     }
   }

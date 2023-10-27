@@ -13,7 +13,8 @@ class __attribute__((visibility("default"))) Renderer
 public:
     ~Renderer()
     {
-        free(buffer);
+        if (buffer)
+            free(buffer);
         Initializer::term(CanvasEngine::Sw);
     }
 
@@ -27,12 +28,16 @@ public:
         return errorMsg;
     }
 
-    bool load(string data, string mimetype, int width, int height)
+    bool load(string data, int width, int height)
     {
+
         errorMsg = NoError;
 
         if (!canvas)
+        {
+            errorMsg = "Invalid canvas";
             return false;
+        }
 
         if (data.empty())
         {
@@ -44,7 +49,7 @@ public:
 
         animation = Animation::gen();
 
-        if (animation->picture()->load(data.c_str(), data.size(), mimetype, false) != Result::Success)
+        if (animation->picture()->load(data.c_str(), data.size(), "lottie", false) != Result::Success)
         {
             errorMsg = "load() fail";
             return false;
@@ -92,10 +97,16 @@ public:
         errorMsg = NoError;
 
         if (!canvas || !animation)
+        {
+            errorMsg = "Invalid canvas or animation";
             return val(typed_memory_view<uint8_t>(0, nullptr));
+        }
 
         if (!updated)
+        {
+
             return val(typed_memory_view(width * height * 4, buffer));
+        }
 
         if (canvas->draw() != Result::Success)
         {
