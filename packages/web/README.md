@@ -60,6 +60,12 @@ const dotLottie = new DotLottie({
 pnpm install
 ```
 
+### Run Dev Server
+
+```bash
+pnpm dev
+```
+
 ### Build
 
 ```bash
