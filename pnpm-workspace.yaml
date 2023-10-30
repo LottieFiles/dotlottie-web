@@ -1,4 +1,3 @@
 packages:
-  - 'packages/renderers/*'
   - 'packages/*'
   - 'scripts/'
