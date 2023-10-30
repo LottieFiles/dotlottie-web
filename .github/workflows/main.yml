@@ -1,0 +1,114 @@
+name: main
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛑 Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.0
+
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup pnpm@v8
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: ⎔ Setup Node@v18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: 📥 Download deps
+        run: pnpm install
+
+      - name: 🏗 Build
+        run: pnpm build
+
+      - name: 🔍 Verify types
+        run: pnpm type-check
+
+      - name: 🕵️ Lint
+        run: pnpm lint:prod
+
+      - name: 💅 Verify format (`pnpm format` committed?)
+        run: pnpm format
+
+      - name: 🛡️ Test
+        run: pnpm test
+
+  release:
+    name: release
+    needs: validate
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup pnpm@v8
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: ⎔ Setup Node@v18
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version: 18
+          registry-url: 'https://registry.npmjs.org'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+
+      - name: ⎔ Setup .npmrc (NPM)
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPMJS_TOKEN }}" >> ~/.npmrc
+
+      - name: 📥 Install dependencies
+        run: pnpm install
+
+      - name: 🚀 Release to NPM
+        uses: changesets/action@v1
+        with:
+          commit: 'chore: 🤖 update versions'
+          title: 'chore: 🤖 update versions'
+          publish: pnpm release:publish
+          version: pnpm release:version
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GPR_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+
+      - name: Remove existing NPM .npmrc
+        run: rm -f "$HOME/.npmrc"
+
+      - name: ⎔ Setup Node@v18 for Github Packages
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version: 18
+          registry-url: 'https://npm.pkg.github.com/'
+
+      - name: 📥 Install dependencies
+        run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GPR_TOKEN }}
+
+      - name: 🚀 Release to Github Packages
+        uses: changesets/action@v1
+        with:
+          commit: 'chore: update versions'
+          title: 'chore: update versions'
+          publish: pnpm release:publish
+          version: pnpm release:version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets. NPM_TOKEN }}

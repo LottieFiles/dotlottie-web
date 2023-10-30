@@ -3,7 +3,6 @@
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "packages/renderers/*",
     "packages/*",
     "scripts/"
   ],
@@ -29,6 +28,8 @@
     "release:version": "changeset version",
     "stats:eslint": "cross-env TIMING=1 turbo run stats:eslint",
     "stats:ts": "turbo run stats:ts",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
     "type-check": "turbo run type-check"
   },
   "devDependencies": {
@@ -50,5 +51,5 @@
     "turbo": "1.9.3",
     "typescript": "5.0.4"
   },
-  "packageManager": "pnpm@7.1.6"
+  "packageManager": "pnpm@8.9.2"
 }
