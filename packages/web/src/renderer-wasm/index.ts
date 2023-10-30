@@ -8,7 +8,7 @@ export interface Renderer {
   duration(): number;
   error(): string;
   frame(no: number): boolean;
-  load(data: Int8Array, mimetype: 'lottie', width: number, height: number): boolean;
+  load(data: string, width: number, height: number): boolean;
   render(): Uint8Array;
   resize(width: number, height: number): void;
   size(): Float32Array;

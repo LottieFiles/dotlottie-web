@@ -1,4 +1,4 @@
-project('thorvgLottieRenderer', 'cpp')
+project('Renderer', 'cpp')
 
 cc = meson.get_compiler('cpp')
 
