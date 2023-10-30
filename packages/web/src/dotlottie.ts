@@ -147,15 +147,7 @@ export class DotLottie {
 
     this._currentFrame = Math.max(0, Math.min(this._currentFrame, this._totalFrame - 1));
 
-    if (!this._renderer?.frame(this._currentFrame)) {
-      console.error(this._renderer?.error());
-
-      // eslint-disable-next-line no-warning-comments
-      // TODO: should return false, but would stop the animation loop
-      return true;
-    }
-
-    return true;
+    return this._renderer?.frame(this._currentFrame) ?? false;
   }
 
   /**
