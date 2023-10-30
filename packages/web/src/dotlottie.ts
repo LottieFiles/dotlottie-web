@@ -37,6 +37,10 @@ export class DotLottie {
 
   private _duration = 0;
 
+  /**
+   * Creates an instance of DotLottie.
+   * @param config - Configuration object for DotLottie.
+   */
   public constructor(config: Config) {
     this._animationLoop = this._animationLoop.bind(this);
     this._initRenderer();
@@ -57,33 +61,53 @@ export class DotLottie {
     }
   }
 
+  public get currentFrame(): number {
+    return this._currentFrame;
+  }
+
+  public get duration(): number {
+    return this._duration;
+  }
+
+  public get totalFrame(): number {
+    return this._totalFrame;
+  }
+
+  public get loop(): boolean {
+    return this._loop;
+  }
+
+  /**
+   * Initializes the renderer.
+   */
   private async _initRenderer(): Promise<void> {
     if (this._renderer) return;
 
     this._renderer = await createRenderer();
   }
 
+  /**
+   * Load animation data from a URL.
+   * @param src - Source URL of the animation data.
+   */
   private async _loadFromURL(src: string): Promise<void> {
     const response = await fetch(src);
 
     if (response.ok) {
-      const buffer = await response.arrayBuffer();
+      const data = await response.text();
 
-      this.loadData(buffer);
+      if (!this._renderer?.load(data, this._canvas.width, this._canvas.height)) {
+        console.error(`Unable to load an image. Error: ${this._renderer?.error()}`);
+      }
     } else {
       console.error(`Failed to fetch ${src}`);
     }
   }
 
-  public flush(): void {
-    const context = this._canvas.getContext('2d');
-
-    if (context && this._imageData) {
-      context.putImageData(this._imageData, 0, 0);
-    }
-  }
-
-  public render(): void {
+  /**
+   * Renders the animation frame on the canvas.
+   */
+  private _render(): void {
     this._renderer?.resize(this._canvas.width, this._canvas.height);
 
     if (this._renderer?.update()) {
@@ -92,21 +116,21 @@ export class DotLottie {
 
       if (clampedBuffer.length === 0) return;
       this._imageData = new ImageData(clampedBuffer, this._canvas.width, this._canvas.height);
-      this.flush();
+      const context = this._canvas.getContext('2d');
+
+      context?.putImageData(this._imageData, 0, 0);
     }
   }
 
-  public setSpeed(speed: number): void {
-    this._speed = speed;
-  }
-
-  public update(): boolean {
+  /**
+   * Updates the current frame and animation state.
+   * @returns Boolean indicating if update was successful.
+   */
+  private _update(): boolean {
     if (!this._playing) return false;
 
     this._duration = this._renderer?.duration() ?? 0;
-    this._currentFrame = Math.round(
-      (((Date.now() / 1000 - this._beginTime) * this._speed) / this._duration) * this._totalFrame,
-    );
+    this._currentFrame = (((Date.now() / 1000 - this._beginTime) * this._speed) / this._duration) * this._totalFrame;
 
     if (this._currentFrame >= this._totalFrame) {
       if (this._loop) {
@@ -123,52 +147,74 @@ export class DotLottie {
 
     this._currentFrame = Math.max(0, Math.min(this._currentFrame, this._totalFrame - 1));
 
-    return this._renderer?.frame(this._currentFrame) ?? false;
+    if (!this._renderer?.frame(this._currentFrame)) {
+      console.error(this._renderer?.error());
+
+      // eslint-disable-next-line no-warning-comments
+      // TODO: should return false, but would stop the animation loop
+      return true;
+    }
+
+    return true;
   }
 
-  public stop(): void {
-    this._playing = false;
-    this._currentFrame = 0;
-    this._renderer?.frame(0);
-  }
-
-  public frame(frameNo: number): void {
-    this.pause();
-    this._currentFrame = frameNo;
-    this._renderer?.frame(this._currentFrame);
-  }
-
-  public pause(): void {
-    this._playing = false;
-  }
-
+  /**
+   * Loop that handles the animation playback.
+   */
   private _animationLoop(): void {
-    if (this.update() && this._playing) {
-      this.render();
+    if (this._update()) {
+      this._render();
       window.requestAnimationFrame(this._animationLoop);
     }
   }
 
-  private get progressFraction(): number {
-    return this._currentFrame / this._totalFrame;
-  }
-
+  /**
+   * Starts the animation playback.
+   */
   public play(): void {
     this._totalFrame = this._renderer?.totalFrame() ?? 0;
 
-    if (this._totalFrame === 0) return;
+    if (this._totalFrame === 0) {
+      console.error('Unable to play animation. No frames found.');
 
-    this._beginTime = Date.now() / 1000 - this.progressFraction * this._duration;
+      return;
+    }
 
+    const progress = this._currentFrame / this._totalFrame;
+
+    this._beginTime = Date.now() / 1000 - progress * this._duration;
     if (!this._playing) {
       this._playing = true;
-      window.requestAnimationFrame(this._animationLoop);
+      this._animationLoop();
     }
   }
 
-  public loadData(data: ArrayBuffer): void {
-    if (!this._renderer?.load(new Int8Array(data), this._canvas.width, this._canvas.height)) {
-      console.error(`Unable to load an image. Error: ${this._renderer?.error()}`);
-    }
+  /**
+   * Stops the animation playback and resets the current frame.
+   */
+  public stop(): void {
+    if (!this._playing && this._currentFrame === 0) return;
+
+    this._playing = false;
+    this._currentFrame = 0;
+    this._renderer?.frame(0);
+    this._render();
+  }
+
+  /**
+   * Pauses the animation playback.
+   */
+  public pause(): void {
+    if (!this._playing) return;
+
+    this._playing = false;
+  }
+
+  /**
+   * Sets the speed for animation playback.
+   * @param speed - Speed multiplier for playback.
+   */
+  public speed(speed: number): void {
+    this._speed = speed;
   }
 }

@@ -13,8 +13,7 @@ class __attribute__((visibility("default"))) Renderer
 public:
     ~Renderer()
     {
-        if (buffer)
-            free(buffer);
+        free(buffer);
         Initializer::term(CanvasEngine::Sw);
     }
 
