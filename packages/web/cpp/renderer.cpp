@@ -143,14 +143,8 @@ public:
     {
         if (!canvas || !animation)
             return false;
-        if (animation->frame(no) != Result::Success)
-        {
-            errorMsg = "frame() fail";
-            return false;
-        }
-
-        updated = true;
-
+        if (animation->frame(no) == Result::Success)
+            updated = true;
         return true;
     }
 
