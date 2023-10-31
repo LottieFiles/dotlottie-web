@@ -67,7 +67,7 @@ importers:
         version: link:../../packages/web
     devDependencies:
       typescript:
-        specifier: ^5.0.2
+        specifier: 5.0.4
         version: 5.0.4
       vite:
         specifier: ^4.4.5

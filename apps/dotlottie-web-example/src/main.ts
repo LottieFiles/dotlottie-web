@@ -14,10 +14,17 @@ app.innerHTML = `
   <button class="control-button" id="play">Play</button>
   <button class="control-button" id="pause">Pause</button>
   <button class="control-button" id="stop">Stop</button>
-  <label for="speed" class="speed-label">Speed</label>
-  <input type="range" id="speed" min="0" max="5" step="0.01" value="1" class="speed-slider" />
+  <label for="speed" class="speed-label">Speed: <span id="speed-value">x1</span></label>
+  <input type="range" id="speed" min="0" max="5" step="0.1" value="1" class="speed-slider" />
 </div>
 `;
+
+const speedSlider = document.getElementById('speed') as HTMLInputElement;
+const speedValueSpan = document.getElementById('speed-value') as HTMLSpanElement;
+
+speedSlider.addEventListener('input', () => {
+  speedValueSpan.textContent = `x${parseFloat(speedSlider.value).toFixed(2)}`;
+});
 
 const dotLottie = new DotLottie({
   autoplay: true,
