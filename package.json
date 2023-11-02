@@ -49,7 +49,7 @@
     "prettier": "2.8.8",
     "remark-cli": "11.0.0",
     "syncpack": "9.8.6",
-    "turbo": "1.9.3",
+    "turbo": "1.10.16",
     "typescript": "5.0.4"
   },
   "packageManager": "pnpm@8.10.1"
