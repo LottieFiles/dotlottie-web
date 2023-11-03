@@ -1,5 +1,9 @@
 # @lottiefiles/dotlottie-web
 
+![npm](https://img.shields.io/npm/v/@lottiefiles/dotlottie-web)
+![npm bundle size](https://img.shields.io/bundlephobia/min/@lottiefiles/dotlottie-web)
+![NPM](https://img.shields.io/npm/l/@lottiefiles/dotlottie-web)
+
 A JavaScript library for rendering [lottie](https://lottiefiles.github.io/lottie-docs/) and [dotLottie](https://dotlottie.io) animations in the browser.
 
 > 🚧 **Beta Alert:** We're still refining! The APIs in this package may undergo changes.
@@ -8,6 +12,7 @@ A JavaScript library for rendering [lottie](https://lottiefiles.github.io/lottie
 
 - [Installation](#installation)
 - [Usage](#usage)
+- [Live Example](#live-example)
 - [Options](#options)
 - [Properties](#properties)
 - [Methods](#methods)
@@ -22,22 +27,60 @@ npm install @lottiefiles/dotlottie-web
 
 ## Usage
 
+### Via npm
+
+After installation, you can import `DotLottie` in your JavaScript or TypeScript module:
+
 ```html
-<!-- HTML -->
-<canvas id="my-canvas"></canvas>
+<!-- Canvas element where the animation will be rendered -->
+<canvas id="my-canvas" width="300px" height="300px"></canvas>
 ```
 
-```javascript
-// JavaScript
+```js
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 
 const dotLottie = new DotLottie({
     autoplay: true,
     loop: true,
     canvas: document.getElementById('my-canvas'),
-    src: "https://example.com/path/to/animation.lottie", // or "https://example.com/path/to/animation.json"
+    src: "https://lottie.host/4db68bbd-31f6-4cd8-84eb-189de081159a/IGmMCqhzpt.lottie", // or .json file
 });
 ```
+
+### Via CDN
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>@lottiefiles/dotlottie-web | basic example</title>
+  </head>
+  <body>
+    <!-- Canvas element where the Lottie animation will be rendered -->
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <script type="module">
+      import { DotLottie } from "https://unpkg.com/@lottiefiles/dotlottie-web@latest/dist/index.js";
+
+      new DotLottie({
+        autoplay: true,
+        loop: true,
+        canvas: document.getElementById("canvas"),
+        src:
+          "https://lottie.host/5f7f4690-6311-4279-82e4-38c2eab146ab/niPwIBUnGa.json"
+      });
+    </script>
+  </body>
+</html>
+```
+
+## Live Example
+
+[![Edit @lottiefiles/dotlottie-web basic example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/lottiefiles-dotlottie-web-basic-example-tcy3rv?autoresize=1&fontsize=14&hidenavigation=1&theme=dark)
 
 ## Options
 
