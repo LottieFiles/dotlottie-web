@@ -28,7 +28,7 @@ npm install @lottiefiles/dotlottie-web
 ## Usage
 
 ```html
-<!-- Canvas where the animation will be rendered -->
+<!-- Canvas element where the animation will be rendered -->
 <canvas id="my-canvas" width="300px" height="300px"></canvas>
 ```
 
@@ -45,14 +45,7 @@ const dotLottie = new DotLottie({
 
 ## Live Example
 
-To see `@lottiefiles/dotlottie-web` in action, check out the live example below:
-
-<iframe src="https://codesandbox.io/embed/lottiefiles-dotlottie-web-basic-example-tcy3rv?fontsize=14&hidenavigation=1&theme=light"
-     style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
-     title="@lottiefiles/dotlottie-web basic example"
-     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
-     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts">
-</iframe>
+[![Edit @lottiefiles/dotlottie-web basic example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/lottiefiles-dotlottie-web-basic-example-tcy3rv?autoresize=1&fontsize=14&hidenavigation=1&theme=dark)
 
 ## Options
 
