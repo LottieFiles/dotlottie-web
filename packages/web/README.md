@@ -1,5 +1,9 @@
 # @lottiefiles/dotlottie-web
 
+![npm](https://img.shields.io/npm/v/@lottiefiles/dotlottie-web)
+![npm bundle size](https://img.shields.io/bundlephobia/min/@lottiefiles/dotlottie-web)
+![NPM](https://img.shields.io/npm/l/@lottiefiles/dotlottie-web)
+
 A JavaScript library for rendering [lottie](https://lottiefiles.github.io/lottie-docs/) and [dotLottie](https://dotlottie.io) animations in the browser.
 
 > 🚧 **Beta Alert:** We're still refining! The APIs in this package may undergo changes.
@@ -8,6 +12,7 @@ A JavaScript library for rendering [lottie](https://lottiefiles.github.io/lottie
 
 - [Installation](#installation)
 - [Usage](#usage)
+- [Live Example](#live-example)
 - [Options](#options)
 - [Properties](#properties)
 - [Methods](#methods)
@@ -23,21 +28,31 @@ npm install @lottiefiles/dotlottie-web
 ## Usage
 
 ```html
-<!-- HTML -->
-<canvas id="my-canvas"></canvas>
+<!-- Canvas where the animation will be rendered -->
+<canvas id="my-canvas" width="300px" height="300px"></canvas>
 ```
 
-```javascript
-// JavaScript
+```js
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 
 const dotLottie = new DotLottie({
     autoplay: true,
     loop: true,
     canvas: document.getElementById('my-canvas'),
-    src: "https://example.com/path/to/animation.lottie", // or "https://example.com/path/to/animation.json"
+    src: "https://lottie.host/4db68bbd-31f6-4cd8-84eb-189de081159a/IGmMCqhzpt.lottie", // or .json file
 });
 ```
+
+## Live Example
+
+To see `@lottiefiles/dotlottie-web` in action, check out the live example below:
+
+<iframe src="https://codesandbox.io/embed/lottiefiles-dotlottie-web-basic-example-tcy3rv?fontsize=14&hidenavigation=1&theme=light"
+     style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="@lottiefiles/dotlottie-web basic example"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts">
+</iframe>
 
 ## Options
 
