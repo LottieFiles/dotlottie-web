@@ -3,3 +3,4 @@
  */
 
 export * from './dotlottie';
+export * from './event-manager';

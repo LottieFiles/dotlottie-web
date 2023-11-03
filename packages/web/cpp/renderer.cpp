@@ -132,7 +132,7 @@ public:
         return val(animation->duration());
     }
 
-    val totalFrame()
+    val totalFrames()
     {
         if (!canvas || !animation)
             return val(0);
@@ -222,6 +222,6 @@ EMSCRIPTEN_BINDINGS(Renderer)
         .function("render", &Renderer::render)
         .function("size", &Renderer::size)
         .function("duration", &Renderer::duration)
-        .function("totalFrame", &Renderer::totalFrame)
+        .function("totalFrames", &Renderer::totalFrames)
         .function("frame", &Renderer::frame);
 }
