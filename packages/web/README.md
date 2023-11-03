@@ -27,6 +27,10 @@ npm install @lottiefiles/dotlottie-web
 
 ## Usage
 
+### Via npm
+
+After installation, you can import `DotLottie` in your JavaScript or TypeScript module:
+
 ```html
 <!-- Canvas element where the animation will be rendered -->
 <canvas id="my-canvas" width="300px" height="300px"></canvas>
@@ -41,6 +45,37 @@ const dotLottie = new DotLottie({
     canvas: document.getElementById('my-canvas'),
     src: "https://lottie.host/4db68bbd-31f6-4cd8-84eb-189de081159a/IGmMCqhzpt.lottie", // or .json file
 });
+```
+
+### Via CDN
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>@lottiefiles/dotlottie-web | basic example</title>
+  </head>
+  <body>
+    <!-- Canvas element where the Lottie animation will be rendered -->
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <script type="module">
+      import { DotLottie } from "https://unpkg.com/@lottiefiles/dotlottie-web@latest/dist/index.js";
+
+      new DotLottie({
+        autoplay: true,
+        loop: true,
+        canvas: document.getElementById("canvas"),
+        src:
+          "https://lottie.host/5f7f4690-6311-4279-82e4-38c2eab146ab/niPwIBUnGa.json"
+      });
+    </script>
+  </body>
+</html>
 ```
 
 ## Live Example
