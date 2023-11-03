@@ -35,13 +35,20 @@
     "build:wasm:docker": "./docker_build_wasm.sh",
     "dev": "tsup --watch",
     "lint": "eslint --fix .",
+    "size": "size-limit",
+    "size:why": "size-limit --why --clean-dir --save-bundle ./tmp",
     "stats:eslint": "cross-env TIMING=1 eslint .",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
     "type-check": "tsc --noEmit"
   },
+  "dependencies": {
+    "@dotlottie/dotlottie-js": "^0.6.0"
+  },
   "devDependencies": {
+    "@size-limit/esbuild-why": "^10.0.2",
+    "@size-limit/preset-small-lib": "^10.0.2",
     "cross-env": "7.0.3",
-    "serve": "^14.2.1",
+    "size-limit": "^10.0.2",
     "tsup": "7.2.0",
     "typescript": "5.0.4"
   },

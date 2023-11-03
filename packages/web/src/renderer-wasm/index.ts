@@ -12,7 +12,7 @@ export interface Renderer {
   render(): Uint8Array;
   resize(width: number, height: number): void;
   size(): Float32Array;
-  totalFrame(): number;
+  totalFrames(): number;
   update(): boolean;
 }
 
