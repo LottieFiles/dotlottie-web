@@ -10,15 +10,36 @@ import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import type { Renderer } from './renderer-wasm';
 import { createRenderer } from './renderer-wasm';
-import { loadFromURL } from './utils';
+import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL } from './utils';
 
 const MS_TO_SEC_FACTOR = 1000;
 
-interface Config {
+export interface Options {
+  /**
+   * Boolean indicating if the animation should start playing automatically.
+   */
   autoplay?: boolean;
+  /**
+   * The canvas element to render the animation on.
+   */
   canvas: HTMLCanvasElement;
+  /**
+   * The animation data.
+   * string: The JSON string of the animation data.
+   * ArrayBuffer: The ArrayBuffer of the .lottie file.
+   */
+  data?: string | ArrayBuffer;
+  /**
+   * Boolean indicating if the animation should loop.
+   */
   loop?: boolean;
+  /**
+   * The speed of the animation.
+   */
   speed?: number;
+  /**
+   * The source URL of the animation.
+   */
   src?: string;
 }
 
@@ -49,7 +70,7 @@ export class DotLottie {
 
   private _autoplay = false;
 
-  public constructor(config: Config) {
+  public constructor(config: Options) {
     this._animationLoop = this._animationLoop.bind(this);
 
     this._canvas = config.canvas;
@@ -61,7 +82,9 @@ export class DotLottie {
     this._initRenderer();
 
     if (config.src) {
-      this._load(config.src);
+      this._loadAnimationFromURL(config.src);
+    } else if (config.data) {
+      this._initializeAnimationFromData(config.data);
     }
   }
 
@@ -145,27 +168,12 @@ export class DotLottie {
    * Loads and initializes the animation from a given URL.
    *
    * @public
-   * @param src - The source URL of the animation.
+   * @param animationURL - The source URL of the animation.
    */
-  private _load(src: string): void {
-    loadFromURL(src)
-      .then((data) => {
-        if (this._renderer?.load(data, this._canvas.width, this._canvas.height)) {
-          this._totalFrames = this._renderer.totalFrames();
-          this._duration = this._renderer.duration();
-
-          this._eventManager.dispatch({
-            type: 'load',
-          });
-
-          if (this._autoplay) {
-            this.play();
-          }
-        } else {
-          throw new Error(
-            this._renderer?.error() ?? 'Error encountered while loading animation data into the renderer.',
-          );
-        }
+  private _loadAnimationFromURL(animationURL: string): void {
+    loadAnimationJSONFromURL(animationURL)
+      .then((animationJSON) => {
+        this._initializeAnimationFromData(animationJSON);
       })
       .catch((error) => {
         this._eventManager.dispatch({
@@ -173,6 +181,35 @@ export class DotLottie {
           error: error as Error,
         });
       });
+  }
+
+  /**
+   * Initializes the animation from the given data.
+   *
+   * @public
+   * @param data - The animation data.
+   */
+  private async _initializeAnimationFromData(data: string | ArrayBuffer): Promise<void> {
+    if (typeof data === 'string') {
+      if (this._renderer?.load(data, this._canvas.width, this._canvas.height)) {
+        this._totalFrames = this._renderer.totalFrames();
+        this._duration = this._renderer.duration();
+
+        this._eventManager.dispatch({
+          type: 'load',
+        });
+
+        if (this._autoplay) {
+          this.play();
+        }
+      } else {
+        throw new Error(this._renderer?.error() ?? 'Error encountered while initializing animation from data.');
+      }
+    } else if (data instanceof ArrayBuffer) {
+      const animationJSON = await getAnimationJSONFromDotLottie(data);
+
+      this._initializeAnimationFromData(animationJSON);
+    }
   }
 
   /**

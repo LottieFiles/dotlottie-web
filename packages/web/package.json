@@ -6,7 +6,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LottieFiles/dotlottie-web.git",
-    "directory": "packages/dotlottie-web"
+    "directory": "packages/web"
   },
   "homepage": "https://github.com/LottieFiles/dotlottie-web#readme",
   "bugs": "https://github.com/LottieFiles/dotlottie-web/issues",
