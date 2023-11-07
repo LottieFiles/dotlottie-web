@@ -79,13 +79,20 @@ export class DotLottie {
     this._speed = config.speed ?? 1;
     this._autoplay = config.autoplay ?? false;
 
-    this._initRenderer();
-
-    if (config.src) {
-      this._loadAnimationFromURL(config.src);
-    } else if (config.data) {
-      this._initializeAnimationFromData(config.data);
-    }
+    this._initRenderer()
+      .then(() => {
+        if (config.src) {
+          this._loadAnimationFromURL(config.src);
+        } else if (config.data) {
+          this._initializeAnimationFromData(config.data);
+        }
+      })
+      .catch((error) => {
+        this._eventManager.dispatch({
+          type: 'loadError',
+          error: error as Error,
+        });
+      });
   }
 
   // #region Getters and Setters
@@ -189,26 +196,50 @@ export class DotLottie {
    * @public
    * @param data - The animation data.
    */
-  private async _initializeAnimationFromData(data: string | ArrayBuffer): Promise<void> {
-    if (typeof data === 'string') {
-      if (this._renderer?.load(data, this._canvas.width, this._canvas.height)) {
-        this._totalFrames = this._renderer.totalFrames();
-        this._duration = this._renderer.duration();
-
-        this._eventManager.dispatch({
-          type: 'load',
-        });
-
-        if (this._autoplay) {
-          this.play();
+  private _initializeAnimationFromData(data: string | ArrayBuffer): void {
+    const loadAnimation = (animationData: string): void => {
+      try {
+        if (this._renderer?.load(animationData, this._canvas.width, this._canvas.height)) {
+          this._setupAnimationDetails();
+          this._eventManager.dispatch({ type: 'load' });
+          if (this._autoplay) {
+            this.play();
+          }
+        } else {
+          this._eventManager.dispatch({
+            type: 'loadError',
+            error: new Error('Error encountered while initializing animation from data.'),
+          });
         }
-      } else {
-        throw new Error(this._renderer?.error() ?? 'Error encountered while initializing animation from data.');
+      } catch (error) {
+        this._eventManager.dispatch({
+          type: 'loadError',
+          error: error as Error,
+        });
       }
-    } else if (data instanceof ArrayBuffer) {
-      const animationJSON = await getAnimationJSONFromDotLottie(data);
+    };
 
-      this._initializeAnimationFromData(animationJSON);
+    if (typeof data === 'string') {
+      loadAnimation(data);
+    } else if (data instanceof ArrayBuffer) {
+      getAnimationJSONFromDotLottie(data)
+        .then(loadAnimation)
+        .catch((error) => {
+          this._eventManager.dispatch({
+            type: 'loadError',
+            error: error as Error,
+          });
+        });
+    }
+  }
+
+  /**
+   * Sets up animation details like total frames and duration.
+   */
+  private _setupAnimationDetails(): void {
+    if (this._renderer) {
+      this._totalFrames = this._renderer.totalFrames();
+      this._duration = this._renderer.duration();
     }
   }
 
@@ -239,7 +270,6 @@ export class DotLottie {
   private _update(): boolean {
     if (!this._playing) return false;
 
-    this._duration = this._renderer?.duration() ?? 0;
     this._currentFrame =
       (((performance.now() / MS_TO_SEC_FACTOR - this._beginTime) * this._speed) / this._duration) * this._totalFrames;
 
@@ -297,8 +327,6 @@ export class DotLottie {
    * Starts the animation playback.
    */
   public play(): void {
-    this._totalFrames = this._renderer?.totalFrames() ?? 0;
-
     if (this._totalFrames === 0) {
       this._eventManager.dispatch({
         type: 'loadError',

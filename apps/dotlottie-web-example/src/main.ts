@@ -23,93 +23,101 @@ app.innerHTML = `
 </div>
 `;
 
-const dotLottie = new DotLottie({
-  canvas: document.getElementById('canvas') as HTMLCanvasElement,
-  // eslint-disable-next-line no-secrets/no-secrets
-  src: 'https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie',
-  // src: '/lolo.json',
-  loop: true,
-  autoplay: true,
-});
+fetch('/hamster.lottie')
+  .then(async (res) => res.arrayBuffer())
+  .then((data): void => {
+    const dotLottie = new DotLottie({
+      canvas: document.getElementById('canvas') as HTMLCanvasElement,
+      // eslint-disable-next-line no-secrets/no-secrets
+      // src: 'https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie',
+      // src: '/lolo.json',
+      data,
+      loop: true,
+      autoplay: true,
+    });
 
-const playPauseButton = document.getElementById('playPause') as HTMLButtonElement;
-const stopButton = document.getElementById('stop') as HTMLButtonElement;
-const currentFrameSpan = document.getElementById('current-frame') as HTMLSpanElement;
-const frameSlider = document.getElementById('frameSlider') as HTMLInputElement;
-const loopToggle = document.getElementById('loopToggle') as HTMLInputElement;
-const speedSlider = document.getElementById('speed') as HTMLInputElement;
-const speedValueSpan = document.getElementById('speed-value') as HTMLSpanElement;
+    const playPauseButton = document.getElementById('playPause') as HTMLButtonElement;
+    const stopButton = document.getElementById('stop') as HTMLButtonElement;
+    const currentFrameSpan = document.getElementById('current-frame') as HTMLSpanElement;
+    const frameSlider = document.getElementById('frameSlider') as HTMLInputElement;
+    const loopToggle = document.getElementById('loopToggle') as HTMLInputElement;
+    const speedSlider = document.getElementById('speed') as HTMLInputElement;
+    const speedValueSpan = document.getElementById('speed-value') as HTMLSpanElement;
 
-playPauseButton.addEventListener('click', () => {
-  if (dotLottie.playing) {
-    dotLottie.pause();
-  } else {
-    dotLottie.play();
-  }
-});
+    playPauseButton.addEventListener('click', () => {
+      if (dotLottie.playing) {
+        dotLottie.pause();
+      } else {
+        dotLottie.play();
+      }
+    });
 
-stopButton.addEventListener('click', () => {
-  dotLottie.stop();
-  playPauseButton.innerText = 'Play';
-  frameSlider.value = '0';
-});
+    stopButton.addEventListener('click', () => {
+      dotLottie.stop();
+      playPauseButton.innerText = 'Play';
+      frameSlider.value = '0';
+    });
 
-frameSlider.addEventListener('input', () => {
-  const frame = frameSlider.valueAsNumber;
+    frameSlider.addEventListener('input', () => {
+      const frame = frameSlider.valueAsNumber;
 
-  dotLottie.pause();
-  dotLottie.setFrame(frame);
-  dotLottie.play();
-});
+      dotLottie.pause();
+      dotLottie.setFrame(frame);
+      dotLottie.play();
+    });
 
-loopToggle.addEventListener('change', () => {
-  dotLottie.setLoop(!dotLottie.loop);
-});
+    loopToggle.addEventListener('change', () => {
+      dotLottie.setLoop(!dotLottie.loop);
+    });
 
-// Speed control
-speedSlider.addEventListener('input', () => {
-  speedValueSpan.textContent = `x${parseFloat(speedSlider.value).toFixed(2)}`;
+    // Speed control
+    speedSlider.addEventListener('input', () => {
+      speedValueSpan.textContent = `x${parseFloat(speedSlider.value).toFixed(2)}`;
 
-  dotLottie.setSpeed(parseFloat(speedSlider.value));
-});
+      dotLottie.setSpeed(parseFloat(speedSlider.value));
+    });
 
-dotLottie.addEventListener('load', (event) => {
-  console.log(event);
-});
+    dotLottie.addEventListener('load', (event) => {
+      console.log(event);
+    });
 
-dotLottie.addEventListener('loadError', (event) => {
-  console.log(event);
-});
+    dotLottie.addEventListener('loadError', (event) => {
+      console.log(event);
+    });
 
-dotLottie.addEventListener('play', (event) => {
-  console.log(event);
-  frameSlider.max = (dotLottie.totalFrames - 1).toString();
-  playPauseButton.innerText = 'Pause';
-});
+    dotLottie.addEventListener('play', (event) => {
+      console.log(event);
+      frameSlider.max = (dotLottie.totalFrames - 1).toString();
+      playPauseButton.innerText = 'Pause';
+    });
 
-dotLottie.addEventListener('pause', (event) => {
-  console.log(event);
-  playPauseButton.innerText = 'Play';
-});
+    dotLottie.addEventListener('pause', (event) => {
+      console.log(event);
+      playPauseButton.innerText = 'Play';
+    });
 
-dotLottie.addEventListener('frame', (event) => {
-  const roundedFrame = Math.round(event.currentFrame);
+    dotLottie.addEventListener('frame', (event) => {
+      const roundedFrame = Math.round(event.currentFrame);
 
-  frameSlider.value = roundedFrame.toString();
-  currentFrameSpan.textContent = roundedFrame.toString();
-});
+      frameSlider.value = roundedFrame.toString();
+      currentFrameSpan.textContent = roundedFrame.toString();
+    });
 
-dotLottie.addEventListener('loop', (event) => {
-  console.log(event);
-});
+    dotLottie.addEventListener('loop', (event) => {
+      console.log(event);
+    });
 
-// Handle complete events
-dotLottie.addEventListener('complete', (event) => {
-  console.log(event);
+    // Handle complete events
+    dotLottie.addEventListener('complete', (event) => {
+      console.log(event);
 
-  playPauseButton.innerText = 'Play';
-});
+      playPauseButton.innerText = 'Play';
+    });
 
-dotLottie.addEventListener('stop', (event) => {
-  console.log(event);
-});
+    dotLottie.addEventListener('stop', (event) => {
+      console.log(event);
+    });
+  })
+  .catch((error) => {
+    console.log(error);
+  });
