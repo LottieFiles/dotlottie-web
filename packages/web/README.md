@@ -10,14 +10,20 @@ A JavaScript library for rendering [lottie](https://lottiefiles.github.io/lottie
 
 ## Contents
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [Live Example](#live-example)
-- [Options](#options)
-- [Properties](#properties)
-- [Methods](#methods)
-- [Events](#events)
-- [Development](#development)
+* [Installation](#installation)
+* [Usage](#usage)
+  * [Via npm](#via-npm)
+  * [Via CDN](#via-cdn)
+* [Live Example](#live-example)
+* [Options](#options)
+* [Properties](#properties)
+* [Methods](#methods)
+* [Events](#events)
+* [Development](#development)
+  * [Setup](#setup)
+  * [Development](#development-1)
+  * [Build](#build)
+  * [Build WASM (Optional)](#build-wasm-optional)
 
 ## Installation
 
@@ -80,55 +86,56 @@ const dotLottie = new DotLottie({
 
 ## Live Example
 
-[![Edit @lottiefiles/dotlottie-web basic example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/lottiefiles-dotlottie-web-basic-example-tcy3rv?autoresize=1&fontsize=14&hidenavigation=1&theme=dark)
+[![Edit @lottiefiles/dotlottie-web basic example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/lottiefiles-dotlottie-web-basic-example-tcy3rv?autoresize=1\&fontsize=14\&hidenavigation=1\&theme=dark)
 
 ## Options
 
-| Option      | Type               | Required | Default | Description                                                                                        |
-|-------------|--------------------|:--------:|---------|----------------------------------------------------------------------------------------------------|
-| `autoplay`  | boolean            |          | false   | Auto-starts the animation on load.                                                                  |
-| `loop`      | boolean            |          | false   | Determines if the animation should loop.                                                            |
-| `canvas`    | HTMLCanvasElement  | ✔️       | null    | Canvas element for animation rendering.                                                             |
-| `src`       | string             |          | null    | URL to the animation data (`.json` or `.lottie`).                                                   |
-| `speed`     | number             |          | 1       | Animation playback speed. 1 is regular speed.                                                       |
+| Option     | Type                  | Required | Default   | Description                                                                                           |
+| ---------- | --------------------- | :------: | --------- | ----------------------------------------------------------------------------------------------------- |
+| `autoplay` | boolean               |          | false     | Auto-starts the animation on load.                                                                    |
+| `loop`     | boolean               |          | false     | Determines if the animation should loop.                                                              |
+| `canvas`   | HTMLCanvasElement     |    ✔️    | undefined | Canvas element for animation rendering.                                                               |
+| `src`      | string                |          | undefined | URL to the animation data (`.json` or `.lottie`).                                                     |
+| `speed`    | number                |          | 1         | Animation playback speed. 1 is regular speed.                                                         |
+| `data`     | string \| ArrayBuffer |          | undefined | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for `.lottie` animations. |
 
 ## Properties
 
-| Property      | Type    | Description                                                       |
-|---------------|---------|-------------------------------------------------------------------|
-| `currentFrame`| number  | Represents the animation's currently displayed frame number.      |
-| `duration`    | number  | Specifies the animation's total playback time in milliseconds.    |
-| `totalFrames` | number  | Denotes the total count of individual frames within the animation.|
-| `loop`        | boolean | Indicates if the animation is set to play in a continuous loop.   |
-| `speed`       | number  | Represents the playback speed factor; e.g., 2 would mean double speed.|
-| `loopCount`   | number  | Tracks how many times the animation has completed its loop.       |
-| `playing`     | boolean | Reflects whether the animation is in active playback or not       |
+| Property       | Type    | Description                                                            |
+| -------------- | ------- | ---------------------------------------------------------------------- |
+| `currentFrame` | number  | Represents the animation's currently displayed frame number.           |
+| `duration`     | number  | Specifies the animation's total playback time in milliseconds.         |
+| `totalFrames`  | number  | Denotes the total count of individual frames within the animation.     |
+| `loop`         | boolean | Indicates if the animation is set to play in a continuous loop.        |
+| `speed`        | number  | Represents the playback speed factor; e.g., 2 would mean double speed. |
+| `loopCount`    | number  | Tracks how many times the animation has completed its loop.            |
+| `playing`      | boolean | Reflects whether the animation is in active playback or not            |
 
 ## Methods
 
-| Method                                                     | Description                                                                           |
-|------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| `play()`                                                   | Begins playback from the current animation position.                                  |
-| `pause()`                                                  | Pauses the animation without resetting its position.                                  |
-| `stop()`                                                   | Halts playback and returns the animation to its initial frame.                        |
-| `setSpeed(speed: number)`                                  | Sets the playback speed with the given multiplier.                                    |
-| `setLoop(loop: boolean)`                                   | Configures whether the animation should loop continuously.                             |
-| `setFrame(frame: number)`                                  | Directly navigates the animation to a specified frame.                                |
-| `addEventListener(event: string, listener: Function)`      | Registers a function to respond to a specific animation event.                        |
-| `removeEventListener(event: string, listener?: Function)`  | Removes a previously registered function from responding to a specific animation event.|
+| Method                                                    | Description                                                                             |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `play()`                                                  | Begins playback from the current animation position.                                    |
+| `pause()`                                                 | Pauses the animation without resetting its position.                                    |
+| `stop()`                                                  | Halts playback and returns the animation to its initial frame.                          |
+| `setSpeed(speed: number)`                                 | Sets the playback speed with the given multiplier.                                      |
+| `setLoop(loop: boolean)`                                  | Configures whether the animation should loop continuously.                              |
+| `setFrame(frame: number)`                                 | Directly navigates the animation to a specified frame.                                  |
+| `addEventListener(event: string, listener: Function)`     | Registers a function to respond to a specific animation event.                          |
+| `removeEventListener(event: string, listener?: Function)` | Removes a previously registered function from responding to a specific animation event. |
 
 ## Events
 
-| Event | Description |
-| --- | --- |
-| `load` | Emitted when the animation is loaded. |
+| Event       | Description                                          |
+| ----------- | ---------------------------------------------------- |
+| `load`      | Emitted when the animation is loaded.                |
 | `loadError` | Emitted when there's an error loading the animation. |
-| `play` | Emitted when the animation starts playing. |
-| `pause` | Emitted when the animation is paused. |
-| `stop` | Emitted when the animation is stopped. |
-| `loop` | Emitted when the animation completes a loop. |
-| `complete` | Emitted when the animation completes. |
-| `frame` | Emitted when the animation reaches a new frame. |
+| `play`      | Emitted when the animation starts playing.           |
+| `pause`     | Emitted when the animation is paused.                |
+| `stop`      | Emitted when the animation is stopped.               |
+| `loop`      | Emitted when the animation completes a loop.         |
+| `complete`  | Emitted when the animation completes.                |
+| `frame`     | Emitted when the animation reaches a new frame.      |
 
 ## Development
 

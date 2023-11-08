@@ -4,37 +4,42 @@
 
 import { getAnimation, getManifest, loadFromArrayBuffer } from '@dotlottie/dotlottie-js';
 
-export async function loadFromURL(src: string): Promise<string> {
+export async function getAnimationJSONFromDotLottie(dotLottieBuffer: ArrayBuffer): Promise<string> {
+  const loadedDotLottieFile = await loadFromArrayBuffer(dotLottieBuffer);
+  const manifest = await getManifest(loadedDotLottieFile);
+  const activeAnimationId = manifest?.activeAnimationId || manifest?.animations[0]?.id || '';
+
+  if (!activeAnimationId) {
+    throw new Error('Unable to determine the active animation ID from the .lottie manifest.');
+  }
+  const animationData = await getAnimation(loadedDotLottieFile, activeAnimationId, { inlineAssets: true });
+
+  return JSON.stringify(animationData);
+}
+
+export async function loadAnimationJSONFromURL(animationURL: string): Promise<string> {
   try {
-    const response = await fetch(src);
+    const response = await fetch(animationURL);
 
     if (!response.ok) {
       throw new Error(
-        `Failed to fetch the animation data from URL: ${src}. ${response.status}: ${response.statusText}`,
+        `Failed to fetch the animation data from URL: ${animationURL}. ${response.status}: ${response.statusText}`,
       );
     }
 
     const contentType = response.headers.get('content-type');
-    let data: string;
+    let animationJSON: string;
 
     if (contentType?.includes('application/json')) {
-      data = await response.text();
+      animationJSON = await response.text();
     } else {
       const arrayBuffer = await response.arrayBuffer();
-      const dotLottie = await loadFromArrayBuffer(arrayBuffer);
-      const manifest = await getManifest(dotLottie);
-      const animationId = manifest?.activeAnimationId || manifest?.animations[0]?.id || '';
 
-      if (!animationId) {
-        throw new Error('Unable to determine animation ID from manifest.');
-      }
-      const animation = await getAnimation(dotLottie, animationId, { inlineAssets: true });
-
-      data = JSON.stringify(animation);
+      animationJSON = await getAnimationJSONFromDotLottie(arrayBuffer);
     }
 
-    return data;
+    return animationJSON;
   } catch (error) {
-    throw new Error(`Failed to load animation data from URL: ${src}. ${error}`);
+    throw new Error(`Failed to load animation data from URL: ${animationURL}. ${error}`);
   }
 }

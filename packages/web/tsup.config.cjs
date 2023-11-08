@@ -7,14 +7,14 @@ const path = require('path');
 
 const { defineConfig } = require('tsup');
 
-module.exports = defineConfig({
+module.exports = defineConfig((options) => ({
   bundle: true,
   metafile: false,
   splitting: true,
   treeshake: true,
   clean: true,
   dts: true,
-  minify: true,
+  minify: !options.watch,
   sourcemap: true,
   entry: ['./src/*.ts'],
   format: ['esm'],
@@ -28,4 +28,4 @@ module.exports = defineConfig({
     );
   },
   noExternal: ['@dotlottie/dotlottie-js'],
-});
+}));
