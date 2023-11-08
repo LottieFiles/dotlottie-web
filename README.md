@@ -5,7 +5,9 @@
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
 ![GitHub](https://img.shields.io/github/license/LottieFiles/dotlottie-web)
 
-![dotlottie logo](https://user-images.githubusercontent.com/23125742/201124166-c2a0bc2a-018b-463b-b291-944fb767b5c2.png)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/23125742/201124166-c2a0bc2a-018b-463b-b291-944fb767b5c2.png" />
+</p>
 
 ## Table of Contents
 
