@@ -1,5 +1,3 @@
-# dotlottie-web monorepo
-
 ![CI](https://github.com/LottieFiles/dotlottie-web/workflows/main/badge.svg)
 ![GitHub contributors](https://img.shields.io/github/contributors/LottieFiles/dotlottie-web)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
@@ -9,39 +7,39 @@
   <img src="https://user-images.githubusercontent.com/23125742/201124166-c2a0bc2a-018b-463b-b291-944fb767b5c2.png" />
 </p>
 
-## Table of Contents
+<h1 align="center">dotLottie Web</h1>
 
-1. [Introduction](#dotlottie-web-monorepo)
-2. [What is dotLottie?](#what-is-dotlottie)
-3. [Packages](#packages)
-4. [Coming Soon Packages](#coming-soon-packages)
-5. [Getting Started](#getting-started)
-   * [Prerequisites](#prerequisites)
-   * [Setup](#setup)
-6. [Development](#development)
-   * [Building Packages](#building-packages)
-   * [Running Locally](#running-locally)
-7. [Contributing](#contributing)
-8. [Scripts](#scripts)
-9. [License](#license)
+Streamline your web animations with LottieFiles' official players for dotLottie and Lottie animations. Designed for quick integration, these packages help developers swiftly bring animated visuals into web projects with minimal effort.
 
-### Introduction
-
-This is the official repository for LottieFiles' web renderers for Lottie and dotLottie animations. It contains a set of packages that support developers in integrating and managing animations within web applications.
-
-### What is dotLottie?
+# What is dotLottie?
 
 dotLottie is an open-source file format that aggregates one or more Lottie files and their associated resources into a single file. They are ZIP archives compressed with the Deflate compression method and carry the file extension of ".lottie".
 
 [Learn more about dotLottie](https://dotlottie.io/).
 
+## Contents
+
+* [Packages](#packages)
+* [Coming Soon Packages](#coming-soon-packages)
+* [Getting Started](#getting-started)
+  * [Prerequisites](#prerequisites)
+  * [Setup](#setup)
+* [Local Examples](#local-examples)
+* [Live Examples](#live-examples)
+* [Development](#development)
+  * [Building Packages](#building-packages)
+  * [Running Locally](#running-locally)
+  * [Scripts](#scripts)
+* [Contributing](#contributing)
+* [License](#license)
+
 ### Packages
 
 The monorepo contains the following package:
 
-* **[@lottiefiles/dotlottie-web](./packages/web/README.md)**: A JavaScript library for rendering Lottie and dotLottie animations in the browser.
+* **[@lottiefiles/dotlottie-web](packages/web/README.md)**: A JavaScript library for rendering Lottie and dotLottie animations in the browser.
 
-Each package has its own README.md with detailed documentation on usage and development.
+Each package has its own README.md with detailed documentation on usage and APIs.
 
 ### Coming Soon Packages
 
@@ -79,6 +77,49 @@ Install dependencies:
 pnpm install
 ```
 
+### Local Examples
+
+Discover how to implement and utilize the dotlottie-web packages with our example applications. These examples serve as a practical guide to help you understand how to integrate Lottie and dotLottie animations into your web projects.
+
+Available examples:
+
+* [dotlottie-web-example](apps/dotlottie-web-example/src/main.ts): A basic typescript example app of how to use `@lottiefiles/dotlottie-web` to render a Lottie or dotLottie animation in the browser.
+
+#### Running Examples
+
+* Clone the repository:
+
+```bash
+git clone https://github.com/LottieFiles/dotlottie-web.git
+cd dotlottie-web
+```
+
+* Install dependencies:
+
+```bash
+pnpm install
+```
+
+* Build the packages:
+
+```bash
+pnpm run build
+```
+
+* Run the app:
+
+```bash
+# Change directory to the example app folder
+cd apps/dotlottie-web-example 
+pnpm run dev
+```
+
+Feel free to modify and play around with the code to see how changes affect the animations.
+
+### Live Examples
+
+* [@lottiefiles/dotlottie-web](packages/web/README.md#live-example)
+
 ### Development
 
 #### Building Packages
@@ -97,11 +138,7 @@ To start a local development environment for all packages:
 pnpm run dev
 ```
 
-### Contributing
-
-We welcome contributions to any of the packages in this monorepo. Please read our [Contributing Guidelines](CONTRIBUTING.md) and our [Code of Conduct](CODE_OF_CONDUCT.md) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes to the project.
-
-### Scripts
+#### Scripts
 
 Here's a brief explanation of the scripts available in the root package.json:
 
@@ -115,6 +152,10 @@ Here's a brief explanation of the scripts available in the root package.json:
 * `type-check`: Checks for TypeScript type errors.
 
 For a full list of available scripts, see the `scripts` section in `package.json`.
+
+### Contributing
+
+We welcome contributions to any of the packages in this monorepo. Please read our [Contributing Guidelines](CONTRIBUTING.md) and our [Code of Conduct](CODE_OF_CONDUCT.md) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes to the project.
 
 ### License
 
