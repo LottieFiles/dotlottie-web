@@ -1,29 +1,45 @@
 # @lottiefiles/dotlottie-web
 
 ![npm](https://img.shields.io/npm/v/@lottiefiles/dotlottie-web)
-![npm bundle size](https://img.shields.io/bundlephobia/min/@lottiefiles/dotlottie-web)
+![npm bundle size](https://img.shields.io/bundlephobia/minzip/%40lottiefiles%2Fdotlottie-web)
+![npm](https://img.shields.io/npm/dt/%40lottiefiles/dotlottie-web)
 ![NPM](https://img.shields.io/npm/l/@lottiefiles/dotlottie-web)
 
-A JavaScript library for rendering [lottie](https://lottiefiles.github.io/lottie-docs/) and [dotLottie](https://dotlottie.io) animations in the browser.
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/23125742/201124166-c2a0bc2a-018b-463b-b291-944fb767b5c2.png" />
+</p>
 
 > 🚧 **Beta Alert:** We're still refining! The APIs in this package may undergo changes.
 
 ## Contents
 
+* [Introduction](#introduction)
+  * [What is dotLottie?](#what-is-dotlottie)
 * [Installation](#installation)
 * [Usage](#usage)
   * [Via npm](#via-npm)
   * [Via CDN](#via-cdn)
 * [Live Example](#live-example)
-* [Options](#options)
-* [Properties](#properties)
-* [Methods](#methods)
-* [Events](#events)
+* [APIs](#apis)
+  * [Options](#options)
+  * [Properties](#properties)
+  * [Methods](#methods)
+  * [Events](#events)
 * [Development](#development)
   * [Setup](#setup)
-  * [Development](#development-1)
+  * [Dev](#dev)
   * [Build](#build)
   * [Build WASM (Optional)](#build-wasm-optional)
+
+## Introduction
+
+A JavaScript library for rendering [lottie](https://lottiefiles.github.io/lottie-docs/) and [dotLottie](https://dotlottie.io) animations in the browser.
+
+### What is dotLottie?
+
+dotLottie is an open-source file format that aggregates one or more Lottie files and their associated resources into a single file. They are ZIP archives compressed with the Deflate compression method and carry the file extension of ".lottie".
+
+[Learn more about dotLottie](https://dotlottie.io/).
 
 ## Installation
 
@@ -88,18 +104,20 @@ const dotLottie = new DotLottie({
 
 [![Edit @lottiefiles/dotlottie-web basic example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/lottiefiles-dotlottie-web-basic-example-tcy3rv?autoresize=1\&fontsize=14\&hidenavigation=1\&theme=dark)
 
-## Options
+## APIs
 
-| Option     | Type                  | Required | Default   | Description                                                                                           |
-| ---------- | --------------------- | :------: | --------- | ----------------------------------------------------------------------------------------------------- |
-| `autoplay` | boolean               |          | false     | Auto-starts the animation on load.                                                                    |
-| `loop`     | boolean               |          | false     | Determines if the animation should loop.                                                              |
-| `canvas`   | HTMLCanvasElement     |    ✔️    | undefined | Canvas element for animation rendering.                                                               |
-| `src`      | string                |          | undefined | URL to the animation data (`.json` or `.lottie`).                                                     |
-| `speed`    | number                |          | 1         | Animation playback speed. 1 is regular speed.                                                         |
-| `data`     | string \| ArrayBuffer |          | undefined | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for `.lottie` animations. |
+### Options
 
-## Properties
+| Option     | Type                  | Required | Default   | Description                                                                                         |
+| ---------- | --------------------- | :------: | --------- | --------------------------------------------------------------------------------------------------- |
+| `autoplay` | boolean               |          | false     | Auto-starts the animation on load.                                                                  |
+| `loop`     | boolean               |          | false     | Determines if the animation should loop.                                                            |
+| `canvas`   | HTMLCanvasElement     |    ✔️    | undefined | Canvas element for animation rendering.                                                             |
+| `src`      | string                |          | undefined | URL to the animation data (`.json` or `.lottie`).                                                   |
+| `speed`    | number                |          | 1         | Animation playback speed. 1 is regular speed.                                                       |
+| `data`     | string \| ArrayBuffer |          | undefined | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations. |
+
+### Properties
 
 | Property       | Type    | Description                                                            |
 | -------------- | ------- | ---------------------------------------------------------------------- |
@@ -111,7 +129,7 @@ const dotLottie = new DotLottie({
 | `loopCount`    | number  | Tracks how many times the animation has completed its loop.            |
 | `playing`      | boolean | Reflects whether the animation is in active playback or not            |
 
-## Methods
+### Methods
 
 | Method                                                    | Description                                                                             |
 | --------------------------------------------------------- | --------------------------------------------------------------------------------------- |
@@ -124,7 +142,7 @@ const dotLottie = new DotLottie({
 | `addEventListener(event: string, listener: Function)`     | Registers a function to respond to a specific animation event.                          |
 | `removeEventListener(event: string, listener?: Function)` | Removes a previously registered function from responding to a specific animation event. |
 
-## Events
+### Events
 
 | Event       | Description                                          |
 | ----------- | ---------------------------------------------------- |
@@ -145,7 +163,7 @@ const dotLottie = new DotLottie({
 pnpm install
 ```
 
-### Development
+### Dev
 
 ```bash
 pnpm dev
