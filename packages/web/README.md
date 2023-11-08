@@ -97,13 +97,14 @@ const dotLottie = new DotLottie({
 
 ### Options
 
-| Option     | Type              | Required | Default | Description                                       |
-| ---------- | ----------------- | :------: | ------- | ------------------------------------------------- |
-| `autoplay` | boolean           |          | false   | Auto-starts the animation on load.                |
-| `loop`     | boolean           |          | false   | Determines if the animation should loop.          |
-| `canvas`   | HTMLCanvasElement |    ✔️    | null    | Canvas element for animation rendering.           |
-| `src`      | string            |          | null    | URL to the animation data (`.json` or `.lottie`). |
-| `speed`    | number            |          | 1       | Animation playback speed. 1 is regular speed.     |
+| Option     | Type                  | Required | Default   | Description                                                                                         |
+| ---------- | --------------------- | :------: | --------- | --------------------------------------------------------------------------------------------------- |
+| `autoplay` | boolean               |          | false     | Auto-starts the animation on load.                                                                  |
+| `loop`     | boolean               |          | false     | Determines if the animation should loop.                                                            |
+| `canvas`   | HTMLCanvasElement     |    ✔️    | undefined | Canvas element for animation rendering.                                                             |
+| `src`      | string                |          | undefined | URL to the animation data (`.json` or `.lottie`).                                                   |
+| `speed`    | number                |          | 1         | Animation playback speed. 1 is regular speed.                                                       |
+| `data`     | string \| ArrayBuffer |          | undefined | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations. |
 
 ### Properties
 
