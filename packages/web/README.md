@@ -1,10 +1,9 @@
 # @lottiefiles/dotlottie-web
 
 ![npm](https://img.shields.io/npm/v/@lottiefiles/dotlottie-web)
-![npm bundle size](https://img.shields.io/bundlephobia/min/@lottiefiles/dotlottie-web)
+![npm bundle size](https://img.shields.io/bundlephobia/minzip/%40lottiefiles%2Fdotlottie-web)
+![npm](https://img.shields.io/npm/dt/%40lottiefiles/dotlottie-web)
 ![NPM](https://img.shields.io/npm/l/@lottiefiles/dotlottie-web)
-
-A JavaScript library for rendering [lottie](https://lottiefiles.github.io/lottie-docs/) and [dotLottie](https://dotlottie.io) animations in the browser.
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/23125742/201124166-c2a0bc2a-018b-463b-b291-944fb767b5c2.png" />
@@ -14,6 +13,8 @@ A JavaScript library for rendering [lottie](https://lottiefiles.github.io/lottie
 
 ## Contents
 
+* [Introduction](#introduction)
+  * [What is dotLottie?](#what-is-dotlottie)
 * [Installation](#installation)
 * [Usage](#usage)
   * [Via npm](#via-npm)
@@ -29,6 +30,16 @@ A JavaScript library for rendering [lottie](https://lottiefiles.github.io/lottie
   * [Dev](#dev)
   * [Build](#build)
   * [Build WASM (Optional)](#build-wasm-optional)
+
+## Introduction
+
+A JavaScript library for rendering [lottie](https://lottiefiles.github.io/lottie-docs/) and [dotLottie](https://dotlottie.io) animations in the browser.
+
+### What is dotLottie?
+
+dotLottie is an open-source file format that aggregates one or more Lottie files and their associated resources into a single file. They are ZIP archives compressed with the Deflate compression method and carry the file extension of ".lottie".
+
+[Learn more about dotLottie](https://dotlottie.io/).
 
 ## Installation
 

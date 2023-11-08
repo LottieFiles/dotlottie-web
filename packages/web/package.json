@@ -26,11 +26,12 @@
   ],
   "keywords": [
     "dotlottie",
-    "thorvg",
     "lottie",
     "player",
     "animation",
-    "web"
+    "web",
+    "canvas",
+    "javascript"
   ],
   "scripts": {
     "build": "tsup",
