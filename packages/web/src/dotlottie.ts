@@ -9,7 +9,7 @@
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import type { Renderer } from './renderer-wasm';
-import { createRenderer } from './renderer-wasm';
+import { WasmLoader } from './renderer-wasm';
 import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL } from './utils';
 
 const MS_TO_SEC_FACTOR = 1000;
@@ -79,8 +79,10 @@ export class DotLottie {
     this._speed = config.speed ?? 1;
     this._autoplay = config.autoplay ?? false;
 
-    this._initRenderer()
-      .then(() => {
+    WasmLoader.awaitInstance()
+      .then((renderer) => {
+        this._renderer = renderer;
+
         if (config.src) {
           this._loadAnimationFromURL(config.src);
         } else if (config.data) {
@@ -159,17 +161,6 @@ export class DotLottie {
     return this._playing;
   }
   // #endregion
-
-  // #region Private Methods
-  /**
-   * Initializes the renderer.
-   *
-   * @returns A promise that resolves when the renderer is initialized.
-   */
-  private async _initRenderer(): Promise<void> {
-    if (this._renderer) return;
-    this._renderer = await createRenderer();
-  }
 
   /**
    * Loads and initializes the animation from a given URL.
@@ -431,6 +422,14 @@ export class DotLottie {
    */
   public removeEventListener<T extends EventType>(type: T, listener?: EventListener<T>): void {
     this._eventManager.removeEventListener(type, listener);
+  }
+
+  /**
+   * Sets the source URL of the WASM file to load.
+   * @param url - The URL of the WASM file to load.
+   */
+  public static setWasmUrl(url: string): void {
+    WasmLoader.setWasmUrl(url);
   }
 
   // #endregion

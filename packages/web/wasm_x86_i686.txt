@@ -12,7 +12,7 @@ exe_suffix = 'js'
 
 [built-in options]
 cpp_args = ['-Wshift-negative-value', '-flto', '-Os', '-fno-exceptions', '-ffunction-sections', '-fdata-sections']
-cpp_link_args = ['-Wshift-negative-value', '-flto', '-Os', '--bind', '-sWASM=1', '-sALLOW_MEMORY_GROWTH=1', '-sFORCE_FILESYSTEM=0', '-sMODULARIZE=1', '-sEXPORT_NAME=createRendererModule', '-sEXPORT_ES6=1', '-sUSE_ES6_IMPORT_META=1', '-sENVIRONMENT=web', '-sFILESYSTEM=0', '--no-entry', '--strip-all', '--minify=0']
+cpp_link_args = ['-Wshift-negative-value', '-flto', '-Os', '--bind', '-sWASM=1', '-sALLOW_MEMORY_GROWTH=1', '-sFORCE_FILESYSTEM=0', '-sMODULARIZE=1', '-sEXPORT_NAME=createRendererModule', '-sEXPORT_ES6=1', '-sUSE_ES6_IMPORT_META=0', '-sENVIRONMENT=web', '-sFILESYSTEM=0', '--no-entry', '--strip-all', '--minify=0', '-sDYNAMIC_EXECUTION=0']
 
 [host_machine]
 system = 'emscripten'
