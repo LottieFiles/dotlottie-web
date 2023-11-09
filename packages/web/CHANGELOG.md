@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.3.0
+
+### Minor Changes
+
+- 3388c48: fix: 🐛 loading wasm binaries feat:🎸 add setWasmUrl static method
+
 ## 0.2.0
 
 ### Minor Changes
