@@ -24,6 +24,7 @@
   * [Options](#options)
   * [Properties](#properties)
   * [Methods](#methods)
+  * [Static Methods](#static-methods)
   * [Events](#events)
 * [Development](#development)
   * [Setup](#setup)
@@ -141,6 +142,12 @@ const dotLottie = new DotLottie({
 | `setFrame(frame: number)`                                 | Directly navigates the animation to a specified frame.                                  |
 | `addEventListener(event: string, listener: Function)`     | Registers a function to respond to a specific animation event.                          |
 | `removeEventListener(event: string, listener?: Function)` | Removes a previously registered function from responding to a specific animation event. |
+
+### Static Methods
+
+| Method                    | Description                               |
+| ------------------------- | ----------------------------------------- |
+| `setWasmUrl(url: string)` | Sets the URL to the renderer.wasm binary. |
 
 ### Events
 
