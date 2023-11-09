@@ -37,7 +37,7 @@ export class WasmLoader {
     createRendererModule({
       locateFile: () => WasmLoader._wasmURL,
     })
-      .then((module: unknown) => {
+      .then((module: { Renderer: new () => Renderer }) => {
         WasmLoader._renderer = new module.Renderer();
       })
       .catch(() => {
