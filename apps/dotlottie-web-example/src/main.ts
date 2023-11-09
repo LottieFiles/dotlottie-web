@@ -5,6 +5,8 @@
 import './styles.css';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 
+import wasmUrl from '../../../packages/web/dist/renderer.wasm?url';
+
 const app = document.getElementById('app') as HTMLDivElement;
 
 app.innerHTML = `
@@ -22,6 +24,8 @@ app.innerHTML = `
   <input type="range" id="speed" min="0.1" max="5" step="0.1" value="1" class="speed-slider" />
 </div>
 `;
+
+DotLottie.setWasmUrl(wasmUrl);
 
 fetch('/hamster.lottie')
   .then(async (res) => res.arrayBuffer())

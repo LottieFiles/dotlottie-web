@@ -1,5 +1,5 @@
 var createRendererModule = (() => {
-  var _scriptDir = import.meta.url;
+  var _scriptDir = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : undefined;
 
   return function (moduleArg = {}) {
     var Module = moduleArg;
@@ -238,13 +238,10 @@ var createRendererModule = (() => {
 
     var wasmBinaryFile;
 
-    if (Module['locateFile']) {
-      wasmBinaryFile = 'renderer.wasm';
-      if (!isDataURI(wasmBinaryFile)) {
-        wasmBinaryFile = locateFile(wasmBinaryFile);
-      }
-    } else {
-      wasmBinaryFile = new URL('renderer.wasm', import.meta.url).href;
+    wasmBinaryFile = 'renderer.wasm';
+
+    if (!isDataURI(wasmBinaryFile)) {
+      wasmBinaryFile = locateFile(wasmBinaryFile);
     }
 
     function getBinarySync(file) {
@@ -1360,26 +1357,6 @@ var createRendererModule = (() => {
       }
     };
 
-    function newFunc(constructor, argumentList) {
-      if (!(constructor instanceof Function)) {
-        throw new TypeError(`new_ called with constructor type ${typeof constructor} which is not a function`);
-      }
-      /*
-       * Previously, the following line was just:
-       *   function dummy() {};
-       * Unfortunately, Chrome was preserving 'dummy' as the object's name, even
-       * though at creation, the 'dummy' has the correct constructor name.  Thus,
-       * objects created with IMVU.new would show up in the debugger as 'dummy',
-       * which isn't very helpful.  Using IMVU.createNamedFunction addresses the
-       * issue.  Doublely-unfortunately, there's no way to write a test for this
-       * behavior.  -NRD 2013.02.22
-       */ var dummy = createNamedFunction(constructor.name || 'unknownFunctionName', function () {});
-      dummy.prototype = constructor.prototype;
-      var obj = new dummy();
-      var r = constructor.apply(obj, argumentList);
-      return r instanceof Object ? r : obj;
-    }
-
     function craftInvokerFunction(
       humanName,
       argTypes,
@@ -1401,72 +1378,46 @@ var createRendererModule = (() => {
         }
       }
       var returns = argTypes[0].name !== 'void';
-      var argsList = '';
-      var argsListWired = '';
-      for (var i = 0; i < argCount - 2; ++i) {
-        argsList += (i !== 0 ? ', ' : '') + 'arg' + i;
-        argsListWired += (i !== 0 ? ', ' : '') + 'arg' + i + 'Wired';
-      }
-      var invokerFnBody = `\n        return function ${makeLegalFunctionName(
-        humanName,
-      )}(${argsList}) {\n        if (arguments.length !== ${
-        argCount - 2
-      }) {\n          throwBindingError('function ${humanName} called with ' + arguments.length + ' arguments, expected ${
-        argCount - 2
-      }');\n        }`;
-      if (needsDestructorStack) {
-        invokerFnBody += 'var destructors = [];\n';
-      }
-      var dtorStack = needsDestructorStack ? 'destructors' : 'null';
-      var args1 = ['throwBindingError', 'invoker', 'fn', 'runDestructors', 'retType', 'classParam'];
-      var args2 = [throwBindingError, cppInvokerFunc, cppTargetFunc, runDestructors, argTypes[0], argTypes[1]];
-      if (isClassMethodFunc) {
-        invokerFnBody += 'var thisWired = classParam.toWireType(' + dtorStack + ', this);\n';
-      }
-      for (var i = 0; i < argCount - 2; ++i) {
-        invokerFnBody +=
-          'var arg' +
-          i +
-          'Wired = argType' +
-          i +
-          '.toWireType(' +
-          dtorStack +
-          ', arg' +
-          i +
-          '); // ' +
-          argTypes[i + 2].name +
-          '\n';
-        args1.push('argType' + i);
-        args2.push(argTypes[i + 2]);
-      }
-      if (isClassMethodFunc) {
-        argsListWired = 'thisWired' + (argsListWired.length > 0 ? ', ' : '') + argsListWired;
-      }
-      invokerFnBody +=
-        (returns || isAsync ? 'var rv = ' : '') +
-        'invoker(fn' +
-        (argsListWired.length > 0 ? ', ' : '') +
-        argsListWired +
-        ');\n';
-      if (needsDestructorStack) {
-        invokerFnBody += 'runDestructors(destructors);\n';
-      } else {
-        for (var i = isClassMethodFunc ? 1 : 2; i < argTypes.length; ++i) {
-          var paramName = i === 1 ? 'thisWired' : 'arg' + (i - 2) + 'Wired';
-          if (argTypes[i].destructorFunction !== null) {
-            invokerFnBody += paramName + '_dtor(' + paramName + '); // ' + argTypes[i].name + '\n';
-            args1.push(paramName + '_dtor');
-            args2.push(argTypes[i].destructorFunction);
+      var expectedArgCount = argCount - 2;
+      var argsWired = new Array(expectedArgCount);
+      var invokerFuncArgs = [];
+      var destructors = [];
+      return function () {
+        if (arguments.length !== expectedArgCount) {
+          throwBindingError(
+            `function ${humanName} called with ${arguments.length} arguments, expected ${expectedArgCount}`,
+          );
+        }
+        destructors.length = 0;
+        var thisWired;
+        invokerFuncArgs.length = isClassMethodFunc ? 2 : 1;
+        invokerFuncArgs[0] = cppTargetFunc;
+        if (isClassMethodFunc) {
+          thisWired = argTypes[1]['toWireType'](destructors, this);
+          invokerFuncArgs[1] = thisWired;
+        }
+        for (var i = 0; i < expectedArgCount; ++i) {
+          argsWired[i] = argTypes[i + 2]['toWireType'](destructors, arguments[i]);
+          invokerFuncArgs.push(argsWired[i]);
+        }
+        var rv = cppInvokerFunc.apply(null, invokerFuncArgs);
+        function onDone(rv) {
+          if (needsDestructorStack) {
+            runDestructors(destructors);
+          } else {
+            for (var i = isClassMethodFunc ? 1 : 2; i < argTypes.length; i++) {
+              var param = i === 1 ? thisWired : argsWired[i - 2];
+              if (argTypes[i].destructorFunction !== null) {
+                argTypes[i].destructorFunction(param);
+              }
+            }
+          }
+          if (returns) {
+            return argTypes[0]['fromWireType'](rv);
           }
         }
-      }
-      if (returns) {
-        invokerFnBody += 'var ret = retType.fromWireType(rv);\n' + 'return ret;\n';
-      } else {
-      }
-      invokerFnBody += '}\n';
-      args1.push(invokerFnBody);
-      return newFunc(Function, args1).apply(null, args2);
+        return onDone(rv);
+      };
     }
 
     var __embind_register_class_constructor = (

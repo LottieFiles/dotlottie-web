@@ -8,7 +8,7 @@
     "outDir": "./dist",
 
     // Source root directory
-    "rootDir": "./src"
+    "rootDir": "."
   },
 
   // Files included in compilation
