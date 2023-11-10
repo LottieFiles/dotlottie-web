@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.4.0
+
+### Minor Changes
+
+- 83f1b6b: chore: 🤖 upgrade thorvg to v0.11.4
+
 ## 0.3.1
 
 ### Patch Changes
