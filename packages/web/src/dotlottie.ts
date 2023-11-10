@@ -79,7 +79,7 @@ export class DotLottie {
     this._speed = config.speed ?? 1;
     this._autoplay = config.autoplay ?? false;
 
-    WasmLoader.awaitInstance()
+    WasmLoader.getInstance()
       .then((renderer) => {
         this._renderer = renderer;
 

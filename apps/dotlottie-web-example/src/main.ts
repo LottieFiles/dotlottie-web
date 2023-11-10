@@ -2,6 +2,8 @@
  * Copyright 2023 Design Barn Inc.
  */
 
+/* eslint-disable no-secrets/no-secrets */
+
 import './styles.css';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 
@@ -10,29 +12,69 @@ import wasmUrl from '../../../packages/web/dist/renderer.wasm?url';
 const app = document.getElementById('app') as HTMLDivElement;
 
 app.innerHTML = `
-<canvas id="canvas" width="400" height="400"></canvas>
-<div class="control-panel">
-  <button id="playPause" class="control-button">Play</button>
-  <button id="stop" class="control-button">Stop</button>
-  
-  <label for="frameSlider">Frame: <span id="current-frame">0</span></label>
-  <input type="range" id="frameSlider" min="0" step="1" />
+<div class="grid">
+  <canvas data-src="https://lottie.host/1cf72a35-6d88-4d9a-9961-f1bb88087f2c/miJIHiyH4Q.lottie" width="200px" height="200px"></canvas>
+  <canvas data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json" width="200px" height="200px"></canvas>
+  <canvas data-src="https://lottie.host/a7421582-4733-49e5-9f77-e8d4cd792239/WZQjpo4uZR.lottie" width="200px" height="200px"></canvas>
+  <canvas data-src="https://lottie.host/e2a24b6f-df7f-4fc5-94ea-30f0846f85dc/1RLOR2g0m3.lottie" width="200px" height="200px"></canvas>
+  <canvas data-src="https://lottie.host/35326116-a8ca-4219-81ca-df9ce56a3f22/zCGFevEA23.lottie" width="200px" height="200px"></canvas>
+  <canvas data-src="https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie" width="200px" height="200px"></canvas>
+  <canvas data-src="/down.json" width="200px" height="200px"></canvas>
+  <canvas data-src="/dragon.json" width="200px" height="200px"></canvas>
+  <canvas data-src="/editor.json" width="200px" height="200px"></canvas>
+  <canvas data-src="/growup.json" width="200px" height="200px"></canvas>
+  <canvas data-src="/hamster.lottie" width="200px" height="200px"></canvas>
+  <canvas data-src="/like.json" width="200px" height="200px"></canvas>
+  <canvas data-src="/lolo.json" width="200px" height="200px"></canvas>
+  <canvas data-src="/walker.json" width="200px" height="200px"></canvas>
+  <canvas data-src="/waves.json" width="200px" height="200px"></canvas>
+  <canvas data-src="/woman.json" width="200px" height="200px"></canvas>
+</div>
 
-  <label for="loopToggle">Loop: </label>
-  <input type="checkbox" id="loopToggle" checked />
-  <label for="speed" class="speed-label">Speed: <span id="speed-value">x1</span></label>
-  <input type="range" id="speed" min="0.1" max="5" step="0.1" value="1" class="speed-slider" />
+<div class="container">
+  <canvas id="canvas" width="400" height="400"></canvas>
+  <div class="control-panel">
+    <button id="playPause" class="control-button">Play</button>
+    <button id="stop" class="control-button">Stop</button>
+    
+    <label for="frameSlider">Frame: <span id="current-frame">0</span></label>
+    <input type="range" id="frameSlider" min="0" step="1" />
+
+    <label for="loopToggle">Loop: </label>
+    <input type="checkbox" id="loopToggle" checked />
+    <label for="speed" class="speed-label">Speed: <span id="speed-value">x1</span></label>
+    <input type="range" id="speed" min="0.1" max="5" step="0.1" value="1" class="speed-slider" />
+  </div>
 </div>
 `;
 
+/**
+ * This is only required for testing the local version of the renderer
+ */
 DotLottie.setWasmUrl(wasmUrl);
+
+/**
+ * Load all canvas elements with data-src attribute
+ */
+const allCanvas = document.querySelectorAll('canvas[data-src]') as NodeListOf<HTMLCanvasElement>;
+
+allCanvas.forEach((canvas) => {
+  const src = canvas.getAttribute('data-src') as string;
+
+  // eslint-disable-next-line no-new
+  new DotLottie({
+    canvas,
+    src,
+    loop: true,
+    autoplay: true,
+  });
+});
 
 fetch('/hamster.lottie')
   .then(async (res) => res.arrayBuffer())
   .then((data): void => {
     const dotLottie = new DotLottie({
       canvas: document.getElementById('canvas') as HTMLCanvasElement,
-      // eslint-disable-next-line no-secrets/no-secrets
       // src: 'https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie',
       // src: '/lolo.json',
       data,
