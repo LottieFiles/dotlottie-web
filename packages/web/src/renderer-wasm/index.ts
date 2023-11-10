@@ -2,9 +2,6 @@
  * Copyright 2023 Design Barn Inc.
  */
 
-/* eslint-disable no-negated-condition */
-/* eslint-disable no-console */
-
 import pkg from '../../package.json';
 
 import createRendererModule from './bin/renderer';
@@ -23,59 +20,60 @@ export interface Renderer {
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class WasmLoader {
-  private static _renderer: Renderer | null = null;
-
-  private static _isLoading = false;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  private static _Renderer: (new () => Renderer) | null = null;
 
   private static _wasmURL = `https://unpkg.com/${pkg.name}@${pkg.version}/dist/renderer.wasm`;
 
   private constructor() {
-    // Class is never instantiated
+    throw new Error('WasmLoader is a static class and cannot be instantiated.');
   }
 
-  public static loadRenderer(): void {
-    createRendererModule({
-      locateFile: () => WasmLoader._wasmURL,
-    })
-      .then((module: { Renderer: new () => Renderer }) => {
-        WasmLoader._renderer = new module.Renderer();
-      })
-      .catch(() => {
-        const backupJsdelivrUrl = `https://cdn.jsdelivr.net/npm/${pkg.name}@${pkg.version}/dist/renderer.wasm`;
+  private static async _tryLoad(url: string): Promise<new () => Renderer> {
+    try {
+      const module = await createRendererModule({ locateFile: () => url });
 
-        if (WasmLoader._wasmURL.toLowerCase() !== backupJsdelivrUrl) {
-          console.warn(`Failed to load WASM from ${WasmLoader._wasmURL}, trying jsdelivr as a backup`);
-          WasmLoader.setWasmUrl(backupJsdelivrUrl);
-          WasmLoader.loadRenderer();
-        } else {
-          console.error(
-            `Could not load Rive WASM file from unpkg or jsdelivr, network connection may be down, or \
-        you may need to call set a new WASM source via WasmLoader.setWasmUrl() and call \
-        WasmLoader.loadRenderer() again`,
-          );
-        }
-      });
-  }
+      return module.Renderer;
+    } catch (error) {
+      console.warn(`Attempt to load WASM from ${url} failed. Error: ${(error as Error).message}`);
 
-  public static getInstance(callback: (renderer: Renderer) => void): void {
-    if (!WasmLoader._isLoading) {
-      WasmLoader._isLoading = true;
-      WasmLoader.loadRenderer();
-    }
-
-    if (WasmLoader._renderer) {
-      // eslint-disable-next-line node/callback-return
-      callback(WasmLoader._renderer);
-    } else {
-      setTimeout(() => WasmLoader.getInstance(callback), 100);
+      throw error;
     }
   }
 
-  public static async awaitInstance(): Promise<Renderer> {
-    return new Promise<Renderer>((resolve) => WasmLoader.getInstance((renderer: Renderer): void => resolve(renderer)));
+  private static async _loadWithBackup(): Promise<new () => Renderer> {
+    try {
+      return await this._tryLoad(this._wasmURL);
+    } catch (initialError) {
+      const backupUrl = `https://cdn.jsdelivr.net/npm/${pkg.name}@${pkg.version}/dist/renderer.wasm`;
+
+      console.warn(`Trying backup URL for WASM loading: ${backupUrl}`);
+      try {
+        return await this._tryLoad(backupUrl);
+      } catch (backupError) {
+        console.error(
+          `Both primary and backup WASM URLs failed. Primary error: ${(initialError as Error).message}, Backup error: ${
+            (backupError as Error).message
+          }`,
+        );
+        throw new Error('WASM loading failed from all sources.');
+      }
+    }
+  }
+
+  public static async getInstance(): Promise<Renderer> {
+    if (!this._Renderer) {
+      try {
+        this._Renderer = await this._loadWithBackup();
+      } catch (error) {
+        throw new Error(`WASM Renderer instantiation failed: ${(error as Error).message}`);
+      }
+    }
+
+    return new this._Renderer();
   }
 
   public static setWasmUrl(url: string): void {
-    WasmLoader._wasmURL = url;
+    this._wasmURL = url;
   }
 }
