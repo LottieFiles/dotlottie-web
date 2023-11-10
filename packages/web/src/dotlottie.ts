@@ -79,9 +79,9 @@ export class DotLottie {
     this._speed = config.speed ?? 1;
     this._autoplay = config.autoplay ?? false;
 
-    WasmLoader.getInstance()
-      .then((renderer) => {
-        this._renderer = renderer;
+    WasmLoader.load()
+      .then((module) => {
+        this._renderer = new module.Renderer();
 
         if (config.src) {
           this._loadAnimationFromURL(config.src);
