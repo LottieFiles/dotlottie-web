@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.4.1
+
+### Patch Changes
+
+- 44d7357: fix: 🐛 load .wasm binary only once
+
 ## 0.4.0
 
 ### Minor Changes
