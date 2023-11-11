@@ -2,9 +2,6 @@
  * Copyright 2022 Design Barn Inc.
  */
 
-const fs = require('fs');
-const path = require('path');
-
 const { defineConfig } = require('tsup');
 
 const pkg = require('./package.json');
@@ -12,7 +9,7 @@ const pkg = require('./package.json');
 module.exports = defineConfig((options) => ({
   bundle: true,
   metafile: false,
-  splitting: false,
+  splitting: true,
   treeshake: true,
   clean: true,
   dts: true,
@@ -20,15 +17,9 @@ module.exports = defineConfig((options) => ({
   sourcemap: true,
   entry: ['./src/*.ts'],
   format: ['esm'],
-  platform: 'neutral',
-  target: ['es2020', 'node18'],
+  platform: 'browser',
+  target: ['es2020', 'chrome58'],
   tsconfig: 'tsconfig.build.json',
-  onSuccess: () => {
-    fs.copyFileSync(
-      path.resolve(__dirname, './src/renderer-wasm/bin/renderer.wasm'),
-      path.resolve(__dirname, './dist/renderer.wasm'),
-    );
-  },
   // To ensure the ESM bundle is self-contained and usable via CDN
   noExternal: Object.keys(pkg.dependencies),
 }));
