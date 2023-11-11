@@ -137,6 +137,11 @@ pnpm run dev
 
 Feel free to modify and play around with the code to see how changes affect the animations.
 
+### Live Examples
+
+* [@lottiefiles/dotlottie-web](packages/web/README.md#live-example)
+* [@lottiefiles/dotlottie-wc](packages/wc/README.md#live-example)
+
 ### Development
 
 #### Building Packages
