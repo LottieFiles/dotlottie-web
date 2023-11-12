@@ -152,4 +152,8 @@ export class EventManager {
 
     listeners?.forEach((listener) => listener(event));
   }
+
+  public removeAllEventListeners(): void {
+    this._eventListeners.clear();
+  }
 }
