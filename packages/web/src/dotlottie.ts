@@ -432,5 +432,15 @@ export class DotLottie {
     WasmLoader.setWasmUrl(url);
   }
 
+  /**
+   * Destroys the DotLottie instance.
+   *
+   */
+  public destroy(): void {
+    this._eventManager.removeAllEventListeners();
+    this._context = null;
+    this._renderer = null;
+  }
+
   // #endregion
 }

@@ -44,6 +44,7 @@ app.innerHTML = `
     <input type="checkbox" id="loopToggle" checked />
     <label for="speed" class="speed-label">Speed: <span id="speed-value">x1</span></label>
     <input type="range" id="speed" min="0.1" max="5" step="0.1" value="1" class="speed-slider" />
+    <button id="destroy" class="control-button" style="background: #cd3434;">Destroy</button>
   </div>
 </div>
 `;
@@ -73,8 +74,10 @@ allCanvas.forEach((canvas) => {
 fetch('/hamster.lottie')
   .then(async (res) => res.arrayBuffer())
   .then((data): void => {
+    const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+
     const dotLottie = new DotLottie({
-      canvas: document.getElementById('canvas') as HTMLCanvasElement,
+      canvas,
       // src: 'https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie',
       // src: '/lolo.json',
       data,
@@ -89,6 +92,13 @@ fetch('/hamster.lottie')
     const loopToggle = document.getElementById('loopToggle') as HTMLInputElement;
     const speedSlider = document.getElementById('speed') as HTMLInputElement;
     const speedValueSpan = document.getElementById('speed-value') as HTMLSpanElement;
+    const destroyButton = document.getElementById('destroy') as HTMLButtonElement;
+
+    destroyButton.addEventListener('click', () => {
+      canvas.remove();
+
+      dotLottie.destroy();
+    });
 
     playPauseButton.addEventListener('click', () => {
       if (dotLottie.playing) {

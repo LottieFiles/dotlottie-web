@@ -132,16 +132,17 @@ const dotLottie = new DotLottie({
 
 ### Methods
 
-| Method                                                    | Description                                                                             |
-| --------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `play()`                                                  | Begins playback from the current animation position.                                    |
-| `pause()`                                                 | Pauses the animation without resetting its position.                                    |
-| `stop()`                                                  | Halts playback and returns the animation to its initial frame.                          |
-| `setSpeed(speed: number)`                                 | Sets the playback speed with the given multiplier.                                      |
-| `setLoop(loop: boolean)`                                  | Configures whether the animation should loop continuously.                              |
-| `setFrame(frame: number)`                                 | Directly navigates the animation to a specified frame.                                  |
-| `addEventListener(event: string, listener: Function)`     | Registers a function to respond to a specific animation event.                          |
-| `removeEventListener(event: string, listener?: Function)` | Removes a previously registered function from responding to a specific animation event. |
+| Method                                                    | Description                                                                                                                                                       |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `play()`                                                  | Begins playback from the current animation position.                                                                                                              |
+| `pause()`                                                 | Pauses the animation without resetting its position.                                                                                                              |
+| `stop()`                                                  | Halts playback and returns the animation to its initial frame.                                                                                                    |
+| `setSpeed(speed: number)`                                 | Sets the playback speed with the given multiplier.                                                                                                                |
+| `setLoop(loop: boolean)`                                  | Configures whether the animation should loop continuously.                                                                                                        |
+| `setFrame(frame: number)`                                 | Directly navigates the animation to a specified frame.                                                                                                            |
+| `addEventListener(event: string, listener: Function)`     | Registers a function to respond to a specific animation event.                                                                                                    |
+| `removeEventListener(event: string, listener?: Function)` | Removes a previously registered function from responding to a specific animation event.                                                                           |
+| `destroy()`                                               | Destroys the renderer instance and unregisters all event listeners. This method should be called when the canvas is removed from the DOM to prevent memory leaks. |
 
 ### Static Methods
 
