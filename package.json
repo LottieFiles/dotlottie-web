@@ -47,7 +47,7 @@
     "@size-limit/esbuild-why": "^11.0.0",
     "@size-limit/preset-small-lib": "^10.0.2",
     "cross-env": "7.0.3",
-    "eslint": "7.32.0",
+    "eslint": "8.53.0",
     "husky": "8.0.3",
     "lint-staged": "13.2.1",
     "npm-check-updates": "16.10.9",
