@@ -44,6 +44,7 @@ jobs:
         run: pnpm test
 
       - name: 📏 Report bundle size
+        if: github.event_name == 'pull_request'
         uses: andresz1/size-limit-action@v1
         continue-on-error: true
         with:
