@@ -2,6 +2,6 @@
   "name": "scripts",
   "private": true,
   "devDependencies": {
-    "zx": "7.0.7"
+    "zx": "7.2.3"
   }
 }
