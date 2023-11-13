@@ -50,7 +50,7 @@
     "eslint": "7.32.0",
     "husky": "8.0.3",
     "lint-staged": "13.2.1",
-    "npm-check-updates": "16.10.9",
+    "npm-check-updates": "16.14.6",
     "prettier": "2.8.8",
     "remark-cli": "11.0.0",
     "size-limit": "^10.0.2",
