@@ -12,7 +12,7 @@
     "@lottiefiles/dotlottie-web": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "5.0.4",
+    "typescript": "5.2.2",
     "vite": "^4.4.5"
   }
 }
