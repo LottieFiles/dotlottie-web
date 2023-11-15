@@ -50,7 +50,8 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@lottiefiles/dotlottie-web": "workspace:*"
+    "@lottiefiles/dotlottie-web": "workspace:*",
+    "lit": "^3.0.2"
   },
   "devDependencies": {
     "@size-limit/esbuild-why": "^10.0.2",

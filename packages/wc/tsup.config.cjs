@@ -20,6 +20,9 @@ module.exports = defineConfig((options) => ({
   platform: 'browser',
   target: ['es2020', 'chrome58'],
   tsconfig: 'tsconfig.build.json',
+  loader: {
+    '.svg': 'text',
+  },
   // To ensure the ESM bundle is self-contained and usable via CDN
   noExternal: Object.keys(pkg.dependencies),
 }));

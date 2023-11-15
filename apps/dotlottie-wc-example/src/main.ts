@@ -13,18 +13,11 @@ const app = document.querySelector<HTMLDivElement>('#app');
 if (app) {
   app.innerHTML = `
   <dotlottie-wc
-    src="https://lottie.host/35326116-a8ca-4219-81ca-df9ce56a3f22/zCGFevEA23.lottie"  
+    src="https://lottie.host/0e2d86ab-604d-4fc4-8512-d44a30eb81a8/YFj05ZHqHA.json"  
     autoplay
     loop
-    width="200"
-    height="200"
+    controls
   ></dotlottie-wc>
-  <dotlottie-wc
-    src="https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie"  
-    autoplay
-    loop
-    width="200"
-    height="200"
-  ></dotlottie-wc>
+
   `;
 }
