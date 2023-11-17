@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.5.0
+
+### Minor Changes
+
+- 126a410: feat: 🎸 add destroy method
+
 ## 0.4.1
 
 ### Patch Changes

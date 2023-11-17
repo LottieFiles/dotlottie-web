@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-web",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "type": "module",
   "description": "Lottie and DotLottie player for the web",
   "repository": {
@@ -39,7 +39,6 @@
     "build:wasm:docker": "./docker_build_wasm.sh",
     "dev": "tsup --watch",
     "lint": "eslint --fix .",
-    "size": "size-limit",
     "size:why": "size-limit --why --clean-dir --save-bundle ./tmp",
     "stats:eslint": "cross-env TIMING=1 eslint .",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
@@ -49,10 +48,7 @@
     "@dotlottie/dotlottie-js": "^0.6.0"
   },
   "devDependencies": {
-    "@size-limit/esbuild-why": "^10.0.2",
-    "@size-limit/preset-small-lib": "^10.0.2",
     "cross-env": "7.0.3",
-    "size-limit": "^10.0.2",
     "tsup": "7.2.0",
     "typescript": "5.0.4"
   },

@@ -29,6 +29,15 @@ importers:
       '@lottiefiles/tsconfig':
         specifier: 2.0.0
         version: 2.0.0(typescript@5.0.4)
+      '@size-limit/esbuild':
+        specifier: ^11.0.0
+        version: 11.0.0(size-limit@10.0.2)
+      '@size-limit/esbuild-why':
+        specifier: ^11.0.0
+        version: 11.0.0(size-limit@10.0.2)
+      '@size-limit/preset-small-lib':
+        specifier: ^10.0.2
+        version: 10.0.2(size-limit@10.0.2)
       cross-env:
         specifier: 7.0.3
         version: 7.0.3
@@ -50,6 +59,9 @@ importers:
       remark-cli:
         specifier: 11.0.0
         version: 11.0.0
+      size-limit:
+        specifier: ^10.0.2
+        version: 10.0.2
       syncpack:
         specifier: 9.8.6
         version: 9.8.6
@@ -79,18 +91,9 @@ importers:
         specifier: ^0.6.0
         version: 0.6.0
     devDependencies:
-      '@size-limit/esbuild-why':
-        specifier: ^10.0.2
-        version: 10.0.2(size-limit@10.0.2)
-      '@size-limit/preset-small-lib':
-        specifier: ^10.0.2
-        version: 10.0.2(size-limit@10.0.2)
       cross-env:
         specifier: 7.0.3
         version: 7.0.3
-      size-limit:
-        specifier: ^10.0.2
-        version: 10.0.2
       tsup:
         specifier: 7.2.0
         version: 7.2.0(ts-node@10.9.1)(typescript@5.0.4)
@@ -1953,11 +1956,11 @@ packages:
     engines: {node: '>=14.16'}
     dev: true
 
-  /@size-limit/esbuild-why@10.0.2(size-limit@10.0.2):
-    resolution: {integrity: sha512-X1NNP2c6BEpsVGqyG2ptwpm95AfP46Dgr4tMRx63pONv3LlG/3YF2d8aG1vQoQvMk1y2c7Uh0C9U/kOqGFrs8g==}
+  /@size-limit/esbuild-why@11.0.0(size-limit@10.0.2):
+    resolution: {integrity: sha512-YTEmxCBE5PF6LH9lvNYXJM/h7XqVjpCVFVf2NrsJ75d3HdU8q77WriI7/T1++reBf8GfUhY5RIyASdR1ZJ8S4w==}
     engines: {node: ^18.0.0 || >=20.0.0}
     peerDependencies:
-      size-limit: 10.0.2
+      size-limit: 11.0.0
     dependencies:
       esbuild-visualizer: 0.4.1
       open: 9.1.0
@@ -1972,6 +1975,17 @@ packages:
     dependencies:
       esbuild: 0.19.5
       nanoid: 5.0.2
+      size-limit: 10.0.2
+    dev: true
+
+  /@size-limit/esbuild@11.0.0(size-limit@10.0.2):
+    resolution: {integrity: sha512-OOmba2ZuMpaUhmBXgCfgrO7L6zkUDwvFFfW8T+dK08968LQ79Q+kNgEXQAd+dhj9TlTkHyyEDczWmx16e9cXoQ==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    peerDependencies:
+      size-limit: 11.0.0
+    dependencies:
+      esbuild: 0.19.5
+      nanoid: 5.0.3
       size-limit: 10.0.2
     dev: true
 
@@ -7988,6 +8002,12 @@ packages:
 
   /nanoid@5.0.2:
     resolution: {integrity: sha512-2ustYUX1R2rL/Br5B/FMhi8d5/QzvkJ912rBYxskcpu0myTHzSZfTr1LAS2Sm7jxRUObRrSBFoyzwAhL49aVSg==}
+    engines: {node: ^18 || >=20}
+    hasBin: true
+    dev: true
+
+  /nanoid@5.0.3:
+    resolution: {integrity: sha512-I7X2b22cxA4LIHXPSqbBCEQSL+1wv8TuoefejsX4HFWyC6jc5JG7CEaxOltiKjc1M+YCS2YkrZZcj4+dytw9GA==}
     engines: {node: ^18 || >=20}
     hasBin: true
     dev: true
