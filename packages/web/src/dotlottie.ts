@@ -240,6 +240,8 @@ export class DotLottie {
   private _render(): void {
     if (!this._context) return;
 
+    this._adjustCanvasSize();
+
     this._renderer?.resize(this._canvas.width, this._canvas.height);
 
     if (this._renderer?.update()) {
@@ -310,6 +312,28 @@ export class DotLottie {
       window.requestAnimationFrame(this._animationLoop);
     }
   }
+
+  /**
+   * Adjusts the canvas size based on the device pixel ratio and the size of the canvas element.
+   *
+   */
+  private _adjustCanvasSize(): void {
+    const rect = this._canvas.getBoundingClientRect();
+
+    // If the canvas is too large, we don't want to render at a higher resolution. This is to avoid performance issues.
+    const isLargeCanvas = rect.width > 500 || rect.height > 500;
+
+    const ratio = Math.min(window.devicePixelRatio || 1, isLargeCanvas ? 1 : 2);
+
+    const width = rect.width * ratio;
+    const height = rect.height * ratio;
+
+    if (this._canvas.width !== width || this._canvas.height !== height) {
+      this._canvas.width = width;
+      this._canvas.height = height;
+    }
+  }
+
   // #endregion
 
   // #region Public Methods
