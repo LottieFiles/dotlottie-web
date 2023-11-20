@@ -117,18 +117,20 @@ const dotLottie = new DotLottie({
 | `src`      | string                |          | undefined | URL to the animation data (`.json` or `.lottie`).                                                   |
 | `speed`    | number                |          | 1         | Animation playback speed. 1 is regular speed.                                                       |
 | `data`     | string \| ArrayBuffer |          | undefined | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations. |
+| `mode`     | string                |          | "normal"  | Animation play mode. Accepts "normal", "reverse", "bounce", "bounce-reverse".                       |
 
 ### Properties
 
-| Property       | Type    | Description                                                            |
-| -------------- | ------- | ---------------------------------------------------------------------- |
-| `currentFrame` | number  | Represents the animation's currently displayed frame number.           |
-| `duration`     | number  | Specifies the animation's total playback time in milliseconds.         |
-| `totalFrames`  | number  | Denotes the total count of individual frames within the animation.     |
-| `loop`         | boolean | Indicates if the animation is set to play in a continuous loop.        |
-| `speed`        | number  | Represents the playback speed factor; e.g., 2 would mean double speed. |
-| `loopCount`    | number  | Tracks how many times the animation has completed its loop.            |
-| `playing`      | boolean | Reflects whether the animation is in active playback or not            |
+| Property       | Type    | Description                                                                                 |
+| -------------- | ------- | ------------------------------------------------------------------------------------------- |
+| `currentFrame` | number  | Represents the animation's currently displayed frame number.                                |
+| `duration`     | number  | Specifies the animation's total playback time in milliseconds.                              |
+| `totalFrames`  | number  | Denotes the total count of individual frames within the animation.                          |
+| `loop`         | boolean | Indicates if the animation is set to play in a continuous loop.                             |
+| `speed`        | number  | Represents the playback speed factor; e.g., 2 would mean double speed.                      |
+| `loopCount`    | number  | Tracks how many times the animation has completed its loop.                                 |
+| `playing`      | boolean | Reflects whether the animation is in active playback or not                                 |
+| `direction`    | string  | Reflects the current playback direction; e.g., 1 would mean forward, -1 would mean reverse. |
 
 ### Methods
 

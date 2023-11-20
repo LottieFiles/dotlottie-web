@@ -13,7 +13,7 @@ const app = document.getElementById('app') as HTMLDivElement;
 
 app.innerHTML = `
 <div class="grid">
-  <canvas data-src="https://lottie.host/1cf72a35-6d88-4d9a-9961-f1bb88087f2c/miJIHiyH4Q.lottie" width="200px" height="200px"></canvas>
+ <canvas data-src="https://lottie.host/1cf72a35-6d88-4d9a-9961-f1bb88087f2c/miJIHiyH4Q.lottie" width="200px" height="200px"></canvas>
   <canvas data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json" width="200px" height="200px"></canvas>
   <canvas data-src="https://lottie.host/a7421582-4733-49e5-9f77-e8d4cd792239/WZQjpo4uZR.lottie" width="200px" height="200px"></canvas>
   <canvas data-src="https://lottie.host/e2a24b6f-df7f-4fc5-94ea-30f0846f85dc/1RLOR2g0m3.lottie" width="200px" height="200px"></canvas>
@@ -83,6 +83,7 @@ fetch('/hamster.lottie')
       data,
       loop: true,
       autoplay: true,
+      mode: 'bounce',
     });
 
     const playPauseButton = document.getElementById('playPause') as HTMLButtonElement;
@@ -114,11 +115,17 @@ fetch('/hamster.lottie')
       frameSlider.value = '0';
     });
 
+    frameSlider.addEventListener('mousedown', () => {
+      dotLottie.pause();
+    });
+
     frameSlider.addEventListener('input', () => {
       const frame = frameSlider.valueAsNumber;
 
-      dotLottie.pause();
       dotLottie.setFrame(frame);
+    });
+
+    frameSlider.addEventListener('mouseup', () => {
       dotLottie.play();
     });
 
