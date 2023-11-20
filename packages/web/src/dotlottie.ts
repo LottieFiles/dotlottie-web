@@ -4,7 +4,6 @@
 
 /* eslint-disable promise/prefer-await-to-then */
 /* eslint-disable @typescript-eslint/unbound-method */
-/* eslint-disable @typescript-eslint/prefer-readonly */
 
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
@@ -14,7 +13,9 @@ import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL } from './utils
 
 const MS_TO_SEC_FACTOR = 1000;
 
-export interface Options {
+export type Mode = 'normal' | 'reverse' | 'bounce' | 'bounce-reverse';
+
+export interface Config {
   /**
    * Boolean indicating if the animation should start playing automatically.
    */
@@ -33,6 +34,10 @@ export interface Options {
    * Boolean indicating if the animation should loop.
    */
   loop?: boolean;
+  /**
+   *  The playback mode of the animation.
+   */
+  mode?: Mode;
   /**
    * The speed of the animation.
    */
@@ -70,14 +75,33 @@ export class DotLottie {
 
   private _autoplay = false;
 
-  public constructor(config: Options) {
+  private _mode: Mode = 'normal';
+
+  private _direction = 1;
+
+  private _bounceCount = 0;
+
+  private _animationFrameId?: number;
+
+  public constructor(config: Config) {
     this._animationLoop = this._animationLoop.bind(this);
 
     this._canvas = config.canvas;
     this._context = this._canvas.getContext('2d');
+    if (!this._context) {
+      throw new Error('2D context not supported or canvas already initialized with another context type.');
+    }
+
     this._loop = config.loop ?? false;
     this._speed = config.speed ?? 1;
     this._autoplay = config.autoplay ?? false;
+    this._mode = config.mode ?? 'normal';
+
+    const observer = new ResizeObserver(() => {
+      this._resizeAnimationToCanvas();
+    });
+
+    observer.observe(this._canvas);
 
     WasmLoader.load()
       .then((module) => {
@@ -98,6 +122,16 @@ export class DotLottie {
   }
 
   // #region Getters and Setters
+
+  /**
+   * Gets the current direction of the animation.
+   *
+   * @returns The current direction of the animation.
+   */
+  public get direction(): number {
+    return this._direction;
+  }
+
   /**
    * Gets the current frame number.
    *
@@ -160,8 +194,9 @@ export class DotLottie {
   public get playing(): boolean {
     return this._playing;
   }
-  // #endregion
+  // #endregion Getters and Setters
 
+  // #region Private Methods
   /**
    * Loads and initializes the animation from a given URL.
    *
@@ -221,6 +256,8 @@ export class DotLottie {
             error: error as Error,
           });
         });
+    } else {
+      console.error('Unsupported data type for animation data. Expected a string or ArrayBuffer.');
     }
   }
 
@@ -240,8 +277,6 @@ export class DotLottie {
   private _render(): void {
     if (!this._context) return;
 
-    this.resizeAnimationToCanvas();
-
     if (this._renderer?.update()) {
       const buffer = this._renderer.render();
       const clampedBuffer = Uint8ClampedArray.from(buffer);
@@ -259,35 +294,68 @@ export class DotLottie {
    * @returns Boolean indicating if update was successful.
    */
   private _update(): boolean {
-    if (!this._playing) return false;
+    // animation is not loaded yet
+    if (this._duration === 0) return false;
 
-    this._currentFrame =
-      (((performance.now() / MS_TO_SEC_FACTOR - this._beginTime) * this._speed) / this._duration) * this._totalFrames;
+    const timeElapsed = (performance.now() / MS_TO_SEC_FACTOR - this._beginTime) * this._speed;
+    let frameProgress = (timeElapsed / this._duration) * this._totalFrames;
 
-    if (this._currentFrame >= this._totalFrames) {
-      if (this._loop) {
-        this._currentFrame = 0;
+    if (this._mode === 'normal') {
+      this._currentFrame = frameProgress;
+    } else if (this._mode === 'reverse') {
+      this._currentFrame = this._totalFrames - frameProgress - 1;
+    } else if (this._mode === 'bounce') {
+      if (this._direction === -1) {
+        frameProgress = this._totalFrames - frameProgress - 1;
+      }
+      this._currentFrame = frameProgress;
+    } else {
+      // bounce-reverse mode
+      if (this._direction === -1) {
+        frameProgress = this._totalFrames - frameProgress - 1;
+      }
+      this._currentFrame = frameProgress;
+      if (this._bounceCount === 0) {
+        this._direction = -1;
+      }
+    }
+
+    // ensure the frame is within the valid range
+    this._currentFrame = Math.max(0, Math.min(this._currentFrame, this._totalFrames - 1));
+
+    // handle animation looping or completion
+    if (this._currentFrame >= this._totalFrames - 1 || this._currentFrame <= 0) {
+      if (this._loop || this._mode === 'bounce' || this._mode === 'bounce-reverse') {
         this._beginTime = performance.now() / MS_TO_SEC_FACTOR;
-        this._loopCount += 1;
 
-        this._eventManager.dispatch({
-          type: 'loop',
-          loopCount: this._loopCount,
-        });
+        if (this._mode === 'bounce' || this._mode === 'bounce-reverse') {
+          this._direction *= -1;
+          this._bounceCount += 1;
 
-        return true;
+          if (this._bounceCount >= 2) {
+            this._bounceCount = 0;
+            if (!this._loop) {
+              this._playing = false;
+              this._bounceCount = 0;
+              this._direction = 1;
+              this._eventManager.dispatch({ type: 'complete' });
+
+              return false;
+            }
+            this._loopCount += 1;
+            this._eventManager.dispatch({ type: 'loop', loopCount: this._loopCount });
+          }
+        } else {
+          this._loopCount += 1;
+          this._eventManager.dispatch({ type: 'loop', loopCount: this._loopCount });
+        }
       } else {
         this._playing = false;
-
-        this._eventManager.dispatch({
-          type: 'complete',
-        });
+        this._eventManager.dispatch({ type: 'complete' });
 
         return false;
       }
     }
-
-    this._currentFrame = Math.max(0, Math.min(this._currentFrame, this._totalFrames - 1));
 
     if (this._renderer?.frame(this._currentFrame)) {
       this._eventManager.dispatch({
@@ -305,9 +373,9 @@ export class DotLottie {
    * Loop that handles the animation playback.
    */
   private _animationLoop(): void {
-    if (this._update()) {
+    if (this._playing && this._update()) {
       this._render();
-      window.requestAnimationFrame(this._animationLoop);
+      this._startAnimationLoop();
     }
   }
 
@@ -315,7 +383,7 @@ export class DotLottie {
    * Adjusts the canvas size based on the device pixel ratio and the size of the canvas element.
    *
    */
-  public resizeAnimationToCanvas(): void {
+  public _resizeAnimationToCanvas(): void {
     const clientRects = this._canvas.getClientRects();
 
     if (!clientRects.length) return;
@@ -338,6 +406,28 @@ export class DotLottie {
     this._renderer?.resize(width, height);
   }
 
+  /**
+   * Stops the animation loop.
+   *
+   * This is used to ensure that the animation loop is only stopped once.
+   */
+  public _stopAnimationLoop(): void {
+    if (this._animationFrameId) {
+      window.cancelAnimationFrame(this._animationFrameId);
+    }
+  }
+
+  /**
+   * Starts the animation loop.
+   *
+   * This is used to ensure that the animation loop is only started once.
+   */
+  public _startAnimationLoop(): void {
+    if (this._animationFrameId) {
+      window.cancelAnimationFrame(this._animationFrameId);
+    }
+    this._animationFrameId = window.requestAnimationFrame(this._animationLoop);
+  }
   // #endregion
 
   // #region Public Methods
@@ -355,16 +445,21 @@ export class DotLottie {
       return;
     }
 
-    const progress = this._currentFrame / this._totalFrames;
+    const currentProgress = this._currentFrame / this._totalFrames;
 
-    this._beginTime = performance.now() / 1000 - progress * this._duration;
+    if (this._direction === -1) {
+      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - this._duration * (1 - currentProgress);
+    } else {
+      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - this._duration * currentProgress;
+    }
+
     if (!this._playing) {
       this._playing = true;
-      this._animationLoop();
-
       this._eventManager.dispatch({
         type: 'play',
       });
+
+      this._startAnimationLoop();
     }
   }
 
@@ -372,9 +467,13 @@ export class DotLottie {
    * Stops the animation playback and resets the current frame.
    */
   public stop(): void {
-    if (!this._playing && this._currentFrame === 0) return;
-
+    this._stopAnimationLoop();
     this._playing = false;
+    this._loopCount = 0;
+    this._direction = 1;
+    this._currentFrame = 0;
+    this._bounceCount = 0;
+    this._beginTime = 0;
     this.setFrame(0);
     this._eventManager.dispatch({
       type: 'stop',
@@ -399,6 +498,11 @@ export class DotLottie {
    * @param speed - Speed multiplier for playback.
    */
   public setSpeed(speed: number): void {
+    if (speed <= 0) {
+      console.error('Speed must be a positive number.');
+
+      return;
+    }
     this._speed = speed;
   }
 
@@ -416,7 +520,6 @@ export class DotLottie {
    */
   public setFrame(frame: number): void {
     if (frame < 0 || frame >= this._totalFrames) {
-      // eslint-disable-next-line no-console
       console.error(`Invalid frame number provided: ${frame}. Valid range is between 0 and ${this._totalFrames - 1}.`);
 
       return;
@@ -430,6 +533,29 @@ export class DotLottie {
       type: 'frame',
       currentFrame: this._currentFrame,
     });
+  }
+
+  public load(config: Omit<Config, 'canvas'>): void {
+    this._playing = false;
+    this._stopAnimationLoop();
+
+    this._loop = config.loop ?? false;
+    this._speed = config.speed ?? 1;
+    this._autoplay = config.autoplay ?? false;
+    this._loopCount = 0;
+    this._currentFrame = 0;
+    this._beginTime = 0;
+    this._totalFrames = 0;
+    this._duration = 0;
+    this._bounceCount = 0;
+    this._direction = 1;
+    this._mode = config.mode ?? 'normal';
+
+    if (config.src) {
+      this._loadAnimationFromURL(config.src);
+    } else if (config.data) {
+      this._initializeAnimationFromData(config.data);
+    }
   }
 
   /**
@@ -465,6 +591,7 @@ export class DotLottie {
    *
    */
   public destroy(): void {
+    this._stopAnimationLoop();
     this._eventManager.removeAllEventListeners();
     this._context = null;
     this._renderer = null;

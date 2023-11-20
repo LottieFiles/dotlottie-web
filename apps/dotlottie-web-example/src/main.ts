@@ -45,6 +45,7 @@ app.innerHTML = `
     <label for="speed" class="speed-label">Speed: <span id="speed-value">x1</span></label>
     <input type="range" id="speed" min="0.1" max="5" step="0.1" value="1" class="speed-slider" />
     <button id="destroy" class="control-button" style="background: #cd3434;">Destroy</button>
+    <button id="reload" class="control-button">Reload</button>
   </div>
 </div>
 `;
@@ -83,6 +84,7 @@ fetch('/hamster.lottie')
       data,
       loop: true,
       autoplay: true,
+      mode: 'bounce',
     });
 
     const playPauseButton = document.getElementById('playPause') as HTMLButtonElement;
@@ -93,11 +95,21 @@ fetch('/hamster.lottie')
     const speedSlider = document.getElementById('speed') as HTMLInputElement;
     const speedValueSpan = document.getElementById('speed-value') as HTMLSpanElement;
     const destroyButton = document.getElementById('destroy') as HTMLButtonElement;
+    const reloadButton = document.getElementById('reload') as HTMLButtonElement;
 
     destroyButton.addEventListener('click', () => {
       canvas.remove();
 
       dotLottie.destroy();
+    });
+
+    reloadButton.addEventListener('click', () => {
+      dotLottie.load({
+        src: 'https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie',
+        loop: true,
+        autoplay: true,
+        mode: 'bounce-reverse',
+      });
     });
 
     playPauseButton.addEventListener('click', () => {
@@ -114,11 +126,17 @@ fetch('/hamster.lottie')
       frameSlider.value = '0';
     });
 
+    frameSlider.addEventListener('mousedown', () => {
+      dotLottie.pause();
+    });
+
     frameSlider.addEventListener('input', () => {
       const frame = frameSlider.valueAsNumber;
 
-      dotLottie.pause();
       dotLottie.setFrame(frame);
+    });
+
+    frameSlider.addEventListener('mouseup', () => {
       dotLottie.play();
     });
 

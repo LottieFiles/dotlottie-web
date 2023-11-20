@@ -21,7 +21,7 @@
   * [Via CDN](#via-cdn)
 * [Live Example](#live-example)
 * [APIs](#apis)
-  * [Options](#options)
+  * [Config](#config)
   * [Properties](#properties)
   * [Methods](#methods)
   * [Static Methods](#static-methods)
@@ -107,30 +107,38 @@ const dotLottie = new DotLottie({
 
 ## APIs
 
-### Options
+### Config
 
-| Option     | Type                  | Required | Default   | Description                                                                                         |
-| ---------- | --------------------- | :------: | --------- | --------------------------------------------------------------------------------------------------- |
-| `autoplay` | boolean               |          | false     | Auto-starts the animation on load.                                                                  |
-| `loop`     | boolean               |          | false     | Determines if the animation should loop.                                                            |
-| `canvas`   | HTMLCanvasElement     |    ✔️    | undefined | Canvas element for animation rendering.                                                             |
-| `src`      | string                |          | undefined | URL to the animation data (`.json` or `.lottie`).                                                   |
-| `speed`    | number                |          | 1         | Animation playback speed. 1 is regular speed.                                                       |
-| `data`     | string \| ArrayBuffer |          | undefined | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations. |
+The `DotLottie` constructor accepts a config object with the following properties:
+
+| Property name | Type                  | Required | Default   | Description                                                                                         |
+| ------------- | --------------------- | :------: | --------- | --------------------------------------------------------------------------------------------------- |
+| `autoplay`    | boolean               |          | false     | Auto-starts the animation on load.                                                                  |
+| `loop`        | boolean               |          | false     | Determines if the animation should loop.                                                            |
+| `canvas`      | HTMLCanvasElement     |    ✔️    | undefined | Canvas element for animation rendering.                                                             |
+| `src`         | string                |          | undefined | URL to the animation data (`.json` or `.lottie`).                                                   |
+| `speed`       | number                |          | 1         | Animation playback speed. 1 is regular speed.                                                       |
+| `data`        | string \| ArrayBuffer |          | undefined | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations. |
+| `mode`        | string                |          | "normal"  | Animation play mode. Accepts "normal", "reverse", "bounce", "bounce-reverse".                       |
 
 ### Properties
 
-| Property       | Type    | Description                                                            |
-| -------------- | ------- | ---------------------------------------------------------------------- |
-| `currentFrame` | number  | Represents the animation's currently displayed frame number.           |
-| `duration`     | number  | Specifies the animation's total playback time in milliseconds.         |
-| `totalFrames`  | number  | Denotes the total count of individual frames within the animation.     |
-| `loop`         | boolean | Indicates if the animation is set to play in a continuous loop.        |
-| `speed`        | number  | Represents the playback speed factor; e.g., 2 would mean double speed. |
-| `loopCount`    | number  | Tracks how many times the animation has completed its loop.            |
-| `playing`      | boolean | Reflects whether the animation is in active playback or not            |
+`DotLottie` instances expose the following properties:
+
+| Property       | Type    | Description                                                                                 |
+| -------------- | ------- | ------------------------------------------------------------------------------------------- |
+| `currentFrame` | number  | Represents the animation's currently displayed frame number.                                |
+| `duration`     | number  | Specifies the animation's total playback time in milliseconds.                              |
+| `totalFrames`  | number  | Denotes the total count of individual frames within the animation.                          |
+| `loop`         | boolean | Indicates if the animation is set to play in a continuous loop.                             |
+| `speed`        | number  | Represents the playback speed factor; e.g., 2 would mean double speed.                      |
+| `loopCount`    | number  | Tracks how many times the animation has completed its loop.                                 |
+| `playing`      | boolean | Reflects whether the animation is in active playback or not                                 |
+| `direction`    | string  | Reflects the current playback direction; e.g., 1 would mean forward, -1 would mean reverse. |
 
 ### Methods
+
+`DotLottie` instances expose the following methods that can be used to control the animation:
 
 | Method                                                    | Description                                                                                                                                                       |
 | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -143,14 +151,19 @@ const dotLottie = new DotLottie({
 | `addEventListener(event: string, listener: Function)`     | Registers a function to respond to a specific animation event.                                                                                                    |
 | `removeEventListener(event: string, listener?: Function)` | Removes a previously registered function from responding to a specific animation event.                                                                           |
 | `destroy()`                                               | Destroys the renderer instance and unregisters all event listeners. This method should be called when the canvas is removed from the DOM to prevent memory leaks. |
+| `load(config: Config)`                                    | Loads a new configuration or a new animation.                                                                                                                     |
 
 ### Static Methods
+
+The `DotLottie` class exposes the following static methods:
 
 | Method                    | Description                               |
 | ------------------------- | ----------------------------------------- |
 | `setWasmUrl(url: string)` | Sets the URL to the renderer.wasm binary. |
 
 ### Events
+
+The `DotLottie` instance emits the following events that can be listened to via the `addEventListener` method:
 
 | Event       | Description                                          |
 | ----------- | ---------------------------------------------------- |
