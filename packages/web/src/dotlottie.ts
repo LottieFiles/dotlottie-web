@@ -4,7 +4,6 @@
 
 /* eslint-disable promise/prefer-await-to-then */
 /* eslint-disable @typescript-eslint/unbound-method */
-/* eslint-disable @typescript-eslint/prefer-readonly */
 
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
@@ -16,7 +15,7 @@ const MS_TO_SEC_FACTOR = 1000;
 
 export type Mode = 'normal' | 'reverse' | 'bounce' | 'bounce-reverse';
 
-export interface Options {
+export interface Config {
   /**
    * Boolean indicating if the animation should start playing automatically.
    */
@@ -84,7 +83,7 @@ export class DotLottie {
 
   private _animationFrameId?: number;
 
-  public constructor(config: Options) {
+  public constructor(config: Config) {
     this._animationLoop = this._animationLoop.bind(this);
 
     this._canvas = config.canvas;
@@ -501,6 +500,29 @@ export class DotLottie {
       type: 'frame',
       currentFrame: this._currentFrame,
     });
+  }
+
+  public load(config: Omit<Config, 'canvas'>): void {
+    this._playing = false;
+    this._stopAnimationLoop();
+
+    this._loop = config.loop ?? false;
+    this._speed = config.speed ?? 1;
+    this._autoplay = config.autoplay ?? false;
+    this._loopCount = 0;
+    this._currentFrame = 0;
+    this._beginTime = 0;
+    this._totalFrames = 0;
+    this._duration = 0;
+    this._bounceCount = 0;
+    this._direction = 1;
+    this._mode = config.mode ?? 'normal';
+
+    if (config.src) {
+      this._loadAnimationFromURL(config.src);
+    } else if (config.data) {
+      this._initializeAnimationFromData(config.data);
+    }
   }
 
   /**
