@@ -9,7 +9,7 @@ import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import type { Renderer } from './renderer-wasm';
 import { WasmLoader } from './renderer-wasm';
-import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL } from './utils';
+import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL, debounce } from './utils';
 
 const MS_TO_SEC_FACTOR = 1000;
 
@@ -36,6 +36,7 @@ export interface Config {
   loop?: boolean;
   /**
    *  The playback mode of the animation.
+   *
    */
   mode?: Mode;
   /**
@@ -83,6 +84,11 @@ export class DotLottie {
 
   private _animationFrameId?: number;
 
+  // eslint-disable-next-line @typescript-eslint/prefer-readonly
+  private _shouldAutoResizeCanvas = false;
+
+  private readonly _canvasResizeObserver?: ResizeObserver | null = null;
+
   public constructor(config: Config) {
     this._animationLoop = this._animationLoop.bind(this);
 
@@ -97,11 +103,20 @@ export class DotLottie {
     this._autoplay = config.autoplay ?? false;
     this._mode = config.mode ?? 'normal';
 
-    const observer = new ResizeObserver(() => {
-      this._resizeAnimationToCanvas();
-    });
+    if (!(this._canvas.hasAttribute('width') || this._canvas.hasAttribute('height'))) {
+      this._shouldAutoResizeCanvas = true;
 
-    observer.observe(this._canvas);
+      this._canvasResizeObserver = new ResizeObserver(
+        debounce(() => {
+          this._resizeAnimationToCanvas();
+          if (!this._playing) {
+            this._render();
+          }
+        }, 100),
+      );
+
+      this._canvasResizeObserver.observe(this._canvas);
+    }
 
     WasmLoader.load()
       .then((module) => {
@@ -228,8 +243,11 @@ export class DotLottie {
         if (this._renderer?.load(animationData, this._canvas.width, this._canvas.height)) {
           this._setupAnimationDetails();
           this._eventManager.dispatch({ type: 'load' });
+          this._resizeAnimationToCanvas();
           if (this._autoplay) {
             this.play();
+          } else {
+            this._render();
           }
         } else {
           this._eventManager.dispatch({
@@ -276,6 +294,8 @@ export class DotLottie {
    */
   private _render(): void {
     if (!this._context) return;
+
+    this._renderer?.resize(this._canvas.width, this._canvas.height);
 
     if (this._renderer?.update()) {
       const buffer = this._renderer.render();
@@ -384,6 +404,8 @@ export class DotLottie {
    *
    */
   public _resizeAnimationToCanvas(): void {
+    if (!this._shouldAutoResizeCanvas) return;
+
     const clientRects = this._canvas.getClientRects();
 
     if (!clientRects.length) return;
@@ -402,8 +424,6 @@ export class DotLottie {
 
     this._canvas.width = width;
     this._canvas.height = height;
-
-    this._renderer?.resize(width, height);
   }
 
   /**
@@ -593,6 +613,7 @@ export class DotLottie {
   public destroy(): void {
     this._stopAnimationLoop();
     this._eventManager.removeAllEventListeners();
+    this._canvasResizeObserver?.disconnect();
     this._context = null;
     this._renderer = null;
   }
