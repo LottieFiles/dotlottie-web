@@ -436,6 +436,8 @@ export class DotLottie {
    * Stops the animation playback and resets the current frame.
    */
   public stop(): void {
+    this._stopAnimationLoop();
+    this._playing = false;
     this._loopCount = 0;
     this._direction = 1;
     this._currentFrame = 0;
