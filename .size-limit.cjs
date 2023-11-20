@@ -22,4 +22,15 @@ const packages = packageDirs
   })
   .filter(Boolean);
 
+// for dotlottie-web *.wasm
+packages.push({
+  name: '@lottiefiles/dotlottie-web WASM',
+  path: 'packages/web/dist/*.wasm',
+  modifyWebpackConfig: (config) => {
+    config.experiments = {
+      asyncWebAssembly: true,
+    };
+  },
+});
+
 module.exports = packages;
