@@ -1,5 +1,17 @@
 # @lottiefiles/dotlottie-web
 
+## 0.6.0
+
+### Minor Changes
+
+- 82830d2: feat: 🎸 add load method
+- 600aed1: feat: 🎸 add play mode
+
+### Patch Changes
+
+- 5e4bd8c: fix: 🐛 quality loss when resize canvas
+- bff25d3: chore: 🤖 refine loaders in meson build for ThorVG
+
 ## 0.5.0
 
 ### Minor Changes
