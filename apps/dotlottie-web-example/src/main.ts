@@ -13,26 +13,26 @@ const app = document.getElementById('app') as HTMLDivElement;
 
 app.innerHTML = `
 <div class="grid">
- <canvas data-src="https://lottie.host/1cf72a35-6d88-4d9a-9961-f1bb88087f2c/miJIHiyH4Q.lottie" width="200px" height="200px"></canvas>
-  <canvas data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json" width="200px" height="200px"></canvas>
-  <canvas data-src="https://lottie.host/a7421582-4733-49e5-9f77-e8d4cd792239/WZQjpo4uZR.lottie" width="200px" height="200px"></canvas>
-  <canvas data-src="https://lottie.host/e2a24b6f-df7f-4fc5-94ea-30f0846f85dc/1RLOR2g0m3.lottie" width="200px" height="200px"></canvas>
-  <canvas data-src="https://lottie.host/35326116-a8ca-4219-81ca-df9ce56a3f22/zCGFevEA23.lottie" width="200px" height="200px"></canvas>
-  <canvas data-src="https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie" width="200px" height="200px"></canvas>
-  <canvas data-src="/down.json" width="200px" height="200px"></canvas>
-  <canvas data-src="/dragon.json" width="200px" height="200px"></canvas>
-  <canvas data-src="/editor.json" width="200px" height="200px"></canvas>
-  <canvas data-src="/growup.json" width="200px" height="200px"></canvas>
-  <canvas data-src="/hamster.lottie" width="200px" height="200px"></canvas>
-  <canvas data-src="/like.json" width="200px" height="200px"></canvas>
-  <canvas data-src="/lolo.json" width="200px" height="200px"></canvas>
-  <canvas data-src="/walker.json" width="200px" height="200px"></canvas>
-  <canvas data-src="/waves.json" width="200px" height="200px"></canvas>
-  <canvas data-src="/woman.json" width="200px" height="200px"></canvas>
+  <canvas data-src="https://lottie.host/1cf72a35-6d88-4d9a-9961-f1bb88087f2c/miJIHiyH4Q.lottie"></canvas>
+  <canvas data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"></canvas>
+  <canvas data-src="https://lottie.host/a7421582-4733-49e5-9f77-e8d4cd792239/WZQjpo4uZR.lottie"></canvas>
+  <canvas data-src="https://lottie.host/e2a24b6f-df7f-4fc5-94ea-30f0846f85dc/1RLOR2g0m3.lottie"></canvas>
+  <canvas data-src="https://lottie.host/35326116-a8ca-4219-81ca-df9ce56a3f22/zCGFevEA23.lottie"></canvas>
+  <canvas data-src="https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie"></canvas>
+  <canvas data-src="/down.json"></canvas>
+  <canvas data-src="/dragon.json"></canvas>
+  <canvas data-src="/editor.json"></canvas>
+  <canvas data-src="/growup.json"></canvas>
+  <canvas data-src="/hamster.lottie"></canvas>
+  <canvas data-src="/like.json"></canvas>
+  <canvas data-src="/lolo.json"></canvas>
+  <canvas data-src="/walker.json"></canvas>
+  <canvas data-src="/waves.json"></canvas>
+  <canvas data-src="/woman.json"></canvas>
 </div>
 
 <div class="container">
-  <canvas id="canvas" width="400" height="400"></canvas>
+  <canvas id="canvas"></canvas>
   <div class="control-panel">
     <button id="playPause" class="control-button">Play</button>
     <button id="stop" class="control-button">Stop</button>
