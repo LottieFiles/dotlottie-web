@@ -19,6 +19,7 @@
 * [Usage](#usage)
   * [Via npm](#via-npm)
   * [Via CDN](#via-cdn)
+  * [Responsive Canvas](#responsive-canvas)
 * [Live Example](#live-example)
 * [APIs](#apis)
   * [Config](#config)
@@ -99,6 +100,16 @@ const dotLottie = new DotLottie({
     </script>
   </body>
 </html>
+```
+
+### Responsive Canvas
+
+`DotLottie` offers an automatic canvas resizing behavior to ensure optimal animation quality, especially when the canvas size changes dynamically, such as during browser window resizing or layout adjustments. This behavior is particularly useful when the canvas does not have fixed width and height attributes set, as it maintains the quality of the animation by adjusting the canvas's internal drawing buffer to match its display size.
+
+For this behavior to work correctly, the canvas element must be styled using CSS to take up 100% of the width of its parent container. Additionally, you can use the `aspect-ratio` property to maintain a specific aspect ratio for the canvas. Adjust this property as needed for your design requirements. For example:
+
+```html
+<canvas id="canvas" style="width: 100%; aspect-ratio: 1"></canvas>
 ```
 
 ## Live Example
