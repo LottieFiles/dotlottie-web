@@ -131,6 +131,7 @@ The `DotLottie` constructor accepts a config object with the following propertie
 | `speed`       | number                |          | 1         | Animation playback speed. 1 is regular speed.                                                       |
 | `data`        | string \| ArrayBuffer |          | undefined | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations. |
 | `mode`        | string                |          | "normal"  | Animation play mode. Accepts "normal", "reverse", "bounce", "bounce-reverse".                       |
+| `segments`    | number\[]             |          | undefined | Array of two numbers representing the start and end frame of the animation.                         |
 
 ### Properties
 
@@ -146,6 +147,8 @@ The `DotLottie` constructor accepts a config object with the following propertie
 | `loopCount`    | number  | Tracks how many times the animation has completed its loop.                                 |
 | `playing`      | boolean | Reflects whether the animation is in active playback or not                                 |
 | `direction`    | string  | Reflects the current playback direction; e.g., 1 would mean forward, -1 would mean reverse. |
+| `startFrame`   | number  | Represents the animation's starting frame number.                                           |
+| `endFrame`     | number  | Represents the animation's ending frame number.                                             |
 
 ### Methods
 

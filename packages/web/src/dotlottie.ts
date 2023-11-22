@@ -40,6 +40,10 @@ export interface Config {
    */
   mode?: Mode;
   /**
+   *  The frame boundaries of the animation.
+   */
+  segments?: [number, number];
+  /**
    * The speed of the animation.
    */
   speed?: number;
@@ -84,6 +88,12 @@ export class DotLottie {
 
   private _animationFrameId?: number;
 
+  private _startFrame = 0;
+
+  private _endFrame = -1;
+
+  private readonly _segments?: [number, number];
+
   // eslint-disable-next-line @typescript-eslint/prefer-readonly
   private _shouldAutoResizeCanvas = false;
 
@@ -102,6 +112,9 @@ export class DotLottie {
     this._speed = config.speed ?? 1;
     this._autoplay = config.autoplay ?? false;
     this._mode = config.mode ?? 'normal';
+    if (config.segments) {
+      this._segments = config.segments;
+    }
 
     if (!(this._canvas.hasAttribute('width') || this._canvas.hasAttribute('height'))) {
       this._shouldAutoResizeCanvas = true;
@@ -137,6 +150,24 @@ export class DotLottie {
   }
 
   // #region Getters and Setters
+
+  /**
+   * Gets the animation start frame.
+   *
+   * @returns The animation start frame.
+   */
+  public get startFrame(): number {
+    return this._startFrame;
+  }
+
+  /**
+   * Gets the animation end frame.
+   *
+   * @returns The animation end frame.
+   */
+  public get endFrame(): number {
+    return this._endFrame;
+  }
 
   /**
    * Gets the current direction of the animation.
@@ -286,6 +317,9 @@ export class DotLottie {
     if (this._renderer) {
       this._totalFrames = this._renderer.totalFrames();
       this._duration = this._renderer.duration();
+      if (this._segments) {
+        this.setFrameBoundaries(this._segments[0], this._segments[1]);
+      }
     }
   }
 
@@ -320,19 +354,27 @@ export class DotLottie {
     const timeElapsed = (performance.now() / MS_TO_SEC_FACTOR - this._beginTime) * this._speed;
     let frameProgress = (timeElapsed / this._duration) * this._totalFrames;
 
+    // Define effective start and end frames
+    const effectiveStartFrame = this._startFrame;
+    const effectiveEndFrame = this._endFrame >= 0 ? this._endFrame : this._totalFrames - 1;
+
+    // Normalize frameProgress within the effective frame range
+    frameProgress = effectiveStartFrame + (frameProgress % (effectiveEndFrame - effectiveStartFrame + 1));
+
     if (this._mode === 'normal') {
       this._currentFrame = frameProgress;
     } else if (this._mode === 'reverse') {
-      this._currentFrame = this._totalFrames - frameProgress - 1;
+      this._currentFrame = effectiveEndFrame - (frameProgress - effectiveStartFrame);
     } else if (this._mode === 'bounce') {
       if (this._direction === -1) {
-        frameProgress = this._totalFrames - frameProgress - 1;
+        frameProgress = effectiveEndFrame - (frameProgress - effectiveStartFrame);
       }
+
       this._currentFrame = frameProgress;
     } else {
       // bounce-reverse mode
       if (this._direction === -1) {
-        frameProgress = this._totalFrames - frameProgress - 1;
+        frameProgress = effectiveEndFrame - (frameProgress - effectiveStartFrame);
       }
       this._currentFrame = frameProgress;
       if (this._bounceCount === 0) {
@@ -341,10 +383,10 @@ export class DotLottie {
     }
 
     // ensure the frame is within the valid range
-    this._currentFrame = Math.max(0, Math.min(this._currentFrame, this._totalFrames - 1));
+    this._currentFrame = Math.max(effectiveStartFrame, Math.min(this._currentFrame, effectiveEndFrame));
 
     // handle animation looping or completion
-    if (this._currentFrame >= this._totalFrames - 1 || this._currentFrame <= 0) {
+    if (this._currentFrame >= effectiveEndFrame || this._currentFrame <= effectiveStartFrame) {
       if (this._loop || this._mode === 'bounce' || this._mode === 'bounce-reverse') {
         this._beginTime = performance.now() / MS_TO_SEC_FACTOR;
 
@@ -465,12 +507,21 @@ export class DotLottie {
       return;
     }
 
-    const currentProgress = this._currentFrame / this._totalFrames;
+    // Determine effective end frame
+    const effectiveEndFrame = this._endFrame >= 0 ? this._endFrame : this._totalFrames - 1;
+
+    // If the current frame is out of bounds, reset it to the start frame
+    if (this._currentFrame < this._startFrame || this._currentFrame > effectiveEndFrame) {
+      this._currentFrame = this._startFrame;
+    }
+
+    // Calculate the correct begin time based on the current frame and direction
+    const progressRatio = (this._currentFrame - this._startFrame) / (effectiveEndFrame - this._startFrame);
 
     if (this._direction === -1) {
-      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - this._duration * (1 - currentProgress);
+      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - this._duration * (1 - progressRatio);
     } else {
-      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - this._duration * currentProgress;
+      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - this._duration * progressRatio;
     }
 
     if (!this._playing) {
@@ -478,7 +529,6 @@ export class DotLottie {
       this._eventManager.dispatch({
         type: 'play',
       });
-
       this._startAnimationLoop();
     }
   }
@@ -491,7 +541,7 @@ export class DotLottie {
     this._playing = false;
     this._loopCount = 0;
     this._direction = 1;
-    this._currentFrame = 0;
+    this._currentFrame = this._startFrame;
     this._bounceCount = 0;
     this._beginTime = 0;
     this.setFrame(0);
@@ -539,8 +589,10 @@ export class DotLottie {
    * @param frame - Frame number to set.
    */
   public setFrame(frame: number): void {
-    if (frame < 0 || frame >= this._totalFrames) {
-      console.error(`Invalid frame number provided: ${frame}. Valid range is between 0 and ${this._totalFrames - 1}.`);
+    if (frame < this._startFrame || frame > this._endFrame) {
+      console.error(
+        `Invalid frame number: ${frame}. Valid range is between ${this._startFrame} and ${this._endFrame}.`,
+      );
 
       return;
     }
@@ -616,6 +668,16 @@ export class DotLottie {
     this._canvasResizeObserver?.disconnect();
     this._context = null;
     this._renderer = null;
+  }
+
+  public setFrameBoundaries(startFrame: number, endFrame: number): void {
+    if (startFrame < 0 || endFrame < startFrame || endFrame >= this._totalFrames) {
+      console.error(`Invalid frame boundaries: startFrame=${startFrame}, endFrame=${endFrame}`);
+
+      return;
+    }
+    this._startFrame = startFrame;
+    this._endFrame = endFrame;
   }
 
   // #endregion
