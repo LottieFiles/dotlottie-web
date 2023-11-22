@@ -69,8 +69,8 @@ fetch('/hamster.lottie')
       data,
       loop: true,
       autoplay: true,
-      mode: 'reverse',
-      segments: [10, 120],
+      mode: 'bounce',
+      segments: [10, 14],
       speed: 1,
     });
 

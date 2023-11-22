@@ -41,6 +41,11 @@ export interface Config {
   mode?: Mode;
   /**
    *  The frame boundaries of the animation.
+   *
+   * The animation will only play between the given start and end frames.
+   *
+   * e.g. [0, 10] will play the first 10 frames of the animation only.
+   *
    */
   segments?: [number, number];
   /**
@@ -352,14 +357,12 @@ export class DotLottie {
     if (this._duration === 0) return false;
 
     const timeElapsed = (performance.now() / MS_TO_SEC_FACTOR - this._beginTime) * this._speed;
-    let frameProgress = (timeElapsed / this._duration) * this._totalFrames;
 
-    // Define effective start and end frames
+    // define effective start and end frames
     const effectiveStartFrame = this._startFrame;
     const effectiveEndFrame = this._endFrame >= 0 ? this._endFrame : this._totalFrames - 1;
 
-    // Normalize frameProgress within the effective frame range
-    frameProgress = effectiveStartFrame + (frameProgress % (effectiveEndFrame - effectiveStartFrame + 1));
+    let frameProgress = (timeElapsed / this._duration) * this._totalFrames + effectiveStartFrame;
 
     if (this._mode === 'normal') {
       this._currentFrame = frameProgress;
