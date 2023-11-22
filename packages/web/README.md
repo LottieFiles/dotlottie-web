@@ -122,16 +122,16 @@ For this behavior to work correctly, the canvas element must be styled using CSS
 
 The `DotLottie` constructor accepts a config object with the following properties:
 
-| Property name | Type                  | Required | Default   | Description                                                                                         |
-| ------------- | --------------------- | :------: | --------- | --------------------------------------------------------------------------------------------------- |
-| `autoplay`    | boolean               |          | false     | Auto-starts the animation on load.                                                                  |
-| `loop`        | boolean               |          | false     | Determines if the animation should loop.                                                            |
-| `canvas`      | HTMLCanvasElement     |    ✔️    | undefined | Canvas element for animation rendering.                                                             |
-| `src`         | string                |          | undefined | URL to the animation data (`.json` or `.lottie`).                                                   |
-| `speed`       | number                |          | 1         | Animation playback speed. 1 is regular speed.                                                       |
-| `data`        | string \| ArrayBuffer |          | undefined | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations. |
-| `mode`        | string                |          | "normal"  | Animation play mode. Accepts "normal", "reverse", "bounce", "bounce-reverse".                       |
-| `segments`    | number\[]             |          | undefined | Array of two numbers representing the start and end frame of the animation.                         |
+| Property name | Type                  | Required | Default               | Description                                                                                                                                                                                                                                                            |
+| ------------- | --------------------- | :------: | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `autoplay`    | boolean               |          | false                 | Auto-starts the animation on load.                                                                                                                                                                                                                                     |
+| `loop`        | boolean               |          | false                 | Determines if the animation should loop.                                                                                                                                                                                                                               |
+| `canvas`      | HTMLCanvasElement     |    ✔️    | undefined             | Canvas element for animation rendering.                                                                                                                                                                                                                                |
+| `src`         | string                |          | undefined             | URL to the animation data (`.json` or `.lottie`).                                                                                                                                                                                                                      |
+| `speed`       | number                |          | 1                     | Animation playback speed. 1 is regular speed.                                                                                                                                                                                                                          |
+| `data`        | string \| ArrayBuffer |          | undefined             | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations.                                                                                                                                                                    |
+| `mode`        | string                |          | "normal"              | Animation play mode. Accepts "normal", "reverse", "bounce", "bounce-reverse".                                                                                                                                                                                          |
+| `segments`    | \[number, number]     |          | \[0, totalFrames - 1] | Defines a specific segment of the animation to play, specified as an array with two numbers indicating the start and end frames. For example, \[0, 10] plays the animation from frame 0 to frame 10. This is useful for selectively playing a portion of an animation. |
 
 ### Properties
 

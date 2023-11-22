@@ -37,6 +37,11 @@ export interface Config {
   /**
    *  The playback mode of the animation.
    *
+   * normal: The animation will play from start to end.
+   * reverse: The animation will play from end to start.
+   * bounce: The animation will play from start to end and then from end to start.
+   * bounce-reverse: The animation will play from end to start and then from start to end.
+   *
    */
   mode?: Mode;
   /**
