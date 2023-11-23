@@ -21,6 +21,10 @@ export interface Config {
    */
   autoplay?: boolean;
   /**
+   * Animation canvas background color.
+   */
+  backgroundColor?: string;
+  /**
    * The canvas element to render the animation on.
    */
   canvas: HTMLCanvasElement;
@@ -102,6 +106,10 @@ export class DotLottie {
     this._speed = config.speed ?? 1;
     this._autoplay = config.autoplay ?? false;
     this._mode = config.mode ?? 'normal';
+
+    if (config.backgroundColor) {
+      this._canvas.style.backgroundColor = config.backgroundColor;
+    }
 
     if (!(this._canvas.hasAttribute('width') || this._canvas.hasAttribute('height'))) {
       this._shouldAutoResizeCanvas = true;
@@ -570,6 +578,11 @@ export class DotLottie {
     this._bounceCount = 0;
     this._direction = 1;
     this._mode = config.mode ?? 'normal';
+    this._canvas.style.backgroundColor = '';
+
+    if (config.backgroundColor) {
+      this._canvas.style.backgroundColor = config.backgroundColor;
+    }
 
     if (config.src) {
       this._loadAnimationFromURL(config.src);
