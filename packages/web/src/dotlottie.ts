@@ -482,7 +482,7 @@ export class DotLottie {
       let frameTime = this._currentFrame * frameDuration;
 
       // adjust frame time based on the current direction
-      if (this._mode === 'reverse' || (this._mode.includes('bounce') && this._direction === -1)) {
+      if (this._direction === -1) {
         frameTime = this._duration - frameTime;
       }
 
@@ -576,7 +576,7 @@ export class DotLottie {
       let frameTime = frame * frameDuration;
 
       // adjust frame time based on the current direction
-      if (this._mode === 'reverse' || (this._mode.includes('bounce') && this._direction === -1)) {
+      if (this._direction === -1) {
         frameTime = this._duration - frameTime;
       }
 
