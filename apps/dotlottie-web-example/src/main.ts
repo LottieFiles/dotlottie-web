@@ -38,12 +38,13 @@ app.innerHTML = `
     <button id="stop" class="control-button">Stop</button>
     
     <label for="frameSlider">Frame: <span id="current-frame">0</span></label>
-    <input type="range" id="frameSlider" min="0" step="1" />
+    <input type="range" id="frameSlider" min="0" step="0.1" />
 
     <label for="loopToggle">Loop: </label>
     <input type="checkbox" id="loopToggle" checked />
     <label for="speed" class="speed-label">Speed: <span id="speed-value">x1</span></label>
     <input type="range" id="speed" min="0.1" max="5" step="0.1" value="1" class="speed-slider" />
+    <button id="jump" class="control-button">Jump</button>
     <button id="destroy" class="control-button" style="background: #cd3434;">Destroy</button>
     <button id="reload" class="control-button">Reload</button>
   </div>
@@ -99,6 +100,13 @@ fetch('/hamster.lottie')
     const speedValueSpan = document.getElementById('speed-value') as HTMLSpanElement;
     const destroyButton = document.getElementById('destroy') as HTMLButtonElement;
     const reloadButton = document.getElementById('reload') as HTMLButtonElement;
+    const jumpButton = document.getElementById('jump') as HTMLButtonElement;
+
+    jumpButton.addEventListener('click', () => {
+      const midFrame = dotLottie.totalFrames / 2;
+
+      dotLottie.setFrame(midFrame);
+    });
 
     destroyButton.addEventListener('click', () => {
       canvas.remove();
@@ -125,8 +133,6 @@ fetch('/hamster.lottie')
 
     stopButton.addEventListener('click', () => {
       dotLottie.stop();
-      playPauseButton.innerText = 'Play';
-      frameSlider.value = '0';
     });
 
     frameSlider.addEventListener('mousedown', () => {
@@ -174,10 +180,10 @@ fetch('/hamster.lottie')
     });
 
     dotLottie.addEventListener('frame', (event) => {
-      const roundedFrame = Math.round(event.currentFrame);
+      const frame = parseFloat(event.currentFrame.toFixed(2));
 
-      frameSlider.value = roundedFrame.toString();
-      currentFrameSpan.textContent = roundedFrame.toString();
+      frameSlider.value = frame.toString();
+      currentFrameSpan.textContent = frame.toString();
     });
 
     dotLottie.addEventListener('loop', (event) => {
@@ -193,6 +199,8 @@ fetch('/hamster.lottie')
 
     dotLottie.addEventListener('stop', (event) => {
       console.log(event);
+
+      playPauseButton.innerText = 'Play';
     });
   })
   .catch((error) => {
