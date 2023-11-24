@@ -165,6 +165,7 @@ The `DotLottie` constructor accepts a config object with the following propertie
 | `removeEventListener(event: string, listener?: Function)` | Removes a previously registered function from responding to a specific animation event.                                                                           |
 | `destroy()`                                               | Destroys the renderer instance and unregisters all event listeners. This method should be called when the canvas is removed from the DOM to prevent memory leaks. |
 | `load(config: Config)`                                    | Loads a new configuration or a new animation.                                                                                                                     |
+| `setMode(mode: string)`                                   | Sets the animation play mode.                                                                                                                                     |
 
 ### Static Methods
 
