@@ -477,7 +477,15 @@ export class DotLottie {
     }
 
     if (!this._playing) {
-      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - this._elapsedTime / this._speed;
+      // check if the animation has completed and is not currently playing
+      if (this._currentFrame >= this._totalFrames - 1 || this._currentFrame <= 0) {
+        this._beginTime = performance.now() / MS_TO_SEC_FACTOR;
+        this._elapsedTime = 0;
+        this._currentFrame = 0;
+      } else {
+        // animation is not complete, resume from the current position
+        this._beginTime = performance.now() / MS_TO_SEC_FACTOR - this._elapsedTime / this._speed;
+      }
 
       this._playing = true;
       this._eventManager.dispatch({
