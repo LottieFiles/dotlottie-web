@@ -24,8 +24,8 @@ dotLottie is an open-source file format that aggregates one or more Lottie files
 * [Getting Started](#getting-started)
   * [Prerequisites](#prerequisites)
   * [Setup](#setup)
-* [Local Examples](#local-examples)
 * [Live Examples](#live-examples)
+* [Local Examples](#local-examples)
 * [Development](#development)
   * [Building Packages](#building-packages)
   * [Running Locally](#running-locally)
@@ -77,6 +77,12 @@ Install dependencies:
 pnpm install
 ```
 
+### Live Examples
+
+* `@lottiefiles/dotlottie-web`
+  * [Basic Example](https://codesandbox.io/s/lottiefiles-dotlottie-web-basic-example-tcy3rv?autoresize=1\&fontsize=14\&hidenavigation=1\&theme=dark)
+  * [Controlling Animation Playback Example](https://codesandbox.io/p/sandbox/lottiefiles-dotlottie-web-basic-example-forked-4v3t9y?autoresize=1\&fontsize=14\&hidenavigation=1\&theme=dark)
+
 ### Local Examples
 
 Discover how to implement and utilize the dotlottie-web packages with our example applications. These examples serve as a practical guide to help you understand how to integrate Lottie and dotLottie animations into your web projects.
@@ -115,10 +121,6 @@ pnpm run dev
 ```
 
 Feel free to modify and play around with the code to see how changes affect the animations.
-
-### Live Examples
-
-* [@lottiefiles/dotlottie-web](packages/web/README.md#live-example)
 
 ### Development
 
