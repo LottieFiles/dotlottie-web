@@ -38,7 +38,7 @@ app.innerHTML = `
     <button id="stop" class="control-button">Stop</button>
     
     <label for="frameSlider">Frame: <span id="current-frame">0</span></label>
-    <input type="range" id="frameSlider" min="0" step="1" />
+    <input type="range" id="frameSlider" min="0" step="0.1" />
 
     <label for="loopToggle">Loop: </label>
     <input type="checkbox" id="loopToggle" checked />
@@ -172,10 +172,10 @@ fetch('/hamster.lottie')
     });
 
     dotLottie.addEventListener('frame', (event) => {
-      const roundedFrame = Math.round(event.currentFrame);
+      const frame = parseFloat(event.currentFrame).toFixed(2);
 
-      frameSlider.value = roundedFrame.toString();
-      currentFrameSpan.textContent = roundedFrame.toString();
+      frameSlider.value = frame.toString();
+      currentFrameSpan.textContent = frame.toString();
     });
 
     dotLottie.addEventListener('loop', (event) => {
