@@ -20,7 +20,7 @@
   * [Via npm](#via-npm)
   * [Via CDN](#via-cdn)
   * [Responsive Canvas](#responsive-canvas)
-* [Live Example](#live-example)
+* [Live Examples](#live-examples)
 * [APIs](#apis)
   * [Config](#config)
   * [Properties](#properties)
@@ -112,9 +112,10 @@ For this behavior to work correctly, the canvas element must be styled using CSS
 <canvas id="canvas" style="width: 100%; aspect-ratio: 1"></canvas>
 ```
 
-## Live Example
+## Live Examples
 
-[![Edit @lottiefiles/dotlottie-web basic example](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/lottiefiles-dotlottie-web-basic-example-tcy3rv?autoresize=1\&fontsize=14\&hidenavigation=1\&theme=dark)
+* <a href="https://codesandbox.io/s/lottiefiles-dotlottie-web-basic-example-tcy3rv?autoresize=1&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Basic Example</a>
+* <a href="https://codesandbox.io/p/sandbox/lottiefiles-dotlottie-web-basic-example-forked-4v3t9y?autoresize=1&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Controlling Animation Playback Example</a>
 
 ## APIs
 
