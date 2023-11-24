@@ -172,7 +172,7 @@ fetch('/hamster.lottie')
     });
 
     dotLottie.addEventListener('frame', (event) => {
-      const frame = parseFloat(event.currentFrame).toFixed(2);
+      const frame = parseFloat(event.currentFrame.toFixed(2));
 
       frameSlider.value = frame.toString();
       currentFrameSpan.textContent = frame.toString();
