@@ -333,16 +333,16 @@ export class DotLottie {
     if (this._mode === 'normal') {
       this._currentFrame = frameProgress;
     } else if (this._mode === 'reverse') {
-      this._currentFrame = this._totalFrames - frameProgress;
+      this._currentFrame = this._totalFrames - frameProgress - 1;
     } else if (this._mode === 'bounce') {
       if (this._direction === -1) {
-        frameProgress = this._totalFrames - frameProgress;
+        frameProgress = this._totalFrames - frameProgress - 1;
       }
       this._currentFrame = frameProgress;
     } else {
       // bounce-reverse mode
       if (this._direction === -1) {
-        frameProgress = this._totalFrames - frameProgress;
+        frameProgress = this._totalFrames - frameProgress - 1;
       }
       this._currentFrame = frameProgress;
       if (this._bounceCount === 0) {
@@ -351,10 +351,10 @@ export class DotLottie {
     }
 
     // ensure the frame is within the valid range
-    this._currentFrame = Math.max(0, Math.min(this._currentFrame, this._totalFrames));
+    this._currentFrame = Math.max(0, Math.min(this._currentFrame, this._totalFrames - 1));
 
     // handle animation looping or completion
-    if (this._currentFrame >= this._totalFrames || this._currentFrame <= 0) {
+    if (this._currentFrame >= this._totalFrames - 1 || this._currentFrame <= 0) {
       if (this._loop || this._mode === 'bounce' || this._mode === 'bounce-reverse') {
         this._beginTime = performance.now() / MS_TO_SEC_FACTOR;
         this._elapsedTime = 0;
@@ -562,7 +562,7 @@ export class DotLottie {
    * @param frame - Frame number to set.
    */
   public setFrame(frame: number): void {
-    if (frame < 0 || frame > this._totalFrames) {
+    if (frame < 0 || frame >= this._totalFrames) {
       console.error(`Invalid frame number provided: ${frame}. Valid range is between 0 and ${this._totalFrames}.`);
 
       return;
