@@ -477,15 +477,17 @@ export class DotLottie {
     }
 
     if (!this._playing) {
-      // check if the animation has completed and is not currently playing
-      if (this._currentFrame >= this._totalFrames - 1 || this._currentFrame <= 0) {
-        this._beginTime = performance.now() / MS_TO_SEC_FACTOR;
-        this._elapsedTime = 0;
-        this._currentFrame = 0;
-      } else {
-        // animation is not complete, resume from the current position
-        this._beginTime = performance.now() / MS_TO_SEC_FACTOR - this._elapsedTime / this._speed;
+      // calculate the elapsed time based on the current frame and direction
+      const frameDuration = this._duration / this._totalFrames;
+      let frameTime = this._currentFrame * frameDuration;
+
+      // adjust frame time based on the current direction
+      if (this._mode === 'reverse' || (this._mode.includes('bounce') && this._direction === -1)) {
+        frameTime = this._duration - frameTime;
       }
+
+      // set the begin time based on the current frame position
+      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - frameTime / this._speed;
 
       this._playing = true;
       this._eventManager.dispatch({
@@ -567,6 +569,20 @@ export class DotLottie {
     }
 
     this._currentFrame = frame;
+
+    // if the animation is playing, adjust the begin time to maintain continuity
+    if (this._playing) {
+      const frameDuration = this._duration / this._totalFrames;
+      let frameTime = frame * frameDuration;
+
+      // adjust frame time based on the current direction
+      if (this._mode === 'reverse' || (this._mode.includes('bounce') && this._direction === -1)) {
+        frameTime = this._duration - frameTime;
+      }
+
+      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - frameTime / this._speed;
+    }
+
     this._renderer?.frame(this._currentFrame);
     this._render();
 
