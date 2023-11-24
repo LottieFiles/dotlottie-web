@@ -66,6 +66,8 @@ export class DotLottie {
 
   private _beginTime = 0;
 
+  private _elapsedTime = 0;
+
   private _totalFrames = 0;
 
   private _loop = false;
@@ -325,8 +327,8 @@ export class DotLottie {
     // animation is not loaded yet
     if (this._duration === 0) return false;
 
-    const timeElapsed = (performance.now() / MS_TO_SEC_FACTOR - this._beginTime) * this._speed;
-    let frameProgress = (timeElapsed / this._duration) * this._totalFrames;
+    this._elapsedTime = (performance.now() / MS_TO_SEC_FACTOR - this._beginTime) * this._speed;
+    let frameProgress = (this._elapsedTime / this._duration) * this._totalFrames;
 
     if (this._mode === 'normal') {
       this._currentFrame = frameProgress;
@@ -355,6 +357,7 @@ export class DotLottie {
     if (this._currentFrame >= this._totalFrames - 1 || this._currentFrame <= 0) {
       if (this._loop || this._mode === 'bounce' || this._mode === 'bounce-reverse') {
         this._beginTime = performance.now() / MS_TO_SEC_FACTOR;
+        this._elapsedTime = 0;
 
         if (this._mode === 'bounce' || this._mode === 'bounce-reverse') {
           this._direction *= -1;
@@ -473,15 +476,9 @@ export class DotLottie {
       return;
     }
 
-    const currentProgress = this._currentFrame / this._totalFrames;
-
-    if (this._direction === -1) {
-      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - this._duration * (1 - currentProgress);
-    } else {
-      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - this._duration * currentProgress;
-    }
-
     if (!this._playing) {
+      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - this._elapsedTime / this._speed;
+
       this._playing = true;
       this._eventManager.dispatch({
         type: 'play',
@@ -531,6 +528,14 @@ export class DotLottie {
 
       return;
     }
+
+    if (this._playing) {
+      // recalculate the begin time based on the new speed to maintain the current position
+      const currentTime = performance.now() / MS_TO_SEC_FACTOR;
+
+      this._beginTime = currentTime - this._elapsedTime / speed;
+    }
+
     this._speed = speed;
   }
 

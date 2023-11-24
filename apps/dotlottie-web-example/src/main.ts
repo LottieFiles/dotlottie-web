@@ -125,8 +125,6 @@ fetch('/hamster.lottie')
 
     stopButton.addEventListener('click', () => {
       dotLottie.stop();
-      playPauseButton.innerText = 'Play';
-      frameSlider.value = '0';
     });
 
     frameSlider.addEventListener('mousedown', () => {
@@ -193,6 +191,8 @@ fetch('/hamster.lottie')
 
     dotLottie.addEventListener('stop', (event) => {
       console.log(event);
+
+      playPauseButton.innerText = 'Play';
     });
   })
   .catch((error) => {
