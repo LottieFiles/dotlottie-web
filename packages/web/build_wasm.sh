@@ -3,7 +3,7 @@
 # Store positional arguments in descriptive variables for clarity
 SCRIPT_NAME="$0"
 EMSDK_PATH="$1"
-THORVG_TAG_OR_BRANCH="${2:-tags/v0.11.4}"
+THORVG_TAG_OR_BRANCH="${2:-tags/v0.11.5}"
 
 # Ensure we always execute from the directory the script resides in
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
