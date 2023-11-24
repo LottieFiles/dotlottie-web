@@ -114,8 +114,8 @@ For this behavior to work correctly, the canvas element must be styled using CSS
 
 ## Live Examples
 
-* [Basic Example](https://codesandbox.io/s/lottiefiles-dotlottie-web-basic-example-tcy3rv?autoresize=1\&fontsize=14\&hidenavigation=1\&theme=dark)
-* [Controlling Animation Playback Example](https://codesandbox.io/p/sandbox/lottiefiles-dotlottie-web-basic-example-forked-4v3t9y?autoresize=1\&fontsize=14\&hidenavigation=1\&theme=dark)
+* <a href="https://codesandbox.io/s/lottiefiles-dotlottie-web-basic-example-tcy3rv?autoresize=1&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Basic Example</a>
+* <a href="https://codesandbox.io/p/sandbox/lottiefiles-dotlottie-web-basic-example-forked-4v3t9y?autoresize=1&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Controlling Animation Playback Example</a>
 
 ## APIs
 
