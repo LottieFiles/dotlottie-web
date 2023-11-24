@@ -563,7 +563,7 @@ export class DotLottie {
    */
   public setFrame(frame: number): void {
     if (frame < 0 || frame >= this._totalFrames) {
-      console.error(`Invalid frame number provided: ${frame}. Valid range is between 0 and ${this._totalFrames}.`);
+      console.error(`Invalid frame number provided: ${frame}. Valid range is between 0 and ${this._totalFrames - 1}.`);
 
       return;
     }
