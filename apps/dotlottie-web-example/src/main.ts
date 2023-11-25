@@ -5,6 +5,7 @@
 /* eslint-disable no-secrets/no-secrets */
 
 import './styles.css';
+import type { Mode } from '@lottiefiles/dotlottie-web';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 
 import wasmUrl from '../../../packages/web/dist/renderer.wasm?url';
@@ -47,6 +48,13 @@ app.innerHTML = `
     <button id="jump" class="control-button">Jump</button>
     <button id="destroy" class="control-button" style="background: #cd3434;">Destroy</button>
     <button id="reload" class="control-button">Reload</button>
+    <label for="mode">Mode: </label>
+    <select id="mode">
+      <option value="bounce">Bounce</option>
+      <option value="bounce-reverse">Bounce Reverse</option>
+      <option value="reverse">Reverse</option>
+      <option value="normal">Default</option>
+    </select>
   </div>
 </div>
 `;
@@ -101,6 +109,11 @@ fetch('/hamster.lottie')
     const destroyButton = document.getElementById('destroy') as HTMLButtonElement;
     const reloadButton = document.getElementById('reload') as HTMLButtonElement;
     const jumpButton = document.getElementById('jump') as HTMLButtonElement;
+    const modeSelect = document.getElementById('mode') as HTMLSelectElement;
+
+    modeSelect.addEventListener('change', () => {
+      dotLottie.setMode(modeSelect.value.toString() as Mode);
+    });
 
     jumpButton.addEventListener('click', () => {
       const midFrame = dotLottie.totalFrames / 2;
@@ -170,7 +183,7 @@ fetch('/hamster.lottie')
 
     dotLottie.addEventListener('play', (event) => {
       console.log(event);
-      frameSlider.max = (dotLottie.totalFrames - 1).toString();
+      frameSlider.max = dotLottie.totalFrames.toString();
       playPauseButton.innerText = 'Pause';
     });
 

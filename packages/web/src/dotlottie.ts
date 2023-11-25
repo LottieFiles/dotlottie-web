@@ -592,6 +592,32 @@ export class DotLottie {
     });
   }
 
+  /**
+   *
+   * Sets the playback mode of the animation.
+   *
+   */
+  public setMode(mode: Mode): void {
+    if (this._mode === mode) {
+      return;
+    }
+
+    this._mode = mode;
+    this._bounceCount = 0;
+    this._direction = mode.includes('reverse') ? -1 : 1;
+
+    const frameDuration = this._duration / this._totalFrames;
+    let frameTime = this._currentFrame * frameDuration;
+
+    // Adjust frame time based on the current direction
+    if (this._direction === -1) {
+      frameTime = this._duration - frameTime;
+    }
+
+    // Set the begin time based on the current frame position
+    this._beginTime = performance.now() / MS_TO_SEC_FACTOR - frameTime / this._speed;
+  }
+
   public load(config: Omit<Config, 'canvas'>): void {
     this._playing = false;
     this._stopAnimationLoop();
