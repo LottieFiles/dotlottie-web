@@ -40,6 +40,15 @@ app.innerHTML = `
       <option value="reverse">Reverse</option>
       <option value="forward">Forward</option>
     </select>
+    <div class="segments-control">
+      <label for="startFrame">Start Frame: </label>
+      <input type="number" id="startFrame" value="10" min="0" />
+
+      <label for="endFrame">End Frame: </label>
+      <input type="number" id="endFrame" value="90" min="0" />
+
+      <button id="setSegments" class="control-button">Set Segments</button>
+    </div>
   </div>
 </div>
 `;
@@ -97,13 +106,26 @@ fetch('/hamster.lottie')
     const reloadButton = document.getElementById('reload') as HTMLButtonElement;
     const jumpButton = document.getElementById('jump') as HTMLButtonElement;
     const modeSelect = document.getElementById('mode') as HTMLSelectElement;
+    const startFrameInput = document.getElementById('startFrame') as HTMLInputElement;
+    const endFrameInput = document.getElementById('endFrame') as HTMLInputElement;
+    const setSegmentsButton = document.getElementById('setSegments') as HTMLButtonElement;
+
+    setSegmentsButton.addEventListener('click', () => {
+      const startFrame = parseInt(startFrameInput.value, 10);
+      const endFrame = parseInt(endFrameInput.value, 10);
+
+      dotLottie.setSegments(startFrame, endFrame);
+    });
 
     modeSelect.addEventListener('change', () => {
       dotLottie.setMode(modeSelect.value.toString() as Mode);
     });
 
     jumpButton.addEventListener('click', () => {
-      const midFrame = dotLottie.totalFrames / 2;
+      const startFrame = parseInt(dotLottie.segments[0].toString(), 10);
+      const endFrame = parseInt(dotLottie.segments[1].toString(), 10);
+
+      const midFrame = (endFrame - startFrame) / 2 + startFrame;
 
       dotLottie.setFrame(midFrame);
     });

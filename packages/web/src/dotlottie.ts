@@ -33,6 +33,8 @@ export interface Config {
    * The animation data.
    * string: The JSON string of the animation data.
    * ArrayBuffer: The ArrayBuffer of the .lottie file.
+   *
+   * If the data is an ArrayBuffer, the JSON string will be extracted from the .lottie file.
    */
   data?: string | ArrayBuffer;
   /**
@@ -42,7 +44,7 @@ export interface Config {
   /**
    *  The playback mode of the animation.
    *
-   * normal: The animation will play from start to end.
+   * forward: The animation will play from start to end.
    * reverse: The animation will play from end to start.
    * bounce: The animation will play from start to end and then from end to start.
    * bounce-reverse: The animation will play from end to start and then from start to end.
@@ -64,6 +66,8 @@ export interface Config {
   speed?: number;
   /**
    * The source URL of the animation.
+   *
+   * If the data is provided, the src will be ignored.
    */
   src?: string;
 }
@@ -238,11 +242,6 @@ export class DotLottie {
     return this._segments;
   }
 
-  /**
-   * Gets the playing status of the animation.
-   *
-   * @returns The playing status of the animation.
-   */
   public get isPlaying(): boolean {
     return this._playbackState === 'playing';
   }
@@ -254,7 +253,6 @@ export class DotLottie {
   public get isStopped(): boolean {
     return this._playbackState === 'stopped';
   }
-
   // #endregion Getters and Setters
 
   // #region Private Methods
@@ -343,16 +341,22 @@ export class DotLottie {
    * Renders the animation frame on the canvas.
    */
   private _render(): void {
-    if (!this._context) return;
+    if (!this._context || !this._renderer) {
+      return;
+    }
 
-    this._renderer?.resize(this._canvas.width, this._canvas.height);
+    this._renderer.resize(this._canvas.width, this._canvas.height);
 
-    if (this._renderer?.update()) {
+    if (this._renderer.update()) {
       const buffer = this._renderer.render();
-      const clampedBuffer = Uint8ClampedArray.from(buffer);
 
-      if (clampedBuffer.length === 0) return;
+      if (buffer.length === 0) {
+        console.warn('Empty buffer received from renderer.');
 
+        return;
+      }
+
+      const clampedBuffer = new Uint8ClampedArray(buffer);
       const imageData = new ImageData(clampedBuffer, this._canvas.width, this._canvas.height);
 
       this._context.putImageData(imageData, 0, 0);
@@ -413,15 +417,14 @@ export class DotLottie {
         this._bounceCount += 1;
         if (this._bounceCount % 2 === 0) {
           // A full bounce completed
-          // eslint-disable-next-line no-negated-condition
-          if (!this._loop) {
+          if (this._loop) {
+            this._loopCount += 1;
+            this._eventManager.dispatch({ type: 'loop', loopCount: this._loopCount });
+          } else {
             this._playbackState = 'stopped';
             this._eventManager.dispatch({ type: 'complete' });
 
             return false;
-          } else {
-            this._loopCount += 1;
-            this._eventManager.dispatch({ type: 'loop', loopCount: this._loopCount });
           }
         }
       }
@@ -502,25 +505,48 @@ export class DotLottie {
   }
 
   public _getEffectiveStartFrame(): number {
-    // If segments are defined, use the first value as the start frame.
     return this._segments ? this._segments[0] : 0;
   }
 
   public _getEffectiveEndFrame(): number {
-    // If segments are defined, use the second value as the end frame.
     return this._segments ? this._segments[1] : this._totalFrames - 1;
   }
 
   public _getEffectiveTotalFrames(): number {
-    // If segments are defined, use the difference between the start and end frames as the total frames.
     return this._segments ? this._segments[1] - this._segments[0] : this._totalFrames;
   }
 
   public _getEffectiveDuration(): number {
-    // If segments are defined, use the difference between the start and end frames as the duration.
     return this._segments
       ? this._duration * ((this._segments[1] - this._segments[0]) / this._totalFrames)
       : this._duration;
+  }
+
+  /**
+   * Synchronizes the animation timing based on the current frame, direction, and speed settings.
+   * This method calculates the appropriate begin time for the animation loop, ensuring that the
+   * animation's playback is consistent with the specified parameters.
+   *
+   * @param frame - The current frame number from which the animation timing will be synchronized.
+   *                This frame number is used to calculate the correct position in the animation timeline.
+   *
+   * Usage:
+   *  - This function should be called whenever there is a change in the frame, speed, or direction
+   *    of the animation to maintain the correct timing.
+   *  - It is used internally in methods like `play`, `setFrame`, and `setMode` to ensure that the
+   *    animation's playback remains smooth and accurate.
+   */
+  private _synchronizeAnimationTiming(frame: number): void {
+    const effectiveDuration = this._getEffectiveDuration();
+    const effectiveTotalFrames = this._getEffectiveTotalFrames();
+    const frameDuration = effectiveDuration / effectiveTotalFrames;
+    let frameTime = (frame - this._getEffectiveStartFrame()) * frameDuration;
+
+    if (this._direction === -1) {
+      frameTime = effectiveDuration - frameTime;
+    }
+
+    this._beginTime = performance.now() / MS_TO_SEC_FACTOR - frameTime / this._speed;
   }
 
   // #endregion
@@ -532,45 +558,30 @@ export class DotLottie {
    */
   public play(): void {
     if (this._totalFrames === 0) {
-      this._eventManager.dispatch({
-        type: 'loadError',
-        error: new Error('Unable to play animation.'),
-      });
+      console.error('Animation is not loaded yet.');
 
       return;
     }
 
-    if (this.isPlaying) return;
-
     const effectiveStartFrame = this._getEffectiveStartFrame();
     const effectiveEndFrame = this._getEffectiveEndFrame();
-    const effectiveDuration = this._getEffectiveDuration();
-    const effectiveTotalFrames = this._getEffectiveTotalFrames();
 
-    // if the current frame is at the end, start from the beginning
-    if (this._currentFrame >= effectiveEndFrame) {
-      this._currentFrame = effectiveStartFrame;
+    // resume from the current frame if paused, otherwise start from the beginning or end based on the mode
+    if (this._playbackState !== 'paused') {
+      this._currentFrame =
+        this._mode === 'reverse' || this._mode === 'bounce-reverse' ? effectiveEndFrame : effectiveStartFrame;
     }
 
-    // calculate the elapsed time based on the current frame and direction
-    const frameDuration = effectiveDuration / effectiveTotalFrames;
+    this._synchronizeAnimationTiming(this._currentFrame);
 
-    let frameTime = this._currentFrame * frameDuration;
+    if (!this.isPlaying) {
+      this._playbackState = 'playing';
 
-    // adjust frame time based on the current direction
-    if (this._direction === -1) {
-      frameTime = effectiveDuration - frameTime;
+      this._eventManager.dispatch({
+        type: 'play',
+      });
+      this._startAnimationLoop();
     }
-
-    // set the begin time based on the current frame position
-    this._beginTime = performance.now() / MS_TO_SEC_FACTOR - frameTime / this._speed;
-
-    this._playbackState = 'playing';
-
-    this._eventManager.dispatch({
-      type: 'play',
-    });
-    this._startAnimationLoop();
   }
 
   /**
@@ -588,8 +599,6 @@ export class DotLottie {
     } else {
       this._currentFrame = this._getEffectiveStartFrame();
     }
-
-    console.log(this._currentFrame);
 
     this.setFrame(this._currentFrame);
     this._render();
@@ -650,36 +659,31 @@ export class DotLottie {
    * @param frame - Frame number to set.
    */
   public setFrame(frame: number): void {
-    const startFrame = this._getEffectiveStartFrame();
-    const endFrame = this._getEffectiveEndFrame();
+    const effectiveStartFrame = this._getEffectiveStartFrame();
+    const effectiveEndFrame = this._getEffectiveEndFrame();
 
-    if (frame < startFrame || frame > endFrame) {
-      console.error(`Invalid frame number: ${frame}`);
+    // validate the frame number within the effective frame range
+    if (frame < effectiveStartFrame || frame > effectiveEndFrame) {
+      console.error(
+        `Invalid frame number: ${frame}. It should be between ${effectiveStartFrame} and ${effectiveEndFrame}.`,
+      );
 
       return;
     }
 
     this._currentFrame = frame;
 
-    // if the animation is playing, adjust the begin time to maintain continuity
     if (this.isPlaying) {
-      const frameDuration = this._duration / this._totalFrames;
-      let frameTime = frame * frameDuration;
-
-      // adjust frame time based on the current direction
-      if (this._direction === -1) {
-        frameTime = this._duration - frameTime;
-      }
-
-      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - frameTime / this._speed;
+      this._synchronizeAnimationTiming(frame);
     }
 
-    this._renderer?.frame(this._currentFrame);
-
-    this._eventManager.dispatch({
-      type: 'frame',
-      currentFrame: this._currentFrame,
-    });
+    if (this._renderer?.frame(this._currentFrame)) {
+      this._render();
+      this._eventManager.dispatch({
+        type: 'frame',
+        currentFrame: this._currentFrame,
+      });
+    }
   }
 
   /**
@@ -696,43 +700,86 @@ export class DotLottie {
     this._bounceCount = 0;
     this._direction = mode.includes('reverse') ? -1 : 1;
 
-    const frameDuration = this._duration / this._totalFrames;
-    let frameTime = this._currentFrame * frameDuration;
-
-    // Adjust frame time based on the current direction
-    if (this._direction === -1) {
-      frameTime = this._duration - frameTime;
+    if (this.isPlaying) {
+      this._synchronizeAnimationTiming(this._currentFrame);
     }
-
-    // Set the begin time based on the current frame position
-    this._beginTime = performance.now() / MS_TO_SEC_FACTOR - frameTime / this._speed;
   }
 
   public load(config: Omit<Config, 'canvas'>): void {
-    this._playbackState = 'stopped';
+    if (!this._renderer || !this._context) {
+      return;
+    }
+
+    if (!config.src && !config.data) {
+      console.error('Either "src" or "data" must be provided.');
+
+      return;
+    }
+
     this._stopAnimationLoop();
+    this._playbackState = 'stopped';
 
     this._loop = config.loop ?? false;
     this._speed = config.speed ?? 1;
     this._autoplay = config.autoplay ?? false;
+    this._mode = config.mode ?? 'forward';
+    this._segments = config.segments ?? null;
     this._loopCount = 0;
-    this._currentFrame = 0;
+    this._bounceCount = 0;
+    this._direction = this._mode.includes('reverse') ? -1 : 1;
+
+    // Set the initial frame based on the mode and segments
+    const effectiveStartFrame = this._getEffectiveStartFrame();
+    const effectiveEndFrame = this._getEffectiveEndFrame();
+
+    this._currentFrame =
+      this._mode === 'reverse' || this._mode === 'bounce-reverse' ? effectiveEndFrame : effectiveStartFrame;
+
+    // Reset other properties
     this._beginTime = 0;
     this._totalFrames = 0;
     this._duration = 0;
-    this._bounceCount = 0;
-    this._direction = 1;
-    this._mode = config.mode ?? 'forward';
-    this._canvas.style.backgroundColor = '';
-
-    if (config.backgroundColor) {
-      this._canvas.style.backgroundColor = config.backgroundColor;
-    }
+    this._canvas.style.backgroundColor = config.backgroundColor ?? '';
 
     if (config.src) {
       this._loadAnimationFromURL(config.src);
     } else if (config.data) {
       this._initializeAnimationFromData(config.data);
+    }
+  }
+
+  public setSegments(startFrame: number, endFrame: number): void {
+    if (!this._renderer) {
+      console.error('Animation not initialized.');
+
+      return;
+    }
+
+    // Validate the frame range
+    if (startFrame < 0 || endFrame >= this._totalFrames || startFrame > endFrame) {
+      console.error('Invalid frame range.');
+
+      return;
+    }
+
+    this._segments = [startFrame, endFrame];
+
+    if (this._currentFrame < startFrame || this._currentFrame > endFrame) {
+      this._currentFrame = this._direction === 1 ? startFrame : endFrame;
+
+      // render the current frame
+      if (this._renderer.frame(this._currentFrame)) {
+        this._render();
+        this._eventManager.dispatch({
+          type: 'frame',
+          currentFrame: this._currentFrame,
+        });
+      }
+    }
+
+    // If playing, adjust the animation timing
+    if (this.isPlaying) {
+      this._synchronizeAnimationTiming(this._currentFrame);
     }
   }
 
