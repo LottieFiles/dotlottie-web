@@ -1,5 +1,19 @@
 # @lottiefiles/dotlottie-web
 
+## 0.7.0
+
+### Minor Changes
+
+- 8e8bd1b: feat: 🎸 backgroundColor
+
+### Patch Changes
+
+- 75d0aa6: fix: 🐛 ensure smooth frame transition in setFrame for reverse and bounce modes
+- ee65f5b: chore: 🤖 upgrade thorvg to v0.11.5
+- 75d0aa6: fix: 🐛 Reset elapsedTime for loop/bounce continuity
+- 75d0aa6: fix: 🐛 Resume from correct progress on play
+- 75d0aa6: fix: 🐛 Smooth frame transition on speed change
+
 ## 0.6.0
 
 ### Minor Changes

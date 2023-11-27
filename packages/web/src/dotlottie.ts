@@ -13,13 +13,18 @@ import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL, debounce } fro
 
 const MS_TO_SEC_FACTOR = 1000;
 
-export type Mode = 'normal' | 'reverse' | 'bounce' | 'bounce-reverse';
+export type Mode = 'forward' | 'reverse' | 'bounce' | 'bounce-reverse';
+export type PlaybackState = 'playing' | 'paused' | 'stopped';
 
 export interface Config {
   /**
    * Boolean indicating if the animation should start playing automatically.
    */
   autoplay?: boolean;
+  /**
+   * Animation canvas background color.
+   */
+  backgroundColor?: string;
   /**
    * The canvas element to render the animation on.
    */
@@ -72,9 +77,9 @@ export class DotLottie {
 
   private _renderer: Renderer | null = null;
 
-  private _playing = false;
-
   private _beginTime = 0;
+
+  private _elapsedTime = 0;
 
   private _totalFrames = 0;
 
@@ -90,7 +95,7 @@ export class DotLottie {
 
   private _autoplay = false;
 
-  private _mode: Mode = 'normal';
+  private _mode: Mode = 'forward';
 
   private _direction = 1;
 
@@ -98,11 +103,9 @@ export class DotLottie {
 
   private _animationFrameId?: number;
 
-  private _startFrame = 0;
+  private _segments: [number, number] | null = null;
 
-  private _endFrame = -1;
-
-  private readonly _segments?: [number, number];
+  private _playbackState: PlaybackState = 'stopped';
 
   // eslint-disable-next-line @typescript-eslint/prefer-readonly
   private _shouldAutoResizeCanvas = false;
@@ -121,9 +124,11 @@ export class DotLottie {
     this._loop = config.loop ?? false;
     this._speed = config.speed ?? 1;
     this._autoplay = config.autoplay ?? false;
-    this._mode = config.mode ?? 'normal';
-    if (config.segments) {
-      this._segments = config.segments;
+    this._mode = config.mode ?? 'forward';
+    this._segments = config.segments ?? null;
+
+    if (config.backgroundColor) {
+      this._canvas.style.backgroundColor = config.backgroundColor;
     }
 
     if (!(this._canvas.hasAttribute('width') || this._canvas.hasAttribute('height'))) {
@@ -132,7 +137,7 @@ export class DotLottie {
       this._canvasResizeObserver = new ResizeObserver(
         debounce(() => {
           this._resizeAnimationToCanvas();
-          if (!this._playing) {
+          if (!this.isPlaying) {
             this._render();
           }
         }, 100),
@@ -160,24 +165,6 @@ export class DotLottie {
   }
 
   // #region Getters and Setters
-
-  /**
-   * Gets the animation start frame.
-   *
-   * @returns The animation start frame.
-   */
-  public get startFrame(): number {
-    return this._startFrame;
-  }
-
-  /**
-   * Gets the animation end frame.
-   *
-   * @returns The animation end frame.
-   */
-  public get endFrame(): number {
-    return this._endFrame;
-  }
 
   /**
    * Gets the current direction of the animation.
@@ -243,13 +230,31 @@ export class DotLottie {
   }
 
   /**
+   *  Gets the segments of the animation if any are set.
+   *  Default is 0 to total frames. but if segments are set, it will be the start and end frames.
+   *
+   */
+  public get segments(): [number, number] | null {
+    return this._segments;
+  }
+
+  /**
    * Gets the playing status of the animation.
    *
    * @returns The playing status of the animation.
    */
-  public get playing(): boolean {
-    return this._playing;
+  public get isPlaying(): boolean {
+    return this._playbackState === 'playing';
   }
+
+  public get isPaused(): boolean {
+    return this._playbackState === 'paused';
+  }
+
+  public get isStopped(): boolean {
+    return this._playbackState === 'stopped';
+  }
+
   // #endregion Getters and Setters
 
   // #region Private Methods
@@ -327,9 +332,10 @@ export class DotLottie {
     if (this._renderer) {
       this._totalFrames = this._renderer.totalFrames();
       this._duration = this._renderer.duration();
-      if (this._segments) {
-        this.setFrameBoundaries(this._segments[0], this._segments[1]);
-      }
+      this._segments = [
+        Math.max(0, this._segments?.[0] ?? 0),
+        Math.min(this._totalFrames - 1, this.segments?.[1] ?? this._totalFrames - 1),
+      ];
     }
   }
 
@@ -359,73 +365,69 @@ export class DotLottie {
    */
   private _update(): boolean {
     // animation is not loaded yet
-    if (this._duration === 0) return false;
+    if (this._duration === 0 || this._totalFrames === 0) return false;
 
-    const timeElapsed = (performance.now() / MS_TO_SEC_FACTOR - this._beginTime) * this._speed;
+    const effectiveStartFrame = this._getEffectiveStartFrame();
+    const effectiveEndFrame = this._getEffectiveEndFrame();
+    const effectiveDuration = this._getEffectiveDuration();
+    const frameDuration = effectiveDuration / (effectiveEndFrame - effectiveStartFrame);
 
-    // define effective start and end frames
-    const effectiveStartFrame = this._startFrame;
-    const effectiveEndFrame = this._endFrame >= 0 ? this._endFrame : this._totalFrames - 1;
+    this._elapsedTime = (performance.now() / MS_TO_SEC_FACTOR - this._beginTime) * this._speed;
+    const frameProgress = this._elapsedTime / frameDuration;
 
-    let frameProgress = (timeElapsed / this._duration) * this._totalFrames + effectiveStartFrame;
+    if (this._mode === 'forward' || this._mode === 'reverse') {
+      this._currentFrame =
+        this._mode === 'forward' ? effectiveStartFrame + frameProgress : effectiveEndFrame - frameProgress;
 
-    if (this._mode === 'normal') {
-      this._currentFrame = frameProgress;
-    } else if (this._mode === 'reverse') {
-      this._currentFrame = effectiveEndFrame - (frameProgress - effectiveStartFrame);
-    } else if (this._mode === 'bounce') {
-      if (this._direction === -1) {
-        frameProgress = effectiveEndFrame - (frameProgress - effectiveStartFrame);
+      if (this._currentFrame >= effectiveEndFrame || this._currentFrame <= effectiveStartFrame) {
+        if (this._loop) {
+          this._beginTime = performance.now() / MS_TO_SEC_FACTOR;
+          this._loopCount += 1;
+          this._eventManager.dispatch({ type: 'loop', loopCount: this._loopCount });
+        } else {
+          this._playbackState = 'stopped';
+          this._eventManager.dispatch({ type: 'complete' });
+
+          return false;
+        }
       }
-
-      this._currentFrame = frameProgress;
     } else {
-      // bounce-reverse mode
-      if (this._direction === -1) {
-        frameProgress = effectiveEndFrame - (frameProgress - effectiveStartFrame);
+      // bounce or bounce-reverse
+      if (this._direction === 1) {
+        this._currentFrame = effectiveStartFrame + frameProgress;
+        if (this._currentFrame >= effectiveEndFrame) {
+          this._currentFrame = effectiveEndFrame;
+          this._direction = -1;
+          this._beginTime = performance.now() / MS_TO_SEC_FACTOR;
+        }
+      } else {
+        this._currentFrame = effectiveEndFrame - frameProgress;
+        if (this._currentFrame <= effectiveStartFrame) {
+          this._currentFrame = effectiveStartFrame;
+          this._direction = 1;
+          this._beginTime = performance.now() / MS_TO_SEC_FACTOR;
+        }
       }
-      this._currentFrame = frameProgress;
-      if (this._bounceCount === 0) {
-        this._direction = -1;
-      }
-    }
 
-    // ensure the frame is within the valid range
-    this._currentFrame = Math.max(effectiveStartFrame, Math.min(this._currentFrame, effectiveEndFrame));
+      if (this._currentFrame <= effectiveStartFrame || this._currentFrame >= effectiveEndFrame) {
+        this._bounceCount += 1;
+        if (this._bounceCount % 2 === 0) {
+          // A full bounce completed
+          // eslint-disable-next-line no-negated-condition
+          if (!this._loop) {
+            this._playbackState = 'stopped';
+            this._eventManager.dispatch({ type: 'complete' });
 
-    // handle animation looping or completion
-    if (this._currentFrame >= effectiveEndFrame || this._currentFrame <= effectiveStartFrame) {
-      if (this._loop || this._mode === 'bounce' || this._mode === 'bounce-reverse') {
-        this._beginTime = performance.now() / MS_TO_SEC_FACTOR;
-
-        if (this._mode === 'bounce' || this._mode === 'bounce-reverse') {
-          this._direction *= -1;
-          this._bounceCount += 1;
-
-          if (this._bounceCount >= 2) {
-            this._bounceCount = 0;
-            if (!this._loop) {
-              this._playing = false;
-              this._bounceCount = 0;
-              this._direction = 1;
-              this._eventManager.dispatch({ type: 'complete' });
-
-              return false;
-            }
+            return false;
+          } else {
             this._loopCount += 1;
             this._eventManager.dispatch({ type: 'loop', loopCount: this._loopCount });
           }
-        } else {
-          this._loopCount += 1;
-          this._eventManager.dispatch({ type: 'loop', loopCount: this._loopCount });
         }
-      } else {
-        this._playing = false;
-        this._eventManager.dispatch({ type: 'complete' });
-
-        return false;
       }
     }
+
+    this._currentFrame = Math.max(effectiveStartFrame, Math.min(this._currentFrame, effectiveEndFrame));
 
     if (this._renderer?.frame(this._currentFrame)) {
       this._eventManager.dispatch({
@@ -443,7 +445,7 @@ export class DotLottie {
    * Loop that handles the animation playback.
    */
   private _animationLoop(): void {
-    if (this._playing && this._update()) {
+    if (this.isPlaying && this._update()) {
       this._render();
       this._startAnimationLoop();
     }
@@ -498,6 +500,29 @@ export class DotLottie {
     }
     this._animationFrameId = window.requestAnimationFrame(this._animationLoop);
   }
+
+  public _getEffectiveStartFrame(): number {
+    // If segments are defined, use the first value as the start frame.
+    return this._segments ? this._segments[0] : 0;
+  }
+
+  public _getEffectiveEndFrame(): number {
+    // If segments are defined, use the second value as the end frame.
+    return this._segments ? this._segments[1] : this._totalFrames - 1;
+  }
+
+  public _getEffectiveTotalFrames(): number {
+    // If segments are defined, use the difference between the start and end frames as the total frames.
+    return this._segments ? this._segments[1] - this._segments[0] : this._totalFrames;
+  }
+
+  public _getEffectiveDuration(): number {
+    // If segments are defined, use the difference between the start and end frames as the duration.
+    return this._segments
+      ? this._duration * ((this._segments[1] - this._segments[0]) / this._totalFrames)
+      : this._duration;
+  }
+
   // #endregion
 
   // #region Public Methods
@@ -515,44 +540,60 @@ export class DotLottie {
       return;
     }
 
-    // Determine effective end frame
-    const effectiveEndFrame = this._endFrame >= 0 ? this._endFrame : this._totalFrames - 1;
+    if (this.isPlaying) return;
 
-    // If the current frame is out of bounds, reset it to the start frame
-    if (this._currentFrame < this._startFrame || this._currentFrame > effectiveEndFrame) {
-      this._currentFrame = this._startFrame;
+    const effectiveStartFrame = this._getEffectiveStartFrame();
+    const effectiveEndFrame = this._getEffectiveEndFrame();
+    const effectiveDuration = this._getEffectiveDuration();
+    const effectiveTotalFrames = this._getEffectiveTotalFrames();
+
+    // if the current frame is at the end, start from the beginning
+    if (this._currentFrame >= effectiveEndFrame) {
+      this._currentFrame = effectiveStartFrame;
     }
 
-    // Calculate the correct begin time based on the current frame and direction
-    const progressRatio = (this._currentFrame - this._startFrame) / (effectiveEndFrame - this._startFrame);
+    // calculate the elapsed time based on the current frame and direction
+    const frameDuration = effectiveDuration / effectiveTotalFrames;
 
+    let frameTime = this._currentFrame * frameDuration;
+
+    // adjust frame time based on the current direction
     if (this._direction === -1) {
-      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - this._duration * (1 - progressRatio);
-    } else {
-      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - this._duration * progressRatio;
+      frameTime = effectiveDuration - frameTime;
     }
 
-    if (!this._playing) {
-      this._playing = true;
-      this._eventManager.dispatch({
-        type: 'play',
-      });
-      this._startAnimationLoop();
-    }
+    // set the begin time based on the current frame position
+    this._beginTime = performance.now() / MS_TO_SEC_FACTOR - frameTime / this._speed;
+
+    this._playbackState = 'playing';
+
+    this._eventManager.dispatch({
+      type: 'play',
+    });
+    this._startAnimationLoop();
   }
 
   /**
    * Stops the animation playback and resets the current frame.
    */
   public stop(): void {
+    if (this.isStopped) return;
+
     this._stopAnimationLoop();
-    this._playing = false;
-    this._loopCount = 0;
-    this._direction = 1;
-    this._currentFrame = this._startFrame;
-    this._bounceCount = 0;
-    this._beginTime = 0;
-    this.setFrame(0);
+    this._playbackState = 'stopped';
+    // based on the mode, set the current frame to the start or end frame
+
+    if (this._mode === 'reverse' || this._mode === 'bounce-reverse') {
+      this._currentFrame = this._getEffectiveEndFrame();
+    } else {
+      this._currentFrame = this._getEffectiveStartFrame();
+    }
+
+    console.log(this._currentFrame);
+
+    this.setFrame(this._currentFrame);
+    this._render();
+
     this._eventManager.dispatch({
       type: 'stop',
     });
@@ -562,9 +603,11 @@ export class DotLottie {
    * Pauses the animation playback.
    */
   public pause(): void {
-    if (!this._playing) return;
+    if (this.isPaused) return;
 
-    this._playing = false;
+    this._stopAnimationLoop();
+
+    this._playbackState = 'paused';
 
     this._eventManager.dispatch({
       type: 'pause',
@@ -581,6 +624,16 @@ export class DotLottie {
 
       return;
     }
+
+    if (this._speed === speed) return;
+
+    if (this.isPlaying) {
+      // recalculate the begin time based on the new speed to maintain the current position
+      const currentTime = performance.now() / MS_TO_SEC_FACTOR;
+
+      this._beginTime = currentTime - this._elapsedTime / speed;
+    }
+
     this._speed = speed;
   }
 
@@ -597,17 +650,31 @@ export class DotLottie {
    * @param frame - Frame number to set.
    */
   public setFrame(frame: number): void {
-    if (frame < this._startFrame || frame > this._endFrame) {
-      console.error(
-        `Invalid frame number: ${frame}. Valid range is between ${this._startFrame} and ${this._endFrame}.`,
-      );
+    const startFrame = this._getEffectiveStartFrame();
+    const endFrame = this._getEffectiveEndFrame();
+
+    if (frame < startFrame || frame > endFrame) {
+      console.error(`Invalid frame number: ${frame}`);
 
       return;
     }
 
     this._currentFrame = frame;
+
+    // if the animation is playing, adjust the begin time to maintain continuity
+    if (this.isPlaying) {
+      const frameDuration = this._duration / this._totalFrames;
+      let frameTime = frame * frameDuration;
+
+      // adjust frame time based on the current direction
+      if (this._direction === -1) {
+        frameTime = this._duration - frameTime;
+      }
+
+      this._beginTime = performance.now() / MS_TO_SEC_FACTOR - frameTime / this._speed;
+    }
+
     this._renderer?.frame(this._currentFrame);
-    this._render();
 
     this._eventManager.dispatch({
       type: 'frame',
@@ -615,8 +682,34 @@ export class DotLottie {
     });
   }
 
+  /**
+   *
+   * Sets the playback mode of the animation.
+   *
+   */
+  public setMode(mode: Mode): void {
+    if (this._mode === mode) {
+      return;
+    }
+
+    this._mode = mode;
+    this._bounceCount = 0;
+    this._direction = mode.includes('reverse') ? -1 : 1;
+
+    const frameDuration = this._duration / this._totalFrames;
+    let frameTime = this._currentFrame * frameDuration;
+
+    // Adjust frame time based on the current direction
+    if (this._direction === -1) {
+      frameTime = this._duration - frameTime;
+    }
+
+    // Set the begin time based on the current frame position
+    this._beginTime = performance.now() / MS_TO_SEC_FACTOR - frameTime / this._speed;
+  }
+
   public load(config: Omit<Config, 'canvas'>): void {
-    this._playing = false;
+    this._playbackState = 'stopped';
     this._stopAnimationLoop();
 
     this._loop = config.loop ?? false;
@@ -629,7 +722,12 @@ export class DotLottie {
     this._duration = 0;
     this._bounceCount = 0;
     this._direction = 1;
-    this._mode = config.mode ?? 'normal';
+    this._mode = config.mode ?? 'forward';
+    this._canvas.style.backgroundColor = '';
+
+    if (config.backgroundColor) {
+      this._canvas.style.backgroundColor = config.backgroundColor;
+    }
 
     if (config.src) {
       this._loadAnimationFromURL(config.src);
@@ -676,16 +774,7 @@ export class DotLottie {
     this._canvasResizeObserver?.disconnect();
     this._context = null;
     this._renderer = null;
-  }
-
-  public setFrameBoundaries(startFrame: number, endFrame: number): void {
-    if (startFrame < 0 || endFrame < startFrame || endFrame >= this._totalFrames) {
-      console.error(`Invalid frame boundaries: startFrame=${startFrame}, endFrame=${endFrame}`);
-
-      return;
-    }
-    this._startFrame = startFrame;
-    this._endFrame = endFrame;
+    this._playbackState = 'stopped';
   }
 
   // #endregion
