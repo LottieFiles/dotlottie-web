@@ -147,10 +147,12 @@ The `DotLottie` constructor accepts a config object with the following propertie
 | `loop`         | boolean | Indicates if the animation is set to play in a continuous loop.                             |
 | `speed`        | number  | Represents the playback speed factor; e.g., 2 would mean double speed.                      |
 | `loopCount`    | number  | Tracks how many times the animation has completed its loop.                                 |
-| `playing`      | boolean | Reflects whether the animation is in active playback or not                                 |
 | `direction`    | string  | Reflects the current playback direction; e.g., 1 would mean forward, -1 would mean reverse. |
-| `startFrame`   | number  | Represents the animation's starting frame number.                                           |
-| `endFrame`     | number  | Represents the animation's ending frame number.                                             |
+| `mode`         | string  | Reflects the current playback mode.                                                         |
+| `isPaused`     | boolean | Reflects whether the animation is paused or not.                                            |
+| `isStopped`    | boolean | Reflects whether the animation is stopped or not.                                           |
+| `isPlaying`    | boolean | Reflects whether the animation is playing or not.                                           |
+| `segments`     | number  | Reflects the number of segments in the animation.                                           |
 
 ### Methods
 
@@ -169,6 +171,7 @@ The `DotLottie` constructor accepts a config object with the following propertie
 | `destroy()`                                               | Destroys the renderer instance and unregisters all event listeners. This method should be called when the canvas is removed from the DOM to prevent memory leaks. |
 | `load(config: Config)`                                    | Loads a new configuration or a new animation.                                                                                                                     |
 | `setMode(mode: string)`                                   | Sets the animation play mode.                                                                                                                                     |
+| `setSegments(startFrame: number, endFrame: number)`       | Sets the animation segments.                                                                                                                                      |
 
 ### Static Methods
 
@@ -182,16 +185,17 @@ The `DotLottie` class exposes the following static methods:
 
 The `DotLottie` instance emits the following events that can be listened to via the `addEventListener` method:
 
-| Event       | Description                                          |
-| ----------- | ---------------------------------------------------- |
-| `load`      | Emitted when the animation is loaded.                |
-| `loadError` | Emitted when there's an error loading the animation. |
-| `play`      | Emitted when the animation starts playing.           |
-| `pause`     | Emitted when the animation is paused.                |
-| `stop`      | Emitted when the animation is stopped.               |
-| `loop`      | Emitted when the animation completes a loop.         |
-| `complete`  | Emitted when the animation completes.                |
-| `frame`     | Emitted when the animation reaches a new frame.      |
+| Event       | Description                                                |
+| ----------- | ---------------------------------------------------------- |
+| `ready`     | Emitted when the renderer has been initialized and loaded. |
+| `load`      | Emitted when the animation is loaded.                      |
+| `loadError` | Emitted when there's an error loading the animation.       |
+| `play`      | Emitted when the animation starts playing.                 |
+| `pause`     | Emitted when the animation is paused.                      |
+| `stop`      | Emitted when the animation is stopped.                     |
+| `loop`      | Emitted when the animation completes a loop.               |
+| `complete`  | Emitted when the animation completes.                      |
+| `frame`     | Emitted when the animation reaches a new frame.            |
 
 ## Development
 
