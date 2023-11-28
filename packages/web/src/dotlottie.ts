@@ -749,6 +749,8 @@ export class DotLottie {
     this._duration = 0;
     this._canvas.style.backgroundColor = config.backgroundColor ?? '';
 
+    this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
+
     if (config.src) {
       this._loadAnimationFromURL(config.src);
     } else if (config.data) {
