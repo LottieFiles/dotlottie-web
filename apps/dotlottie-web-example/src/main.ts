@@ -35,26 +35,39 @@ app.innerHTML = `
 <div class="container">
   <canvas id="canvas"></canvas>
   <div class="control-panel">
-    <button id="playPause" class="control-button">Play</button>
-    <button id="stop" class="control-button">Stop</button>
+    <div>
+      <button id="playPause" class="control-button">Play</button>
+      <button id="stop" class="control-button">Stop</button>
+      <button id="jump" class="control-button">Jump</button>
+      <button id="destroy" class="control-button" style="background: #cd3434;">Destroy</button>
+      <button id="reload" class="control-button">Reload</button>
+      
+      <label for="loopToggle">Loop: </label>
+      <input type="checkbox" id="loopToggle" checked />
+    </div>
     
     <label for="frameSlider">Frame: <span id="current-frame">0</span></label>
     <input type="range" id="frameSlider" min="0" step="0.1" />
 
-    <label for="loopToggle">Loop: </label>
-    <input type="checkbox" id="loopToggle" checked />
+    
     <label for="speed" class="speed-label">Speed: <span id="speed-value">x1</span></label>
     <input type="range" id="speed" min="0.1" max="5" step="0.1" value="1" class="speed-slider" />
-    <button id="jump" class="control-button">Jump</button>
-    <button id="destroy" class="control-button" style="background: #cd3434;">Destroy</button>
-    <button id="reload" class="control-button">Reload</button>
     <label for="mode">Mode: </label>
     <select id="mode">
       <option value="bounce">Bounce</option>
       <option value="bounce-reverse">Bounce Reverse</option>
       <option value="reverse">Reverse</option>
-      <option value="normal">Default</option>
+      <option value="forward">Forward</option>
     </select>
+    <div class="segments-control">
+      <label for="startFrame">Start Frame: </label>
+      <input type="number" id="startFrame" value="10" min="0" />
+
+      <label for="endFrame">End Frame: </label>
+      <input type="number" id="endFrame" value="90" min="0" />
+
+      <button id="setSegments" class="control-button">Set Segments</button>
+    </div>
   </div>
 </div>
 `;
@@ -96,6 +109,8 @@ fetch('/hamster.lottie')
       loop: true,
       autoplay: true,
       mode: 'bounce',
+      segments: [10, 90],
+      speed: 1,
       backgroundColor: 'purple',
     });
 
@@ -110,13 +125,28 @@ fetch('/hamster.lottie')
     const reloadButton = document.getElementById('reload') as HTMLButtonElement;
     const jumpButton = document.getElementById('jump') as HTMLButtonElement;
     const modeSelect = document.getElementById('mode') as HTMLSelectElement;
+    const startFrameInput = document.getElementById('startFrame') as HTMLInputElement;
+    const endFrameInput = document.getElementById('endFrame') as HTMLInputElement;
+    const setSegmentsButton = document.getElementById('setSegments') as HTMLButtonElement;
+
+    setSegmentsButton.addEventListener('click', () => {
+      const startFrame = parseInt(startFrameInput.value, 10);
+      const endFrame = parseInt(endFrameInput.value, 10);
+
+      dotLottie.setSegments(startFrame, endFrame);
+    });
 
     modeSelect.addEventListener('change', () => {
       dotLottie.setMode(modeSelect.value.toString() as Mode);
     });
 
     jumpButton.addEventListener('click', () => {
-      const midFrame = dotLottie.totalFrames / 2;
+      if (!dotLottie.segments) return;
+
+      const startFrame = parseInt(dotLottie.segments[0].toString(), 10);
+      const endFrame = parseInt(dotLottie.segments[1].toString(), 10);
+
+      const midFrame = (endFrame - startFrame) / 2 + startFrame;
 
       dotLottie.setFrame(midFrame);
     });
@@ -137,7 +167,7 @@ fetch('/hamster.lottie')
     });
 
     playPauseButton.addEventListener('click', () => {
-      if (dotLottie.playing) {
+      if (dotLottie.isPlaying) {
         dotLottie.pause();
       } else {
         dotLottie.play();

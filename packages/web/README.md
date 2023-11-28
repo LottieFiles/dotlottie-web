@@ -124,31 +124,36 @@ For this behavior to work correctly, the canvas element must be styled using CSS
 
 The `DotLottie` constructor accepts a config object with the following properties:
 
-| Property name     | Type                  | Required | Default   | Description                                                                                         |
-| ----------------- | --------------------- | :------: | --------- | --------------------------------------------------------------------------------------------------- |
-| `autoplay`        | boolean               |          | false     | Auto-starts the animation on load.                                                                  |
-| `loop`            | boolean               |          | false     | Determines if the animation should loop.                                                            |
-| `canvas`          | HTMLCanvasElement     |    ✔️    | undefined | Canvas element for animation rendering.                                                             |
-| `src`             | string                |          | undefined | URL to the animation data (`.json` or `.lottie`).                                                   |
-| `speed`           | number                |          | 1         | Animation playback speed. 1 is regular speed.                                                       |
-| `data`            | string \| ArrayBuffer |          | undefined | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations. |
-| `mode`            | string                |          | "normal"  | Animation play mode. Accepts "normal", "reverse", "bounce", "bounce-reverse".                       |
-| `backgroundColor` | string                |          | undefined | Background color of the canvas. e.g., "#000000", "rgba(0, 0, 0, 0.5)" or "transparent".             |
+| Property name     | Type                  | Required | Default               | Description                                                                                                                            |
+| ----------------- | --------------------- | :------: | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `autoplay`        | boolean               |          | false                 | Auto-starts the animation on load.                                                                                                     |
+| `loop`            | boolean               |          | false                 | Determines if the animation should loop.                                                                                               |
+| `canvas`          | HTMLCanvasElement     |    ✔️    | undefined             | Canvas element for animation rendering.                                                                                                |
+| `src`             | string                |          | undefined             | URL to the animation data (`.json` or `.lottie`).                                                                                      |
+| `speed`           | number                |          | 1                     | Animation playback speed. 1 is regular speed.                                                                                          |
+| `data`            | string \| ArrayBuffer |          | undefined             | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations.                                    |
+| `mode`            | string                |          | "normal"              | Animation play mode. Accepts "normal", "reverse", "bounce", "bounce-reverse".                                                          |
+| `backgroundColor` | string                |          | undefined             | Background color of the canvas. e.g., "#000000", "rgba(0, 0, 0, 0.5)" or "transparent".                                                |
+| `segments`        | \[number, number]     |          | \[0, totalFrames - 1] | Animation segments. Accepts an array of two numbers, where the first number is the start frame and the second number is the end frame. |
 
 ### Properties
 
 `DotLottie` instances expose the following properties:
 
-| Property       | Type    | Description                                                                                 |
-| -------------- | ------- | ------------------------------------------------------------------------------------------- |
-| `currentFrame` | number  | Represents the animation's currently displayed frame number.                                |
-| `duration`     | number  | Specifies the animation's total playback time in milliseconds.                              |
-| `totalFrames`  | number  | Denotes the total count of individual frames within the animation.                          |
-| `loop`         | boolean | Indicates if the animation is set to play in a continuous loop.                             |
-| `speed`        | number  | Represents the playback speed factor; e.g., 2 would mean double speed.                      |
-| `loopCount`    | number  | Tracks how many times the animation has completed its loop.                                 |
-| `playing`      | boolean | Reflects whether the animation is in active playback or not                                 |
-| `direction`    | string  | Reflects the current playback direction; e.g., 1 would mean forward, -1 would mean reverse. |
+| Property       | Type    | Description                                                                                                           |
+| -------------- | ------- | --------------------------------------------------------------------------------------------------------------------- |
+| `currentFrame` | number  | Represents the animation's currently displayed frame number.                                                          |
+| `duration`     | number  | Specifies the animation's total playback time in milliseconds.                                                        |
+| `totalFrames`  | number  | Denotes the total count of individual frames within the animation.                                                    |
+| `loop`         | boolean | Indicates if the animation is set to play in a continuous loop.                                                       |
+| `speed`        | number  | Represents the playback speed factor; e.g., 2 would mean double speed.                                                |
+| `loopCount`    | number  | Tracks how many times the animation has completed its loop.                                                           |
+| `direction`    | string  | Reflects the current playback direction; e.g., 1 would mean forward, -1 would mean reverse.                           |
+| `mode`         | string  | Reflects the current playback mode.                                                                                   |
+| `isPaused`     | boolean | Reflects whether the animation is paused or not.                                                                      |
+| `isStopped`    | boolean | Reflects whether the animation is stopped or not.                                                                     |
+| `isPlaying`    | boolean | Reflects whether the animation is playing or not.                                                                     |
+| `segments`     | number  | Reflects the frames range of the animations. where segments\[0] is the start frame and segments\[1] is the end frame. |
 
 ### Methods
 
@@ -167,6 +172,7 @@ The `DotLottie` constructor accepts a config object with the following propertie
 | `destroy()`                                               | Destroys the renderer instance and unregisters all event listeners. This method should be called when the canvas is removed from the DOM to prevent memory leaks. |
 | `load(config: Config)`                                    | Loads a new configuration or a new animation.                                                                                                                     |
 | `setMode(mode: string)`                                   | Sets the animation play mode.                                                                                                                                     |
+| `setSegments(startFrame: number, endFrame: number)`       | Sets the start and end frame of the animation.                                                                                                                    |
 
 ### Static Methods
 
