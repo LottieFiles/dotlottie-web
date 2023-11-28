@@ -124,16 +124,17 @@ For this behavior to work correctly, the canvas element must be styled using CSS
 
 The `DotLottie` constructor accepts a config object with the following properties:
 
-| Property name     | Type                  | Required | Default   | Description                                                                                         |
-| ----------------- | --------------------- | :------: | --------- | --------------------------------------------------------------------------------------------------- |
-| `autoplay`        | boolean               |          | false     | Auto-starts the animation on load.                                                                  |
-| `loop`            | boolean               |          | false     | Determines if the animation should loop.                                                            |
-| `canvas`          | HTMLCanvasElement     |    ✔️    | undefined | Canvas element for animation rendering.                                                             |
-| `src`             | string                |          | undefined | URL to the animation data (`.json` or `.lottie`).                                                   |
-| `speed`           | number                |          | 1         | Animation playback speed. 1 is regular speed.                                                       |
-| `data`            | string \| ArrayBuffer |          | undefined | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations. |
-| `mode`            | string                |          | "normal"  | Animation play mode. Accepts "normal", "reverse", "bounce", "bounce-reverse".                       |
-| `backgroundColor` | string                |          | undefined | Background color of the canvas. e.g., "#000000", "rgba(0, 0, 0, 0.5)" or "transparent".             |
+| Property name     | Type                  | Required | Default               | Description                                                                                         |
+| ----------------- | --------------------- | :------: | --------------------- | --------------------------------------------------------------------------------------------------- |
+| `autoplay`        | boolean               |          | false                 | Auto-starts the animation on load.                                                                  |
+| `loop`            | boolean               |          | false                 | Determines if the animation should loop.                                                            |
+| `canvas`          | HTMLCanvasElement     |    ✔️    | undefined             | Canvas element for animation rendering.                                                             |
+| `src`             | string                |          | undefined             | URL to the animation data (`.json` or `.lottie`).                                                   |
+| `speed`           | number                |          | 1                     | Animation playback speed. 1 is regular speed.                                                       |
+| `data`            | string \| ArrayBuffer |          | undefined             | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations. |
+| `mode`            | string                |          | "normal"              | Animation play mode. Accepts "normal", "reverse", "bounce", "bounce-reverse".                       |
+| `backgroundColor` | string                |          | undefined             | Background color of the canvas. e.g., "#000000", "rgba(0, 0, 0, 0.5)" or "transparent".             |
+| `segments`        | \[number, number]     |          | \[0, totalFrames - 1] | Animation segments. Accepts an array of two numbers representing the start and end frame.           |
 
 ### Properties
 
@@ -185,17 +186,16 @@ The `DotLottie` class exposes the following static methods:
 
 The `DotLottie` instance emits the following events that can be listened to via the `addEventListener` method:
 
-| Event       | Description                                                |
-| ----------- | ---------------------------------------------------------- |
-| `ready`     | Emitted when the renderer has been initialized and loaded. |
-| `load`      | Emitted when the animation is loaded.                      |
-| `loadError` | Emitted when there's an error loading the animation.       |
-| `play`      | Emitted when the animation starts playing.                 |
-| `pause`     | Emitted when the animation is paused.                      |
-| `stop`      | Emitted when the animation is stopped.                     |
-| `loop`      | Emitted when the animation completes a loop.               |
-| `complete`  | Emitted when the animation completes.                      |
-| `frame`     | Emitted when the animation reaches a new frame.            |
+| Event       | Description                                          |
+| ----------- | ---------------------------------------------------- |
+| `load`      | Emitted when the animation is loaded.                |
+| `loadError` | Emitted when there's an error loading the animation. |
+| `play`      | Emitted when the animation starts playing.           |
+| `pause`     | Emitted when the animation is paused.                |
+| `stop`      | Emitted when the animation is stopped.               |
+| `loop`      | Emitted when the animation completes a loop.         |
+| `complete`  | Emitted when the animation completes.                |
+| `frame`     | Emitted when the animation reaches a new frame.      |
 
 ## Development
 

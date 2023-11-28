@@ -832,21 +832,5 @@ export class DotLottie {
     this._playbackState = 'stopped';
   }
 
-  /**
-   * Stops the animation loop and freezes the animation.
-   *
-   */
-  public freez(): void {
-    this._stopAnimationLoop();
-  }
-
-  /**
-   * Starts the animation loop and unfreezes the animation.
-   *
-   */
-  public unfreez(): void {
-    this._startAnimationLoop();
-  }
-
   // #endregion
 }
