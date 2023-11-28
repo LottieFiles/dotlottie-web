@@ -126,6 +126,8 @@ fetch('/hamster.lottie')
     });
 
     jumpButton.addEventListener('click', () => {
+      if (!dotLottie.segments) return;
+
       const startFrame = parseInt(dotLottie.segments[0].toString(), 10);
       const endFrame = parseInt(dotLottie.segments[1].toString(), 10);
 
