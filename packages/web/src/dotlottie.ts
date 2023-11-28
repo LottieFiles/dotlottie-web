@@ -172,6 +172,15 @@ export class DotLottie {
   // #region Getters and Setters
 
   /**
+   * Gets the background color of the canvas.
+   *
+   * @returns The background color of the canvas.
+   */
+  public get backgroundColor(): string {
+    return this._canvas.style.backgroundColor;
+  }
+
+  /**
    * Gets the current direction of the animation.
    *
    * @returns The current direction of the animation.
@@ -830,6 +839,15 @@ export class DotLottie {
     this._context = null;
     this._renderer = null;
     this._playbackState = 'stopped';
+  }
+
+  /**
+   *  Sets the background color of the canvas.
+   *
+   * @param color - The background color of the canvas.
+   */
+  public setBackgroundColor(color: string): void {
+    this._canvas.style.backgroundColor = color;
   }
 
   // #endregion
