@@ -140,20 +140,21 @@ The `DotLottie` constructor accepts a config object with the following propertie
 
 `DotLottie` instances expose the following properties:
 
-| Property       | Type    | Description                                                                                                           |
-| -------------- | ------- | --------------------------------------------------------------------------------------------------------------------- |
-| `currentFrame` | number  | Represents the animation's currently displayed frame number.                                                          |
-| `duration`     | number  | Specifies the animation's total playback time in milliseconds.                                                        |
-| `totalFrames`  | number  | Denotes the total count of individual frames within the animation.                                                    |
-| `loop`         | boolean | Indicates if the animation is set to play in a continuous loop.                                                       |
-| `speed`        | number  | Represents the playback speed factor; e.g., 2 would mean double speed.                                                |
-| `loopCount`    | number  | Tracks how many times the animation has completed its loop.                                                           |
-| `direction`    | string  | Reflects the current playback direction; e.g., 1 would mean forward, -1 would mean reverse.                           |
-| `mode`         | string  | Reflects the current playback mode.                                                                                   |
-| `isPaused`     | boolean | Reflects whether the animation is paused or not.                                                                      |
-| `isStopped`    | boolean | Reflects whether the animation is stopped or not.                                                                     |
-| `isPlaying`    | boolean | Reflects whether the animation is playing or not.                                                                     |
-| `segments`     | number  | Reflects the frames range of the animations. where segments\[0] is the start frame and segments\[1] is the end frame. |
+| Property          | Type    | Description                                                                                                           |
+| ----------------- | ------- | --------------------------------------------------------------------------------------------------------------------- |
+| `currentFrame`    | number  | Represents the animation's currently displayed frame number.                                                          |
+| `duration`        | number  | Specifies the animation's total playback time in milliseconds.                                                        |
+| `totalFrames`     | number  | Denotes the total count of individual frames within the animation.                                                    |
+| `loop`            | boolean | Indicates if the animation is set to play in a continuous loop.                                                       |
+| `speed`           | number  | Represents the playback speed factor; e.g., 2 would mean double speed.                                                |
+| `loopCount`       | number  | Tracks how many times the animation has completed its loop.                                                           |
+| `direction`       | string  | Reflects the current playback direction; e.g., 1 would mean forward, -1 would mean reverse.                           |
+| `mode`            | string  | Reflects the current playback mode.                                                                                   |
+| `isPaused`        | boolean | Reflects whether the animation is paused or not.                                                                      |
+| `isStopped`       | boolean | Reflects whether the animation is stopped or not.                                                                     |
+| `isPlaying`       | boolean | Reflects whether the animation is playing or not.                                                                     |
+| `segments`        | number  | Reflects the frames range of the animations. where segments\[0] is the start frame and segments\[1] is the end frame. |
+| `backgroundColor` | string  | Gets the background color of the canvas.                                                                              |
 
 ### Methods
 
@@ -175,6 +176,7 @@ The `DotLottie` constructor accepts a config object with the following propertie
 | `setSegments(startFrame: number, endFrame: number)`       | Sets the start and end frame of the animation.                                                                                                                    |
 | `freeze()`                                                | Freezes the animation by stopping the animation loop.                                                                                                             |
 | `unfreeze()`                                              | Unfreezes the animation by resuming the animation loop.                                                                                                           |
+| `setBackgroundColor(color: string)`                       | Sets the background color of the canvas.                                                                                                                          |
 
 ### Static Methods
 

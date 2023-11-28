@@ -112,6 +112,8 @@ export class DotLottie {
 
   private _playbackState: PlaybackState = 'stopped';
 
+  private _backgroundColor = '';
+
   // eslint-disable-next-line @typescript-eslint/prefer-readonly
   private _shouldAutoResizeCanvas = false;
 
@@ -131,10 +133,9 @@ export class DotLottie {
     this._autoplay = config.autoplay ?? false;
     this._mode = config.mode ?? 'forward';
     this._segments = config.segments ?? null;
+    this._backgroundColor = config.backgroundColor ?? '';
 
-    if (config.backgroundColor) {
-      this._canvas.style.backgroundColor = config.backgroundColor;
-    }
+    this.setBackgroundColor(this._backgroundColor);
 
     if (!(this._canvas.hasAttribute('width') || this._canvas.hasAttribute('height'))) {
       this._shouldAutoResizeCanvas = true;
@@ -170,6 +171,15 @@ export class DotLottie {
   }
 
   // #region Getters and Setters
+
+  /**
+   * Gets the background color of the canvas.
+   *
+   * @returns The background color of the canvas.
+   */
+  public get backgroundColor(): string {
+    return this._backgroundColor;
+  }
 
   /**
    * Gets the current direction of the animation.
@@ -747,7 +757,9 @@ export class DotLottie {
     this._beginTime = 0;
     this._totalFrames = 0;
     this._duration = 0;
-    this._canvas.style.backgroundColor = config.backgroundColor ?? '';
+    this._backgroundColor = config.backgroundColor ?? '';
+
+    this.setBackgroundColor(this._backgroundColor);
 
     if (config.src) {
       this._loadAnimationFromURL(config.src);
@@ -847,6 +859,15 @@ export class DotLottie {
   public unfreeze(): void {
     this._synchronizeAnimationTiming(this._currentFrame);
     this._startAnimationLoop();
+  }
+
+  /**  Sets the background color of the canvas.
+   *
+   * @param color - The background color of the canvas.
+   */
+  public setBackgroundColor(color: string): void {
+    this._backgroundColor = color;
+    this._canvas.style.backgroundColor = color;
   }
 
   // #endregion
