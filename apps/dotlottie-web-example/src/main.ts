@@ -20,19 +20,23 @@ app.innerHTML = `
 <div class="container">
   <canvas id="canvas"></canvas>
   <div class="control-panel">
-    <button id="playPause" class="control-button">Play</button>
-    <button id="stop" class="control-button">Stop</button>
+    <div>
+      <button id="playPause" class="control-button">Play</button>
+      <button id="stop" class="control-button">Stop</button>
+      <button id="jump" class="control-button">Jump</button>
+      <button id="destroy" class="control-button" style="background: #cd3434;">Destroy</button>
+      <button id="reload" class="control-button">Reload</button>
+      
+      <label for="loopToggle">Loop: </label>
+      <input type="checkbox" id="loopToggle" checked />
+    </div>
     
     <label for="frameSlider">Frame: <span id="current-frame">0</span></label>
     <input type="range" id="frameSlider" min="0" step="0.1" />
 
-    <label for="loopToggle">Loop: </label>
-    <input type="checkbox" id="loopToggle" checked />
+    
     <label for="speed" class="speed-label">Speed: <span id="speed-value">x1</span></label>
     <input type="range" id="speed" min="0.1" max="5" step="0.1" value="1" class="speed-slider" />
-    <button id="jump" class="control-button">Jump</button>
-    <button id="destroy" class="control-button" style="background: #cd3434;">Destroy</button>
-    <button id="reload" class="control-button">Reload</button>
     <label for="mode">Mode: </label>
     <select id="mode">
       <option value="bounce">Bounce</option>

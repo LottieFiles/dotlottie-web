@@ -2,4 +2,4 @@
 '@lottiefiles/dotlottie-web': minor
 ---
 
-feat: 🎸 segments
+feat: 🎸 add `setSegments` method & `segments` config.
