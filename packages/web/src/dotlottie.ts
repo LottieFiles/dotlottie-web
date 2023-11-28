@@ -861,7 +861,8 @@ export class DotLottie {
     this._startAnimationLoop();
   }
 
-  /**  Sets the background color of the canvas.
+  /**
+   * Sets the background color of the canvas.
    *
    * @param color - The background color of the canvas.
    */
