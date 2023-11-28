@@ -45,20 +45,24 @@ app.innerHTML = `
       <label for="loopToggle">Loop: </label>
       <input type="checkbox" id="loopToggle" checked />
     </div>
-    
+
     <label for="frameSlider">Frame: <span id="current-frame">0</span></label>
     <input type="range" id="frameSlider" min="0" step="0.1" />
 
     
     <label for="speed" class="speed-label">Speed: <span id="speed-value">x1</span></label>
     <input type="range" id="speed" min="0.1" max="5" step="0.1" value="1" class="speed-slider" />
-    <label for="mode">Mode: </label>
-    <select id="mode">
-      <option value="bounce">Bounce</option>
-      <option value="bounce-reverse">Bounce Reverse</option>
-      <option value="reverse">Reverse</option>
-      <option value="forward">Forward</option>
-    </select>
+    <div>
+      <label for="mode">Mode: </label>
+      <select id="mode">
+        <option value="bounce">Bounce</option>
+        <option value="bounce-reverse">Bounce Reverse</option>
+        <option value="reverse">Reverse</option>
+        <option value="forward">Forward</option>
+      </select>
+      <label for="bg-color">Background Color: </label>
+      <input type="color" id="bg-color" />
+    </div>
     <div class="segments-control">
       <label for="startFrame">Start Frame: </label>
       <input type="number" id="startFrame" value="10" min="0" />
@@ -111,7 +115,7 @@ fetch('/hamster.lottie')
       mode: 'bounce',
       segments: [10, 90],
       speed: 1,
-      backgroundColor: 'purple',
+      backgroundColor: '#800080',
     });
 
     const playPauseButton = document.getElementById('playPause') as HTMLButtonElement;
@@ -128,6 +132,11 @@ fetch('/hamster.lottie')
     const startFrameInput = document.getElementById('startFrame') as HTMLInputElement;
     const endFrameInput = document.getElementById('endFrame') as HTMLInputElement;
     const setSegmentsButton = document.getElementById('setSegments') as HTMLButtonElement;
+    const bgColorInput = document.getElementById('bg-color') as HTMLInputElement;
+
+    bgColorInput.addEventListener('change', () => {
+      dotLottie.setBackgroundColor(bgColorInput.value);
+    });
 
     setSegmentsButton.addEventListener('click', () => {
       const startFrame = parseInt(startFrameInput.value, 10);
@@ -204,6 +213,8 @@ fetch('/hamster.lottie')
     });
 
     dotLottie.addEventListener('load', (event) => {
+      bgColorInput.value = dotLottie.backgroundColor || '#ffffff';
+
       console.log(event);
     });
 
