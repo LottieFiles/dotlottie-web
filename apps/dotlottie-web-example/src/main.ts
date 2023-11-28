@@ -45,6 +45,11 @@ app.innerHTML = `
       <label for="loopToggle">Loop: </label>
       <input type="checkbox" id="loopToggle" checked />
     </div>
+
+    <div>
+      <button id="freeze" class="control-button">Freeze</button>
+      <button id="unfreeze" class="control-button">Unfreeze</button>
+    </div>
     
     <label for="frameSlider">Frame: <span id="current-frame">0</span></label>
     <input type="range" id="frameSlider" min="0" step="0.1" />
@@ -128,6 +133,16 @@ fetch('/hamster.lottie')
     const startFrameInput = document.getElementById('startFrame') as HTMLInputElement;
     const endFrameInput = document.getElementById('endFrame') as HTMLInputElement;
     const setSegmentsButton = document.getElementById('setSegments') as HTMLButtonElement;
+    const freezeButton = document.getElementById('freeze') as HTMLButtonElement;
+    const unfreezeButton = document.getElementById('unfreeze') as HTMLButtonElement;
+
+    freezeButton.addEventListener('click', () => {
+      dotLottie.freeze();
+    });
+
+    unfreezeButton.addEventListener('click', () => {
+      dotLottie.unfreeze();
+    });
 
     setSegmentsButton.addEventListener('click', () => {
       const startFrame = parseInt(startFrameInput.value, 10);

@@ -173,6 +173,8 @@ The `DotLottie` constructor accepts a config object with the following propertie
 | `load(config: Config)`                                    | Loads a new configuration or a new animation.                                                                                                                     |
 | `setMode(mode: string)`                                   | Sets the animation play mode.                                                                                                                                     |
 | `setSegments(startFrame: number, endFrame: number)`       | Sets the start and end frame of the animation.                                                                                                                    |
+| `freeze()`                                                | Freezes the animation by stopping the animation loop.                                                                                                             |
+| `unfreeze()`                                              | Unfreezes the animation by resuming the animation loop.                                                                                                           |
 
 ### Static Methods
 
