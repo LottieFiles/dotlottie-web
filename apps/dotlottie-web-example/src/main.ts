@@ -245,6 +245,10 @@ fetch('/hamster.lottie')
 
       playPauseButton.innerText = 'Play';
     });
+
+    dotLottie.addEventListener('destroy', (event) => {
+      console.log(event);
+    });
   })
   .catch((error) => {
     console.log(error);

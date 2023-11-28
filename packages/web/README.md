@@ -196,6 +196,7 @@ The `DotLottie` instance emits the following events that can be listened to via 
 | `loop`      | Emitted when the animation completes a loop.         |
 | `complete`  | Emitted when the animation completes.                |
 | `frame`     | Emitted when the animation reaches a new frame.      |
+| `destroy`   | Emitted when the animation is destroyed.             |
 
 ## Development
 
