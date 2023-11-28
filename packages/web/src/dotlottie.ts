@@ -463,7 +463,7 @@ export class DotLottie {
    * Adjusts the canvas size based on the device pixel ratio and the size of the canvas element.
    *
    */
-  public _resizeAnimationToCanvas(): void {
+  private _resizeAnimationToCanvas(): void {
     if (!this._shouldAutoResizeCanvas) return;
 
     const clientRects = this._canvas.getClientRects();
@@ -491,7 +491,7 @@ export class DotLottie {
    *
    * This is used to ensure that the animation loop is only stopped once.
    */
-  public _stopAnimationLoop(): void {
+  private _stopAnimationLoop(): void {
     if (this._animationFrameId) {
       window.cancelAnimationFrame(this._animationFrameId);
     }
@@ -502,26 +502,26 @@ export class DotLottie {
    *
    * This is used to ensure that the animation loop is only started once.
    */
-  public _startAnimationLoop(): void {
+  private _startAnimationLoop(): void {
     if (this._animationFrameId) {
       window.cancelAnimationFrame(this._animationFrameId);
     }
     this._animationFrameId = window.requestAnimationFrame(this._animationLoop);
   }
 
-  public _getEffectiveStartFrame(): number {
+  private _getEffectiveStartFrame(): number {
     return this._segments ? this._segments[0] : 0;
   }
 
-  public _getEffectiveEndFrame(): number {
+  private _getEffectiveEndFrame(): number {
     return this._segments ? this._segments[1] : this._totalFrames - 1;
   }
 
-  public _getEffectiveTotalFrames(): number {
+  private _getEffectiveTotalFrames(): number {
     return this._segments ? this._segments[1] - this._segments[0] : this._totalFrames;
   }
 
-  public _getEffectiveDuration(): number {
+  private _getEffectiveDuration(): number {
     return this._segments
       ? this._duration * ((this._segments[1] - this._segments[0]) / this._totalFrames)
       : this._duration;
