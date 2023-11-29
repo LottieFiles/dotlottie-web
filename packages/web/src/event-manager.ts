@@ -5,7 +5,18 @@
 /**
  * Represents the different types of events that can be dispatched.
  */
-export type EventType = 'complete' | 'frame' | 'load' | 'loadError' | 'loop' | 'pause' | 'play' | 'stop' | 'destroy';
+export type EventType =
+  | 'complete'
+  | 'frame'
+  | 'load'
+  | 'loadError'
+  | 'loop'
+  | 'pause'
+  | 'play'
+  | 'stop'
+  | 'destroy'
+  | 'freeze'
+  | 'unfreeze';
 
 /**
  * Maps an event type string to its respective event interface.
@@ -28,6 +39,10 @@ type EventByType<T> = T extends 'complete'
   ? StopEvent
   : T extends 'destroy'
   ? DestroyEvent
+  : T extends 'freeze'
+  ? FreezeEvent
+  : T extends 'unfreeze'
+  ? UnfreezeEvent
   : never;
 
 /**
@@ -35,6 +50,14 @@ type EventByType<T> = T extends 'complete'
  */
 export interface BaseEvent {
   type: EventType;
+}
+
+export interface FreezeEvent extends BaseEvent {
+  type: 'freeze';
+}
+
+export interface UnfreezeEvent extends BaseEvent {
+  type: 'unfreeze';
 }
 
 /*

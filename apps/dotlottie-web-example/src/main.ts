@@ -275,6 +275,14 @@ fetch('/hamster.lottie')
     dotLottie.addEventListener('destroy', (event) => {
       console.log(event);
     });
+
+    dotLottie.addEventListener('freeze', (event) => {
+      console.log(event);
+    });
+
+    dotLottie.addEventListener('unfreeze', (event) => {
+      console.log(event);
+    });
   })
   .catch((error) => {
     console.log(error);

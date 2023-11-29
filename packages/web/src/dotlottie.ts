@@ -867,6 +867,10 @@ export class DotLottie {
    */
   public freeze(): void {
     this._stopAnimationLoop();
+
+    this._eventManager.dispatch({
+      type: 'freeze',
+    });
   }
 
   /**
@@ -876,6 +880,10 @@ export class DotLottie {
   public unfreeze(): void {
     this._synchronizeAnimationTiming(this._currentFrame);
     this._startAnimationLoop();
+
+    this._eventManager.dispatch({
+      type: 'unfreeze',
+    });
   }
 
   /**
