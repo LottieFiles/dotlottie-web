@@ -5,7 +5,7 @@
 /**
  * Represents the different types of events that can be dispatched.
  */
-export type EventType = 'complete' | 'frame' | 'load' | 'loadError' | 'loop' | 'pause' | 'play' | 'stop';
+export type EventType = 'complete' | 'frame' | 'load' | 'loadError' | 'loop' | 'pause' | 'play' | 'stop' | 'destroy';
 
 /**
  * Maps an event type string to its respective event interface.
@@ -26,6 +26,8 @@ type EventByType<T> = T extends 'complete'
   ? PlayEvent
   : T extends 'stop'
   ? StopEvent
+  : T extends 'destroy'
+  ? DestroyEvent
   : never;
 
 /**
@@ -33,6 +35,13 @@ type EventByType<T> = T extends 'complete'
  */
 export interface BaseEvent {
   type: EventType;
+}
+
+/*
+ * Event fired when a destroy action occurs.
+ */
+export interface DestroyEvent extends BaseEvent {
+  type: 'destroy';
 }
 
 /**
