@@ -173,6 +173,15 @@ export class DotLottie {
   // #region Getters and Setters
 
   /**
+   * Gets the autoplay status of the animation.
+   *
+   * @returns The autoplay status of the animation.
+   */
+  public get autoplay(): boolean {
+    return this._autoplay;
+  }
+
+  /**
    * Gets the background color of the canvas.
    *
    * @returns The background color of the canvas.

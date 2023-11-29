@@ -155,6 +155,7 @@ The `DotLottie` constructor accepts a config object with the following propertie
 | `isPlaying`       | boolean | Reflects whether the animation is playing or not.                                                                     |
 | `segments`        | number  | Reflects the frames range of the animations. where segments\[0] is the start frame and segments\[1] is the end frame. |
 | `backgroundColor` | string  | Gets the background color of the canvas.                                                                              |
+| `autoplay`        | boolean | Indicates if the animation is set to auto-play.                                                                       |
 
 ### Methods
 
