@@ -837,11 +837,17 @@ export class DotLottie {
    */
   public destroy(): void {
     this._stopAnimationLoop();
-    this._eventManager.removeAllEventListeners();
-    this._canvasResizeObserver?.disconnect();
+    this._playbackState = 'stopped';
+
     this._context = null;
     this._renderer = null;
-    this._playbackState = 'stopped';
+    this._canvasResizeObserver?.disconnect();
+
+    this._eventManager.dispatch({
+      type: 'destroy',
+    });
+
+    this._eventManager.removeAllEventListeners();
   }
 
   /**
