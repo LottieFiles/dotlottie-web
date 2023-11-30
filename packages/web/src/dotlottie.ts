@@ -5,14 +5,13 @@
 /* eslint-disable promise/prefer-await-to-then */
 /* eslint-disable @typescript-eslint/unbound-method */
 
+import { AnimationFrameManager } from './animation-frame-manager';
+import { ENVIRONMENT_IS_WEB, MS_TO_SEC_FACTOR } from './constants';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import type { Renderer } from './renderer-wasm';
 import { WasmLoader } from './renderer-wasm';
 import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL } from './utils';
-
-const ENVIRONMENT_IS_WEB = typeof window !== 'undefined';
-const MS_TO_SEC_FACTOR = 1000;
 
 export type Mode = 'forward' | 'reverse' | 'bounce' | 'bounce-reverse';
 
@@ -129,6 +128,8 @@ export class DotLottie {
   private _backgroundColor = '';
 
   private _renderConfig: RenderConfig = {};
+
+  private readonly _animationFrameManager = new AnimationFrameManager();
 
   public constructor(config: Config) {
     this._animationLoop = this._animationLoop.bind(this);
@@ -377,7 +378,10 @@ export class DotLottie {
       }
 
       const clampedBuffer = new Uint8ClampedArray(buffer);
-      const imageData = new ImageData(clampedBuffer, this._canvas.width, this._canvas.height);
+
+      const imageData = this._context.createImageData(width, height);
+
+      imageData.data.set(clampedBuffer);
 
       this._context.putImageData(imageData, 0, 0);
     }
@@ -475,7 +479,7 @@ export class DotLottie {
     if (this.isPlaying && this._update()) {
       this._render();
 
-      this._animationFrameId = window.requestAnimationFrame(this._animationLoop);
+      this._animationFrameId = this._animationFrameManager.requestAnimationFrame(this._animationLoop);
     }
   }
 
@@ -486,7 +490,7 @@ export class DotLottie {
    */
   private _stopAnimationLoop(): void {
     if (this._animationFrameId) {
-      window.cancelAnimationFrame(this._animationFrameId);
+      this._animationFrameManager.cancelAnimationFrame(this._animationFrameId);
       this._animationFrameId = null;
     }
   }
@@ -498,7 +502,7 @@ export class DotLottie {
    */
   private _startAnimationLoop(): void {
     if (!this._animationFrameId) {
-      this._animationFrameId = window.requestAnimationFrame(this._animationLoop);
+      this._animationFrameId = this._animationFrameManager.requestAnimationFrame(this._animationLoop);
     }
   }
 
