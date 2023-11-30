@@ -106,13 +106,15 @@ export class DotLottie {
 
   private _bounceCount = 0;
 
-  private _animationFrameId?: number;
+  private _animationFrameId?: number | null = null;
 
   private _segments: [number, number] | null = null;
 
   private _playbackState: PlaybackState = 'stopped';
 
   private _backgroundColor = '';
+
+  private _isFrozen = false;
 
   // eslint-disable-next-line @typescript-eslint/prefer-readonly
   private _shouldAutoResizeCanvas = false;
@@ -273,6 +275,11 @@ export class DotLottie {
   public get isStopped(): boolean {
     return this._playbackState === 'stopped';
   }
+
+  public get isFrozen(): boolean {
+    return this._isFrozen;
+  }
+
   // #endregion Getters and Setters
 
   // #region Private Methods
@@ -474,7 +481,7 @@ export class DotLottie {
   private _animationLoop(): void {
     if (this.isPlaying && this._update()) {
       this._render();
-      this._startAnimationLoop();
+      this._animationFrameId = window.requestAnimationFrame(this._animationLoop);
     }
   }
 
@@ -513,6 +520,7 @@ export class DotLottie {
   private _stopAnimationLoop(): void {
     if (this._animationFrameId) {
       window.cancelAnimationFrame(this._animationFrameId);
+      this._animationFrameId = null;
     }
   }
 
@@ -522,10 +530,9 @@ export class DotLottie {
    * This is used to ensure that the animation loop is only started once.
    */
   private _startAnimationLoop(): void {
-    if (this._animationFrameId) {
-      window.cancelAnimationFrame(this._animationFrameId);
+    if (!this._animationFrameId) {
+      this._animationFrameId = window.requestAnimationFrame(this._animationLoop);
     }
-    this._animationFrameId = window.requestAnimationFrame(this._animationLoop);
   }
 
   private _getEffectiveStartFrame(): number {
@@ -602,9 +609,13 @@ export class DotLottie {
 
     if (!this.isPlaying) {
       this._playbackState = 'playing';
+
       this._eventManager.dispatch({
         type: 'play',
       });
+
+      this._isFrozen = false;
+
       this._startAnimationLoop();
     }
   }
@@ -755,14 +766,12 @@ export class DotLottie {
     this._bounceCount = 0;
     this._direction = this._mode.includes('reverse') ? -1 : 1;
 
-    // Set the initial frame based on the mode and segments
     const effectiveStartFrame = this._getEffectiveStartFrame();
     const effectiveEndFrame = this._getEffectiveEndFrame();
 
     this._currentFrame =
       this._mode === 'reverse' || this._mode === 'bounce-reverse' ? effectiveEndFrame : effectiveStartFrame;
 
-    // Reset other properties
     this._beginTime = 0;
     this._totalFrames = 0;
     this._duration = 0;
@@ -866,7 +875,11 @@ export class DotLottie {
    *
    */
   public freeze(): void {
+    if (this._isFrozen) return;
+
     this._stopAnimationLoop();
+
+    this._isFrozen = true;
 
     this._eventManager.dispatch({
       type: 'freeze',
@@ -878,12 +891,16 @@ export class DotLottie {
    *
    */
   public unfreeze(): void {
-    this._synchronizeAnimationTiming(this._currentFrame);
-    this._startAnimationLoop();
+    if (!this.isFrozen) return;
 
-    this._eventManager.dispatch({
-      type: 'unfreeze',
-    });
+    this._isFrozen = false;
+    this._eventManager.dispatch({ type: 'unfreeze' });
+
+    // resume the animation loop only if the playback state is 'playing'
+    if (this.isPlaying) {
+      this._synchronizeAnimationTiming(this._currentFrame);
+      this._startAnimationLoop();
+    }
   }
 
   /**
