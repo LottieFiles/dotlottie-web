@@ -94,13 +94,16 @@ allCanvas.forEach((canvas) => {
   const src = canvas.getAttribute('data-src') as string;
   const backgroundColor = canvas.getAttribute('data-bg-color') as string;
 
-  // eslint-disable-next-line no-new
-  new DotLottie({
+  const dotLottie = new DotLottie({
     canvas,
     src,
     loop: true,
     autoplay: true,
     backgroundColor,
+  });
+
+  window.addEventListener('resize', () => {
+    dotLottie.resize();
   });
 });
 
@@ -187,6 +190,9 @@ fetch('/hamster.lottie')
         loop: true,
         autoplay: true,
         mode: 'bounce-reverse',
+        renderConfig: {
+          devicePixelRatio: 0.2,
+        },
       });
     });
 

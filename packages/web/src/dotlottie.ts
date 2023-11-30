@@ -9,13 +9,23 @@ import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import type { Renderer } from './renderer-wasm';
 import { WasmLoader } from './renderer-wasm';
-import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL, debounce } from './utils';
+import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL } from './utils';
 
+const ENVIRONMENT_IS_WEB = typeof window !== 'undefined';
 const MS_TO_SEC_FACTOR = 1000;
 
 export type Mode = 'forward' | 'reverse' | 'bounce' | 'bounce-reverse';
 
 type PlaybackState = 'playing' | 'paused' | 'stopped';
+
+interface RenderConfig {
+  /**
+   * The device pixel ratio to use when resizing the canvas.
+   *
+   * Default is window.devicePixelRatio or 1.
+   */
+  devicePixelRatio?: number;
+}
 
 export interface Config {
   /**
@@ -52,6 +62,10 @@ export interface Config {
    *
    */
   mode?: Mode;
+  /**
+   * The render configuration.
+   */
+  renderConfig?: RenderConfig;
   /**
    *  The frame boundaries of the animation.
    *
@@ -106,7 +120,7 @@ export class DotLottie {
 
   private _bounceCount = 0;
 
-  private _animationFrameId?: number;
+  private _animationFrameId?: number | null = null;
 
   private _segments: [number, number] | null = null;
 
@@ -114,10 +128,7 @@ export class DotLottie {
 
   private _backgroundColor = '';
 
-  // eslint-disable-next-line @typescript-eslint/prefer-readonly
-  private _shouldAutoResizeCanvas = false;
-
-  private readonly _canvasResizeObserver?: ResizeObserver | null = null;
+  private _renderConfig: RenderConfig = {};
 
   public constructor(config: Config) {
     this._animationLoop = this._animationLoop.bind(this);
@@ -134,23 +145,9 @@ export class DotLottie {
     this._mode = config.mode ?? 'forward';
     this._segments = config.segments ?? null;
     this._backgroundColor = config.backgroundColor ?? '';
+    this._renderConfig = config.renderConfig ?? {};
 
     this.setBackgroundColor(this._backgroundColor);
-
-    if (!(this._canvas.hasAttribute('width') || this._canvas.hasAttribute('height'))) {
-      this._shouldAutoResizeCanvas = true;
-
-      this._canvasResizeObserver = new ResizeObserver(
-        debounce(() => {
-          this._resizeAnimationToCanvas();
-          if (!this.isPlaying) {
-            this._render();
-          }
-        }, 100),
-      );
-
-      this._canvasResizeObserver.observe(this._canvas);
-    }
 
     WasmLoader.load()
       .then((module) => {
@@ -307,7 +304,7 @@ export class DotLottie {
         if (this._renderer?.load(animationData, this._canvas.width, this._canvas.height)) {
           this._setupAnimationDetails();
           this._eventManager.dispatch({ type: 'load' });
-          this._resizeAnimationToCanvas();
+          this.resize();
           if (this._autoplay) {
             this.play();
           } else {
@@ -365,7 +362,10 @@ export class DotLottie {
       return;
     }
 
-    this._renderer.resize(this._canvas.width, this._canvas.height);
+    const width = this._canvas.width;
+    const height = this._canvas.height;
+
+    this._renderer.resize(width, height);
 
     if (this._renderer.update()) {
       const buffer = this._renderer.render();
@@ -474,35 +474,9 @@ export class DotLottie {
   private _animationLoop(): void {
     if (this.isPlaying && this._update()) {
       this._render();
-      this._startAnimationLoop();
+
+      this._animationFrameId = window.requestAnimationFrame(this._animationLoop);
     }
-  }
-
-  /**
-   * Adjusts the canvas size based on the device pixel ratio and the size of the canvas element.
-   *
-   */
-  private _resizeAnimationToCanvas(): void {
-    if (!this._shouldAutoResizeCanvas) return;
-
-    const clientRects = this._canvas.getClientRects();
-
-    if (!clientRects.length) return;
-
-    const rect = clientRects[0] as DOMRect;
-
-    const devicePixelRatio = window.devicePixelRatio || 1;
-
-    const width = Math.round(rect.width * devicePixelRatio);
-    const height = Math.round(rect.height * devicePixelRatio);
-
-    const currentWidth = this._canvas.width;
-    const currentHeight = this._canvas.height;
-
-    if (width === currentWidth || height === currentHeight) return;
-
-    this._canvas.width = width;
-    this._canvas.height = height;
   }
 
   /**
@@ -513,6 +487,7 @@ export class DotLottie {
   private _stopAnimationLoop(): void {
     if (this._animationFrameId) {
       window.cancelAnimationFrame(this._animationFrameId);
+      this._animationFrameId = null;
     }
   }
 
@@ -522,10 +497,9 @@ export class DotLottie {
    * This is used to ensure that the animation loop is only started once.
    */
   private _startAnimationLoop(): void {
-    if (this._animationFrameId) {
-      window.cancelAnimationFrame(this._animationFrameId);
+    if (!this._animationFrameId) {
+      this._animationFrameId = window.requestAnimationFrame(this._animationLoop);
     }
-    this._animationFrameId = window.requestAnimationFrame(this._animationLoop);
   }
 
   private _getEffectiveStartFrame(): number {
@@ -754,6 +728,7 @@ export class DotLottie {
     this._loopCount = 0;
     this._bounceCount = 0;
     this._direction = this._mode.includes('reverse') ? -1 : 1;
+    this._renderConfig = config.renderConfig ?? {};
 
     // Set the initial frame based on the mode and segments
     const effectiveStartFrame = this._getEffectiveStartFrame();
@@ -852,7 +827,6 @@ export class DotLottie {
 
     this._context = null;
     this._renderer = null;
-    this._canvasResizeObserver?.disconnect();
 
     this._eventManager.dispatch({
       type: 'destroy',
@@ -885,7 +859,35 @@ export class DotLottie {
    */
   public setBackgroundColor(color: string): void {
     this._backgroundColor = color;
-    this._canvas.style.backgroundColor = color;
+
+    if (ENVIRONMENT_IS_WEB) {
+      // eslint-disable-next-line no-warning-comments
+      // TODO: Change the background color from the renderer instead of the canvas to support non web environments
+      this._canvas.style.backgroundColor = color;
+    }
+  }
+
+  /**
+   * Adjusts the canvas size to match the size of its bounding box, considering the device's pixel ratio.
+   * This method ensures that the canvas is correctly scaled for high-density displays, maintaining
+   * the clarity and quality of the rendered animation.
+   *
+   * Call this method whenever the size of the canvas element changes (e.g., due to window resizing,
+   * orientation changes, or dynamic layout updates) to ensure that the canvas is always properly scaled.
+   *
+   */
+  public resize(): void {
+    if (!ENVIRONMENT_IS_WEB) return;
+
+    const { height, width } = this._canvas.getBoundingClientRect();
+
+    const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
+
+    this._canvas.width = width * dpr;
+    this._canvas.height = height * dpr;
+
+    // resize the renderer and render the current frame
+    this._render();
   }
 
   // #endregion

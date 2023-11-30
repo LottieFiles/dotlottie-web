@@ -19,7 +19,6 @@
 * [Usage](#usage)
   * [Via npm](#via-npm)
   * [Via CDN](#via-cdn)
-  * [Responsive Canvas](#responsive-canvas)
 * [Live Examples](#live-examples)
 * [APIs](#apis)
   * [Config](#config)
@@ -102,16 +101,6 @@ const dotLottie = new DotLottie({
 </html>
 ```
 
-### Responsive Canvas
-
-`DotLottie` offers an automatic canvas resizing behavior to ensure optimal animation quality, especially when the canvas size changes dynamically, such as during browser window resizing or layout adjustments. This behavior is particularly useful when the canvas does not have fixed width and height attributes set, as it maintains the quality of the animation by adjusting the canvas's internal drawing buffer to match its display size.
-
-For this behavior to work correctly, the canvas element must be styled using CSS to take up 100% of the width of its parent container. Additionally, you can use the `aspect-ratio` property to maintain a specific aspect ratio for the canvas. Adjust this property as needed for your design requirements. For example:
-
-```html
-<canvas id="canvas" style="width: 100%; aspect-ratio: 1"></canvas>
-```
-
 ## Live Examples
 
 * <a href="https://codesandbox.io/s/lottiefiles-dotlottie-web-basic-example-tcy3rv?autoresize=1&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Basic Example</a>
@@ -132,9 +121,18 @@ The `DotLottie` constructor accepts a config object with the following propertie
 | `src`             | string                |          | undefined             | URL to the animation data (`.json` or `.lottie`).                                                                                      |
 | `speed`           | number                |          | 1                     | Animation playback speed. 1 is regular speed.                                                                                          |
 | `data`            | string \| ArrayBuffer |          | undefined             | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations.                                    |
-| `mode`            | string                |          | "normal"              | Animation play mode. Accepts "normal", "reverse", "bounce", "bounce-reverse".                                                          |
+| `mode`            | string                |          | "forward"             | Animation play mode. Accepts "forward", "reverse", "bounce", "bounce-reverse".                                                         |
 | `backgroundColor` | string                |          | undefined             | Background color of the canvas. e.g., "#000000", "rgba(0, 0, 0, 0.5)" or "transparent".                                                |
 | `segments`        | \[number, number]     |          | \[0, totalFrames - 1] | Animation segments. Accepts an array of two numbers, where the first number is the start frame and the second number is the end frame. |
+| `renderConfig`    | RenderConfig          |          | `{}`                  | Configuration for rendering the animation.                                                                                             |
+
+#### RenderConfig
+
+The `renderConfig` object accepts the following properties:
+
+| Property name      | Type   | Required | Default                       | Description             |
+| ------------------ | ------ | :------: | ----------------------------- | ----------------------- |
+| `devicePixelRatio` | number |          | window\.devicePixelRatio \| 1 | The device pixel ratio. |
 
 ### Properties
 
@@ -161,23 +159,24 @@ The `DotLottie` constructor accepts a config object with the following propertie
 
 `DotLottie` instances expose the following methods that can be used to control the animation:
 
-| Method                                                    | Description                                                                                                                                                       |
-| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `play()`                                                  | Begins playback from the current animation position.                                                                                                              |
-| `pause()`                                                 | Pauses the animation without resetting its position.                                                                                                              |
-| `stop()`                                                  | Halts playback and returns the animation to its initial frame.                                                                                                    |
-| `setSpeed(speed: number)`                                 | Sets the playback speed with the given multiplier.                                                                                                                |
-| `setLoop(loop: boolean)`                                  | Configures whether the animation should loop continuously.                                                                                                        |
-| `setFrame(frame: number)`                                 | Directly navigates the animation to a specified frame.                                                                                                            |
-| `addEventListener(event: string, listener: Function)`     | Registers a function to respond to a specific animation event.                                                                                                    |
-| `removeEventListener(event: string, listener?: Function)` | Removes a previously registered function from responding to a specific animation event.                                                                           |
-| `destroy()`                                               | Destroys the renderer instance and unregisters all event listeners. This method should be called when the canvas is removed from the DOM to prevent memory leaks. |
-| `load(config: Config)`                                    | Loads a new configuration or a new animation.                                                                                                                     |
-| `setMode(mode: string)`                                   | Sets the animation play mode.                                                                                                                                     |
-| `setSegments(startFrame: number, endFrame: number)`       | Sets the start and end frame of the animation.                                                                                                                    |
-| `freeze()`                                                | Freezes the animation by stopping the animation loop.                                                                                                             |
-| `unfreeze()`                                              | Unfreezes the animation by resuming the animation loop.                                                                                                           |
-| `setBackgroundColor(color: string)`                       | Sets the background color of the canvas.                                                                                                                          |
+| Method                                                    | Description                                                                                                                                                                                                                                                   |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `play()`                                                  | Begins playback from the current animation position.                                                                                                                                                                                                          |
+| `pause()`                                                 | Pauses the animation without resetting its position.                                                                                                                                                                                                          |
+| `stop()`                                                  | Halts playback and returns the animation to its initial frame.                                                                                                                                                                                                |
+| `setSpeed(speed: number)`                                 | Sets the playback speed with the given multiplier.                                                                                                                                                                                                            |
+| `setLoop(loop: boolean)`                                  | Configures whether the animation should loop continuously.                                                                                                                                                                                                    |
+| `setFrame(frame: number)`                                 | Directly navigates the animation to a specified frame.                                                                                                                                                                                                        |
+| `addEventListener(event: string, listener: Function)`     | Registers a function to respond to a specific animation event.                                                                                                                                                                                                |
+| `removeEventListener(event: string, listener?: Function)` | Removes a previously registered function from responding to a specific animation event.                                                                                                                                                                       |
+| `destroy()`                                               | Destroys the renderer instance and unregisters all event listeners. This method should be called when the canvas is removed from the DOM to prevent memory leaks.                                                                                             |
+| `load(config: Config)`                                    | Loads a new configuration or a new animation.                                                                                                                                                                                                                 |
+| `setMode(mode: string)`                                   | Sets the animation play mode.                                                                                                                                                                                                                                 |
+| `setSegments(startFrame: number, endFrame: number)`       | Sets the start and end frame of the animation.                                                                                                                                                                                                                |
+| `freeze()`                                                | Freezes the animation by stopping the animation loop.                                                                                                                                                                                                         |
+| `unfreeze()`                                              | Unfreezes the animation by resuming the animation loop.                                                                                                                                                                                                       |
+| `setBackgroundColor(color: string)`                       | Sets the background color of the canvas.                                                                                                                                                                                                                      |
+| `resize()`                                                | This method adjusts the canvas size to match its bounding box dimensions, considering the device's pixel ratio. This prevents the canvas from appearing blurry on high-resolution screens. Call this method when the window or the canvas element is resized. |
 
 ### Static Methods
 
