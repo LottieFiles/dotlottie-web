@@ -18,7 +18,7 @@ module.exports = defineConfig((options) => ({
   sourcemap: true,
   entry: ['./src/*.ts'],
   format: ['esm'],
-  platform: 'browser',
+  platform: 'neutral',
   target: ['es2020'],
   tsconfig: 'tsconfig.build.json',
   onSuccess: () => {
