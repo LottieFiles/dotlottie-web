@@ -1,5 +1,24 @@
 # @lottiefiles/dotlottie-web
 
+## 0.8.0
+
+### Minor Changes
+
+- 9cbed11: feat: 🎸 add resize method and renderConfig
+- 4fd194a: feat: 🎸 add setBackgroundColor method & backgroundColor property
+- a3a4cb3: feat: 🎸 add `freeze` & `unfreeze` methods
+- e23f84a: feat: 🎸 add destroy event
+- 0508345: feat: 🎸 add autoplay getter
+- 82c01b6: refactor: rename default mode to `forward`
+- 82c01b6: feat: 🎸 `isPlaying`, `isPaused`, `isStopped` properties
+- 76838e9: feat: 🎸 add setMode method
+- 82c01b6: feat: 🎸 add `setSegments` method & `segments` config.
+
+### Patch Changes
+
+- 635d9c9: fix: 🐛 ensure the canvas is cleared before loading a new animation
+- 82c01b6: fix: 🐛 prevent `stop` event from triggering if playback is already stopped.
+
 ## 0.7.0
 
 ### Minor Changes
