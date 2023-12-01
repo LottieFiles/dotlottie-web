@@ -309,7 +309,11 @@ export class DotLottie {
           if (this._autoplay) {
             this.play();
           } else {
-            this._render();
+            this._currentFrame = this._mode.includes('reverse')
+              ? this._getEffectiveEndFrame()
+              : this._getEffectiveStartFrame();
+
+            this.setFrame(this._currentFrame);
           }
         } else {
           this._eventManager.dispatch({
@@ -583,7 +587,7 @@ export class DotLottie {
       this._eventManager.dispatch({
         type: 'play',
       });
-      this._startAnimationLoop();
+      this._animationFrameId = this._animationFrameManager.requestAnimationFrame(this._animationLoop);
     }
   }
 
