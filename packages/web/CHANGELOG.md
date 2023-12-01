@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-web
 
+## 0.8.1
+
+### Patch Changes
+
+- aaa851f: fix: 🐛 render and dispatch `frame` event for first frame when autoplay is false
+- aaa851f: fix: 🐛 ensure animation loop restarts on play after stop
+
 ## 0.8.0
 
 ### Minor Changes
