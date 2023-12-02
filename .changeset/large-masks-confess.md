@@ -2,4 +2,4 @@
 '@lottiefiles/dotlottie-web': minor
 ---
 
-feat(node-support): 🎸 Enable dotLottie animations in non-browser environments
+feat(node-support): 🎸 Enable playing dotLottie animations in non-browser environments
