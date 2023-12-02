@@ -432,8 +432,7 @@ export class DotLottie {
     }
 
     // clamp the current frame within the effective range and round it
-    this._currentFrame =
-      Math.round(Math.max(effectiveStartFrame, Math.min(this._currentFrame, effectiveEndFrame)) * 100) / 100;
+    this._currentFrame = Math.max(effectiveStartFrame, Math.min(this._currentFrame, effectiveEndFrame));
 
     let shouldUpdate = false;
 
