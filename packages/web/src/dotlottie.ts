@@ -34,8 +34,10 @@ export interface Config {
   autoplay?: boolean;
   /**
    * Animation canvas background color.
+   *
+   * Default is transparent.
    */
-  backgroundColor?: string;
+  backgroundColor?: number;
   /**
    * The canvas element to render the animation on.
    */
@@ -126,7 +128,7 @@ export class DotLottie {
 
   private _playbackState: PlaybackState = 'stopped';
 
-  private _backgroundColor = '';
+  private _backgroundColor: number = 0x00000000;
 
   private _renderConfig: RenderConfig = {};
 
@@ -144,14 +146,14 @@ export class DotLottie {
     this._autoplay = config.autoplay ?? false;
     this._mode = config.mode ?? 'forward';
     this._segments = config.segments ?? null;
-    this._backgroundColor = config.backgroundColor ?? '';
+    this._backgroundColor = config.backgroundColor ?? 0x00000000;
     this._renderConfig = config.renderConfig ?? {};
-
-    this.setBackgroundColor(this._backgroundColor);
 
     WasmLoader.load()
       .then((module) => {
         this._renderer = new module.Renderer();
+
+        this.setBackgroundColor(this._backgroundColor);
 
         if (config.src) {
           this._loadAnimationFromURL(config.src);
@@ -183,7 +185,7 @@ export class DotLottie {
    *
    * @returns The background color of the canvas.
    */
-  public get backgroundColor(): string {
+  public get backgroundColor(): number {
     return this._backgroundColor;
   }
 
@@ -745,7 +747,7 @@ export class DotLottie {
     this._beginTime = 0;
     this._totalFrames = 0;
     this._duration = 0;
-    this._backgroundColor = config.backgroundColor ?? '';
+    this._backgroundColor = config.backgroundColor ?? 0x000000ff;
 
     this.setBackgroundColor(this._backgroundColor);
 
@@ -861,13 +863,11 @@ export class DotLottie {
    *
    * @param color - The background color of the canvas.
    */
-  public setBackgroundColor(color: string): void {
+  public setBackgroundColor(color: number): void {
     this._backgroundColor = color;
 
-    if (ENVIRONMENT_IS_WEB) {
-      // eslint-disable-next-line no-warning-comments
-      // TODO: Change the background color from the renderer instead of the canvas to support non web environments
-      this._canvas.style.backgroundColor = color;
+    if (this._renderer) {
+      this._renderer.setBgColor(color);
     }
   }
 

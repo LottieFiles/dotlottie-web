@@ -62,6 +62,18 @@ public:
 
         resize(width, height);
 
+        // create background shape
+        background = Shape::gen();
+        background->appendRect(0, 0, psize[0], psize[1]);
+        uint8_t r = (bgColor >> 24) & 0xFF;
+        uint8_t g = (bgColor >> 16) & 0xFF;
+        uint8_t b = (bgColor >> 8) & 0xFF;
+        uint8_t a = bgColor & 0xFF;
+        background->fill(r, g, b, a);
+        canvas->push(std::move(background));
+
+        printf("color: %d, %d, %d, %d\n", r, g, b, a);
+
         std::unique_ptr<Paint> picturePaint(animation->picture());
 
         if (canvas->push(std::move(picturePaint)) != Result::Success)
@@ -144,8 +156,27 @@ public:
         if (!canvas || !animation)
             return false;
         if (animation->frame(no) == Result::Success)
+        {
+
             updated = true;
-        return true;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    void setBgColor(uint32_t color)
+    {
+        if (!canvas)
+            return;
+
+        if (color == bgColor)
+            return;
+
+        bgColor = color;
+
+        updated = true;
     }
 
     void resize(int width, int height)
@@ -177,6 +208,13 @@ public:
         animation->picture()->scale(scale);
         animation->picture()->translate(shiftX, shiftY);
 
+        if (background)
+        {
+
+            background->reset();
+            background->appendRect(0, 0, psize[0], psize[1]);
+        }
+
         updated = true;
     }
 
@@ -204,9 +242,11 @@ private:
     string errorMsg;
     unique_ptr<SwCanvas> canvas = nullptr;
     unique_ptr<Animation> animation = nullptr;
+    unique_ptr<Shape> background = nullptr;
     uint8_t *buffer = nullptr;
     uint32_t width = 0;
     uint32_t height = 0;
+    uint32_t bgColor = 0x00000000;
     float psize[2]; // picture size
     bool updated = false;
 };
@@ -223,5 +263,6 @@ EMSCRIPTEN_BINDINGS(Renderer)
         .function("size", &Renderer::size)
         .function("duration", &Renderer::duration)
         .function("totalFrames", &Renderer::totalFrames)
-        .function("frame", &Renderer::frame);
+        .function("frame", &Renderer::frame)
+        .function("setBgColor", &Renderer::setBgColor);
 }
