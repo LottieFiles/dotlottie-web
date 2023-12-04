@@ -107,6 +107,9 @@ importers:
         specifier: ^0.6.0
         version: 0.6.0
     devDependencies:
+      '@types/node':
+        specifier: ^20.10.2
+        version: 20.10.2
       cross-env:
         specifier: 7.0.3
         version: 7.0.3

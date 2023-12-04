@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 
 import { AnimationFrameManager } from './animation-frame-manager';
-import { ENVIRONMENT_IS_WEB, MS_TO_SEC_FACTOR } from './constants';
+import { IS_BROWSER, MS_TO_SEC_FACTOR } from './constants';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import type { Renderer } from './renderer-wasm';
@@ -867,7 +867,7 @@ export class DotLottie {
   public setBackgroundColor(color: string): void {
     this._backgroundColor = color;
 
-    if (ENVIRONMENT_IS_WEB) {
+    if (IS_BROWSER) {
       // eslint-disable-next-line no-warning-comments
       // TODO: Change the background color from the renderer instead of the canvas to support non web environments
       this._canvas.style.backgroundColor = color;
@@ -884,7 +884,7 @@ export class DotLottie {
    *
    */
   public resize(): void {
-    if (!ENVIRONMENT_IS_WEB) return;
+    if (!IS_BROWSER) return;
 
     const { height, width } = this._canvas.getBoundingClientRect();
 

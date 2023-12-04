@@ -4,7 +4,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { ENVIRONMENT_IS_WEB } from './constants';
+import { IS_BROWSER } from './constants';
 
 interface AnimationFrameStrategy {
   cancelAnimationFrame(id: number): void;
@@ -22,22 +22,28 @@ class WebAnimationFrameStrategy implements AnimationFrameStrategy {
 }
 
 class NodeAnimationFrameStrategy implements AnimationFrameStrategy {
-  private _lastFrame: number = 0;
+  private _lastHandleId: number = 0;
 
-  private readonly _frameDuration: number = 1000 / 60;
+  private _lastImmediate: NodeJS.Immediate | null = null;
 
   public requestAnimationFrame(callback: (time: number) => void): number {
-    const currentTime = Date.now();
-    const timeToCall = Math.max(0, this._frameDuration - (currentTime - this._lastFrame));
+    if (this._lastHandleId >= Number.MAX_SAFE_INTEGER) {
+      this._lastHandleId = 0;
+    }
 
-    this._lastFrame = currentTime + timeToCall;
+    this._lastHandleId += 1;
 
-    // eslint-disable-next-line node/no-callback-literal
-    return setTimeout(() => callback(currentTime + timeToCall), timeToCall) as unknown as number;
+    this._lastImmediate = setImmediate(() => {
+      callback(Date.now());
+    });
+
+    return this._lastHandleId;
   }
 
-  public cancelAnimationFrame(id: number): void {
-    clearTimeout(id);
+  public cancelAnimationFrame(_id: number): void {
+    if (this._lastImmediate) {
+      clearImmediate(this._lastImmediate);
+    }
   }
 }
 
@@ -45,7 +51,7 @@ export class AnimationFrameManager {
   private readonly _strategy: AnimationFrameStrategy;
 
   public constructor() {
-    this._strategy = ENVIRONMENT_IS_WEB ? new WebAnimationFrameStrategy() : new NodeAnimationFrameStrategy();
+    this._strategy = IS_BROWSER ? new WebAnimationFrameStrategy() : new NodeAnimationFrameStrategy();
   }
 
   public requestAnimationFrame(callback: (time: number) => void): number {
