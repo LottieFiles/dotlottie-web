@@ -63,7 +63,9 @@ public:
         resize(width, height);
 
         // create background shape
-        background = Shape::gen();
+        auto background = Shape::gen();
+        this->background = background.get();
+
         background->appendRect(0, 0, psize[0], psize[1]);
         uint8_t r = (bgColor >> 24) & 0xFF;
         uint8_t g = (bgColor >> 16) & 0xFF;
@@ -210,7 +212,8 @@ public:
         {
 
             background->reset();
-            background->appendRect(0, 0, psize[0], psize[1]);
+            background->appendRect(shiftX, shiftY, psize[0], psize[1]);
+            background->scale(scale);
         }
 
         updated = true;
@@ -240,7 +243,7 @@ private:
     string errorMsg;
     unique_ptr<SwCanvas> canvas = nullptr;
     unique_ptr<Animation> animation = nullptr;
-    unique_ptr<Shape> background = nullptr;
+    Shape *background = nullptr;
     uint8_t *buffer = nullptr;
     uint32_t width = 0;
     uint32_t height = 0;
