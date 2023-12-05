@@ -9,10 +9,11 @@ import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import type { Renderer } from './renderer-wasm';
 import { WasmLoader } from './renderer-wasm';
-import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL } from './utils';
+import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL, hexStringToRGBAInt } from './utils';
 
 const ENVIRONMENT_IS_WEB = typeof window !== 'undefined';
 const MS_TO_SEC_FACTOR = 1000;
+const DEFAULT_BG_COLOR = '#00000000';
 
 export type Mode = 'forward' | 'reverse' | 'bounce' | 'bounce-reverse';
 
@@ -35,9 +36,9 @@ export interface Config {
   /**
    * Animation canvas background color.
    *
-   * Default is transparent.
+   * Default is #00000000.
    */
-  backgroundColor?: number;
+  backgroundColor?: string;
   /**
    * The canvas element to render the animation on.
    */
@@ -128,7 +129,7 @@ export class DotLottie {
 
   private _playbackState: PlaybackState = 'stopped';
 
-  private _backgroundColor: number = 0x00000000;
+  private _backgroundColor: string = DEFAULT_BG_COLOR;
 
   private _renderConfig: RenderConfig = {};
 
@@ -146,7 +147,7 @@ export class DotLottie {
     this._autoplay = config.autoplay ?? false;
     this._mode = config.mode ?? 'forward';
     this._segments = config.segments ?? null;
-    this._backgroundColor = config.backgroundColor ?? 0x00000000;
+    this._backgroundColor = config.backgroundColor ?? DEFAULT_BG_COLOR;
     this._renderConfig = config.renderConfig ?? {};
 
     WasmLoader.load()
@@ -185,7 +186,7 @@ export class DotLottie {
    *
    * @returns The background color of the canvas.
    */
-  public get backgroundColor(): number {
+  public get backgroundColor(): string {
     return this._backgroundColor;
   }
 
@@ -747,7 +748,7 @@ export class DotLottie {
     this._beginTime = 0;
     this._totalFrames = 0;
     this._duration = 0;
-    this._backgroundColor = config.backgroundColor ?? 0x000000ff;
+    this._backgroundColor = config.backgroundColor ?? DEFAULT_BG_COLOR;
 
     this.setBackgroundColor(this._backgroundColor);
 
@@ -863,12 +864,12 @@ export class DotLottie {
    *
    * @param color - The background color of the canvas.
    */
-  public setBackgroundColor(color: number): void {
+  public setBackgroundColor(color: string): void {
     this._backgroundColor = color;
 
-    if (this._renderer) {
-      this._renderer.setBgColor(color);
-    }
+    const rgbaInt = hexStringToRGBAInt(color);
+
+    this._renderer?.setBgColor(rgbaInt);
   }
 
   /**
