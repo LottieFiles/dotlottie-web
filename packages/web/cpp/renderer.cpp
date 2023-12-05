@@ -72,8 +72,6 @@ public:
         background->fill(r, g, b, a);
         canvas->push(std::move(background));
 
-        printf("color: %d, %d, %d, %d\n", r, g, b, a);
-
         std::unique_ptr<Paint> picturePaint(animation->picture());
 
         if (canvas->push(std::move(picturePaint)) != Result::Success)
