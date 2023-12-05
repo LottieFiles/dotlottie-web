@@ -5,15 +5,12 @@
 /* eslint-disable promise/prefer-await-to-then */
 /* eslint-disable @typescript-eslint/unbound-method */
 
+import { ENVIRONMENT_IS_WEB, MS_TO_SEC_FACTOR, DEFAULT_BG_COLOR } from './constants';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import type { Renderer } from './renderer-wasm';
 import { WasmLoader } from './renderer-wasm';
 import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL, hexStringToRGBAInt } from './utils';
-
-const ENVIRONMENT_IS_WEB = typeof window !== 'undefined';
-const MS_TO_SEC_FACTOR = 1000;
-const DEFAULT_BG_COLOR = '#00000000';
 
 export type Mode = 'forward' | 'reverse' | 'bounce' | 'bounce-reverse';
 
