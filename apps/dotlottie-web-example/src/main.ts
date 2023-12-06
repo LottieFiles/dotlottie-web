@@ -126,7 +126,7 @@ fetch('/hamster.lottie')
       mode: 'bounce',
       segments: [10, 90],
       speed: 1,
-      backgroundColor: '#800080',
+      backgroundColor: '#800080ff',
     });
 
     const playPauseButton = document.getElementById('playPause') as HTMLButtonElement;

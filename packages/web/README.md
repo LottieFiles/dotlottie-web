@@ -122,7 +122,7 @@ The `DotLottie` constructor accepts a config object with the following propertie
 | `speed`           | number                |          | 1                     | Animation playback speed. 1 is regular speed.                                                                                          |
 | `data`            | string \| ArrayBuffer |          | undefined             | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations.                                    |
 | `mode`            | string                |          | "forward"             | Animation play mode. Accepts "forward", "reverse", "bounce", "bounce-reverse".                                                         |
-| `backgroundColor` | string                |          | undefined             | Background color of the canvas. e.g., "#000000", "rgba(0, 0, 0, 0.5)" or "transparent".                                                |
+| `backgroundColor` | string                |          | undefined             | Background color of the canvas. Accepts 6-digit or 8-digit hex color string (e.g., "#000000", "#000000FF"),                            |
 | `segments`        | \[number, number]     |          | \[0, totalFrames - 1] | Animation segments. Accepts an array of two numbers, where the first number is the start frame and the second number is the end frame. |
 | `renderConfig`    | RenderConfig          |          | `{}`                  | Configuration for rendering the animation.                                                                                             |
 

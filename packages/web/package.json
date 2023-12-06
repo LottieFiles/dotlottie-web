@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-web",
-  "version": "0.7.0",
+  "version": "0.8.1",
   "type": "module",
   "description": "Lottie and DotLottie player for the web",
   "repository": {
@@ -42,15 +42,21 @@
     "size:why": "size-limit --why --clean-dir --save-bundle ./tmp",
     "stats:eslint": "cross-env TIMING=1 eslint .",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
+    "test": "vitest --watch=false",
+    "test:coverage": "vitest --coverage --watch=false",
+    "test:watch": "vitest --watch",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@dotlottie/dotlottie-js": "^0.6.0"
   },
   "devDependencies": {
+    "@types/node": "^20.10.2",
+    "@vitest/coverage-v8": "^1.0.1",
     "cross-env": "7.0.3",
     "tsup": "7.2.0",
-    "typescript": "5.0.4"
+    "typescript": "5.0.4",
+    "vitest": "^1.0.1"
   },
   "publishConfig": {
     "access": "public"

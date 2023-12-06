@@ -44,17 +44,19 @@ export async function loadAnimationJSONFromURL(animationURL: string): Promise<st
   }
 }
 
-export function debounce<T extends (...args: any[]) => void>(
-  func: T,
-  wait: number,
-): (...funcArgs: Parameters<T>) => void {
-  let timeoutId: number | undefined;
+export function isHexColor(color: string): boolean {
+  return /^#([\da-f]{6}|[\da-f]{8})$/iu.test(color);
+}
 
-  return function debounced(...args: Parameters<T>) {
-    clearTimeout(timeoutId);
+export function hexStringToRGBAInt(colorHex: string): number {
+  if (!isHexColor(colorHex)) {
+    return 0;
+  }
 
-    timeoutId = window.setTimeout(() => {
-      func(...args);
-    }, wait);
-  };
+  let hex = colorHex.replace('#', '');
+
+  // Add alpha if it's not included
+  hex = hex.length === 6 ? `${hex}ff` : hex;
+
+  return parseInt(hex, 16);
 }

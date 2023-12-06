@@ -11,6 +11,16 @@
 
 Streamline your web animations with LottieFiles' official players for dotLottie and Lottie animations. Designed for quick integration, these packages help developers swiftly bring animated visuals into web projects with minimal effort.
 
+<div align="center">
+  <img src="./assets/1.gif" alt="dotLottie web sample 1" />
+
+  <img src="./assets/2.gif" alt="dotLottie web sample 2" />
+
+  <img src="./assets/3.gif" alt="dotLottie web sample 3" />
+
+  <img src="./assets/4.gif" alt="dotLottie web sample 4" />
+</div>
+
 # What is dotLottie?
 
 dotLottie is an open-source file format that aggregates one or more Lottie files and their associated resources into a single file. They are ZIP archives compressed with the Deflate compression method and carry the file extension of ".lottie".
@@ -91,6 +101,7 @@ Discover how to implement and utilize the dotlottie-web packages with our exampl
 Available examples:
 
 * [dotlottie-web-example](apps/dotlottie-web-example/src/main.ts): A basic typescript example app of how to use `@lottiefiles/dotlottie-web` to render a Lottie or dotLottie animation in the browser.
+* [dotlottie-web-node-example](apps/dotlottie-web-node-example/index.ts): This example demonstrates how to use the `@lottiefiles/dotlottie-web` in a Node.js environment. It showcases controlling animation playback, rendering frame by frame, and converting a dotLottie animation into a GIF file. for more information, see the [README](apps/dotlottie-web-node-example/README.md).
 
 #### Running Examples
 
