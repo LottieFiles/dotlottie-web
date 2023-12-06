@@ -88,6 +88,7 @@ dotLottie.addEventListener('load', () => {
 
   gif.setRepeat(args.repeat);
   gif.setFrameRate(args.fps);
+  gif.setTransparent(0x00000000);
   gif.setQuality(qualityMap[args.quality]);
 
   gif.writeHeader();
