@@ -131,6 +131,8 @@ export class DotLottie {
 
   private _renderConfig: RenderConfig = {};
 
+  private _isFrozen = false;
+
   private readonly _animationFrameManager = new AnimationFrameManager();
 
   public constructor(config: Config) {
@@ -273,6 +275,11 @@ export class DotLottie {
   public get isStopped(): boolean {
     return this._playbackState === 'stopped';
   }
+
+  public get isFrozen(): boolean {
+    return this._isFrozen;
+  }
+
   // #endregion Getters and Setters
 
   // #region Private Methods
@@ -585,9 +592,13 @@ export class DotLottie {
 
     if (!this.isPlaying) {
       this._playbackState = 'playing';
+
       this._eventManager.dispatch({
         type: 'play',
       });
+
+      this._isFrozen = false;
+
       this._animationFrameId = this._animationFrameManager.requestAnimationFrame(this._animationLoop);
     }
   }
@@ -739,14 +750,12 @@ export class DotLottie {
     this._direction = this._mode.includes('reverse') ? -1 : 1;
     this._renderConfig = config.renderConfig ?? {};
 
-    // Set the initial frame based on the mode and segments
     const effectiveStartFrame = this._getEffectiveStartFrame();
     const effectiveEndFrame = this._getEffectiveEndFrame();
 
     this._currentFrame =
       this._mode === 'reverse' || this._mode === 'bounce-reverse' ? effectiveEndFrame : effectiveStartFrame;
 
-    // Reset other properties
     this._beginTime = 0;
     this._totalFrames = 0;
     this._duration = 0;
@@ -849,7 +858,15 @@ export class DotLottie {
    *
    */
   public freeze(): void {
+    if (this._isFrozen) return;
+
     this._stopAnimationLoop();
+
+    this._isFrozen = true;
+
+    this._eventManager.dispatch({
+      type: 'freeze',
+    });
   }
 
   /**
@@ -857,8 +874,16 @@ export class DotLottie {
    *
    */
   public unfreeze(): void {
-    this._synchronizeAnimationTiming(this._currentFrame);
-    this._startAnimationLoop();
+    if (!this.isFrozen) return;
+
+    this._isFrozen = false;
+    this._eventManager.dispatch({ type: 'unfreeze' });
+
+    // resume the animation loop only if the playback state is 'playing'
+    if (this.isPlaying) {
+      this._synchronizeAnimationTiming(this._currentFrame);
+      this._startAnimationLoop();
+    }
   }
 
   /**

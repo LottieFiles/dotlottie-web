@@ -35,6 +35,10 @@ app.innerHTML = `
 <div class="container">
   <canvas id="canvas"></canvas>
   <div class="control-panel">
+    <div class="status-panel">
+      <div id="playbackStatus">Playback State: <span id="playback-state">Stopped</span></div>
+      <div id="freezeStatus">Is Frozen: <span id="is-frozen">No</span></div>
+    </div>
     <div>
       <button id="playPause" class="control-button">Play</button>
       <button id="stop" class="control-button">Stop</button>
@@ -141,6 +145,8 @@ fetch('/hamster.lottie')
     const setSegmentsButton = document.getElementById('setSegments') as HTMLButtonElement;
     const freezeButton = document.getElementById('freeze') as HTMLButtonElement;
     const unfreezeButton = document.getElementById('unfreeze') as HTMLButtonElement;
+    const freezeStateSpan = document.getElementById('is-frozen') as HTMLSpanElement;
+    const playbackStateSpan = document.getElementById('playback-state') as HTMLSpanElement;
 
     freezeButton.addEventListener('click', () => {
       dotLottie.freeze();
@@ -247,11 +253,15 @@ fetch('/hamster.lottie')
       console.log(event);
       frameSlider.max = dotLottie.totalFrames.toString();
       playPauseButton.innerText = 'Pause';
+
+      playbackStateSpan.textContent = `▶️ Playing`;
     });
 
     dotLottie.addEventListener('pause', (event) => {
       console.log(event);
       playPauseButton.innerText = 'Play';
+
+      playbackStateSpan.textContent = `⏸ Paused`;
     });
 
     dotLottie.addEventListener('frame', (event) => {
@@ -276,10 +286,24 @@ fetch('/hamster.lottie')
       console.log(event);
 
       playPauseButton.innerText = 'Play';
+
+      playbackStateSpan.textContent = `⏹ Stopped`;
     });
 
     dotLottie.addEventListener('destroy', (event) => {
       console.log(event);
+    });
+
+    dotLottie.addEventListener('freeze', (event) => {
+      console.log(event);
+
+      freezeStateSpan.textContent = dotLottie.isFrozen ? `✅` : `❌`;
+    });
+
+    dotLottie.addEventListener('unfreeze', (event) => {
+      console.log(event);
+
+      freezeStateSpan.textContent = dotLottie.isFrozen ? `✅` : `❌`;
     });
   })
   .catch((error) => {
