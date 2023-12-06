@@ -51,6 +51,7 @@
     "@dotlottie/dotlottie-js": "^0.6.0"
   },
   "devDependencies": {
+    "@types/node": "^20.10.2",
     "@vitest/coverage-v8": "^1.0.1",
     "cross-env": "7.0.3",
     "tsup": "7.2.0",

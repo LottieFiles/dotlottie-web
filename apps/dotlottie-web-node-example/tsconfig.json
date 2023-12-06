@@ -1,0 +1,12 @@
+{
+  // Extend from the build config
+  "extends": "../../tsconfig.build.json",
+
+  // Compiler options
+  "compilerOptions": {
+    // Source root directory
+    "rootDir": ".",
+
+    "resolveJsonModule": true
+  }
+}

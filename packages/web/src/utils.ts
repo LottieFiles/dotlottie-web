@@ -44,21 +44,6 @@ export async function loadAnimationJSONFromURL(animationURL: string): Promise<st
   }
 }
 
-export function debounce<T extends (...args: any[]) => void>(
-  func: T,
-  wait: number,
-): (...funcArgs: Parameters<T>) => void {
-  let timeoutId: number | undefined;
-
-  return function debounced(...args: Parameters<T>) {
-    clearTimeout(timeoutId);
-
-    timeoutId = window.setTimeout(() => {
-      func(...args);
-    }, wait);
-  };
-}
-
 export function isHexColor(color: string): boolean {
   return /^#([\da-f]{6}|[\da-f]{8})$/iu.test(color);
 }
