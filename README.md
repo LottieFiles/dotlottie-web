@@ -11,7 +11,15 @@
 
 Streamline your web animations with LottieFiles' official players for dotLottie and Lottie animations. Designed for quick integration, these packages help developers swiftly bring animated visuals into web projects with minimal effort.
 
-![Demo gif](./demo.gif)
+<div align="center">
+  <img src="./apps/dotlottie-web-node-example/samples/1.gif" />
+
+  <img src="./apps/dotlottie-web-node-example/samples/2.gif" />
+
+  <img src="./apps/dotlottie-web-node-example/samples/3.gif" />
+
+  <img src="./apps/dotlottie-web-node-example/samples/4.gif" />
+</div>
 
 # What is dotLottie?
 
