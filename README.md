@@ -12,13 +12,13 @@
 Streamline your web animations with LottieFiles' official players for dotLottie and Lottie animations. Designed for quick integration, these packages help developers swiftly bring animated visuals into web projects with minimal effort.
 
 <div align="center">
-  <img src="./assets/1.gif" />
+  <img src="./assets/1.gif" alt="dotLottie web sample 1" />
 
-  <img src="./assets/2.gif" />
+  <img src="./assets/2.gif" alt="dotLottie web sample 2" />
 
-  <img src="./assets/3.gif" />
+  <img src="./assets/3.gif" alt="dotLottie web sample 3" />
 
-  <img src="./assets/4.gif" />
+  <img src="./assets/4.gif" alt="dotLottie web sample 4" />
 </div>
 
 # What is dotLottie?
