@@ -90,10 +90,16 @@ importers:
       gif-encoder:
         specifier: ^0.7.2
         version: 0.7.2
+      minimist:
+        specifier: ^1.2.8
+        version: 1.2.8
     devDependencies:
       '@types/gif-encoder':
         specifier: ^0.7.4
         version: 0.7.4
+      '@types/minimist':
+        specifier: ^1.2.5
+        version: 1.2.5
       '@types/node':
         specifier: ^20.10.2
         version: 20.10.2
@@ -2131,6 +2137,10 @@ packages:
 
   /@types/minimist@1.2.4:
     resolution: {integrity: sha512-Kfe/D3hxHTusnPNRbycJE1N77WHDsdS4AjUYIzlDzhDrS47NrwuL3YW4VITxwR7KCVpzwgy4Rbj829KSSQmwXQ==}
+    dev: true
+
+  /@types/minimist@1.2.5:
+    resolution: {integrity: sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==}
     dev: true
 
   /@types/ms@0.7.33:

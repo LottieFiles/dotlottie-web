@@ -6,3 +6,4 @@
 *.json linguist-language=JSON-with-Comments
 
 *.wasm binary
+*.gif binary
