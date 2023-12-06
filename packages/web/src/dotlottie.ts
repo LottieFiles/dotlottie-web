@@ -5,14 +5,13 @@
 /* eslint-disable promise/prefer-await-to-then */
 /* eslint-disable @typescript-eslint/unbound-method */
 
+import { AnimationFrameManager } from './animation-frame-manager';
+import { IS_BROWSER, MS_TO_SEC_FACTOR } from './constants';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import type { Renderer } from './renderer-wasm';
 import { WasmLoader } from './renderer-wasm';
 import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL } from './utils';
-
-const ENVIRONMENT_IS_WEB = typeof window !== 'undefined';
-const MS_TO_SEC_FACTOR = 1000;
 
 export type Mode = 'forward' | 'reverse' | 'bounce' | 'bounce-reverse';
 
@@ -129,6 +128,8 @@ export class DotLottie {
   private _backgroundColor = '';
 
   private _renderConfig: RenderConfig = {};
+
+  private readonly _animationFrameManager = new AnimationFrameManager();
 
   public constructor(config: Config) {
     this._animationLoop = this._animationLoop.bind(this);
@@ -381,7 +382,10 @@ export class DotLottie {
       }
 
       const clampedBuffer = new Uint8ClampedArray(buffer);
-      const imageData = new ImageData(clampedBuffer, this._canvas.width, this._canvas.height);
+
+      const imageData = this._context.createImageData(width, height);
+
+      imageData.data.set(clampedBuffer);
 
       this._context.putImageData(imageData, 0, 0);
     }
@@ -428,8 +432,7 @@ export class DotLottie {
     }
 
     // clamp the current frame within the effective range and round it
-    this._currentFrame =
-      Math.round(Math.max(effectiveStartFrame, Math.min(this._currentFrame, effectiveEndFrame)) * 100) / 100;
+    this._currentFrame = Math.max(effectiveStartFrame, Math.min(this._currentFrame, effectiveEndFrame));
 
     let shouldUpdate = false;
 
@@ -479,7 +482,7 @@ export class DotLottie {
     if (this.isPlaying && this._update()) {
       this._render();
 
-      this._animationFrameId = window.requestAnimationFrame(this._animationLoop);
+      this._animationFrameId = this._animationFrameManager.requestAnimationFrame(this._animationLoop);
     }
   }
 
@@ -490,7 +493,7 @@ export class DotLottie {
    */
   private _stopAnimationLoop(): void {
     if (this._animationFrameId) {
-      window.cancelAnimationFrame(this._animationFrameId);
+      this._animationFrameManager.cancelAnimationFrame(this._animationFrameId);
       this._animationFrameId = null;
     }
   }
@@ -502,7 +505,7 @@ export class DotLottie {
    */
   private _startAnimationLoop(): void {
     if (!this._animationFrameId) {
-      this._animationFrameId = window.requestAnimationFrame(this._animationLoop);
+      this._animationFrameId = this._animationFrameManager.requestAnimationFrame(this._animationLoop);
     }
   }
 
@@ -583,7 +586,7 @@ export class DotLottie {
       this._eventManager.dispatch({
         type: 'play',
       });
-      this._animationFrameId = window.requestAnimationFrame(this._animationLoop);
+      this._animationFrameId = this._animationFrameManager.requestAnimationFrame(this._animationLoop);
     }
   }
 
@@ -864,7 +867,7 @@ export class DotLottie {
   public setBackgroundColor(color: string): void {
     this._backgroundColor = color;
 
-    if (ENVIRONMENT_IS_WEB) {
+    if (IS_BROWSER) {
       // eslint-disable-next-line no-warning-comments
       // TODO: Change the background color from the renderer instead of the canvas to support non web environments
       this._canvas.style.backgroundColor = color;
@@ -881,7 +884,7 @@ export class DotLottie {
    *
    */
   public resize(): void {
-    if (!ENVIRONMENT_IS_WEB) return;
+    if (!IS_BROWSER) return;
 
     const { height, width } = this._canvas.getBoundingClientRect();
 

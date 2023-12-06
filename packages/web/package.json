@@ -48,6 +48,7 @@
     "@dotlottie/dotlottie-js": "^0.6.0"
   },
   "devDependencies": {
+    "@types/node": "^20.10.2",
     "cross-env": "7.0.3",
     "tsup": "7.2.0",
     "typescript": "5.0.4"

@@ -10,7 +10,7 @@ const { defineConfig } = require('tsup');
 module.exports = defineConfig((options) => ({
   bundle: true,
   metafile: false,
-  splitting: true,
+  splitting: false,
   treeshake: true,
   clean: true,
   dts: true,
@@ -18,8 +18,8 @@ module.exports = defineConfig((options) => ({
   sourcemap: true,
   entry: ['./src/*.ts'],
   format: ['esm'],
-  platform: 'browser',
-  target: ['es2020'],
+  platform: 'neutral',
+  target: ['es2020', 'node18'],
   tsconfig: 'tsconfig.build.json',
   onSuccess: () => {
     fs.copyFileSync(
