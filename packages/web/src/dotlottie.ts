@@ -6,12 +6,12 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 
 import { AnimationFrameManager } from './animation-frame-manager';
-import { IS_BROWSER, MS_TO_SEC_FACTOR } from './constants';
+import { IS_BROWSER, MS_TO_SEC_FACTOR, DEFAULT_BG_COLOR } from './constants';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import type { Renderer } from './renderer-wasm';
 import { WasmLoader } from './renderer-wasm';
-import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL } from './utils';
+import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL, hexStringToRGBAInt } from './utils';
 
 export type Mode = 'forward' | 'reverse' | 'bounce' | 'bounce-reverse';
 
@@ -33,6 +33,8 @@ export interface Config {
   autoplay?: boolean;
   /**
    * Animation canvas background color.
+   *
+   * Default is #00000000.
    */
   backgroundColor?: string;
   /**
@@ -125,7 +127,7 @@ export class DotLottie {
 
   private _playbackState: PlaybackState = 'stopped';
 
-  private _backgroundColor = '';
+  private _backgroundColor: string = DEFAULT_BG_COLOR;
 
   private _renderConfig: RenderConfig = {};
 
@@ -145,14 +147,14 @@ export class DotLottie {
     this._autoplay = config.autoplay ?? false;
     this._mode = config.mode ?? 'forward';
     this._segments = config.segments ?? null;
-    this._backgroundColor = config.backgroundColor ?? '';
+    this._backgroundColor = config.backgroundColor ?? DEFAULT_BG_COLOR;
     this._renderConfig = config.renderConfig ?? {};
-
-    this.setBackgroundColor(this._backgroundColor);
 
     WasmLoader.load()
       .then((module) => {
         this._renderer = new module.Renderer();
+
+        this.setBackgroundColor(this._backgroundColor);
 
         if (config.src) {
           this._loadAnimationFromURL(config.src);
@@ -748,7 +750,7 @@ export class DotLottie {
     this._beginTime = 0;
     this._totalFrames = 0;
     this._duration = 0;
-    this._backgroundColor = config.backgroundColor ?? '';
+    this._backgroundColor = config.backgroundColor ?? DEFAULT_BG_COLOR;
 
     this.setBackgroundColor(this._backgroundColor);
 
@@ -867,11 +869,9 @@ export class DotLottie {
   public setBackgroundColor(color: string): void {
     this._backgroundColor = color;
 
-    if (IS_BROWSER) {
-      // eslint-disable-next-line no-warning-comments
-      // TODO: Change the background color from the renderer instead of the canvas to support non web environments
-      this._canvas.style.backgroundColor = color;
-    }
+    const rgbaInt = hexStringToRGBAInt(color);
+
+    this._renderer?.setBgColor(rgbaInt);
   }
 
   /**
