@@ -76,8 +76,8 @@ importers:
         specifier: 5.0.4
         version: 5.0.4
       vite:
-        specifier: ^4.4.5
-        version: 4.5.0(@types/node@20.5.1)
+        specifier: ^4.5.1
+        version: 4.5.1(@types/node@20.5.1)
 
   apps/dotlottie-web-node-example:
     dependencies:
@@ -5622,7 +5622,7 @@ packages:
       '@sitespeed.io/tracium': 0.3.3
       commander: 9.5.0
       find-chrome-bin: 0.1.0
-      nanoid: 3.3.6
+      nanoid: 3.3.7
       puppeteer-core: 13.7.0
     transitivePeerDependencies:
       - bufferutil
@@ -8677,12 +8677,6 @@ packages:
       thenify-all: 1.6.0
     dev: true
 
-  /nanoid@3.3.6:
-    resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}
-    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
-    hasBin: true
-    dev: true
-
   /nanoid@3.3.7:
     resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -9409,15 +9403,6 @@ packages:
       lilconfig: 2.1.0
       ts-node: 10.9.1(@types/node@20.5.1)(typescript@5.0.4)
       yaml: 2.3.3
-    dev: true
-
-  /postcss@8.4.31:
-    resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
-    engines: {node: ^10 || ^12 || >=14}
-    dependencies:
-      nanoid: 3.3.6
-      picocolors: 1.0.0
-      source-map-js: 1.0.2
     dev: true
 
   /postcss@8.4.32:
@@ -10391,7 +10376,7 @@ packages:
       '@types/mdast': 3.0.11
       import-meta-resolve: 1.1.1
       mdast-util-heading-range: 3.1.0
-      nanoid: 3.3.6
+      nanoid: 3.3.7
       remark-parse: 10.0.2
       to-vfile: 7.2.4
       trough: 2.1.0
@@ -12443,8 +12428,8 @@ packages:
       - terser
     dev: true
 
-  /vite@4.5.0(@types/node@20.5.1):
-    resolution: {integrity: sha512-ulr8rNLA6rkyFAlVWw2q5YJ91v098AFQ2R0PRFwPzREXOUJQPtFUG0t+/ZikhaOCDqFoDhN6/v8Sq0o4araFAw==}
+  /vite@4.5.1(@types/node@20.5.1):
+    resolution: {integrity: sha512-AXXFaAJ8yebyqzoNB9fu2pHoo/nWX+xZlaRwoeYUxEqBO+Zj4msE5G+BhGBll9lYEKv9Hfks52PAF2X7qDYXQA==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
     peerDependencies:
@@ -12473,7 +12458,7 @@ packages:
     dependencies:
       '@types/node': 20.5.1
       esbuild: 0.18.20
-      postcss: 8.4.31
+      postcss: 8.4.32
       rollup: 3.29.4
     optionalDependencies:
       fsevents: 2.3.3
