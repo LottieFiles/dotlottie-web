@@ -9,8 +9,8 @@ export default defineConfig({
     browser: {
       enabled: true,
       headless: true,
-      name: 'chromium',
-      provider: 'playwright',
+      name: 'chrome',
+      provider: 'webdriverio',
     },
     coverage: {
       provider: 'istanbul',
