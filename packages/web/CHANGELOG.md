@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.9.2
+
+### Patch Changes
+
+- 5d4cf24: fix: 🐛 correct regression in animation play check before frame request
+
 ## 0.9.1
 
 ### Patch Changes
