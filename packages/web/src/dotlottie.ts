@@ -494,7 +494,10 @@ export class DotLottie {
       this._render();
     }
 
-    this._animationFrameId = this._animationFrameManager.requestAnimationFrame(this._animationLoop);
+    // check if the animation is still playing before requesting the next frame
+    if (this.isPlaying) {
+      this._animationFrameId = this._animationFrameManager.requestAnimationFrame(this._animationLoop);
+    }
   }
 
   /**
