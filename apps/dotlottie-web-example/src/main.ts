@@ -280,6 +280,8 @@ fetch('/hamster.lottie')
       console.log(event);
 
       playPauseButton.innerText = 'Play';
+
+      playbackStateSpan.textContent = `⏹ Stopped`;
     });
 
     dotLottie.addEventListener('stop', (event) => {
