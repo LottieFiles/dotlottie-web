@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-web
 
+## 0.9.0
+
+### Minor Changes
+
+- 6bc0f68: feat: 🎸 add `freeze` & `unfreeze` events & `isFrozen` property
+- 7bad1ec: feat(node-support): 🎸 Enable playing dotLottie animations in non-browser environments
+- c9ba3a7: feat: 🎸 make background color independent of platform
+
 ## 0.8.1
 
 ### Patch Changes
