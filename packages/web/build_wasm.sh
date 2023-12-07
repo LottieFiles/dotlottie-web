@@ -3,7 +3,7 @@
 # Store positional arguments in descriptive variables for clarity
 SCRIPT_NAME="$0"
 EMSDK_PATH="$1"
-THORVG_TAG_OR_BRANCH="${2:-tags/v0.11.4}"
+THORVG_TAG_OR_BRANCH="${2:-tags/v0.11.5}"
 
 # Ensure we always execute from the directory the script resides in
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -64,9 +64,9 @@ git fetch origin
 git checkout "$THORVG_TAG_OR_BRANCH"
 check_command_success "Error switching to the desired tag/branch: $THORVG_TAG_OR_BRANCH"
 
-# Run the wasm build script with the provided EMSDK path
-./wasm_build.sh "$EMSDK_PATH"
-check_command_success "Error running wasm_build.sh"
+sed "s|EMSDK:|$EMSDK_PATH|g" wasm_cross.txt > /tmp/.wasm_cross.txt
+meson -Db_lto=true -Ddefault_library=static -Dstatic=true -Dloaders="lottie, png, jpg" --cross-file /tmp/.wasm_cross.txt build_wasm
+ninja -C build_wasm/
 
 # Change back to the parent directory
 cd "$DIR"
@@ -82,9 +82,9 @@ TMPFILE=$(mktemp /tmp/wasm_cross.XXXXXX)
 # Ensure the temp file is always cleaned up on exit
 trap 'rm -f "$TMPFILE"' EXIT
 
-# Substitute the EMSDK path in the wasm_x86_i686.txt file and save to the temporary file
-sed "s|EMSDK:|$EMSDK_PATH|g" "$DIR/wasm_x86_i686.txt" > "$TMPFILE"
-check_command_success "Error substituting EMSDK path in wasm_x86_i686.txt"
+# Substitute the EMSDK path in the wasm_cross.txt file and save to the temporary file
+sed "s|EMSDK:|$EMSDK_PATH|g" "$DIR/wasm_cross.txt" > "$TMPFILE"
+check_command_success "Error substituting EMSDK path in wasm_cross.txt"
 
 # Setup meson build with the cross file
 meson --cross-file "$TMPFILE" src/renderer-wasm/bin

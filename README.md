@@ -1,6 +1,6 @@
 ![CI](https://github.com/LottieFiles/dotlottie-web/workflows/main/badge.svg)
 ![GitHub contributors](https://img.shields.io/github/contributors/LottieFiles/dotlottie-web)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 ![GitHub](https://img.shields.io/github/license/LottieFiles/dotlottie-web)
 
 <p align="center">
@@ -10,6 +10,16 @@
 <h1 align="center">dotLottie Web</h1>
 
 Streamline your web animations with LottieFiles' official players for dotLottie and Lottie animations. Designed for quick integration, these packages help developers swiftly bring animated visuals into web projects with minimal effort.
+
+<div align="center">
+  <img src="./assets/1.gif" alt="dotLottie web sample 1" />
+
+  <img src="./assets/2.gif" alt="dotLottie web sample 2" />
+
+  <img src="./assets/3.gif" alt="dotLottie web sample 3" />
+
+  <img src="./assets/4.gif" alt="dotLottie web sample 4" />
+</div>
 
 # What is dotLottie?
 
@@ -24,8 +34,8 @@ dotLottie is an open-source file format that aggregates one or more Lottie files
 * [Getting Started](#getting-started)
   * [Prerequisites](#prerequisites)
   * [Setup](#setup)
-* [Local Examples](#local-examples)
 * [Live Examples](#live-examples)
+* [Local Examples](#local-examples)
 * [Development](#development)
   * [Building Packages](#building-packages)
   * [Running Locally](#running-locally)
@@ -77,6 +87,13 @@ Install dependencies:
 pnpm install
 ```
 
+### Live Examples
+
+* `@lottiefiles/dotlottie-web`
+  * <a href="https://codesandbox.io/s/lottiefiles-dotlottie-web-basic-example-tcy3rv?autoresize=1&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Basic Example</a>
+  * <a href="https://codesandbox.io/p/sandbox/lottiefiles-dotlottie-web-basic-example-forked-4v3t9y?autoresize=1&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Controlling Animation Playback Example</a>
+  * <a href="https://codesandbox.io/s/lottiefiles-dotlottie-web-dynamic-animation-loading-example-q7dgvr?autoresize=1&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Dynamic Animation Loading Example</a>
+
 ### Local Examples
 
 Discover how to implement and utilize the dotlottie-web packages with our example applications. These examples serve as a practical guide to help you understand how to integrate Lottie and dotLottie animations into your web projects.
@@ -84,6 +101,7 @@ Discover how to implement and utilize the dotlottie-web packages with our exampl
 Available examples:
 
 * [dotlottie-web-example](apps/dotlottie-web-example/src/main.ts): A basic typescript example app of how to use `@lottiefiles/dotlottie-web` to render a Lottie or dotLottie animation in the browser.
+* [dotlottie-web-node-example](apps/dotlottie-web-node-example/index.ts): This example demonstrates how to use the `@lottiefiles/dotlottie-web` in a Node.js environment. It showcases controlling animation playback, rendering frame by frame, and converting a dotLottie animation into a GIF file. for more information, see the [README](apps/dotlottie-web-node-example/README.md).
 
 #### Running Examples
 
@@ -115,10 +133,6 @@ pnpm run dev
 ```
 
 Feel free to modify and play around with the code to see how changes affect the animations.
-
-### Live Examples
-
-* [@lottiefiles/dotlottie-web](packages/web/README.md#live-example)
 
 ### Development
 

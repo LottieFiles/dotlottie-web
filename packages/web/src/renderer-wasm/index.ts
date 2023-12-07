@@ -13,6 +13,7 @@ export interface Renderer {
   load(data: string, width: number, height: number): boolean;
   render(): Uint8Array;
   resize(width: number, height: number): void;
+  setBgColor(color: number): void;
   size(): Float32Array;
   totalFrames(): number;
   update(): boolean;

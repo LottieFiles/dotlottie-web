@@ -11,10 +11,14 @@ canvas {
   border: 2px solid #333;
   margin-bottom: 20px;
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%; /* Full width of the container */
+  max-width: 500px;
+  aspect-ratio: 1/1;
 }
 
 .grid {
   display: grid;
+  grid-template-rows: repeat(1, 1fr);
   grid-template-columns: repeat(6, 1fr);
   gap: 10px;
 }
@@ -55,4 +59,28 @@ canvas {
 .speed-slider {
   width: 200px;
   cursor: pointer;
+}
+
+.segments-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin: 20px 0;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.segments-control label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.segments-control input[type='number'] {
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 60px;
+  margin: 0 10px;
 }
