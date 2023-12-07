@@ -52,8 +52,10 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.2",
-    "@vitest/coverage-v8": "^1.0.1",
+    "@vitest/browser": "^1.0.2",
+    "@vitest/coverage-istanbul": "^1.0.2",
     "cross-env": "7.0.3",
+    "playwright": "^1.40.1",
     "tsup": "7.2.0",
     "typescript": "5.0.4",
     "vitest": "^1.0.1"
