@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.9.1
+
+### Patch Changes
+
+- b6eb1f2: fix: 🐛 unfreeze on play
+
 ## 0.9.0
 
 ### Minor Changes
