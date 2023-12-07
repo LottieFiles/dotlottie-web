@@ -488,11 +488,13 @@ export class DotLottie {
    * Loop that handles the animation playback.
    */
   private _animationLoop(): void {
-    if (this.isPlaying && this._update()) {
-      this._render();
+    const updated = this._update();
 
-      this._animationFrameId = this._animationFrameManager.requestAnimationFrame(this._animationLoop);
+    if (updated) {
+      this._render();
     }
+
+    this._animationFrameId = this._animationFrameManager.requestAnimationFrame(this._animationLoop);
   }
 
   /**
@@ -593,11 +595,16 @@ export class DotLottie {
     if (!this.isPlaying) {
       this._playbackState = 'playing';
 
+      // auto unfreeze if the animation on play
+      if (this._isFrozen) {
+        this._isFrozen = false;
+
+        this._eventManager.dispatch({ type: 'unfreeze' });
+      }
+
       this._eventManager.dispatch({
         type: 'play',
       });
-
-      this._isFrozen = false;
 
       this._animationFrameId = this._animationFrameManager.requestAnimationFrame(this._animationLoop);
     }
