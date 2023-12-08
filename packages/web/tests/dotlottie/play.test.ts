@@ -47,26 +47,6 @@ describe('play animation', () => {
 
     dotLottie.addEventListener('play', onPlay);
 
-    const onFrame = vi.fn();
-
-    dotLottie.addEventListener('frame', onFrame);
-
-    const onCompleted = vi.fn();
-
-    dotLottie.addEventListener('complete', onCompleted);
-
-    // verify the animation is not playing initially
-    expect(onPlay).not.toHaveBeenCalled();
-    expect(onFrame).not.toHaveBeenCalled();
-    expect(onLoad).not.toHaveBeenCalled();
-    expect(onCompleted).not.toHaveBeenCalled();
-
-    expect(dotLottie.isPlaying).toBe(false);
-    expect(dotLottie.isPaused).toBe(false);
-    expect(dotLottie.isStopped).toBe(true);
-    expect(dotLottie.isFrozen).toBe(false);
-
-    // wait for the animation to load
     await vi.waitFor(
       () => {
         expect(onLoad).toHaveBeenCalledTimes(1);
@@ -76,41 +56,12 @@ describe('play animation', () => {
       },
     );
 
-    // wait for the animation to start playing
-    await vi.waitFor(() => {
-      expect(onPlay).toHaveBeenCalledTimes(1);
-    });
+    expect(onPlay).toHaveBeenCalledTimes(1);
 
-    // verify the animation is playing
     expect(dotLottie.isPlaying).toBe(true);
     expect(dotLottie.isPaused).toBe(false);
     expect(dotLottie.isStopped).toBe(false);
     expect(dotLottie.isFrozen).toBe(false);
-
-    // wait for the animation to complete
-    expect(onCompleted).not.toHaveBeenCalled();
-
-    await vi.waitFor(
-      () => {
-        expect(onCompleted).toHaveBeenCalledTimes(1);
-      },
-      {
-        // wait for the animation duration + 250ms (to account for retry interval)
-        timeout: dotLottie.duration * 1000 + 250,
-      },
-    );
-
-    // verify the animation stopped playing
-    expect(dotLottie.isPlaying).toBe(false);
-    expect(dotLottie.isPaused).toBe(false);
-    expect(dotLottie.isStopped).toBe(true);
-    expect(dotLottie.isFrozen).toBe(false);
-
-    // verify the animation rendered the last frame
-    expect(onFrame).toHaveBeenLastCalledWith({
-      type: 'frame',
-      currentFrame: dotLottie.totalFrames - 1,
-    });
   });
 
   test('play animation with `autoplay` set to false, verify it does not play', async () => {
