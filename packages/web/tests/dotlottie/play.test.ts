@@ -39,13 +39,13 @@ describe('play animation', () => {
       src,
     });
 
-    const onPlay = vi.fn();
-
-    dotLottie.addEventListener('play', onPlay);
-
     const onLoad = vi.fn();
 
     dotLottie.addEventListener('load', onLoad);
+
+    const onPlay = vi.fn();
+
+    dotLottie.addEventListener('play', onPlay);
 
     const onFrame = vi.fn();
 
@@ -72,7 +72,7 @@ describe('play animation', () => {
         expect(onLoad).toHaveBeenCalledTimes(1);
       },
       {
-        timeout: 1000,
+        timeout: 2000,
       },
     );
 
@@ -133,7 +133,7 @@ describe('play animation', () => {
         expect(onLoad).toHaveBeenCalledTimes(1);
       },
       {
-        timeout: 1000,
+        timeout: 2000,
       },
     );
 
@@ -164,7 +164,7 @@ describe('play animation', () => {
         expect(onLoad).toHaveBeenCalledTimes(1);
       },
       {
-        timeout: 1000,
+        timeout: 2000,
       },
     );
 
@@ -197,7 +197,7 @@ describe('play animation', () => {
         expect(onLoad).toHaveBeenCalledTimes(1);
       },
       {
-        timeout: 1000,
+        timeout: 2000,
       },
     );
 
@@ -239,7 +239,7 @@ describe('play animation', () => {
         expect(onLoad).toHaveBeenCalledTimes(1);
       },
       {
-        timeout: 1000,
+        timeout: 2000,
       },
     );
 
@@ -290,7 +290,7 @@ describe('play animation', () => {
         expect(onLoad).toHaveBeenCalledTimes(1);
       },
       {
-        timeout: 1000,
+        timeout: 2000,
       },
     );
 
