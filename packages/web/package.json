@@ -42,9 +42,9 @@
     "size:why": "size-limit --why --clean-dir --save-bundle ./tmp",
     "stats:eslint": "cross-env TIMING=1 eslint .",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
-    "test": "vitest --watch=false",
-    "test:coverage": "vitest --coverage --watch=false",
-    "test:watch": "vitest --watch",
+    "test": "vitest run --browser.headless",
+    "test:coverage": "vitest run --browser.headless --coverage",
+    "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

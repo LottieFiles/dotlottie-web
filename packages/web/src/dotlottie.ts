@@ -174,6 +174,10 @@ export class DotLottie {
 
   // #region Getters and Setters
 
+  public get mode(): Mode {
+    return this._mode;
+  }
+
   /**
    * Gets the autoplay status of the animation.
    *
