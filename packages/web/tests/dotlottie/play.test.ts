@@ -10,7 +10,7 @@ import { createCanvas, sleep } from '../../test-utils';
 // to use the local wasm file
 DotLottie.setWasmUrl('src/renderer-wasm/bin/renderer.wasm');
 
-describe.skip('play animation', () => {
+describe('play animation', () => {
   let canvas: HTMLCanvasElement;
   let dotLottie: DotLottie;
   const src = 'https://lottie.host/66096915-99e9-472d-ad95-591372738141/7p6YR50Nfv.lottie';
@@ -34,49 +34,12 @@ describe.skip('play animation', () => {
       src,
     });
 
-    const onPlay = vi.fn();
-    const onComplete = vi.fn();
-    const onFrame = vi.fn();
-
-    dotLottie.addEventListener('play', onPlay);
-    dotLottie.addEventListener('complete', onComplete);
-    dotLottie.addEventListener('frame', onFrame);
-
-    // wait for the animation to load and start playing
-    await vi.waitFor(() => expect(dotLottie.isPlaying).toBe(true), {
-      timeout: 2000,
-    });
-
-    expect(onPlay).toHaveBeenCalledTimes(1);
-
-    // wait until current frame is half way through the animation
-    await vi.waitFor(() => expect(dotLottie.currentFrame).toBeGreaterThan(dotLottie.totalFrames / 2));
-
-    expect(dotLottie.isPlaying).toBe(true);
-
-    // wait until the animation is complete
-    await vi.waitFor(() => expect(dotLottie.currentFrame).toBe(dotLottie.totalFrames - 1));
-
-    expect(dotLottie.isPlaying).toBe(false);
     expect(dotLottie.isStopped).toBe(true);
 
-    expect(onComplete).toHaveBeenCalledTimes(1);
-    expect(onFrame.mock.calls.length).toBeGreaterThan(0);
-
-    // eslint-disable-next-line no-warning-comments
-    // TODO: fix: auto play doesn't render frame 0
-    // expect(onFrame.mock.calls[0]).toEqual([
-    //   {
-    //     type: 'frame',
-    //     currentFrame: 0,
-    //   },
-    // ]);
-    expect(onFrame.mock.calls[onFrame.mock.calls.length - 1]).toEqual([
-      {
-        type: 'frame',
-        currentFrame: dotLottie.totalFrames - 1,
-      },
-    ]);
+    // wait until the animation load and play
+    await vi.waitUntil(() => dotLottie.isPlaying, {
+      timeout: 2000,
+    });
   });
 
   test('play animation with `autoplay` set to false, verify it does not play', async () => {

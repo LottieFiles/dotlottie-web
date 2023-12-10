@@ -6,8 +6,6 @@ import path from 'node:path';
 
 import { defineConfig } from 'vitest/config';
 
-console.log(path.resolve(__dirname, 'setup-files.ts'));
-
 export default defineConfig({
   test: {
     browser: {
@@ -16,6 +14,7 @@ export default defineConfig({
     },
     coverage: {
       provider: 'istanbul',
+      reportsDirectory: '.nyc_output',
     },
     testTimeout: 10000,
     cache: false,

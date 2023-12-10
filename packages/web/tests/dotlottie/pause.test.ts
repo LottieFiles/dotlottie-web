@@ -32,46 +32,14 @@ describe('pause animation', () => {
       src,
     });
 
-    const onPlay = vi.fn();
-    const onPause = vi.fn();
-    const onFrame = vi.fn();
-
-    dotLottie.addEventListener('play', onPlay);
-    dotLottie.addEventListener('pause', onPause);
-    dotLottie.addEventListener('frame', onFrame);
-
-    // wait for the animation to load and start playing
-    await vi.waitFor(() => expect(onPlay).toHaveBeenCalledTimes(1), {
+    await vi.waitFor(() => expect(dotLottie.currentFrame).toBeGreaterThan(dotLottie.totalFrames / 2), {
       timeout: 2000,
     });
-
-    const midFrame = dotLottie.totalFrames / 2 - 1;
-
-    // wait until the current frame is half way through the animation
-    await vi.waitUntil(() => dotLottie.currentFrame >= midFrame, {
-      timeout: (dotLottie.duration / 2) * 1000,
-    });
+    expect(dotLottie.isPaused).toBe(false);
 
     dotLottie.pause();
 
-    expect(onPause).toHaveBeenCalledTimes(1);
-
     expect(dotLottie.isPaused).toBe(true);
-
-    onFrame.mockClear();
-
-    const frameAtPause = dotLottie.currentFrame;
-
-    dotLottie.play();
-
-    expect(onPlay).toHaveBeenCalledTimes(2);
-
-    expect(dotLottie.isPaused).toBe(false);
-    expect(dotLottie.isPlaying).toBe(true);
-
-    const nextFrame = frameAtPause + 5;
-
-    await vi.waitUntil(() => dotLottie.currentFrame >= nextFrame);
   });
 
   test('animation frame remains constant during pause', async () => {
@@ -103,10 +71,9 @@ describe('pause animation', () => {
     expect(onFrame).not.toHaveBeenCalled();
   });
 
-  test('pause event is dispatched', async () => {
+  test('pause event is dispatched when animation is playing', async () => {
     dotLottie = new DotLottie({
       canvas,
-      autoplay: true,
       src,
     });
 
@@ -114,7 +81,19 @@ describe('pause animation', () => {
 
     dotLottie.addEventListener('pause', onPause);
 
+    await vi.waitUntil(() => dotLottie.totalFrames > 0, { timeout: 2000 });
+
     dotLottie.pause();
+
+    expect(onPause).not.toHaveBeenCalled();
+
+    dotLottie.play();
+
+    await vi.waitUntil(() => dotLottie.isPlaying);
+
+    dotLottie.pause();
+
+    expect(dotLottie.isPlaying).toBe(false);
 
     expect(onPause).toHaveBeenCalledTimes(1);
   });

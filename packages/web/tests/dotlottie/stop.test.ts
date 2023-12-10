@@ -8,7 +8,7 @@ import type { Mode } from '../../src';
 import { DotLottie } from '../../src';
 import { createCanvas, sleep } from '../../test-utils';
 
-describe.skip('stop animation', () => {
+describe('stop animation', () => {
   let canvas: HTMLCanvasElement;
   let dotLottie: DotLottie;
   const src = 'https://lottie.host/66096915-99e9-472d-ad95-591372738141/7p6YR50Nfv.lottie';
