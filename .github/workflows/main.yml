@@ -49,7 +49,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           working-directory: packages/web
-          name: '📏 Coverage Report for @lottiefiles/dotlottie-web'
+          name: '@lottiefiles/dotlottie-web'
 
       - name: 📏 Report bundle size
         if: github.event_name == 'pull_request'

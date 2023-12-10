@@ -14,12 +14,12 @@
     },
     "test": {
       "cache": false,
-      "dependsOn": ["build"],
+      "dependsOn": [],
       "outputs": []
     },
     "test:coverage": {
       "cache": false,
-      "dependsOn": ["build"],
+      "dependsOn": [],
       "outputs": ["coverage/**"]
     },
     "type-check": {
