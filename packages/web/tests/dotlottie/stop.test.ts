@@ -26,17 +26,21 @@ describe('stop animation', () => {
   test('stop and reset animation', async () => {
     dotLottie = new DotLottie({
       canvas,
+      autoplay: true,
       src,
     });
 
     // wait for the animation to load
-    await vi.waitUntil(() => dotLottie.duration > 0, {
-      timeout: 1000,
+    await vi.waitUntil(() => dotLottie.isPlaying, {
+      timeout: 2000,
     });
 
-    dotLottie.play();
+    dotLottie.stop();
 
-    await vi.waitUntil(() => dotLottie.currentFrame > 0);
+    expect(dotLottie.isPlaying).toBe(false);
+    expect(dotLottie.isStopped).toBe(true);
+
+    expect(dotLottie.currentFrame).toBe(0);
   });
 
   test('stop event is dispatched', async () => {
