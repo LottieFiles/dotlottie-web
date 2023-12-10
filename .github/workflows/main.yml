@@ -47,7 +47,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: davelosert/vitest-coverage-report-action@v2.1.1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           working-directory: packages/web
 
       - name: 📏 Report bundle size
