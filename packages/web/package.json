@@ -43,7 +43,7 @@
     "stats:eslint": "cross-env TIMING=1 eslint .",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
     "test": "vitest run --browser.headless",
-    "test:coverage": "vitest run --browser.headless --coverage && npx nyc report --temp-dir=./.nyc_output/.tmp --reporter=lcov --reporter=text",
+    "test:coverage": "vitest run --browser.headless --coverage && nyc report --temp-dir=./.nyc_output/.tmp --reporter=html --reporter=json-summary --reporter=text-summary",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },
@@ -55,6 +55,7 @@
     "@vitest/browser": "^1.0.2",
     "@vitest/coverage-istanbul": "^1.0.2",
     "cross-env": "7.0.3",
+    "nyc": "^15.1.0",
     "tsup": "7.2.0",
     "typescript": "5.0.4",
     "vitest": "^1.0.2",

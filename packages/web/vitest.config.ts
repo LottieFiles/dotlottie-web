@@ -15,6 +15,7 @@ export default defineConfig({
     coverage: {
       provider: 'istanbul',
       reportsDirectory: '.nyc_output',
+      exclude: ['src/renderer-wasm/bin/renderer.js'],
     },
     testTimeout: 10000,
     cache: false,

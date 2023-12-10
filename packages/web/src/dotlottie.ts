@@ -317,19 +317,22 @@ export class DotLottie {
   private _initializeAnimationFromData(data: string | ArrayBuffer): void {
     const loadAnimation = (animationData: string): void => {
       try {
+        this.resize();
         if (this._renderer?.load(animationData, this._canvas.width, this._canvas.height)) {
           this._setupAnimationDetails();
+
           this._isLoaded = true;
+
           this._eventManager.dispatch({ type: 'load' });
-          this.resize();
+
+          this._currentFrame = this._mode.includes('reverse')
+            ? this._getEffectiveEndFrame()
+            : this._getEffectiveStartFrame();
+
+          this.setFrame(this._currentFrame);
+
           if (this._autoplay) {
             this.play();
-          } else {
-            this._currentFrame = this._mode.includes('reverse')
-              ? this._getEffectiveEndFrame()
-              : this._getEffectiveStartFrame();
-
-            this.setFrame(this._currentFrame);
           }
         } else {
           this._eventManager.dispatch({
@@ -715,11 +718,12 @@ export class DotLottie {
 
     if (this._renderer?.frame(this._currentFrame)) {
       this._render();
-      this._eventManager.dispatch({
-        type: 'frame',
-        currentFrame: this._currentFrame,
-      });
     }
+
+    this._eventManager.dispatch({
+      type: 'frame',
+      currentFrame: this._currentFrame,
+    });
   }
 
   /**

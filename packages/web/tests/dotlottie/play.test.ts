@@ -34,12 +34,36 @@ describe('play animation', () => {
       src,
     });
 
+    const onFrame = vi.fn();
+
+    dotLottie.addEventListener('frame', onFrame);
+
     expect(dotLottie.isStopped).toBe(true);
 
     // wait until the animation load and play
     await vi.waitUntil(() => dotLottie.isPlaying, {
       timeout: 2000,
     });
+
+    // wait until the animation completes
+    await vi.waitUntil(() => dotLottie.isStopped, {
+      timeout: dotLottie.duration * 1000 + 250,
+    });
+
+    // check if first and last frame events are fired
+    expect(onFrame.mock.calls[0]).toEqual([
+      {
+        currentFrame: 0,
+        type: 'frame',
+      },
+    ]);
+
+    expect(onFrame.mock.calls[onFrame.mock.calls.length - 1]).toEqual([
+      {
+        currentFrame: dotLottie.totalFrames - 1,
+        type: 'frame',
+      },
+    ]);
   });
 
   test('play animation with `autoplay` set to false, verify it does not play', async () => {
