@@ -1,0 +1,62 @@
+{
+  "name": "@lottiefiles/dotlottie-react",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "React wrapper around the dotlottie-web library",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LottieFiles/dotlottie-web.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://github.com/LottieFiles/dotlottie-web#readme",
+  "bugs": "https://github.com/LottieFiles/dotlottie-web/issues",
+  "author": "LottieFiles",
+  "contributors": [
+    "Abdelrahman Ashraf <a.theashraf@gmail.com>"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "dotlottie",
+    "lottie",
+    "player",
+    "animation",
+    "web",
+    "canvas",
+    "javascript",
+    "react"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint --fix .",
+    "stats:eslint": "cross-env TIMING=1 eslint .",
+    "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
+    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0"
+  },
+  "dependencies": {
+    "@lottiefiles/dotlottie-web": "workspace:*"
+  },
+  "devDependencies": {
+    "cross-env": "7.0.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tsup": "8.0.1",
+    "typescript": "5.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

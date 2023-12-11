@@ -1,0 +1,10 @@
+{
+  // Extend from the build config
+  "extends": "../../tsconfig.dev.json",
+
+  // Compiler options
+  "compilerOptions": {
+    "jsx": "react",
+    "exactOptionalPropertyTypes": false
+  }
+}
