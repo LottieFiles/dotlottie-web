@@ -717,13 +717,12 @@ export class DotLottie {
     }
 
     if (this._renderer?.frame(this._currentFrame)) {
+      this._eventManager.dispatch({
+        type: 'frame',
+        currentFrame: this._currentFrame,
+      });
       this._render();
     }
-
-    this._eventManager.dispatch({
-      type: 'frame',
-      currentFrame: this._currentFrame,
-    });
   }
 
   /**
