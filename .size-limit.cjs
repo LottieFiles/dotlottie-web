@@ -13,6 +13,21 @@ const dotLottieWebConfig = [
       };
     },
   },
+  {
+    name: '@lottiefiles/dotlottie-react',
+    path: 'packages/react/dist/index.js',
+    import: '*',
+    modifyWebpackConfig: (config) => {
+      config.module.rules.push({
+        test: /\.m?js/, // fix:issue: https://github.com/webpack/webpack/issues/11467
+        resolve: {
+          fullySpecified: false,
+        },
+      });
+
+      return config;
+    },
+  },
 ];
 
 module.exports = [...dotLottieWebConfig];
