@@ -156,6 +156,12 @@ importers:
         specifier: workspace:*
         version: link:../web
     devDependencies:
+      '@types/react':
+        specifier: ^18.2.37
+        version: 18.2.43
+      '@types/react-dom':
+        specifier: ^18.2.15
+        version: 18.2.17
       cross-env:
         specifier: 7.0.3
         version: 7.0.3
