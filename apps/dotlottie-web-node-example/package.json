@@ -1,8 +1,7 @@
 {
   "name": "@lottiefiles/dotlottie-web-node-example",
-  "version": "0.0.0",
   "type": "module",
-  "license": "MIT",
+  "private": true,
   "scripts": {
     "build": "tsc --noEmit",
     "start": "tsx index.ts"

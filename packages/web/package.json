@@ -42,9 +42,9 @@
     "size:why": "size-limit --why --clean-dir --save-bundle ./tmp",
     "stats:eslint": "cross-env TIMING=1 eslint .",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
-    "test": "vitest --watch=false",
-    "test:coverage": "vitest --coverage --watch=false",
-    "test:watch": "vitest --watch",
+    "test": "vitest run --browser.headless --retry 2",
+    "test:coverage": "vitest run --browser.headless --retry 2 --coverage && nyc report --temp-dir=./.nyc_output/.tmp --reporter=html --reporter=json-summary --reporter=text-summary",
+    "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -52,11 +52,14 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.2",
-    "@vitest/coverage-v8": "^1.0.1",
+    "@vitest/browser": "^1.0.2",
+    "@vitest/coverage-istanbul": "^1.0.2",
     "cross-env": "7.0.3",
+    "nyc": "^15.1.0",
     "tsup": "7.2.0",
     "typescript": "5.0.4",
-    "vitest": "^1.0.1"
+    "vitest": "^1.0.2",
+    "webdriverio": "^8.24.12"
   },
   "publishConfig": {
     "access": "public"

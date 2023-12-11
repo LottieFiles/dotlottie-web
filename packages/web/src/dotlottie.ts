@@ -133,6 +133,8 @@ export class DotLottie {
 
   private _isFrozen = false;
 
+  private _isLoaded = false;
+
   private readonly _animationFrameManager = new AnimationFrameManager();
 
   public constructor(config: Config) {
@@ -173,6 +175,10 @@ export class DotLottie {
   }
 
   // #region Getters and Setters
+
+  public get mode(): Mode {
+    return this._mode;
+  }
 
   /**
    * Gets the autoplay status of the animation.
@@ -313,16 +319,20 @@ export class DotLottie {
       try {
         if (this._renderer?.load(animationData, this._canvas.width, this._canvas.height)) {
           this._setupAnimationDetails();
+          this._isLoaded = true;
           this._eventManager.dispatch({ type: 'load' });
           this.resize();
+
+          // render the first frame of the animation
+          this._currentFrame = this._mode.includes('reverse')
+            ? this._getEffectiveEndFrame()
+            : this._getEffectiveStartFrame();
+
+          this._renderer.frame(this._currentFrame);
+          this._render();
+
           if (this._autoplay) {
             this.play();
-          } else {
-            this._currentFrame = this._mode.includes('reverse')
-              ? this._getEffectiveEndFrame()
-              : this._getEffectiveStartFrame();
-
-            this.setFrame(this._currentFrame);
           }
         } else {
           this._eventManager.dispatch({
@@ -417,26 +427,18 @@ export class DotLottie {
     const frameProgress = this._elapsedTime / frameDuration;
 
     // determine the current frame based on the animation mode and progress
-    if (this._mode === 'forward' || this._mode === 'reverse') {
-      this._currentFrame =
-        this._mode === 'forward' ? effectiveStartFrame + frameProgress : effectiveEndFrame - frameProgress;
+    if (this._mode === 'forward') {
+      this._currentFrame = effectiveStartFrame + frameProgress;
+    } else if (this._mode === 'reverse') {
+      this._currentFrame = effectiveEndFrame - frameProgress;
     } else {
       // handle bounce or bounce-reverse mode
-      // eslint-disable-next-line no-lonely-if
-      if (this._direction === 1) {
+      const isForward = this._direction === 1;
+
+      if (isForward) {
         this._currentFrame = effectiveStartFrame + frameProgress;
-        if (this._currentFrame >= effectiveEndFrame) {
-          this._currentFrame = effectiveEndFrame;
-          this._direction = -1;
-          this._beginTime = Date.now() / MS_TO_SEC_FACTOR;
-        }
       } else {
         this._currentFrame = effectiveEndFrame - frameProgress;
-        if (this._currentFrame <= effectiveStartFrame) {
-          this._currentFrame = effectiveStartFrame;
-          this._direction = 1;
-          this._beginTime = Date.now() / MS_TO_SEC_FACTOR;
-        }
       }
     }
 
@@ -455,15 +457,26 @@ export class DotLottie {
     }
 
     // check if the animation should loop or complete
-    if (this._mode === 'forward' || this._mode === 'reverse') {
-      if (this._currentFrame >= effectiveEndFrame || this._currentFrame <= effectiveStartFrame) {
-        this._handleLoopOrCompletion();
-      }
-    } else if (this._currentFrame <= effectiveStartFrame || this._currentFrame >= effectiveEndFrame) {
+    if (
+      (this._mode === 'forward' && this._currentFrame >= effectiveEndFrame) ||
+      (this._mode === 'reverse' && this._currentFrame <= effectiveStartFrame)
+    ) {
+      this._handleLoopOrCompletion();
+    } else if (
+      this._mode.includes('bounce') &&
+      (this._currentFrame <= effectiveStartFrame || this._currentFrame >= effectiveEndFrame)
+    ) {
+      // change the direction if the animation reaches the start or end frame
+      this._direction *= -1;
+
+      // increment the bounce cycle count, 2 cycles means 1 loop
       this._bounceCount += 1;
+
       if (this._bounceCount % 2 === 0) {
         this._bounceCount = 0;
         this._handleLoopOrCompletion();
+      } else {
+        this._beginTime = Date.now() / MS_TO_SEC_FACTOR;
       }
     }
 
@@ -481,6 +494,7 @@ export class DotLottie {
     } else {
       this._playbackState = 'stopped';
       this._eventManager.dispatch({ type: 'complete' });
+      this._stopAnimationLoop();
     }
   }
 
@@ -576,11 +590,7 @@ export class DotLottie {
    * Starts the animation playback.
    */
   public play(): void {
-    if (this._totalFrames === 0) {
-      console.error('Animation is not loaded yet.');
-
-      return;
-    }
+    if (!this._isLoaded || this.isPlaying) return;
 
     const effectiveStartFrame = this._getEffectiveStartFrame();
     const effectiveEndFrame = this._getEffectiveEndFrame();
@@ -595,29 +605,27 @@ export class DotLottie {
       this._synchronizeAnimationTiming(this._currentFrame);
     }
 
-    if (!this.isPlaying) {
-      this._playbackState = 'playing';
+    this._playbackState = 'playing';
 
-      // auto unfreeze if the animation on play
-      if (this._isFrozen) {
-        this._isFrozen = false;
+    // auto unfreeze if the animation on play
+    if (this._isFrozen) {
+      this._isFrozen = false;
 
-        this._eventManager.dispatch({ type: 'unfreeze' });
-      }
-
-      this._eventManager.dispatch({
-        type: 'play',
-      });
-
-      this._animationFrameId = this._animationFrameManager.requestAnimationFrame(this._animationLoop);
+      this._eventManager.dispatch({ type: 'unfreeze' });
     }
+
+    this._eventManager.dispatch({
+      type: 'play',
+    });
+
+    this._animationFrameId = this._animationFrameManager.requestAnimationFrame(this._animationLoop);
   }
 
   /**
    * Stops the animation playback and resets the current frame.
    */
   public stop(): void {
-    if (this.isStopped) return;
+    if (!this._isLoaded || this.isStopped) return;
 
     this._stopAnimationLoop();
     this._playbackState = 'stopped';
@@ -643,7 +651,7 @@ export class DotLottie {
    * Pauses the animation playback.
    */
   public pause(): void {
-    if (this.isPaused) return;
+    if (!this._isLoaded || !this.isPlaying) return;
 
     this._stopAnimationLoop();
 
@@ -659,11 +667,7 @@ export class DotLottie {
    * @param speed - Speed multiplier for playback.
    */
   public setSpeed(speed: number): void {
-    if (speed <= 0) {
-      console.error('Speed must be a positive number.');
-
-      return;
-    }
+    if (!this._isLoaded || speed <= 0 || speed >= Number.MAX_SAFE_INTEGER) return;
 
     if (this._speed === speed) return;
 
@@ -682,6 +686,8 @@ export class DotLottie {
    * @param loop - Boolean indicating if the animation should loop.
    */
   public setLoop(loop: boolean): void {
+    if (!this._isLoaded) return;
+
     this._loop = loop;
   }
 
@@ -690,6 +696,8 @@ export class DotLottie {
    * @param frame - Frame number to set.
    */
   public setFrame(frame: number): void {
+    if (!this._isLoaded) return;
+
     const effectiveStartFrame = this._getEffectiveStartFrame();
     const effectiveEndFrame = this._getEffectiveEndFrame();
 
@@ -709,11 +717,11 @@ export class DotLottie {
     }
 
     if (this._renderer?.frame(this._currentFrame)) {
-      this._render();
       this._eventManager.dispatch({
         type: 'frame',
         currentFrame: this._currentFrame,
       });
+      this._render();
     }
   }
 
@@ -723,7 +731,7 @@ export class DotLottie {
    *
    */
   public setMode(mode: Mode): void {
-    if (this._mode === mode) {
+    if (!this._isLoaded || this._mode === mode) {
       return;
     }
 
@@ -749,6 +757,7 @@ export class DotLottie {
 
     this._stopAnimationLoop();
     this._playbackState = 'stopped';
+    this._isLoaded = false;
 
     this._loop = config.loop ?? false;
     this._speed = config.speed ?? 1;
@@ -783,11 +792,7 @@ export class DotLottie {
   }
 
   public setSegments(startFrame: number, endFrame: number): void {
-    if (!this._renderer) {
-      console.error('Animation not initialized.');
-
-      return;
-    }
+    if (!this._isLoaded) return;
 
     // Validate the frame range
     if (startFrame < 0 || endFrame >= this._totalFrames || startFrame > endFrame) {
@@ -802,7 +807,7 @@ export class DotLottie {
       this._currentFrame = this._direction === 1 ? startFrame : endFrame;
 
       // render the current frame
-      if (this._renderer.frame(this._currentFrame)) {
+      if (this._renderer?.frame(this._currentFrame)) {
         this._render();
         this._eventManager.dispatch({
           type: 'frame',
