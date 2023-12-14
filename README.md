@@ -48,6 +48,7 @@ dotLottie is an open-source file format that aggregates one or more Lottie files
 The monorepo contains the following package:
 
 * **[@lottiefiles/dotlottie-web](packages/web/README.md)**: A JavaScript library for rendering Lottie and dotLottie animations in the browser.
+* **[@lottiefiles/dotlottie-react](packages/react/README.md)**: A React component wrapper for `@lottiefiles/dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.
 
 Each package has its own README.md with detailed documentation on usage and APIs.
 
@@ -55,9 +56,9 @@ Each package has its own README.md with detailed documentation on usage and APIs
 
 We are actively working on expanding our suite of packages. Here's what's coming soon:
 
-* **@lottiefiles/dotlottie-react**: A React component wrapper for `@lottiefiles/dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.
-
 * **@lottiefiles/dotlottie-wc**: A Web Component wrapper for `@lottiefiles/dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.
+* **@lottiefiles/dotlottie-vue**: A Vue component wrapper for `@lottiefiles/dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.
+* **@lottiefiles/dotlottie-svelte**: A Svelte component wrapper for `@lottiefiles/dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.
 
 Stay tuned for updates and releases of these new packages!
 
@@ -93,6 +94,9 @@ pnpm install
   * <a href="https://codesandbox.io/s/lottiefiles-dotlottie-web-basic-example-tcy3rv?autoresize=1&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Basic Example</a>
   * <a href="https://codesandbox.io/p/sandbox/lottiefiles-dotlottie-web-basic-example-forked-4v3t9y?autoresize=1&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Controlling Animation Playback Example</a>
   * <a href="https://codesandbox.io/s/lottiefiles-dotlottie-web-dynamic-animation-loading-example-q7dgvr?autoresize=1&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Dynamic Animation Loading Example</a>
+
+* `@lottiefiles/dotlottie-react`
+  * <a href="https://codesandbox.io/p/sandbox/dotlottie-react-basic-example-66cwfq?autoresize=1&file=%2Fsrc%2FApp.tsx&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Basic Example</a>
 
 ### Local Examples
 

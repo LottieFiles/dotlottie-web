@@ -17,6 +17,7 @@
   * [What is dotLottie?](#what-is-dotlottie)
 * [Installation](#installation)
 * [Usage](#usage)
+* [Live Examples](#live-examples)
 * [APIs](#apis)
   * [DotLottieReactProps](#dotlottiereactprops)
 * [Development](#development)
@@ -56,6 +57,10 @@ const App = () => {
   );
 };
 ```
+
+## Live Examples
+
+* <a href="https://codesandbox.io/p/sandbox/dotlottie-react-basic-example-66cwfq?autoresize=1&file=%2Fsrc%2FApp.tsx&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Basic Example</a>
 
 ## APIs
 
