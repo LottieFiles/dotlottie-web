@@ -35,8 +35,11 @@ describe('load animation', () => {
 
     dotLottie.addEventListener('load', onLoad);
 
+    expect(dotLottie.isLoaded).toBe(false);
+
     await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), { timeout: 5000 });
 
+    expect(dotLottie.isLoaded).toBe(true);
     expect(dotLottie.isPlaying).toBe(false);
     expect(dotLottie.isStopped).toBe(true);
     expect(dotLottie.totalFrames).toBeGreaterThan(0);
@@ -55,6 +58,7 @@ describe('load animation', () => {
     await sleep(2000);
 
     expect(onLoadError).toHaveBeenCalledTimes(1);
+    expect(dotLottie.isLoaded).toBe(false);
   });
 
   test('loads animation from animation data', async () => {
