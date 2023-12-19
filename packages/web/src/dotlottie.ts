@@ -282,6 +282,10 @@ export class DotLottie {
     return this._playbackState === 'stopped';
   }
 
+  public get isLoaded(): boolean {
+    return this._isLoaded;
+  }
+
   public get isFrozen(): boolean {
     return this._isFrozen;
   }

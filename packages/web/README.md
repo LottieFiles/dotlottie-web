@@ -155,6 +155,7 @@ The `renderConfig` object accepts the following properties:
 | `backgroundColor` | string  | Gets the background color of the canvas.                                                                              |
 | `autoplay`        | boolean | Indicates if the animation is set to auto-play.                                                                       |
 | `isFrozen`        | boolean | Reflects whether the animation loop is stopped or not.                                                                |
+| `isLoaded`        | boolean | Reflects whether the animation is loaded or not.                                                                      |
 
 ### Methods
 
