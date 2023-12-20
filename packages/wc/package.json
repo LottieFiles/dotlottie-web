@@ -2,7 +2,7 @@
   "name": "@lottiefiles/dotlottie-wc",
   "version": "0.0.0",
   "type": "module",
-  "description": "DotLottie Web Component - Effortlessly embed and control Lottie and DotLottie animations in web projects with this lightweight, feature-rich, and easily customizable web component. Ideal for adding dynamic, high-quality animations to UIs with minimal effort.",
+  "description": "Web component wrapper around the dotlottie-web library",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LottieFiles/dotlottie-web.git",
@@ -25,40 +25,33 @@
     "dist"
   ],
   "keywords": [
-    "lottie",
     "dotlottie",
-    "web",
-    "component",
-    "webcomponent",
-    "web-component",
-    "animation",
-    "render",
-    "rendering",
+    "lottie",
     "player",
-    "dotlottie-web"
+    "animation",
+    "web",
+    "canvas",
+    "javascript",
+    "lottiefiles",
+    "dotlottie-web",
+    "thorvg",
+    "web-component"
   ],
   "scripts": {
     "build": "tsup",
-    "build:wasm": "./build_wasm.sh",
-    "build:wasm:docker": "./docker_build_wasm.sh",
     "dev": "tsup --watch",
     "lint": "eslint --fix .",
-    "size": "size-limit",
-    "size:why": "size-limit --why --clean-dir --save-bundle ./tmp",
     "stats:eslint": "cross-env TIMING=1 eslint .",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@lottiefiles/dotlottie-web": "workspace:*",
-    "lit": "^3.0.2"
+    "lit": "^3.1.0"
   },
   "devDependencies": {
-    "@size-limit/esbuild-why": "^10.0.2",
-    "@size-limit/preset-small-lib": "^10.0.2",
     "cross-env": "7.0.3",
-    "size-limit": "^10.0.2",
-    "tsup": "7.2.0",
+    "tsup": "8.0.1",
     "typescript": "5.0.4"
   },
   "publishConfig": {

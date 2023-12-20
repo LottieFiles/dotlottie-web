@@ -1,4 +1,4 @@
-const dotLottieWebConfig = [
+module.exports = [
   {
     name: '@lottiefiles/dotlottie-web',
     path: 'packages/web/dist/index.js',
@@ -28,6 +28,9 @@ const dotLottieWebConfig = [
       return config;
     },
   },
+  {
+    name: '@lottiefiles/dotlottie-wc',
+    path: 'packages/wc/dist/index.js',
+    import: '*',
+  },
 ];
-
-module.exports = [...dotLottieWebConfig];
