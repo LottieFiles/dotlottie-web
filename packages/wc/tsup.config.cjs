@@ -6,23 +6,20 @@ const { defineConfig } = require('tsup');
 
 const pkg = require('./package.json');
 
-module.exports = defineConfig((options) => ({
+module.exports = defineConfig({
   bundle: true,
   metafile: false,
   splitting: true,
   treeshake: true,
   clean: true,
   dts: true,
-  minify: !options.watch,
+  minify: true,
   sourcemap: true,
   entry: ['./src/*.ts'],
   format: ['esm'],
   platform: 'browser',
-  target: ['es2020', 'chrome58'],
+  target: ['es2020', 'chrome58', 'firefox57', 'safari11'],
   tsconfig: 'tsconfig.build.json',
-  loader: {
-    '.svg': 'text',
-  },
   // To ensure the ESM bundle is self-contained and usable via CDN
   noExternal: Object.keys(pkg.dependencies),
-}));
+});

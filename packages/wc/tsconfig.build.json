@@ -8,7 +8,11 @@
     "outDir": "./dist",
 
     // Source root directory
-    "rootDir": "."
+    "rootDir": ".",
+
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "exactOptionalPropertyTypes": false
   },
 
   // Files included in compilation

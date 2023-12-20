@@ -3,5 +3,9 @@
   "extends": "../../tsconfig.dev.json",
 
   // Compiler options
-  "compilerOptions": {}
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "exactOptionalPropertyTypes": false
+  }
 }

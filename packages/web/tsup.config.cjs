@@ -7,8 +7,6 @@ const path = require('path');
 
 const { defineConfig } = require('tsup');
 
-const pkg = require('./package.json');
-
 module.exports = defineConfig((options) => ({
   bundle: true,
   metafile: false,
@@ -29,6 +27,4 @@ module.exports = defineConfig((options) => ({
       path.resolve(__dirname, './dist/renderer.wasm'),
     );
   },
-  // To ensure the ESM bundle is self-contained and usable via CDN
-  noExternal: Object.keys(pkg.dependencies),
 }));
