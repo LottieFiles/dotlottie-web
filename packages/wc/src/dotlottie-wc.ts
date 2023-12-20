@@ -68,6 +68,16 @@ export class DotLottieWC extends LitElement {
         this.dotLottie.resize();
       }
     });
+
+    window.addEventListener('visibilitychange', () => {
+      if (this.dotLottie) {
+        if (document.visibilityState === 'visible') {
+          this.dotLottie.unfreeze();
+        } else {
+          this.dotLottie.freeze();
+        }
+      }
+    });
   }
 
   public override firstUpdated(): void {
