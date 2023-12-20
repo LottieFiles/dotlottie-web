@@ -86,6 +86,14 @@ export interface Config {
    * If the data is provided, the src will be ignored.
    */
   src?: string;
+  /**
+   *
+   *  If true, it will update on every requestAnimationFrame with intermediate values.
+   *  If false, it will respect the original AE fps.
+   *
+   *  Default is true.
+   */
+  subFrame?: boolean;
 }
 
 export class DotLottie {
@@ -137,6 +145,8 @@ export class DotLottie {
 
   private readonly _animationFrameManager = new AnimationFrameManager();
 
+  private _subFrame = true;
+
   public constructor(config: Config) {
     this._animationLoop = this._animationLoop.bind(this);
 
@@ -153,6 +163,7 @@ export class DotLottie {
     this._segments = config.segments ?? null;
     this._backgroundColor = config.backgroundColor ?? DEFAULT_BG_COLOR;
     this._renderConfig = config.renderConfig ?? {};
+    this._subFrame = config.subFrame === undefined ? true : config.subFrame;
 
     WasmLoader.load()
       .then((module) => {
@@ -419,8 +430,8 @@ export class DotLottie {
    * @returns Boolean indicating if the frame was updated.
    */
   private _update(): boolean {
-    // animation is not loaded yet
-    if (this._duration === 0 || this._totalFrames === 0) return false;
+    // Animation is not loaded yet
+    if (!this._isLoaded || this._duration === 0 || this._totalFrames === 0) return false;
 
     const effectiveStartFrame = this._getEffectiveStartFrame();
     const effectiveEndFrame = this._getEffectiveEndFrame();
@@ -430,61 +441,70 @@ export class DotLottie {
     this._elapsedTime = (Date.now() / MS_TO_SEC_FACTOR - this._beginTime) * this._speed;
     const frameProgress = this._elapsedTime / frameDuration;
 
-    // determine the current frame based on the animation mode and progress
+    let currentRawFrame = 0;
+
+    // Determine the current frame based on the animation mode and progress
     if (this._mode === 'forward') {
-      this._currentFrame = effectiveStartFrame + frameProgress;
+      currentRawFrame = effectiveStartFrame + frameProgress;
     } else if (this._mode === 'reverse') {
-      this._currentFrame = effectiveEndFrame - frameProgress;
+      currentRawFrame = effectiveEndFrame - frameProgress;
     } else {
-      // handle bounce or bounce-reverse mode
+      // Handle bounce or bounce-reverse mode
       const isForward = this._direction === 1;
 
-      if (isForward) {
-        this._currentFrame = effectiveStartFrame + frameProgress;
-      } else {
-        this._currentFrame = effectiveEndFrame - frameProgress;
+      currentRawFrame = isForward ? effectiveStartFrame + frameProgress : effectiveEndFrame - frameProgress;
+    }
+
+    // Apply subFrame calculation
+    if (!this._subFrame) {
+      currentRawFrame = Math.round(currentRawFrame);
+    }
+
+    // Update current frame only if it's different
+    if (this._currentFrame !== currentRawFrame) {
+      this._currentFrame = currentRawFrame;
+      // Ensure the current frame is within the effective range
+      this._currentFrame = Math.max(effectiveStartFrame, Math.min(this._currentFrame, effectiveEndFrame));
+
+      let shouldUpdate = false;
+
+      if (this._renderer?.frame(this._currentFrame)) {
+        this._eventManager.dispatch({
+          type: 'frame',
+          currentFrame: this._currentFrame,
+        });
+
+        shouldUpdate = true;
       }
-    }
 
-    // clamp the current frame within the effective range and round it
-    this._currentFrame = Math.max(effectiveStartFrame, Math.min(this._currentFrame, effectiveEndFrame));
-
-    let shouldUpdate = false;
-
-    if (this._renderer?.frame(this._currentFrame)) {
-      this._eventManager.dispatch({
-        type: 'frame',
-        currentFrame: this._currentFrame,
-      });
-
-      shouldUpdate = true;
-    }
-
-    // check if the animation should loop or complete
-    if (
-      (this._mode === 'forward' && this._currentFrame >= effectiveEndFrame) ||
-      (this._mode === 'reverse' && this._currentFrame <= effectiveStartFrame)
-    ) {
-      this._handleLoopOrCompletion();
-    } else if (
-      this._mode.includes('bounce') &&
-      (this._currentFrame <= effectiveStartFrame || this._currentFrame >= effectiveEndFrame)
-    ) {
-      // change the direction if the animation reaches the start or end frame
-      this._direction *= -1;
-
-      // increment the bounce cycle count, 2 cycles means 1 loop
-      this._bounceCount += 1;
-
-      if (this._bounceCount % 2 === 0) {
-        this._bounceCount = 0;
+      // check if the animation should loop or complete
+      if (
+        (this._mode === 'forward' && this._currentFrame >= effectiveEndFrame) ||
+        (this._mode === 'reverse' && this._currentFrame <= effectiveStartFrame)
+      ) {
         this._handleLoopOrCompletion();
-      } else {
-        this._beginTime = Date.now() / MS_TO_SEC_FACTOR;
+      } else if (
+        this._mode.includes('bounce') &&
+        (this._currentFrame <= effectiveStartFrame || this._currentFrame >= effectiveEndFrame)
+      ) {
+        // change the direction if the animation reaches the start or end frame
+        this._direction *= -1;
+
+        // increment the bounce cycle count, 2 cycles means 1 loop
+        this._bounceCount += 1;
+
+        if (this._bounceCount % 2 === 0) {
+          this._bounceCount = 0;
+          this._handleLoopOrCompletion();
+        } else {
+          this._beginTime = Date.now() / MS_TO_SEC_FACTOR;
+        }
       }
+
+      return shouldUpdate;
     }
 
-    return shouldUpdate;
+    return false;
   }
 
   /**
@@ -772,6 +792,7 @@ export class DotLottie {
     this._bounceCount = 0;
     this._direction = this._mode.includes('reverse') ? -1 : 1;
     this._renderConfig = config.renderConfig ?? {};
+    this._subFrame = config.subFrame === undefined ? true : config.subFrame;
 
     const effectiveStartFrame = this._getEffectiveStartFrame();
     const effectiveEndFrame = this._getEffectiveEndFrame();
