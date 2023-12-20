@@ -46,16 +46,18 @@ dotLottie is an open-source file format that aggregates one or more Lottie files
 
 The monorepo contains the following package:
 
-* **[@lottiefiles/dotlottie-web](packages/web/README.md)**: A JavaScript library for rendering Lottie and dotLottie animations in the browser.
-* **[@lottiefiles/dotlottie-react](packages/react/README.md)**: A React component wrapper for `@lottiefiles/dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.
+| Package                                                      | Description                                                                                                                                                                         |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[@lottiefiles/dotlottie-web](packages/web/README.md)**     | A JavaScript library for rendering Lottie and dotLottie animations in the browser.                                                                                                  |
+| **[@lottiefiles/dotlottie-react](packages/react/README.md)** | A React component wrapper for `@lottiefiles/dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them. |
+| **[@lottiefiles/dotlottie-wc](packages/wc/README.md)**       | A Web Component wrapper for `@lottiefiles/dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.   |
 
-Each package has its own README.md with detailed documentation on usage and APIs.
+> Note: Each package has its own README.md with detailed documentation on usage and APIs.
 
 ### Coming Soon Packages
 
 We are actively working on expanding our suite of packages. Here's what's coming soon:
 
-* **@lottiefiles/dotlottie-wc**: A Web Component wrapper for `@lottiefiles/dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.
 * **@lottiefiles/dotlottie-vue**: A Vue component wrapper for `@lottiefiles/dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.
 * **@lottiefiles/dotlottie-svelte**: A Svelte component wrapper for `@lottiefiles/dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.
 
@@ -101,7 +103,7 @@ pnpm install
 
 Discover how to implement and utilize the dotlottie-web packages with our example applications. These examples serve as a practical guide to help you understand how to integrate Lottie and dotLottie animations into your web projects.
 
-**Available examples:**
+Available examples:
 
 * [dotlottie-web-example](apps/dotlottie-web-example/src/main.ts): A basic typescript example app of how to use `@lottiefiles/dotlottie-web` to render a Lottie or dotLottie animation in the browser.
 * [dotlottie-web-node-example](apps/dotlottie-web-node-example/index.ts): This example demonstrates how to use the `@lottiefiles/dotlottie-web` in a Node.js environment. It showcases controlling animation playback, rendering frame by frame, and converting a dotLottie animation into a GIF file. for more information, see the [README](apps/dotlottie-web-node-example/README.md).
@@ -136,11 +138,6 @@ pnpm run dev
 ```
 
 Feel free to modify and play around with the code to see how changes affect the animations.
-
-### Live Examples
-
-* [@lottiefiles/dotlottie-web](packages/web/README.md#live-example)
-* [@lottiefiles/dotlottie-wc](packages/wc/README.md#live-example)
 
 ### Development
 
