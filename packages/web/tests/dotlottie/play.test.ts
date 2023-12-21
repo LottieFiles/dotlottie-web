@@ -189,4 +189,26 @@ describe('play animation', () => {
     expect(dotLottie.isStopped).toBe(true);
     expect(dotLottie.isFrozen).toBe(false);
   });
+
+  test('animation plays and renders correctly on subFrame = false', async () => {
+    const onFrame = vi.fn();
+    const onCompleted = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+      autoplay: true,
+      subFrame: false,
+    });
+
+    dotLottie.addEventListener('frame', onFrame);
+    dotLottie.addEventListener('complete', onCompleted);
+
+    await vi.waitFor(() => expect(onCompleted).toHaveBeenCalledTimes(1), {
+      // wait for the animation to complete
+      timeout: dotLottie.duration * 1000 + 2000,
+    });
+
+    expect(onFrame).toHaveBeenCalledTimes(dotLottie.totalFrames - 1);
+  });
 });
