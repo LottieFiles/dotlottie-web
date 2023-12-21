@@ -56,30 +56,64 @@ export interface UseDotLottieResult {
 export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieResult => {
   const [dotLottie, setDotLottie] = React.useState<DotLottie | null>(null);
 
+  const dotLottieRef = React.useRef<DotLottie | null>(null);
+
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
 
-  React.useEffect(() => {
-    return () => {
-      dotLottie?.destroy();
-      setDotLottie(null);
-    };
-  }, []);
+  dotLottieRef.current = dotLottie;
 
-  const setCanvasRef = React.useCallback((canvas: HTMLCanvasElement | null) => {
-    if (canvas) {
-      const dotLottieInstance = new DotLottie({
-        ...dotLottieConfig,
-        canvas,
+  const [intersectionObserver] = React.useState(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            dotLottieRef.current?.unfreeze();
+          } else {
+            dotLottieRef.current?.freeze();
+          }
+        });
+      },
+      {
+        threshold: 0,
+      },
+    );
+
+    return observer;
+  });
+
+  const [resizeObserver] = React.useState(() => {
+    const observer = new ResizeObserver((entries) => {
+      entries.forEach(() => {
+        dotLottieRef.current?.resize();
       });
+    });
 
-      setDotLottie(dotLottieInstance);
-    } else {
-      dotLottie?.destroy();
-    }
+    return observer;
+  });
 
-    canvasRef.current = canvas;
-  }, []);
+  const setCanvasRef = React.useCallback(
+    (canvas: HTMLCanvasElement | null) => {
+      if (canvas) {
+        const dotLottieInstance = new DotLottie({
+          ...dotLottieConfig,
+          canvas,
+        });
+
+        setDotLottie(dotLottieInstance);
+
+        intersectionObserver.observe(canvas);
+        resizeObserver.observe(canvas);
+      } else {
+        dotLottieRef.current?.destroy();
+        intersectionObserver.disconnect();
+        resizeObserver.disconnect();
+      }
+
+      canvasRef.current = canvas;
+    },
+    [intersectionObserver, resizeObserver],
+  );
 
   const setContainerRef = React.useCallback((container: HTMLDivElement | null) => {
     containerRef.current = container;
@@ -91,6 +125,33 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
     },
     [setCanvasRef, setContainerRef],
   );
+
+  React.useEffect(() => {
+    function onVisibilityChange(): void {
+      if (document.hidden) {
+        dotLottieRef.current?.freeze();
+      } else {
+        dotLottieRef.current?.unfreeze();
+      }
+    }
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      if (!dotLottie) return;
+
+      dotLottie.destroy();
+      setDotLottie(null);
+      resizeObserver.disconnect();
+      intersectionObserver.disconnect();
+    };
+  }, []);
 
   return {
     dotLottie,
