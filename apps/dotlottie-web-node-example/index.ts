@@ -56,6 +56,8 @@ const ctx = canvas.getContext('2d');
 const dotLottieConfig: Config = {
   speed: args.speed,
   canvas: canvas as unknown as HTMLCanvasElement,
+  autoplay: true,
+  useFrameInterpolation: false,
 };
 
 if (args.input.startsWith('http://') || args.input.startsWith('https://')) {
@@ -111,18 +113,12 @@ dotLottie.addEventListener('load', () => {
       - Output Path: ${outputPath}
     `,
   );
-
-  for (let timeElapsed = 0; timeElapsed <= dotLottie.duration; timeElapsed += delay) {
-    const frameNo = (dotLottie.totalFrames - 1) * (timeElapsed / dotLottie.duration);
-
-    dotLottie.setFrame(frameNo);
-  }
 });
 
 dotLottie.addEventListener('frame', (event) => {
   const frame = ctx.getImageData(0, 0, args.width, args.height).data;
 
-  if (Math.round(event.currentFrame) >= dotLottie.totalFrames - 1) {
+  if (event.currentFrame >= dotLottie.totalFrames - 1) {
     console.log('Finished recording GIF');
     gif.finish();
   } else {
