@@ -301,6 +301,10 @@ export class DotLottie {
     return this._isFrozen;
   }
 
+  public get subFrame(): boolean {
+    return this._subFrame;
+  }
+
   // #endregion Getters and Setters
 
   // #region Private Methods
@@ -430,7 +434,7 @@ export class DotLottie {
    * @returns Boolean indicating if the frame was updated.
    */
   private _update(): boolean {
-    // Animation is not loaded yet
+    // animation is not loaded yet
     if (!this._isLoaded || this._duration === 0 || this._totalFrames === 0) return false;
 
     const effectiveStartFrame = this._getEffectiveStartFrame();
@@ -443,27 +447,25 @@ export class DotLottie {
 
     let currentRawFrame = 0;
 
-    // Determine the current frame based on the animation mode and progress
     if (this._mode === 'forward') {
       currentRawFrame = effectiveStartFrame + frameProgress;
     } else if (this._mode === 'reverse') {
       currentRawFrame = effectiveEndFrame - frameProgress;
     } else {
-      // Handle bounce or bounce-reverse mode
+      // handle bounce or bounce-reverse mode
       const isForward = this._direction === 1;
 
       currentRawFrame = isForward ? effectiveStartFrame + frameProgress : effectiveEndFrame - frameProgress;
     }
 
-    // Apply subFrame calculation
     if (!this._subFrame) {
       currentRawFrame = Math.round(currentRawFrame);
     }
 
-    // Update current frame only if it's different
+    // update current frame only if it's different
     if (this._currentFrame !== currentRawFrame) {
       this._currentFrame = currentRawFrame;
-      // Ensure the current frame is within the effective range
+      // ensure the current frame is within the effective range
       this._currentFrame = Math.max(effectiveStartFrame, Math.min(this._currentFrame, effectiveEndFrame));
 
       let shouldUpdate = false;
@@ -960,6 +962,10 @@ export class DotLottie {
 
     // resize the renderer and render the current frame
     this._render();
+  }
+
+  public setSubFrame(subFrame: boolean): void {
+    this._subFrame = subFrame;
   }
 
   // #endregion

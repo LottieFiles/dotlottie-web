@@ -113,18 +113,19 @@ const dotLottie = new DotLottie({
 
 The `DotLottie` constructor accepts a config object with the following properties:
 
-| Property name     | Type                  | Required | Default               | Description                                                                                                                            |
-| ----------------- | --------------------- | :------: | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `autoplay`        | boolean               |          | false                 | Auto-starts the animation on load.                                                                                                     |
-| `loop`            | boolean               |          | false                 | Determines if the animation should loop.                                                                                               |
-| `canvas`          | HTMLCanvasElement     |    ✔️    | undefined             | Canvas element for animation rendering.                                                                                                |
-| `src`             | string                |          | undefined             | URL to the animation data (`.json` or `.lottie`).                                                                                      |
-| `speed`           | number                |          | 1                     | Animation playback speed. 1 is regular speed.                                                                                          |
-| `data`            | string \| ArrayBuffer |          | undefined             | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations.                                    |
-| `mode`            | string                |          | "forward"             | Animation play mode. Accepts "forward", "reverse", "bounce", "bounce-reverse".                                                         |
-| `backgroundColor` | string                |          | undefined             | Background color of the canvas. Accepts 6-digit or 8-digit hex color string (e.g., "#000000", "#000000FF"),                            |
-| `segments`        | \[number, number]     |          | \[0, totalFrames - 1] | Animation segments. Accepts an array of two numbers, where the first number is the start frame and the second number is the end frame. |
-| `renderConfig`    | RenderConfig          |          | `{}`                  | Configuration for rendering the animation.                                                                                             |
+| Property name     | Type                          | Required | Default               | Description                                                                                                                                                                                                                                        |
+| ----------------- | ----------------------------- | :------: | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `autoplay`        | boolean                       |          | false                 | Auto-starts the animation on load.                                                                                                                                                                                                                 |
+| `loop`            | boolean                       |          | false                 | Determines if the animation should loop.                                                                                                                                                                                                           |
+| `canvas`          | HTMLCanvasElement             |    ✔️    | undefined             | Canvas element for animation rendering.                                                                                                                                                                                                            |
+| `src`             | string                        |          | undefined             | URL to the animation data (`.json` or `.lottie`).                                                                                                                                                                                                  |
+| `speed`           | number                        |          | 1                     | Animation playback speed. 1 is regular speed.                                                                                                                                                                                                      |
+| `data`            | string \| ArrayBuffer         |          | undefined             | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations.                                                                                                                                                |
+| `mode`            | string                        |          | "forward"             | Animation play mode. Accepts "forward", "reverse", "bounce", "bounce-reverse".                                                                                                                                                                     |
+| `backgroundColor` | string                        |          | undefined             | Background color of the canvas. Accepts 6-digit or 8-digit hex color string (e.g., "#000000", "#000000FF"),                                                                                                                                        |
+| `segments`        | \[number, number]             |          | \[0, totalFrames - 1] | Animation segments. Accepts an array of two numbers, where the first number is the start frame and the second number is the end frame.                                                                                                             |
+| `renderConfig`    | [RenderConfig](#renderconfig) |          | `{}`                  | Configuration for rendering the animation.                                                                                                                                                                                                         |
+| `subframe`        | boolean                       |          | false                 | Determines if the animation should update on subframes. If set to false, the original AE frame rate will be maintained. If set to true, it will refresh at each requestAnimationFrame, including intermediate values. The default setting is true. |
 
 #### RenderConfig
 
@@ -156,6 +157,7 @@ The `renderConfig` object accepts the following properties:
 | `autoplay`        | boolean | Indicates if the animation is set to auto-play.                                                                       |
 | `isFrozen`        | boolean | Reflects whether the animation loop is stopped or not.                                                                |
 | `isLoaded`        | boolean | Reflects whether the animation is loaded or not.                                                                      |
+| `subFrame`        | boolean | Reflects whether the animation should update on subframes.                                                            |
 
 ### Methods
 
@@ -179,6 +181,7 @@ The `renderConfig` object accepts the following properties:
 | `unfreeze()`                                              | Unfreezes the animation by resuming the animation loop.                                                                                                                                                                                                       |
 | `setBackgroundColor(color: string)`                       | Sets the background color of the canvas.                                                                                                                                                                                                                      |
 | `resize()`                                                | This method adjusts the canvas size to match its bounding box dimensions, considering the device's pixel ratio. This prevents the canvas from appearing blurry on high-resolution screens. Call this method when the window or the canvas element is resized. |
+| `setSubframe(subframe: boolean)`                          | Sets whether the animation should update on subframes.                                                                                                                                                                                                        |
 
 ### Static Methods
 
