@@ -14,7 +14,7 @@ const app = document.getElementById('app') as HTMLDivElement;
 
 app.innerHTML = `
 <div class="grid">
- <canvas data-bg-color="green" data-src="https://lottie.host/1cf72a35-6d88-4d9a-9961-f1bb88087f2c/miJIHiyH4Q.lottie"></canvas>
+  <canvas data-bg-color="green" data-src="https://lottie.host/1cf72a35-6d88-4d9a-9961-f1bb88087f2c/miJIHiyH4Q.lottie"></canvas>
   <canvas data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"></canvas>
   <canvas data-src="https://lottie.host/a7421582-4733-49e5-9f77-e8d4cd792239/WZQjpo4uZR.lottie"></canvas>
   <canvas data-src="https://lottie.host/e2a24b6f-df7f-4fc5-94ea-30f0846f85dc/1RLOR2g0m3.lottie"></canvas>
@@ -104,7 +104,7 @@ allCanvas.forEach((canvas) => {
     loop: true,
     autoplay: true,
     backgroundColor,
-    subFrame: false,
+    useFrameInterpolation: false,
   });
 
   window.addEventListener('resize', () => {
@@ -128,7 +128,7 @@ fetch('/hamster.lottie')
       segments: [10, 90],
       speed: 1,
       backgroundColor: '#800080ff',
-      subFrame: false,
+      useFrameInterpolation: false,
     });
 
     const playPauseButton = document.getElementById('playPause') as HTMLButtonElement;
