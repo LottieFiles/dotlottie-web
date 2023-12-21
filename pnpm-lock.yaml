@@ -109,6 +109,19 @@ importers:
         specifier: ^5.0.0
         version: 5.0.5(@types/node@20.5.1)
 
+  apps/dotlottie-wc-example:
+    dependencies:
+      '@lottiefiles/dotlottie-wc':
+        specifier: workspace:*
+        version: link:../../packages/wc
+    devDependencies:
+      typescript:
+        specifier: ^5.0.2
+        version: 5.0.4
+      vite:
+        specifier: ^4.4.5
+        version: 4.5.1(@types/node@20.5.1)
+
   apps/dotlottie-web-example:
     dependencies:
       '@lottiefiles/dotlottie-web':
@@ -171,6 +184,25 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
+      tsup:
+        specifier: 8.0.1
+        version: 8.0.1(ts-node@10.9.1)(typescript@5.0.4)
+      typescript:
+        specifier: 5.0.4
+        version: 5.0.4
+
+  packages/wc:
+    dependencies:
+      '@lottiefiles/dotlottie-web':
+        specifier: workspace:*
+        version: link:../web
+      lit:
+        specifier: ^3.1.0
+        version: 3.1.0
+    devDependencies:
+      cross-env:
+        specifier: 7.0.3
+        version: 7.0.3
       tsup:
         specifier: 8.0.1
         version: 8.0.1(ts-node@10.9.1)(typescript@5.0.4)
@@ -1739,6 +1771,16 @@ packages:
       '@jridgewell/sourcemap-codec': 1.4.15
     dev: true
 
+  /@lit-labs/ssr-dom-shim@1.1.2:
+    resolution: {integrity: sha512-jnOD+/+dSrfTWYfSXBXlo5l5f0q1UuJo3tkbMDCYA2lKUYq79jaxqtGEvnRoh049nt1vdo1+45RinipU6FGY2g==}
+    dev: false
+
+  /@lit/reactive-element@2.0.1:
+    resolution: {integrity: sha512-eu50SQXHRthFwWJMp0oAFg95Rvm6MTPjxSXWuvAu7It90WVFLFpNBoIno7XOXSDvVgTrtKnUV4OLJqys2Svn4g==}
+    dependencies:
+      '@lit-labs/ssr-dom-shim': 1.1.2
+    dev: false
+
   /@lottiefiles/commitlint-config@2.0.0(@commitlint/cli@17.6.1):
     resolution: {integrity: sha512-P6Ro3iZYHtZ46jKozYHPVNxxjr+8B5No+jVVxT/gkBf0lvbKDZu0fX5lNzPwoGFDqfd20R3kWphQh31gpIMXXA==}
     engines: {node: '>= 14'}
@@ -2851,6 +2893,10 @@ packages:
   /@types/text-table@0.2.4:
     resolution: {integrity: sha512-jxT2kMVKXQole5LryYWdaRzmSxEQPyWAjYRO77TyqEfp1YEnNV5Dq4h4OlUDLrZkiYbQHzYQMKbsz4bgPCpaug==}
     dev: true
+
+  /@types/trusted-types@2.0.6:
+    resolution: {integrity: sha512-HYtNooPvUY9WAVRBr4u+4Qa9fYD1ze2IUlAD3HoA6oehn1taGwBx3Oa52U4mTslTS+GAExKpaFu39Y5xUEwfjg==}
+    dev: false
 
   /@types/unist@2.0.6:
     resolution: {integrity: sha512-PBjIUxZHOuj0R15/xuwJYjFi+KZdNFrehocChv4g5hu6aFroHue8m0lBP0POdK2nKzbw0cgV1mws8+V/JAcEkQ==}
@@ -8277,6 +8323,28 @@ packages:
       through: 2.3.8
       wrap-ansi: 7.0.0
     dev: true
+
+  /lit-element@4.0.1:
+    resolution: {integrity: sha512-OxRMJem4HKZt0320HplLkBPoi4KHiEHoPHKd8Lzf07ZQVAOKIjZ32yPLRKRDEolFU1RgrQBfSHQMoxKZ72V3Kw==}
+    dependencies:
+      '@lit-labs/ssr-dom-shim': 1.1.2
+      '@lit/reactive-element': 2.0.1
+      lit-html: 3.1.0
+    dev: false
+
+  /lit-html@3.1.0:
+    resolution: {integrity: sha512-FwAjq3iNsaO6SOZXEIpeROlJLUlrbyMkn4iuv4f4u1H40Jw8wkeR/OUXZUHUoiYabGk8Y4Y0F/rgq+R4MrOLmA==}
+    dependencies:
+      '@types/trusted-types': 2.0.6
+    dev: false
+
+  /lit@3.1.0:
+    resolution: {integrity: sha512-rzo/hmUqX8zmOdamDAeydfjsGXbbdtAFqMhmocnh2j9aDYqbu0fjXygjCa0T99Od9VQ/2itwaGrjZz/ZELVl7w==}
+    dependencies:
+      '@lit/reactive-element': 2.0.1
+      lit-element: 4.0.1
+      lit-html: 3.1.0
+    dev: false
 
   /load-plugin@4.0.1:
     resolution: {integrity: sha512-4kMi+mOSn/TR51pDo4tgxROHfBHXsrcyEYSGHcJ1o6TtRaP2PsRM5EwmYbj1uiLDvbfA/ohwuSWZJzqGiai8Dw==}

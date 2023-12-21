@@ -27,5 +27,4 @@ module.exports = defineConfig((options) => ({
       path.resolve(__dirname, './dist/renderer.wasm'),
     );
   },
-  noExternal: ['@dotlottie/dotlottie-js'],
 }));

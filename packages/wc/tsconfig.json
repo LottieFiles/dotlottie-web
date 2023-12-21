@@ -1,0 +1,11 @@
+{
+  // Extend from the build config
+  "extends": "../../tsconfig.dev.json",
+
+  // Compiler options
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "exactOptionalPropertyTypes": false
+  }
+}
