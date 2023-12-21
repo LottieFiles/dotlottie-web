@@ -93,7 +93,7 @@ export interface Config {
    *
    *  Default is true.
    */
-  subFrame?: boolean;
+  useFrameInterpolation?: boolean;
 }
 
 export class DotLottie {
@@ -145,7 +145,7 @@ export class DotLottie {
 
   private readonly _animationFrameManager = new AnimationFrameManager();
 
-  private _subFrame = true;
+  private _useFrameInterpolation = true;
 
   public constructor(config: Config) {
     this._animationLoop = this._animationLoop.bind(this);
@@ -163,7 +163,7 @@ export class DotLottie {
     this._segments = config.segments ?? null;
     this._backgroundColor = config.backgroundColor ?? DEFAULT_BG_COLOR;
     this._renderConfig = config.renderConfig ?? {};
-    this._subFrame = config.subFrame === undefined ? true : config.subFrame;
+    this._useFrameInterpolation = config.useFrameInterpolation ?? true;
 
     WasmLoader.load()
       .then((module) => {
@@ -301,8 +301,8 @@ export class DotLottie {
     return this._isFrozen;
   }
 
-  public get subFrame(): boolean {
-    return this._subFrame;
+  public get useFrameInterpolation(): boolean {
+    return this._useFrameInterpolation;
   }
 
   // #endregion Getters and Setters
@@ -347,6 +347,10 @@ export class DotLottie {
             ? this._getEffectiveEndFrame()
             : this._getEffectiveStartFrame();
 
+          this._eventManager.dispatch({
+            type: 'frame',
+            currentFrame: this._currentFrame,
+          });
           this._renderer.frame(this._currentFrame);
           this._render();
 
@@ -458,7 +462,7 @@ export class DotLottie {
       currentRawFrame = isForward ? effectiveStartFrame + frameProgress : effectiveEndFrame - frameProgress;
     }
 
-    if (!this._subFrame) {
+    if (!this._useFrameInterpolation) {
       currentRawFrame = Math.round(currentRawFrame);
     }
 
@@ -794,7 +798,7 @@ export class DotLottie {
     this._bounceCount = 0;
     this._direction = this._mode.includes('reverse') ? -1 : 1;
     this._renderConfig = config.renderConfig ?? {};
-    this._subFrame = config.subFrame === undefined ? true : config.subFrame;
+    this._useFrameInterpolation = config.useFrameInterpolation ?? true;
 
     const effectiveStartFrame = this._getEffectiveStartFrame();
     const effectiveEndFrame = this._getEffectiveEndFrame();
@@ -964,8 +968,8 @@ export class DotLottie {
     this._render();
   }
 
-  public setSubFrame(subFrame: boolean): void {
-    this._subFrame = subFrame;
+  public setUseFrameInterpolation(useFrameInterpolation: boolean): void {
+    this._useFrameInterpolation = useFrameInterpolation;
   }
 
   // #endregion
