@@ -66,6 +66,10 @@ jobs:
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
+        with:
+          # https://github.com/changesets/action/issues/201#issuecomment-1206088289
+          # check out all commits and tags so changeset can skip duplicate tags
+          fetch-depth: 0
 
       - name: ⎔ Setup pnpm@v8
         uses: pnpm/action-setup@v2
