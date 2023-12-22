@@ -8,6 +8,8 @@ import type { Mode } from '../../src';
 import { DotLottie } from '../../src';
 import { createCanvas, sleep } from '../../test-utils';
 
+DotLottie.setWasmUrl('src/renderer-wasm/bin/renderer.wasm');
+
 describe('stop animation', () => {
   let canvas: HTMLCanvasElement;
   let dotLottie: DotLottie;
