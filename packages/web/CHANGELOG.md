@@ -1,5 +1,15 @@
 # @lottiefiles/dotlottie-web
 
+## 0.10.0
+
+### Minor Changes
+
+- 8732113: feat: 🎸 add isLoaded property
+
+### Patch Changes
+
+- e57fbac: chore: 🤖 upgrade thorvg\@0.11.6
+
 ## 0.9.2
 
 ### Patch Changes
