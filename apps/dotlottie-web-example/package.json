@@ -1,5 +1,5 @@
 {
-  "name": "@lottiefiles/dotlottie-web-example",
+  "name": "dotlottie-web-example",
   "type": "module",
   "private": true,
   "scripts": {
