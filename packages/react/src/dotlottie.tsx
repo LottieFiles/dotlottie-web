@@ -26,6 +26,7 @@ export const DotLottieReact = ({
   segments,
   speed,
   src,
+  useFrameInterpolation,
   ...props
 }: DotLottieComponentProps): JSX.Element => {
   const { DotLottieComponent, dotLottie } = useDotLottie({
@@ -38,6 +39,7 @@ export const DotLottieReact = ({
     segments,
     renderConfig,
     backgroundColor,
+    useFrameInterpolation,
   });
 
   React.useEffect(() => {

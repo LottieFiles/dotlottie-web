@@ -104,6 +104,7 @@ allCanvas.forEach((canvas) => {
     loop: true,
     autoplay: true,
     backgroundColor,
+    useFrameInterpolation: false,
   });
 
   window.addEventListener('resize', () => {
@@ -127,6 +128,7 @@ fetch('/hamster.lottie')
       segments: [10, 90],
       speed: 1,
       backgroundColor: '#800080ff',
+      useFrameInterpolation: false,
     });
 
     const playPauseButton = document.getElementById('playPause') as HTMLButtonElement;

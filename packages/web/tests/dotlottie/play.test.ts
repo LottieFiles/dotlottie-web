@@ -189,4 +189,103 @@ describe('play animation', () => {
     expect(dotLottie.isStopped).toBe(true);
     expect(dotLottie.isFrozen).toBe(false);
   });
+
+  test('animation duration and frame rate accuracy with frame interpolation disabled', async () => {
+    const onFrame = vi.fn();
+    const onCompleted = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+      autoplay: true,
+      useFrameInterpolation: false,
+    });
+
+    let playTime = 0;
+    let completedTime = 0;
+
+    // 50 milliseconds as timing tolerance
+    const timingTolerance = 50;
+
+    dotLottie.addEventListener('play', () => {
+      playTime = performance.now();
+    });
+    dotLottie.addEventListener('complete', () => {
+      completedTime = performance.now();
+    });
+
+    dotLottie.addEventListener('frame', onFrame);
+    dotLottie.addEventListener('complete', onCompleted);
+
+    await vi.waitFor(() => expect(onCompleted).toHaveBeenCalledTimes(1), {
+      // wait for the animation to complete
+      timeout: dotLottie.duration * 1000 + 2000,
+    });
+
+    expect(onFrame).toHaveBeenNthCalledWith(1, {
+      type: 'frame',
+      currentFrame: 0,
+    });
+    expect(onFrame).toHaveBeenLastCalledWith({
+      type: 'frame',
+      currentFrame: dotLottie.totalFrames - 1,
+    });
+    expect(onFrame).toHaveBeenCalledTimes(dotLottie.totalFrames);
+
+    const actualDuration = completedTime - playTime;
+    const expectedDuration = dotLottie.duration * 1000;
+    const durationDiff = Math.abs(actualDuration - expectedDuration);
+
+    expect(durationDiff).toBeLessThanOrEqual(timingTolerance);
+  });
+
+  test('animation duration and frame rate accuracy with frame interpolation enabled', async () => {
+    const onFrame = vi.fn();
+    const onCompleted = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+      autoplay: true,
+      // enabled by default
+      // useFrameInterpolation: true,
+    });
+
+    let playTime = 0;
+    let completedTime = 0;
+
+    // 50 milliseconds as timing tolerance
+    const timingTolerance = 50;
+
+    dotLottie.addEventListener('play', () => {
+      playTime = performance.now();
+    });
+    dotLottie.addEventListener('complete', () => {
+      completedTime = performance.now();
+    });
+
+    dotLottie.addEventListener('frame', onFrame);
+    dotLottie.addEventListener('complete', onCompleted);
+
+    await vi.waitFor(() => expect(onCompleted).toHaveBeenCalledTimes(1), {
+      // wait for the animation to complete
+      timeout: dotLottie.duration * 1000 + 2000,
+    });
+
+    expect(onFrame).toHaveBeenNthCalledWith(1, {
+      type: 'frame',
+      currentFrame: 0,
+    });
+    expect(onFrame).toHaveBeenLastCalledWith({
+      type: 'frame',
+      currentFrame: dotLottie.totalFrames - 1,
+    });
+    expect(onFrame.mock.calls.length).toBeGreaterThan(dotLottie.totalFrames);
+
+    const actualDuration = completedTime - playTime;
+    const expectedDuration = dotLottie.duration * 1000;
+    const durationDiff = Math.abs(actualDuration - expectedDuration);
+
+    expect(durationDiff).toBeLessThanOrEqual(timingTolerance);
+  });
 });

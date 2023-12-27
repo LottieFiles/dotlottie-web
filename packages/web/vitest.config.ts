@@ -2,8 +2,6 @@
  * Copyright 2023 Design Barn Inc.
  */
 
-import path from 'node:path';
-
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -19,6 +17,5 @@ export default defineConfig({
     },
     testTimeout: 10000,
     cache: false,
-    setupFiles: [path.resolve(__dirname, 'setup-files.ts')],
   },
 });

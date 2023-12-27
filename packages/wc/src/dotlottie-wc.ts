@@ -28,6 +28,8 @@ export class DotLottieWC extends LitElement {
 
   @property({ type: Object }) public renderConfig: Config['renderConfig'];
 
+  @property({ type: Boolean }) public useFrameInterpolation: Config['useFrameInterpolation'];
+
   @state() public dotLottie: DotLottie | null = null;
 
   private readonly _intersectionObserver: IntersectionObserver;
@@ -99,6 +101,7 @@ export class DotLottieWC extends LitElement {
         segments: this.segments,
         mode: this.mode,
         renderConfig: this.renderConfig,
+        useFrameInterpolation: this.useFrameInterpolation,
       });
       this._intersectionObserver.observe(canvas);
       this._resizeObserver.observe(canvas);
