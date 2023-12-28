@@ -11,7 +11,9 @@ import { createCanvas } from '@napi-rs/canvas';
 import GIFEncoder from 'gif-encoder';
 import minimist from 'minimist';
 
-const wasmBase64 = fs.readFileSync('./node_modules/@lottiefiles/dotlottie-web/dist/renderer.wasm').toString('base64');
+const wasmBase64 = fs
+  .readFileSync('./node_modules/@lottiefiles/dotlottie-web/dist/wasm/renderer.wasm')
+  .toString('base64');
 const wasmDataUri = `data:application/octet-stream;base64,${wasmBase64}`;
 
 // This is only required for testing the local version of the renderer
