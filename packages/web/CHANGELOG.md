@@ -1,5 +1,18 @@
 # @lottiefiles/dotlottie-web
 
+## 0.11.0
+
+### Minor Changes
+
+- 495a3d5: refactor: utilize jsDelivr CDN as the primary source for loading the renderer.wasm, with unpkg serving as the
+  fallback CDN
+- 13a5217: feat: 🎸 useFrameInterpolation
+- 495a3d5: fix: 🐛 ability to run DotLottie in web workers
+
+### Patch Changes
+
+- 495a3d5: chore: avoid bundling for the ESM build target
+
 ## 0.10.0
 
 ### Minor Changes
