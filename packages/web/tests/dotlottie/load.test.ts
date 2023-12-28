@@ -7,7 +7,7 @@ import { describe, afterEach, beforeEach, test, expect, vi } from 'vitest';
 import { DotLottie } from '../../src';
 import { createCanvas, sleep } from '../../test-utils';
 
-DotLottie.setWasmUrl('src/renderer-wasm/bin/renderer.wasm');
+DotLottie.setWasmUrl('src/wasm/renderer.wasm');
 
 describe('load animation', () => {
   let canvas: HTMLCanvasElement;

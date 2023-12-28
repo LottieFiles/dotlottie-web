@@ -8,7 +8,7 @@ import { DotLottie } from '../../src';
 import { createCanvas, sleep } from '../../test-utils';
 
 // to use the local wasm file
-DotLottie.setWasmUrl('src/renderer-wasm/bin/renderer.wasm');
+DotLottie.setWasmUrl('src/wasm/renderer.wasm');
 
 describe('play animation', () => {
   let canvas: HTMLCanvasElement;

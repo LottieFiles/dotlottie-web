@@ -5,4 +5,4 @@
 export * from './dotlottie';
 export * from './event-manager';
 export * from './utils';
-export * from './renderer-wasm';
+export * from './renderer-loader';

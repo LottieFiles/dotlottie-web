@@ -71,11 +71,6 @@ ninja -C build_wasm/
 # Change back to the parent directory
 cd "$DIR"
 
-# Delete the src/renderer-wasm/bin directory if it exists
-if [ -d "$DIR/src/renderer-wasm/bin" ]; then
-  rm -r "$DIR/src/renderer-wasm/bin"
-fi
-
 # Create a unique temporary file to hold the cross file after substitution
 TMPFILE=$(mktemp /tmp/wasm_cross.XXXXXX)
 
@@ -87,15 +82,15 @@ sed "s|EMSDK:|$EMSDK_PATH|g" "$DIR/wasm_cross.txt" > "$TMPFILE"
 check_command_success "Error substituting EMSDK path in wasm_cross.txt"
 
 # Setup meson build with the cross file
-meson --cross-file "$TMPFILE" src/renderer-wasm/bin
+meson --cross-file "$TMPFILE" src/wasm
 check_command_success "Error setting up meson"
 
 # Build using ninja
-ninja -C src/renderer-wasm/bin/
+ninja -C src/wasm/
 check_command_success "Error during ninja build"
 
-# Remove all non .js and .wasm files
-find "$DIR/src/renderer-wasm/bin" -type f ! \( -name "*.js" -o -name "*.wasm" \) -delete
+# Remove all non .js, .ts and .wasm files
+find "$DIR/src/wasm" -type f ! \( -name "*.js" -o -name "*.wasm" -o -name "*.ts" \) -delete
 
 # Remove unwanted directories
-rm -rf "$DIR/src/renderer-wasm/bin/meson-info" "$DIR/src/renderer-wasm/bin/meson-logs" "$DIR/src/renderer-wasm/bin/meson-private" "$DIR/src/renderer-wasm/bin/renderer.js.p"
+rm -rf "$DIR/src/wasm/meson-info" "$DIR/src/wasm/meson-logs" "$DIR/src/wasm/meson-private" "$DIR/src/wasm/renderer.js.p"
