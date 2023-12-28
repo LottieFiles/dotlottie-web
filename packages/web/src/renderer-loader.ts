@@ -2,41 +2,25 @@
  * Copyright 2023 Design Barn Inc.
  */
 
-import pkg from '../../package.json';
+import pkg from '../package.json';
 
-import createRendererModule from './bin/renderer';
-
-export interface Renderer {
-  duration(): number;
-  error(): string;
-  frame(no: number): boolean;
-  load(data: string, width: number, height: number): boolean;
-  render(): Uint8Array;
-  resize(width: number, height: number): void;
-  setBgColor(color: number): void;
-  size(): Float32Array;
-  totalFrames(): number;
-  update(): boolean;
-}
-
-interface Module {
-  Renderer: new () => Renderer;
-}
+import type { Module } from './wasm';
+import { createRendererModule } from './wasm';
 
 /**
- * WasmLoader is a utility class for loading WebAssembly modules.
+ * RendererLoader is a utility class for loading WebAssembly modules.
  * It provides methods to load modules with a primary URL and a backup URL.
  */
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
-export class WasmLoader {
+export class RendererLoader {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   private static _ModulePromise: Promise<Module> | null = null;
 
   // URL for the WASM file, constructed using package information
-  private static _wasmURL = `https://unpkg.com/${pkg.name}@${pkg.version}/dist/renderer.wasm`;
+  private static _wasmURL = `https://cdn.jsdelivr.net/npm/${pkg.name}@${pkg.version}/dist/wasm/renderer.wasm`;
 
   private constructor() {
-    throw new Error('WasmLoader is a static class and cannot be instantiated.');
+    throw new Error('RendererLoader is a static class and cannot be instantiated.');
   }
 
   private static async _tryLoad(url: string): Promise<Module> {
@@ -53,7 +37,7 @@ export class WasmLoader {
   private static async _loadWithBackup(): Promise<Module> {
     if (!this._ModulePromise) {
       this._ModulePromise = this._tryLoad(this._wasmURL).catch(async (initialError): Promise<Module> => {
-        const backupUrl = `https://cdn.jsdelivr.net/npm/${pkg.name}@${pkg.version}/dist/renderer.wasm`;
+        const backupUrl = `https://unpkg.com/${pkg.name}@${pkg.version}/dist/wasm/renderer.wasm`;
 
         console.warn(`Trying backup URL for WASM loading: ${backupUrl}`);
         try {

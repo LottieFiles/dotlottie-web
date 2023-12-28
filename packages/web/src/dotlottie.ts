@@ -9,9 +9,9 @@ import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER, MS_TO_SEC_FACTOR, DEFAULT_BG_COLOR } from './constants';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
-import type { Renderer } from './renderer-wasm';
-import { WasmLoader } from './renderer-wasm';
+import { RendererLoader } from './renderer-loader';
 import { getAnimationJSONFromDotLottie, loadAnimationJSONFromURL, hexStringToRGBAInt } from './utils';
+import type { Renderer } from './wasm';
 
 export type Mode = 'forward' | 'reverse' | 'bounce' | 'bounce-reverse';
 
@@ -97,7 +97,7 @@ export interface Config {
 }
 
 export class DotLottie {
-  private readonly _canvas: HTMLCanvasElement;
+  private readonly _canvas: HTMLCanvasElement | OffscreenCanvas;
 
   private _context: CanvasRenderingContext2D | null;
 
@@ -165,7 +165,7 @@ export class DotLottie {
     this._renderConfig = config.renderConfig ?? {};
     this._useFrameInterpolation = config.useFrameInterpolation ?? true;
 
-    WasmLoader.load()
+    RendererLoader.load()
       .then((module) => {
         this._renderer = new module.Renderer();
 
@@ -186,6 +186,10 @@ export class DotLottie {
   }
 
   // #region Getters and Setters
+
+  public get canvas(): HTMLCanvasElement | OffscreenCanvas {
+    return this._canvas;
+  }
 
   public get mode(): Mode {
     return this._mode;
@@ -340,7 +344,10 @@ export class DotLottie {
           this._setupAnimationDetails();
           this._isLoaded = true;
           this._eventManager.dispatch({ type: 'load' });
-          this.resize();
+
+          if (IS_BROWSER) {
+            this.resize();
+          }
 
           // render the first frame of the animation
           this._currentFrame = this._mode.includes('reverse')
@@ -878,7 +885,7 @@ export class DotLottie {
    * @param url - The URL of the WASM file to load.
    */
   public static setWasmUrl(url: string): void {
-    WasmLoader.setWasmUrl(url);
+    RendererLoader.setWasmUrl(url);
   }
 
   /**
@@ -955,14 +962,26 @@ export class DotLottie {
    *
    */
   public resize(): void {
-    if (!IS_BROWSER) return;
+    if (!IS_BROWSER) {
+      console.warn(
+        `
+          Resize operation failed: The canvas cannot be resized in a Node.js or Web Worker environment.
+          In these environments, you must manually set the canvas size.
+        `,
+      );
 
-    const { height, width } = this._canvas.getBoundingClientRect();
+      return;
+    }
 
+    if (!(this._canvas instanceof HTMLCanvasElement)) {
+      return;
+    }
+
+    const { height: clientHeight, width: clientWidth } = this._canvas.getBoundingClientRect();
     const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
 
-    this._canvas.width = width * dpr;
-    this._canvas.height = height * dpr;
+    this._canvas.width = clientWidth * dpr;
+    this._canvas.height = clientHeight * dpr;
 
     // resize the renderer and render the current frame
     this._render();

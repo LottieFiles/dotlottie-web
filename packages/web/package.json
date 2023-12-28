@@ -19,8 +19,20 @@
     "node": ">=18"
   },
   "main": "dist/index.js",
-  "module": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./*": "./dist/*.js",
+    "./package.json": "./package.json"
+  },
   "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/*",
+        "dist/index.d.ts"
+      ]
+    }
+  },
   "files": [
     "dist"
   ],
@@ -31,7 +43,8 @@
     "animation",
     "web",
     "canvas",
-    "javascript"
+    "javascript",
+    "thorvg"
   ],
   "scripts": {
     "build": "tsup",
@@ -39,7 +52,6 @@
     "build:wasm:docker": "./docker_build_wasm.sh",
     "dev": "tsup --watch",
     "lint": "eslint --fix .",
-    "size:why": "size-limit --why --clean-dir --save-bundle ./tmp",
     "stats:eslint": "cross-env TIMING=1 eslint .",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
     "test": "vitest run --browser.headless --retry 2",
@@ -51,15 +63,15 @@
     "@dotlottie/dotlottie-js": "^0.6.0"
   },
   "devDependencies": {
-    "@types/node": "^20.10.2",
-    "@vitest/browser": "^1.0.2",
-    "@vitest/coverage-istanbul": "^1.0.2",
+    "@types/node": "^20.10.5",
+    "@vitest/browser": "^1.1.0",
+    "@vitest/coverage-istanbul": "^1.1.0",
     "cross-env": "7.0.3",
     "nyc": "^15.1.0",
-    "tsup": "7.2.0",
+    "tsup": "8.0.1",
     "typescript": "5.0.4",
-    "vitest": "^1.0.2",
-    "webdriverio": "^8.24.12"
+    "vitest": "^1.1.0",
+    "webdriverio": "^8.27.0"
   },
   "publishConfig": {
     "access": "public"

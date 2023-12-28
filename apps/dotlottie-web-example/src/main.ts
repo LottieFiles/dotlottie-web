@@ -8,7 +8,7 @@ import './styles.css';
 import type { Mode } from '@lottiefiles/dotlottie-web';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 
-import wasmUrl from '../../../packages/web/dist/renderer.wasm?url';
+import wasmUrl from '../../../packages/web/dist/wasm/renderer.wasm?url';
 
 const app = document.getElementById('app') as HTMLDivElement;
 

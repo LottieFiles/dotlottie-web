@@ -4,7 +4,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { IS_BROWSER } from './constants';
+import { IS_NODE } from './constants';
 
 interface AnimationFrameStrategy {
   cancelAnimationFrame(id: number): void;
@@ -13,11 +13,11 @@ interface AnimationFrameStrategy {
 
 class WebAnimationFrameStrategy implements AnimationFrameStrategy {
   public requestAnimationFrame(callback: (time: number) => void): number {
-    return window.requestAnimationFrame(callback);
+    return requestAnimationFrame(callback);
   }
 
   public cancelAnimationFrame(id: number): void {
-    window.cancelAnimationFrame(id);
+    cancelAnimationFrame(id);
   }
 }
 
@@ -51,7 +51,7 @@ export class AnimationFrameManager {
   private readonly _strategy: AnimationFrameStrategy;
 
   public constructor() {
-    this._strategy = IS_BROWSER ? new WebAnimationFrameStrategy() : new NodeAnimationFrameStrategy();
+    this._strategy = IS_NODE ? new NodeAnimationFrameStrategy() : new WebAnimationFrameStrategy();
   }
 
   public requestAnimationFrame(callback: (time: number) => void): number {
