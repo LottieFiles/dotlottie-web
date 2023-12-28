@@ -7,7 +7,7 @@ import { describe, afterEach, beforeEach, test, expect, vi } from 'vitest';
 import { DotLottie } from '../../src';
 import { createCanvas } from '../../test-utils';
 
-DotLottie.setWasmUrl('src/renderer-wasm/bin/renderer.wasm');
+DotLottie.setWasmUrl('src/wasm/renderer.wasm');
 
 describe('freeze and unfreeze animation', () => {
   let canvas: HTMLCanvasElement;
