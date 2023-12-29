@@ -174,7 +174,17 @@ public:
         if (color == bgColor)
             return;
 
-        bgColor = color;
+        this->bgColor = color;
+
+        if (background)
+        {
+            uint8_t r = (bgColor >> 24) & 0xFF;
+            uint8_t g = (bgColor >> 16) & 0xFF;
+            uint8_t b = (bgColor >> 8) & 0xFF;
+            uint8_t a = bgColor & 0xFF;
+
+            background->fill(r, g, b, a);
+        }
 
         updated = true;
     }
@@ -207,14 +217,6 @@ public:
         }
         animation->picture()->scale(scale);
         animation->picture()->translate(shiftX, shiftY);
-
-        if (background)
-        {
-
-            background->reset();
-            background->appendRect(shiftX, shiftY, psize[0], psize[1]);
-            background->scale(scale);
-        }
 
         updated = true;
     }
