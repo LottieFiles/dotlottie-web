@@ -97,11 +97,10 @@ describe('stop animation', () => {
     expect(dotLottie.loopCount).toBe(1);
   });
 
-  // 'b ounce', 'bounce-reverse' are buggy
-  test.each(['forward', 'reverse'])('stop animation in %s mode', async (mode) => {
+  test.each(['forward', 'reverse', 'bounce', 'bounce-reverse'])('stop animation in %s mode', async (mode) => {
     const onFrame = vi.fn();
     const onPlay = vi.fn();
-    // const onCompelete = vi.fn();
+    const onCompelete = vi.fn();
 
     dotLottie = new DotLottie({
       canvas,
@@ -112,15 +111,15 @@ describe('stop animation', () => {
 
     dotLottie.addEventListener('frame', onFrame);
     dotLottie.addEventListener('play', onPlay);
-    // do tLottie.addEventListener('complete', onCompelete);
+    dotLottie.addEventListener('complete', onCompelete);
 
-    await vi.waitFor(() => expect(onPlay).toHaveBeenCalled(), { timeout: 3000 });
+    await vi.waitFor(() => expect(onPlay).toHaveBeenCalledTimes(1));
 
-    await sleep(400);
+    await sleep(dotLottie.duration * 1000 * 0.25);
 
     dotLottie.stop();
 
-    // ex pect(onCompelete).not.toHaveBeenCalled();
+    expect(onCompelete).not.toHaveBeenCalled();
 
     const expectedFrame = mode.includes('reverse') ? dotLottie.totalFrames - 1 : 0;
 

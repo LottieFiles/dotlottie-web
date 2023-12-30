@@ -21,19 +21,38 @@ describe('pause animation', () => {
     dotLottie.destroy();
   });
 
-  test.skip('pause and resume animation', async () => {
+  test('pause and resume animation', async () => {
+    const onComplete = vi.fn();
+    const onPause = vi.fn();
+
     dotLottie = new DotLottie({
       canvas,
       autoplay: true,
       src,
+      useFrameInterpolation: false,
     });
 
-    await vi.waitFor(() => expect(dotLottie.currentFrame).toBeGreaterThan(dotLottie.totalFrames / 2));
+    dotLottie.addEventListener('complete', onComplete);
+    dotLottie.addEventListener('pause', onPause);
+
+    await vi.waitUntil(() => dotLottie.isPlaying);
+
+    await vi.waitUntil(() => dotLottie.currentFrame >= (dotLottie.totalFrames - 1) / 2, {
+      timeout: dotLottie.duration * 2000,
+    });
+
     expect(dotLottie.isPaused).toBe(false);
+
+    const currentFrameBeforePause = dotLottie.currentFrame;
 
     dotLottie.pause();
 
     expect(dotLottie.isPaused).toBe(true);
+
+    expect(dotLottie.currentFrame).toBe(currentFrameBeforePause);
+
+    expect(onComplete).not.toHaveBeenCalled();
+    expect(onPause).toHaveBeenCalledTimes(1);
   });
 
   test('animation frame remains constant during pause', async () => {
