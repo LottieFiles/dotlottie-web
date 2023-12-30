@@ -8,14 +8,21 @@ export default defineConfig({
   test: {
     browser: {
       enabled: true,
-      name: 'firefox',
+      name: 'chrome',
     },
     coverage: {
       provider: 'istanbul',
       include: ['src/**/*.ts'],
-      reporter: ['json-summary', 'text-summary', 'lcov'],
+      reporter: ['json', 'json-summary', 'text-summary', 'lcov'],
+      thresholds: {
+        statements: 88,
+        branches: 80,
+        functions: 92,
+        lines: 90,
+      },
     },
     testTimeout: 10000,
     cache: false,
+    setupFiles: ['./tests/setup.ts'],
   },
 });

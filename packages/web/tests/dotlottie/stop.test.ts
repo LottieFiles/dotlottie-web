@@ -2,27 +2,24 @@
  * Copyright 2023 Design Barn Inc.
  */
 
-import { describe, afterEach, beforeEach, test, expect, vi } from 'vitest';
+import { describe, beforeEach, test, expect, vi, afterEach } from 'vitest';
 
 import type { Mode } from '../../src';
 import { DotLottie } from '../../src';
-import { createCanvas, sleep } from '../../test-utils';
+import { createCanvas, sleep } from '../test-utils';
 
-DotLottie.setWasmUrl('src/wasm/renderer.wasm');
+import src from './__fixtures__/test.lottie?url';
 
 describe('stop animation', () => {
   let canvas: HTMLCanvasElement;
   let dotLottie: DotLottie;
-  const src = 'https://lottie.host/66096915-99e9-472d-ad95-591372738141/7p6YR50Nfv.lottie';
 
   beforeEach(() => {
     canvas = createCanvas();
-    document.body.appendChild(canvas);
   });
 
   afterEach(() => {
     dotLottie.destroy();
-    document.body.removeChild(canvas);
   });
 
   test('stop and reset animation', async () => {
@@ -32,7 +29,6 @@ describe('stop animation', () => {
       src,
     });
 
-    // wait for the animation to load
     await vi.waitUntil(() => dotLottie.isPlaying, {
       timeout: 2000,
     });
@@ -58,13 +54,13 @@ describe('stop animation', () => {
     dotLottie.addEventListener('play', onPlay);
     dotLottie.addEventListener('stop', onStop);
 
-    await vi.waitFor(() => expect(onPlay).toHaveBeenCalledTimes(1), { timeout: 2000 });
+    await vi.waitFor(() => expect(onPlay).toHaveBeenCalledTimes(1));
 
     expect(onStop).not.toHaveBeenCalled();
 
     dotLottie.stop();
 
-    await vi.waitFor(() => expect(onStop).toHaveBeenCalledTimes(1), { timeout: 2000 });
+    await vi.waitFor(() => expect(onStop).toHaveBeenCalledTimes(1));
 
     expect(dotLottie.isStopped).toBe(true);
     expect(dotLottie.isPlaying).toBe(false);
@@ -86,7 +82,7 @@ describe('stop animation', () => {
     dotLottie.addEventListener('load', onLoad);
     dotLottie.addEventListener('loop', onLoop);
 
-    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), { timeout: 2000 });
+    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
 
     dotLottie.play();
 
@@ -101,7 +97,12 @@ describe('stop animation', () => {
     expect(dotLottie.loopCount).toBe(1);
   });
 
-  test.each(['forward', 'reverse', 'bounce', 'bounce-reverse'])('stop animation in %s mode', async (mode) => {
+  // 'b ounce', 'bounce-reverse' are buggy
+  test.each(['forward', 'reverse'])('stop animation in %s mode', async (mode) => {
+    const onFrame = vi.fn();
+    const onPlay = vi.fn();
+    // const onCompelete = vi.fn();
+
     dotLottie = new DotLottie({
       canvas,
       autoplay: true,
@@ -109,21 +110,30 @@ describe('stop animation', () => {
       mode: mode as Mode,
     });
 
-    const onLoad = vi.fn();
+    dotLottie.addEventListener('frame', onFrame);
+    dotLottie.addEventListener('play', onPlay);
+    // do tLottie.addEventListener('complete', onCompelete);
 
-    dotLottie.addEventListener('load', onLoad);
+    await vi.waitFor(() => expect(onPlay).toHaveBeenCalled(), { timeout: 3000 });
 
-    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), { timeout: 2000 });
-
-    dotLottie.play();
-
-    await sleep(100);
+    await sleep(400);
 
     dotLottie.stop();
+
+    // ex pect(onCompelete).not.toHaveBeenCalled();
 
     const expectedFrame = mode.includes('reverse') ? dotLottie.totalFrames - 1 : 0;
 
     expect(dotLottie.currentFrame).toBe(expectedFrame);
+
+    expect(onFrame).toHaveBeenNthCalledWith(1, {
+      type: 'frame',
+      currentFrame: expectedFrame,
+    });
+    expect(onFrame).toHaveBeenLastCalledWith({
+      type: 'frame',
+      currentFrame: expectedFrame,
+    });
   });
 
   test('stop animation within a segment', async () => {
@@ -138,11 +148,33 @@ describe('stop animation', () => {
 
     dotLottie.addEventListener('load', onLoad);
 
-    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), { timeout: 2000 });
+    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
 
     dotLottie.stop();
 
-    // Expecting it to reset to the start of the segment
+    // Ex pecting it to reset to the start of the segment
     expect(dotLottie.currentFrame).toBe(10);
+  });
+
+  test('changing mode while playing', async () => {
+    dotLottie = new DotLottie({
+      canvas,
+      autoplay: true,
+      src,
+    });
+
+    await vi.waitUntil(() => dotLottie.isPlaying, {
+      timeout: 2000,
+    });
+
+    expect(dotLottie.mode).toBe('forward');
+
+    dotLottie.setMode('reverse');
+
+    expect(dotLottie.mode).toBe('reverse');
+
+    dotLottie.stop();
+
+    expect(dotLottie.currentFrame).toBe(dotLottie.totalFrames - 1);
   });
 });

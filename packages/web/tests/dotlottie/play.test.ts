@@ -2,29 +2,23 @@
  * Copyright 2023 Design Barn Inc.
  */
 
-import { describe, afterEach, beforeEach, test, expect, vi } from 'vitest';
+import { describe, beforeEach, test, expect, vi, afterEach } from 'vitest';
 
 import { DotLottie } from '../../src';
-import { createCanvas, sleep } from '../../test-utils';
+import { createCanvas, sleep } from '../test-utils';
 
-// to use the local wasm file
-DotLottie.setWasmUrl('src/wasm/renderer.wasm');
+import src from './__fixtures__/test.lottie?url';
 
 describe('play animation', () => {
   let canvas: HTMLCanvasElement;
   let dotLottie: DotLottie;
-  const src = 'https://lottie.host/66096915-99e9-472d-ad95-591372738141/7p6YR50Nfv.lottie';
 
   beforeEach(() => {
     canvas = createCanvas();
-    document.body.appendChild(canvas);
-    vi.clearAllMocks();
-    vi.clearAllTimers();
   });
 
   afterEach(() => {
     dotLottie.destroy();
-    document.body.removeChild(canvas);
   });
 
   test('play animation with `autoplay` set to false, verify it does not play', async () => {
@@ -41,11 +35,8 @@ describe('play animation', () => {
 
     dotLottie.addEventListener('play', onPlay);
 
-    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), {
-      timeout: 2000,
-    });
+    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
 
-    // wait briefly to see if the animation starts
     await sleep(500);
 
     expect(onPlay).not.toHaveBeenCalled();
@@ -66,9 +57,7 @@ describe('play animation', () => {
 
     dotLottie.addEventListener('play', onPlay);
 
-    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), {
-      timeout: 2000,
-    });
+    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
 
     dotLottie.play();
 
@@ -91,9 +80,7 @@ describe('play animation', () => {
 
     dotLottie.addEventListener('play', onPlay);
 
-    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), {
-      timeout: 2000,
-    });
+    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
 
     dotLottie.play();
 
@@ -127,9 +114,7 @@ describe('play animation', () => {
 
     dotLottie.addEventListener('play', onPlay);
 
-    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), {
-      timeout: 2000,
-    });
+    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
 
     dotLottie.play();
 
@@ -172,9 +157,7 @@ describe('play animation', () => {
 
     dotLottie.addEventListener('play', onPlay);
 
-    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), {
-      timeout: 2000,
-    });
+    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
 
     dotLottie.play();
 
@@ -287,5 +270,29 @@ describe('play animation', () => {
     const durationDiff = Math.abs(actualDuration - expectedDuration);
 
     expect(durationDiff).toBeLessThanOrEqual(timingTolerance);
+  });
+
+  test('remove event listeners', async () => {
+    const onPlay = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+      autoplay: true,
+    });
+
+    dotLottie.addEventListener('play', onPlay);
+
+    await vi.waitUntil(() => dotLottie.isPlaying);
+
+    expect(onPlay).toHaveBeenCalledTimes(1);
+
+    dotLottie.stop();
+
+    dotLottie.removeEventListener('play', onPlay);
+
+    dotLottie.play();
+
+    expect(onPlay).toHaveBeenCalledTimes(1);
   });
 });
