@@ -10,7 +10,7 @@ export interface Renderer {
   error(): string;
   frame(no: number): boolean;
   load(data: string, width: number, height: number): boolean;
-  render(): Uint8Array;
+  render(): Uint8ClampedArray;
   resize(width: number, height: number): void;
   setBgColor(color: number): void;
   size(): Float32Array;
