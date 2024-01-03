@@ -96,4 +96,15 @@ describe('EventManager', () => {
 
     expect(manager['_eventListeners'].has('play')).toBe(false);
   });
+
+  test('does nothing when attempting to add a listener that already exists', () => {
+    const manager = new EventManager();
+
+    const listener = vi.fn();
+
+    manager.addEventListener('play', listener);
+    manager.addEventListener('play', listener);
+
+    expect(manager['_eventListeners'].get('play')?.size).toBe(1);
+  });
 });
