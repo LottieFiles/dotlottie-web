@@ -1,8 +1,8 @@
 # @lottiefiles/dotlottie-web
 
 ![npm](https://img.shields.io/npm/v/@lottiefiles/dotlottie-web)
-![npm bundle size](https://img.shields.io/bundlephobia/minzip/%40lottiefiles%2Fdotlottie-web)
-![npm](https://img.shields.io/npm/dt/%40lottiefiles/dotlottie-web)
+![npm bundle size](https://img.shields.io/bundlephobia/minzip/@lottiefiles/dotlottie-web)
+![npm](https://img.shields.io/npm/dt/@lottiefiles/dotlottie-web)
 ![NPM](https://img.shields.io/npm/l/@lottiefiles/dotlottie-web)
 
 <p align="center">
