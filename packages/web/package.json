@@ -54,8 +54,8 @@
     "lint": "eslint --fix .",
     "stats:eslint": "cross-env TIMING=1 eslint .",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
-    "test": "vitest run --browser.headless --retry 2",
-    "test:coverage": "pnpm test -- --coverage",
+    "test": "vitest run --browser.headless",
+    "test:coverage": "vitest run --browser.headless --coverage",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },

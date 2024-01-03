@@ -13,5 +13,7 @@ export const createCanvas = (): HTMLCanvasElement => {
   canvas.style.top = '0';
   canvas.style.right = '0';
 
+  document.body.appendChild(canvas);
+
   return canvas;
 };

@@ -1,9 +1,10 @@
 # @lottiefiles/dotlottie-web
 
 ![npm](https://img.shields.io/npm/v/@lottiefiles/dotlottie-web)
-![npm bundle size](https://img.shields.io/bundlephobia/minzip/%40lottiefiles%2Fdotlottie-web)
-![npm](https://img.shields.io/npm/dt/%40lottiefiles/dotlottie-web)
+![npm bundle size](https://img.shields.io/bundlephobia/minzip/@lottiefiles/dotlottie-web)
+![npm](https://img.shields.io/npm/dm/@lottiefiles/dotlottie-web)
 ![NPM](https://img.shields.io/npm/l/@lottiefiles/dotlottie-web)
+[![](https://data.jsdelivr.com/v1/package/npm/@lottiefiles/dotlottie-web/badge)](https://www.jsdelivr.com/package/npm/@lottiefiles/dotlottie-web)
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/23125742/201124166-c2a0bc2a-018b-463b-b291-944fb767b5c2.png" />
@@ -56,7 +57,7 @@ After installation, you can import `DotLottie` in your JavaScript or TypeScript 
 
 ```html
 <!-- Canvas element where the animation will be rendered -->
-<canvas id="my-canvas" width="300px" height="300px"></canvas>
+<canvas id="dotlottie-canvas" style="width: 300px; height:300px;"></canvas>
 ```
 
 ```js
@@ -65,7 +66,7 @@ import { DotLottie } from '@lottiefiles/dotlottie-web';
 const dotLottie = new DotLottie({
     autoplay: true,
     loop: true,
-    canvas: document.getElementById('my-canvas'),
+    canvas: document.querySelector('#dotlottie-canvas'),
     src: "https://lottie.host/4db68bbd-31f6-4cd8-84eb-189de081159a/IGmMCqhzpt.lottie", // or .json file
 });
 ```
@@ -87,14 +88,13 @@ const dotLottie = new DotLottie({
     <!-- Canvas element where the Lottie animation will be rendered -->
     <canvas id="canvas" width="300" height="300"></canvas>
     <script type="module">
-      import { DotLottie } from "https://unpkg.com/@lottiefiles/dotlottie-web@latest/dist/index.js";
+      import { DotLottie } from "https://cdn.jsdelivr.net/npm/@lottiefiles/dotlottie-web/+esm";
 
       new DotLottie({
         autoplay: true,
         loop: true,
         canvas: document.getElementById("canvas"),
-        src:
-          "https://lottie.host/5f7f4690-6311-4279-82e4-38c2eab146ab/niPwIBUnGa.json"
+        src: "https://lottie.host/4db68bbd-31f6-4cd8-84eb-189de081159a/IGmMCqhzpt.lottie", // or .json file
       });
     </script>
   </body>

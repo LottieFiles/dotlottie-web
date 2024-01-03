@@ -44,7 +44,7 @@ jobs:
         run: pnpm test:coverage
 
       - name: 📏 Report coverage
-        if: github.event_name == 'pull_request'
+        if: always() && github.event_name == 'pull_request'
         uses: davelosert/vitest-coverage-report-action@v2.1.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
