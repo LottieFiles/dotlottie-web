@@ -1,5 +1,14 @@
 # @lottiefiles/dotlottie-web
 
+## 0.11.1
+
+### Patch Changes
+
+- 63333c5: fix: 🐛 infer the initial direction before loading from the config mode
+- c135278: perf: ⚡️ skip re-allocating new ImageData & Uint8ClampedArray for each frame
+- 11c7ae5: fix: 🐛 update background color
+- fb3eeeb: fix: 🐛 IS_NODE -> cannot read properties of undefined
+
 ## 0.11.0
 
 ### Minor Changes
