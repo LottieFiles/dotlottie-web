@@ -147,6 +147,8 @@ export class DotLottie {
 
   private _useFrameInterpolation = true;
 
+  private _imageData: ImageData | null = null;
+
   public constructor(config: Config) {
     this._animationLoop = this._animationLoop.bind(this);
 
@@ -424,19 +426,13 @@ export class DotLottie {
     if (this._renderer.update()) {
       const buffer = this._renderer.render();
 
-      if (buffer.length === 0) {
-        console.warn('Empty buffer received from renderer.');
-
-        return;
+      if (this._imageData?.data.length !== buffer.length) {
+        this._imageData = this._context.createImageData(width, height);
       }
 
-      const clampedBuffer = new Uint8ClampedArray(buffer);
+      this._imageData.data.set(buffer);
 
-      const imageData = this._context.createImageData(width, height);
-
-      imageData.data.set(clampedBuffer);
-
-      this._context.putImageData(imageData, 0, 0);
+      this._context.putImageData(this._imageData, 0, 0);
     }
   }
 
