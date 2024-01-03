@@ -154,10 +154,6 @@ export class DotLottie {
 
     this._canvas = config.canvas;
     this._context = this._canvas.getContext('2d');
-    if (!this._context) {
-      throw new Error('2D context not supported or canvas already initialized with another context type.');
-    }
-
     this._loop = config.loop ?? false;
     this._speed = config.speed ?? 1;
     this._autoplay = config.autoplay ?? false;
@@ -166,6 +162,7 @@ export class DotLottie {
     this._backgroundColor = config.backgroundColor ?? DEFAULT_BG_COLOR;
     this._renderConfig = config.renderConfig ?? {};
     this._useFrameInterpolation = config.useFrameInterpolation ?? true;
+    this._direction = this._mode.includes('reverse') ? -1 : 1;
 
     RendererLoader.load()
       .then((module) => {
