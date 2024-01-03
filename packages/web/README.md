@@ -2,8 +2,9 @@
 
 ![npm](https://img.shields.io/npm/v/@lottiefiles/dotlottie-web)
 ![npm bundle size](https://img.shields.io/bundlephobia/minzip/@lottiefiles/dotlottie-web)
-![npm](https://img.shields.io/npm/dt/@lottiefiles/dotlottie-web)
+![npm](https://img.shields.io/npm/dm/@lottiefiles/dotlottie-web)
 ![NPM](https://img.shields.io/npm/l/@lottiefiles/dotlottie-web)
+[![](https://data.jsdelivr.com/v1/package/npm/@lottiefiles/dotlottie-web/badge)](https://www.jsdelivr.com/package/npm/@lottiefiles/dotlottie-web)
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/23125742/201124166-c2a0bc2a-018b-463b-b291-944fb767b5c2.png" />
