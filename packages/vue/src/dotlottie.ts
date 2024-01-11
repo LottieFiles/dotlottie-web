@@ -2,36 +2,48 @@
  * Copyright 2023 Design Barn Inc.
  */
 
-import { type Config, DotLottie, type EventType, type EventListener } from '@lottiefiles/dotlottie-web';
-import { type VNode, h, ref, onMounted, type Ref, watch, type SetupContext, onBeforeUnmount } from 'vue';
+import { type Config, DotLottie, type EventType, type EventListener, type Mode } from '@lottiefiles/dotlottie-web';
+import {
+  type VNode,
+  h,
+  ref,
+  onMounted,
+  type Ref,
+  watch,
+  type SetupContext,
+  onBeforeUnmount,
+  defineComponent,
+  toRefs,
+} from 'vue';
 
 export { type DotLottie };
 
 interface DotLottieVueProps extends Omit<Config, 'canvas'> {}
 
-export const DotLottieVue = {
+export const DotLottieVue = defineComponent({
   props: {
-    autoplay: { type: Boolean, require: false },
-    backgroundColor: { type: String, require: false },
-    data: { type: String, require: false },
-    loop: { type: Boolean, require: false },
-    mode: { type: String, require: false },
-    renderConfig: { type: String, require: false },
-    segments: { type: Array, require: false },
-    speed: { type: Number, require: false },
-    src: { type: String, require: false },
-    useFrameInterpolation: { type: String, require: false },
+    autoplay: { type: Boolean, required: false },
+    backgroundColor: { type: String, required: false },
+    data: { type: String, required: false },
+    loop: { type: Boolean, required: false },
+    mode: { type: String as () => Mode, required: false },
+    renderConfig: { type: Object, required: false },
+    segments: { type: Array as unknown as () => [number, number], required: false },
+    speed: { type: Number, required: false },
+    src: { type: String, required: false },
+    useFrameInterpolation: { type: Boolean, required: false },
   },
 
   setup(props: DotLottieVueProps, { attrs, expose }: SetupContext): () => VNode {
     const canvas: Ref<HTMLCanvasElement | undefined> = ref(undefined);
+    const { backgroundColor, loop, mode, segments, speed, useFrameInterpolation } = toRefs(props);
     let dotLottie: DotLottie | null = null;
     let intersectionObserver: IntersectionObserver | null = null;
     let resizeObserver: ResizeObserver | null = null;
 
     // Prop change
     watch(
-      () => props.backgroundColor,
+      () => backgroundColor?.value,
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
           dotLottie.setBackgroundColor(newVal);
@@ -39,7 +51,7 @@ export const DotLottieVue = {
       },
     );
     watch(
-      () => props.loop,
+      () => loop?.value,
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
           dotLottie.setLoop(newVal);
@@ -47,7 +59,7 @@ export const DotLottieVue = {
       },
     );
     watch(
-      () => props.mode,
+      () => mode?.value,
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
           dotLottie.setMode(newVal);
@@ -55,7 +67,7 @@ export const DotLottieVue = {
       },
     );
     watch(
-      () => props.segments,
+      () => segments?.value,
       (newVal) => {
         if (dotLottie && Array.isArray(newVal)) {
           dotLottie.setSegments(newVal[0], newVal[1]);
@@ -63,7 +75,7 @@ export const DotLottieVue = {
       },
     );
     watch(
-      () => props.speed,
+      () => speed?.value,
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
           dotLottie.setSpeed(newVal);
@@ -71,7 +83,7 @@ export const DotLottieVue = {
       },
     );
     watch(
-      () => props.useFrameInterpolation,
+      () => useFrameInterpolation?.value,
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
           dotLottie.setUseFrameInterpolation(newVal);
@@ -146,4 +158,4 @@ export const DotLottieVue = {
 
     return () => h('div', { ...attrs }, h('canvas', { style: 'height: 100%; width: 100%', ref: canvas }));
   },
-};
+});

@@ -1,7 +1,7 @@
-<script setup>
-import { onMounted, ref, watch } from 'vue';
+<script setup lang="ts">
+import { Ref, onMounted, ref } from 'vue';
 import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
-const player = ref(null);
+const player: Ref<typeof DotLottieVue | null> = ref(null);
 const loop = ref(true);
 
 function toggleLoop() {
@@ -30,9 +30,9 @@ onMounted(() => {
     player.value.addEventListener('pause', () => {
       console.log('paused');
     });
-    player.value.addEventListener('frame', ({ currentFrame }) => {
-      // console.log('Frame:', currentFrame)
-    });
+    // player.value.addEventListener('frame', ({currentFrame}) => {
+    //   console.log('Frame:', currentFrame)
+    // });
     player.value.addEventListener('complete', () => {
       console.log('completed');
     });
@@ -42,7 +42,7 @@ onMounted(() => {
 
 <template>
   <DotLottieVue
-    backgroundColor="#222"
+    background-color="#222"
     style="height: 500px; width: 500px"
     autoplay
     :loop="loop"
