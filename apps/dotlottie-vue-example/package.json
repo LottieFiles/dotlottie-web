@@ -4,9 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "vite build",
     "dev": "vite",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "run-build": "vite build"
   },
   "dependencies": {
     "@lottiefiles/dotlottie-vue": "workspace:*",
