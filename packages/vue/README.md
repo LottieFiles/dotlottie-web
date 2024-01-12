@@ -76,14 +76,15 @@ import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
-const player = ref(null);
+const playerRef = ref(null);
 
 onMounted(() => {
   if (player.value) {
-    player.value.addEventListener('pause', () => {
+    const dotLottie = player.value.getDotLottieInstance();
+    dotLottie.addEventListener('pause', () => {
       console.log('paused')
     });
-    player.value.addEventListener('frame', ({ currentFrame }) => {
+    dotlottie.addEventListener('frame', ({ currentFrame }) => {
       console.log('Frame:', currentFrame)
     });
   }
@@ -91,7 +92,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <DotLottieVue autoplay loop ref="player" src="path-to-lottie.lottie" />
+  <DotLottieVue autoplay loop ref="playerRef" src="path-to-lottie.lottie" />
 </template>
 ```
 
