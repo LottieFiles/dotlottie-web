@@ -2,38 +2,38 @@
 import { Ref, onMounted, ref } from 'vue';
 import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
 const player: Ref<typeof DotLottieVue | null> = ref(null);
-const loop = ref(true);
 
 function toggleLoop() {
-  loop.value = !loop.value;
+  const dotLottie = player.value?.getDotLottieInstance();
+  dotLottie.setLoop(!dotLottie.loop);
 }
 
 function play() {
-  player.value?.getInstance().play();
+  player.value?.getDotLottieInstance().play();
 }
 function pause() {
-  player.value?.getInstance().pause();
+  player.value?.getDotLottieInstance().pause();
 }
 function stop() {
-  player.value?.getInstance();
-  player.value?.getInstance().stop();
+  player.value?.getDotLottieInstance().stop();
 }
 
 onMounted(() => {
   if (player.value) {
-    player.value.addEventListener('play', () => {
+    const dotLottie = player.value?.getDotLottieInstance();
+    dotLottie.addEventListener('play', () => {
       console.log('play');
     });
-    player.value.addEventListener('stop', () => {
+    dotLottie.addEventListener('stop', () => {
       console.log('stop');
     });
-    player.value.addEventListener('pause', () => {
+    dotLottie.addEventListener('pause', () => {
       console.log('paused');
     });
-    // player.value.addEventListener('frame', ({currentFrame}) => {
+    // dotLottie.addEventListener('frame', ({currentFrame}) => {
     //   console.log('Frame:', currentFrame)
     // });
-    player.value.addEventListener('complete', () => {
+    dotLottie.addEventListener('complete', () => {
       console.log('completed');
     });
   }
@@ -45,7 +45,7 @@ onMounted(() => {
     background-color="#222"
     style="height: 500px; width: 500px"
     autoplay
-    :loop="loop"
+    loop
     ref="player"
     src="https://lottie.host/5525262b-4e57-4f0a-8103-cfdaa7c8969e/VCYIkooYX8.json"
   />

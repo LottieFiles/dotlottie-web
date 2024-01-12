@@ -2,4 +2,4 @@
 '@lottiefiles/dotlottie-vue': minor
 ---
 
-vue init
+feat: dotlottie-vue init release

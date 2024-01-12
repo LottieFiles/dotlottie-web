@@ -2,7 +2,7 @@
  * Copyright 2023 Design Barn Inc.
  */
 
-import { type Config, DotLottie, type EventType, type EventListener, type Mode } from '@lottiefiles/dotlottie-web';
+import { type Config, DotLottie, type Mode } from '@lottiefiles/dotlottie-web';
 import {
   type VNode,
   h,
@@ -18,13 +18,13 @@ import {
 
 export { type DotLottie };
 
-interface DotLottieVueProps extends Omit<Config, 'canvas'> {}
+export interface DotLottieVueProps extends Omit<Config, 'canvas'> {}
 
 export const DotLottieVue = defineComponent({
   props: {
     autoplay: { type: Boolean, required: false },
     backgroundColor: { type: String, required: false },
-    data: { type: String, required: false },
+    data: { type: [String, ArrayBuffer], required: false },
     loop: { type: Boolean, required: false },
     mode: { type: String as () => Mode, required: false },
     renderConfig: { type: Object, required: false },
@@ -69,7 +69,8 @@ export const DotLottieVue = defineComponent({
     watch(
       () => segments?.value,
       (newVal) => {
-        if (dotLottie && Array.isArray(newVal)) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (dotLottie && Array.isArray(newVal) && newVal.length === 2) {
           dotLottie.setSegments(newVal[0], newVal[1]);
         }
       },
@@ -132,8 +133,6 @@ export const DotLottieVue = defineComponent({
         ...props,
       });
 
-      dotLottie.resize();
-
       intersectionObserver = getIntersectionObserver();
       resizeObserver = getResizeObserver();
       intersectionObserver.observe(canvas.value);
@@ -149,11 +148,7 @@ export const DotLottieVue = defineComponent({
     });
 
     expose({
-      getInstance: (): DotLottie | null => dotLottie,
-      addEventListener: <T extends EventType>(type: T, listener: EventListener<T>) =>
-        dotLottie?.addEventListener(type, listener),
-      removeEventListener: <T extends EventType>(type: T, listener: EventListener<T>) =>
-        dotLottie?.removeEventListener(type, listener),
+      getDotLottieInstance: (): DotLottie | null => dotLottie,
     });
 
     return () => h('div', { ...attrs }, h('canvas', { style: 'height: 100%; width: 100%', ref: canvas }));
