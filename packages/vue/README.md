@@ -1,0 +1,127 @@
+# @lottiefiles/dotlottie-vue
+
+![npm](https://img.shields.io/npm/v/@lottiefiles/dotlottie-vue)
+![npm bundle size](https://img.shields.io/bundlephobia/minzip/%40lottiefiles%2Fdotlottie-vue)
+![npm](https://img.shields.io/npm/dt/%40lottiefiles/dotlottie-vue)
+![NPM](https://img.shields.io/npm/l/@lottiefiles/dotlottie-vue)
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/23125742/201124166-c2a0bc2a-018b-463b-b291-944fb767b5c2.png" />
+</p>
+
+> 🚧 **Beta Alert:** We're still refining! The APIs in this package may undergo changes.
+
+## Contents
+
+* [Introduction](#introduction)
+  * [What is dotLottie?](#what-is-dotlottie)
+* [Installation](#installation)
+* [Usage](#usage)
+* [APIs](#apis)
+  * [DotLottieVue Props](#dotlottievue-props)
+  * [Listening to DotLottie Events](#listening-to-dotlottie-events)
+* [Development](#development)
+  * [Setup](#setup)
+  * [Dev](#dev)
+  * [Build](#build)
+
+## Introduction
+
+A Vue library for rendering [lottie](https://lottiefiles.github.io/lottie-docs/) and [dotLottie](https://dotlottie.io) animations in the browser.
+
+### What is dotLottie?
+
+dotLottie is an open-source file format that aggregates one or more Lottie files and their associated resources into a single file. They are ZIP archives compressed with the Deflate compression method and carry the file extension of ".lottie".
+
+[Learn more about dotLottie](https://dotlottie.io/).
+
+## Installation
+
+```bash
+npm install @lottiefiles/dotlottie-vue
+```
+
+## Usage
+
+```vue
+<script setup>
+import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
+</script>
+
+<template>
+  <DotLottieVue style="height: 500px; width: 500px" autoplay loop src="https://path-to-lottie.lottie" />
+</template>
+```
+
+## APIs
+
+### DotLottieVue Props
+
+| Property name           | Type                  | Required | Default               | Description                                                                                                                                                                                                                                        |
+| ----------------------- | --------------------- | :------: | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `autoplay`              | boolean               |          | false                 | Auto-starts the animation on load.                                                                                                                                                                                                                 |
+| `loop`                  | boolean               |          | false                 | Determines if the animation should loop.                                                                                                                                                                                                           |
+| `src`                   | string                |          | undefined             | URL to the animation data (`.json` or `.lottie`).                                                                                                                                                                                                  |
+| `speed`                 | number                |          | 1                     | Animation playback speed. 1 is regular speed.                                                                                                                                                                                                      |
+| `data`                  | string \| ArrayBuffer |          | undefined             | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations.                                                                                                                                                |
+| `mode`                  | string                |          | "forward"             | Animation play mode. Accepts "forward", "reverse", "bounce", "bounce-reverse".                                                                                                                                                                     |
+| `backgroundColor`       | string                |          | undefined             | Background color of the canvas. Accepts 6-digit or 8-digit hex color string (e.g., "#000000", "#000000FF"),                                                                                                                                        |
+| `segments`              | \[number, number]     |          | \[0, totalFrames - 1] | Animation segments. Accepts an array of two numbers, where the first number is the start frame and the second number is the end frame.                                                                                                             |
+| `renderConfig`          | RenderConfig          |          | `{}`                  | Configuration for rendering the animation.                                                                                                                                                                                                         |
+| `useFrameInterpolation` | boolean               |          | false                 | Determines if the animation should update on subframes. If set to false, the original AE frame rate will be maintained. If set to true, it will refresh at each requestAnimationFrame, including intermediate values. The default setting is true. |
+
+### Listening to [DotLottie](../web/README.md) Events
+
+```vue
+<script setup>
+import { onMounted, ref, watch } from 'vue';
+import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
+const playerRef = ref(null);
+
+onMounted(() => {
+  if (playerRef.value) {
+    const dotLottie = playerRef.value.getDotLottieInstance();
+    dotLottie.addEventListener('pause', () => {
+      console.log('paused')
+    });
+    dotlottie.addEventListener('frame', ({ currentFrame }) => {
+      console.log('Frame:', currentFrame)
+    });
+  }
+})
+</script>
+
+<template>
+  <DotLottieVue autoplay loop ref="playerRef" src="path-to-lottie.lottie" />
+</template>
+```
+
+> Refer to [DotLottie](../web/README.md) Events sections to know more about all available events.
+
+#### RenderConfig
+
+The `renderConfig` object accepts the following properties:
+
+| Property name      | Type   | Required | Default                       | Description             |
+| ------------------ | ------ | :------: | ----------------------------- | ----------------------- |
+| `devicePixelRatio` | number |          | window\.devicePixelRatio \| 1 | The device pixel ratio. |
+
+## Development
+
+### Setup
+
+```bash
+pnpm install
+```
+
+### Dev
+
+```bash
+pnpm dev
+```
+
+### Build
+
+```bash
+pnpm build
+```

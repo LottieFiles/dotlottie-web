@@ -1,0 +1,24 @@
+{
+  // Extend from the build config
+  "extends": ["../../tsconfig.build.json", "@vue/tsconfig/tsconfig.json"],
+
+  // Compiler options
+  "compilerOptions": {
+    // Compiled output JS and source maps output directory
+    "outDir": "./dist",
+
+    // Source root directory
+    "rootDir": ".",
+
+    "isolatedModules": true,
+
+    "jsx": "preserve",
+
+    "jsxImportSource": "vue",
+
+    "exactOptionalPropertyTypes": false
+  },
+
+  // Files included in compilation
+  "include": ["./src"]
+}

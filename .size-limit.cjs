@@ -32,6 +32,12 @@ module.exports = [
     modifyWebpackConfig,
   },
   {
+    name: '@lottiefiles/dotlottie-vue',
+    path: 'packages/vue/dist/index.js',
+    import: '*',
+    modifyWebpackConfig,
+  },
+  {
     name: '@lottiefiles/dotlottie-wc',
     path: 'packages/wc/dist/index.js',
     import: '*',

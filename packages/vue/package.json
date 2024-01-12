@@ -1,0 +1,61 @@
+{
+  "name": "@lottiefiles/dotlottie-vue",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Vue wrapper around the dotlottie-web library",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LottieFiles/dotlottie-web.git",
+    "directory": "packages/vue"
+  },
+  "homepage": "https://github.com/LottieFiles/dotlottie-web#readme",
+  "bugs": "https://github.com/LottieFiles/dotlottie-web/issues",
+  "author": "LottieFiles",
+  "contributors": [
+    "Abdelrahman Ashraf <a.theashraf@gmail.com>"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "dotlottie",
+    "lottie",
+    "player",
+    "animation",
+    "web",
+    "canvas",
+    "javascript",
+    "vue"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint --fix .",
+    "stats:eslint": "cross-env TIMING=1 eslint .",
+    "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "vue": "^3.3.4"
+  },
+  "dependencies": {
+    "@lottiefiles/dotlottie-web": "workspace:*"
+  },
+  "devDependencies": {
+    "@vue/runtime-dom": "^3.4.6",
+    "@vue/tsconfig": "^0.5.1",
+    "cross-env": "7.0.3",
+    "tsup": "8.0.1",
+    "typescript": "5.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
