@@ -79,8 +79,8 @@ import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
 const playerRef = ref(null);
 
 onMounted(() => {
-  if (player.value) {
-    const dotLottie = player.value.getDotLottieInstance();
+  if (playerRef.value) {
+    const dotLottie = playerRef.value.getDotLottieInstance();
     dotLottie.addEventListener('pause', () => {
       console.log('paused')
     });
