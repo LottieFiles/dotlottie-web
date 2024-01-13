@@ -19,7 +19,7 @@
 * [Usage](#usage)
 * [APIs](#apis)
   * [DotLottieVue Props](#dotlottievue-props)
-  * [Listening to DotLottie Events](#listening-to-dotlottie-events)
+  * [Listening to Events](#listening-to-events)
 * [Development](#development)
   * [Setup](#setup)
   * [Dev](#dev)
@@ -70,9 +70,17 @@ import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
 | `renderConfig`          | RenderConfig          |          | `{}`                  | Configuration for rendering the animation.                                                                                                                                                                                                         |
 | `useFrameInterpolation` | boolean               |          | false                 | Determines if the animation should update on subframes. If set to false, the original AE frame rate will be maintained. If set to true, it will refresh at each requestAnimationFrame, including intermediate values. The default setting is true. |
 
-### Listening to [DotLottie](../web/README.md) Events
+#### RenderConfig
 
-```vue
+The `renderConfig` object accepts the following properties:
+
+| Property name      | Type   | Required | Default                       | Description             |
+| ------------------ | ------ | :------: | ----------------------------- | ----------------------- |
+| `devicePixelRatio` | number |          | window\.devicePixelRatio \| 1 | The device pixel ratio. |
+
+### Listening to Events
+
+```javascript
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
@@ -96,15 +104,7 @@ onMounted(() => {
 </template>
 ```
 
-> Refer to [DotLottie](../web/README.md) Events sections to know more about all available events.
-
-#### RenderConfig
-
-The `renderConfig` object accepts the following properties:
-
-| Property name      | Type   | Required | Default                       | Description             |
-| ------------------ | ------ | :------: | ----------------------------- | ----------------------- |
-| `devicePixelRatio` | number |          | window\.devicePixelRatio \| 1 | The device pixel ratio. |
+> Refer to [dotlottie-web](../web/README.md) Events sections to know more about all available events.
 
 ## Development
 
