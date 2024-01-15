@@ -17,6 +17,7 @@
   * [What is dotLottie?](#what-is-dotlottie)
 * [Installation](#installation)
 * [Usage](#usage)
+* [Live Examples](#live-examples)
 * [APIs](#apis)
   * [DotLottieVue Props](#dotlottievue-props)
   * [Listening to Events](#listening-to-events)
@@ -52,6 +53,10 @@ import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
   <DotLottieVue style="height: 500px; width: 500px" autoplay loop src="https://path-to-lottie.lottie" />
 </template>
 ```
+
+## Live Examples
+
+* <a href="https://codepen.io/lottiefiles/pen/yLwgeoJ" target="_blank">Basic Example</a>
 
 ## APIs
 
