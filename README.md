@@ -101,6 +101,9 @@ pnpm install
 * `@lottiefiles/dotlottie-react`
   * <a href="https://codesandbox.io/p/sandbox/dotlottie-react-basic-example-66cwfq?autoresize=1&file=%2Fsrc%2FApp.tsx&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Basic Example</a>
 
+* `@lottiefiles/dotlottie-vue`
+  * <a href="https://codepen.io/lottiefiles/pen/yLwgeoJ" target="_blank">Basic Example</a>
+
 ### Local Examples
 
 Discover how to implement and utilize the dotlottie-web packages with our example applications. These examples serve as a practical guide to help you understand how to integrate Lottie and dotLottie animations into your web projects.
