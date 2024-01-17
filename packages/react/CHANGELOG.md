@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.0.0-framer-20240117111453
+
+### Patch Changes
+
+- bundle dotlottie-web
+
 ## 0.1.2
 
 ### Patch Changes

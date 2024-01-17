@@ -5,7 +5,7 @@
 const { defineConfig } = require('tsup');
 
 module.exports = defineConfig({
-  bundle: false,
+  bundle: true,
   metafile: false,
   splitting: false,
   treeshake: true,
@@ -18,4 +18,5 @@ module.exports = defineConfig({
   platform: 'browser',
   target: ['es2020', 'node18'],
   tsconfig: 'tsconfig.build.json',
+  noExternal: ['@lottiefiles/dotlottie-web'],
 });
