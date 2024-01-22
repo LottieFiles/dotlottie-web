@@ -77,24 +77,26 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
 
   dotLottieRef.current = dotLottie;
 
-  // const [intersectionObserver] = React.useState(() => {
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       entries.forEach((entry) => {
-  //         if (entry.isIntersecting) {
-  //           dotLottieRef.current?.unfreeze();
-  //         } else {
-  //           dotLottieRef.current?.freeze();
-  //         }
-  //       });
-  //     },
-  //     {
-  //       threshold: 0,
-  //     },
-  //   );
+  const [intersectionObserver] = React.useState(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          // debounce
+          if (entry.isIntersecting) {
+            dotLottieRef.current?.resize();
+            // dotLottieRef.current?.unfreeze();
+          } else {
+            // dotLottieRef.current?.freeze();
+          }
+        }, 150);
+      },
+      {
+        threshold: 0,
+      },
+    );
 
-  //   return observer;
-  // });
+    return observer;
+  });
 
   const [resizeObserver] = React.useState(() => {
     const observer = new ResizeObserver((entries) => {
@@ -118,20 +120,17 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
 
         setDotLottie(dotLottieInstance);
 
-        // intersectionObserver.observe(canvas);
+        intersectionObserver.observe(canvas);
         resizeObserver.observe(canvas);
       } else {
         dotLottieRef.current?.destroy();
-        // intersectionObserver.disconnect();
+        intersectionObserver.disconnect();
         resizeObserver.disconnect();
       }
 
       canvasRef.current = canvas;
     },
-    [
-      // intersectionObserver,
-      resizeObserver,
-    ],
+    [intersectionObserver, resizeObserver],
   );
 
   const setContainerRef = React.useCallback((container: HTMLDivElement | null) => {
@@ -152,7 +151,7 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
       dotLottie.destroy();
       setDotLottie(null);
       resizeObserver.disconnect();
-      // intersectionObserver.disconnect();
+      intersectionObserver.disconnect();
     };
   }, []);
 
