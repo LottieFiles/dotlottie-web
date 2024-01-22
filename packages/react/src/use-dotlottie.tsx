@@ -127,22 +127,6 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
   );
 
   React.useEffect(() => {
-    function onVisibilityChange(): void {
-      if (document.hidden) {
-        dotLottieRef.current?.freeze();
-      } else {
-        dotLottieRef.current?.unfreeze();
-      }
-    }
-
-    document.addEventListener('visibilitychange', onVisibilityChange);
-
-    return () => {
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-    };
-  }, []);
-
-  React.useEffect(() => {
     return () => {
       if (!dotLottie) return;
 
