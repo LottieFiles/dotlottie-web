@@ -944,7 +944,11 @@ export class DotLottie {
 
     const rgbaInt = hexStringToRGBAInt(color);
 
-    this._renderer?.setBgColor(rgbaInt);
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      this._canvas.style.backgroundColor = color;
+    } else {
+      this._renderer?.setBgColor(rgbaInt);
+    }
   }
 
   /**
