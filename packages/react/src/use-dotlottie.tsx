@@ -80,8 +80,8 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
   const [intersectionObserver] = React.useState(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          debounce(() => {
+        debounce(() => {
+          entries.forEach((entry) => {
             // debounce
             if (entry.isIntersecting) {
               dotLottieRef.current?.resize();
@@ -89,8 +89,8 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
             } else {
               // dotLottieRef.current?.freeze();
             }
-          }, 150)();
-        });
+          });
+        }, 150)();
       },
       {
         threshold: 0,
