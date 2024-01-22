@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.0.0-framer-20240122155350
+
+### Patch Changes
+
+- fix background color updates
+
 ## 0.0.0-framer-20240122154320
 
 ### Patch Changes
