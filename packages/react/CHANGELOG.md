@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.0.0-framer-20240122163021
+
+### Minor Changes
+
+- feat: add playOnHover prop
+
 ## 0.0.0-framer-20240122155350
 
 ### Patch Changes
