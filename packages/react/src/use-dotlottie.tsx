@@ -81,14 +81,16 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          // debounce
-          if (entry.isIntersecting) {
-            dotLottieRef.current?.resize();
-            // dotLottieRef.current?.unfreeze();
-          } else {
-            // dotLottieRef.current?.freeze();
-          }
-        }, 150);
+          debounce(() => {
+            // debounce
+            if (entry.isIntersecting) {
+              dotLottieRef.current?.resize();
+              // dotLottieRef.current?.unfreeze();
+            } else {
+              // dotLottieRef.current?.freeze();
+            }
+          }, 150)();
+        });
       },
       {
         threshold: 0,
