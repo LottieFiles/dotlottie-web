@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.0.0-framer-20240122145830
+
+### Patch Changes
+
+- fix env checks
+
 ## 0.0.0-framer-20240117111453
 
 ### Patch Changes
