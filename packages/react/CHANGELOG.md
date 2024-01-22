@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.0.0-framer-20240122152840
+
+### Patch Changes
+
+- delete the intersection observer logic
+
 ## 0.0.0-framer-20240122151245
 
 ### Patch Changes
