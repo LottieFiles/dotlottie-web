@@ -77,6 +77,7 @@ const App = () => {
 | `backgroundColor` | string                |          | undefined             | Background color of the canvas. Accepts 6-digit or 8-digit hex color string (e.g., "#000000", "#000000FF"),                            |
 | `segments`        | \[number, number]     |          | \[0, totalFrames - 1] | Animation segments. Accepts an array of two numbers, where the first number is the start frame and the second number is the end frame. |
 | `renderConfig`    | RenderConfig          |          | `{}`                  | Configuration for rendering the animation.                                                                                             |
+| `playOnHover`     | boolean               |          | false                 | Determines if the animation should play on mouse hover and pause on mouse out.                                                         |
 
 #### RenderConfig
 

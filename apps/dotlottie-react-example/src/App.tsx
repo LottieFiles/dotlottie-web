@@ -20,6 +20,7 @@ function App() {
         dotLottieRefCallback={dotLottieRefCallback}
         src="https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie"
         autoplay
+        playOnHover
         loop
       />
       <button

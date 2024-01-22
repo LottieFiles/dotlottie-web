@@ -56,7 +56,9 @@ function DotLottieComponent({
   );
 }
 
-export type DotLottieConfig = Omit<Config, 'canvas'>;
+export type DotLottieConfig = Omit<Config, 'canvas'> & {
+  playOnHover?: boolean;
+};
 
 export interface UseDotLottieResult {
   DotLottieComponent: (props: ComponentProps<'canvas'>) => JSX.Element;
@@ -77,12 +79,24 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
 
   dotLottieRef.current = dotLottie;
 
+  const playOnHoverHandler = React.useCallback(
+    (event: MouseEvent) => {
+      if (!dotLottieConfig?.playOnHover || !dotLottieRef.current?.isLoaded) return;
+
+      if (event.type === 'mouseenter') {
+        dotLottieRef.current.play();
+      } else if (event.type === 'mouseleave') {
+        dotLottieRef.current.pause();
+      }
+    },
+    [dotLottieConfig?.playOnHover],
+  );
+
   const [intersectionObserver] = React.useState(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         debounce(() => {
           entries.forEach((entry) => {
-            // debounce
             if (entry.isIntersecting) {
               dotLottieRef.current?.resize();
               // dotLottieRef.current?.unfreeze();
@@ -124,6 +138,8 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
 
         intersectionObserver.observe(canvas);
         resizeObserver.observe(canvas);
+        canvas.addEventListener('mouseenter', playOnHoverHandler);
+        canvas.addEventListener('mouseleave', playOnHoverHandler);
       } else {
         dotLottieRef.current?.destroy();
         intersectionObserver.disconnect();
@@ -132,7 +148,7 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
 
       canvasRef.current = canvas;
     },
-    [intersectionObserver, resizeObserver],
+    [intersectionObserver, resizeObserver, playOnHoverHandler],
   );
 
   const setContainerRef = React.useCallback((container: HTMLDivElement | null) => {
@@ -154,6 +170,8 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
       setDotLottie(null);
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
+      canvasRef.current?.removeEventListener('mouseenter', playOnHoverHandler);
+      canvasRef.current?.removeEventListener('mouseleave', playOnHoverHandler);
     };
   }, []);
 

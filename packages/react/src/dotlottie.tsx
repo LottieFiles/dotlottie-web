@@ -13,6 +13,7 @@ export type { DotLottie };
 export type DotLottieComponentProps = Omit<Config, 'canvas'> &
   ComponentProps<'canvas'> & {
     dotLottieRefCallback?: RefCallback<DotLottie>;
+    playOnHover?: boolean;
   };
 
 export const DotLottieReact = ({
@@ -22,6 +23,7 @@ export const DotLottieReact = ({
   dotLottieRefCallback,
   loop,
   mode,
+  playOnHover,
   renderConfig,
   segments,
   speed,
@@ -40,6 +42,7 @@ export const DotLottieReact = ({
     renderConfig,
     backgroundColor,
     useFrameInterpolation,
+    playOnHover,
   });
 
   React.useEffect(() => {
