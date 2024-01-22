@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.0.0-framer-20240122154320
+
+### Patch Changes
+
+- fix resize issue
+
 ## 0.0.0-framer-20240122152840
 
 ### Patch Changes
