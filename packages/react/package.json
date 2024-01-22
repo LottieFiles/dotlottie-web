@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-react",
-  "version": "0.0.0-framer-20240122145830",
+  "version": "0.0.0-framer-20240122151245",
   "type": "module",
   "description": "React wrapper around the dotlottie-web library",
   "repository": {

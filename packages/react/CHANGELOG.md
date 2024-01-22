@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.0.0-framer-20240122151245
+
+### Patch Changes
+
+- avoid rendering when width and height are zeros
+
 ## 0.0.0-framer-20240122145830
 
 ### Patch Changes
