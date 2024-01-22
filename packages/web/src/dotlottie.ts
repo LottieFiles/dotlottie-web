@@ -418,12 +418,12 @@ export class DotLottie {
     const width = this._canvas.width;
     const height = this._canvas.height;
 
+    if (width <= 0 || height <= 0) return;
+
     this._renderer.resize(width, height);
 
     if (this._renderer.update()) {
       const buffer = this._renderer.render();
-
-      if (width <= 0 || height <= 0) return;
 
       if (this._imageData?.data.length !== buffer.length) {
         this._imageData = this._context.createImageData(width, height);
