@@ -69,18 +69,15 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   dotLottieRef.current = dotLottie;
   configRef.current = config;
 
-  const playOnHoverHandler = React.useCallback(
-    (event: MouseEvent) => {
-      if (!config?.playOnHover || !dotLottieRef.current?.isLoaded) return;
+  const hoverHandler = React.useCallback((event: MouseEvent) => {
+    if (!configRef.current?.playOnHover || !dotLottieRef.current?.isLoaded) return;
 
-      if (event.type === 'mouseenter') {
-        dotLottieRef.current.play();
-      } else if (event.type === 'mouseleave') {
-        dotLottieRef.current.pause();
-      }
-    },
-    [config?.playOnHover],
-  );
+    if (event.type === 'mouseenter') {
+      dotLottieRef.current.play();
+    } else if (event.type === 'mouseleave') {
+      dotLottieRef.current.pause();
+    }
+  }, []);
 
   const [intersectionObserver] = React.useState(() => {
     const observer = new IntersectionObserver(
@@ -128,8 +125,8 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
 
         intersectionObserver.observe(canvas);
         resizeObserver.observe(canvas);
-        canvas.addEventListener('mouseenter', playOnHoverHandler);
-        canvas.addEventListener('mouseleave', playOnHoverHandler);
+        canvas.addEventListener('mouseenter', hoverHandler);
+        canvas.addEventListener('mouseleave', hoverHandler);
       } else {
         dotLottieRef.current?.destroy();
         intersectionObserver.disconnect();
@@ -138,7 +135,7 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
 
       canvasRef.current = canvas;
     },
-    [intersectionObserver, resizeObserver, playOnHoverHandler],
+    [intersectionObserver, resizeObserver, hoverHandler],
   );
 
   const setContainerRef = React.useCallback((container: HTMLDivElement | null) => {
@@ -160,8 +157,8 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
       setDotLottie(null);
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
-      canvasRef.current?.removeEventListener('mouseenter', playOnHoverHandler);
-      canvasRef.current?.removeEventListener('mouseleave', playOnHoverHandler);
+      canvasRef.current?.removeEventListener('mouseenter', hoverHandler);
+      canvasRef.current?.removeEventListener('mouseleave', hoverHandler);
     };
   }, []);
 

@@ -1,5 +1,4 @@
 import { DotLottieReact, DotLottie } from '@lottiefiles/dotlottie-react';
-import { FrameEvent } from '@lottiefiles/dotlottie-web';
 import React, { useState } from 'react';
 
 const animations = [
@@ -15,9 +14,10 @@ function App() {
   const [currentFrame, setCurrentFrame] = useState(0);
   const [srcIdx, setSrcIdx] = useState(0);
   const [useFrameInterpolation, setUseFrameInterpolation] = useState(false);
+  const [playOnHover, setPlayOnHover] = useState(false);
 
   React.useEffect(() => {
-    function updateCurrentFrame(event: FrameEvent) {
+    function updateCurrentFrame(event: { currentFrame: number }) {
       setCurrentFrame(event.currentFrame);
     }
 
@@ -50,6 +50,7 @@ function App() {
         autoplay
         loop={loop}
         speed={speed}
+        playOnHover={playOnHover}
       />
       <input type="range" min="0" max="100" defaultValue="0" value={progress} />
       <button
@@ -111,6 +112,13 @@ function App() {
         }}
       >
         {useFrameInterpolation ? 'Using frame interpolation' : 'Not using frame interpolation'}
+      </button>
+      <button
+        onClick={() => {
+          setPlayOnHover(!playOnHover);
+        }}
+      >
+        {playOnHover ? 'Play on hover' : 'Not play on hover'}
       </button>
     </>
   );
