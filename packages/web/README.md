@@ -152,7 +152,7 @@ The `renderConfig` object accepts the following properties:
 | `isPaused`              | boolean                       | Reflects whether the animation is paused or not.                                                                      |
 | `isStopped`             | boolean                       | Reflects whether the animation is stopped or not.                                                                     |
 | `isPlaying`             | boolean                       | Reflects whether the animation is playing or not.                                                                     |
-| `segments`              | number                        | Reflects the frames range of the animations. where segments\[0] is the start frame and segments\[1] is the end frame. |
+| `segments`              | \[number, number]             | Reflects the frames range of the animations. where segments\[0] is the start frame and segments\[1] is the end frame. |
 | `backgroundColor`       | string                        | Gets the background color of the canvas.                                                                              |
 | `autoplay`              | boolean                       | Indicates if the animation is set to auto-play.                                                                       |
 | `isFrozen`              | boolean                       | Reflects whether the animation loop is stopped or not.                                                                |
