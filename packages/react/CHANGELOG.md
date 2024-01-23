@@ -1,47 +1,5 @@
 # @lottiefiles/dotlottie-react
 
-## 0.0.0-framer-20240122163021
-
-### Minor Changes
-
-- feat: add playOnHover prop
-
-## 0.0.0-framer-20240122155350
-
-### Patch Changes
-
-- fix background color updates
-
-## 0.0.0-framer-20240122154320
-
-### Patch Changes
-
-- fix resize issue
-
-## 0.0.0-framer-20240122152840
-
-### Patch Changes
-
-- delete the intersection observer logic
-
-## 0.0.0-framer-20240122151245
-
-### Patch Changes
-
-- avoid rendering when width and height are zeros
-
-## 0.0.0-framer-20240122145830
-
-### Patch Changes
-
-- fix env checks
-
-## 0.0.0-framer-20240117111453
-
-### Patch Changes
-
-- bundle dotlottie-web
-
 ## 0.1.2
 
 ### Patch Changes
