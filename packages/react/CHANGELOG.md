@@ -1,5 +1,23 @@
 # @lottiefiles/dotlottie-react
 
+## 0.2.0
+
+### Minor Changes
+
+- 121474d: feat: add `playOnHover` prop
+- 121474d: feat: reactivity of DotLottieReact component props
+
+### Patch Changes
+
+- 121474d: chore: bundle the esm build artifacts to work with webpack
+- 121474d: fix: debounce resize\&intersection observers callbacks
+- 121474d: fix: stability of dotLottieRefCallback prop using useStableCallback hooks
+- Updated dependencies [121474d]
+- Updated dependencies [121474d]
+- Updated dependencies [121474d]
+- Updated dependencies [121474d]
+  - @lottiefiles/dotlottie-web@0.12.0
+
 ## 0.1.2
 
 ### Patch Changes

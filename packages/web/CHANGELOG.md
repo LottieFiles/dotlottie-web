@@ -1,5 +1,17 @@
 # @lottiefiles/dotlottie-web
 
+## 0.12.0
+
+### Minor Changes
+
+- 121474d: feat: expose `setRenderConfig` method & `renderConfig` property
+
+### Patch Changes
+
+- 121474d: fix: nodejs env check
+- 121474d: chore: bundle the esm build artifacts to work with webpack
+- 121474d: fix: skip rendering when canvas width or height is less than or equal zero
+
 ## 0.11.1
 
 ### Patch Changes
