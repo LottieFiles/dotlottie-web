@@ -18,5 +18,6 @@ module.exports = defineConfig({
   platform: 'browser',
   target: ['es2020', 'node18'],
   tsconfig: 'tsconfig.build.json',
-  noExternal: ['@lottiefiles/dotlottie-web'],
+  // This is required for usage in framer
+  noExternal: Object.keys(require('./package.json').dependencies),
 });
