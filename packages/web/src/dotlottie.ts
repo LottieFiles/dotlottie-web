@@ -990,5 +990,9 @@ export class DotLottie {
     this._useFrameInterpolation = useFrameInterpolation;
   }
 
+  public setRenderConfig(config: RenderConfig): void {
+    this._renderConfig = config;
+  }
+
   // #endregion
 }

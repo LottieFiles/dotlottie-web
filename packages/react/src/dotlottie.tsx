@@ -7,6 +7,7 @@ import type { ComponentProps, RefCallback } from 'react';
 import React from 'react';
 
 import { useDotLottie } from './use-dotlottie';
+import useStableCallback from './use-stable-callback';
 
 export type { DotLottie };
 
@@ -45,11 +46,14 @@ export const DotLottieReact = ({
     playOnHover,
   });
 
+  const stableDotLottieRefCallback =
+    typeof dotLottieRefCallback === 'function' ? useStableCallback(dotLottieRefCallback) : undefined;
+
   React.useEffect(() => {
-    if (typeof dotLottieRefCallback === 'function') {
-      dotLottieRefCallback(dotLottie);
+    if (typeof stableDotLottieRefCallback === 'function') {
+      stableDotLottieRefCallback(dotLottie);
     }
-  }, [dotLottieRefCallback, dotLottie]);
+  }, [stableDotLottieRefCallback, dotLottie]);
 
   return <DotLottieComponent {...props} />;
 };
