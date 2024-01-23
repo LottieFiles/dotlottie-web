@@ -5,7 +5,7 @@
 const { defineConfig } = require('tsup');
 
 module.exports = defineConfig({
-  bundle: false,
+  bundle: true,
   metafile: false,
   splitting: false,
   treeshake: true,
