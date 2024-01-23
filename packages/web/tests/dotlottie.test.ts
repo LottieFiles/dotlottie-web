@@ -1214,3 +1214,26 @@ describe('addEventListener', () => {
     });
   });
 });
+
+describe('setRenderConfig', () => {
+  test('setRenderConfig() sets the render config', async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    dotLottie.setRenderConfig({
+      devicePixelRatio: 0.2,
+    });
+
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(0.2);
+  });
+});

@@ -21,7 +21,6 @@ app.innerHTML = `
   <canvas data-src="https://lottie.host/35326116-a8ca-4219-81ca-df9ce56a3f22/zCGFevEA23.lottie"></canvas>
   <canvas data-src="https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie"></canvas>
   <canvas data-src="/down.json"></canvas>
-  <canvas data-src="/dragon.json"></canvas>
   <canvas data-src="/editor.json"></canvas>
   <canvas data-src="/growup.json"></canvas>
   <canvas data-src="/hamster.lottie"></canvas>

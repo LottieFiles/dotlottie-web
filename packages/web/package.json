@@ -60,7 +60,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@dotlottie/dotlottie-js": "^0.6.0"
+    "@dotlottie/dotlottie-js": "^0.6.2"
   },
   "devDependencies": {
     "@types/node": "^20.10.5",

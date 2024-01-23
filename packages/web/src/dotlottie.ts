@@ -186,6 +186,10 @@ export class DotLottie {
 
   // #region Getters and Setters
 
+  public get renderConfig(): RenderConfig {
+    return this._renderConfig;
+  }
+
   public get canvas(): HTMLCanvasElement | OffscreenCanvas {
     return this._canvas;
   }
@@ -417,6 +421,8 @@ export class DotLottie {
 
     const width = this._canvas.width;
     const height = this._canvas.height;
+
+    if (width <= 0 || height <= 0) return;
 
     this._renderer.resize(width, height);
 
@@ -942,7 +948,11 @@ export class DotLottie {
 
     const rgbaInt = hexStringToRGBAInt(color);
 
-    this._renderer?.setBgColor(rgbaInt);
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      this._canvas.style.backgroundColor = color;
+    } else {
+      this._renderer?.setBgColor(rgbaInt);
+    }
   }
 
   /**
@@ -982,6 +992,10 @@ export class DotLottie {
 
   public setUseFrameInterpolation(useFrameInterpolation: boolean): void {
     this._useFrameInterpolation = useFrameInterpolation;
+  }
+
+  public setRenderConfig(config: RenderConfig): void {
+    this._renderConfig = config;
   }
 
   // #endregion

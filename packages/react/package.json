@@ -32,7 +32,8 @@
     "web",
     "canvas",
     "javascript",
-    "react"
+    "react",
+    "thorvg"
   ],
   "scripts": {
     "build": "tsup",

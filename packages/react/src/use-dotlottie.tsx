@@ -7,6 +7,8 @@ import { DotLottie } from '@lottiefiles/dotlottie-web';
 import React, { useCallback } from 'react';
 import type { ComponentProps, RefCallback } from 'react';
 
+import { debounce } from './utils';
+
 interface DotLottieComponentProps {
   setCanvasRef: RefCallback<HTMLCanvasElement>;
   setContainerRef: RefCallback<HTMLElement>;
@@ -42,7 +44,9 @@ function DotLottieComponent({
   );
 }
 
-export type DotLottieConfig = Omit<Config, 'canvas'>;
+export type DotLottieConfig = Omit<Config, 'canvas'> & {
+  playOnHover?: boolean;
+};
 
 export interface UseDotLottieResult {
   DotLottieComponent: (props: ComponentProps<'canvas'>) => JSX.Element;
@@ -53,26 +57,41 @@ export interface UseDotLottieResult {
   setContainerRef: RefCallback<HTMLDivElement>;
 }
 
-export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieResult => {
+export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   const [dotLottie, setDotLottie] = React.useState<DotLottie | null>(null);
 
   const dotLottieRef = React.useRef<DotLottie | null>(null);
+  const configRef = React.useRef<DotLottieConfig | undefined>(config);
 
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
 
   dotLottieRef.current = dotLottie;
+  configRef.current = config;
+
+  const hoverHandler = React.useCallback((event: MouseEvent) => {
+    if (!configRef.current?.playOnHover || !dotLottieRef.current?.isLoaded) return;
+
+    if (event.type === 'mouseenter') {
+      dotLottieRef.current.play();
+    } else if (event.type === 'mouseleave') {
+      dotLottieRef.current.pause();
+    }
+  }, []);
 
   const [intersectionObserver] = React.useState(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            dotLottieRef.current?.unfreeze();
-          } else {
-            dotLottieRef.current?.freeze();
-          }
-        });
+        debounce(() => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              dotLottieRef.current?.resize();
+              dotLottieRef.current?.unfreeze();
+            } else {
+              dotLottieRef.current?.freeze();
+            }
+          });
+        }, 100)();
       },
       {
         threshold: 0,
@@ -84,9 +103,11 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
 
   const [resizeObserver] = React.useState(() => {
     const observer = new ResizeObserver((entries) => {
-      entries.forEach(() => {
-        dotLottieRef.current?.resize();
-      });
+      debounce(() => {
+        entries.forEach(() => {
+          dotLottieRef.current?.resize();
+        });
+      }, 150)();
     });
 
     return observer;
@@ -96,7 +117,7 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
     (canvas: HTMLCanvasElement | null) => {
       if (canvas) {
         const dotLottieInstance = new DotLottie({
-          ...dotLottieConfig,
+          ...config,
           canvas,
         });
 
@@ -104,6 +125,8 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
 
         intersectionObserver.observe(canvas);
         resizeObserver.observe(canvas);
+        canvas.addEventListener('mouseenter', hoverHandler);
+        canvas.addEventListener('mouseleave', hoverHandler);
       } else {
         dotLottieRef.current?.destroy();
         intersectionObserver.disconnect();
@@ -112,7 +135,7 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
 
       canvasRef.current = canvas;
     },
-    [intersectionObserver, resizeObserver],
+    [intersectionObserver, resizeObserver, hoverHandler],
   );
 
   const setContainerRef = React.useCallback((container: HTMLDivElement | null) => {
@@ -127,22 +150,6 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
   );
 
   React.useEffect(() => {
-    function onVisibilityChange(): void {
-      if (document.hidden) {
-        dotLottieRef.current?.freeze();
-      } else {
-        dotLottieRef.current?.unfreeze();
-      }
-    }
-
-    document.addEventListener('visibilitychange', onVisibilityChange);
-
-    return () => {
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-    };
-  }, []);
-
-  React.useEffect(() => {
     return () => {
       if (!dotLottie) return;
 
@@ -150,8 +157,110 @@ export const useDotLottie = (dotLottieConfig?: DotLottieConfig): UseDotLottieRes
       setDotLottie(null);
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
+      canvasRef.current?.removeEventListener('mouseenter', hoverHandler);
+      canvasRef.current?.removeEventListener('mouseleave', hoverHandler);
     };
   }, []);
+
+  // speed reactivity
+  React.useEffect(() => {
+    if (!dotLottie) return;
+
+    if (typeof config?.speed === 'number' && config.speed !== dotLottie.speed && dotLottie.isLoaded) {
+      dotLottie.setSpeed(config.speed);
+    }
+  }, [config?.speed]);
+
+  // mode reactivity
+  React.useEffect(() => {
+    if (!dotLottie) return;
+
+    if (typeof config?.mode === 'string' && config.mode !== dotLottie.mode && dotLottie.isLoaded) {
+      dotLottie.setMode(config.mode);
+    }
+  }, [config?.mode]);
+
+  // loop reactivity
+  React.useEffect(() => {
+    if (!dotLottie) return;
+
+    if (typeof config?.loop === 'boolean' && config.loop !== dotLottie.loop && dotLottie.isLoaded) {
+      dotLottie.setLoop(config.loop);
+    }
+  }, [config?.loop]);
+
+  // useFrameInterpolation reactivity
+  React.useEffect(() => {
+    if (!dotLottie) return;
+
+    if (
+      typeof config?.useFrameInterpolation === 'boolean' &&
+      config.useFrameInterpolation !== dotLottie.useFrameInterpolation &&
+      dotLottie.isLoaded
+    ) {
+      dotLottie.setUseFrameInterpolation(config.useFrameInterpolation);
+    }
+  }, [config?.useFrameInterpolation]);
+
+  // segments reactivity
+  React.useEffect(() => {
+    if (!dotLottie) return;
+
+    if (
+      typeof config?.segments === 'object' &&
+      Array.isArray(config.segments) &&
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      config.segments.length === 2 &&
+      dotLottie.isLoaded
+    ) {
+      const startFrame = config.segments[0];
+      const endFrame = config.segments[1];
+
+      dotLottie.setSegments(startFrame, endFrame);
+    }
+  }, [config?.segments]);
+
+  // background color reactivity
+  React.useEffect(() => {
+    if (!dotLottie) return;
+
+    if (typeof config?.backgroundColor === 'string' && config.backgroundColor !== dotLottie.backgroundColor) {
+      dotLottie.setBackgroundColor(config.backgroundColor);
+    }
+  }, [config?.backgroundColor]);
+
+  // render config reactivity
+  React.useEffect(() => {
+    if (!dotLottie) return;
+
+    if (typeof config?.renderConfig === 'object') {
+      dotLottie.setRenderConfig(config.renderConfig);
+    }
+  }, [config?.renderConfig]);
+
+  // data reactivity
+  React.useEffect(() => {
+    if (!dotLottie) return;
+
+    if (typeof config?.data === 'string' || config?.data instanceof ArrayBuffer) {
+      dotLottie.load({
+        data: config.data,
+        ...(configRef.current || {}),
+      });
+    }
+  }, [config?.data]);
+
+  // src reactivity
+  React.useEffect(() => {
+    if (!dotLottie) return;
+
+    if (typeof config?.src === 'string') {
+      dotLottie.load({
+        src: config.src,
+        ...(configRef.current || {}),
+      });
+    }
+  }, [config?.src]);
 
   return {
     dotLottie,

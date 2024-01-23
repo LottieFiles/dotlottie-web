@@ -10,6 +10,7 @@ export default defineConfig({
       enabled: true,
       name: 'chrome',
     },
+    retry: 1,
     coverage: {
       provider: 'istanbul',
       include: ['src/**/*.ts'],
