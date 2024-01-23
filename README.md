@@ -94,15 +94,16 @@ pnpm install
 ### Live Examples
 
 * `@lottiefiles/dotlottie-web`
-  * <a href="https://codesandbox.io/s/lottiefiles-dotlottie-web-basic-example-tcy3rv?autoresize=1&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Basic Example</a>
-  * <a href="https://codesandbox.io/p/sandbox/lottiefiles-dotlottie-web-basic-example-forked-4v3t9y?autoresize=1&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Controlling Animation Playback Example</a>
-  * <a href="https://codesandbox.io/s/lottiefiles-dotlottie-web-dynamic-animation-loading-example-q7dgvr?autoresize=1&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Dynamic Animation Loading Example</a>
+  * <a href="https://codepen.io/lottiefiles/pen/JjzJZmL" target="_blank">Getting Started</a>
+  * <a href="https://codepen.io/lottiefiles/pen/dyrRKwg" target="_blank">Controlling Animation Playback</a>
+  * <a href="https://codepen.io/lottiefiles/pen/JjzJZgB" target="_blank">Dynamic Animation Loading</a>
 
 * `@lottiefiles/dotlottie-react`
-  * <a href="https://codesandbox.io/p/sandbox/dotlottie-react-basic-example-66cwfq?autoresize=1&file=%2Fsrc%2FApp.tsx&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Basic Example</a>
+  * <a href="https://codepen.io/lottiefiles/pen/vYPJpBN" target="_blank">Getting Started</a>
+  * <a href="https://codepen.io/lottiefiles/pen/WNmEdxd" target="_blank">Custom Playback Controls</a>
 
 * `@lottiefiles/dotlottie-vue`
-  * <a href="https://codepen.io/lottiefiles/pen/yLwgeoJ" target="_blank">Basic Example</a>
+  * <a href="https://codepen.io/lottiefiles/pen/yLwgeoJ" target="_blank">Getting Started</a>
 
 ### Local Examples
 

@@ -62,7 +62,8 @@ const App = () => {
 
 ## Live Examples
 
-* <a href="https://codesandbox.io/p/sandbox/dotlottie-react-basic-example-66cwfq?autoresize=1&file=%2Fsrc%2FApp.tsx&fontsize=14&hidenavigation=1&theme=dark" target="_blank">Basic Example</a>
+* <a href="https://codepen.io/lottiefiles/pen/vYPJpBN" target="_blank">Getting Started</a>
+* <a href="https://codepen.io/lottiefiles/pen/WNmEdxd" target="_blank">Custom Playback Controls</a>
 
 ## APIs
 
