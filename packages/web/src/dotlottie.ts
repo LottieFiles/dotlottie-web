@@ -186,6 +186,10 @@ export class DotLottie {
 
   // #region Getters and Setters
 
+  public get renderConfig(): RenderConfig {
+    return this._renderConfig;
+  }
+
   public get canvas(): HTMLCanvasElement | OffscreenCanvas {
     return this._canvas;
   }

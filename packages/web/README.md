@@ -139,25 +139,26 @@ The `renderConfig` object accepts the following properties:
 
 `DotLottie` instances expose the following properties:
 
-| Property                | Type    | Description                                                                                                           |
-| ----------------------- | ------- | --------------------------------------------------------------------------------------------------------------------- |
-| `currentFrame`          | number  | Represents the animation's currently displayed frame number.                                                          |
-| `duration`              | number  | Specifies the animation's total playback time in milliseconds.                                                        |
-| `totalFrames`           | number  | Denotes the total count of individual frames within the animation.                                                    |
-| `loop`                  | boolean | Indicates if the animation is set to play in a continuous loop.                                                       |
-| `speed`                 | number  | Represents the playback speed factor; e.g., 2 would mean double speed.                                                |
-| `loopCount`             | number  | Tracks how many times the animation has completed its loop.                                                           |
-| `direction`             | string  | Reflects the current playback direction; e.g., 1 would mean forward, -1 would mean reverse.                           |
-| `mode`                  | string  | Reflects the current playback mode.                                                                                   |
-| `isPaused`              | boolean | Reflects whether the animation is paused or not.                                                                      |
-| `isStopped`             | boolean | Reflects whether the animation is stopped or not.                                                                     |
-| `isPlaying`             | boolean | Reflects whether the animation is playing or not.                                                                     |
-| `segments`              | number  | Reflects the frames range of the animations. where segments\[0] is the start frame and segments\[1] is the end frame. |
-| `backgroundColor`       | string  | Gets the background color of the canvas.                                                                              |
-| `autoplay`              | boolean | Indicates if the animation is set to auto-play.                                                                       |
-| `isFrozen`              | boolean | Reflects whether the animation loop is stopped or not.                                                                |
-| `isLoaded`              | boolean | Reflects whether the animation is loaded or not.                                                                      |
-| `useFrameInterpolation` | boolean | Reflects whether the animation should update on subframes.                                                            |
+| Property                | Type                          | Description                                                                                                           |
+| ----------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `currentFrame`          | number                        | Represents the animation's currently displayed frame number.                                                          |
+| `duration`              | number                        | Specifies the animation's total playback time in milliseconds.                                                        |
+| `totalFrames`           | number                        | Denotes the total count of individual frames within the animation.                                                    |
+| `loop`                  | boolean                       | Indicates if the animation is set to play in a continuous loop.                                                       |
+| `speed`                 | number                        | Represents the playback speed factor; e.g., 2 would mean double speed.                                                |
+| `loopCount`             | number                        | Tracks how many times the animation has completed its loop.                                                           |
+| `direction`             | string                        | Reflects the current playback direction; e.g., 1 would mean forward, -1 would mean reverse.                           |
+| `mode`                  | string                        | Reflects the current playback mode.                                                                                   |
+| `isPaused`              | boolean                       | Reflects whether the animation is paused or not.                                                                      |
+| `isStopped`             | boolean                       | Reflects whether the animation is stopped or not.                                                                     |
+| `isPlaying`             | boolean                       | Reflects whether the animation is playing or not.                                                                     |
+| `segments`              | number                        | Reflects the frames range of the animations. where segments\[0] is the start frame and segments\[1] is the end frame. |
+| `backgroundColor`       | string                        | Gets the background color of the canvas.                                                                              |
+| `autoplay`              | boolean                       | Indicates if the animation is set to auto-play.                                                                       |
+| `isFrozen`              | boolean                       | Reflects whether the animation loop is stopped or not.                                                                |
+| `isLoaded`              | boolean                       | Reflects whether the animation is loaded or not.                                                                      |
+| `useFrameInterpolation` | boolean                       | Reflects whether the animation should update on subframes.                                                            |
+| `renderConfig`          | [RenderConfig](#renderconfig) | Configuration for rendering the animation.                                                                            |
 
 ### Methods
 
@@ -182,6 +183,7 @@ The `renderConfig` object accepts the following properties:
 | `setBackgroundColor(color: string)`                        | Sets the background color of the canvas.                                                                                                                                                                                                                      |
 | `resize()`                                                 | This method adjusts the canvas size to match its bounding box dimensions, considering the device's pixel ratio. This prevents the canvas from appearing blurry on high-resolution screens. Call this method when the window or the canvas element is resized. |
 | `setUseFrameInterpolation(useFrameInterpolation: boolean)` | Sets whether the animation should update on subframes.                                                                                                                                                                                                        |
+| `setRenderConfig(renderConfig: RenderConfig)`              | Sets the render configuration. check [RenderConfig](#renderconfig) for more details.                                                                                                                                                                          |
 
 ### Static Methods
 
