@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <canvas width="200" height="200"></canvas>
+        <button id="play">play</button>
+        <button id="pause">pause</button>
+        <button id="stop">stop</button>
+        <button id="freeze">freeze</button>
+        <button id="unfreeze">unfreeze</button>
+        <button id="speed-up">+ speed</button>
+        <button id="speed-down">- speed</button>
+        <input id="progress" type="range" min="0" max="100" defaultValue="0" step="0.01" />
+
+        <script type="module">
+            import { DotLottie } from './dist/dotlottie-rs.js';
+
+            const canvas = document.querySelector('canvas');
+
+            const playBtn = document.querySelector('#play');
+            const pauseBtn = document.querySelector('#pause');
+            const stopBtn = document.querySelector('#stop');
+            const freezeBtn = document.querySelector('#freeze');
+            const unfreezeBtn = document.querySelector('#unfreeze');
+            const progress = document.querySelector('#progress');
+            const speedUpBtn = document.querySelector('#speed-up');
+            const speedDownBtn = document.querySelector('#speed-down');
+
+            DotLottie.setWasmUrl('./dist/core/dotlottie-player.wasm');
+
+            const response = await fetch('https://lottie.host/5525262b-4e57-4f0a-8103-cfdaa7c8969e/VCYIkooYX8.json');
+            const data = await response.text();
+
+            const dotLottie = new DotLottie({
+                canvas,
+                autoplay: true,
+                data,
+                loop: true,
+                useFrameInterpolation: true,
+            });
+
+            dotLottie.addEventListener('frame', ({ currentFrame }) => {
+                progress.value = (currentFrame / dotLottie.totalFrames) * 100;
+            });
+
+            playBtn.addEventListener('click', () => {
+                dotLottie.play();
+            });
+
+            pauseBtn.addEventListener('click', () => {
+                dotLottie.pause();
+            });
+
+            stopBtn.addEventListener('click', () => {
+                dotLottie.stop();
+            });
+
+            freezeBtn.addEventListener('click', () => {
+                dotLottie.freeze();
+            });
+
+            unfreezeBtn.addEventListener('click', () => {
+                dotLottie.unfreeze();
+            });
+
+            speedUpBtn.addEventListener('click', () => {
+                dotLottie.setSpeed(dotLottie.speed + 0.1);
+            });
+
+            speedDownBtn.addEventListener('click', () => {
+                dotLottie.setSpeed(dotLottie.speed - 0.1);
+            });
+        </script>
+    </body>
+</html>

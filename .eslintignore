@@ -43,3 +43,5 @@ next-env.d.ts
 releases/
 
 renderer.js
+
+dotlottie-player.mjs
