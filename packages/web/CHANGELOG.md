@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-web
 
+## 0.12.1
+
+### Patch Changes
+
+- 1ed6c7c: chore: 🤖 upgrade thorvg to v0.12.2
+- b0ca50e: chore: 🤖 disable thorvg threads feature
+
 ## 0.12.0
 
 ### Minor Changes
