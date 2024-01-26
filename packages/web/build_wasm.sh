@@ -3,7 +3,7 @@
 # Store positional arguments in descriptive variables for clarity
 SCRIPT_NAME="$0"
 EMSDK_PATH="$1"
-THORVG_TAG_OR_BRANCH="${2:-tags/v0.12.2}"
+THORVG_TAG_OR_BRANCH="${2:-v0.12.x}"
 
 # Ensure we always execute from the directory the script resides in
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -65,7 +65,7 @@ git checkout "$THORVG_TAG_OR_BRANCH"
 check_command_success "Error switching to the desired tag/branch: $THORVG_TAG_OR_BRANCH"
 
 sed "s|EMSDK:|$EMSDK_PATH|g" cross/wasm_x86_i686.txt > /tmp/.wasm_cross.txt
-meson -Db_lto=true -Ddefault_library=static -Dstatic=true -Dloaders="lottie, png, jpg" --cross-file /tmp/.wasm_cross.txt build_wasm
+meson -Db_lto=true -Ddefault_library=static -Dstatic=true -Dthreads=false -Dloaders="lottie, png, jpg" --cross-file /tmp/.wasm_cross.txt build_wasm
 ninja -C build_wasm/
 
 # Change back to the parent directory

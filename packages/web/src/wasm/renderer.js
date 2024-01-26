@@ -112,12 +112,6 @@ var createRendererModule = (() => {
 
     var EXITSTATUS;
 
-    /** @type {function(*, string=)} */ function assert(condition, text) {
-      if (!condition) {
-        abort(text);
-      }
-    }
-
     var /** @type {!Int8Array} */ HEAP8,
       /** @type {!Uint8Array} */ HEAPU8,
       /** @type {!Int16Array} */ HEAP16,
@@ -192,16 +186,12 @@ var createRendererModule = (() => {
 
     function addRunDependency(id) {
       runDependencies++;
-      if (Module['monitorRunDependencies']) {
-        Module['monitorRunDependencies'](runDependencies);
-      }
+      Module['monitorRunDependencies']?.(runDependencies);
     }
 
     function removeRunDependency(id) {
       runDependencies--;
-      if (Module['monitorRunDependencies']) {
-        Module['monitorRunDependencies'](runDependencies);
-      }
+      Module['monitorRunDependencies']?.(runDependencies);
       if (runDependencies == 0) {
         if (runDependencyWatcher !== null) {
           clearInterval(runDependencyWatcher);
@@ -216,9 +206,7 @@ var createRendererModule = (() => {
     }
 
     /** @param {string|number=} what */ function abort(what) {
-      if (Module['onAbort']) {
-        Module['onAbort'](what);
-      }
+      Module['onAbort']?.(what);
       what = 'Aborted(' + what + ')';
       err(what);
       ABORT = true;
@@ -311,7 +299,7 @@ var createRendererModule = (() => {
         wasmExports = instance.exports;
         wasmMemory = wasmExports['I'];
         updateMemoryViews();
-        wasmTable = wasmExports['O'];
+        wasmTable = wasmExports['N'];
         addOnInit(wasmExports['J']);
         removeRunDependency('wasm-instantiate');
         return wasmExports;
@@ -692,6 +680,7 @@ var createRendererModule = (() => {
         Object.create(prototype, {
           $$: {
             value: record,
+            writable: true,
           },
         }),
       );
@@ -863,30 +852,10 @@ var createRendererModule = (() => {
 
     /** @constructor */ function ClassHandle() {}
 
-    var char_0 = 48;
-
-    var char_9 = 57;
-
-    var makeLegalFunctionName = (name) => {
-      if (undefined === name) {
-        return '_unknown';
-      }
-      name = name.replace(/[^a-zA-Z0-9_]/g, '$');
-      var f = name.charCodeAt(0);
-      if (f >= char_0 && f <= char_9) {
-        return `_${name}`;
-      }
-      return name;
-    };
-
-    function createNamedFunction(name, body) {
-      name = makeLegalFunctionName(name);
-      return {
-        [name]: function () {
-          return body.apply(this, arguments);
-        },
-      }[name];
-    }
+    var createNamedFunction = (name, body) =>
+      Object.defineProperty(body, 'name', {
+        value: name,
+      });
 
     var ensureOverloadTable = (proto, methodName, humanName) => {
       if (undefined === proto[methodName].overloadTable) {
@@ -925,6 +894,22 @@ var createRendererModule = (() => {
           Module[name].numArguments = numArguments;
         }
       }
+    };
+
+    var char_0 = 48;
+
+    var char_9 = 57;
+
+    var makeLegalFunctionName = (name) => {
+      if (undefined === name) {
+        return '_unknown';
+      }
+      name = name.replace(/[^a-zA-Z0-9_]/g, '$');
+      var f = name.charCodeAt(0);
+      if (f >= char_0 && f <= char_9) {
+        return `_${name}`;
+      }
+      return name;
     };
 
     /** @constructor */ function RegisteredClass(
@@ -993,7 +978,7 @@ var createRendererModule = (() => {
           return 0;
         }
       }
-      if (!handle.$$) {
+      if (!handle || !handle.$$) {
         throwBindingError(`Cannot pass "${embindRepr(handle)}" as a ${this.name}`);
       }
       if (!handle.$$.ptr) {
@@ -1085,17 +1070,10 @@ var createRendererModule = (() => {
           return ptr;
         },
         destructor(ptr) {
-          if (this.rawDestructor) {
-            this.rawDestructor(ptr);
-          }
+          this.rawDestructor?.(ptr);
         },
         argPackAdvance: GenericWireTypeSize,
         readValueFromPointer: readPointer,
-        deleteObject(handle) {
-          if (handle !== null) {
-            handle['delete']();
-          }
-        },
         fromWireType: RegisteredPointer_fromWireType,
       });
     };
@@ -1265,12 +1243,8 @@ var createRendererModule = (() => {
     ) => {
       name = readLatin1String(name);
       getActualType = embind__requireFunction(getActualTypeSignature, getActualType);
-      if (upcast) {
-        upcast = embind__requireFunction(upcastSignature, upcast);
-      }
-      if (downcast) {
-        downcast = embind__requireFunction(downcastSignature, downcast);
-      }
+      upcast &&= embind__requireFunction(upcastSignature, upcast);
+      downcast &&= embind__requireFunction(downcastSignature, downcast);
       rawDestructor = embind__requireFunction(destructorSignature, rawDestructor);
       var legalFunctionName = makeLegalFunctionName(name);
       exposePublicSymbol(legalFunctionName, function () {
@@ -1289,7 +1263,7 @@ var createRendererModule = (() => {
           } else {
             basePrototype = ClassHandle.prototype;
           }
-          var constructor = createNamedFunction(legalFunctionName, function () {
+          var constructor = createNamedFunction(name, function () {
             if (Object.getPrototypeOf(this) !== instancePrototype) {
               throw new BindingError("Use 'new' to construct " + name);
             }
@@ -1323,9 +1297,7 @@ var createRendererModule = (() => {
             downcast,
           );
           if (registeredClass.baseClass) {
-            if (registeredClass.baseClass.__derivedClasses === undefined) {
-              registeredClass.baseClass.__derivedClasses = [];
-            }
+            registeredClass.baseClass.__derivedClasses ??= [];
             registeredClass.baseClass.__derivedClasses.push(registeredClass);
           }
           var referenceConverter = new RegisteredPointer(name, registeredClass, true, false, false);
@@ -1357,6 +1329,15 @@ var createRendererModule = (() => {
       }
     };
 
+    function usesDestructorStack(argTypes) {
+      for (var i = 1; i < argTypes.length; ++i) {
+        if (argTypes[i] !== null && argTypes[i].destructorFunction === undefined) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     function craftInvokerFunction(
       humanName,
       argTypes,
@@ -1370,19 +1351,13 @@ var createRendererModule = (() => {
         throwBindingError("argTypes array size mismatch! Must at least get return value and 'this' types!");
       }
       var isClassMethodFunc = argTypes[1] !== null && classType !== null;
-      var needsDestructorStack = false;
-      for (var i = 1; i < argTypes.length; ++i) {
-        if (argTypes[i] !== null && argTypes[i].destructorFunction === undefined) {
-          needsDestructorStack = true;
-          break;
-        }
-      }
+      var needsDestructorStack = usesDestructorStack(argTypes);
       var returns = argTypes[0].name !== 'void';
       var expectedArgCount = argCount - 2;
       var argsWired = new Array(expectedArgCount);
       var invokerFuncArgs = [];
       var destructors = [];
-      return function () {
+      var invokerFn = function () {
         if (arguments.length !== expectedArgCount) {
           throwBindingError(
             `function ${humanName} called with ${arguments.length} arguments, expected ${expectedArgCount}`,
@@ -1418,6 +1393,7 @@ var createRendererModule = (() => {
         }
         return onDone(rv);
       };
+      return createNamedFunction(humanName, invokerFn);
     }
 
     var __embind_register_class_constructor = (
@@ -1465,7 +1441,6 @@ var createRendererModule = (() => {
       signature = signature.trim();
       const argsIndex = signature.indexOf('(');
       if (argsIndex !== -1) {
-        assert(signature[signature.length - 1] == ')', 'Parentheses for argument names should match.');
         return signature.substr(0, argsIndex);
       } else {
         return signature;
@@ -1528,32 +1503,26 @@ var createRendererModule = (() => {
       });
     };
 
-    function handleAllocatorInit() {
-      Object.assign(
-        HandleAllocator.prototype,
-        /** @lends {HandleAllocator.prototype} */ {
-          get(id) {
-            return this.allocated[id];
-          },
-          has(id) {
-            return this.allocated[id] !== undefined;
-          },
-          allocate(handle) {
-            var id = this.freelist.pop() || this.allocated.length;
-            this.allocated[id] = handle;
-            return id;
-          },
-          free(id) {
-            this.allocated[id] = undefined;
-            this.freelist.push(id);
-          },
-        },
-      );
-    }
-
-    /** @constructor */ function HandleAllocator() {
-      this.allocated = [undefined];
-      this.freelist = [];
+    class HandleAllocator {
+      constructor() {
+        this.allocated = [undefined];
+        this.freelist = [];
+      }
+      get(id) {
+        return this.allocated[id];
+      }
+      has(id) {
+        return this.allocated[id] !== undefined;
+      }
+      allocate(handle) {
+        var id = this.freelist.pop() || this.allocated.length;
+        this.allocated[id] = handle;
+        return id;
+      }
+      free(id) {
+        this.allocated[id] = undefined;
+        this.freelist.push(id);
+      }
     }
 
     var emval_handles = new HandleAllocator();
@@ -1589,8 +1558,13 @@ var createRendererModule = (() => {
           value: false,
         },
       );
-      emval_handles.reserved = emval_handles.allocated.length;
-      Module['count_emval_handles'] = count_emval_handles;
+      Object.assign(
+        emval_handles,
+        /** @lends {emval_handles} */ {
+          reserved: emval_handles.allocated.length,
+        },
+      ),
+        (Module['count_emval_handles'] = count_emval_handles);
     };
 
     var Emval = {
@@ -1628,21 +1602,20 @@ var createRendererModule = (() => {
       return this['fromWireType'](HEAP32[pointer >> 2]);
     }
 
-    var __embind_register_emval = (rawType, name) => {
-      name = readLatin1String(name);
-      registerType(rawType, {
-        name: name,
-        fromWireType: (handle) => {
-          var rv = Emval.toValue(handle);
-          __emval_decref(handle);
-          return rv;
-        },
-        toWireType: (destructors, value) => Emval.toHandle(value),
-        argPackAdvance: GenericWireTypeSize,
-        readValueFromPointer: simpleReadValueFromPointer,
-        destructorFunction: null,
-      });
+    var EmValType = {
+      name: 'emscripten::val',
+      fromWireType: (handle) => {
+        var rv = Emval.toValue(handle);
+        __emval_decref(handle);
+        return rv;
+      },
+      toWireType: (destructors, value) => Emval.toHandle(value),
+      argPackAdvance: GenericWireTypeSize,
+      readValueFromPointer: simpleReadValueFromPointer,
+      destructorFunction: null,
     };
+
+    var __embind_register_emval = (rawType) => registerType(rawType, EmValType);
 
     var embindRepr = (v) => {
       if (v === null) {
@@ -1930,9 +1903,7 @@ var createRendererModule = (() => {
     };
 
     var stringToUTF16 = (str, outPtr, maxBytesToWrite) => {
-      if (maxBytesToWrite === undefined) {
-        maxBytesToWrite = 2147483647;
-      }
+      maxBytesToWrite ??= 2147483647;
       if (maxBytesToWrite < 2) return 0;
       maxBytesToWrite -= 2;
       var startPtr = outPtr;
@@ -1966,9 +1937,7 @@ var createRendererModule = (() => {
     };
 
     var stringToUTF32 = (str, outPtr, maxBytesToWrite) => {
-      if (maxBytesToWrite === undefined) {
-        maxBytesToWrite = 2147483647;
-      }
+      maxBytesToWrite ??= 2147483647;
       if (maxBytesToWrite < 4) return 0;
       var startPtr = outPtr;
       var endPtr = startPtr + maxBytesToWrite - 4;
@@ -2193,8 +2162,6 @@ var createRendererModule = (() => {
 
     UnboundTypeError = Module['UnboundTypeError'] = extendError(Error, 'UnboundTypeError');
 
-    handleAllocatorInit();
-
     init_emval();
 
     var wasmImports = {
@@ -2244,16 +2211,11 @@ var createRendererModule = (() => {
 
     var ___getTypeName = (a0) => (___getTypeName = wasmExports['M'])(a0);
 
-    var __embind_initialize_bindings = (Module['__embind_initialize_bindings'] = () =>
-      (__embind_initialize_bindings = Module['__embind_initialize_bindings'] = wasmExports['N'])());
+    var _setThrew = (a0, a1) => (_setThrew = wasmExports['O'])(a0, a1);
 
-    var ___errno_location = () => (___errno_location = wasmExports['__errno_location'])();
+    var stackSave = () => (stackSave = wasmExports['P'])();
 
-    var _setThrew = (a0, a1) => (_setThrew = wasmExports['P'])(a0, a1);
-
-    var stackSave = () => (stackSave = wasmExports['Q'])();
-
-    var stackRestore = (a0) => (stackRestore = wasmExports['R'])(a0);
+    var stackRestore = (a0) => (stackRestore = wasmExports['Q'])(a0);
 
     var ___cxa_increment_exception_refcount = (a0) =>
       (___cxa_increment_exception_refcount = wasmExports['__cxa_increment_exception_refcount'])(a0);
@@ -2261,10 +2223,10 @@ var createRendererModule = (() => {
     var ___cxa_is_pointer_type = (a0) => (___cxa_is_pointer_type = wasmExports['__cxa_is_pointer_type'])(a0);
 
     var dynCall_viiij = (Module['dynCall_viiij'] = (a0, a1, a2, a3, a4, a5) =>
-      (dynCall_viiij = Module['dynCall_viiij'] = wasmExports['S'])(a0, a1, a2, a3, a4, a5));
+      (dynCall_viiij = Module['dynCall_viiij'] = wasmExports['R'])(a0, a1, a2, a3, a4, a5));
 
     var dynCall_jiji = (Module['dynCall_jiji'] = (a0, a1, a2, a3, a4) =>
-      (dynCall_jiji = Module['dynCall_jiji'] = wasmExports['T'])(a0, a1, a2, a3, a4));
+      (dynCall_jiji = Module['dynCall_jiji'] = wasmExports['S'])(a0, a1, a2, a3, a4));
 
     function invoke_vi(index, a1) {
       var sp = stackSave();
