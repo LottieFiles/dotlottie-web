@@ -4,8 +4,6 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { IS_NODE } from './constants';
-
 interface AnimationFrameStrategy {
   cancelAnimationFrame(id: number): void;
   requestAnimationFrame(callback: (time: number) => void): number;
@@ -51,7 +49,8 @@ export class AnimationFrameManager {
   private readonly _strategy: AnimationFrameStrategy;
 
   public constructor() {
-    this._strategy = IS_NODE ? new NodeAnimationFrameStrategy() : new WebAnimationFrameStrategy();
+    this._strategy =
+      typeof requestAnimationFrame === 'function' ? new WebAnimationFrameStrategy() : new NodeAnimationFrameStrategy();
   }
 
   public requestAnimationFrame(callback: (time: number) => void): number {
