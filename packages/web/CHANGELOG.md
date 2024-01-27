@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.12.2
+
+### Patch Changes
+
+- 7b2b596: fix: 🐛 animation loop not starting in remix apps
+
 ## 0.12.1
 
 ### Patch Changes
