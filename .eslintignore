@@ -42,6 +42,4 @@ next-env.d.ts
 # Ignore renderer releases
 releases/
 
-renderer.js
-
-dotlottie-player.mjs
+dotlottie-player.js

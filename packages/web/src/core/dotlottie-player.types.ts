@@ -24,6 +24,7 @@ export interface DotLottiePlayer {
   currentFrame(): number;
   delete(): void;
   duration(): number;
+  isComplete(): boolean;
   isLoaded(): boolean;
   isPaused(): boolean;
   isPlaying(): boolean;
@@ -51,7 +52,6 @@ export interface DotLottiePlayer {
   render(): boolean;
   requestFrame(): number;
   resize(_0: number, _1: number): boolean;
-  setBackgroundColor(_0: number): boolean;
   setConfig(_0: Config): void;
   setFrame(_0: number): boolean;
   stop(): boolean;

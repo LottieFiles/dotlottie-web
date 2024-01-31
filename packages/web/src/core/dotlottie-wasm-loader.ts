@@ -4,8 +4,8 @@
 
 import pkg from '../../package.json';
 
-import type { MainModule } from './dotlottie-player';
-import createDotLottiePlayerModule from './dotlottie-player.mjs';
+import createDotLottiePlayerModule from './dotlottie-player';
+import type { MainModule } from './dotlottie-player.types';
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class DotLottieWasmLoader {
@@ -13,7 +13,7 @@ export class DotLottieWasmLoader {
   private static _ModulePromise: Promise<MainModule> | null = null;
 
   // URL for the WASM file, constructed using package information
-  private static _wasmURL = `https://cdn.jsdelivr.net/npm/${pkg.name}@${pkg.version}/dist/core/dotlottie-player.wasm`;
+  private static _wasmURL = `https://cdn.jsdelivr.net/npm/${pkg.name}@${pkg.version}/dist/dotlottie-player.wasm`;
 
   private constructor() {
     throw new Error('RendererLoader is a static class and cannot be instantiated.');
@@ -33,7 +33,7 @@ export class DotLottieWasmLoader {
   private static async _loadWithBackup(): Promise<MainModule> {
     if (!this._ModulePromise) {
       this._ModulePromise = this._tryLoad(this._wasmURL).catch(async (initialError): Promise<MainModule> => {
-        const backupUrl = `https://unpkg.com/${pkg.name}@${pkg.version}/dist/core/dotlottie-player.wasm`;
+        const backupUrl = `https://unpkg.com/${pkg.name}@${pkg.version}/dist/dotlottie-player.wasm`;
 
         console.warn(`Trying backup URL for WASM loading: ${backupUrl}`);
         try {
