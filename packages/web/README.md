@@ -197,19 +197,20 @@ The `DotLottie` class exposes the following static methods:
 
 The `DotLottie` instance emits the following events that can be listened to via the `addEventListener` method:
 
-| Event       | Description                                                             | Event Parameter (Type and Fields)                    |
-| ----------- | ----------------------------------------------------------------------- | ---------------------------------------------------- |
-| `load`      | Emitted when the animation is loaded.                                   | `LoadEvent { type: 'load' }`                         |
-| `loadError` | Emitted when there's an error loading the animation.                    | `LoadErrorEvent { type: 'loadError', error: Error }` |
-| `play`      | Emitted when the animation starts playing.                              | `PlayEvent { type: 'play' }`                         |
-| `pause`     | Emitted when the animation is paused.                                   | `PauseEvent { type: 'pause' }`                       |
-| `stop`      | Emitted when the animation is stopped.                                  | `StopEvent { type: 'stop' }`                         |
-| `loop`      | Emitted when the animation completes a loop.                            | `LoopEvent { type: 'loop', loopCount: number }`      |
-| `complete`  | Emitted when the animation completes.                                   | `CompleteEvent { type: 'complete' }`                 |
-| `frame`     | Emitted when the animation reaches a new frame.                         | `FrameEvent { type: 'frame', currentFrame: number }` |
-| `destroy`   | Emitted when the animation is destroyed.                                | `DestroyEvent { type: 'destroy' }`                   |
-| `freeze`    | Emitted when the animation is freezed and the animation loop stops.     | `FreezeEvent { type: 'freeze' }`                     |
-| `unfreeze`  | Emitted when the animation is unfreezed and the animation loop resumes. | `UnfreezeEvent { type: 'unfreeze' }`                 |
+| Event       | Description                                                             | Event Parameter (Type and Fields)                      |
+| ----------- | ----------------------------------------------------------------------- | ------------------------------------------------------ |
+| `load`      | Emitted when the animation is loaded.                                   | `LoadEvent { type: 'load' }`                           |
+| `loadError` | Emitted when there's an error loading the animation.                    | `LoadErrorEvent { type: 'loadError', error: Error }`   |
+| `play`      | Emitted when the animation starts playing.                              | `PlayEvent { type: 'play' }`                           |
+| `pause`     | Emitted when the animation is paused.                                   | `PauseEvent { type: 'pause' }`                         |
+| `stop`      | Emitted when the animation is stopped.                                  | `StopEvent { type: 'stop' }`                           |
+| `loop`      | Emitted when the animation completes a loop.                            | `LoopEvent { type: 'loop', loopCount: number }`        |
+| `complete`  | Emitted when the animation completes.                                   | `CompleteEvent { type: 'complete' }`                   |
+| `frame`     | Emitted when the animation reaches a new frame.                         | `FrameEvent { type: 'frame', currentFrame: number }`   |
+| `destroy`   | Emitted when the animation is destroyed.                                | `DestroyEvent { type: 'destroy' }`                     |
+| `freeze`    | Emitted when the animation is freezed and the animation loop stops.     | `FreezeEvent { type: 'freeze' }`                       |
+| `unfreeze`  | Emitted when the animation is unfreezed and the animation loop resumes. | `UnfreezeEvent { type: 'unfreeze' }`                   |
+| `render`    | Emitted when a new frame is rendered to the canvas.                     | `RenderEvent { type: 'render', currentFrame: number }` |
 
 ## Development
 
