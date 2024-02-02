@@ -1,5 +1,6 @@
 {
   "name": "dotlottie-web-node-example",
+  "version": "0.0.0",
   "type": "module",
   "license": "MIT",
   "private": true,
