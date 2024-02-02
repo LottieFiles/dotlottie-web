@@ -120,7 +120,7 @@ dotLottie.addEventListener('load', () => {
 dotLottie.addEventListener('frame', (event) => {
   const frame = ctx.getImageData(0, 0, args.width, args.height).data;
 
-  if (event.currentFrame >= dotLottie.totalFrames - 1) {
+  if (event.currentFrame >= dotLottie.totalFrames) {
     console.log('Finished recording GIF');
     gif.finish();
   } else {

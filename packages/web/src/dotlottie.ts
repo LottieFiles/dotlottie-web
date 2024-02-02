@@ -84,10 +84,6 @@ export class DotLottie {
       .then((module) => {
         this._wasmModule = module;
 
-        if (config.backgroundColor) {
-          this.setBackgroundColor(config.backgroundColor);
-        }
-
         this._dotLottieCore = new module.DotLottiePlayer({
           autoplay: config.autoplay ?? false,
           backgroundColor: 0,
@@ -102,6 +98,10 @@ export class DotLottie {
           this._loadFromData(config.data);
         } else if (config.src) {
           this._loadFromSrc(config.src);
+        }
+
+        if (config.backgroundColor) {
+          this.setBackgroundColor(config.backgroundColor);
         }
       })
       .catch((error) => {
@@ -164,7 +164,12 @@ export class DotLottie {
       } else if (data instanceof ArrayBuffer) {
         loaded = this._dotLottieCore.loadDotLottieData(data, width, height);
       } else {
-        console.error('Unsupported data type for animation data. Expected a string or ArrayBuffer.');
+        this._eventManager.dispatch({
+          type: 'loadError',
+          error: new Error('Unsupported data type for animation data. Expected a string or ArrayBuffer.'),
+        });
+
+        return;
       }
 
       if (loaded) {

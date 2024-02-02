@@ -103,8 +103,10 @@ allCanvas.forEach((canvas) => {
     loop: true,
     autoplay: true,
     backgroundColor,
-    useFrameInterpolation: false,
+    // useFrameInterpolation: false,
   });
+
+  dotLottie.addEventListener('loadError', console.error);
 
   window.addEventListener('resize', () => {
     dotLottie.resize();
@@ -127,8 +129,10 @@ fetch('/hamster.lottie')
       segments: [10, 90],
       speed: 1,
       backgroundColor: '#800080ff',
-      useFrameInterpolation: false,
+      // useFrameInterpolation: false,
     });
+
+    dotLottie.addEventListener('loadError', console.error);
 
     const playPauseButton = document.getElementById('playPause') as HTMLButtonElement;
     const stopButton = document.getElementById('stop') as HTMLButtonElement;

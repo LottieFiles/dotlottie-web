@@ -723,16 +723,21 @@ describe('load', () => {
   });
 
   test('log error when loading invalid animation data of invalid type', async () => {
-    const error = vi.spyOn(console, 'error');
+    const onLoadError = vi.fn();
 
     dotLottie = new DotLottie({
       canvas,
       data: 1 as unknown as string,
     });
 
-    await vi.waitFor(() => expect(error).toHaveBeenCalledTimes(1));
+    dotLottie.addEventListener('loadError', onLoadError);
 
-    expect(error).toHaveBeenCalledWith('Unsupported data type for animation data. Expected a string or ArrayBuffer.');
+    await vi.waitFor(() => expect(onLoadError).toHaveBeenCalledTimes(1));
+
+    expect(onLoadError).toHaveBeenCalledWith({
+      type: 'loadError',
+      error: new Error('Unsupported data type for animation data. Expected a string or ArrayBuffer.'),
+    });
   });
 
   test('emit loadError when fail to load wasm', async () => {
