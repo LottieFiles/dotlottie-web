@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-web
 
+## 0.13.0-beta.0
+
+### Minor Changes
+
+- 4810361: refactor: 💡 dotlottie-rs wasm bindings integration
+- 4810361: feat: 🎸 emit `render` event when a new frame is rendered
+
 ## 0.12.3
 
 ### Patch Changes
