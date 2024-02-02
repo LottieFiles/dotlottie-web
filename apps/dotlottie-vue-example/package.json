@@ -1,5 +1,5 @@
 {
-  "name": "@lottiefiles/dotlottie-vue-example",
+  "name": "dotlottie-vue-example",
   "type": "module",
   "private": true,
   "scripts": {
