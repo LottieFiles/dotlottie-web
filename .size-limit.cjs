@@ -6,7 +6,7 @@ module.exports = [
   },
   {
     name: '@lottiefiles/dotlottie-web WASM',
-    path: 'packages/web/dist/wasm/*.wasm',
+    path: 'packages/web/dist/*.wasm',
     modifyWebpackConfig: (config) => {
       config.experiments = {
         asyncWebAssembly: true,

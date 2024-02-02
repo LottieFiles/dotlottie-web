@@ -4,4 +4,4 @@
 
 import { DotLottie } from '../src';
 
-DotLottie.setWasmUrl('src/wasm/renderer.wasm');
+DotLottie.setWasmUrl('src/core/dotlottie-player.wasm');

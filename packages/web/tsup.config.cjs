@@ -14,17 +14,17 @@ module.exports = defineConfig({
   treeshake: true,
   clean: true,
   dts: true,
-  minify: false,
-  sourcemap: false,
-  entry: ['./src/**/*.ts', './src/**/*.js'],
-  format: ['esm'],
+  minify: true,
+  sourcemap: true,
+  entry: ['./src/index.ts'],
+  format: ['esm', 'cjs'],
   platform: 'neutral',
   target: ['es2020', 'node18'],
   tsconfig: 'tsconfig.build.json',
   onSuccess: () => {
     fs.copyFileSync(
-      path.resolve(__dirname, 'src/wasm/renderer.wasm'),
-      path.resolve(__dirname, 'dist/wasm/renderer.wasm'),
+      path.resolve(__dirname, 'src/core/dotlottie-player.wasm'),
+      path.resolve(__dirname, 'dist/dotlottie-player.wasm'),
     );
   },
 });

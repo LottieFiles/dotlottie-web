@@ -12,7 +12,7 @@ import GIFEncoder from 'gif-encoder';
 import minimist from 'minimist';
 
 const wasmBase64 = fs
-  .readFileSync('./node_modules/@lottiefiles/dotlottie-web/dist/wasm/renderer.wasm')
+  .readFileSync('./node_modules/@lottiefiles/dotlottie-web/dist/dotlottie-player.wasm')
   .toString('base64');
 const wasmDataUri = `data:application/octet-stream;base64,${wasmBase64}`;
 
@@ -120,7 +120,7 @@ dotLottie.addEventListener('load', () => {
 dotLottie.addEventListener('frame', (event) => {
   const frame = ctx.getImageData(0, 0, args.width, args.height).data;
 
-  if (event.currentFrame >= dotLottie.totalFrames - 1) {
+  if (event.currentFrame >= dotLottie.totalFrames) {
     console.log('Finished recording GIF');
     gif.finish();
   } else {

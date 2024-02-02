@@ -1,6 +1,5 @@
 {
-  "name": "dotlottie-vue-example",
-  "version": "0.0.0",
+  "name": "@lottiefiles/dotlottie-vue-example",
   "type": "module",
   "private": true,
   "scripts": {
