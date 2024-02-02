@@ -6,6 +6,14 @@
 
 - Updated dependencies [09116cb]
   - @lottiefiles/dotlottie-web@0.12.4
+  
+## 0.0.8-beta.0
+
+### Patch Changes
+
+- Updated dependencies [4810361]
+- Updated dependencies [4810361]
+  - @lottiefiles/dotlottie-web@0.13.0-beta.0
 
 ## 0.0.7
 
