@@ -3,6 +3,4 @@
  */
 
 export * from './dotlottie';
-export * from './event-manager';
-export * from './utils';
-export * from './renderer-loader';
+export type * from './event-manager';

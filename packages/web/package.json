@@ -18,21 +18,9 @@
   "engines": {
     "node": ">=18"
   },
-  "main": "dist/index.js",
-  "exports": {
-    ".": "./dist/index.js",
-    "./*": "./dist/*.js",
-    "./package.json": "./package.json"
-  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "*": [
-        "dist/*",
-        "dist/index.d.ts"
-      ]
-    }
-  },
   "files": [
     "dist"
   ],
@@ -58,9 +46,6 @@
     "test:coverage": "vitest run --browser.headless --coverage",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@dotlottie/dotlottie-js": "^0.6.2"
   },
   "devDependencies": {
     "@types/node": "^20.10.5",

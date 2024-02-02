@@ -8,7 +8,7 @@ import './styles.css';
 import type { Mode } from '@lottiefiles/dotlottie-web';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 
-import wasmUrl from '../../../packages/web/dist/wasm/renderer.wasm?url';
+import wasmUrl from '../../../packages/web/dist/dotlottie-player.wasm?url';
 
 const app = document.getElementById('app') as HTMLDivElement;
 
@@ -63,7 +63,7 @@ app.innerHTML = `
       <label for="mode">Mode: </label>
       <select id="mode">
         <option value="bounce">Bounce</option>
-        <option value="bounce-reverse">Bounce Reverse</option>
+        <option value="reverse-bounce">Bounce Reverse</option>
         <option value="reverse">Reverse</option>
         <option value="forward">Forward</option>
       </select>
@@ -103,8 +103,10 @@ allCanvas.forEach((canvas) => {
     loop: true,
     autoplay: true,
     backgroundColor,
-    useFrameInterpolation: false,
+    // useFrameInterpolation: false,
   });
+
+  dotLottie.addEventListener('loadError', console.error);
 
   window.addEventListener('resize', () => {
     dotLottie.resize();
@@ -127,8 +129,10 @@ fetch('/hamster.lottie')
       segments: [10, 90],
       speed: 1,
       backgroundColor: '#800080ff',
-      useFrameInterpolation: false,
+      // useFrameInterpolation: false,
     });
+
+    dotLottie.addEventListener('loadError', console.error);
 
     const playPauseButton = document.getElementById('playPause') as HTMLButtonElement;
     const stopButton = document.getElementById('stop') as HTMLButtonElement;
@@ -196,7 +200,7 @@ fetch('/hamster.lottie')
         src: 'https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie',
         loop: true,
         autoplay: true,
-        mode: 'bounce-reverse',
+        mode: 'reverse-bounce',
         renderConfig: {
           devicePixelRatio: 0.2,
         },

@@ -16,7 +16,8 @@ export type EventType =
   | 'stop'
   | 'destroy'
   | 'freeze'
-  | 'unfreeze';
+  | 'unfreeze'
+  | 'render';
 
 /**
  * Maps an event type string to its respective event interface.
@@ -43,6 +44,8 @@ type EventByType<T> = T extends 'complete'
   ? FreezeEvent
   : T extends 'unfreeze'
   ? UnfreezeEvent
+  : T extends 'render'
+  ? RenderEvent
   : never;
 
 /**
@@ -50,6 +53,11 @@ type EventByType<T> = T extends 'complete'
  */
 export interface BaseEvent {
   type: EventType;
+}
+
+export interface RenderEvent extends BaseEvent {
+  currentFrame: number;
+  type: 'render';
 }
 
 export interface FreezeEvent extends BaseEvent {

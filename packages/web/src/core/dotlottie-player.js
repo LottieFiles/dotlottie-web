@@ -1,4 +1,4 @@
-var createRendererModule = (() => {
+var createDotLottiePlayerModule = (() => {
   var _scriptDir = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : undefined;
 
   return function (moduleArg = {}) {
@@ -226,7 +226,7 @@ var createRendererModule = (() => {
 
     var wasmBinaryFile;
 
-    wasmBinaryFile = 'renderer.wasm';
+    wasmBinaryFile = 'DotLottiePlayer.wasm';
 
     if (!isDataURI(wasmBinaryFile)) {
       wasmBinaryFile = locateFile(wasmBinaryFile);
@@ -297,10 +297,10 @@ var createRendererModule = (() => {
       };
       /** @param {WebAssembly.Module=} module*/ function receiveInstance(instance, module) {
         wasmExports = instance.exports;
-        wasmMemory = wasmExports['I'];
+        wasmMemory = wasmExports['Aa'];
         updateMemoryViews();
-        wasmTable = wasmExports['N'];
-        addOnInit(wasmExports['J']);
+        wasmTable = wasmExports['Da'];
+        addOnInit(wasmExports['Ba']);
         removeRunDependency('wasm-instantiate');
         return wasmExports;
       }
@@ -400,6 +400,129 @@ var createRendererModule = (() => {
       );
     };
 
+    var exceptionCaught = [];
+
+    var uncaughtExceptionCount = 0;
+
+    var ___cxa_begin_catch = (ptr) => {
+      var info = new ExceptionInfo(ptr);
+      if (!info.get_caught()) {
+        info.set_caught(true);
+        uncaughtExceptionCount--;
+      }
+      info.set_rethrown(false);
+      exceptionCaught.push(info);
+      ___cxa_increment_exception_refcount(info.excPtr);
+      return info.get_exception_ptr();
+    };
+
+    var exceptionLast = 0;
+
+    var ___cxa_end_catch = () => {
+      _setThrew(0, 0);
+      var info = exceptionCaught.pop();
+      ___cxa_decrement_exception_refcount(info.excPtr);
+      exceptionLast = 0;
+    };
+
+    /** @constructor */ function ExceptionInfo(excPtr) {
+      this.excPtr = excPtr;
+      this.ptr = excPtr - 24;
+      this.set_type = function (type) {
+        HEAPU32[(this.ptr + 4) >> 2] = type;
+      };
+      this.get_type = function () {
+        return HEAPU32[(this.ptr + 4) >> 2];
+      };
+      this.set_destructor = function (destructor) {
+        HEAPU32[(this.ptr + 8) >> 2] = destructor;
+      };
+      this.get_destructor = function () {
+        return HEAPU32[(this.ptr + 8) >> 2];
+      };
+      this.set_caught = function (caught) {
+        caught = caught ? 1 : 0;
+        HEAP8[(this.ptr + 12) >> 0] = caught;
+      };
+      this.get_caught = function () {
+        return HEAP8[(this.ptr + 12) >> 0] != 0;
+      };
+      this.set_rethrown = function (rethrown) {
+        rethrown = rethrown ? 1 : 0;
+        HEAP8[(this.ptr + 13) >> 0] = rethrown;
+      };
+      this.get_rethrown = function () {
+        return HEAP8[(this.ptr + 13) >> 0] != 0;
+      };
+      this.init = function (type, destructor) {
+        this.set_adjusted_ptr(0);
+        this.set_type(type);
+        this.set_destructor(destructor);
+      };
+      this.set_adjusted_ptr = function (adjustedPtr) {
+        HEAPU32[(this.ptr + 16) >> 2] = adjustedPtr;
+      };
+      this.get_adjusted_ptr = function () {
+        return HEAPU32[(this.ptr + 16) >> 2];
+      };
+      this.get_exception_ptr = function () {
+        var isPointer = ___cxa_is_pointer_type(this.get_type());
+        if (isPointer) {
+          return HEAPU32[this.excPtr >> 2];
+        }
+        var adjusted = this.get_adjusted_ptr();
+        if (adjusted !== 0) return adjusted;
+        return this.excPtr;
+      };
+    }
+
+    var ___resumeException = (ptr) => {
+      if (!exceptionLast) {
+        exceptionLast = ptr;
+      }
+      throw exceptionLast;
+    };
+
+    var findMatchingCatch = (args) => {
+      var thrown = exceptionLast;
+      if (!thrown) {
+        setTempRet0(0);
+        return 0;
+      }
+      var info = new ExceptionInfo(thrown);
+      info.set_adjusted_ptr(thrown);
+      var thrownType = info.get_type();
+      if (!thrownType) {
+        setTempRet0(0);
+        return thrown;
+      }
+      for (var arg in args) {
+        var caughtType = args[arg];
+        if (caughtType === 0 || caughtType === thrownType) {
+          break;
+        }
+        var adjusted_ptr_addr = info.ptr + 16;
+        if (___cxa_can_catch(caughtType, thrownType, adjusted_ptr_addr)) {
+          setTempRet0(caughtType);
+          return thrown;
+        }
+      }
+      setTempRet0(thrownType);
+      return thrown;
+    };
+
+    var ___cxa_find_matching_catch_2 = () => findMatchingCatch([]);
+
+    var ___cxa_find_matching_catch_4 = (arg0, arg1) => findMatchingCatch([arg0, arg1]);
+
+    var ___cxa_throw = (ptr, type, destructor) => {
+      var info = new ExceptionInfo(ptr);
+      info.init(type, destructor);
+      exceptionLast = ptr;
+      uncaughtExceptionCount++;
+      throw exceptionLast;
+    };
+
     var SYSCALLS = {
       varargs: undefined,
       get() {
@@ -421,6 +544,62 @@ var createRendererModule = (() => {
       return 0;
     }
 
+    var lengthBytesUTF8 = (str) => {
+      var len = 0;
+      for (var i = 0; i < str.length; ++i) {
+        var c = str.charCodeAt(i);
+        if (c <= 127) {
+          len++;
+        } else if (c <= 2047) {
+          len += 2;
+        } else if (c >= 55296 && c <= 57343) {
+          len += 4;
+          ++i;
+        } else {
+          len += 3;
+        }
+      }
+      return len;
+    };
+
+    var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
+      if (!(maxBytesToWrite > 0)) return 0;
+      var startIdx = outIdx;
+      var endIdx = outIdx + maxBytesToWrite - 1;
+      for (var i = 0; i < str.length; ++i) {
+        var u = str.charCodeAt(i);
+        if (u >= 55296 && u <= 57343) {
+          var u1 = str.charCodeAt(++i);
+          u = (65536 + ((u & 1023) << 10)) | (u1 & 1023);
+        }
+        if (u <= 127) {
+          if (outIdx >= endIdx) break;
+          heap[outIdx++] = u;
+        } else if (u <= 2047) {
+          if (outIdx + 1 >= endIdx) break;
+          heap[outIdx++] = 192 | (u >> 6);
+          heap[outIdx++] = 128 | (u & 63);
+        } else if (u <= 65535) {
+          if (outIdx + 2 >= endIdx) break;
+          heap[outIdx++] = 224 | (u >> 12);
+          heap[outIdx++] = 128 | ((u >> 6) & 63);
+          heap[outIdx++] = 128 | (u & 63);
+        } else {
+          if (outIdx + 3 >= endIdx) break;
+          heap[outIdx++] = 240 | (u >> 18);
+          heap[outIdx++] = 128 | ((u >> 12) & 63);
+          heap[outIdx++] = 128 | ((u >> 6) & 63);
+          heap[outIdx++] = 128 | (u & 63);
+        }
+      }
+      heap[outIdx] = 0;
+      return outIdx - startIdx;
+    };
+
+    var stringToUTF8 = (str, outPtr, maxBytesToWrite) => stringToUTF8Array(str, HEAPU8, outPtr, maxBytesToWrite);
+
+    var ___syscall_getcwd = (buf, size) => {};
+
     function ___syscall_ioctl(fd, op, varargs) {
       SYSCALLS.varargs = varargs;
       return 0;
@@ -430,38 +609,25 @@ var createRendererModule = (() => {
       SYSCALLS.varargs = varargs;
     }
 
-    var __embind_register_bigint = (primitiveType, name, size, minRange, maxRange) => {};
+    var structRegistrations = {};
 
-    var embind_init_charCodes = () => {
-      var codes = new Array(256);
-      for (var i = 0; i < 256; ++i) {
-        codes[i] = String.fromCharCode(i);
+    var runDestructors = (destructors) => {
+      while (destructors.length) {
+        var ptr = destructors.pop();
+        var del = destructors.pop();
+        del(ptr);
       }
-      embind_charCodes = codes;
     };
 
-    var embind_charCodes;
-
-    var readLatin1String = (ptr) => {
-      var ret = '';
-      var c = ptr;
-      while (HEAPU8[c]) {
-        ret += embind_charCodes[HEAPU8[c++]];
-      }
-      return ret;
-    };
+    /** @suppress {globalThis} */ function simpleReadValueFromPointer(pointer) {
+      return this['fromWireType'](HEAP32[pointer >> 2]);
+    }
 
     var awaitingDependencies = {};
 
     var registeredTypes = {};
 
     var typeDependencies = {};
-
-    var BindingError;
-
-    var throwBindingError = (message) => {
-      throw new BindingError(message);
-    };
 
     var InternalError;
 
@@ -505,6 +671,95 @@ var createRendererModule = (() => {
       if (0 === unregisteredTypes.length) {
         onComplete(typeConverters);
       }
+    };
+
+    var __embind_finalize_value_object = (structType) => {
+      var reg = structRegistrations[structType];
+      delete structRegistrations[structType];
+      var rawConstructor = reg.rawConstructor;
+      var rawDestructor = reg.rawDestructor;
+      var fieldRecords = reg.fields;
+      var fieldTypes = fieldRecords
+        .map((field) => field.getterReturnType)
+        .concat(fieldRecords.map((field) => field.setterArgumentType));
+      whenDependentTypesAreResolved([structType], fieldTypes, (fieldTypes) => {
+        var fields = {};
+        fieldRecords.forEach((field, i) => {
+          var fieldName = field.fieldName;
+          var getterReturnType = fieldTypes[i];
+          var getter = field.getter;
+          var getterContext = field.getterContext;
+          var setterArgumentType = fieldTypes[i + fieldRecords.length];
+          var setter = field.setter;
+          var setterContext = field.setterContext;
+          fields[fieldName] = {
+            read: (ptr) => getterReturnType['fromWireType'](getter(getterContext, ptr)),
+            write: (ptr, o) => {
+              var destructors = [];
+              setter(setterContext, ptr, setterArgumentType['toWireType'](destructors, o));
+              runDestructors(destructors);
+            },
+          };
+        });
+        return [
+          {
+            name: reg.name,
+            fromWireType: (ptr) => {
+              var rv = {};
+              for (var i in fields) {
+                rv[i] = fields[i].read(ptr);
+              }
+              rawDestructor(ptr);
+              return rv;
+            },
+            toWireType: (destructors, o) => {
+              for (var fieldName in fields) {
+                if (!(fieldName in o)) {
+                  throw new TypeError(`Missing field: "${fieldName}"`);
+                }
+              }
+              var ptr = rawConstructor();
+              for (fieldName in fields) {
+                fields[fieldName].write(ptr, o[fieldName]);
+              }
+              if (destructors !== null) {
+                destructors.push(rawDestructor, ptr);
+              }
+              return ptr;
+            },
+            argPackAdvance: GenericWireTypeSize,
+            readValueFromPointer: simpleReadValueFromPointer,
+            destructorFunction: rawDestructor,
+          },
+        ];
+      });
+    };
+
+    var __embind_register_bigint = (primitiveType, name, size, minRange, maxRange) => {};
+
+    var embind_init_charCodes = () => {
+      var codes = new Array(256);
+      for (var i = 0; i < 256; ++i) {
+        codes[i] = String.fromCharCode(i);
+      }
+      embind_charCodes = codes;
+    };
+
+    var embind_charCodes;
+
+    var readLatin1String = (ptr) => {
+      var ret = '';
+      var c = ptr;
+      while (HEAPU8[c]) {
+        ret += embind_charCodes[HEAPU8[c++]];
+      }
+      return ret;
+    };
+
+    var BindingError;
+
+    var throwBindingError = (message) => {
+      throw new BindingError(message);
     };
 
     /** @param {Object=} options */ function sharedRegisterType(rawType, registeredInstance, options = {}) {
@@ -1321,13 +1576,14 @@ var createRendererModule = (() => {
       return array;
     };
 
-    var runDestructors = (destructors) => {
-      while (destructors.length) {
-        var ptr = destructors.pop();
-        var del = destructors.pop();
-        del(ptr);
+    function usesDestructorStack(argTypes) {
+      for (var i = 1; i < argTypes.length; ++i) {
+        if (argTypes[i] !== null && argTypes[i].destructorFunction === undefined) {
+          return true;
+        }
       }
-    };
+      return false;
+    }
 
     function usesDestructorStack(argTypes) {
       for (var i = 1; i < argTypes.length; ++i) {
@@ -1598,24 +1854,97 @@ var createRendererModule = (() => {
       },
     };
 
-    /** @suppress {globalThis} */ function simpleReadValueFromPointer(pointer) {
-      return this['fromWireType'](HEAP32[pointer >> 2]);
-    }
-
-    var EmValType = {
-      name: 'emscripten::val',
-      fromWireType: (handle) => {
-        var rv = Emval.toValue(handle);
-        __emval_decref(handle);
-        return rv;
-      },
-      toWireType: (destructors, value) => Emval.toHandle(value),
-      argPackAdvance: GenericWireTypeSize,
-      readValueFromPointer: simpleReadValueFromPointer,
-      destructorFunction: null,
+    var __embind_register_emval = (rawType, name) => {
+      name = readLatin1String(name);
+      registerType(rawType, {
+        name: name,
+        fromWireType: (handle) => {
+          var rv = Emval.toValue(handle);
+          __emval_decref(handle);
+          return rv;
+        },
+        toWireType: (destructors, value) => Emval.toHandle(value),
+        argPackAdvance: GenericWireTypeSize,
+        readValueFromPointer: simpleReadValueFromPointer,
+        destructorFunction: null,
+      });
     };
 
-    var __embind_register_emval = (rawType) => registerType(rawType, EmValType);
+    var enumReadValueFromPointer = (name, width, signed) => {
+      switch (width) {
+        case 1:
+          return signed
+            ? function (pointer) {
+                return this['fromWireType'](HEAP8[pointer >> 0]);
+              }
+            : function (pointer) {
+                return this['fromWireType'](HEAPU8[pointer >> 0]);
+              };
+
+        case 2:
+          return signed
+            ? function (pointer) {
+                return this['fromWireType'](HEAP16[pointer >> 1]);
+              }
+            : function (pointer) {
+                return this['fromWireType'](HEAPU16[pointer >> 1]);
+              };
+
+        case 4:
+          return signed
+            ? function (pointer) {
+                return this['fromWireType'](HEAP32[pointer >> 2]);
+              }
+            : function (pointer) {
+                return this['fromWireType'](HEAPU32[pointer >> 2]);
+              };
+
+        default:
+          throw new TypeError(`invalid integer width (${width}): ${name}`);
+      }
+    };
+
+    /** @suppress {globalThis} */ var __embind_register_enum = (rawType, name, size, isSigned) => {
+      name = readLatin1String(name);
+      function ctor() {}
+      ctor.values = {};
+      registerType(rawType, {
+        name: name,
+        constructor: ctor,
+        fromWireType: function (c) {
+          return this.constructor.values[c];
+        },
+        toWireType: (destructors, c) => c.value,
+        argPackAdvance: GenericWireTypeSize,
+        readValueFromPointer: enumReadValueFromPointer(name, size, isSigned),
+        destructorFunction: null,
+      });
+      exposePublicSymbol(name, ctor);
+    };
+
+    var requireRegisteredType = (rawType, humanName) => {
+      var impl = registeredTypes[rawType];
+      if (undefined === impl) {
+        throwBindingError(humanName + ' has unknown type ' + getTypeName(rawType));
+      }
+      return impl;
+    };
+
+    var __embind_register_enum_value = (rawEnumType, name, enumValue) => {
+      var enumType = requireRegisteredType(rawEnumType, 'enum');
+      name = readLatin1String(name);
+      var Enum = enumType.constructor;
+      var Value = Object.create(enumType.constructor.prototype, {
+        value: {
+          value: enumValue,
+        },
+        constructor: {
+          value: createNamedFunction(`${enumType.name}_${name}`, function () {}),
+        },
+      });
+      Enum.values[enumValue] = Value;
+      Enum[name] = Value;
+    };
 
     var embindRepr = (v) => {
       if (v === null) {
@@ -1740,58 +2069,42 @@ var createRendererModule = (() => {
       );
     };
 
-    var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
-      if (!(maxBytesToWrite > 0)) return 0;
-      var startIdx = outIdx;
-      var endIdx = outIdx + maxBytesToWrite - 1;
-      for (var i = 0; i < str.length; ++i) {
-        var u = str.charCodeAt(i);
-        if (u >= 55296 && u <= 57343) {
-          var u1 = str.charCodeAt(++i);
-          u = (65536 + ((u & 1023) << 10)) | (u1 & 1023);
-        }
-        if (u <= 127) {
-          if (outIdx >= endIdx) break;
-          heap[outIdx++] = u;
-        } else if (u <= 2047) {
-          if (outIdx + 1 >= endIdx) break;
-          heap[outIdx++] = 192 | (u >> 6);
-          heap[outIdx++] = 128 | (u & 63);
-        } else if (u <= 65535) {
-          if (outIdx + 2 >= endIdx) break;
-          heap[outIdx++] = 224 | (u >> 12);
-          heap[outIdx++] = 128 | ((u >> 6) & 63);
-          heap[outIdx++] = 128 | (u & 63);
-        } else {
-          if (outIdx + 3 >= endIdx) break;
-          heap[outIdx++] = 240 | (u >> 18);
-          heap[outIdx++] = 128 | ((u >> 12) & 63);
-          heap[outIdx++] = 128 | ((u >> 6) & 63);
-          heap[outIdx++] = 128 | (u & 63);
-        }
-      }
-      heap[outIdx] = 0;
-      return outIdx - startIdx;
-    };
-
-    var stringToUTF8 = (str, outPtr, maxBytesToWrite) => stringToUTF8Array(str, HEAPU8, outPtr, maxBytesToWrite);
-
-    var lengthBytesUTF8 = (str) => {
-      var len = 0;
-      for (var i = 0; i < str.length; ++i) {
-        var c = str.charCodeAt(i);
-        if (c <= 127) {
-          len++;
-        } else if (c <= 2047) {
-          len += 2;
-        } else if (c >= 55296 && c <= 57343) {
-          len += 4;
-          ++i;
-        } else {
-          len += 3;
-        }
-      }
-      return len;
+    var __embind_register_smart_ptr = (
+      rawType,
+      rawPointeeType,
+      name,
+      sharingPolicy,
+      getPointeeSignature,
+      rawGetPointee,
+      constructorSignature,
+      rawConstructor,
+      shareSignature,
+      rawShare,
+      destructorSignature,
+      rawDestructor,
+    ) => {
+      name = readLatin1String(name);
+      rawGetPointee = embind__requireFunction(getPointeeSignature, rawGetPointee);
+      rawConstructor = embind__requireFunction(constructorSignature, rawConstructor);
+      rawShare = embind__requireFunction(shareSignature, rawShare);
+      rawDestructor = embind__requireFunction(destructorSignature, rawDestructor);
+      whenDependentTypesAreResolved([rawType], [rawPointeeType], function (pointeeType) {
+        pointeeType = pointeeType[0];
+        var registeredPointer = new RegisteredPointer(
+          name,
+          pointeeType.registeredClass,
+          false,
+          false,
+          true,
+          pointeeType,
+          sharingPolicy,
+          rawGetPointee,
+          rawConstructor,
+          rawShare,
+          rawDestructor,
+        );
+        return [registeredPointer];
+      });
     };
 
     var __embind_register_std_string = (rawType, name) => {
@@ -2026,6 +2339,45 @@ var createRendererModule = (() => {
       });
     };
 
+    var __embind_register_value_object = (
+      rawType,
+      name,
+      constructorSignature,
+      rawConstructor,
+      destructorSignature,
+      rawDestructor,
+    ) => {
+      structRegistrations[rawType] = {
+        name: readLatin1String(name),
+        rawConstructor: embind__requireFunction(constructorSignature, rawConstructor),
+        rawDestructor: embind__requireFunction(destructorSignature, rawDestructor),
+        fields: [],
+      };
+    };
+
+    var __embind_register_value_object_field = (
+      structType,
+      fieldName,
+      getterReturnType,
+      getterSignature,
+      getter,
+      getterContext,
+      setterArgumentType,
+      setterSignature,
+      setter,
+      setterContext,
+    ) => {
+      structRegistrations[structType].fields.push({
+        fieldName: readLatin1String(fieldName),
+        getterReturnType: getterReturnType,
+        getter: embind__requireFunction(getterSignature, getter),
+        getterContext: getterContext,
+        setterArgumentType: setterArgumentType,
+        setter: embind__requireFunction(setterSignature, setter),
+        setterContext: setterContext,
+      });
+    };
+
     var __embind_register_void = (rawType, name) => {
       name = readLatin1String(name);
       registerType(rawType, {
@@ -2041,18 +2393,70 @@ var createRendererModule = (() => {
       throw Infinity;
     };
 
+    var emval_methodCallers = [];
+
+    var __emval_call = (caller, handle, destructorsRef, args) => {
+      caller = emval_methodCallers[caller];
+      handle = Emval.toValue(handle);
+      return caller(null, handle, destructorsRef, args);
+    };
+
+    var emval_addMethodCaller = (caller) => {
+      var id = emval_methodCallers.length;
+      emval_methodCallers.push(caller);
+      return id;
+    };
+
+    var emval_lookupTypes = (argCount, argTypes) => {
+      var a = new Array(argCount);
+      for (var i = 0; i < argCount; ++i) {
+        a[i] = requireRegisteredType(HEAPU32[(argTypes + i * 4) >> 2], 'parameter ' + i);
+      }
+      return a;
+    };
+
+    var reflectConstruct = Reflect.construct;
+
+    var emval_returnValue = (returnType, destructorsRef, handle) => {
+      var destructors = [];
+      var result = returnType['toWireType'](destructors, handle);
+      if (destructors.length) {
+        HEAPU32[destructorsRef >> 2] = Emval.toHandle(destructors);
+      }
+      return result;
+    };
+
+    var __emval_get_method_caller = (argCount, argTypes, kind) => {
+      var types = emval_lookupTypes(argCount, argTypes);
+      var retType = types.shift();
+      argCount--;
+      var argN = new Array(argCount);
+      var invokerFunction = (obj, func, destructorsRef, args) => {
+        var offset = 0;
+        for (var i = 0; i < argCount; ++i) {
+          argN[i] = types[i]['readValueFromPointer'](args + offset);
+          offset += types[i]['argPackAdvance'];
+        }
+        var rv = kind === /* CONSTRUCTOR */ 1 ? reflectConstruct(func, argN) : func.apply(obj, argN);
+        for (var i = 0; i < argCount; ++i) {
+          types[i].deleteObject?.(argN[i]);
+        }
+        return emval_returnValue(retType, destructorsRef, rv);
+      };
+      var functionName = `methodCaller<(${types.map((t) => t.name).join(', ')}) => ${retType.name}>`;
+      return emval_addMethodCaller(createNamedFunction(functionName, invokerFunction));
+    };
+
     var __emval_incref = (handle) => {
       if (handle > 4) {
         emval_handles.get(handle).refcount += 1;
       }
     };
 
-    var requireRegisteredType = (rawType, humanName) => {
-      var impl = registeredTypes[rawType];
-      if (undefined === impl) {
-        throwBindingError(humanName + ' has unknown type ' + getTypeName(rawType));
-      }
-      return impl;
+    var __emval_run_destructors = (handle) => {
+      var destructors = Emval.toValue(handle);
+      runDestructors(destructors);
+      __emval_decref(handle);
     };
 
     var __emval_take_value = (type, arg) => {
@@ -2064,6 +2468,10 @@ var createRendererModule = (() => {
     var _abort = () => {
       abort('');
     };
+
+    var _emscripten_get_now;
+
+    _emscripten_get_now = () => performance.now();
 
     var _emscripten_memcpy_js = (dest, src, num) => HEAPU8.copyWithin(dest, src, src + num);
 
@@ -2097,6 +2505,64 @@ var createRendererModule = (() => {
         }
       }
       return false;
+    };
+
+    var ENV = {};
+
+    var getExecutableName = () => thisProgram || './this.program';
+
+    var getEnvStrings = () => {
+      if (!getEnvStrings.strings) {
+        var lang =
+          ((typeof navigator == 'object' && navigator.languages && navigator.languages[0]) || 'C').replace('-', '_') +
+          '.UTF-8';
+        var env = {
+          USER: 'web_user',
+          LOGNAME: 'web_user',
+          PATH: '/',
+          PWD: '/',
+          HOME: '/home/web_user',
+          LANG: lang,
+          _: getExecutableName(),
+        };
+        for (var x in ENV) {
+          if (ENV[x] === undefined) delete env[x];
+          else env[x] = ENV[x];
+        }
+        var strings = [];
+        for (var x in env) {
+          strings.push(`${x}=${env[x]}`);
+        }
+        getEnvStrings.strings = strings;
+      }
+      return getEnvStrings.strings;
+    };
+
+    var stringToAscii = (str, buffer) => {
+      for (var i = 0; i < str.length; ++i) {
+        HEAP8[buffer++ >> 0] = str.charCodeAt(i);
+      }
+      HEAP8[buffer >> 0] = 0;
+    };
+
+    var _environ_get = (__environ, environ_buf) => {
+      var bufSize = 0;
+      getEnvStrings().forEach((string, i) => {
+        var ptr = environ_buf + bufSize;
+        HEAPU32[(__environ + i * 4) >> 2] = ptr;
+        stringToAscii(string, ptr);
+        bufSize += string.length + 1;
+      });
+      return 0;
+    };
+
+    var _environ_sizes_get = (penviron_count, penviron_buf_size) => {
+      var strings = getEnvStrings();
+      HEAPU32[penviron_count >> 2] = strings.length;
+      var bufSize = 0;
+      strings.forEach((string) => (bufSize += string.length + 1));
+      HEAPU32[penviron_buf_size >> 2] = bufSize;
+      return 0;
     };
 
     var _fd_close = (fd) => 52;
@@ -2138,19 +2604,298 @@ var createRendererModule = (() => {
       return 0;
     };
 
+    var initRandomFill = () => {
+      if (typeof crypto == 'object' && typeof crypto['getRandomValues'] == 'function') {
+        return (view) => crypto.getRandomValues(view);
+      } else abort('initRandomDevice');
+    };
+
+    var randomFill = (view) => (randomFill = initRandomFill())(view);
+
+    var _getentropy = (buffer, size) => {
+      randomFill(HEAPU8.subarray(buffer, buffer + size));
+      return 0;
+    };
+
+    var _llvm_eh_typeid_for = (type) => type;
+
+    var isLeapYear = (year) => year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+
+    var arraySum = (array, index) => {
+      var sum = 0;
+      for (var i = 0; i <= index; sum += array[i++]) {}
+      return sum;
+    };
+
+    var MONTH_DAYS_LEAP = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    var MONTH_DAYS_REGULAR = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    var addDays = (date, days) => {
+      var newDate = new Date(date.getTime());
+      while (days > 0) {
+        var leap = isLeapYear(newDate.getFullYear());
+        var currentMonth = newDate.getMonth();
+        var daysInCurrentMonth = (leap ? MONTH_DAYS_LEAP : MONTH_DAYS_REGULAR)[currentMonth];
+        if (days > daysInCurrentMonth - newDate.getDate()) {
+          days -= daysInCurrentMonth - newDate.getDate() + 1;
+          newDate.setDate(1);
+          if (currentMonth < 11) {
+            newDate.setMonth(currentMonth + 1);
+          } else {
+            newDate.setMonth(0);
+            newDate.setFullYear(newDate.getFullYear() + 1);
+          }
+        } else {
+          newDate.setDate(newDate.getDate() + days);
+          return newDate;
+        }
+      }
+      return newDate;
+    };
+
+    /** @type {function(string, boolean=, number=)} */ function intArrayFromString(stringy, dontAddNull, length) {
+      var len = length > 0 ? length : lengthBytesUTF8(stringy) + 1;
+      var u8array = new Array(len);
+      var numBytesWritten = stringToUTF8Array(stringy, u8array, 0, u8array.length);
+      if (dontAddNull) u8array.length = numBytesWritten;
+      return u8array;
+    }
+
+    var writeArrayToMemory = (array, buffer) => {
+      HEAP8.set(array, buffer);
+    };
+
+    var _strftime = (s, maxsize, format, tm) => {
+      var tm_zone = HEAPU32[(tm + 40) >> 2];
+      var date = {
+        tm_sec: HEAP32[tm >> 2],
+        tm_min: HEAP32[(tm + 4) >> 2],
+        tm_hour: HEAP32[(tm + 8) >> 2],
+        tm_mday: HEAP32[(tm + 12) >> 2],
+        tm_mon: HEAP32[(tm + 16) >> 2],
+        tm_year: HEAP32[(tm + 20) >> 2],
+        tm_wday: HEAP32[(tm + 24) >> 2],
+        tm_yday: HEAP32[(tm + 28) >> 2],
+        tm_isdst: HEAP32[(tm + 32) >> 2],
+        tm_gmtoff: HEAP32[(tm + 36) >> 2],
+        tm_zone: tm_zone ? UTF8ToString(tm_zone) : '',
+      };
+      var pattern = UTF8ToString(format);
+      var EXPANSION_RULES_1 = {
+        '%c': '%a %b %d %H:%M:%S %Y',
+        '%D': '%m/%d/%y',
+        '%F': '%Y-%m-%d',
+        '%h': '%b',
+        '%r': '%I:%M:%S %p',
+        '%R': '%H:%M',
+        '%T': '%H:%M:%S',
+        '%x': '%m/%d/%y',
+        '%X': '%H:%M:%S',
+        '%Ec': '%c',
+        '%EC': '%C',
+        '%Ex': '%m/%d/%y',
+        '%EX': '%H:%M:%S',
+        '%Ey': '%y',
+        '%EY': '%Y',
+        '%Od': '%d',
+        '%Oe': '%e',
+        '%OH': '%H',
+        '%OI': '%I',
+        '%Om': '%m',
+        '%OM': '%M',
+        '%OS': '%S',
+        '%Ou': '%u',
+        '%OU': '%U',
+        '%OV': '%V',
+        '%Ow': '%w',
+        '%OW': '%W',
+        '%Oy': '%y',
+      };
+      for (var rule in EXPANSION_RULES_1) {
+        pattern = pattern.replace(new RegExp(rule, 'g'), EXPANSION_RULES_1[rule]);
+      }
+      var WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      var MONTHS = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+      function leadingSomething(value, digits, character) {
+        var str = typeof value == 'number' ? value.toString() : value || '';
+        while (str.length < digits) {
+          str = character[0] + str;
+        }
+        return str;
+      }
+      function leadingNulls(value, digits) {
+        return leadingSomething(value, digits, '0');
+      }
+      function compareByDay(date1, date2) {
+        function sgn(value) {
+          return value < 0 ? -1 : value > 0 ? 1 : 0;
+        }
+        var compare;
+        if ((compare = sgn(date1.getFullYear() - date2.getFullYear())) === 0) {
+          if ((compare = sgn(date1.getMonth() - date2.getMonth())) === 0) {
+            compare = sgn(date1.getDate() - date2.getDate());
+          }
+        }
+        return compare;
+      }
+      function getFirstWeekStartDate(janFourth) {
+        switch (janFourth.getDay()) {
+          case 0:
+            return new Date(janFourth.getFullYear() - 1, 11, 29);
+
+          case 1:
+            return janFourth;
+
+          case 2:
+            return new Date(janFourth.getFullYear(), 0, 3);
+
+          case 3:
+            return new Date(janFourth.getFullYear(), 0, 2);
+
+          case 4:
+            return new Date(janFourth.getFullYear(), 0, 1);
+
+          case 5:
+            return new Date(janFourth.getFullYear() - 1, 11, 31);
+
+          case 6:
+            return new Date(janFourth.getFullYear() - 1, 11, 30);
+        }
+      }
+      function getWeekBasedYear(date) {
+        var thisDate = addDays(new Date(date.tm_year + 1900, 0, 1), date.tm_yday);
+        var janFourthThisYear = new Date(thisDate.getFullYear(), 0, 4);
+        var janFourthNextYear = new Date(thisDate.getFullYear() + 1, 0, 4);
+        var firstWeekStartThisYear = getFirstWeekStartDate(janFourthThisYear);
+        var firstWeekStartNextYear = getFirstWeekStartDate(janFourthNextYear);
+        if (compareByDay(firstWeekStartThisYear, thisDate) <= 0) {
+          if (compareByDay(firstWeekStartNextYear, thisDate) <= 0) {
+            return thisDate.getFullYear() + 1;
+          }
+          return thisDate.getFullYear();
+        }
+        return thisDate.getFullYear() - 1;
+      }
+      var EXPANSION_RULES_2 = {
+        '%a': (date) => WEEKDAYS[date.tm_wday].substring(0, 3),
+        '%A': (date) => WEEKDAYS[date.tm_wday],
+        '%b': (date) => MONTHS[date.tm_mon].substring(0, 3),
+        '%B': (date) => MONTHS[date.tm_mon],
+        '%C': (date) => {
+          var year = date.tm_year + 1900;
+          return leadingNulls((year / 100) | 0, 2);
+        },
+        '%d': (date) => leadingNulls(date.tm_mday, 2),
+        '%e': (date) => leadingSomething(date.tm_mday, 2, ' '),
+        '%g': (date) => getWeekBasedYear(date).toString().substring(2),
+        '%G': (date) => getWeekBasedYear(date),
+        '%H': (date) => leadingNulls(date.tm_hour, 2),
+        '%I': (date) => {
+          var twelveHour = date.tm_hour;
+          if (twelveHour == 0) twelveHour = 12;
+          else if (twelveHour > 12) twelveHour -= 12;
+          return leadingNulls(twelveHour, 2);
+        },
+        '%j': (date) =>
+          leadingNulls(
+            date.tm_mday +
+              arraySum(isLeapYear(date.tm_year + 1900) ? MONTH_DAYS_LEAP : MONTH_DAYS_REGULAR, date.tm_mon - 1),
+            3,
+          ),
+        '%m': (date) => leadingNulls(date.tm_mon + 1, 2),
+        '%M': (date) => leadingNulls(date.tm_min, 2),
+        '%n': () => '\n',
+        '%p': (date) => {
+          if (date.tm_hour >= 0 && date.tm_hour < 12) {
+            return 'AM';
+          }
+          return 'PM';
+        },
+        '%S': (date) => leadingNulls(date.tm_sec, 2),
+        '%t': () => '\t',
+        '%u': (date) => date.tm_wday || 7,
+        '%U': (date) => {
+          var days = date.tm_yday + 7 - date.tm_wday;
+          return leadingNulls(Math.floor(days / 7), 2);
+        },
+        '%V': (date) => {
+          var val = Math.floor((date.tm_yday + 7 - ((date.tm_wday + 6) % 7)) / 7);
+          if ((date.tm_wday + 371 - date.tm_yday - 2) % 7 <= 2) {
+            val++;
+          }
+          if (!val) {
+            val = 52;
+            var dec31 = (date.tm_wday + 7 - date.tm_yday - 1) % 7;
+            if (dec31 == 4 || (dec31 == 5 && isLeapYear((date.tm_year % 400) - 1))) {
+              val++;
+            }
+          } else if (val == 53) {
+            var jan1 = (date.tm_wday + 371 - date.tm_yday) % 7;
+            if (jan1 != 4 && (jan1 != 3 || !isLeapYear(date.tm_year))) val = 1;
+          }
+          return leadingNulls(val, 2);
+        },
+        '%w': (date) => date.tm_wday,
+        '%W': (date) => {
+          var days = date.tm_yday + 7 - ((date.tm_wday + 6) % 7);
+          return leadingNulls(Math.floor(days / 7), 2);
+        },
+        '%y': (date) => (date.tm_year + 1900).toString().substring(2),
+        '%Y': (date) => date.tm_year + 1900,
+        '%z': (date) => {
+          var off = date.tm_gmtoff;
+          var ahead = off >= 0;
+          off = Math.abs(off) / 60;
+          off = (off / 60) * 100 + (off % 60);
+          return (ahead ? '+' : '-') + String('0000' + off).slice(-4);
+        },
+        '%Z': (date) => date.tm_zone,
+        '%%': () => '%',
+      };
+      pattern = pattern.replace(/%%/g, '\0\0');
+      for (var rule in EXPANSION_RULES_2) {
+        if (pattern.includes(rule)) {
+          pattern = pattern.replace(new RegExp(rule, 'g'), EXPANSION_RULES_2[rule](date));
+        }
+      }
+      pattern = pattern.replace(/\0\0/g, '%');
+      var bytes = intArrayFromString(pattern, false);
+      if (bytes.length > maxsize) {
+        return 0;
+      }
+      writeArrayToMemory(bytes, s);
+      return bytes.length - 1;
+    };
+
+    var _strftime_l = (s, maxsize, format, tm, loc) => _strftime(s, maxsize, format, tm);
+
+    InternalError = Module['InternalError'] = class InternalError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = 'InternalError';
+      }
+    };
+
     embind_init_charCodes();
 
     BindingError = Module['BindingError'] = class BindingError extends Error {
       constructor(message) {
         super(message);
         this.name = 'BindingError';
-      }
-    };
-
-    InternalError = Module['InternalError'] = class InternalError extends Error {
-      constructor(message) {
-        super(message);
-        this.name = 'InternalError';
       }
     };
 
@@ -2165,68 +2910,169 @@ var createRendererModule = (() => {
     init_emval();
 
     var wasmImports = {
-      /** @export */ b: ___assert_fail,
-      /** @export */ n: ___syscall_fcntl64,
-      /** @export */ D: ___syscall_ioctl,
-      /** @export */ E: ___syscall_openat,
-      /** @export */ w: __embind_register_bigint,
-      /** @export */ q: __embind_register_bool,
-      /** @export */ H: __embind_register_class,
-      /** @export */ G: __embind_register_class_constructor,
-      /** @export */ e: __embind_register_class_function,
-      /** @export */ F: __embind_register_emval,
-      /** @export */ o: __embind_register_float,
-      /** @export */ f: __embind_register_integer,
-      /** @export */ d: __embind_register_memory_view,
-      /** @export */ p: __embind_register_std_string,
-      /** @export */ k: __embind_register_std_wstring,
-      /** @export */ r: __embind_register_void,
-      /** @export */ y: __emscripten_throw_longjmp,
-      /** @export */ s: __emval_decref,
-      /** @export */ t: __emval_incref,
-      /** @export */ g: __emval_take_value,
-      /** @export */ h: _abort,
-      /** @export */ A: _emscripten_memcpy_js,
-      /** @export */ z: _emscripten_resize_heap,
-      /** @export */ m: _fd_close,
-      /** @export */ C: _fd_read,
-      /** @export */ v: _fd_seek,
-      /** @export */ B: _fd_write,
-      /** @export */ j: invoke_ii,
-      /** @export */ i: invoke_iiii,
-      /** @export */ l: invoke_iiiiii,
-      /** @export */ a: invoke_vi,
+      /** @export */ m: ___assert_fail,
+      /** @export */ qa: ___cxa_begin_catch,
+      /** @export */ pa: ___cxa_end_catch,
+      /** @export */ a: ___cxa_find_matching_catch_2,
+      /** @export */ f: ___cxa_find_matching_catch_4,
+      /** @export */ v: ___cxa_throw,
+      /** @export */ d: ___resumeException,
+      /** @export */ I: ___syscall_fcntl64,
+      /** @export */ ea: ___syscall_getcwd,
+      /** @export */ ga: ___syscall_ioctl,
+      /** @export */ ha: ___syscall_openat,
+      /** @export */ za: __embind_finalize_value_object,
+      /** @export */ T: __embind_register_bigint,
+      /** @export */ na: __embind_register_bool,
+      /** @export */ P: __embind_register_class,
+      /** @export */ O: __embind_register_class_constructor,
+      /** @export */ q: __embind_register_class_function,
+      /** @export */ la: __embind_register_emval,
+      /** @export */ $: __embind_register_enum,
+      /** @export */ z: __embind_register_enum_value,
+      /** @export */ K: __embind_register_float,
+      /** @export */ s: __embind_register_integer,
+      /** @export */ p: __embind_register_memory_view,
+      /** @export */ ya: __embind_register_smart_ptr,
+      /** @export */ L: __embind_register_std_string,
+      /** @export */ F: __embind_register_std_wstring,
+      /** @export */ Q: __embind_register_value_object,
+      /** @export */ y: __embind_register_value_object_field,
+      /** @export */ oa: __embind_register_void,
+      /** @export */ ba: __emscripten_throw_longjmp,
+      /** @export */ xa: __emval_call,
+      /** @export */ ma: __emval_decref,
+      /** @export */ wa: __emval_get_method_caller,
+      /** @export */ G: __emval_incref,
+      /** @export */ va: __emval_run_destructors,
+      /** @export */ E: __emval_take_value,
+      /** @export */ N: _abort,
+      /** @export */ w: _emscripten_get_now,
+      /** @export */ ia: _emscripten_memcpy_js,
+      /** @export */ da: _emscripten_resize_heap,
+      /** @export */ ja: _environ_get,
+      /** @export */ ka: _environ_sizes_get,
+      /** @export */ J: _fd_close,
+      /** @export */ fa: _fd_read,
+      /** @export */ S: _fd_seek,
+      /** @export */ D: _fd_write,
+      /** @export */ ra: _getentropy,
+      /** @export */ u: invoke_d,
+      /** @export */ B: invoke_fi,
+      /** @export */ H: invoke_i,
+      /** @export */ h: invoke_ii,
+      /** @export */ A: invoke_iif,
+      /** @export */ g: invoke_iii,
+      /** @export */ k: invoke_iiii,
+      /** @export */ o: invoke_iiiii,
+      /** @export */ r: invoke_iiiiii,
+      /** @export */ ua: invoke_iiiiiii,
+      /** @export */ M: invoke_iiiiiiii,
+      /** @export */ aa: invoke_ji,
+      /** @export */ Y: invoke_jii,
+      /** @export */ l: invoke_v,
+      /** @export */ b: invoke_vi,
+      /** @export */ t: invoke_vid,
+      /** @export */ x: invoke_vif,
       /** @export */ c: invoke_vii,
-      /** @export */ x: invoke_viiii,
-      /** @export */ u: invoke_viiij,
+      /** @export */ ta: invoke_viif,
+      /** @export */ sa: invoke_viiff,
+      /** @export */ e: invoke_viii,
+      /** @export */ n: invoke_viiii,
+      /** @export */ i: invoke_viiiii,
+      /** @export */ C: invoke_viiiiii,
+      /** @export */ R: invoke_viiij,
+      /** @export */ V: invoke_viiiji,
+      /** @export */ W: invoke_viij,
+      /** @export */ U: invoke_viiji,
+      /** @export */ X: invoke_viijj,
+      /** @export */ Z: invoke_vij,
+      /** @export */ _: invoke_vijiji,
+      /** @export */ j: _llvm_eh_typeid_for,
+      /** @export */ ca: _strftime_l,
     };
 
     var wasmExports = createWasm();
 
-    var ___wasm_call_ctors = () => (___wasm_call_ctors = wasmExports['J'])();
+    var ___wasm_call_ctors = () => (___wasm_call_ctors = wasmExports['Ba'])();
 
-    var _free = (a0) => (_free = wasmExports['K'])(a0);
+    var _malloc = (a0) => (_malloc = wasmExports['Ca'])(a0);
 
-    var _malloc = (a0) => (_malloc = wasmExports['L'])(a0);
-
-    var ___getTypeName = (a0) => (___getTypeName = wasmExports['M'])(a0);
-
-    var _setThrew = (a0, a1) => (_setThrew = wasmExports['O'])(a0, a1);
+    var _free = (a0) => (_free = wasmExports['Ea'])(a0);
 
     var stackSave = () => (stackSave = wasmExports['P'])();
 
-    var stackRestore = (a0) => (stackRestore = wasmExports['Q'])(a0);
+    var ___getTypeName = (a0) => (___getTypeName = wasmExports['Fa'])(a0);
 
-    var ___cxa_increment_exception_refcount = (a0) =>
-      (___cxa_increment_exception_refcount = wasmExports['__cxa_increment_exception_refcount'])(a0);
+    var _htonl = (a0) => (_htonl = wasmExports['htonl'])(a0);
 
-    var ___cxa_is_pointer_type = (a0) => (___cxa_is_pointer_type = wasmExports['__cxa_is_pointer_type'])(a0);
+    var _htons = (a0) => (_htons = wasmExports['htons'])(a0);
+
+    var _ntohs = (a0) => (_ntohs = wasmExports['ntohs'])(a0);
+
+    var _setThrew = (a0, a1) => (_setThrew = wasmExports['Ga'])(a0, a1);
+
+    var setTempRet0 = (a0) => (setTempRet0 = wasmExports['Ha'])(a0);
+
+    var stackSave = () => (stackSave = wasmExports['Ia'])();
+
+    var stackRestore = (a0) => (stackRestore = wasmExports['Ja'])(a0);
+
+    var ___cxa_decrement_exception_refcount = (a0) => (___cxa_decrement_exception_refcount = wasmExports['Ka'])(a0);
+
+    var ___cxa_increment_exception_refcount = (a0) => (___cxa_increment_exception_refcount = wasmExports['La'])(a0);
+
+    var ___cxa_can_catch = (a0, a1, a2) => (___cxa_can_catch = wasmExports['Ma'])(a0, a1, a2);
+
+    var ___cxa_is_pointer_type = (a0) => (___cxa_is_pointer_type = wasmExports['Na'])(a0);
+
+    var dynCall_iijj = (Module['dynCall_iijj'] = (a0, a1, a2, a3, a4, a5) =>
+      (dynCall_iijj = Module['dynCall_iijj'] = wasmExports['Oa'])(a0, a1, a2, a3, a4, a5));
+
+    var dynCall_vijj = (Module['dynCall_vijj'] = (a0, a1, a2, a3, a4, a5) =>
+      (dynCall_vijj = Module['dynCall_vijj'] = wasmExports['Pa'])(a0, a1, a2, a3, a4, a5));
+
+    var dynCall_ji = (Module['dynCall_ji'] = (a0, a1) =>
+      (dynCall_ji = Module['dynCall_ji'] = wasmExports['Qa'])(a0, a1));
+
+    var dynCall_vijiji = (Module['dynCall_vijiji'] = (a0, a1, a2, a3, a4, a5, a6, a7) =>
+      (dynCall_vijiji = Module['dynCall_vijiji'] = wasmExports['Ra'])(a0, a1, a2, a3, a4, a5, a6, a7));
+
+    var dynCall_vij = (Module['dynCall_vij'] = (a0, a1, a2, a3) =>
+      (dynCall_vij = Module['dynCall_vij'] = wasmExports['Sa'])(a0, a1, a2, a3));
+
+    var dynCall_jii = (Module['dynCall_jii'] = (a0, a1, a2) =>
+      (dynCall_jii = Module['dynCall_jii'] = wasmExports['Ta'])(a0, a1, a2));
+
+    var dynCall_viijj = (Module['dynCall_viijj'] = (a0, a1, a2, a3, a4, a5, a6) =>
+      (dynCall_viijj = Module['dynCall_viijj'] = wasmExports['Ua'])(a0, a1, a2, a3, a4, a5, a6));
+
+    var dynCall_viij = (Module['dynCall_viij'] = (a0, a1, a2, a3, a4) =>
+      (dynCall_viij = Module['dynCall_viij'] = wasmExports['Va'])(a0, a1, a2, a3, a4));
+
+    var dynCall_viiiji = (Module['dynCall_viiiji'] = (a0, a1, a2, a3, a4, a5, a6) =>
+      (dynCall_viiiji = Module['dynCall_viiiji'] = wasmExports['Wa'])(a0, a1, a2, a3, a4, a5, a6));
+
+    var dynCall_viiji = (Module['dynCall_viiji'] = (a0, a1, a2, a3, a4, a5) =>
+      (dynCall_viiji = Module['dynCall_viiji'] = wasmExports['Xa'])(a0, a1, a2, a3, a4, a5));
 
     var dynCall_viiij = (Module['dynCall_viiij'] = (a0, a1, a2, a3, a4, a5) =>
-      (dynCall_viiij = Module['dynCall_viiij'] = wasmExports['R'])(a0, a1, a2, a3, a4, a5));
+      (dynCall_viiij = Module['dynCall_viiij'] = wasmExports['Ya'])(a0, a1, a2, a3, a4, a5));
 
     var dynCall_jiji = (Module['dynCall_jiji'] = (a0, a1, a2, a3, a4) =>
-      (dynCall_jiji = Module['dynCall_jiji'] = wasmExports['S'])(a0, a1, a2, a3, a4));
+      (dynCall_jiji = Module['dynCall_jiji'] = wasmExports['Za'])(a0, a1, a2, a3, a4));
+
+    var dynCall_viijii = (Module['dynCall_viijii'] = (a0, a1, a2, a3, a4, a5, a6) =>
+      (dynCall_viijii = Module['dynCall_viijii'] = wasmExports['_a'])(a0, a1, a2, a3, a4, a5, a6));
+
+    var dynCall_iiiiij = (Module['dynCall_iiiiij'] = (a0, a1, a2, a3, a4, a5, a6) =>
+      (dynCall_iiiiij = Module['dynCall_iiiiij'] = wasmExports['$a'])(a0, a1, a2, a3, a4, a5, a6));
+
+    var dynCall_iiiiijj = (Module['dynCall_iiiiijj'] = (a0, a1, a2, a3, a4, a5, a6, a7, a8) =>
+      (dynCall_iiiiijj = Module['dynCall_iiiiijj'] = wasmExports['ab'])(a0, a1, a2, a3, a4, a5, a6, a7, a8));
+
+    var dynCall_iiiiiijj = (Module['dynCall_iiiiiijj'] = (a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) =>
+      (dynCall_iiiiiijj = Module['dynCall_iiiiiijj'] = wasmExports['bb'])(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9));
 
     function invoke_vi(index, a1) {
       var sp = stackSave();
@@ -2250,10 +3096,10 @@ var createRendererModule = (() => {
       }
     }
 
-    function invoke_ii(index, a1) {
+    function invoke_viii(index, a1, a2, a3) {
       var sp = stackSave();
       try {
-        return getWasmTableEntry(index)(a1);
+        getWasmTableEntry(index)(a1, a2, a3);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0) throw e;
@@ -2272,6 +3118,83 @@ var createRendererModule = (() => {
       }
     }
 
+    function invoke_ii(index, a1) {
+      var sp = stackSave();
+      try {
+        return getWasmTableEntry(index)(a1);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_viiiii(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        getWasmTableEntry(index)(a1, a2, a3, a4, a5);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_i(index) {
+      var sp = stackSave();
+      try {
+        return getWasmTableEntry(index)();
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_v(index) {
+      var sp = stackSave();
+      try {
+        getWasmTableEntry(index)();
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_viiiiii(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        getWasmTableEntry(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_fi(index, a1) {
+      var sp = stackSave();
+      try {
+        return getWasmTableEntry(index)(a1);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_iif(index, a1, a2) {
+      var sp = stackSave();
+      try {
+        return getWasmTableEntry(index)(a1, a2);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
     function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
       var sp = stackSave();
       try {
@@ -2283,10 +3206,197 @@ var createRendererModule = (() => {
       }
     }
 
+    function invoke_iiiii(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        return getWasmTableEntry(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_iii(index, a1, a2) {
+      var sp = stackSave();
+      try {
+        return getWasmTableEntry(index)(a1, a2);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_d(index) {
+      var sp = stackSave();
+      try {
+        return getWasmTableEntry(index)();
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_vid(index, a1, a2) {
+      var sp = stackSave();
+      try {
+        getWasmTableEntry(index)(a1, a2);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
     function invoke_viiii(index, a1, a2, a3, a4) {
       var sp = stackSave();
       try {
         getWasmTableEntry(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_vif(index, a1, a2) {
+      var sp = stackSave();
+      try {
+        getWasmTableEntry(index)(a1, a2);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        return getWasmTableEntry(index)(a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_viif(index, a1, a2, a3) {
+      var sp = stackSave();
+      try {
+        getWasmTableEntry(index)(a1, a2, a3);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_viiff(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        getWasmTableEntry(index)(a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        return getWasmTableEntry(index)(a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_ji(index, a1) {
+      var sp = stackSave();
+      try {
+        return dynCall_ji(index, a1);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_vijiji(index, a1, a2, a3, a4, a5, a6, a7) {
+      var sp = stackSave();
+      try {
+        dynCall_vijiji(index, a1, a2, a3, a4, a5, a6, a7);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_vij(index, a1, a2, a3) {
+      var sp = stackSave();
+      try {
+        dynCall_vij(index, a1, a2, a3);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_jii(index, a1, a2) {
+      var sp = stackSave();
+      try {
+        return dynCall_jii(index, a1, a2);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_viijj(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        dynCall_viijj(index, a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_viij(index, a1, a2, a3, a4) {
+      var sp = stackSave();
+      try {
+        dynCall_viij(index, a1, a2, a3, a4);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_viiiji(index, a1, a2, a3, a4, a5, a6) {
+      var sp = stackSave();
+      try {
+        dynCall_viiiji(index, a1, a2, a3, a4, a5, a6);
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
+
+    function invoke_viiji(index, a1, a2, a3, a4, a5) {
+      var sp = stackSave();
+      try {
+        dynCall_viiji(index, a1, a2, a3, a4, a5);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0) throw e;
@@ -2355,4 +3465,4 @@ var createRendererModule = (() => {
     return moduleArg.ready;
   };
 })();
-export default createRendererModule;
+export default createDotLottiePlayerModule;

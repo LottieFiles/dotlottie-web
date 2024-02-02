@@ -1,30 +1,26 @@
 /**
- * Copyright 2023 Design Barn Inc.
+ * Copyright 2024 Design Barn Inc.
  */
 
-import pkg from '../package.json';
+import pkg from '../../package.json';
 
-import type { Module } from './wasm';
-import { createRendererModule } from './wasm';
+import createDotLottiePlayerModule from './dotlottie-player';
+import type { MainModule } from './dotlottie-player.types';
 
-/**
- * RendererLoader is a utility class for loading WebAssembly modules.
- * It provides methods to load modules with a primary URL and a backup URL.
- */
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
-export class RendererLoader {
+export class DotLottieWasmLoader {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  private static _ModulePromise: Promise<Module> | null = null;
+  private static _ModulePromise: Promise<MainModule> | null = null;
 
   // URL for the WASM file, constructed using package information
-  private static _wasmURL = `https://cdn.jsdelivr.net/npm/${pkg.name}@${pkg.version}/dist/wasm/renderer.wasm`;
+  private static _wasmURL = `https://cdn.jsdelivr.net/npm/${pkg.name}@${pkg.version}/dist/dotlottie-player.wasm`;
 
   private constructor() {
     throw new Error('RendererLoader is a static class and cannot be instantiated.');
   }
 
-  private static async _tryLoad(url: string): Promise<Module> {
-    const module = await createRendererModule({ locateFile: () => url });
+  private static async _tryLoad(url: string): Promise<MainModule> {
+    const module = await createDotLottiePlayerModule({ locateFile: () => url });
 
     return module;
   }
@@ -34,10 +30,10 @@ export class RendererLoader {
    * Throws an error if both URLs fail to load the module.
    * @returns Promise<Module> - A promise that resolves to the loaded module.
    */
-  private static async _loadWithBackup(): Promise<Module> {
+  private static async _loadWithBackup(): Promise<MainModule> {
     if (!this._ModulePromise) {
-      this._ModulePromise = this._tryLoad(this._wasmURL).catch(async (initialError): Promise<Module> => {
-        const backupUrl = `https://unpkg.com/${pkg.name}@${pkg.version}/dist/wasm/renderer.wasm`;
+      this._ModulePromise = this._tryLoad(this._wasmURL).catch(async (initialError): Promise<MainModule> => {
+        const backupUrl = `https://unpkg.com/${pkg.name}@${pkg.version}/dist/dotlottie-player.wasm`;
 
         console.warn(`Trying backup URL for WASM loading: ${backupUrl}`);
         try {
@@ -61,7 +57,7 @@ export class RendererLoader {
    * Utilizes a primary and backup URL for robustness.
    * @returns Promise<Module> - A promise that resolves to the loaded module.
    */
-  public static async load(): Promise<Module> {
+  public static async load(): Promise<MainModule> {
     return this._loadWithBackup();
   }
 
