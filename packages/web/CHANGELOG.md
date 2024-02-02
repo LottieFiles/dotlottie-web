@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.12.3
+
+### Patch Changes
+
+- cd3292e: chore: 🤖 upgrade thorvg\@v0.12.4
+
 ## 0.12.2
 
 ### Patch Changes
