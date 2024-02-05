@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.12.4
+
+### Patch Changes
+
+- 09116cb: fix: 🐛 load animation url with response content-type of text/plain
+
 ## 0.12.3
 
 ### Patch Changes
