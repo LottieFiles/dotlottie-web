@@ -30,7 +30,7 @@ export async function loadAnimationJSONFromURL(animationURL: string): Promise<st
     const contentType = response.headers.get('content-type');
     let animationJSON: string;
 
-    if (contentType?.includes('application/json')) {
+    if (contentType?.includes('application/json') || contentType?.includes('text/plain')) {
       animationJSON = await response.text();
     } else {
       const arrayBuffer = await response.arrayBuffer();
