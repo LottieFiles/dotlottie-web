@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.13.0-beta.1
+
+### Patch Changes
+
+- e9fdc3a: chore: apply resize and load_animation_data fixes from dotlottie-rs wasm bindings
+
 ## 0.12.4
 
 ### Patch Changes
