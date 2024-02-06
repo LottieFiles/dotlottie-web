@@ -36,8 +36,6 @@
   ],
   "scripts": {
     "build": "tsup",
-    "build:wasm": "./build_wasm.sh",
-    "build:wasm:docker": "./docker_build_wasm.sh",
     "dev": "tsup --watch",
     "lint": "eslint --fix .",
     "stats:eslint": "cross-env TIMING=1 eslint .",

@@ -415,7 +415,7 @@ export class DotLottie {
 
     if (frame < 0 || frame > this._dotLottieCore.totalFrames()) return;
 
-    const ok = this._dotLottieCore.setFrame(frame);
+    const ok = this._dotLottieCore.seek(frame);
 
     if (ok) {
       this._eventManager.dispatch({ type: 'frame', currentFrame: this._dotLottieCore.currentFrame() });

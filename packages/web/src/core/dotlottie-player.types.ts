@@ -52,6 +52,7 @@ export interface DotLottiePlayer {
   render(): boolean;
   requestFrame(): number;
   resize(_0: number, _1: number): boolean;
+  seek(_0: number): boolean;
   setConfig(_0: Config): void;
   setFrame(_0: number): boolean;
   stop(): boolean;
