@@ -1,10 +1,23 @@
 # @lottiefiles/dotlottie-web
 
+## 0.13.0-beta.1
+
+### Patch Changes
+
+- e9fdc3a: chore: apply resize and load_animation_data fixes from dotlottie-rs wasm bindings
+
 ## 0.12.4
 
 ### Patch Changes
 
 - 09116cb: fix: 🐛 load animation url with response content-type of text/plain
+
+## 0.13.0-beta.0
+
+### Minor Changes
+
+- 4810361: refactor: 💡 dotlottie-rs wasm bindings integration
+- 4810361: feat: 🎸 emit `render` event when a new frame is rendered
 
 ## 0.12.3
 

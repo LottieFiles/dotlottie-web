@@ -26,7 +26,7 @@ afterEach(() => {
 });
 
 describe('play', () => {
-  test.skip('unfreeze the animation on play()', async () => {
+  test('unfreeze the animation on play()', async () => {
     const onLoad = vi.fn();
     const onPlay = vi.fn();
 
@@ -112,7 +112,7 @@ describe('play', () => {
       mode: 'reverse',
     },
     {
-      mode: 'bounce-reverse',
+      mode: 'reverse-bounce',
     },
     {
       mode: 'bounce',
@@ -123,7 +123,7 @@ describe('play', () => {
       speed: 2,
     },
     {
-      mode: 'bounce-reverse',
+      mode: 'reverse-bounce',
       segments: [5, 25],
       speed: 2,
     },
@@ -165,8 +165,7 @@ describe('play', () => {
         expect(onLoad).toHaveBeenCalledTimes(1);
       });
 
-      const expectedDirection = config.mode === 'reverse' || config.mode === 'bounce-reverse' ? -1 : 1;
-      const totalFrames = (config.segments?.[1] ?? dotLottie.totalFrames - 1) - (config.segments?.[0] ?? 0);
+      const totalFrames = (config.segments?.[1] ?? dotLottie.totalFrames) - (config.segments?.[0] ?? 0);
 
       const expectedDuration =
         ((config.mode?.includes('bounce') ? 2 : 1) *
@@ -175,27 +174,26 @@ describe('play', () => {
         dotLottie.speed;
 
       const expectedEndFrame =
-        config.mode === 'reverse' || config.mode === 'bounce-reverse'
+        config.mode === 'reverse' || config.mode === 'reverse-bounce'
           ? config.segments?.[0] ?? 0
-          : config.segments?.[1] ?? dotLottie.totalFrames - 1;
+          : config.segments?.[1] ?? dotLottie.totalFrames;
       const expectedStartFrame =
-        config.mode === 'reverse' || config.mode === 'bounce-reverse'
-          ? config.segments?.[1] ?? dotLottie.totalFrames - 1
+        config.mode === 'reverse' || config.mode === 'reverse-bounce'
+          ? config.segments?.[1] ?? dotLottie.totalFrames
           : config.segments?.[0] ?? 0;
 
       const startFrame =
-        config.mode === 'reverse' || config.mode === 'bounce-reverse'
-          ? dotLottie.segments?.[1]
-          : dotLottie.segments?.[0];
+        config.mode === 'reverse' || config.mode === 'reverse-bounce'
+          ? dotLottie.segments?.[1] ?? dotLottie.totalFrames
+          : dotLottie.segments?.[0] ?? 0;
       const endFrame =
-        config.mode === 'reverse' || config.mode === 'bounce-reverse'
-          ? dotLottie.segments?.[0]
-          : dotLottie.segments?.[1];
+        config.mode === 'reverse' || config.mode === 'reverse-bounce'
+          ? dotLottie.segments?.[0] ?? 0
+          : dotLottie.segments?.[1] ?? dotLottie.totalFrames;
 
       expect(startFrame).toBe(expectedStartFrame);
       expect(endFrame).toBe(expectedEndFrame);
 
-      expect(dotLottie.direction).toBe(expectedDirection);
       expect(dotLottie.isLoaded).toBe(true);
 
       await vi.waitFor(() => {
@@ -263,8 +261,7 @@ describe('play', () => {
         expect(onLoad).toHaveBeenCalledTimes(1);
       });
 
-      const expectedDirection = config.mode === 'reverse' || config.mode === 'bounce-reverse' ? -1 : 1;
-      const totalFrames = (config.segments?.[1] ?? dotLottie.totalFrames - 1) - (config.segments?.[0] ?? 0);
+      const totalFrames = (config.segments?.[1] ?? dotLottie.totalFrames) - (config.segments?.[0] ?? 0);
 
       const expectedDuration =
         ((config.mode?.includes('bounce') ? 2 : 1) *
@@ -273,31 +270,29 @@ describe('play', () => {
         dotLottie.speed;
 
       const expectedEndFrame =
-        config.mode === 'reverse' || config.mode === 'bounce-reverse'
+        config.mode === 'reverse' || config.mode === 'reverse-bounce'
           ? config.segments?.[0] ?? 0
-          : config.segments?.[1] ?? dotLottie.totalFrames - 1;
+          : config.segments?.[1] ?? dotLottie.totalFrames;
       const expectedStartFrame =
-        config.mode === 'reverse' || config.mode === 'bounce-reverse'
-          ? config.segments?.[1] ?? dotLottie.totalFrames - 1
+        config.mode === 'reverse' || config.mode === 'reverse-bounce'
+          ? config.segments?.[1] ?? dotLottie.totalFrames
           : config.segments?.[0] ?? 0;
 
       const startFrame =
-        config.mode === 'reverse' || config.mode === 'bounce-reverse'
-          ? dotLottie.segments?.[1]
-          : dotLottie.segments?.[0];
+        config.mode === 'reverse' || config.mode === 'reverse-bounce'
+          ? dotLottie.segments?.[1] ?? dotLottie.totalFrames
+          : dotLottie.segments?.[0] ?? 0;
       const endFrame =
-        config.mode === 'reverse' || config.mode === 'bounce-reverse'
-          ? dotLottie.segments?.[0]
-          : dotLottie.segments?.[1];
+        config.mode === 'reverse' || config.mode === 'reverse-bounce'
+          ? dotLottie.segments?.[0] ?? 0
+          : dotLottie.segments?.[1] ?? dotLottie.totalFrames;
 
       expect(startFrame).toBe(expectedStartFrame);
       expect(endFrame).toBe(expectedEndFrame);
 
-      expect(dotLottie.direction).toBe(expectedDirection);
       expect(dotLottie.isLoaded).toBe(true);
 
       await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
         expect(onPlay).toHaveBeenCalledTimes(1);
       });
 
@@ -366,7 +361,7 @@ describe('play', () => {
         expect(onLoad).toHaveBeenCalledTimes(1);
       });
 
-      const totalFrames = (config.segments?.[1] ?? dotLottie.totalFrames - 1) - (config.segments?.[0] ?? 0);
+      const totalFrames = (config.segments?.[1] ?? dotLottie.totalFrames) - (config.segments?.[0] ?? 0);
 
       const expectedDuration =
         ((config.mode?.includes('bounce') ? 2 : 1) *
@@ -439,9 +434,13 @@ describe('play', () => {
         timeout: dotLottie.duration * 1000 * 2,
       });
 
-      const startFrame = dotLottie.mode.includes('reverse') ? dotLottie.segments?.[1] : dotLottie.segments?.[0];
-      const endFrame = dotLottie.mode.includes('reverse') ? dotLottie.segments?.[0] : dotLottie.segments?.[1];
-      const totalFrames = (config.segments?.[1] ?? dotLottie.totalFrames - 1) - (config.segments?.[0] ?? 0);
+      const startFrame = dotLottie.mode.includes('reverse')
+        ? dotLottie.segments?.[1] ?? dotLottie.totalFrames
+        : dotLottie.segments?.[0] ?? 0;
+      const endFrame = dotLottie.mode.includes('reverse')
+        ? dotLottie.segments?.[0] ?? 0
+        : dotLottie.segments?.[1] ?? dotLottie.totalFrames;
+      const totalFrames = (config.segments?.[1] ?? dotLottie.totalFrames) - (config.segments?.[0] ?? 0);
 
       expect(onFrame).toHaveBeenNthCalledWith(1, {
         type: 'frame',
@@ -650,7 +649,6 @@ describe('load', () => {
     expect(dotLottie.autoplay).toBe(true);
     expect(dotLottie.mode).toBe('reverse');
     expect(dotLottie.backgroundColor).toBe('#ff00ff');
-    expect(dotLottie.direction).toBe(-1);
   });
 
   test('loads a new animation data via load() method', async () => {
@@ -687,9 +685,7 @@ describe('load', () => {
     expect(dotLottie.autoplay).toBe(true);
     expect(dotLottie.mode).toBe('reverse');
     expect(dotLottie.backgroundColor).toBe('#000000');
-    expect(dotLottie.direction).toBe(-1);
     expect(dotLottie.useFrameInterpolation).toBe(true);
-    expect(dotLottie.canvas).toBe(canvas);
   });
 
   test('emit loadError event when loading invalid lottie animation data', async () => {
@@ -727,16 +723,21 @@ describe('load', () => {
   });
 
   test('log error when loading invalid animation data of invalid type', async () => {
-    const error = vi.spyOn(console, 'error');
+    const onLoadError = vi.fn();
 
     dotLottie = new DotLottie({
       canvas,
       data: 1 as unknown as string,
     });
 
-    await vi.waitFor(() => expect(error).toHaveBeenCalledTimes(1));
+    dotLottie.addEventListener('loadError', onLoadError);
 
-    expect(error).toHaveBeenCalledWith('Unsupported data type for animation data. Expected a string or ArrayBuffer.');
+    await vi.waitFor(() => expect(onLoadError).toHaveBeenCalledTimes(1));
+
+    expect(onLoadError).toHaveBeenCalledWith({
+      type: 'loadError',
+      error: new Error('Unsupported data type for animation data. Expected a string or ArrayBuffer.'),
+    });
   });
 
   test('emit loadError when fail to load wasm', async () => {
@@ -838,7 +839,7 @@ describe('stop', () => {
       mode: 'reverse',
     },
     {
-      mode: 'bounce-reverse',
+      mode: 'reverse-bounce',
     },
     {
       mode: 'bounce',
@@ -849,7 +850,7 @@ describe('stop', () => {
       speed: 2,
     },
     {
-      mode: 'bounce-reverse',
+      mode: 'reverse-bounce',
       segments: [5, 25],
       speed: 2,
     },
@@ -884,11 +885,11 @@ describe('stop', () => {
         expect(onPlay).toHaveBeenCalledTimes(1);
       });
 
-      const totalFrames = (config.segments?.[1] ?? dotLottie.totalFrames - 1) - (config.segments?.[0] ?? 0);
+      const totalFrames = (config.segments?.[1] ?? dotLottie.totalFrames) - (config.segments?.[0] ?? 0);
 
       const startFrame =
-        config.mode === 'reverse' || config.mode === 'bounce-reverse'
-          ? config.segments?.[1] ?? dotLottie.totalFrames - 1
+        config.mode === 'reverse' || config.mode === 'reverse-bounce'
+          ? config.segments?.[1] ?? dotLottie.totalFrames
           : config.segments?.[0] ?? 0;
 
       expect(onFrame).toHaveBeenNthCalledWith(1, {
@@ -948,7 +949,7 @@ describe('setMode', () => {
     expect(dotLottie.mode).toBe('forward');
   });
 
-  test.each<Mode>(['reverse', 'bounce', 'bounce-reverse'])('setMode(%s)', async (mode) => {
+  test.each<Mode>(['reverse', 'bounce', 'reverse-bounce'])('setMode(%s)', async (mode) => {
     const onPlay = vi.fn();
     const onFrame = vi.fn();
 
@@ -968,8 +969,6 @@ describe('setMode', () => {
     dotLottie.setMode(mode);
 
     expect(dotLottie.mode).toBe(mode);
-
-    expect(dotLottie.direction).toBe(dotLottie.mode.includes('reverse') ? -1 : 1);
   });
 });
 
