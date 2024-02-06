@@ -101,17 +101,17 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
     return observer;
   });
 
-  const [resizeObserver] = React.useState(() => {
-    const observer = new ResizeObserver((entries) => {
-      debounce(() => {
-        entries.forEach(() => {
-          dotLottieRef.current?.resize();
-        });
-      }, 150)();
-    });
+  // const [resizeObserver] = React.useState(() => {
+  //   const observer = new ResizeObserver((entries) => {
+  //     debounce(() => {
+  //       entries.forEach(() => {
+  //         dotLottieRef.current?.resize();
+  //       });
+  //     }, 150)();
+  //   });
 
-    return observer;
-  });
+  //   return observer;
+  // });
 
   const setCanvasRef = React.useCallback(
     (canvas: HTMLCanvasElement | null) => {
@@ -124,18 +124,22 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
         setDotLottie(dotLottieInstance);
 
         intersectionObserver.observe(canvas);
-        resizeObserver.observe(canvas);
+        // resizeObserver.observe(canvas);
         canvas.addEventListener('mouseenter', hoverHandler);
         canvas.addEventListener('mouseleave', hoverHandler);
       } else {
         dotLottieRef.current?.destroy();
         intersectionObserver.disconnect();
-        resizeObserver.disconnect();
+        // resizeObserver.disconnect();
       }
 
       canvasRef.current = canvas;
     },
-    [intersectionObserver, resizeObserver, hoverHandler],
+    [
+      intersectionObserver,
+      // resizeObserver,
+      hoverHandler,
+    ],
   );
 
   const setContainerRef = React.useCallback((container: HTMLDivElement | null) => {
@@ -155,7 +159,7 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
 
       dotLottie.destroy();
       setDotLottie(null);
-      resizeObserver.disconnect();
+      // resizeObserver.disconnect();
       intersectionObserver.disconnect();
       canvasRef.current?.removeEventListener('mouseenter', hoverHandler);
       canvasRef.current?.removeEventListener('mouseleave', hoverHandler);
