@@ -44,6 +44,7 @@ app.innerHTML = `
       <button id="jump" class="control-button">Jump</button>
       <button id="destroy" class="control-button" style="background: #cd3434;">Destroy</button>
       <button id="reload" class="control-button">Reload</button>
+      <button id="next" class="control-button">Next</button>
       
       <label for="loopToggle">Loop: </label>
       <input type="checkbox" id="loopToggle" checked />
@@ -113,7 +114,7 @@ allCanvas.forEach((canvas) => {
   });
 });
 
-fetch('/hamster.lottie')
+fetch('https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lottie')
   .then(async (res) => res.arrayBuffer())
   .then((data): void => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -152,6 +153,25 @@ fetch('/hamster.lottie')
     const unfreezeButton = document.getElementById('unfreeze') as HTMLButtonElement;
     const freezeStateSpan = document.getElementById('is-frozen') as HTMLSpanElement;
     const playbackStateSpan = document.getElementById('playback-state') as HTMLSpanElement;
+    const nextAnimationButton = document.getElementById('next') as HTMLButtonElement;
+
+    let animationIdx = 0;
+
+    nextAnimationButton.addEventListener('click', () => {
+      const manifest = dotLottie.manifest;
+
+      if (manifest) {
+        const animations = manifest.animations;
+
+        animationIdx = (animationIdx + 1) % animations.length;
+
+        const animationId = animations[animationIdx]?.id || '';
+
+        if (animationId) {
+          dotLottie.loadAnimation(animationId);
+        }
+      }
+    });
 
     freezeButton.addEventListener('click', () => {
       dotLottie.freeze();

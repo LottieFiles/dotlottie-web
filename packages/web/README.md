@@ -159,6 +159,11 @@ The `renderConfig` object accepts the following properties:
 | `isLoaded`              | boolean                       | Reflects whether the animation is loaded or not.                                                                      |
 | `useFrameInterpolation` | boolean                       | Reflects whether the animation should update on subframes.                                                            |
 | `renderConfig`          | [RenderConfig](#renderconfig) | Configuration for rendering the animation.                                                                            |
+| `manifest`              | [Manifest](#manifest) \| null | The manifest of the loaded dotLottie file.                                                                            |
+
+#### Manifest
+
+This object contains the manifest of the loaded dotLottie file. as described in the [dotLottie structure](https://dotlottie.io/structure/#manifest-json).
 
 ### Methods
 

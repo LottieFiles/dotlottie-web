@@ -15,6 +15,17 @@ interface RenderConfig {
 
 export type Mode = 'forward' | 'reverse' | 'bounce' | 'reverse-bounce';
 
+export interface Manifest {
+  animations: Array<{
+    id: string;
+    speed: number;
+  }>;
+  author: string;
+  generator: string;
+  revision: number;
+  version: number;
+}
+
 export interface Config {
   autoplay?: boolean;
   backgroundColor?: string;
@@ -207,6 +218,12 @@ export class DotLottie {
         error: error as Error,
       });
     }
+  }
+
+  public get manifest(): Manifest | null {
+    if (this._dotLottieCore === null || !this._dotLottieCore.manifestString()) return null;
+
+    return JSON.parse(this._dotLottieCore.manifestString()) as Manifest;
   }
 
   public get renderConfig(): RenderConfig {
@@ -539,6 +556,22 @@ export class DotLottie {
 
   public setRenderConfig(config: RenderConfig): void {
     this._renderConfig = config;
+  }
+
+  public loadAnimation(animationId: string): void {
+    if (this._dotLottieCore === null) return;
+
+    const loaded = this._dotLottieCore.loadAnimation(animationId, this._canvas.width, this._canvas.height);
+
+    if (loaded) {
+      this._eventManager.dispatch({ type: 'load' });
+      this.resize();
+    } else {
+      this._eventManager.dispatch({
+        type: 'loadError',
+        error: new Error(`Failed to animation :${animationId}`),
+      });
+    }
   }
 
   public static setWasmUrl(url: string): void {
