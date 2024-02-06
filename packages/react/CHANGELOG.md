@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.2.5-beta.0
+
+### Patch Changes
+
+- 135c06f: chore: disable resize observer
+
 ## 0.2.4
 
 ### Patch Changes

@@ -12,5 +12,5 @@
     "@lottiefiles/dotlottie-wc": "0.0.8",
     "@lottiefiles/dotlottie-web": "0.13.0"
   },
-  "changesets": []
+  "changesets": ["tame-cameras-wonder"]
 }
