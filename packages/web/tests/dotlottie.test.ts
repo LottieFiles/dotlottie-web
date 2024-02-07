@@ -7,6 +7,7 @@ import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 import type { Config, Mode } from '../src';
 import { DotLottie } from '../src';
 
+import multiAnimationSrc from './__fixtures__/multi-animation.lottie?url';
 import jsonSrc from './__fixtures__/test.json?url';
 import src from './__fixtures__/test.lottie?url';
 import { createCanvas, sleep } from './test-utils';
@@ -598,7 +599,7 @@ describe('load', () => {
     expect(dotLottie.isLoaded).toBe(false);
   });
 
-  test('loads animation from animation data', async () => {
+  test('loads .lottie animation from animation data as array buffer', async () => {
     const res = await fetch(src);
     const data = await res.arrayBuffer();
 
@@ -615,6 +616,42 @@ describe('load', () => {
 
     expect(dotLottie.isPlaying).toBe(false);
     expect(dotLottie.isStopped).toBe(true);
+    expect(dotLottie.totalFrames).toBeGreaterThan(0);
+  });
+
+  test('loads lottie json file from animation data as string', async () => {
+    const res = await fetch(jsonSrc);
+    const data = await res.text();
+
+    dotLottie = new DotLottie({
+      canvas,
+      data,
+    });
+
+    const onLoad = vi.fn();
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
+
+    expect(dotLottie.totalFrames).toBeGreaterThan(0);
+  });
+
+  test('loads lottie json file from animation data as json object', async () => {
+    const res = await fetch(jsonSrc);
+    const data = await res.json();
+
+    dotLottie = new DotLottie({
+      canvas,
+      data,
+    });
+
+    const onLoad = vi.fn();
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
+
     expect(dotLottie.totalFrames).toBeGreaterThan(0);
   });
 
@@ -1234,5 +1271,83 @@ describe('setRenderConfig', () => {
     });
 
     expect(dotLottie.renderConfig.devicePixelRatio).toBe(0.2);
+  });
+});
+
+describe('loadAnimation', () => {
+  test('loads an animation in .lottie file by id', async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: multiAnimationSrc,
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
+
+    const animations = dotLottie.manifest?.animations ?? [];
+
+    expect(animations.length).toBeGreaterThan(0);
+
+    const animationId = animations[animations.length - 1]?.id ?? '';
+
+    dotLottie.loadAnimation(animationId);
+
+    expect(onLoad).toHaveBeenCalledTimes(2);
+  });
+
+  test('emits loadError when loading an animation by invalid id', async () => {
+    const onLoadError = vi.fn();
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: multiAnimationSrc,
+    });
+
+    dotLottie.addEventListener('loadError', onLoadError);
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
+
+    const animationId = 'invalid';
+
+    dotLottie.loadAnimation(animationId);
+
+    expect(onLoadError).toHaveBeenCalledTimes(1);
+  });
+
+  test('do nothing when .lottie file is not loaded', () => {
+    const onLoad = vi.fn();
+    const onLoadError = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+    dotLottie.addEventListener('loadError', onLoadError);
+
+    dotLottie.loadAnimation('invalid');
+
+    expect(onLoad).not.toHaveBeenCalled();
+    expect(onLoadError).not.toHaveBeenCalled();
+  });
+
+  test('manifest is null when a lottie json is loaded', async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
+
+    expect(dotLottie.manifest).toBeNull();
   });
 });
