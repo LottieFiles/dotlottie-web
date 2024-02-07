@@ -7,7 +7,6 @@ import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 import type { Config, Mode } from '../src';
 import { DotLottie } from '../src';
 
-import multiAnimationSrc from './__fixtures__/multi-animation.lottie?url';
 import jsonSrc from './__fixtures__/test.json?url';
 import src from './__fixtures__/test.lottie?url';
 import { createCanvas, sleep } from './test-utils';
@@ -1275,6 +1274,9 @@ describe('setRenderConfig', () => {
 });
 
 describe('loadAnimation', () => {
+  // eslint-disable-next-line no-secrets/no-secrets
+  const multiAnimationSrc = 'https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lottie';
+
   test('loads an animation in .lottie file by id', async () => {
     const onLoad = vi.fn();
 
