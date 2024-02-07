@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-web
 
+## 0.14.0
+
+### Minor Changes
+
+- 7e0890a: feat: 🎸 dotLottie multi-animations support
+- 7e0890a: feat: 🎸 accept data as a JSON object
+
 ## 0.13.0
 
 ### Minor Changes
