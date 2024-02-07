@@ -9,17 +9,19 @@ import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 
-interface RenderConfig {
+export interface RenderConfig {
   devicePixelRatio?: number;
 }
 
 export type Mode = 'forward' | 'reverse' | 'bounce' | 'reverse-bounce';
 
+export type Data = string | ArrayBuffer | Record<string, unknown>;
+
 export interface Config {
   autoplay?: boolean;
   backgroundColor?: string;
   canvas: HTMLCanvasElement;
-  data?: string | ArrayBuffer;
+  data?: Data;
   loop?: boolean;
   mode?: Mode;
   renderConfig?: RenderConfig;
@@ -27,6 +29,31 @@ export interface Config {
   speed?: number;
   src?: string;
   useFrameInterpolation?: boolean;
+}
+
+export interface Manifest {
+  activeAnimationId?: string;
+  animations: Array<{
+    autoplay?: boolean;
+    defaultTheme?: string;
+    direction?: 1 | -1;
+    hover?: boolean;
+    id: string;
+    intermission?: number;
+    loop?: boolean | number;
+    playMode?: 'bounce' | 'normal';
+    speed?: number;
+    themeColor?: string;
+  }>;
+  author?: string;
+  custom?: Record<string, unknown>;
+  description?: string;
+  generator?: string;
+  keywords?: string;
+  revision?: number;
+  states?: string[];
+  themes?: Array<{ animations: string[]; id: string }>;
+  version?: string;
 }
 
 const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
@@ -53,7 +80,7 @@ const createCoreSegments = (segments: number[], module: MainModule): VectorFloat
 };
 
 export class DotLottie {
-  private readonly _canvas: HTMLCanvasElement;
+  private readonly _canvas: HTMLCanvasElement | OffscreenCanvas;
 
   private _context: CanvasRenderingContext2D | null;
 
@@ -126,7 +153,7 @@ export class DotLottie {
 
       let data: string | ArrayBuffer;
 
-      if (contentType?.includes('application/json')) {
+      if (['application/json', 'text/plain'].includes(contentType ?? '')) {
         data = await response.text();
       } else {
         data = await response.arrayBuffer();
@@ -147,66 +174,68 @@ export class DotLottie {
       });
   }
 
-  private _loadFromData(data: string | ArrayBuffer): void {
+  private _loadFromData(data: Data): void {
     if (this._dotLottieCore === null) return;
 
-    try {
-      const width = this._canvas.width;
-      const height = this._canvas.height;
+    const width = this._canvas.width;
+    const height = this._canvas.height;
 
-      let loaded = false;
+    let loaded = false;
 
-      // clear the buffer
-      this._dotLottieCore.clear();
-
-      if (typeof data === 'string') {
-        loaded = this._dotLottieCore.loadAnimationData(data, width, height);
-      } else if (data instanceof ArrayBuffer) {
-        loaded = this._dotLottieCore.loadDotLottieData(data, width, height);
-      } else {
-        this._eventManager.dispatch({
-          type: 'loadError',
-          error: new Error('Unsupported data type for animation data. Expected a string or ArrayBuffer.'),
-        });
-
-        return;
-      }
-
-      if (loaded) {
-        this._eventManager.dispatch({ type: 'load' });
-
-        if (IS_BROWSER) {
-          this.resize();
-        }
-
-        this._eventManager.dispatch({
-          type: 'frame',
-          currentFrame: this._dotLottieCore.currentFrame(),
-        });
-
-        this._render();
-
-        if (this._dotLottieCore.config().autoplay) {
-          this._dotLottieCore.play();
-          if (this._dotLottieCore.isPlaying()) {
-            this._eventManager.dispatch({ type: 'play' });
-            this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
-          } else {
-            console.error('something went wrong, the animation was suppose to autoplay');
-          }
-        }
-      } else {
-        this._eventManager.dispatch({
-          type: 'loadError',
-          error: new Error('Failed to load animation data'),
-        });
-      }
-    } catch (error) {
+    if (typeof data === 'string') {
+      loaded = this._dotLottieCore.loadAnimationData(data, width, height);
+    } else if (data instanceof ArrayBuffer) {
+      loaded = this._dotLottieCore.loadDotLottieData(data, width, height);
+    } else if (typeof data === 'object') {
+      loaded = this._dotLottieCore.loadAnimationData(JSON.stringify(data), width, height);
+    } else {
       this._eventManager.dispatch({
         type: 'loadError',
-        error: error as Error,
+        error: new Error('Unsupported data type for animation data. Expected a string or ArrayBuffer.'),
+      });
+
+      return;
+    }
+
+    if (loaded) {
+      this._eventManager.dispatch({ type: 'load' });
+
+      if (IS_BROWSER) {
+        this.resize();
+      }
+
+      this._eventManager.dispatch({
+        type: 'frame',
+        currentFrame: this._dotLottieCore.currentFrame(),
+      });
+
+      this._render();
+
+      if (this._dotLottieCore.config().autoplay) {
+        this._dotLottieCore.play();
+        if (this._dotLottieCore.isPlaying()) {
+          this._eventManager.dispatch({ type: 'play' });
+          this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
+        } else {
+          console.error('something went wrong, the animation was suppose to autoplay');
+        }
+      }
+    } else {
+      this._eventManager.dispatch({
+        type: 'loadError',
+        error: new Error('Failed to load animation data'),
       });
     }
+  }
+
+  public get manifest(): Manifest | null {
+    if (this._dotLottieCore === null || !this._dotLottieCore.manifestString()) return null;
+
+    const manifestJson = JSON.parse(this._dotLottieCore.manifestString());
+
+    if (Object.keys(manifestJson).length === 0) return null;
+
+    return manifestJson as Manifest;
   }
 
   public get renderConfig(): RenderConfig {
@@ -503,7 +532,7 @@ export class DotLottie {
   }
 
   public resize(): void {
-    if (!IS_BROWSER) return;
+    if (!IS_BROWSER || !(this._canvas instanceof HTMLCanvasElement)) return;
 
     const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
 
@@ -539,6 +568,22 @@ export class DotLottie {
 
   public setRenderConfig(config: RenderConfig): void {
     this._renderConfig = config;
+  }
+
+  public loadAnimation(animationId: string): void {
+    if (this._dotLottieCore === null) return;
+
+    const loaded = this._dotLottieCore.loadAnimation(animationId, this._canvas.width, this._canvas.height);
+
+    if (loaded) {
+      this._eventManager.dispatch({ type: 'load' });
+      this.resize();
+    } else {
+      this._eventManager.dispatch({
+        type: 'loadError',
+        error: new Error(`Failed to animation :${animationId}`),
+      });
+    }
   }
 
   public static setWasmUrl(url: string): void {
