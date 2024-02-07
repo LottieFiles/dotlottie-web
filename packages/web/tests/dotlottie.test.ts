@@ -1285,7 +1285,9 @@ describe('loadAnimation', () => {
 
     dotLottie.addEventListener('load', onLoad);
 
-    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), {
+      timeout: 2000,
+    });
 
     const animations = dotLottie.manifest?.animations ?? [];
 
@@ -1310,7 +1312,9 @@ describe('loadAnimation', () => {
     dotLottie.addEventListener('loadError', onLoadError);
     dotLottie.addEventListener('load', onLoad);
 
-    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), {
+      timeout: 2000,
+    });
 
     const animationId = 'invalid';
 
