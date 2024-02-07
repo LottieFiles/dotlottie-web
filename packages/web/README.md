@@ -106,6 +106,7 @@ const dotLottie = new DotLottie({
 * <a href="https://codepen.io/lottiefiles/pen/JjzJZmL" target="_blank">Getting Started</a>
 * <a href="https://codepen.io/lottiefiles/pen/dyrRKwg" target="_blank">Controlling Animation Playback</a>
 * <a href="https://codepen.io/lottiefiles/pen/JjzJZgB" target="_blank">Dynamic Animation Loading</a>
+* <a href="https://codepen.io/lottiefiles/pen/wvOxdRa" target="_blank">Multi animations .lottie file</a>
 
 ## APIs
 
