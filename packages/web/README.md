@@ -159,6 +159,11 @@ The `renderConfig` object accepts the following properties:
 | `isLoaded`              | boolean                       | Reflects whether the animation is loaded or not.                                                                      |
 | `useFrameInterpolation` | boolean                       | Reflects whether the animation should update on subframes.                                                            |
 | `renderConfig`          | [RenderConfig](#renderconfig) | Configuration for rendering the animation.                                                                            |
+| `manifest`              | [Manifest](#manifest) \| null | The manifest of the loaded dotLottie file.                                                                            |
+
+#### Manifest
+
+This object contains the manifest of the loaded dotLottie file. as described in the [dotLottie structure](https://dotlottie.io/structure/#manifest-json).
 
 ### Methods
 
@@ -184,6 +189,7 @@ The `renderConfig` object accepts the following properties:
 | `resize()`                                                 | This method adjusts the canvas size to match its bounding box dimensions, considering the device's pixel ratio. This prevents the canvas from appearing blurry on high-resolution screens. Call this method when the window or the canvas element is resized. |
 | `setUseFrameInterpolation(useFrameInterpolation: boolean)` | Sets whether the animation should update on subframes.                                                                                                                                                                                                        |
 | `setRenderConfig(renderConfig: RenderConfig)`              | Sets the render configuration. check [RenderConfig](#renderconfig) for more details.                                                                                                                                                                          |
+| `loadAnimation(animationId: string)`                       | Loads a new animation from the .lottie file, using its ID as specified in the `manifest.json` file of the .lottie file.                                                                                                                                       |
 
 ### Static Methods
 
