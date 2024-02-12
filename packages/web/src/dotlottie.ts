@@ -229,13 +229,19 @@ export class DotLottie {
   }
 
   public get manifest(): Manifest | null {
-    if (this._dotLottieCore === null || !this._dotLottieCore.manifestString()) return null;
+    try {
+      const manifest = this._dotLottieCore?.manifestString();
 
-    const manifestJson = JSON.parse(this._dotLottieCore.manifestString());
+      if (this._dotLottieCore === null || !manifest) return null;
 
-    if (Object.keys(manifestJson).length === 0) return null;
+      const manifestJson = JSON.parse(manifest);
 
-    return manifestJson as Manifest;
+      if (Object.keys(manifestJson).length === 0) return null;
+
+      return manifestJson as Manifest;
+    } catch (_err) {
+      return null;
+    }
   }
 
   public get renderConfig(): RenderConfig {
