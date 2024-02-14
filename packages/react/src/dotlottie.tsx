@@ -17,7 +17,7 @@ export type DotLottieComponentProps = Omit<Config, 'canvas'> &
   };
 
 export const DotLottieReact = ({
-  autoResizeCanvas,
+  autoResizeCanvas = true,
   autoplay,
   backgroundColor,
   data,
