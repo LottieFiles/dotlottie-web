@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.3.0
+
+### Minor Changes
+
+- 5d4f3ea: feat: 🎸 Added `autoResizeCanvas` prop to enable control over the canvas resizing behavior
+
 ## 0.2.6
 
 ### Patch Changes
