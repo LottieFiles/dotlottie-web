@@ -85,6 +85,7 @@ The `DotLottieReactProps` extends the `HTMLCanvasElement` Props and accepts all 
 | `playOnHover`           | boolean                                |          | false                 | Determines if the animation should play on mouse hover and pause on mouse out.                                                                                                                                                                     |   |
 | `dotLottieRefCallback`  | React.RefCallback\<DotLottie \|  null> |          | undefined             | Callback function that receives a reference to the [`dotLottie`](../web/README.md) web player instance.                                                                                                                                            |   |
 | `useFrameInterpolation` | boolean                                |          | true                  | Determines if the animation should update on subframes. If set to false, the original AE frame rate will be maintained. If set to true, it will refresh at each requestAnimationFrame, including intermediate values. The default setting is true. |   |
+| `autoResizeCanvas`      | boolean                                |          | true                  | Determines if the canvas should resize automatically to its container                                                                                                                                                                              |   |
 
 #### RenderConfig
 
