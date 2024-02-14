@@ -15,6 +15,7 @@ function App() {
   const [srcIdx, setSrcIdx] = useState(0);
   const [useFrameInterpolation, setUseFrameInterpolation] = useState(false);
   const [playOnHover, setPlayOnHover] = useState(false);
+  const [autoResizeCanvas, setAutoResizeCanvas] = useState(true);
 
   React.useEffect(() => {
     function updateCurrentFrame(event: { currentFrame: number }) {
@@ -41,9 +42,6 @@ function App() {
   return (
     <>
       <DotLottieReact
-        style={{
-          maxWidth: '400px',
-        }}
         dotLottieRefCallback={setDotLottie}
         useFrameInterpolation={useFrameInterpolation}
         src={animations[srcIdx]}
@@ -51,6 +49,7 @@ function App() {
         loop={loop}
         speed={speed}
         playOnHover={playOnHover}
+        autoResizeCanvas={autoResizeCanvas}
       />
       <input type="range" min="0" max="100" defaultValue="0" value={progress} />
       <button
@@ -120,6 +119,14 @@ function App() {
       >
         {playOnHover ? 'Play on hover' : 'Not play on hover'}
       </button>
+      <input
+        type="checkbox"
+        checked={autoResizeCanvas}
+        onChange={() => {
+          setAutoResizeCanvas(!autoResizeCanvas);
+        }}
+      />
+      Auto resize canvas
     </>
   );
 }
