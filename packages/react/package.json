@@ -48,7 +48,8 @@
     "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "dependencies": {
-    "@lottiefiles/dotlottie-web": "workspace:*"
+    "@lottiefiles/dotlottie-web": "workspace:*",
+    "debounce": "^2.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",

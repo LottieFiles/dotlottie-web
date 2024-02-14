@@ -13,11 +13,12 @@ module.exports = defineConfig({
   dts: true,
   minify: false,
   sourcemap: false,
-  entry: ['./src/**/*.ts', './src/**/*.tsx'],
+  entry: ['./src/index.ts'],
   format: ['esm'],
   platform: 'browser',
   target: ['es2020', 'node18'],
   tsconfig: 'tsconfig.build.json',
-  // This is required for usage in framer
+  // To provide an esm build without any external dependencies
   noExternal: Object.keys(require('./package.json').dependencies),
+  external: ['react'],
 });
