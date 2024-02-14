@@ -9,8 +9,6 @@ import React from 'react';
 import { useDotLottie } from './use-dotlottie';
 import useStableCallback from './use-stable-callback';
 
-export type { DotLottie };
-
 export type DotLottieComponentProps = Omit<Config, 'canvas'> &
   ComponentProps<'canvas'> & {
     dotLottieRefCallback?: RefCallback<DotLottie>;

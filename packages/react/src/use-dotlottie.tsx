@@ -85,7 +85,6 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
         debounce(() => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              dotLottieRef.current?.resize();
               dotLottieRef.current?.unfreeze();
             } else {
               dotLottieRef.current?.freeze();
@@ -101,18 +100,6 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
     return observer;
   });
 
-  const [resizeObserver] = React.useState(() => {
-    const observer = new ResizeObserver((entries) => {
-      debounce(() => {
-        entries.forEach(() => {
-          dotLottieRef.current?.resize();
-        });
-      }, 150)();
-    });
-
-    return observer;
-  });
-
   const setCanvasRef = React.useCallback(
     (canvas: HTMLCanvasElement | null) => {
       if (canvas) {
@@ -124,18 +111,16 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
         setDotLottie(dotLottieInstance);
 
         intersectionObserver.observe(canvas);
-        resizeObserver.observe(canvas);
         canvas.addEventListener('mouseenter', hoverHandler);
         canvas.addEventListener('mouseleave', hoverHandler);
       } else {
         dotLottieRef.current?.destroy();
         intersectionObserver.disconnect();
-        resizeObserver.disconnect();
       }
 
       canvasRef.current = canvas;
     },
-    [intersectionObserver, resizeObserver, hoverHandler],
+    [intersectionObserver, hoverHandler],
   );
 
   const setContainerRef = React.useCallback((container: HTMLDivElement | null) => {
@@ -155,7 +140,6 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
 
       dotLottie.destroy();
       setDotLottie(null);
-      resizeObserver.disconnect();
       intersectionObserver.disconnect();
       canvasRef.current?.removeEventListener('mouseenter', hoverHandler);
       canvasRef.current?.removeEventListener('mouseleave', hoverHandler);

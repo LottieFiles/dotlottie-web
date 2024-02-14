@@ -11,13 +11,14 @@ module.exports = defineConfig({
   treeshake: true,
   clean: true,
   dts: true,
-  minify: false,
-  sourcemap: false,
-  entry: ['./src/**/*.ts', './src/**/*.tsx'],
+  minify: true,
+  sourcemap: true,
+  entry: ['./src/index.ts'],
   format: ['esm'],
   platform: 'browser',
   target: ['es2020', 'node18'],
   tsconfig: 'tsconfig.build.json',
   // This is required for usage in framer
   noExternal: Object.keys(require('./package.json').dependencies),
+  external: ['react'],
 });
