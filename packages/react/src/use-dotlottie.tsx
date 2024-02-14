@@ -90,11 +90,9 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
       });
     }, 150);
 
-    const observer = new IntersectionObserver(observerCallback, {
+    return new IntersectionObserver(observerCallback, {
       threshold: 0,
     });
-
-    return observer;
   }, []);
 
   const resizeObserver = useMemo(() => {
