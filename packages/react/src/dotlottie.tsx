@@ -9,7 +9,7 @@ import React from 'react';
 import { useDotLottie } from './use-dotlottie';
 import useStableCallback from './use-stable-callback';
 
-export type DotLottieComponentProps = Omit<Config, 'canvas'> &
+export type DotLottieReactProps = Omit<Config, 'canvas'> &
   ComponentProps<'canvas'> & {
     autoResizeCanvas?: boolean;
     dotLottieRefCallback?: RefCallback<DotLottie>;
@@ -31,7 +31,7 @@ export const DotLottieReact = ({
   src,
   useFrameInterpolation,
   ...props
-}: DotLottieComponentProps): JSX.Element => {
+}: DotLottieReactProps): JSX.Element => {
   const { DotLottieComponent, dotLottie } = useDotLottie({
     data,
     mode,
