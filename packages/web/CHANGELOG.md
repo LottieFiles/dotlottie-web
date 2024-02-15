@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.15.0
+
+### Minor Changes
+
+- 7f659f7: feat: 🎸 webp support
+
 ## 0.14.1
 
 ### Patch Changes
