@@ -31,7 +31,6 @@
   * [Setup](#setup)
   * [Dev](#dev)
   * [Build](#build)
-  * [Build WASM (Optional)](#build-wasm-optional)
 
 ## Introduction
 
@@ -237,22 +236,4 @@ pnpm dev
 
 ```bash
 pnpm build
-```
-
-### Build WASM (Optional)
-
-> **Note:** This step is necessary only if you wish to update the src/renderer.cpp file or the thorvg version being used. If not, you can skip this step.
-
-**Using Docker (Recommended):**
-
-```bash
-pnpm build:wasm:docker
-```
-
-**Using Emscripten SDK:**
-
-Ensure [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html) is installed.
-
-```bash
-pnpm build:wasm /path/to/emsdk/
 ```
