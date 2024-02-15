@@ -2848,7 +2848,7 @@ var createDotLottiePlayerModule = (() => {
 
     var wasmImports = {
       /** @export */ a: ___assert_fail,
-      /** @export */ i: ___cxa_throw,
+      /** @export */ h: ___cxa_throw,
       /** @export */ r: ___syscall_fcntl64,
       /** @export */ I: ___syscall_getcwd,
       /** @export */ L: ___syscall_ioctl,
@@ -2891,7 +2891,7 @@ var createDotLottiePlayerModule = (() => {
       /** @export */ T: _getentropy,
       /** @export */ m: invoke_ii,
       /** @export */ d: invoke_iii,
-      /** @export */ h: invoke_iiii,
+      /** @export */ i: invoke_iiii,
       /** @export */ q: invoke_iiiiii,
       /** @export */ j: invoke_vi,
       /** @export */ b: invoke_vii,
