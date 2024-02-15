@@ -8,7 +8,7 @@ export default defineConfig({
   test: {
     browser: {
       enabled: true,
-      name: 'chrome',
+      name: 'firefox',
     },
     // retry: 1,
     coverage: {
