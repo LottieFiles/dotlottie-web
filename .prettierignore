@@ -31,3 +31,5 @@ tmp/
 
 # Renderer releases
 releases/
+
+*.svelte

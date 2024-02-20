@@ -28,4 +28,19 @@ module.exports = [
     path: 'packages/wc/dist/index.js',
     import: '*',
   },
+  {
+    name: '@lottiefiles/dotlottie-svelte',
+    path: 'packages/svelte/dist/index.js',
+    import: '*',
+    modifyWebpackConfig: (config) => {
+      config.module.rules.push({
+        test: /\.svelte$/,
+        use: {
+          loader: 'svelte-loader',
+        },
+      });
+
+      return config;
+    },
+  },
 ];
