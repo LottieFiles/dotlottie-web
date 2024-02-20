@@ -46,24 +46,15 @@ dotLottie is an open-source file format that aggregates one or more Lottie files
 
 The monorepo contains the following package:
 
-| Package                                                      | Description                                                                                                                                                            |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **[@lottiefiles/dotlottie-web](packages/web/README.md)**     | A JavaScript library for rendering Lottie and dotLottie animations in the browser or Node.js.                                                                          |
-| **[@lottiefiles/dotlottie-react](packages/react/README.md)** | A React component wrapper for `dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them. |
-| **[@lottiefiles/dotlottie-wc](packages/wc/README.md)**       | A Web Component wrapper for `dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.   |
-| **[@lottiefiles/dotlottie-vue](packages/vue/README.md)**     | A Vue component wrapper for `dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.   |
+| Package                                                        | Description                                                                                                                                                             |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[@lottiefiles/dotlottie-web](packages/web/README.md)**       | A JavaScript library for rendering Lottie and dotLottie animations in the browser or Node.js.                                                                           |
+| **[@lottiefiles/dotlottie-react](packages/react/README.md)**   | A React component wrapper for `dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.  |
+| **[@lottiefiles/dotlottie-wc](packages/wc/README.md)**         | A Web Component wrapper for `dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.    |
+| **[@lottiefiles/dotlottie-vue](packages/vue/README.md)**       | A Vue component wrapper for `dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.    |
+| **[@lottiefiles/dotlottie-svelte](packages/svelte/README.md)** | A Svelte component wrapper for `dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them. |
 
 > Note: Each package has its own README.md with detailed documentation on usage and APIs.
-
-### Coming Soon Packages
-
-We are actively working on expanding our suite of packages. Here's what's coming soon:
-
-| Package                         | Description                                                                                                                                                             |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@lottiefiles/dotlottie-svelte` | A Svelte component wrapper for `dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them. |
-
-Stay tuned for updates and releases of these new packages!
 
 ### Getting Started
 
