@@ -5,7 +5,7 @@
 /* eslint-disable no-secrets/no-secrets */
 
 import './styles.css';
-import type { Mode } from '@lottiefiles/dotlottie-web';
+import type { Fit, Mode } from '@lottiefiles/dotlottie-web';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 
 import wasmUrl from '../../../packages/web/dist/dotlottie-player.wasm?url';
@@ -33,7 +33,7 @@ app.innerHTML = `
 </div>
 
 <div class="container">
-  <canvas id="canvas"></canvas>
+  <canvas style="width: 800px; height: 400px;" id="canvas"></canvas>
   <div class="control-panel">
     <div class="status-panel">
       <div id="playbackStatus">Playback State: <span id="playback-state">Stopped</span></div>
@@ -72,6 +72,50 @@ app.innerHTML = `
       <label for="bg-color">Background Color: </label>
       <input type="color" id="bg-color" />
     </div>
+
+    <div>
+      <label for="marker">Marker: </label>
+      <select id="marker">
+        <option value="">None</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="theme">Theme: </label>
+      <select id="theme">
+        <option value="">None</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="fit">Fit: </label>
+      <select id="fit">
+        <option value="contain" selected>Contain</option>
+        <option value="cover">Cover</option>
+        <option value="fill">Fill</option>
+        <option value="fit-height">Fit Height</option>
+        <option value="fit-width">Fit Width</option>
+        <option value="none">None</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="align">Align: </label>
+      <select id="align">
+        <option value="0,0">Top Left</option>
+        <option value="0.5,0">Top Center</option>
+        <option value="1,0">Top Right</option>
+
+        <option value="0,0.5">Center Left</option>
+        <option value="0.5,0.5" selected>Center</option>
+        <option value="1,0.5">Center Right</option>
+
+        <option value="0,1">Bottom Left</option>
+        <option value="0.5,1">Bottom Center</option>
+        <option value="1,1">Bottom Right</option>
+      </select>
+    </div>
+
     <div class="segments-control">
       <label for="startFrame">Start Frame: </label>
       <input type="number" id="startFrame" value="10" min="0" />
@@ -115,7 +159,12 @@ allCanvas.forEach((canvas) => {
   });
 });
 
-fetch('https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lottie')
+fetch(
+  // '/theming_example.lottie',
+  // '/layout_example.lottie',
+  // '/multi.lottie',
+  '/markers_example.lottie',
+)
   .then(async (res) => res.arrayBuffer())
   .then((data): void => {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -155,6 +204,11 @@ fetch('https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lotti
     const freezeStateSpan = document.getElementById('is-frozen') as HTMLSpanElement;
     const playbackStateSpan = document.getElementById('playback-state') as HTMLSpanElement;
     const nextAnimationButton = document.getElementById('next') as HTMLButtonElement;
+
+    const markerSelect = document.getElementById('marker') as HTMLSelectElement;
+    const themeSelect = document.getElementById('theme') as HTMLSelectElement;
+    const fitSelect = document.getElementById('fit') as HTMLSelectElement;
+    const alignSelect = document.getElementById('align') as HTMLSelectElement;
 
     let animationIdx = 0;
 
@@ -228,6 +282,37 @@ fetch('https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lotti
       });
     });
 
+    markerSelect.addEventListener('change', () => {
+      dotLottie.setMarker(markerSelect.value);
+    });
+
+    themeSelect.addEventListener('change', () => {
+      dotLottie.loadTheme(themeSelect.value);
+    });
+
+    fitSelect.addEventListener('change', () => {
+      const fit = fitSelect.value as Fit;
+      const align = dotLottie.layout?.align || [0.5, 0.5];
+
+      dotLottie.setLayout({
+        align,
+        fit,
+      });
+    });
+
+    alignSelect.addEventListener('change', () => {
+      const [x, y] = alignSelect.value.split(',');
+
+      if (x && y) {
+        const fit = dotLottie.layout?.fit || 'contain';
+
+        dotLottie.setLayout({
+          fit,
+          align: [parseFloat(x), parseFloat(y)],
+        });
+      }
+    });
+
     playPauseButton.addEventListener('click', () => {
       if (dotLottie.isPlaying) {
         dotLottie.pause();
@@ -267,6 +352,31 @@ fetch('https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lotti
 
     dotLottie.addEventListener('load', (event) => {
       bgColorInput.value = dotLottie.backgroundColor || '#ffffff';
+
+      const themes = dotLottie.manifest?.themes || [];
+
+      for (const theme of themes) {
+        const id = theme.id;
+
+        const option = document.createElement('option');
+
+        option.value = id;
+        option.textContent = id;
+
+        themeSelect.appendChild(option);
+      }
+
+      const markers = dotLottie.markers();
+
+      for (const marker of markers) {
+        const option = document.createElement('option');
+
+        option.value = marker.name;
+
+        option.textContent = marker.name;
+
+        markerSelect.appendChild(option);
+      }
 
       console.log(event);
     });

@@ -719,7 +719,7 @@ export class DotLottie {
     return this._dotLottieCore.loadTheme(themeId);
   }
 
-  public loadThemeData(themeData: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean {
+  public loadThemeData(themeData: string): boolean {
     if (this._dotLottieCore === null) return false;
 
     return this._dotLottieCore.loadThemeData(themeData);
