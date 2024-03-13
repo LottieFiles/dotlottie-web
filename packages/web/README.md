@@ -127,6 +127,17 @@ The `DotLottie` constructor accepts a config object with the following propertie
 | `segments`              | \[number, number]             |          | \[0, totalFrames - 1] | Animation segments. Accepts an array of two numbers, where the first number is the start frame and the second number is the end frame.                                                                                                             |
 | `renderConfig`          | [RenderConfig](#renderconfig) |          | `{}`                  | Configuration for rendering the animation.                                                                                                                                                                                                         |
 | `useFrameInterpolation` | boolean                       |          | true                  | Determines if the animation should update on subframes. If set to false, the original AE frame rate will be maintained. If set to true, it will refresh at each requestAnimationFrame, including intermediate values. The default setting is true. |
+| `marker`                | string                        |          | undefined             | The lottie named marker to play.                                                                                                                                                                                                                   |
+| `layout`                | [Layout](#layout)             |          | undefined             | The animation layout configuration.                                                                                                                                                                                                                |
+
+#### Layout
+
+The `layout` object accepts the following properties:
+
+| Property name | Type              | Required | Default     | Description                                                                                                                                                 |
+| ------------- | ----------------- | :------: | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fit`         | string            |          | "contain"   | The fit mode of the animation. Accepts "contain", "cover", "fill", "fit-width", "fit-height" and "none".                                                    |
+| `align`       | \[number, number] |          | \[0.5, 0.5] | The alignment of the animation in the canvas. Origin is at the top-left corner where \[0, 0] is the top-left corner and \[1, 1] is the bottom-right corner. |
 
 #### RenderConfig
 
@@ -161,6 +172,8 @@ The `renderConfig` object accepts the following properties:
 | `useFrameInterpolation` | boolean                       | Reflects whether the animation should update on subframes.                                                            |
 | `renderConfig`          | [RenderConfig](#renderconfig) | Configuration for rendering the animation.                                                                            |
 | `manifest`              | [Manifest](#manifest) \| null | The manifest of the loaded dotLottie file.                                                                            |
+| `marker`                | string                        | The lottie named marker to play.                                                                                      |
+| `layout`                | [Layout](#layout)             | The animation layout configuration.                                                                                   |
 
 #### Manifest
 
@@ -191,6 +204,10 @@ This object contains the manifest of the loaded dotLottie file. as described in 
 | `setUseFrameInterpolation(useFrameInterpolation: boolean)` | Sets whether the animation should update on subframes.                                                                                                                                                                                                        |
 | `setRenderConfig(renderConfig: RenderConfig)`              | Sets the render configuration. check [RenderConfig](#renderconfig) for more details.                                                                                                                                                                          |
 | `loadAnimation(animationId: string)`                       | Loads a new animation from the .lottie file, using its ID as specified in the `manifest.json` file of the .lottie file.                                                                                                                                       |
+| `setMarker(marker: string)`                                | Sets the lottie named marker to play.                                                                                                                                                                                                                         |
+| `setLayout(layout: Layout)`                                | Sets the animation layout configuration.                                                                                                                                                                                                                      |
+| `loadTheme(themeId: string)`                               | Loads a new theme from the .lottie file, using its ID as specified in the `manifest.json` file of the .lottie file.                                                                                                                                           |
+| `loadThemeData(themeData: string)`                         | Loads a new theme from the provided theme data.                                                                                                                                                                                                               |
 
 ### Static Methods
 

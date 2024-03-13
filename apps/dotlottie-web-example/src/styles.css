@@ -12,7 +12,6 @@ canvas {
   margin-bottom: 20px;
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
   width: 100%; /* Full width of the container */
-  max-width: 500px;
   aspect-ratio: 1/1;
 }
 
