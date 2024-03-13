@@ -106,7 +106,10 @@ const dotLottie = new DotLottie({
 * <a href="https://codepen.io/lottiefiles/pen/JjzJZmL" target="_blank">Getting Started</a>
 * <a href="https://codepen.io/lottiefiles/pen/dyrRKwg" target="_blank">Controlling Animation Playback</a>
 * <a href="https://codepen.io/lottiefiles/pen/JjzJZgB" target="_blank">Dynamic Animation Loading</a>
-* <a href="https://codepen.io/lottiefiles/pen/wvOxdRa" target="_blank">Multi animations .lottie file</a>
+* <a href="https://codepen.io/lottiefiles/pen/wvOxdRa" target="_blank">Multi Animations .lottie file</a>
+* <a href="https://codepen.io/lottiefiles/pen/LYvZveR" target="_blank">Advanced Animation Layout</a>
+* <a href="https://codepen.io/lottiefiles/pen/RwOROKp" target="_blank">Named Markers</a>
+* <a href="https://codepen.io/lottiefiles/pen/BaEzEeq" target="_blank">dotLottie theming</a>
 
 ## APIs
 
