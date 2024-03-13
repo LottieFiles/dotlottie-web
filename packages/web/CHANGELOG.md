@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-web
 
+## 0.16.0
+
+### Minor Changes
+
+- 0e521aa: feat:🎸 layout config
+- 0e521aa: feat:🎸 markers
+- 0e521aa: feat:🎸 theming
+
 ## 0.15.0
 
 ### Minor Changes
