@@ -257,6 +257,14 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   }, [config?.src]);
 
   useEffect(() => {
+    if (!dotLottie) return;
+
+    if (typeof config?.marker === 'string') {
+      dotLottie.setMarker(config.marker);
+    }
+  }, [config?.marker]);
+
+  useEffect(() => {
     if (config?.autoResizeCanvas && canvasRef.current) {
       resizeObserver.observe(canvasRef.current);
     } else {
