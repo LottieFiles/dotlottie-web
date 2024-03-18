@@ -34,7 +34,7 @@ export interface Config {
   marker?: string;
   mode?: Mode;
   renderConfig?: RenderConfig;
-  segments?: [number, number];
+  segment?: [number, number];
   speed?: number;
   src?: string;
   useFrameInterpolation?: boolean;
@@ -102,15 +102,15 @@ const createCoreAlign = (align: [number, number], module: MainModule): VectorFlo
   return coreAlign;
 };
 
-const createCoreSegments = (segments: number[], module: MainModule): VectorFloat => {
-  const coreSegments = new module.VectorFloat();
+const createCoreSegment = (segment: number[], module: MainModule): VectorFloat => {
+  const coresegment = new module.VectorFloat();
 
-  if (segments.length !== 2) return coreSegments;
+  if (segment.length !== 2) return coresegment;
 
-  coreSegments.push_back(segments[0] as number);
-  coreSegments.push_back(segments[1] as number);
+  coresegment.push_back(segment[0] as number);
+  coresegment.push_back(segment[1] as number);
 
-  return coreSegments;
+  return coresegment;
 };
 
 export class DotLottie {
@@ -150,7 +150,7 @@ export class DotLottie {
           backgroundColor: 0,
           loopAnimation: config.loop ?? false,
           mode: createCoreMode(config.mode ?? 'forward', module),
-          segments: createCoreSegments(config.segments ?? [], module),
+          segment: createCoreSegment(config.segment ?? [], module),
           speed: config.speed ?? 1,
           useFrameInterpolation: config.useFrameInterpolation ?? true,
           marker: config.marker ?? '',
@@ -331,11 +331,11 @@ export class DotLottie {
     return this._renderConfig;
   }
 
-  public get segments(): [number, number] | undefined {
-    const segments = this._dotLottieCore?.config().segments;
+  public get segment(): [number, number] | undefined {
+    const segment = this._dotLottieCore?.config().segment;
 
-    if (segments && segments.size() === 2) {
-      return [segments.get(0) as number, segments.get(1) as number];
+    if (segment && segment.size() === 2) {
+      return [segment.get(0) as number, segment.get(1) as number];
     }
 
     return undefined;
@@ -419,7 +419,7 @@ export class DotLottie {
       backgroundColor: 0,
       loopAnimation: config.loop ?? false,
       mode: createCoreMode(config.mode ?? 'forward', this._wasmModule),
-      segments: createCoreSegments(config.segments ?? [], this._wasmModule),
+      segment: createCoreSegment(config.segment ?? [], this._wasmModule),
       speed: config.speed ?? 1,
       useFrameInterpolation: config.useFrameInterpolation ?? true,
       marker: config.marker ?? '',
@@ -644,12 +644,12 @@ export class DotLottie {
     }
   }
 
-  public setSegments(startFrame: number, endFrame: number): void {
+  public setSegment(startFrame: number, endFrame: number): void {
     if (this._dotLottieCore === null || this._wasmModule === null) return;
 
     this._dotLottieCore.setConfig({
       ...this._dotLottieCore.config(),
-      segments: createCoreSegments([startFrame, endFrame], this._wasmModule),
+      segment: createCoreSegment([startFrame, endFrame], this._wasmModule),
     });
   }
 

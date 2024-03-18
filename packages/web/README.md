@@ -127,7 +127,7 @@ The `DotLottie` constructor accepts a config object with the following propertie
 | `data`                  | string \| ArrayBuffer         |          | undefined             | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations.                                                                                                                                                |
 | `mode`                  | string                        |          | "forward"             | Animation play mode. Accepts "forward", "reverse", "bounce", "reverse-bounce".                                                                                                                                                                     |
 | `backgroundColor`       | string                        |          | undefined             | Background color of the canvas. Accepts 6-digit or 8-digit hex color string (e.g., "#000000", "#000000FF"),                                                                                                                                        |
-| `segments`              | \[number, number]             |          | \[0, totalFrames - 1] | Animation segments. Accepts an array of two numbers, where the first number is the start frame and the second number is the end frame.                                                                                                             |
+| `segment`               | \[number, number]             |          | \[0, totalFrames - 1] | Animation segment. Accepts an array of two numbers, where the first number is the start frame and the second number is the end frame.                                                                                                              |
 | `renderConfig`          | [RenderConfig](#renderconfig) |          | `{}`                  | Configuration for rendering the animation.                                                                                                                                                                                                         |
 | `useFrameInterpolation` | boolean                       |          | true                  | Determines if the animation should update on subframes. If set to false, the original AE frame rate will be maintained. If set to true, it will refresh at each requestAnimationFrame, including intermediate values. The default setting is true. |
 | `marker`                | string                        |          | undefined             | The lottie named marker to play.                                                                                                                                                                                                                   |
@@ -154,29 +154,29 @@ The `renderConfig` object accepts the following properties:
 
 `DotLottie` instances expose the following properties:
 
-| Property                | Type                          | Description                                                                                                           |
-| ----------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `currentFrame`          | number                        | Represents the animation's currently displayed frame number.                                                          |
-| `duration`              | number                        | Specifies the animation's total playback time in milliseconds.                                                        |
-| `totalFrames`           | number                        | Denotes the total count of individual frames within the animation.                                                    |
-| `loop`                  | boolean                       | Indicates if the animation is set to play in a continuous loop.                                                       |
-| `speed`                 | number                        | Represents the playback speed factor; e.g., 2 would mean double speed.                                                |
-| `loopCount`             | number                        | Tracks how many times the animation has completed its loop.                                                           |
-| `direction`             | string                        | Reflects the current playback direction; e.g., 1 would mean forward, -1 would mean reverse.                           |
-| `mode`                  | string                        | Reflects the current playback mode.                                                                                   |
-| `isPaused`              | boolean                       | Reflects whether the animation is paused or not.                                                                      |
-| `isStopped`             | boolean                       | Reflects whether the animation is stopped or not.                                                                     |
-| `isPlaying`             | boolean                       | Reflects whether the animation is playing or not.                                                                     |
-| `segments`              | \[number, number]             | Reflects the frames range of the animations. where segments\[0] is the start frame and segments\[1] is the end frame. |
-| `backgroundColor`       | string                        | Gets the background color of the canvas.                                                                              |
-| `autoplay`              | boolean                       | Indicates if the animation is set to auto-play.                                                                       |
-| `isFrozen`              | boolean                       | Reflects whether the animation loop is stopped or not.                                                                |
-| `isLoaded`              | boolean                       | Reflects whether the animation is loaded or not.                                                                      |
-| `useFrameInterpolation` | boolean                       | Reflects whether the animation should update on subframes.                                                            |
-| `renderConfig`          | [RenderConfig](#renderconfig) | Configuration for rendering the animation.                                                                            |
-| `manifest`              | [Manifest](#manifest) \| null | The manifest of the loaded dotLottie file.                                                                            |
-| `marker`                | string                        | The lottie named marker to play.                                                                                      |
-| `layout`                | [Layout](#layout)             | The animation layout configuration.                                                                                   |
+| Property                | Type                          | Description                                                                                                         |
+| ----------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `currentFrame`          | number                        | Represents the animation's currently displayed frame number.                                                        |
+| `duration`              | number                        | Specifies the animation's total playback time in milliseconds.                                                      |
+| `totalFrames`           | number                        | Denotes the total count of individual frames within the animation.                                                  |
+| `loop`                  | boolean                       | Indicates if the animation is set to play in a continuous loop.                                                     |
+| `speed`                 | number                        | Represents the playback speed factor; e.g., 2 would mean double speed.                                              |
+| `loopCount`             | number                        | Tracks how many times the animation has completed its loop.                                                         |
+| `direction`             | string                        | Reflects the current playback direction; e.g., 1 would mean forward, -1 would mean reverse.                         |
+| `mode`                  | string                        | Reflects the current playback mode.                                                                                 |
+| `isPaused`              | boolean                       | Reflects whether the animation is paused or not.                                                                    |
+| `isStopped`             | boolean                       | Reflects whether the animation is stopped or not.                                                                   |
+| `isPlaying`             | boolean                       | Reflects whether the animation is playing or not.                                                                   |
+| `segment`               | \[number, number]             | Reflects the frames range of the animations. where segment\[0] is the start frame and segment\[1] is the end frame. |
+| `backgroundColor`       | string                        | Gets the background color of the canvas.                                                                            |
+| `autoplay`              | boolean                       | Indicates if the animation is set to auto-play.                                                                     |
+| `isFrozen`              | boolean                       | Reflects whether the animation loop is stopped or not.                                                              |
+| `isLoaded`              | boolean                       | Reflects whether the animation is loaded or not.                                                                    |
+| `useFrameInterpolation` | boolean                       | Reflects whether the animation should update on subframes.                                                          |
+| `renderConfig`          | [RenderConfig](#renderconfig) | Configuration for rendering the animation.                                                                          |
+| `manifest`              | [Manifest](#manifest) \| null | The manifest of the loaded dotLottie file.                                                                          |
+| `marker`                | string                        | The lottie named marker to play.                                                                                    |
+| `layout`                | [Layout](#layout)             | The animation layout configuration.                                                                                 |
 
 #### Manifest
 
@@ -199,7 +199,7 @@ This object contains the manifest of the loaded dotLottie file. as described in 
 | `destroy()`                                                | Destroys the renderer instance and unregisters all event listeners. This method should be called when the canvas is removed from the DOM to prevent memory leaks.                                                                                             |
 | `load(config: Config)`                                     | Loads a new configuration or a new animation.                                                                                                                                                                                                                 |
 | `setMode(mode: string)`                                    | Sets the animation play mode.                                                                                                                                                                                                                                 |
-| `setSegments(startFrame: number, endFrame: number)`        | Sets the start and end frame of the animation.                                                                                                                                                                                                                |
+| `setSegment(startFrame: number, endFrame: number)`         | Sets the start and end frame of the animation.                                                                                                                                                                                                                |
 | `freeze()`                                                 | Freezes the animation by stopping the animation loop.                                                                                                                                                                                                         |
 | `unfreeze()`                                               | Unfreezes the animation by resuming the animation loop.                                                                                                                                                                                                       |
 | `setBackgroundColor(color: string)`                        | Sets the background color of the canvas.                                                                                                                                                                                                                      |

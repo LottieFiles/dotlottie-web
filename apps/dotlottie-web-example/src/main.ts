@@ -116,14 +116,14 @@ app.innerHTML = `
       </select>
     </div>
 
-    <div class="segments-control">
+    <div class="segment-control">
       <label for="startFrame">Start Frame: </label>
       <input type="number" id="startFrame" value="10" min="0" />
 
       <label for="endFrame">End Frame: </label>
       <input type="number" id="endFrame" value="90" min="0" />
 
-      <button id="setSegments" class="control-button">Set Segments</button>
+      <button id="setSegment" class="control-button">Set segment</button>
     </div>
   </div>
 </div>
@@ -177,7 +177,7 @@ fetch(
       loop: true,
       autoplay: true,
       mode: 'bounce',
-      segments: [10, 90],
+      segment: [10, 90],
       speed: 1,
       backgroundColor: '#800080ff',
       // useFrameInterpolation: false,
@@ -198,7 +198,7 @@ fetch(
     const modeSelect = document.getElementById('mode') as HTMLSelectElement;
     const startFrameInput = document.getElementById('startFrame') as HTMLInputElement;
     const endFrameInput = document.getElementById('endFrame') as HTMLInputElement;
-    const setSegmentsButton = document.getElementById('setSegments') as HTMLButtonElement;
+    const setSegmentButton = document.getElementById('setSegment') as HTMLButtonElement;
     const freezeButton = document.getElementById('freeze') as HTMLButtonElement;
     const unfreezeButton = document.getElementById('unfreeze') as HTMLButtonElement;
     const freezeStateSpan = document.getElementById('is-frozen') as HTMLSpanElement;
@@ -242,11 +242,11 @@ fetch(
       dotLottie.setBackgroundColor(bgColorInput.value);
     });
 
-    setSegmentsButton.addEventListener('click', () => {
+    setSegmentButton.addEventListener('click', () => {
       const startFrame = parseInt(startFrameInput.value, 10);
       const endFrame = parseInt(endFrameInput.value, 10);
 
-      dotLottie.setSegments(startFrame, endFrame);
+      dotLottie.setSegment(startFrame, endFrame);
     });
 
     modeSelect.addEventListener('change', () => {
@@ -254,10 +254,10 @@ fetch(
     });
 
     jumpButton.addEventListener('click', () => {
-      if (!dotLottie.segments) return;
+      if (!dotLottie.segment) return;
 
-      const startFrame = parseInt(dotLottie.segments[0].toString(), 10);
-      const endFrame = parseInt(dotLottie.segments[1].toString(), 10);
+      const startFrame = parseInt(dotLottie.segment[0].toString(), 10);
+      const endFrame = parseInt(dotLottie.segment[1].toString(), 10);
 
       const midFrame = (endFrame - startFrame) / 2 + startFrame;
 

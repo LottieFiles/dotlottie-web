@@ -28,7 +28,7 @@ export const DotLottieVue = defineComponent({
     loop: { type: Boolean, required: false },
     mode: { type: String as () => Mode, required: false },
     renderConfig: { type: Object, required: false },
-    segments: { type: Array as unknown as () => [number, number], required: false },
+    segment: { type: Array as unknown as () => [number, number], required: false },
     speed: { type: Number, required: false },
     src: { type: String, required: false },
     useFrameInterpolation: { type: Boolean, required: false },
@@ -36,7 +36,7 @@ export const DotLottieVue = defineComponent({
 
   setup(props: DotLottieVueProps, { attrs, expose }: SetupContext): () => VNode {
     const canvas: Ref<HTMLCanvasElement | undefined> = ref(undefined);
-    const { backgroundColor, loop, mode, segments, speed, useFrameInterpolation } = toRefs(props);
+    const { backgroundColor, loop, mode, segment, speed, useFrameInterpolation } = toRefs(props);
     let dotLottie: DotLottie | null = null;
     let intersectionObserver: IntersectionObserver | null = null;
     let resizeObserver: ResizeObserver | null = null;
@@ -67,11 +67,11 @@ export const DotLottieVue = defineComponent({
       },
     );
     watch(
-      () => segments?.value,
+      () => segment?.value,
       (newVal) => {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (dotLottie && Array.isArray(newVal) && newVal.length === 2) {
-          dotLottie.setSegments(newVal[0], newVal[1]);
+          dotLottie.setSegment(newVal[0], newVal[1]);
         }
       },
     );
