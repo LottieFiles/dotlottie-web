@@ -2,4 +2,4 @@
 '@lottiefiles/dotlottie-react': minor
 ---
 
-feat: add `marker` prop
+feat: 🎸 add `marker` prop
