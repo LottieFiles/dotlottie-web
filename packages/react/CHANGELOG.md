@@ -1,5 +1,17 @@
 # @lottiefiles/dotlottie-react
 
+## 0.4.0
+
+### Minor Changes
+
+- 51ff0e9: refactor: 💡 rename `segments` to `segment`
+
+### Patch Changes
+
+- Updated dependencies [51ff0e9]
+- Updated dependencies [51ff0e9]
+  - @lottiefiles/dotlottie-web@0.17.0
+
 ## 0.3.2
 
 ### Patch Changes

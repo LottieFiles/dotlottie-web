@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-web
 
+## 0.17.0
+
+### Minor Changes
+
+- 51ff0e9: refactor: 💡 update color space to `ABGR8888S`
+- 51ff0e9: refactor: 💡 rename `segments` to `segment`
+
 ## 0.16.0
 
 ### Minor Changes
