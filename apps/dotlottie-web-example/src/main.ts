@@ -198,7 +198,7 @@ fetch(
     const modeSelect = document.getElementById('mode') as HTMLSelectElement;
     const startFrameInput = document.getElementById('startFrame') as HTMLInputElement;
     const endFrameInput = document.getElementById('endFrame') as HTMLInputElement;
-    const setSegmentButton = document.getElementById('setsegment') as HTMLButtonElement;
+    const setSegmentButton = document.getElementById('setSegment') as HTMLButtonElement;
     const freezeButton = document.getElementById('freeze') as HTMLButtonElement;
     const unfreezeButton = document.getElementById('unfreeze') as HTMLButtonElement;
     const freezeStateSpan = document.getElementById('is-frozen') as HTMLSpanElement;
