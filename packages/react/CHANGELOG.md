@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.5.0
+
+### Minor Changes
+
+- 27174c5: feat: 🎸 add `marker` prop
+
 ## 0.4.0
 
 ### Minor Changes
