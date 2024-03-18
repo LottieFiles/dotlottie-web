@@ -95,7 +95,7 @@ export interface Config {
   loopAnimation: boolean;
   marker: string;
   mode: Mode;
-  segments: VectorFloat;
+  segment: VectorFloat;
   speed: number;
   useFrameInterpolation: boolean;
 }

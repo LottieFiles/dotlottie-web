@@ -91,7 +91,7 @@ The `dotlottie-wc` component accepts all configuration attributes of [`DotLottie
 | `loop`            | boolean               | Loop the animation.                                                                              |
 | `speed`           | number                | Playback speed.                                                                                  |
 | `data`            | string                | Animation data as a string or ArrayBuffer for .lottie animations.                                |
-| `segments`        | Array                 | Animation segments as an array of two numbers (start frame and end frame).                       |
+| `segment`         | Array                 | Animation segment as an array of two numbers (start frame and end frame).                        |
 | `mode`            | string                | Animation play mode (e.g., "forward", "bounce").                                                 |
 | `backgroundColor` | string                | Background color of the canvas. Accepts 6-digit or 8-digit hex color string (e.g., "#000000FF"). |
 | `renderConfig`    | Object (RenderConfig) | Configuration for rendering the animation.                                                       |

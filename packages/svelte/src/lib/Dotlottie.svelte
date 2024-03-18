@@ -9,7 +9,7 @@
 	export let loop: Config['loop'] = false;
 	export let mode: Config['mode'] = 'forward';
 	export let renderConfig: Config['renderConfig'] = undefined;
-	export let segments: Config['segments'] = undefined;
+	export let segment: Config['segment'] = undefined;
 	export let speed: Config['speed'] = 1;
 	export let src: Config['src'] = undefined;
 	export let useFrameInterpolation: Config['useFrameInterpolation'] = true;
@@ -31,7 +31,7 @@
 			speed,
 			data,
 			renderConfig,
-			segments,
+			segment,
 			useFrameInterpolation,
 			backgroundColor,
 			mode
@@ -82,9 +82,9 @@
 	}
 
 	$: {
-		if (dotLottie && dotLottie.isLoaded && Array.isArray(segments) && segments.length === 2 && typeof segments[0] === 'number' && typeof segments[1] === 'number') {
-			let [start, end] = segments;
-			dotLottie.setSegments(start, end);
+		if (dotLottie && dotLottie.isLoaded && Array.isArray(segment) && segment.length === 2 && typeof segment[0] === 'number' && typeof segment[1] === 'number') {
+			let [start, end] = segment;
+			dotLottie.setSegment(start, end);
 		}
 	}
 
@@ -115,7 +115,7 @@
             speed,
             data,
             renderConfig,
-            segments,
+            segment,
             useFrameInterpolation,
             backgroundColor,
             mode
@@ -131,7 +131,7 @@
 			speed,
 			data,
 			renderConfig,
-			segments,
+			segment,
 			useFrameInterpolation,
 			backgroundColor,
 			mode
