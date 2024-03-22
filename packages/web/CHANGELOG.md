@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.18.0
+
+### Minor Changes
+
+- 65c0b29: feat: 🎸 update dotlottie-rs wasm with reset theme feature
+
 ## 0.17.0
 
 ### Minor Changes
