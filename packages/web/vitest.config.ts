@@ -10,7 +10,7 @@ export default defineConfig({
       enabled: true,
       name: 'firefox',
     },
-    // retry: 1,
+    retry: 1,
     coverage: {
       provider: 'istanbul',
       include: ['src/**/*.ts'],
