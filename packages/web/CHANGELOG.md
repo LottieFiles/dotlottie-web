@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.18.1
+
+### Patch Changes
+
+- bcd014b: fix: 🐛 different rendering result compared to lottie-web
+
 ## 0.18.0
 
 ### Minor Changes
