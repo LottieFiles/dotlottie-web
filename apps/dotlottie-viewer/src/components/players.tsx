@@ -1,0 +1,200 @@
+/**
+ * Copyright 2023 Design Barn Inc.
+ */
+
+import { useCallback, useEffect, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import DotLottieNew from './dotlottie-new';
+import DotLottieOld from './dotlottie-old';
+import { DotLottie } from '@lottiefiles/dotlottie-react';
+import {
+  setAnimations,
+  setCurrentFrame,
+  setCurrentState,
+  setLoadTimeDotLottie,
+  setLoadTimeLottieWeb,
+  setLoop,
+  setThemes,
+  setTotalFrames,
+} from '../store/viewer-slice';
+import BaseInput from './form/base-input';
+import { FaPlay, FaPause } from 'react-icons/fa';
+import { ImLoop } from 'react-icons/im';
+// import { GiNextButton, GiPreviousButton } from "react-icons/gi";
+import LoadTime from './load-time';
+
+let startTime = performance.now();
+
+export default function Players() {
+  const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
+  const src = useAppSelector((state) => state.viewer.src);
+  const backgroundColor = useAppSelector((state) => state.viewer.backgroundColor);
+  const speed = useAppSelector((state) => state.viewer.speed);
+  const autoplay = useAppSelector((state) => state.viewer.autoplay);
+  const loop = useAppSelector((state) => state.viewer.loop);
+  const totalFrames = useAppSelector((state) => state.viewer.totalFrames);
+  const currentFrame = useAppSelector((state) => state.viewer.currentFrame);
+  const currentState = useAppSelector((state) => state.viewer.currentState);
+  const mode = useAppSelector((state) => state.viewer.mode);
+  const activeAnimationId = useAppSelector((state) => state.viewer.activeAnimationId);
+  const activeThemeId = useAppSelector((state) => state.viewer.activeThemeId);
+  const isJson = useAppSelector((state) => state.viewer.isJson);
+  const loadTime = useAppSelector((state) => state.viewer.loadTime);
+  const dispatch = useAppDispatch();
+
+  const onLoad = useCallback(() => {
+    dispatch(setTotalFrames(dotLottie?.totalFrames));
+    const endTime = performance.now();
+    dispatch(setLoadTimeDotLottie(endTime - startTime));
+    if (!src.endsWith('.json') && !src.startsWith('data:application/json')) {
+      dispatch(setAnimations(dotLottie?.manifest?.animations?.map((item) => item.id) || []));
+      dispatch(setThemes(dotLottie?.manifest?.themes || []));
+    }
+  }, [src, dotLottie, dispatch]);
+
+  const onFrame = useCallback(() => {
+    dispatch(setCurrentFrame(dotLottie?.currentFrame || 0));
+  }, [dispatch, dotLottie]);
+
+  useEffect(() => {
+    if (!dotLottie) return;
+    dotLottie.addEventListener('load', onLoad);
+    dotLottie.addEventListener('frame', onFrame);
+    return () => {
+      dotLottie.removeEventListener('load', onLoad);
+      dotLottie.removeEventListener('frame', onFrame);
+    };
+  }, [onLoad, dotLottie, onFrame]);
+
+  const addEventListeners = useCallback(
+    (player: DotLottie) => {
+      player.addEventListener('complete', () => {
+        dispatch(setCurrentState('stopped'));
+      });
+      player.addEventListener('stop', () => {
+        dispatch(setCurrentState('stopped'));
+      });
+      player.addEventListener('play', () => {
+        dispatch(setCurrentState('playing'));
+      });
+      player.addEventListener('pause', () => {
+        dispatch(setCurrentState('paused'));
+      });
+    },
+    [dispatch],
+  );
+
+  useEffect(() => {
+    if (!dotLottie) return;
+    dotLottie?.loadAnimation(activeAnimationId);
+  }, [activeAnimationId, dotLottie]);
+
+  useEffect(() => {
+    if (!dotLottie) return;
+    dotLottie?.loadTheme(activeThemeId);
+  }, [activeThemeId, dotLottie]);
+
+  useEffect(() => {
+    if (!dotLottie) return;
+    dispatch(setAnimations(dotLottie?.manifest?.animations?.map((item) => item.id) || []));
+    dispatch(setThemes(dotLottie?.manifest?.themes || []));
+  }, [dotLottie, dispatch]);
+
+  useEffect(() => {
+    startTime = performance.now();
+  }, [src, dotLottie]);
+
+  return (
+    <>
+      <div className="h-full flex-grow flex justify-between items-center flex-col gap-4">
+        <div className="flex justify-center h-full">
+          <div className="flex flex-col dotlottie-player">
+            <LoadTime className="mb-4" title="dotLottie Web" loadTime={parseFloat(loadTime.dotLottie.toFixed(2))} />
+            <div className="flex justify-center items-center p-4 flex-grow">
+              <div style={{ width: '350px', height: '350px' }}>
+                <DotLottieNew
+                  backgroundColor={backgroundColor}
+                  width={350}
+                  height={350}
+                  autoplay={autoplay}
+                  loop={loop}
+                  mode={mode}
+                  speed={speed}
+                  dotLottieRefCallback={(ref) => {
+                    if (ref) {
+                      addEventListeners(ref);
+                      setDotLottie(ref);
+                    }
+                  }}
+                  src={src}
+                />
+              </div>
+            </div>
+          </div>
+          {isJson ? (
+            <div className="flex flex-col lottie-web">
+              <LoadTime className="mb-4" title="Lottie Web" loadTime={parseFloat(loadTime.lottieWeb.toFixed(2))} />
+              <div className="flex justify-center items-center p-4 flex-grow">
+                <div style={{ width: '350px', height: '350px' }}>
+                  <DotLottieOld
+                    background={backgroundColor}
+                    autoplay={autoplay}
+                    loop={loop}
+                    speed={speed}
+                    onEvent={(event) => {
+                      if (event === 'ready') {
+                        const endTime = performance.now();
+                        dispatch(setLoadTimeLottieWeb(endTime - startTime));
+                      }
+                    }}
+                    src={src}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+        <div className="flex items-center gap-4 w-full max-w-[720px]">
+          {currentState !== 'playing' ? (
+            <button
+              onClick={() => {
+                dotLottie?.play();
+              }}
+            >
+              <FaPlay />
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                dotLottie?.pause();
+              }}
+            >
+              <FaPause />
+            </button>
+          )}
+          <BaseInput
+            onMouseDown={() => {
+              dotLottie?.pause();
+            }}
+            onChange={(event) => {
+              dotLottie?.setFrame(parseFloat(event.target.value));
+            }}
+            type="range"
+            className="w-full seeker"
+            min={0}
+            max={totalFrames}
+            defaultValue={currentFrame}
+          />
+
+          <span className="p-2 w-36 text-center flex">
+            <input className="w-14 text-right pr-1 bg-transparent" value={currentFrame.toFixed(2)} disabled />
+            / <input className="w-14 pl-1 bg-transparent" value={totalFrames} disabled />
+          </span>
+          <button className="cursor-pointer" onClick={() => dispatch(setLoop(!loop))}>
+            <ImLoop className={`${!loop ? 'text-gray-500' : ''}`} />
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}

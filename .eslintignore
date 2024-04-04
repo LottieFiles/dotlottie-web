@@ -43,3 +43,5 @@ next-env.d.ts
 releases/
 
 dotlottie-player.js
+
+apps/dotlottie-viewer
