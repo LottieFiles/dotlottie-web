@@ -28,7 +28,6 @@ let startTime = performance.now();
 
 export default function Players() {
   const lottieWebRef = useRef<DotLottieCommonPlayer | null>(null);
-  const dotRef = useRef<DotLottie | null>(null);
   const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
   const src = useAppSelector((state) => state.viewer.src);
   const backgroundColor = useAppSelector((state) => state.viewer.backgroundColor);
