@@ -30,7 +30,7 @@ interface AnimationSlice {
   };
 }
 
-export const DEFAULT_SRC = `${import.meta.env.BASE_URL}celebrate.json`;
+export const DEFAULT_SRC = `https://lottie.host/9ac9c440-c19e-4ac9-b60e-869b6d0ef8cb/7h97gYMCNE.lottie`;
 
 const initialState: AnimationSlice = {
   src: DEFAULT_SRC,
