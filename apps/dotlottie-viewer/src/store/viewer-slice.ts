@@ -31,9 +31,6 @@ interface AnimationSlice {
 }
 
 export const DEFAULT_SRC = '/celebrate.json';
-// src: "https://lottie.host/5525262b-4e57-4f0a-8103-cfdaa7c8969e/VCYIkooYX8.json",
-// src: 'lottie-lego.json',
-// src: './theming_example.lottie',
 
 const initialState: AnimationSlice = {
   src: DEFAULT_SRC,
@@ -42,7 +39,7 @@ const initialState: AnimationSlice = {
   speed: 1,
   autoplay: true,
   loop: true,
-  backgroundColor: '',
+  backgroundColor: '#F3F6F8',
   currentFrame: 0,
   totalFrames: 0,
   themes: [],

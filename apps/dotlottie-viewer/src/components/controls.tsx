@@ -8,6 +8,7 @@ export default function Controls() {
   const speed = useAppSelector((state) => state.viewer.speed);
   const animations = useAppSelector((state) => state.viewer.animations);
   const themes = useAppSelector((state) => state.viewer.themes);
+  const backgroundColor = useAppSelector((state) => state.viewer.backgroundColor);
   const dispatch = useAppDispatch();
 
   return (
@@ -16,6 +17,7 @@ export default function Controls() {
         <InputLabel lablel="backgroundColor">
           <BaseInput
             type="color"
+            defaultValue={backgroundColor}
             onChange={(event) => {
               dispatch(setBackgroundColor(event.target.value));
             }}
@@ -83,7 +85,7 @@ export default function Controls() {
                 label: 'Bounce',
               },
               {
-                value: 'revserse-bounce',
+                value: 'reverse-bounce',
                 label: 'Reverse Bounce',
               },
             ]}

@@ -2,10 +2,10 @@
  * Copyright 2023 Design Barn Inc.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import DotLottieNew from './dotlottie-new';
-import DotLottieOld from './dotlottie-old';
+import { DotLottiePlayer, DotLottieCommonPlayer } from '@dotlottie/react-player';
 import { DotLottie } from '@lottiefiles/dotlottie-react';
 import {
   setAnimations,
@@ -26,6 +26,7 @@ import LoadTime from './load-time';
 let startTime = performance.now();
 
 export default function Players() {
+  const lottieWebRef = useRef<DotLottieCommonPlayer | null>(null);
   const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
   const src = useAppSelector((state) => state.viewer.src);
   const backgroundColor = useAppSelector((state) => state.viewer.backgroundColor);
@@ -136,7 +137,10 @@ export default function Players() {
               <LoadTime className="mb-4" title="Lottie Web" loadTime={parseFloat(loadTime.lottieWeb.toFixed(2))} />
               <div className="flex justify-center items-center p-4 flex-grow">
                 <div style={{ width: '350px', height: '350px' }}>
-                  <DotLottieOld
+                  <DotLottiePlayer
+                    lottieRef={(ref) => {
+                      lottieWebRef.current = ref;
+                    }}
                     background={backgroundColor}
                     autoplay={autoplay}
                     loop={loop}
@@ -159,6 +163,7 @@ export default function Players() {
             <button
               onClick={() => {
                 dotLottie?.play();
+                lottieWebRef.current?.play();
               }}
             >
               <FaPlay />
@@ -167,6 +172,7 @@ export default function Players() {
             <button
               onClick={() => {
                 dotLottie?.pause();
+                lottieWebRef.current?.pause();
               }}
             >
               <FaPause />
@@ -175,15 +181,17 @@ export default function Players() {
           <BaseInput
             onMouseDown={() => {
               dotLottie?.pause();
+              lottieWebRef.current?.pause();
             }}
             onChange={(event) => {
               dotLottie?.setFrame(parseFloat(event.target.value));
+              lottieWebRef.current?.seek(parseFloat(event.target.value));
             }}
             type="range"
             className="w-full seeker"
             min={0}
             max={totalFrames}
-            defaultValue={currentFrame}
+            value={currentFrame}
           />
 
           <span className="p-2 w-36 text-center flex">
