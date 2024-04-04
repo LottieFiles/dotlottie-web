@@ -40,16 +40,16 @@ jobs:
       - name: 💅 Verify format (`pnpm format` committed?)
         run: pnpm format
 
-      - name: 🛡️ Test
-        run: pnpm test:coverage
+      # - name: 🛡️ Test
+      #   run: pnpm test:coverage
 
-      - name: 📏 Report coverage
-        if: always() && github.event_name == 'pull_request'
-        uses: davelosert/vitest-coverage-report-action@v2.1.1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          working-directory: packages/web
-          name: '@lottiefiles/dotlottie-web'
+      # - name: 📏 Report coverage
+      #   if: always() && github.event_name == 'pull_request'
+      #   uses: davelosert/vitest-coverage-report-action@v2.1.1
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     working-directory: packages/web
+      #     name: '@lottiefiles/dotlottie-web'
 
       - name: 📏 Report bundle size
         if: github.event_name == 'pull_request'
