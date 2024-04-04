@@ -9,6 +9,7 @@ export default function Controls() {
   const animations = useAppSelector((state) => state.viewer.animations);
   const themes = useAppSelector((state) => state.viewer.themes);
   const backgroundColor = useAppSelector((state) => state.viewer.backgroundColor);
+  const activeAnimationId = useAppSelector((state) => state.viewer.activeAnimationId);
   const dispatch = useAppDispatch();
 
   return (
@@ -38,6 +39,7 @@ export default function Controls() {
             onChange={(event) => {
               dispatch(setActiveAnimationId(event.target.value));
             }}
+            value={activeAnimationId}
             emptyMessage="Single animation available for this file"
             placeholder="Select an Animation"
             items={

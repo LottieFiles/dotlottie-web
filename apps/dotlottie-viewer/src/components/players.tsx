@@ -8,6 +8,7 @@ import DotLottieNew from './dotlottie-new';
 import { DotLottiePlayer, DotLottieCommonPlayer } from '@dotlottie/react-player';
 import { DotLottie } from '@lottiefiles/dotlottie-react';
 import {
+  setActiveAnimationId,
   setAnimations,
   setCurrentFrame,
   setCurrentState,
@@ -20,13 +21,14 @@ import {
 import BaseInput from './form/base-input';
 import { FaPlay, FaPause } from 'react-icons/fa';
 import { ImLoop } from 'react-icons/im';
-// import { GiNextButton, GiPreviousButton } from "react-icons/gi";
+import { GiNextButton, GiPreviousButton } from 'react-icons/gi';
 import LoadTime from './load-time';
 
 let startTime = performance.now();
 
 export default function Players() {
   const lottieWebRef = useRef<DotLottieCommonPlayer | null>(null);
+  const dotRef = useRef<DotLottie | null>(null);
   const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
   const src = useAppSelector((state) => state.viewer.src);
   const backgroundColor = useAppSelector((state) => state.viewer.backgroundColor);
@@ -41,6 +43,7 @@ export default function Players() {
   const activeThemeId = useAppSelector((state) => state.viewer.activeThemeId);
   const isJson = useAppSelector((state) => state.viewer.isJson);
   const loadTime = useAppSelector((state) => state.viewer.loadTime);
+  const animations = useAppSelector((state) => state.viewer.animations);
   const dispatch = useAppDispatch();
 
   const onLoad = useCallback(() => {
@@ -48,14 +51,35 @@ export default function Players() {
     const endTime = performance.now();
     dispatch(setLoadTimeDotLottie(endTime - startTime));
     if (!src.endsWith('.json') && !src.startsWith('data:application/json')) {
+      if (!activeAnimationId) {
+        dispatch(setActiveAnimationId(dotLottie?.manifest?.animations?.[0]?.id || ''));
+      }
       dispatch(setAnimations(dotLottie?.manifest?.animations?.map((item) => item.id) || []));
       dispatch(setThemes(dotLottie?.manifest?.themes || []));
     }
-  }, [src, dotLottie, dispatch]);
+  }, [src, dotLottie, dispatch, activeAnimationId]);
 
   const onFrame = useCallback(() => {
     dispatch(setCurrentFrame(dotLottie?.currentFrame || 0));
   }, [dispatch, dotLottie]);
+
+  const getNext = useCallback(() => {
+    const currentIndex = animations.indexOf(activeAnimationId);
+    if (currentIndex === -1) return undefined; // or handle error
+
+    // Use modulus to wrap around
+    const nextIndex = (currentIndex + 1) % animations.length;
+    return animations[nextIndex];
+  }, [animations, activeAnimationId]);
+
+  const getPrevious = useCallback(() => {
+    const currentIndex = animations.indexOf(activeAnimationId);
+    if (currentIndex === -1) return undefined; // or handle error
+
+    // Use modulus to wrap around. Adding `emotions.length` before subtracting to avoid negative index
+    const prevIndex = (currentIndex - 1 + animations.length) % animations.length;
+    return animations[prevIndex];
+  }, [animations, activeAnimationId]);
 
   useEffect(() => {
     if (!dotLottie) return;
@@ -87,6 +111,7 @@ export default function Players() {
 
   useEffect(() => {
     if (!dotLottie) return;
+    startTime = performance.now();
     dotLottie?.loadAnimation(activeAnimationId);
   }, [activeAnimationId, dotLottie]);
 
@@ -159,6 +184,18 @@ export default function Players() {
           ) : null}
         </div>
         <div className="flex items-center gap-4 w-full max-w-[720px]">
+          {animations.length > 1 ? (
+            <button
+              onClick={() => {
+                const next = getPrevious();
+                if (next) {
+                  dispatch(setActiveAnimationId(next));
+                }
+              }}
+            >
+              <GiPreviousButton />
+            </button>
+          ) : null}
           {currentState !== 'playing' ? (
             <button
               onClick={() => {
@@ -178,6 +215,18 @@ export default function Players() {
               <FaPause />
             </button>
           )}
+          {animations.length > 1 ? (
+            <button
+              onClick={() => {
+                const next = getNext();
+                if (next) {
+                  dispatch(setActiveAnimationId(next));
+                }
+              }}
+            >
+              <GiNextButton />
+            </button>
+          ) : null}
           <BaseInput
             onMouseDown={() => {
               dotLottie?.pause();
