@@ -9,8 +9,6 @@
   <img src="https://user-images.githubusercontent.com/23125742/201124166-c2a0bc2a-018b-463b-b291-944fb767b5c2.png" />
 </p>
 
-> 🚧 **Beta Alert:** We're still refining! The APIs in this package may undergo changes.
-
 ## Contents
 
 * [Introduction](#introduction)
