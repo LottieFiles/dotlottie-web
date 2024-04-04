@@ -13,7 +13,7 @@
     "@lottiefiles/dotlottie-react": "workspace:*",
     "@reduxjs/toolkit": "^2.2.3",
     "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.38",
+    "postcss": "8.4.32",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
