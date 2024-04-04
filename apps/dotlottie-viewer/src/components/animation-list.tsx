@@ -37,7 +37,7 @@ const AnimationList: React.FC<AnimationListProps> = ({ className = '', ...props 
         name="multi-animations"
         url="https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lottie"
       />
-      <ListItem name="theming example" url="/theming_example.lottie" />
+      <ListItem name="theming example" url={`${import.meta.env.BASE_URL}/theming_example.lottie`} />
     </div>
   );
 };
