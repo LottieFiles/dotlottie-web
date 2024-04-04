@@ -30,7 +30,7 @@ interface AnimationSlice {
   };
 }
 
-export const DEFAULT_SRC = '/celebrate.json';
+export const DEFAULT_SRC = `${import.meta.env.BASE_URL}/celebrate.json`;
 
 const initialState: AnimationSlice = {
   src: DEFAULT_SRC,
