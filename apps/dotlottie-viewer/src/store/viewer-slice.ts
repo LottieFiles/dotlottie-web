@@ -61,6 +61,7 @@ export const animationSlice = createSlice({
   initialState,
   reducers: {
     setSrc: (state, action) => {
+      state.activeAnimationId = '';
       state.src = action.payload;
       if (state.src.endsWith('.json') || state.src.startsWith('data:application/json')) {
         state.isJson = true;
@@ -115,6 +116,7 @@ export const animationSlice = createSlice({
     },
     resetUserConfig: (state) => {
       state.userSrc = '';
+      state.activeAnimationId = '';
       state.src = DEFAULT_SRC;
       if (state.src.endsWith('.json') || state.src.startsWith('data:application/json')) {
         state.isJson = true;

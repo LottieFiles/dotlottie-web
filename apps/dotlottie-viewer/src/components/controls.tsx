@@ -58,7 +58,7 @@ export default function Controls() {
             onChange={(event) => {
               dispatch(setActiveThemeId(event.target.value));
             }}
-            placeholder="Select a Theme"
+            placeholder="default theme"
             emptyMessage="No themes available for this animation"
             items={themes.map((theme) => ({
               value: theme.id,
