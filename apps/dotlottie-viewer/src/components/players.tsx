@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import DotLottieNew from './dotlottie-new';
 import { DotLottiePlayer, DotLottieCommonPlayer } from '@dotlottie/react-player';
 import { DotLottie } from '@lottiefiles/dotlottie-react';
+import { Range, getTrackBackground } from 'react-range';
 import {
   setActiveAnimationId,
   setAnimations,
@@ -18,7 +19,6 @@ import {
   setThemes,
   setTotalFrames,
 } from '../store/viewer-slice';
-import BaseInput from './form/base-input';
 import { FaPlay, FaPause } from 'react-icons/fa';
 import { ImLoop } from 'react-icons/im';
 import { GiNextButton, GiPreviousButton } from 'react-icons/gi';
@@ -226,25 +226,70 @@ export default function Players() {
               <GiNextButton />
             </button>
           ) : null}
-          <BaseInput
-            onMouseDown={() => {
-              dotLottie?.pause();
-              lottieWebRef.current?.pause();
-            }}
-            onChange={(event) => {
-              dotLottie?.setFrame(parseFloat(event.target.value));
-              lottieWebRef.current?.seek(parseFloat(event.target.value));
-            }}
-            type="range"
-            className="w-full seeker"
+          <Range
             min={0}
-            max={totalFrames}
-            value={currentFrame}
+            max={totalFrames || 1}
+            values={[currentFrame]}
+            onChange={(values) => {
+              dotLottie?.setFrame(values[0]);
+              lottieWebRef.current?.seek(values[0]);
+            }}
+            renderTrack={({ props, children }) => (
+              <div
+                onMouseDown={(event) => {
+                  dotLottie?.pause();
+                  lottieWebRef.current?.pause();
+
+                  props.onMouseDown(event);
+                }}
+                onTouchStart={(event) => {
+                  dotLottie?.pause();
+                  lottieWebRef.current?.pause();
+
+                  props.onTouchStart(event);
+                }}
+                className="flex-grow w-full flex h-[20px]"
+                style={{
+                  ...props.style,
+                }}
+              >
+                <div
+                  ref={props.ref}
+                  className="self-center w-full h-[6px] bg-strong rounded-lg"
+                  style={{
+                    background: getTrackBackground({
+                      values: [currentFrame],
+                      colors: ['#80cec8', '#ccc'],
+                      min: 0,
+                      max: totalFrames,
+                    }),
+                  }}
+                >
+                  {children}
+                </div>
+              </div>
+            )}
+            renderThumb={({ props }) => (
+              <div
+                {...props}
+                style={{
+                  ...props.style,
+                  height: '20px',
+                  width: '20px',
+                  backgroundColor: '#019D91',
+                  borderRadius: '50%',
+                }}
+              />
+            )}
           />
 
-          <span className="p-2 w-36 text-center flex">
-            <input className="w-14 text-right pr-1 bg-transparent" value={currentFrame.toFixed(2)} disabled />
-            / <input className="w-14 pl-1 bg-transparent" value={totalFrames} disabled />
+          <span className="p-2 text-center flex items-center justify-center bg-white rounded-lg text-sm">
+            <span className="w-min text-right pr-1 bg-transparent flex relative">
+              <span className="invisible">{totalFrames.toFixed(2)}</span>
+              <span className="absolute self-center">{currentFrame.toFixed(2)}</span>
+            </span>
+            <span className="text-xs text-secondary">of</span>
+            <span className="w-max pl-1 bg-transparent">{totalFrames}</span>
           </span>
           <button className="cursor-pointer" onClick={() => dispatch(setLoop(!loop))}>
             <ImLoop className={`${!loop ? 'text-gray-500' : ''}`} />
