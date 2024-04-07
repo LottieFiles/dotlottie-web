@@ -38,6 +38,7 @@ app.innerHTML = `
     <div class="status-panel">
       <div id="playbackStatus">Playback State: <span id="playback-state">Stopped</span></div>
       <div id="freezeStatus">Is Frozen: <span id="is-frozen">No</span></div>
+      <div>Active Animation ID: <span id="active-animation">None</span></div>
     </div>
     <div>
       <button id="playPause" class="control-button">Play</button>
@@ -167,6 +168,7 @@ fetch(
 )
   .then(async (res) => res.arrayBuffer())
   .then((data): void => {
+    console.log(data);
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
     const dotLottie = new DotLottie({
@@ -204,6 +206,7 @@ fetch(
     const freezeStateSpan = document.getElementById('is-frozen') as HTMLSpanElement;
     const playbackStateSpan = document.getElementById('playback-state') as HTMLSpanElement;
     const nextAnimationButton = document.getElementById('next') as HTMLButtonElement;
+    const activeAnimationSpan = document.getElementById('active-animation') as HTMLSpanElement;
 
     const markerSelect = document.getElementById('marker') as HTMLSelectElement;
     const themeSelect = document.getElementById('theme') as HTMLSelectElement;
@@ -377,6 +380,8 @@ fetch(
 
         markerSelect.appendChild(option);
       }
+
+      activeAnimationSpan.textContent = dotLottie.activeAnimationId ?? 'None';
 
       console.log(event);
     });
