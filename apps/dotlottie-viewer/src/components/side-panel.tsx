@@ -12,7 +12,7 @@ export default function SidePanel() {
         <img src={logo} alt="logo" />
       </a>
       <div className="flex flex-col gap-4 flex-grow overflow-auto">
-        <p className="text-primary text-3xl font-bold">Unleash the power of animations using dotLottie</p>
+        <h1 className="text-primary text-3xl font-bold">Unleash the power of animations using dotLottie</h1>
         <p className="text-secondary">Create captivating product experiences with dotLottie animations.</p>
 
         <a
