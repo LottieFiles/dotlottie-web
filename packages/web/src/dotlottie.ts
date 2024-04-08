@@ -269,6 +269,10 @@ export class DotLottie {
     }
   }
 
+  public get activeAnimationId(): string | undefined {
+    return this._dotLottieCore?.activeAnimationId();
+  }
+
   public get layout(): Layout | undefined {
     const layout = this._dotLottieCore?.config().layout;
 

@@ -1300,6 +1300,8 @@ describe('loadAnimation', () => {
     dotLottie.loadAnimation(animationId);
 
     expect(onLoad).toHaveBeenCalledTimes(2);
+
+    expect(dotLottie.activeAnimationId).toEqual(animationId);
   });
 
   test('emits loadError when loading an animation by invalid id', async () => {

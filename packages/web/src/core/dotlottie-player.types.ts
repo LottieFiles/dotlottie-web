@@ -38,6 +38,7 @@ export interface Layout {
 }
 
 export interface DotLottiePlayer {
+  activeAnimationId(): string;
   buffer(): unknown;
   clear(): void;
   config(): Config;
