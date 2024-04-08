@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.19.0
+
+### Minor Changes
+
+- 0672481: feat: 🎸 integrate dotlottie-rs activeAnimationId getter
+
 ## 0.18.1
 
 ### Patch Changes
