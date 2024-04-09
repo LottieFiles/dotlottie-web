@@ -1,8 +1,24 @@
+/**
+ * Copyright 2023 Design Barn Inc.
+ */
+
+import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { setActiveAnimationId, setActiveThemeId, setBackgroundColor, setMdode, setSpeed } from '../store/viewer-slice';
+import {
+  setActiveAnimationId,
+  setActiveThemeId,
+  setBackgroundColor,
+  setMdode,
+  setSegment,
+  setSegmentInput,
+  setSpeed,
+  setUseFrameInterpolation,
+} from '../store/viewer-slice';
 import BaseInput from './form/base-input';
 import BaseSelect from './form/base-select';
 import InputLabel from './form/input-label';
+import StepSelect from './form/step-select';
+import Switch from './form/switch';
 
 export default function Controls() {
   const speed = useAppSelector((state) => state.viewer.speed);
@@ -10,6 +26,9 @@ export default function Controls() {
   const themes = useAppSelector((state) => state.viewer.themes);
   const backgroundColor = useAppSelector((state) => state.viewer.backgroundColor);
   const activeAnimationId = useAppSelector((state) => state.viewer.activeAnimationId);
+  const totalFrames = useAppSelector((state) => state.viewer.totalFrames);
+  const segmentInput = useAppSelector((state) => state.viewer.segmentInput);
+  const useFrameInterpolation = useAppSelector((state) => state.viewer.useFrameInterpolation);
   const dispatch = useAppDispatch();
 
   return (
@@ -17,22 +36,85 @@ export default function Controls() {
       <div className="flex flex-col items-center gap-4 w-full">
         <InputLabel lablel="backgroundColor">
           <BaseInput
-            type="color"
-            defaultValue={backgroundColor}
-            onChange={(event) => {
-              dispatch(setBackgroundColor(event.target.value));
+            // defaultValue={backgroundColor}
+            value={backgroundColor}
+            onChange={(value) => {
+              dispatch(setBackgroundColor(value));
             }}
           />
         </InputLabel>
         <InputLabel lablel="Speed">
-          <BaseInput
-            type="number"
-            defaultValue={speed}
-            onChange={(event) => {
-              dispatch(setSpeed(parseFloat(event.target.value)));
+          <StepSelect
+            min={0.5}
+            max={3}
+            step={0.5}
+            values={[speed]}
+            onChange={(values) => {
+              dispatch(setSpeed(values[0]));
             }}
           />
         </InputLabel>
+        <InputLabel lablel="Mode">
+          <BaseSelect
+            className="w-full"
+            onChange={(event) => {
+              dispatch(setMdode(event.target.value));
+            }}
+            defaultValue="3"
+            items={[
+              {
+                value: 'forward',
+                label: 'Forward',
+              },
+              {
+                value: 'reverse',
+                label: 'Reverse',
+              },
+              {
+                value: 'bounce',
+                label: 'Bounce',
+              },
+              {
+                value: 'reverse-bounce',
+                label: 'Reverse Bounce',
+              },
+            ]}
+          />
+        </InputLabel>
+        <InputLabel lablel="Segment">
+          <div className="flex gap-2">
+            <StepSelect
+              min={1}
+              max={totalFrames || 2}
+              step={1}
+              values={segmentInput}
+              onChange={(values) => {
+                dispatch(setSegmentInput(values));
+              }}
+            />
+            <button
+              className="bg-subtle hover:bg-subtle/60 border border-subtle rounded-lg p-1 px-2 font-bold h-9"
+              onClick={() => {
+                dispatch(setSegment(segmentInput));
+              }}
+            >
+              Apply
+            </button>
+          </div>
+        </InputLabel>
+        <InputLabel lablel="useFrameInterpolation">
+          <Switch
+            onChange={(value) => {
+              dispatch(setUseFrameInterpolation(value === 'true'));
+            }}
+            items={[
+              { label: 'On', value: 'true' },
+              { label: 'Off', value: 'false' },
+            ]}
+            value={String(useFrameInterpolation)}
+          />
+        </InputLabel>
+
         <InputLabel lablel="Animation">
           <BaseSelect
             className="w-full"
@@ -64,33 +146,6 @@ export default function Controls() {
               value: theme.id,
               label: theme.id,
             }))}
-          />
-        </InputLabel>
-        <InputLabel lablel="Mode">
-          <BaseSelect
-            className="w-full"
-            onChange={(event) => {
-              dispatch(setMdode(event.target.value));
-            }}
-            defaultValue="3"
-            items={[
-              {
-                value: 'forward',
-                label: 'Forward',
-              },
-              {
-                value: 'reverse',
-                label: 'Reverse',
-              },
-              {
-                value: 'bounce',
-                label: 'Bounce',
-              },
-              {
-                value: 'reverse-bounce',
-                label: 'Reverse Bounce',
-              },
-            ]}
           />
         </InputLabel>
       </div>

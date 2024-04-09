@@ -56,7 +56,7 @@ const TopBar: React.FC<TopBarProps> = ({ className = '', ...props }) => {
           <Dropzone onDrop={onDrop} onDropRejected={onDropRejected}>
             {(state): JSX.Element => {
               return (
-                <button className="p-2 bg-subtle rounded-lg font-bold" {...state.getRootProps()}>
+                <button className="p-2 bg-subtle hover:bg-hover rounded-lg font-bold" {...state.getRootProps()}>
                   <input {...state.getInputProps()} />
                   Browse file
                 </button>
@@ -66,7 +66,7 @@ const TopBar: React.FC<TopBarProps> = ({ className = '', ...props }) => {
           <span>or</span>
           <input ref={input} className="p-2 rounded-lg flex-grow" placeholder="Paste JSON or .lottie URL" />
           <button
-            className="p-2 bg-subtle rounded-lg font-bold"
+            className="p-2 bg-subtle hover:bg-hover rounded-lg font-bold"
             onClick={() => {
               if (!input.current) return;
               dispatch(setSrc(input.current.value));
@@ -80,7 +80,7 @@ const TopBar: React.FC<TopBarProps> = ({ className = '', ...props }) => {
         <>
           <span className="">{userSrc}</span>
           <button
-            className="p-2 bg-subtle rounded-lg font-bold"
+            className="p-2 bg-subtle hover:bg-hover rounded-lg font-bold"
             onClick={() => {
               dispatch(resetUserConfig());
             }}

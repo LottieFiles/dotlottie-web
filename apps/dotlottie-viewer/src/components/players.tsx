@@ -43,6 +43,8 @@ export default function Players() {
   const isJson = useAppSelector((state) => state.viewer.isJson);
   const loadTime = useAppSelector((state) => state.viewer.loadTime);
   const animations = useAppSelector((state) => state.viewer.animations);
+  const segment = useAppSelector((state) => state.viewer.segment);
+  const useFrameInterpolation = useAppSelector((state) => state.viewer.useFrameInterpolation);
   const dispatch = useAppDispatch();
 
   const onLoad = useCallback(() => {
@@ -89,6 +91,18 @@ export default function Players() {
       dotLottie.removeEventListener('frame', onFrame);
     };
   }, [onLoad, dotLottie, onFrame]);
+
+  useEffect(() => {
+    if (!dotLottie) return;
+    if (segment[0] && segment[1]) {
+      dotLottie.setSegment(segment[0], segment[1]);
+    }
+  }, [segment, dotLottie]);
+
+  useEffect(() => {
+    if (!dotLottie) return;
+    dotLottie.setUseFrameInterpolation(useFrameInterpolation);
+  }, [dotLottie, useFrameInterpolation]);
 
   const addEventListeners = useCallback(
     (player: DotLottie) => {
@@ -142,6 +156,7 @@ export default function Players() {
                   width={350}
                   height={350}
                   autoplay={autoplay}
+                  useFrameInterpolation={true}
                   loop={loop}
                   mode={mode}
                   speed={speed}

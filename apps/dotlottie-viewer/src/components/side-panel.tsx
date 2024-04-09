@@ -17,7 +17,7 @@ export default function SidePanel() {
 
         <a
           href="https://developers.lottiefiles.com/docs/dotlottie-web/dotlottie-web/getting-started/"
-          className="bg-lottie rounded-lg p-4 text-white font-bold w-fit"
+          className="bg-lottie hover:bg-lottie/90 rounded-lg p-4 text-white font-bold w-fit"
         >
           Get Started
         </a>

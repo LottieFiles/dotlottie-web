@@ -19,6 +19,7 @@ export default {
         primary: '#019D91',
         subtle: '#F3F6F8',
         strong: '#D9E0E6',
+        hover: '#f9fafb',
       },
       borderColor: {
         subtle: '#D9E0E6',

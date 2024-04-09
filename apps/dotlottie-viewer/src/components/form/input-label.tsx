@@ -8,7 +8,7 @@ const InputLabel: React.FC<InputLabelProps> = ({ className = '', lablel, childre
   const combinedClassName = `flex flex-col gap-1 w-full ${className}`;
   return (
     <div className={combinedClassName}>
-      <label className="text-sm" {...props}>
+      <label className="text-sm font-bold" {...props}>
         {lablel}
       </label>
       <div>{children}</div>

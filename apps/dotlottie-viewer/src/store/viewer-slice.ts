@@ -20,7 +20,9 @@ interface AnimationSlice {
   animations: string[];
   activeAnimationId: string;
   activeThemeId: string;
-  segment: string[];
+  segment: number[];
+  segmentInput: number[];
+  useFrameInterpolation: boolean;
   mode: 'forward' | 'reverse' | 'bounce' | 'reverse-bounce';
   currentState: (typeof PlayerStates)[number];
   userSrc: string;
@@ -47,9 +49,11 @@ const initialState: AnimationSlice = {
   activeAnimationId: '',
   activeThemeId: '',
   segment: [],
+  segmentInput: [1, 2],
   currentState: 'idle',
   mode: 'forward',
   userSrc: '',
+  useFrameInterpolation: true,
   loadTime: {
     lottieWeb: 0,
     dotLottie: 0,
@@ -92,6 +96,7 @@ export const animationSlice = createSlice({
     },
     setTotalFrames: (state, action) => {
       state.totalFrames = action.payload;
+      state.segmentInput = [1, action.payload];
     },
     setCurrentState: (state, action) => {
       state.currentState = action.payload;
@@ -130,6 +135,15 @@ export const animationSlice = createSlice({
     setLoadTimeLottieWeb: (state, action) => {
       state.loadTime.lottieWeb = action.payload;
     },
+    setSegment: (state, action) => {
+      state.segment = action.payload;
+    },
+    setSegmentInput: (state, action) => {
+      state.segmentInput = action.payload;
+    },
+    setUseFrameInterpolation: (state, action) => {
+      state.useFrameInterpolation = action.payload;
+    },
   },
 });
 
@@ -154,6 +168,9 @@ export const {
   setIsJson,
   setLoadTimeDotLottie,
   setLoadTimeLottieWeb,
+  setSegment,
+  setSegmentInput,
+  setUseFrameInterpolation,
 } = animationSlice.actions;
 
 export default animationSlice.reducer;
