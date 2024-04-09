@@ -2,7 +2,6 @@
  * Copyright 2023 Design Barn Inc.
  */
 
-import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   setActiveAnimationId,
