@@ -12,12 +12,12 @@ export default function SidePanel() {
         <img src={logo} alt="logo" />
       </a>
       <div className="flex flex-col gap-4 flex-grow overflow-auto">
-        <p className="text-primary text-3xl font-bold">Unleash the power of animations using dotLottie</p>
+        <h1 className="text-primary text-3xl font-bold">Unleash the power of animations using dotLottie</h1>
         <p className="text-secondary">Create captivating product experiences with dotLottie animations.</p>
 
         <a
           href="https://developers.lottiefiles.com/docs/dotlottie-web/dotlottie-web/getting-started/"
-          className="bg-lottie rounded-lg p-4 text-white font-bold w-fit"
+          className="bg-lottie hover:bg-lottie/90 rounded-lg p-4 text-white font-bold w-fit"
         >
           Get Started
         </a>

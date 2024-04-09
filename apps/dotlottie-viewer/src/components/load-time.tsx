@@ -11,7 +11,7 @@ interface LoadTimeProps extends React.HTMLAttributes<HTMLDivElement> {
 const LoadTime: React.FC<LoadTimeProps> = ({ className = '', title, loadTime, ...props }) => {
   return (
     <div className={`flex flex-col items-center ${className}`} {...props}>
-      <p className="text-xl font-bold mb-2">{title}</p>
+      <h6 className="text-xl font-bold mb-2">{title}</h6>
       <p className="text-xs px-2 py-1 bg-strong rounded-full flex justify-center items-center">
         Load Time: {loadTime}ms
       </p>
