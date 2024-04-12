@@ -1,5 +1,17 @@
 # @lottiefiles/dotlottie-web
 
+## 0.20.0
+
+### Minor Changes
+
+- aa102b0: feat(web): 🎸 add activeThemeId property
+
+### Patch Changes
+
+- aa102b0: fix(web): Resolve out-of-bounds table index error caused by invalid image asset embedding in WASM module
+
+  Resolves: [#170](https://github.com/LottieFiles/dotlottie-web/issues/170)
+
 ## 0.19.0
 
 ### Minor Changes
