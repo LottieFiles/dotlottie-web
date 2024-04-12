@@ -29,7 +29,7 @@
   * [Setup](#setup)
   * [Dev](#dev)
   * [Build](#build)
-  * [Build WASM (Optional)](#build-wasm-optional)
+  * [Test](#test)
 
 ## Introduction
 
@@ -175,6 +175,8 @@ The `renderConfig` object accepts the following properties:
 | `manifest`              | [Manifest](#manifest) \| null | The manifest of the loaded dotLottie file.                                                                          |
 | `marker`                | string                        | The lottie named marker to play.                                                                                    |
 | `layout`                | [Layout](#layout)             | The animation layout configuration.                                                                                 |
+| `activeThemeId`         | string                        | The loaded theme id from the .lottie file.                                                                          |
+| `activeAnimationId`     | string                        | The loaded animation id from the .lottie file.                                                                      |
 
 #### Manifest
 
@@ -257,20 +259,8 @@ pnpm dev
 pnpm build
 ```
 
-### Build WASM (Optional)
-
-> **Note:** This step is necessary only if you wish to update the src/renderer.cpp file or the thorvg version being used. If not, you can skip this step.
-
-**Using Docker (Recommended):**
+### Test
 
 ```bash
-pnpm build:wasm:docker
-```
-
-**Using Emscripten SDK:**
-
-Ensure [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html) is installed.
-
-```bash
-pnpm build:wasm /path/to/emsdk/
+  pnpm test
 ```
