@@ -3,39 +3,27 @@ var createDotLottiePlayerModule = (() => {
 
   return function (moduleArg = {}) {
     var Module = moduleArg;
-
     var readyPromiseResolve, readyPromiseReject;
-
     Module['ready'] = new Promise((resolve, reject) => {
       readyPromiseResolve = resolve;
       readyPromiseReject = reject;
     });
-
     var moduleOverrides = Object.assign({}, Module);
-
     var arguments_ = [];
-
     var thisProgram = './this.program';
-
     var quit_ = (status, toThrow) => {
       throw toThrow;
     };
-
     var ENVIRONMENT_IS_WEB = true;
-
     var ENVIRONMENT_IS_WORKER = false;
-
     var scriptDirectory = '';
-
     function locateFile(path) {
       if (Module['locateFile']) {
         return Module['locateFile'](path, scriptDirectory);
       }
       return scriptDirectory + path;
     }
-
     var read_, readAsync, readBinary;
-
     if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
       if (ENVIRONMENT_IS_WORKER) {
         scriptDirectory = self.location.href;
@@ -63,7 +51,7 @@ var createDotLottiePlayerModule = (() => {
             xhr.open('GET', url, false);
             xhr.responseType = 'arraybuffer';
             xhr.send(null);
-            return new Uint8Array(/** @type{!ArrayBuffer} */ (xhr.response));
+            return new Uint8Array(xhr.response);
           };
         }
         readAsync = (url, onload, onerror) => {
@@ -83,44 +71,22 @@ var createDotLottiePlayerModule = (() => {
       }
     } else {
     }
-
     var out = Module['print'] || console.log.bind(console);
-
     var err = Module['printErr'] || console.error.bind(console);
-
     Object.assign(Module, moduleOverrides);
-
     moduleOverrides = null;
-
     if (Module['arguments']) arguments_ = Module['arguments'];
-
     if (Module['thisProgram']) thisProgram = Module['thisProgram'];
-
     if (Module['quit']) quit_ = Module['quit'];
-
     var wasmBinary;
-
     if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
-
     if (typeof WebAssembly != 'object') {
       abort('no native wasm support detected');
     }
-
     var wasmMemory;
-
     var ABORT = false;
-
     var EXITSTATUS;
-
-    var /** @type {!Int8Array} */ HEAP8,
-      /** @type {!Uint8Array} */ HEAPU8,
-      /** @type {!Int16Array} */ HEAP16,
-      /** @type {!Uint16Array} */ HEAPU16,
-      /** @type {!Int32Array} */ HEAP32,
-      /** @type {!Uint32Array} */ HEAPU32,
-      /** @type {!Float32Array} */ HEAPF32,
-      /** @type {!Float64Array} */ HEAPF64;
-
+    var HEAP8, HEAPU8, HEAP16, HEAPU16, HEAP32, HEAPU32, HEAPF32, HEAPF64;
     function updateMemoryViews() {
       var b = wasmMemory.buffer;
       Module['HEAP8'] = HEAP8 = new Int8Array(b);
@@ -132,15 +98,10 @@ var createDotLottiePlayerModule = (() => {
       Module['HEAPF32'] = HEAPF32 = new Float32Array(b);
       Module['HEAPF64'] = HEAPF64 = new Float64Array(b);
     }
-
     var __ATPRERUN__ = [];
-
     var __ATINIT__ = [];
-
     var __ATPOSTRUN__ = [];
-
     var runtimeInitialized = false;
-
     function preRun() {
       if (Module['preRun']) {
         if (typeof Module['preRun'] == 'function') Module['preRun'] = [Module['preRun']];
@@ -150,12 +111,10 @@ var createDotLottiePlayerModule = (() => {
       }
       callRuntimeCallbacks(__ATPRERUN__);
     }
-
     function initRuntime() {
       runtimeInitialized = true;
       callRuntimeCallbacks(__ATINIT__);
     }
-
     function postRun() {
       if (Module['postRun']) {
         if (typeof Module['postRun'] == 'function') Module['postRun'] = [Module['postRun']];
@@ -165,30 +124,22 @@ var createDotLottiePlayerModule = (() => {
       }
       callRuntimeCallbacks(__ATPOSTRUN__);
     }
-
     function addOnPreRun(cb) {
       __ATPRERUN__.unshift(cb);
     }
-
     function addOnInit(cb) {
       __ATINIT__.unshift(cb);
     }
-
     function addOnPostRun(cb) {
       __ATPOSTRUN__.unshift(cb);
     }
-
     var runDependencies = 0;
-
     var runDependencyWatcher = null;
-
     var dependenciesFulfilled = null;
-
     function addRunDependency(id) {
       runDependencies++;
       Module['monitorRunDependencies']?.(runDependencies);
     }
-
     function removeRunDependency(id) {
       runDependencies--;
       Module['monitorRunDependencies']?.(runDependencies);
@@ -204,34 +155,24 @@ var createDotLottiePlayerModule = (() => {
         }
       }
     }
-
-    /** @param {string|number=} what */ function abort(what) {
+    function abort(what) {
       Module['onAbort']?.(what);
       what = 'Aborted(' + what + ')';
       err(what);
       ABORT = true;
       EXITSTATUS = 1;
       what += '. Build with -sASSERTIONS for more info.';
-      /** @suppress {checkTypes} */ var e = new WebAssembly.RuntimeError(what);
+      var e = new WebAssembly.RuntimeError(what);
       readyPromiseReject(e);
       throw e;
     }
-
     var dataURIPrefix = 'data:application/octet-stream;base64,';
-
-    /**
-     * Indicates whether filename is a base64 data URI.
-     * @noinline
-     */ var isDataURI = (filename) => filename.startsWith(dataURIPrefix);
-
+    var isDataURI = (filename) => filename.startsWith(dataURIPrefix);
     var wasmBinaryFile;
-
     wasmBinaryFile = 'DotLottiePlayer.wasm';
-
     if (!isDataURI(wasmBinaryFile)) {
       wasmBinaryFile = locateFile(wasmBinaryFile);
     }
-
     function getBinarySync(file) {
       if (file == wasmBinaryFile && wasmBinary) {
         return new Uint8Array(wasmBinary);
@@ -241,13 +182,10 @@ var createDotLottiePlayerModule = (() => {
       }
       throw 'both async and sync fetching of the wasm failed';
     }
-
     function getBinaryPromise(binaryFile) {
       if (!wasmBinary && (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER)) {
         if (typeof fetch == 'function') {
-          return fetch(binaryFile, {
-            credentials: 'same-origin',
-          })
+          return fetch(binaryFile, { credentials: 'same-origin' })
             .then((response) => {
               if (!response['ok']) {
                 throw "failed to load wasm binary file at '" + binaryFile + "'";
@@ -259,7 +197,6 @@ var createDotLottiePlayerModule = (() => {
       }
       return Promise.resolve().then(() => getBinarySync(binaryFile));
     }
-
     function instantiateArrayBuffer(binaryFile, imports, receiver) {
       return getBinaryPromise(binaryFile)
         .then((binary) => WebAssembly.instantiate(binary, imports))
@@ -269,7 +206,6 @@ var createDotLottiePlayerModule = (() => {
           abort(reason);
         });
     }
-
     function instantiateAsync(binary, binaryFile, imports, callback) {
       if (
         !binary &&
@@ -277,10 +213,8 @@ var createDotLottiePlayerModule = (() => {
         !isDataURI(binaryFile) &&
         typeof fetch == 'function'
       ) {
-        return fetch(binaryFile, {
-          credentials: 'same-origin',
-        }).then((response) => {
-          /** @suppress {checkTypes} */ var result = WebAssembly.instantiateStreaming(response, imports);
+        return fetch(binaryFile, { credentials: 'same-origin' }).then((response) => {
+          var result = WebAssembly.instantiateStreaming(response, imports);
           return result.then(callback, function (reason) {
             err(`wasm streaming compile failed: ${reason}`);
             err('falling back to ArrayBuffer instantiation');
@@ -290,17 +224,14 @@ var createDotLottiePlayerModule = (() => {
       }
       return instantiateArrayBuffer(binaryFile, imports, callback);
     }
-
     function createWasm() {
-      var info = {
-        a: wasmImports,
-      };
-      /** @param {WebAssembly.Module=} module*/ function receiveInstance(instance, module) {
+      var info = { a: wasmImports };
+      function receiveInstance(instance, module) {
         wasmExports = instance.exports;
-        wasmMemory = wasmExports['ba'];
+        wasmMemory = wasmExports['aa'];
         updateMemoryViews();
-        wasmTable = wasmExports['ea'];
-        addOnInit(wasmExports['ca']);
+        wasmTable = wasmExports['da'];
+        addOnInit(wasmExports['ba']);
         removeRunDependency('wasm-instantiate');
         return wasmExports;
       }
@@ -319,26 +250,14 @@ var createDotLottiePlayerModule = (() => {
       instantiateAsync(wasmBinary, wasmBinaryFile, info, receiveInstantiationResult).catch(readyPromiseReject);
       return {};
     }
-
     var callRuntimeCallbacks = (callbacks) => {
       while (callbacks.length > 0) {
         callbacks.shift()(Module);
       }
     };
-
     var noExitRuntime = Module['noExitRuntime'] || true;
-
     var UTF8Decoder = typeof TextDecoder != 'undefined' ? new TextDecoder('utf8') : undefined;
-
-    /**
-     * Given a pointer 'idx' to a null-terminated UTF8-encoded string in the given
-     * array that contains uint8 values, returns a copy of that string as a
-     * Javascript String object.
-     * heapOrArray is either a regular array, or a JavaScript typed array view.
-     * @param {number} idx
-     * @param {number=} maxBytesToRead
-     * @return {string}
-     */ var UTF8ArrayToString = (heapOrArray, idx, maxBytesToRead) => {
+    var UTF8ArrayToString = (heapOrArray, idx, maxBytesToRead) => {
       var endIdx = idx + maxBytesToRead;
       var endPtr = idx;
       while (heapOrArray[endPtr] && !(endPtr >= endIdx)) ++endPtr;
@@ -372,23 +291,7 @@ var createDotLottiePlayerModule = (() => {
       }
       return str;
     };
-
-    /**
-     * Given a pointer 'ptr' to a null-terminated UTF8-encoded string in the
-     * emscripten HEAP, returns a copy of that string as a Javascript String object.
-     *
-     * @param {number} ptr
-     * @param {number=} maxBytesToRead - An optional length that specifies the
-     *   maximum number of bytes to read. You can omit this parameter to scan the
-     *   string until the first 0 byte. If maxBytesToRead is passed, and the string
-     *   at [ptr, ptr+maxBytesToReadr[ contains a null byte in the middle, then the
-     *   string will cut short at that byte index (i.e. maxBytesToRead will not
-     *   produce a string of exact length [ptr, ptr+maxBytesToRead[) N.B. mixing
-     *   frequent uses of UTF8ToString() with and without maxBytesToRead may throw
-     *   JS JIT optimizations off, so it is worth to consider consistently using one
-     * @return {string}
-     */ var UTF8ToString = (ptr, maxBytesToRead) => (ptr ? UTF8ArrayToString(HEAPU8, ptr, maxBytesToRead) : '');
-
+    var UTF8ToString = (ptr, maxBytesToRead) => (ptr ? UTF8ArrayToString(HEAPU8, ptr, maxBytesToRead) : '');
     var ___assert_fail = (condition, filename, line, func) => {
       abort(
         `Assertion failed: ${UTF8ToString(condition)}, at: ` +
@@ -399,8 +302,7 @@ var createDotLottiePlayerModule = (() => {
           ],
       );
     };
-
-    /** @constructor */ function ExceptionInfo(excPtr) {
+    function ExceptionInfo(excPtr) {
       this.excPtr = excPtr;
       this.ptr = excPtr - 24;
       this.set_type = function (type) {
@@ -450,11 +352,8 @@ var createDotLottiePlayerModule = (() => {
         return this.excPtr;
       };
     }
-
     var exceptionLast = 0;
-
     var uncaughtExceptionCount = 0;
-
     var ___cxa_throw = (ptr, type, destructor) => {
       var info = new ExceptionInfo(ptr);
       info.init(type, destructor);
@@ -462,7 +361,6 @@ var createDotLottiePlayerModule = (() => {
       uncaughtExceptionCount++;
       throw exceptionLast;
     };
-
     var SYSCALLS = {
       varargs: undefined,
       get() {
@@ -478,14 +376,11 @@ var createDotLottiePlayerModule = (() => {
         return ret;
       },
     };
-
     function ___syscall_fcntl64(fd, cmd, varargs) {
       SYSCALLS.varargs = varargs;
       return 0;
     }
-
     var ___syscall_fstat64 = (fd, buf) => {};
-
     var lengthBytesUTF8 = (str) => {
       var len = 0;
       for (var i = 0; i < str.length; ++i) {
@@ -503,7 +398,6 @@ var createDotLottiePlayerModule = (() => {
       }
       return len;
     };
-
     var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
       if (!(maxBytesToWrite > 0)) return 0;
       var startIdx = outIdx;
@@ -537,26 +431,18 @@ var createDotLottiePlayerModule = (() => {
       heap[outIdx] = 0;
       return outIdx - startIdx;
     };
-
     var stringToUTF8 = (str, outPtr, maxBytesToWrite) => stringToUTF8Array(str, HEAPU8, outPtr, maxBytesToWrite);
-
     var ___syscall_getcwd = (buf, size) => {};
-
     function ___syscall_ioctl(fd, op, varargs) {
       SYSCALLS.varargs = varargs;
       return 0;
     }
-
     var ___syscall_newfstatat = (dirfd, path, buf, flags) => {};
-
     function ___syscall_openat(dirfd, path, flags, varargs) {
       SYSCALLS.varargs = varargs;
     }
-
     var ___syscall_stat64 = (path, buf) => {};
-
     var structRegistrations = {};
-
     var runDestructors = (destructors) => {
       while (destructors.length) {
         var ptr = destructors.pop();
@@ -564,23 +450,16 @@ var createDotLottiePlayerModule = (() => {
         del(ptr);
       }
     };
-
-    /** @suppress {globalThis} */ function simpleReadValueFromPointer(pointer) {
+    function simpleReadValueFromPointer(pointer) {
       return this['fromWireType'](HEAP32[pointer >> 2]);
     }
-
     var awaitingDependencies = {};
-
     var registeredTypes = {};
-
     var typeDependencies = {};
-
     var InternalError;
-
     var throwInternalError = (message) => {
       throw new InternalError(message);
     };
-
     var whenDependentTypesAreResolved = (myTypes, dependentTypes, getTypeConverters) => {
       myTypes.forEach(function (type) {
         typeDependencies[type] = dependentTypes;
@@ -618,7 +497,6 @@ var createDotLottiePlayerModule = (() => {
         onComplete(typeConverters);
       }
     };
-
     var __embind_finalize_value_object = (structType) => {
       var reg = structRegistrations[structType];
       delete structRegistrations[structType];
@@ -680,9 +558,7 @@ var createDotLottiePlayerModule = (() => {
         ];
       });
     };
-
     var __embind_register_bigint = (primitiveType, name, size, minRange, maxRange) => {};
-
     var embind_init_charCodes = () => {
       var codes = new Array(256);
       for (var i = 0; i < 256; ++i) {
@@ -690,9 +566,7 @@ var createDotLottiePlayerModule = (() => {
       }
       embind_charCodes = codes;
     };
-
     var embind_charCodes;
-
     var readLatin1String = (ptr) => {
       var ret = '';
       var c = ptr;
@@ -701,14 +575,11 @@ var createDotLottiePlayerModule = (() => {
       }
       return ret;
     };
-
     var BindingError;
-
     var throwBindingError = (message) => {
       throw new BindingError(message);
     };
-
-    /** @param {Object=} options */ function sharedRegisterType(rawType, registeredInstance, options = {}) {
+    function sharedRegisterType(rawType, registeredInstance, options = {}) {
       var name = registeredInstance.name;
       if (!rawType) {
         throwBindingError(`type "${name}" must have a positive integer typeid pointer`);
@@ -728,17 +599,14 @@ var createDotLottiePlayerModule = (() => {
         callbacks.forEach((cb) => cb());
       }
     }
-
-    /** @param {Object=} options */ function registerType(rawType, registeredInstance, options = {}) {
+    function registerType(rawType, registeredInstance, options = {}) {
       if (!('argPackAdvance' in registeredInstance)) {
         throw new TypeError('registerType registeredInstance requires argPackAdvance');
       }
       return sharedRegisterType(rawType, registeredInstance, options);
     }
-
     var GenericWireTypeSize = 8;
-
-    /** @suppress {globalThis} */ var __embind_register_bool = (rawType, name, trueValue, falseValue) => {
+    var __embind_register_bool = (rawType, name, trueValue, falseValue) => {
       name = readLatin1String(name);
       registerType(rawType, {
         name: name,
@@ -755,7 +623,6 @@ var createDotLottiePlayerModule = (() => {
         destructorFunction: null,
       });
     };
-
     var shallowCopyInternalPointer = (o) => ({
       count: o.count,
       deleteScheduled: o.deleteScheduled,
@@ -765,18 +632,14 @@ var createDotLottiePlayerModule = (() => {
       smartPtr: o.smartPtr,
       smartPtrType: o.smartPtrType,
     });
-
     var throwInstanceAlreadyDeleted = (obj) => {
       function getInstanceTypeName(handle) {
         return handle.$$.ptrType.registeredClass.name;
       }
       throwBindingError(getInstanceTypeName(obj) + ' instance already deleted');
     };
-
     var finalizationRegistry = false;
-
     var detachFinalizer = (handle) => {};
-
     var runDestructor = ($$) => {
       if ($$.smartPtr) {
         $$.smartPtrType.rawDestructor($$.smartPtr);
@@ -784,7 +647,6 @@ var createDotLottiePlayerModule = (() => {
         $$.ptrType.registeredClass.rawDestructor($$.ptr);
       }
     };
-
     var releaseClassHandle = ($$) => {
       $$.count.value -= 1;
       var toDelete = 0 === $$.count.value;
@@ -792,7 +654,6 @@ var createDotLottiePlayerModule = (() => {
         runDestructor($$);
       }
     };
-
     var downcastPointer = (ptr, ptrClass, desiredClass) => {
       if (ptrClass === desiredClass) {
         return ptr;
@@ -806,11 +667,8 @@ var createDotLottiePlayerModule = (() => {
       }
       return desiredClass.downcast(rv);
     };
-
     var registeredPointers = {};
-
     var getInheritedInstanceCount = () => Object.keys(registeredInstances).length;
-
     var getLiveInheritedInstances = () => {
       var rv = [];
       for (var k in registeredInstances) {
@@ -820,9 +678,7 @@ var createDotLottiePlayerModule = (() => {
       }
       return rv;
     };
-
     var deletionQueue = [];
-
     var flushPendingDeletes = () => {
       while (deletionQueue.length) {
         var obj = deletionQueue.pop();
@@ -830,25 +686,20 @@ var createDotLottiePlayerModule = (() => {
         obj['delete']();
       }
     };
-
     var delayFunction;
-
     var setDelayFunction = (fn) => {
       delayFunction = fn;
       if (deletionQueue.length && delayFunction) {
         delayFunction(flushPendingDeletes);
       }
     };
-
     var init_embind = () => {
       Module['getInheritedInstanceCount'] = getInheritedInstanceCount;
       Module['getLiveInheritedInstances'] = getLiveInheritedInstances;
       Module['flushPendingDeletes'] = flushPendingDeletes;
       Module['setDelayFunction'] = setDelayFunction;
     };
-
     var registeredInstances = {};
-
     var getBasestPointer = (class_, ptr) => {
       if (ptr === undefined) {
         throwBindingError('ptr should not be undefined');
@@ -859,12 +710,10 @@ var createDotLottiePlayerModule = (() => {
       }
       return ptr;
     };
-
     var getInheritedInstance = (class_, ptr) => {
       ptr = getBasestPointer(class_, ptr);
       return registeredInstances[ptr];
     };
-
     var makeClassHandle = (prototype, record) => {
       if (!record.ptrType || !record.ptr) {
         throwInternalError('makeClassHandle requires ptr and ptrType');
@@ -874,20 +723,10 @@ var createDotLottiePlayerModule = (() => {
       if (hasSmartPtrType !== hasSmartPtr) {
         throwInternalError('Both smartPtrType and smartPtr must be specified');
       }
-      record.count = {
-        value: 1,
-      };
-      return attachFinalizer(
-        Object.create(prototype, {
-          $$: {
-            value: record,
-            writable: true,
-          },
-        }),
-      );
+      record.count = { value: 1 };
+      return attachFinalizer(Object.create(prototype, { $$: { value: record, writable: true } }));
     };
-
-    /** @suppress {globalThis} */ function RegisteredPointer_fromWireType(ptr) {
+    function RegisteredPointer_fromWireType(ptr) {
       var rawPointer = this.getPointee(ptr);
       if (!rawPointer) {
         this.destructor(ptr);
@@ -914,10 +753,7 @@ var createDotLottiePlayerModule = (() => {
             smartPtr: ptr,
           });
         } else {
-          return makeClassHandle(this.registeredClass.instancePrototype, {
-            ptrType: this,
-            ptr: ptr,
-          });
+          return makeClassHandle(this.registeredClass.instancePrototype, { ptrType: this, ptr: ptr });
         }
       }
       var actualType = this.registeredClass.getActualType(rawPointer);
@@ -943,13 +779,9 @@ var createDotLottiePlayerModule = (() => {
           smartPtr: ptr,
         });
       } else {
-        return makeClassHandle(toType.registeredClass.instancePrototype, {
-          ptrType: toType,
-          ptr: dp,
-        });
+        return makeClassHandle(toType.registeredClass.instancePrototype, { ptrType: toType, ptr: dp });
       }
     }
-
     var attachFinalizer = (handle) => {
       if ('undefined' === typeof FinalizationRegistry) {
         attachFinalizer = (handle) => handle;
@@ -962,9 +794,7 @@ var createDotLottiePlayerModule = (() => {
         var $$ = handle.$$;
         var hasSmartPtr = !!$$.smartPtr;
         if (hasSmartPtr) {
-          var info = {
-            $$: $$,
-          };
+          var info = { $$: $$ };
           finalizationRegistry.register(handle, info, handle);
         }
         return handle;
@@ -972,7 +802,6 @@ var createDotLottiePlayerModule = (() => {
       detachFinalizer = (handle) => finalizationRegistry.unregister(handle);
       return attachFinalizer(handle);
     };
-
     var init_ClassHandle = () => {
       Object.assign(ClassHandle.prototype, {
         isAliasOf(other) {
@@ -984,7 +813,7 @@ var createDotLottiePlayerModule = (() => {
           }
           var leftClass = this.$$.ptrType.registeredClass;
           var left = this.$$.ptr;
-          other.$$ = /** @type {Object} */ (other.$$);
+          other.$$ = other.$$;
           var rightClass = other.$$.ptrType.registeredClass;
           var right = other.$$.ptr;
           while (leftClass.baseClass) {
@@ -1006,11 +835,7 @@ var createDotLottiePlayerModule = (() => {
             return this;
           } else {
             var clone = attachFinalizer(
-              Object.create(Object.getPrototypeOf(this), {
-                $$: {
-                  value: shallowCopyInternalPointer(this.$$),
-                },
-              }),
+              Object.create(Object.getPrototypeOf(this), { $$: { value: shallowCopyInternalPointer(this.$$) } }),
             );
             clone.$$.count.value += 1;
             clone.$$.deleteScheduled = false;
@@ -1050,14 +875,8 @@ var createDotLottiePlayerModule = (() => {
         },
       });
     };
-
-    /** @constructor */ function ClassHandle() {}
-
-    var createNamedFunction = (name, body) =>
-      Object.defineProperty(body, 'name', {
-        value: name,
-      });
-
+    function ClassHandle() {}
+    var createNamedFunction = (name, body) => Object.defineProperty(body, 'name', { value: name });
     var ensureOverloadTable = (proto, methodName, humanName) => {
       if (undefined === proto[methodName].overloadTable) {
         var prevFunc = proto[methodName];
@@ -1073,8 +892,7 @@ var createDotLottiePlayerModule = (() => {
         proto[methodName].overloadTable[prevFunc.argCount] = prevFunc;
       }
     };
-
-    /** @param {number=} numArguments */ var exposePublicSymbol = (name, value, numArguments) => {
+    var exposePublicSymbol = (name, value, numArguments) => {
       if (Module.hasOwnProperty(name)) {
         if (
           undefined === numArguments ||
@@ -1096,11 +914,8 @@ var createDotLottiePlayerModule = (() => {
         }
       }
     };
-
     var char_0 = 48;
-
     var char_9 = 57;
-
     var makeLegalFunctionName = (name) => {
       if (undefined === name) {
         return '_unknown';
@@ -1112,8 +927,7 @@ var createDotLottiePlayerModule = (() => {
       }
       return name;
     };
-
-    /** @constructor */ function RegisteredClass(
+    function RegisteredClass(
       name,
       constructor,
       instancePrototype,
@@ -1133,7 +947,6 @@ var createDotLottiePlayerModule = (() => {
       this.downcast = downcast;
       this.pureVirtualFunctions = [];
     }
-
     var upcastPointer = (ptr, ptrClass, desiredClass) => {
       while (ptrClass !== desiredClass) {
         if (!ptrClass.upcast) {
@@ -1144,8 +957,7 @@ var createDotLottiePlayerModule = (() => {
       }
       return ptr;
     };
-
-    /** @suppress {globalThis} */ function constNoSmartPtrRawPointerToWireType(destructors, handle) {
+    function constNoSmartPtrRawPointerToWireType(destructors, handle) {
       if (handle === null) {
         if (this.isReference) {
           throwBindingError(`null is not a valid ${this.name}`);
@@ -1162,8 +974,7 @@ var createDotLottiePlayerModule = (() => {
       var ptr = upcastPointer(handle.$$.ptr, handleClass, this.registeredClass);
       return ptr;
     }
-
-    /** @suppress {globalThis} */ function genericPointerToWireType(destructors, handle) {
+    function genericPointerToWireType(destructors, handle) {
       var ptr;
       if (handle === null) {
         if (this.isReference) {
@@ -1210,11 +1021,9 @@ var createDotLottiePlayerModule = (() => {
               );
             }
             break;
-
           case 1:
             ptr = handle.$$.smartPtr;
             break;
-
           case 2:
             if (handle.$$.smartPtrType === this) {
               ptr = handle.$$.smartPtr;
@@ -1229,15 +1038,13 @@ var createDotLottiePlayerModule = (() => {
               }
             }
             break;
-
           default:
             throwBindingError('Unsupporting sharing policy');
         }
       }
       return ptr;
     }
-
-    /** @suppress {globalThis} */ function nonConstNoSmartPtrRawPointerToWireType(destructors, handle) {
+    function nonConstNoSmartPtrRawPointerToWireType(destructors, handle) {
       if (handle === null) {
         if (this.isReference) {
           throwBindingError(`null is not a valid ${this.name}`);
@@ -1257,11 +1064,9 @@ var createDotLottiePlayerModule = (() => {
       var ptr = upcastPointer(handle.$$.ptr, handleClass, this.registeredClass);
       return ptr;
     }
-
-    /** @suppress {globalThis} */ function readPointer(pointer) {
+    function readPointer(pointer) {
       return this['fromWireType'](HEAPU32[pointer >> 2]);
     }
-
     var init_RegisteredPointer = () => {
       Object.assign(RegisteredPointer.prototype, {
         getPointee(ptr) {
@@ -1283,15 +1088,7 @@ var createDotLottiePlayerModule = (() => {
         fromWireType: RegisteredPointer_fromWireType,
       });
     };
-
-    /** @constructor
-      @param {*=} pointeeType,
-      @param {*=} sharingPolicy,
-      @param {*=} rawGetPointee,
-      @param {*=} rawConstructor,
-      @param {*=} rawShare,
-      @param {*=} rawDestructor,
-       */ function RegisteredPointer(
+    function RegisteredPointer(
       name,
       registeredClass,
       isReference,
@@ -1327,8 +1124,7 @@ var createDotLottiePlayerModule = (() => {
         this['toWireType'] = genericPointerToWireType;
       }
     }
-
-    /** @param {number=} numArguments */ var replacePublicSymbol = (name, value, numArguments) => {
+    var replacePublicSymbol = (name, value, numArguments) => {
       if (!Module.hasOwnProperty(name)) {
         throwInternalError('Replacing nonexistant public symbol');
       }
@@ -1339,24 +1135,19 @@ var createDotLottiePlayerModule = (() => {
         Module[name].argCount = numArguments;
       }
     };
-
     var dynCallLegacy = (sig, ptr, args) => {
       var f = Module['dynCall_' + sig];
       return args && args.length ? f.apply(null, [ptr].concat(args)) : f.call(null, ptr);
     };
-
     var wasmTable;
-
     var getWasmTableEntry = (funcPtr) => wasmTable.get(funcPtr);
-
-    /** @param {Object=} args */ var dynCall = (sig, ptr, args) => {
+    var dynCall = (sig, ptr, args) => {
       if (sig.includes('j')) {
         return dynCallLegacy(sig, ptr, args);
       }
       var rtn = getWasmTableEntry(ptr).apply(null, args);
       return rtn;
     };
-
     var getDynCaller = (sig, ptr) => {
       var argCache = [];
       return function () {
@@ -1365,7 +1156,6 @@ var createDotLottiePlayerModule = (() => {
         return dynCall(sig, ptr, argCache);
       };
     };
-
     var embind__requireFunction = (signature, rawFunction) => {
       signature = readLatin1String(signature);
       function makeDynCaller() {
@@ -1380,7 +1170,6 @@ var createDotLottiePlayerModule = (() => {
       }
       return fp;
     };
-
     var extendError = (baseErrorType, errorName) => {
       var errorClass = createNamedFunction(errorName, function (message) {
         this.name = errorName;
@@ -1401,16 +1190,13 @@ var createDotLottiePlayerModule = (() => {
       };
       return errorClass;
     };
-
     var UnboundTypeError;
-
     var getTypeName = (type) => {
       var ptr = ___getTypeName(type);
       var rv = readLatin1String(ptr);
       _free(ptr);
       return rv;
     };
-
     var throwUnboundTypeError = (message, types) => {
       var unboundTypes = [];
       var seen = {};
@@ -1431,7 +1217,6 @@ var createDotLottiePlayerModule = (() => {
       types.forEach(visit);
       throw new UnboundTypeError(`${message}: ` + unboundTypes.map(getTypeName).join([', ']));
     };
-
     var __embind_register_class = (
       rawType,
       rawPointerType,
@@ -1486,11 +1271,7 @@ var createDotLottiePlayerModule = (() => {
             }
             return body.apply(this, arguments);
           });
-          var instancePrototype = Object.create(basePrototype, {
-            constructor: {
-              value: constructor,
-            },
-          });
+          var instancePrototype = Object.create(basePrototype, { constructor: { value: constructor } });
           constructor.prototype = instancePrototype;
           var registeredClass = new RegisteredClass(
             name,
@@ -1509,16 +1290,12 @@ var createDotLottiePlayerModule = (() => {
           var referenceConverter = new RegisteredPointer(name, registeredClass, true, false, false);
           var pointerConverter = new RegisteredPointer(name + '*', registeredClass, false, false, false);
           var constPointerConverter = new RegisteredPointer(name + ' const*', registeredClass, false, true, false);
-          registeredPointers[rawType] = {
-            pointerType: pointerConverter,
-            constPointerType: constPointerConverter,
-          };
+          registeredPointers[rawType] = { pointerType: pointerConverter, constPointerType: constPointerConverter };
           replacePublicSymbol(legalFunctionName, constructor);
           return [referenceConverter, pointerConverter, constPointerConverter];
         },
       );
     };
-
     var heap32VectorToArray = (count, firstElement) => {
       var array = [];
       for (var i = 0; i < count; i++) {
@@ -1526,7 +1303,6 @@ var createDotLottiePlayerModule = (() => {
       }
       return array;
     };
-
     function usesDestructorStack(argTypes) {
       for (var i = 1; i < argTypes.length; ++i) {
         if (argTypes[i] !== null && argTypes[i].destructorFunction === undefined) {
@@ -1535,15 +1311,7 @@ var createDotLottiePlayerModule = (() => {
       }
       return false;
     }
-
-    function craftInvokerFunction(
-      humanName,
-      argTypes,
-      classType,
-      cppInvokerFunc,
-      cppTargetFunc,
-      /** boolean= */ isAsync,
-    ) {
+    function craftInvokerFunction(humanName, argTypes, classType, cppInvokerFunc, cppTargetFunc, isAsync) {
       var argCount = argTypes.length;
       if (argCount < 2) {
         throwBindingError("argTypes array size mismatch! Must at least get return value and 'this' types!");
@@ -1593,7 +1361,6 @@ var createDotLottiePlayerModule = (() => {
       };
       return createNamedFunction(humanName, invokerFn);
     }
-
     var __embind_register_class_constructor = (
       rawClassType,
       argCount,
@@ -1634,7 +1401,6 @@ var createDotLottiePlayerModule = (() => {
         return [];
       });
     };
-
     var getFunctionName = (signature) => {
       signature = signature.trim();
       const argsIndex = signature.indexOf('(');
@@ -1644,7 +1410,6 @@ var createDotLottiePlayerModule = (() => {
         return signature;
       }
     };
-
     var __embind_register_class_function = (
       rawClassType,
       methodName,
@@ -1700,43 +1465,35 @@ var createDotLottiePlayerModule = (() => {
         return [];
       });
     };
-
     function handleAllocatorInit() {
-      Object.assign(
-        HandleAllocator.prototype,
-        /** @lends {HandleAllocator.prototype} */ {
-          get(id) {
-            return this.allocated[id];
-          },
-          has(id) {
-            return this.allocated[id] !== undefined;
-          },
-          allocate(handle) {
-            var id = this.freelist.pop() || this.allocated.length;
-            this.allocated[id] = handle;
-            return id;
-          },
-          free(id) {
-            this.allocated[id] = undefined;
-            this.freelist.push(id);
-          },
+      Object.assign(HandleAllocator.prototype, {
+        get(id) {
+          return this.allocated[id];
         },
-      );
+        has(id) {
+          return this.allocated[id] !== undefined;
+        },
+        allocate(handle) {
+          var id = this.freelist.pop() || this.allocated.length;
+          this.allocated[id] = handle;
+          return id;
+        },
+        free(id) {
+          this.allocated[id] = undefined;
+          this.freelist.push(id);
+        },
+      });
     }
-
-    /** @constructor */ function HandleAllocator() {
+    function HandleAllocator() {
       this.allocated = [undefined];
       this.freelist = [];
     }
-
     var emval_handles = new HandleAllocator();
-
     var __emval_decref = (handle) => {
       if (handle >= emval_handles.reserved && 0 === --emval_handles.get(handle).refcount) {
         emval_handles.free(handle);
       }
     };
-
     var count_emval_handles = () => {
       var count = 0;
       for (var i = emval_handles.reserved; i < emval_handles.allocated.length; ++i) {
@@ -1746,26 +1503,11 @@ var createDotLottiePlayerModule = (() => {
       }
       return count;
     };
-
     var init_emval = () => {
-      emval_handles.allocated.push(
-        {
-          value: undefined,
-        },
-        {
-          value: null,
-        },
-        {
-          value: true,
-        },
-        {
-          value: false,
-        },
-      );
+      emval_handles.allocated.push({ value: undefined }, { value: null }, { value: true }, { value: false });
       emval_handles.reserved = emval_handles.allocated.length;
       Module['count_emval_handles'] = count_emval_handles;
     };
-
     var Emval = {
       toValue: (handle) => {
         if (!handle) {
@@ -1777,26 +1519,18 @@ var createDotLottiePlayerModule = (() => {
         switch (value) {
           case undefined:
             return 1;
-
           case null:
             return 2;
-
           case true:
             return 3;
-
           case false:
             return 4;
-
           default: {
-            return emval_handles.allocate({
-              refcount: 1,
-              value: value,
-            });
+            return emval_handles.allocate({ refcount: 1, value: value });
           }
         }
       },
     };
-
     var __embind_register_emval = (rawType, name) => {
       name = readLatin1String(name);
       registerType(rawType, {
@@ -1812,7 +1546,6 @@ var createDotLottiePlayerModule = (() => {
         destructorFunction: null,
       });
     };
-
     var enumReadValueFromPointer = (name, width, signed) => {
       switch (width) {
         case 1:
@@ -1823,7 +1556,6 @@ var createDotLottiePlayerModule = (() => {
             : function (pointer) {
                 return this['fromWireType'](HEAPU8[pointer >> 0]);
               };
-
         case 2:
           return signed
             ? function (pointer) {
@@ -1832,7 +1564,6 @@ var createDotLottiePlayerModule = (() => {
             : function (pointer) {
                 return this['fromWireType'](HEAPU16[pointer >> 1]);
               };
-
         case 4:
           return signed
             ? function (pointer) {
@@ -1841,13 +1572,11 @@ var createDotLottiePlayerModule = (() => {
             : function (pointer) {
                 return this['fromWireType'](HEAPU32[pointer >> 2]);
               };
-
         default:
           throw new TypeError(`invalid integer width (${width}): ${name}`);
       }
     };
-
-    /** @suppress {globalThis} */ var __embind_register_enum = (rawType, name, size, isSigned) => {
+    var __embind_register_enum = (rawType, name, size, isSigned) => {
       name = readLatin1String(name);
       function ctor() {}
       ctor.values = {};
@@ -1864,7 +1593,6 @@ var createDotLottiePlayerModule = (() => {
       });
       exposePublicSymbol(name, ctor);
     };
-
     var requireRegisteredType = (rawType, humanName) => {
       var impl = registeredTypes[rawType];
       if (undefined === impl) {
@@ -1872,23 +1600,17 @@ var createDotLottiePlayerModule = (() => {
       }
       return impl;
     };
-
     var __embind_register_enum_value = (rawEnumType, name, enumValue) => {
       var enumType = requireRegisteredType(rawEnumType, 'enum');
       name = readLatin1String(name);
       var Enum = enumType.constructor;
       var Value = Object.create(enumType.constructor.prototype, {
-        value: {
-          value: enumValue,
-        },
-        constructor: {
-          value: createNamedFunction(`${enumType.name}_${name}`, function () {}),
-        },
+        value: { value: enumValue },
+        constructor: { value: createNamedFunction(`${enumType.name}_${name}`, function () {}) },
       });
       Enum.values[enumValue] = Value;
       Enum[name] = Value;
     };
-
     var embindRepr = (v) => {
       if (v === null) {
         return 'null';
@@ -1900,24 +1622,20 @@ var createDotLottiePlayerModule = (() => {
         return '' + v;
       }
     };
-
     var floatReadValueFromPointer = (name, width) => {
       switch (width) {
         case 4:
           return function (pointer) {
             return this['fromWireType'](HEAPF32[pointer >> 2]);
           };
-
         case 8:
           return function (pointer) {
             return this['fromWireType'](HEAPF64[pointer >> 3]);
           };
-
         default:
           throw new TypeError(`invalid float width (${width}): ${name}`);
       }
     };
-
     var __embind_register_float = (rawType, name, size) => {
       name = readLatin1String(name);
       registerType(rawType, {
@@ -1929,7 +1647,6 @@ var createDotLottiePlayerModule = (() => {
         destructorFunction: null,
       });
     };
-
     var __embind_register_function = (name, argCount, rawArgTypesAddr, signature, rawInvoker, fn, isAsync) => {
       var argTypes = heap32VectorToArray(argCount, rawArgTypesAddr);
       name = readLatin1String(name);
@@ -1943,33 +1660,28 @@ var createDotLottiePlayerModule = (() => {
         argCount - 1,
       );
       whenDependentTypesAreResolved([], argTypes, function (argTypes) {
-        var invokerArgsArray = [argTypes[0], /* return value */ null].concat(/* no class 'this'*/ argTypes.slice(1));
-        /* actual params */ replacePublicSymbol(
+        var invokerArgsArray = [argTypes[0], null].concat(argTypes.slice(1));
+        replacePublicSymbol(
           name,
-          craftInvokerFunction(name, invokerArgsArray, null, /* no class 'this'*/ rawInvoker, fn, isAsync),
+          craftInvokerFunction(name, invokerArgsArray, null, rawInvoker, fn, isAsync),
           argCount - 1,
         );
         return [];
       });
     };
-
     var integerReadValueFromPointer = (name, width, signed) => {
       switch (width) {
         case 1:
           return signed ? (pointer) => HEAP8[pointer >> 0] : (pointer) => HEAPU8[pointer >> 0];
-
         case 2:
           return signed ? (pointer) => HEAP16[pointer >> 1] : (pointer) => HEAPU16[pointer >> 1];
-
         case 4:
           return signed ? (pointer) => HEAP32[pointer >> 2] : (pointer) => HEAPU32[pointer >> 2];
-
         default:
           throw new TypeError(`invalid integer width (${width}): ${name}`);
       }
     };
-
-    /** @suppress {globalThis} */ var __embind_register_integer = (primitiveType, name, size, minRange, maxRange) => {
+    var __embind_register_integer = (primitiveType, name, size, minRange, maxRange) => {
       name = readLatin1String(name);
       if (maxRange === -1) {
         maxRange = 4294967295;
@@ -2002,7 +1714,6 @@ var createDotLottiePlayerModule = (() => {
         destructorFunction: null,
       });
     };
-
     var __embind_register_memory_view = (rawType, dataTypeIndex, name) => {
       var typeMapping = [
         Int8Array,
@@ -2029,12 +1740,9 @@ var createDotLottiePlayerModule = (() => {
           argPackAdvance: GenericWireTypeSize,
           readValueFromPointer: decodeMemoryView,
         },
-        {
-          ignoreDuplicateRegistrations: true,
-        },
+        { ignoreDuplicateRegistrations: true },
       );
     };
-
     var __embind_register_smart_ptr = (
       rawType,
       rawPointeeType,
@@ -2072,7 +1780,6 @@ var createDotLottiePlayerModule = (() => {
         return [registeredPointer];
       });
     };
-
     var __embind_register_std_string = (rawType, name) => {
       name = readLatin1String(name);
       var stdStringIsUTF8 = name === 'std::string';
@@ -2162,9 +1869,7 @@ var createDotLottiePlayerModule = (() => {
         },
       });
     };
-
     var UTF16Decoder = typeof TextDecoder != 'undefined' ? new TextDecoder('utf-16le') : undefined;
-
     var UTF16ToString = (ptr, maxBytesToRead) => {
       var endPtr = ptr;
       var idx = endPtr >> 1;
@@ -2180,7 +1885,6 @@ var createDotLottiePlayerModule = (() => {
       }
       return str;
     };
-
     var stringToUTF16 = (str, outPtr, maxBytesToWrite) => {
       maxBytesToWrite ??= 2147483647;
       if (maxBytesToWrite < 2) return 0;
@@ -2195,9 +1899,7 @@ var createDotLottiePlayerModule = (() => {
       HEAP16[outPtr >> 1] = 0;
       return outPtr - startPtr;
     };
-
     var lengthBytesUTF16 = (str) => str.length * 2;
-
     var UTF32ToString = (ptr, maxBytesToRead) => {
       var i = 0;
       var str = '';
@@ -2214,7 +1916,6 @@ var createDotLottiePlayerModule = (() => {
       }
       return str;
     };
-
     var stringToUTF32 = (str, outPtr, maxBytesToWrite) => {
       maxBytesToWrite ??= 2147483647;
       if (maxBytesToWrite < 4) return 0;
@@ -2233,7 +1934,6 @@ var createDotLottiePlayerModule = (() => {
       HEAP32[outPtr >> 2] = 0;
       return outPtr - startPtr;
     };
-
     var lengthBytesUTF32 = (str) => {
       var len = 0;
       for (var i = 0; i < str.length; ++i) {
@@ -2243,7 +1943,6 @@ var createDotLottiePlayerModule = (() => {
       }
       return len;
     };
-
     var __embind_register_std_wstring = (rawType, charSize, name) => {
       name = readLatin1String(name);
       var decodeString, encodeString, getHeap, lengthBytesUTF, shift;
@@ -2304,7 +2003,6 @@ var createDotLottiePlayerModule = (() => {
         },
       });
     };
-
     var __embind_register_value_object = (
       rawType,
       name,
@@ -2320,7 +2018,6 @@ var createDotLottiePlayerModule = (() => {
         fields: [],
       };
     };
-
     var __embind_register_value_object_field = (
       structType,
       fieldName,
@@ -2343,7 +2040,6 @@ var createDotLottiePlayerModule = (() => {
         setterContext: setterContext,
       });
     };
-
     var __embind_register_void = (rawType, name) => {
       name = readLatin1String(name);
       registerType(rawType, {
@@ -2354,25 +2050,20 @@ var createDotLottiePlayerModule = (() => {
         toWireType: (destructors, o) => undefined,
       });
     };
-
     var __emscripten_throw_longjmp = () => {
       throw Infinity;
     };
-
     var emval_methodCallers = [];
-
     var __emval_call = (caller, handle, destructorsRef, args) => {
       caller = emval_methodCallers[caller];
       handle = Emval.toValue(handle);
       return caller(null, handle, destructorsRef, args);
     };
-
     var emval_addMethodCaller = (caller) => {
       var id = emval_methodCallers.length;
       emval_methodCallers.push(caller);
       return id;
     };
-
     var emval_lookupTypes = (argCount, argTypes) => {
       var a = new Array(argCount);
       for (var i = 0; i < argCount; ++i) {
@@ -2380,9 +2071,7 @@ var createDotLottiePlayerModule = (() => {
       }
       return a;
     };
-
     var reflectConstruct = Reflect.construct;
-
     var emval_returnValue = (returnType, destructorsRef, handle) => {
       var destructors = [];
       var result = returnType['toWireType'](destructors, handle);
@@ -2391,7 +2080,6 @@ var createDotLottiePlayerModule = (() => {
       }
       return result;
     };
-
     var __emval_get_method_caller = (argCount, argTypes, kind) => {
       var types = emval_lookupTypes(argCount, argTypes);
       var retType = types.shift();
@@ -2403,7 +2091,7 @@ var createDotLottiePlayerModule = (() => {
           argN[i] = types[i]['readValueFromPointer'](args + offset);
           offset += types[i]['argPackAdvance'];
         }
-        var rv = kind === /* CONSTRUCTOR */ 1 ? reflectConstruct(func, argN) : func.apply(obj, argN);
+        var rv = kind === 1 ? reflectConstruct(func, argN) : func.apply(obj, argN);
         for (var i = 0; i < argCount; ++i) {
           types[i].deleteObject?.(argN[i]);
         }
@@ -2412,37 +2100,27 @@ var createDotLottiePlayerModule = (() => {
       var functionName = `methodCaller<(${types.map((t) => t.name).join(', ')}) => ${retType.name}>`;
       return emval_addMethodCaller(createNamedFunction(functionName, invokerFunction));
     };
-
     var __emval_incref = (handle) => {
       if (handle > 4) {
         emval_handles.get(handle).refcount += 1;
       }
     };
-
     var __emval_run_destructors = (handle) => {
       var destructors = Emval.toValue(handle);
       runDestructors(destructors);
       __emval_decref(handle);
     };
-
     var __emval_take_value = (type, arg) => {
       type = requireRegisteredType(type, '_emval_take_value');
       var v = type['readValueFromPointer'](arg);
       return Emval.toHandle(v);
     };
-
     var _abort = () => {
       abort('');
     };
-
     var _emscripten_get_now;
-
     _emscripten_get_now = () => performance.now();
-
-    var _emscripten_memcpy_js = (dest, src, num) => HEAPU8.copyWithin(dest, src, src + num);
-
     var getHeapMax = () => 2147483648;
-
     var growMemory = (size) => {
       var b = wasmMemory.buffer;
       var pages = (size - b.byteLength + 65535) / 65536;
@@ -2450,9 +2128,8 @@ var createDotLottiePlayerModule = (() => {
         wasmMemory.grow(pages);
         updateMemoryViews();
         return 1;
-      } /*success*/ catch (e) {}
+      } catch (e) {}
     };
-
     var _emscripten_resize_heap = (requestedSize) => {
       var oldSize = HEAPU8.length;
       requestedSize >>>= 0;
@@ -2472,11 +2149,8 @@ var createDotLottiePlayerModule = (() => {
       }
       return false;
     };
-
     var ENV = {};
-
     var getExecutableName = () => thisProgram || './this.program';
-
     var getEnvStrings = () => {
       if (!getEnvStrings.strings) {
         var lang =
@@ -2503,14 +2177,12 @@ var createDotLottiePlayerModule = (() => {
       }
       return getEnvStrings.strings;
     };
-
     var stringToAscii = (str, buffer) => {
       for (var i = 0; i < str.length; ++i) {
         HEAP8[buffer++ >> 0] = str.charCodeAt(i);
       }
       HEAP8[buffer >> 0] = 0;
     };
-
     var _environ_get = (__environ, environ_buf) => {
       var bufSize = 0;
       getEnvStrings().forEach((string, i) => {
@@ -2521,7 +2193,6 @@ var createDotLottiePlayerModule = (() => {
       });
       return 0;
     };
-
     var _environ_sizes_get = (penviron_count, penviron_buf_size) => {
       var strings = getEnvStrings();
       HEAPU32[penviron_count >> 2] = strings.length;
@@ -2530,21 +2201,15 @@ var createDotLottiePlayerModule = (() => {
       HEAPU32[penviron_buf_size >> 2] = bufSize;
       return 0;
     };
-
     var _fd_close = (fd) => 52;
-
     var _fd_read = (fd, iov, iovcnt, pnum) => 52;
-
     var convertI32PairToI53Checked = (lo, hi) =>
       (hi + 2097152) >>> 0 < 4194305 - !!lo ? (lo >>> 0) + hi * 4294967296 : NaN;
-
     function _fd_seek(fd, offset_low, offset_high, whence, newOffset) {
       var offset = convertI32PairToI53Checked(offset_low, offset_high);
       return 70;
     }
-
     var printCharBuffers = [null, [], []];
-
     var printChar = (stream, curr) => {
       var buffer = printCharBuffers[stream];
       if (curr === 0 || curr === 10) {
@@ -2554,7 +2219,6 @@ var createDotLottiePlayerModule = (() => {
         buffer.push(curr);
       }
     };
-
     var _fd_write = (fd, iov, iovcnt, pnum) => {
       var num = 0;
       for (var i = 0; i < iovcnt; i++) {
@@ -2569,32 +2233,24 @@ var createDotLottiePlayerModule = (() => {
       HEAPU32[pnum >> 2] = num;
       return 0;
     };
-
     var initRandomFill = () => {
       if (typeof crypto == 'object' && typeof crypto['getRandomValues'] == 'function') {
         return (view) => crypto.getRandomValues(view);
       } else abort('initRandomDevice');
     };
-
     var randomFill = (view) => (randomFill = initRandomFill())(view);
-
     var _getentropy = (buffer, size) => {
       randomFill(HEAPU8.subarray(buffer, buffer + size));
       return 0;
     };
-
     var isLeapYear = (year) => year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
-
     var arraySum = (array, index) => {
       var sum = 0;
       for (var i = 0; i <= index; sum += array[i++]) {}
       return sum;
     };
-
     var MONTH_DAYS_LEAP = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
     var MONTH_DAYS_REGULAR = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
     var addDays = (date, days) => {
       var newDate = new Date(date.getTime());
       while (days > 0) {
@@ -2617,19 +2273,16 @@ var createDotLottiePlayerModule = (() => {
       }
       return newDate;
     };
-
-    /** @type {function(string, boolean=, number=)} */ function intArrayFromString(stringy, dontAddNull, length) {
+    function intArrayFromString(stringy, dontAddNull, length) {
       var len = length > 0 ? length : lengthBytesUTF8(stringy) + 1;
       var u8array = new Array(len);
       var numBytesWritten = stringToUTF8Array(stringy, u8array, 0, u8array.length);
       if (dontAddNull) u8array.length = numBytesWritten;
       return u8array;
     }
-
     var writeArrayToMemory = (array, buffer) => {
       HEAP8.set(array, buffer);
     };
-
     var _strftime = (s, maxsize, format, tm) => {
       var tm_zone = HEAPU32[(tm + 40) >> 2];
       var date = {
@@ -2720,22 +2373,16 @@ var createDotLottiePlayerModule = (() => {
         switch (janFourth.getDay()) {
           case 0:
             return new Date(janFourth.getFullYear() - 1, 11, 29);
-
           case 1:
             return janFourth;
-
           case 2:
             return new Date(janFourth.getFullYear(), 0, 3);
-
           case 3:
             return new Date(janFourth.getFullYear(), 0, 2);
-
           case 4:
             return new Date(janFourth.getFullYear(), 0, 1);
-
           case 5:
             return new Date(janFourth.getFullYear() - 1, 11, 31);
-
           case 6:
             return new Date(janFourth.getFullYear() - 1, 11, 30);
         }
@@ -2844,154 +2491,117 @@ var createDotLottiePlayerModule = (() => {
       writeArrayToMemory(bytes, s);
       return bytes.length - 1;
     };
-
     var _strftime_l = (s, maxsize, format, tm, loc) => _strftime(s, maxsize, format, tm);
-
     InternalError = Module['InternalError'] = class InternalError extends Error {
       constructor(message) {
         super(message);
         this.name = 'InternalError';
       }
     };
-
     embind_init_charCodes();
-
     BindingError = Module['BindingError'] = class BindingError extends Error {
       constructor(message) {
         super(message);
         this.name = 'BindingError';
       }
     };
-
     init_ClassHandle();
-
     init_embind();
-
     init_RegisteredPointer();
-
     UnboundTypeError = Module['UnboundTypeError'] = extendError(Error, 'UnboundTypeError');
-
     handleAllocatorInit();
-
     init_emval();
-
     var wasmImports = {
-      /** @export */ a: ___assert_fail,
-      /** @export */ j: ___cxa_throw,
-      /** @export */ z: ___syscall_fcntl64,
-      /** @export */ O: ___syscall_fstat64,
-      /** @export */ L: ___syscall_getcwd,
-      /** @export */ Q: ___syscall_ioctl,
-      /** @export */ M: ___syscall_newfstatat,
-      /** @export */ y: ___syscall_openat,
-      /** @export */ N: ___syscall_stat64,
-      /** @export */ t: __embind_finalize_value_object,
-      /** @export */ F: __embind_register_bigint,
-      /** @export */ V: __embind_register_bool,
-      /** @export */ u: __embind_register_class,
-      /** @export */ s: __embind_register_class_constructor,
-      /** @export */ c: __embind_register_class_function,
-      /** @export */ U: __embind_register_emval,
-      /** @export */ v: __embind_register_enum,
-      /** @export */ h: __embind_register_enum_value,
-      /** @export */ A: __embind_register_float,
-      /** @export */ aa: __embind_register_function,
-      /** @export */ i: __embind_register_integer,
-      /** @export */ d: __embind_register_memory_view,
-      /** @export */ $: __embind_register_smart_ptr,
-      /** @export */ B: __embind_register_std_string,
-      /** @export */ r: __embind_register_std_wstring,
-      /** @export */ o: __embind_register_value_object,
-      /** @export */ g: __embind_register_value_object_field,
-      /** @export */ W: __embind_register_void,
-      /** @export */ I: __emscripten_throw_longjmp,
-      /** @export */ _: __emval_call,
-      /** @export */ H: __emval_decref,
-      /** @export */ Z: __emval_get_method_caller,
-      /** @export */ p: __emval_incref,
-      /** @export */ Y: __emval_run_destructors,
-      /** @export */ m: __emval_take_value,
-      /** @export */ C: _abort,
-      /** @export */ f: _emscripten_get_now,
-      /** @export */ R: _emscripten_memcpy_js,
-      /** @export */ K: _emscripten_resize_heap,
-      /** @export */ S: _environ_get,
-      /** @export */ T: _environ_sizes_get,
-      /** @export */ q: _fd_close,
-      /** @export */ x: _fd_read,
-      /** @export */ E: _fd_seek,
-      /** @export */ P: _fd_write,
-      /** @export */ X: _getentropy,
-      /** @export */ n: invoke_ii,
-      /** @export */ e: invoke_iii,
-      /** @export */ k: invoke_iiii,
-      /** @export */ w: invoke_iiiiii,
-      /** @export */ l: invoke_vi,
-      /** @export */ b: invoke_vii,
-      /** @export */ G: invoke_viiii,
-      /** @export */ D: invoke_viiij,
-      /** @export */ J: _strftime_l,
+      a: ___assert_fail,
+      i: ___cxa_throw,
+      y: ___syscall_fcntl64,
+      O: ___syscall_fstat64,
+      L: ___syscall_getcwd,
+      Q: ___syscall_ioctl,
+      M: ___syscall_newfstatat,
+      x: ___syscall_openat,
+      N: ___syscall_stat64,
+      s: __embind_finalize_value_object,
+      F: __embind_register_bigint,
+      U: __embind_register_bool,
+      t: __embind_register_class,
+      r: __embind_register_class_constructor,
+      c: __embind_register_class_function,
+      T: __embind_register_emval,
+      u: __embind_register_enum,
+      g: __embind_register_enum_value,
+      z: __embind_register_float,
+      C: __embind_register_function,
+      h: __embind_register_integer,
+      d: __embind_register_memory_view,
+      $: __embind_register_smart_ptr,
+      A: __embind_register_std_string,
+      q: __embind_register_std_wstring,
+      n: __embind_register_value_object,
+      f: __embind_register_value_object_field,
+      V: __embind_register_void,
+      I: __emscripten_throw_longjmp,
+      _: __emval_call,
+      H: __emval_decref,
+      Z: __emval_get_method_caller,
+      o: __emval_incref,
+      Y: __emval_run_destructors,
+      l: __emval_take_value,
+      B: _abort,
+      X: _emscripten_get_now,
+      K: _emscripten_resize_heap,
+      R: _environ_get,
+      S: _environ_sizes_get,
+      p: _fd_close,
+      w: _fd_read,
+      E: _fd_seek,
+      P: _fd_write,
+      W: _getentropy,
+      m: invoke_ii,
+      e: invoke_iii,
+      j: invoke_iiii,
+      v: invoke_iiiiii,
+      k: invoke_vi,
+      b: invoke_vii,
+      G: invoke_viiii,
+      D: invoke_viiij,
+      J: _strftime_l,
     };
-
     var wasmExports = createWasm();
-
-    var ___wasm_call_ctors = () => (___wasm_call_ctors = wasmExports['ca'])();
-
-    var _malloc = (a0) => (_malloc = wasmExports['da'])(a0);
-
-    var _free = (a0) => (_free = wasmExports['fa'])(a0);
-
+    var ___wasm_call_ctors = () => (___wasm_call_ctors = wasmExports['ba'])();
+    var _malloc = (a0) => (_malloc = wasmExports['ca'])(a0);
+    var _free = (a0) => (_free = wasmExports['ea'])(a0);
     var ___errno_location = () => (___errno_location = wasmExports['__errno_location'])();
-
-    var ___getTypeName = (a0) => (___getTypeName = wasmExports['ga'])(a0);
-
+    var ___getTypeName = (a0) => (___getTypeName = wasmExports['fa'])(a0);
     var _htonl = (a0) => (_htonl = wasmExports['htonl'])(a0);
-
     var _htons = (a0) => (_htons = wasmExports['htons'])(a0);
-
     var _ntohs = (a0) => (_ntohs = wasmExports['ntohs'])(a0);
-
-    var _setThrew = (a0, a1) => (_setThrew = wasmExports['ha'])(a0, a1);
-
-    var stackSave = () => (stackSave = wasmExports['ia'])();
-
-    var stackRestore = (a0) => (stackRestore = wasmExports['ja'])(a0);
-
+    var _setThrew = (a0, a1) => (_setThrew = wasmExports['ga'])(a0, a1);
+    var stackSave = () => (stackSave = wasmExports['ha'])();
+    var stackRestore = (a0) => (stackRestore = wasmExports['ia'])(a0);
     var ___cxa_increment_exception_refcount = (a0) =>
       (___cxa_increment_exception_refcount = wasmExports['__cxa_increment_exception_refcount'])(a0);
-
-    var ___cxa_is_pointer_type = (a0) => (___cxa_is_pointer_type = wasmExports['ka'])(a0);
-
+    var ___cxa_is_pointer_type = (a0) => (___cxa_is_pointer_type = wasmExports['ja'])(a0);
     var dynCall_iijj = (Module['dynCall_iijj'] = (a0, a1, a2, a3, a4, a5) =>
-      (dynCall_iijj = Module['dynCall_iijj'] = wasmExports['la'])(a0, a1, a2, a3, a4, a5));
-
+      (dynCall_iijj = Module['dynCall_iijj'] = wasmExports['ka'])(a0, a1, a2, a3, a4, a5));
     var dynCall_vijj = (Module['dynCall_vijj'] = (a0, a1, a2, a3, a4, a5) =>
-      (dynCall_vijj = Module['dynCall_vijj'] = wasmExports['ma'])(a0, a1, a2, a3, a4, a5));
-
+      (dynCall_vijj = Module['dynCall_vijj'] = wasmExports['la'])(a0, a1, a2, a3, a4, a5));
     var dynCall_jiii = (Module['dynCall_jiii'] = (a0, a1, a2, a3) =>
-      (dynCall_jiii = Module['dynCall_jiii'] = wasmExports['na'])(a0, a1, a2, a3));
-
+      (dynCall_jiii = Module['dynCall_jiii'] = wasmExports['ma'])(a0, a1, a2, a3));
     var dynCall_jii = (Module['dynCall_jii'] = (a0, a1, a2) =>
-      (dynCall_jii = Module['dynCall_jii'] = wasmExports['oa'])(a0, a1, a2));
-
+      (dynCall_jii = Module['dynCall_jii'] = wasmExports['na'])(a0, a1, a2));
     var dynCall_viiij = (Module['dynCall_viiij'] = (a0, a1, a2, a3, a4, a5) =>
-      (dynCall_viiij = Module['dynCall_viiij'] = wasmExports['pa'])(a0, a1, a2, a3, a4, a5));
-
+      (dynCall_viiij = Module['dynCall_viiij'] = wasmExports['oa'])(a0, a1, a2, a3, a4, a5));
     var dynCall_jiji = (Module['dynCall_jiji'] = (a0, a1, a2, a3, a4) =>
-      (dynCall_jiji = Module['dynCall_jiji'] = wasmExports['qa'])(a0, a1, a2, a3, a4));
-
+      (dynCall_jiji = Module['dynCall_jiji'] = wasmExports['pa'])(a0, a1, a2, a3, a4));
     var dynCall_viijii = (Module['dynCall_viijii'] = (a0, a1, a2, a3, a4, a5, a6) =>
-      (dynCall_viijii = Module['dynCall_viijii'] = wasmExports['ra'])(a0, a1, a2, a3, a4, a5, a6));
-
+      (dynCall_viijii = Module['dynCall_viijii'] = wasmExports['qa'])(a0, a1, a2, a3, a4, a5, a6));
     var dynCall_iiiiij = (Module['dynCall_iiiiij'] = (a0, a1, a2, a3, a4, a5, a6) =>
-      (dynCall_iiiiij = Module['dynCall_iiiiij'] = wasmExports['sa'])(a0, a1, a2, a3, a4, a5, a6));
-
+      (dynCall_iiiiij = Module['dynCall_iiiiij'] = wasmExports['ra'])(a0, a1, a2, a3, a4, a5, a6));
     var dynCall_iiiiijj = (Module['dynCall_iiiiijj'] = (a0, a1, a2, a3, a4, a5, a6, a7, a8) =>
-      (dynCall_iiiiijj = Module['dynCall_iiiiijj'] = wasmExports['ta'])(a0, a1, a2, a3, a4, a5, a6, a7, a8));
-
+      (dynCall_iiiiijj = Module['dynCall_iiiiijj'] = wasmExports['sa'])(a0, a1, a2, a3, a4, a5, a6, a7, a8));
     var dynCall_iiiiiijj = (Module['dynCall_iiiiiijj'] = (a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) =>
-      (dynCall_iiiiiijj = Module['dynCall_iiiiiijj'] = wasmExports['ua'])(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9));
-
+      (dynCall_iiiiiijj = Module['dynCall_iiiiiijj'] = wasmExports['ta'])(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9));
     function invoke_vi(index, a1) {
       var sp = stackSave();
       try {
@@ -3002,7 +2612,6 @@ var createDotLottiePlayerModule = (() => {
         _setThrew(1, 0);
       }
     }
-
     function invoke_vii(index, a1, a2) {
       var sp = stackSave();
       try {
@@ -3013,7 +2622,6 @@ var createDotLottiePlayerModule = (() => {
         _setThrew(1, 0);
       }
     }
-
     function invoke_iiii(index, a1, a2, a3) {
       var sp = stackSave();
       try {
@@ -3024,7 +2632,6 @@ var createDotLottiePlayerModule = (() => {
         _setThrew(1, 0);
       }
     }
-
     function invoke_iii(index, a1, a2) {
       var sp = stackSave();
       try {
@@ -3035,7 +2642,6 @@ var createDotLottiePlayerModule = (() => {
         _setThrew(1, 0);
       }
     }
-
     function invoke_ii(index, a1) {
       var sp = stackSave();
       try {
@@ -3046,7 +2652,6 @@ var createDotLottiePlayerModule = (() => {
         _setThrew(1, 0);
       }
     }
-
     function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
       var sp = stackSave();
       try {
@@ -3057,7 +2662,6 @@ var createDotLottiePlayerModule = (() => {
         _setThrew(1, 0);
       }
     }
-
     function invoke_viiii(index, a1, a2, a3, a4) {
       var sp = stackSave();
       try {
@@ -3068,7 +2672,6 @@ var createDotLottiePlayerModule = (() => {
         _setThrew(1, 0);
       }
     }
-
     function invoke_viiij(index, a1, a2, a3, a4, a5) {
       var sp = stackSave();
       try {
@@ -3079,14 +2682,11 @@ var createDotLottiePlayerModule = (() => {
         _setThrew(1, 0);
       }
     }
-
     var calledRun;
-
     dependenciesFulfilled = function runCaller() {
       if (!calledRun) run();
       if (!calledRun) dependenciesFulfilled = runCaller;
     };
-
     function run() {
       if (runDependencies > 0) {
         return;
@@ -3117,14 +2717,12 @@ var createDotLottiePlayerModule = (() => {
         doRun();
       }
     }
-
     if (Module['preInit']) {
       if (typeof Module['preInit'] == 'function') Module['preInit'] = [Module['preInit']];
       while (Module['preInit'].length > 0) {
         Module['preInit'].pop()();
       }
     }
-
     run();
 
     return moduleArg.ready;

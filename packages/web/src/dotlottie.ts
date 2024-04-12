@@ -273,6 +273,10 @@ export class DotLottie {
     return this._dotLottieCore?.activeAnimationId();
   }
 
+  public get activeThemeId(): string | undefined {
+    return this._dotLottieCore?.activeThemeId();
+  }
+
   public get layout(): Layout | undefined {
     const layout = this._dotLottieCore?.config().layout;
 

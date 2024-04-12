@@ -1510,6 +1510,8 @@ describe('theming', () => {
 
     const result = dotLottie.loadTheme('invalid');
 
+    expect(dotLottie.activeThemeId).toBeFalsy();
+
     expect(result).toBe(false);
   });
 
@@ -1527,7 +1529,11 @@ describe('theming', () => {
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
 
-    const result = dotLottie.loadTheme('global_theme');
+    const themeId = 'global_theme';
+
+    const result = dotLottie.loadTheme(themeId);
+
+    expect(dotLottie.activeThemeId).toBe(themeId);
 
     expect(result).toBe(true);
   });
@@ -1553,6 +1559,8 @@ describe('theming', () => {
     const themeId = themes[0]?.id ?? '';
 
     const result = dotLottie.loadTheme(themeId);
+
+    expect(dotLottie.activeThemeId).toBe(themeId);
 
     expect(result).toBe(true);
   });
