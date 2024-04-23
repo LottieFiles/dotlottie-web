@@ -30,6 +30,8 @@ interface AnimationSlice {
     lottieWeb: number;
     dotLottie: number;
   };
+  markers: string[];
+  activeMarker: string;
 }
 
 export const DEFAULT_SRC = `https://lottie.host/9ac9c440-c19e-4ac9-b60e-869b6d0ef8cb/7h97gYMCNE.lottie`;
@@ -58,6 +60,8 @@ const initialState: AnimationSlice = {
     lottieWeb: 0,
     dotLottie: 0,
   },
+  markers: [],
+  activeMarker: '',
 };
 
 export const animationSlice = createSlice({
@@ -66,6 +70,8 @@ export const animationSlice = createSlice({
   reducers: {
     setSrc: (state, action) => {
       state.activeAnimationId = '';
+      state.activeMarker = '';
+      state.markers = [];
       state.src = action.payload;
       if (state.src.endsWith('.json') || state.src.startsWith('data:application/json')) {
         state.isJson = true;
@@ -122,6 +128,8 @@ export const animationSlice = createSlice({
     resetUserConfig: (state) => {
       state.userSrc = '';
       state.activeAnimationId = '';
+      state.activeMarker = '';
+      state.markers = [];
       state.src = DEFAULT_SRC;
       if (state.src.endsWith('.json') || state.src.startsWith('data:application/json')) {
         state.isJson = true;
@@ -143,6 +151,12 @@ export const animationSlice = createSlice({
     },
     setUseFrameInterpolation: (state, action) => {
       state.useFrameInterpolation = action.payload;
+    },
+    setMarkers: (state, action) => {
+      state.markers = action.payload;
+    },
+    setActiveMarker: (state, action) => {
+      state.activeMarker = action.payload;
     },
   },
 });
@@ -171,6 +185,8 @@ export const {
   setSegment,
   setSegmentInput,
   setUseFrameInterpolation,
+  setMarkers,
+  setActiveMarker,
 } = animationSlice.actions;
 
 export default animationSlice.reducer;

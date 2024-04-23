@@ -16,6 +16,7 @@ import {
   setLoadTimeDotLottie,
   setLoadTimeLottieWeb,
   setLoop,
+  setMarkers,
   setThemes,
   setTotalFrames,
 } from '../store/viewer-slice';
@@ -45,6 +46,7 @@ export default function Players() {
   const animations = useAppSelector((state) => state.viewer.animations);
   const segment = useAppSelector((state) => state.viewer.segment);
   const useFrameInterpolation = useAppSelector((state) => state.viewer.useFrameInterpolation);
+  const activeMarker = useAppSelector((state) => state.viewer.activeMarker);
   const dispatch = useAppDispatch();
 
   const onLoad = useCallback(() => {
@@ -57,6 +59,7 @@ export default function Players() {
       }
       dispatch(setAnimations(dotLottie?.manifest?.animations?.map((item) => item.id) || []));
       dispatch(setThemes(dotLottie?.manifest?.themes || []));
+      dispatch(setMarkers(dotLottie?.markers()?.map((marker) => marker.name) || []));
     }
   }, [src, dotLottie, dispatch, activeAnimationId]);
 
@@ -98,6 +101,10 @@ export default function Players() {
       dotLottie.setSegment(segment[0], segment[1]);
     }
   }, [segment, dotLottie]);
+
+  useEffect(() => {
+    dotLottie?.setMarker(activeMarker);
+  }, [activeMarker]);
 
   useEffect(() => {
     if (!dotLottie) return;
