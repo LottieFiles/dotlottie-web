@@ -155,7 +155,13 @@ export default function Players() {
       <div className="h-full flex-grow flex justify-between items-center flex-col gap-4">
         <div className="flex justify-center h-full">
           <div className="flex flex-col dotlottie-player">
-            <LoadTime className="mb-4" title="dotLottie Web" loadTime={parseFloat(loadTime.dotLottie.toFixed(2))} />
+            <LoadTime
+              version="v0.20.0"
+              rendererVersion="thorvg@0.13.0"
+              className="mb-4"
+              title="dotLottie Web"
+              loadTime={parseFloat(loadTime.dotLottie.toFixed(2))}
+            />
             <div className="flex justify-center items-center p-4 flex-grow">
               <div style={{ width: '350px', height: '350px' }}>
                 <DotLottieNew
@@ -180,7 +186,13 @@ export default function Players() {
           </div>
           {isJson ? (
             <div className="flex flex-col lottie-web">
-              <LoadTime className="mb-4" title="Lottie Web" loadTime={parseFloat(loadTime.lottieWeb.toFixed(2))} />
+              <LoadTime
+                version="v5.12.2"
+                rendererVersion="lottie-web@5.12.2"
+                className="mb-4"
+                title="Lottie Web"
+                loadTime={parseFloat(loadTime.lottieWeb.toFixed(2))}
+              />
               <div className="flex justify-center items-center p-4 flex-grow">
                 <div style={{ width: '350px', height: '350px' }}>
                   <DotLottiePlayer
