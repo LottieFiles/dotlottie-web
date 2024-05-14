@@ -7,6 +7,18 @@ const path = require('path');
 
 const { defineConfig } = require('tsup');
 
+function copyFileSync(src, dest) {
+  const readStream = fs.createReadStream(src);
+  const writeStream = fs.createWriteStream(dest);
+
+  return new Promise((resolve, reject) => {
+    readStream.on('error', reject);
+    writeStream.on('error', reject);
+    writeStream.on('close', resolve);
+    readStream.pipe(writeStream);
+  });
+}
+
 module.exports = defineConfig({
   bundle: true,
   metafile: false,
@@ -22,9 +34,11 @@ module.exports = defineConfig({
   target: ['es2020', 'node18'],
   tsconfig: 'tsconfig.build.json',
   onSuccess: () => {
-    fs.copyFileSync(
+    copyFileSync(
       path.resolve(__dirname, 'src/core/dotlottie-player.wasm'),
       path.resolve(__dirname, 'dist/dotlottie-player.wasm'),
-    );
+    ).catch((err) => {
+      console.error('Error copying file:', err);
+    });
   },
 });
