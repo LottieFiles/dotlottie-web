@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.20.1
+
+### Patch Changes
+
+- f91a4d6: chore: 🤖 remove node version check from package.json
+
 ## 0.20.0
 
 ### Minor Changes
