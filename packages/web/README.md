@@ -14,6 +14,7 @@
 
 * [Introduction](#introduction)
   * [What is dotLottie?](#what-is-dotlottie)
+* [Prerequisites](#prerequisites)
 * [Installation](#installation)
 * [Usage](#usage)
   * [Via npm](#via-npm)
@@ -40,6 +41,10 @@ A JavaScript library for rendering [lottie](https://lottiefiles.github.io/lottie
 dotLottie is an open-source file format that aggregates one or more Lottie files and their associated resources into a single file. They are ZIP archives compressed with the Deflate compression method and carry the file extension of ".lottie".
 
 [Learn more about dotLottie](https://dotlottie.io/).
+
+## Prerequisites
+
+* [Node.js](https://nodejs.org/en/download/) (v18 or higher)
 
 ## Installation
 
