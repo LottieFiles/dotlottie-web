@@ -190,11 +190,11 @@ export class DotLottie {
         );
       }
 
-      const contentType = response.headers.get('content-type');
+      const contentType = (response.headers.get('content-type') ?? '').trim();
 
       let data: string | ArrayBuffer;
 
-      if (['application/json', 'text/plain'].includes(contentType ?? '')) {
+      if (['application/json', 'text/plain'].some((type) => contentType.startsWith(type))) {
         data = await response.text();
       } else {
         data = await response.arrayBuffer();
