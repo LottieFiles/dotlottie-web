@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.20.2
+
+### Patch Changes
+
+- 9e7a046: fix: 🐛 improve content-type parsing when loading from a url
+
 ## 0.20.1
 
 ### Patch Changes
