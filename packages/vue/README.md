@@ -9,8 +9,6 @@
   <img src="https://user-images.githubusercontent.com/23125742/201124166-c2a0bc2a-018b-463b-b291-944fb767b5c2.png" />
 </p>
 
-> 🚧 **Beta Alert:** We're still refining! The APIs in this package may undergo changes.
-
 ## Contents
 
 * [Introduction](#introduction)
@@ -71,7 +69,7 @@ import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
 | `data`                  | string \| ArrayBuffer |          | undefined             | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations.                                                                                                                                                |
 | `mode`                  | string                |          | "forward"             | Animation play mode. Accepts "forward", "reverse", "bounce", "reverse-bounce".                                                                                                                                                                     |
 | `backgroundColor`       | string                |          | undefined             | Background color of the canvas. Accepts 6-digit or 8-digit hex color string (e.g., "#000000", "#000000FF"),                                                                                                                                        |
-| `segments`              | \[number, number]     |          | \[0, totalFrames - 1] | Animation segments. Accepts an array of two numbers, where the first number is the start frame and the second number is the end frame.                                                                                                             |
+| `segment`               | \[number, number]     |          | \[0, totalFrames - 1] | Animation segment. Accepts an array of two numbers, where the first number is the start frame and the second number is the end frame.                                                                                                              |
 | `renderConfig`          | RenderConfig          |          | `{}`                  | Configuration for rendering the animation.                                                                                                                                                                                                         |
 | `useFrameInterpolation` | boolean               |          | false                 | Determines if the animation should update on subframes. If set to false, the original AE frame rate will be maintained. If set to true, it will refresh at each requestAnimationFrame, including intermediate values. The default setting is true. |
 

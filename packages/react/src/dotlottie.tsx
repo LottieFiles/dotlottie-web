@@ -23,10 +23,11 @@ export const DotLottieReact = ({
   data,
   dotLottieRefCallback,
   loop,
+  marker,
   mode,
   playOnHover,
   renderConfig,
-  segments,
+  segment,
   speed,
   src,
   useFrameInterpolation,
@@ -39,12 +40,13 @@ export const DotLottieReact = ({
     src,
     autoplay,
     loop,
-    segments,
+    segment,
     renderConfig,
     backgroundColor,
     useFrameInterpolation,
     playOnHover,
     autoResizeCanvas,
+    marker,
   });
 
   const stableDotLottieRefCallback =

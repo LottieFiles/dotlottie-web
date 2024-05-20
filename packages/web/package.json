@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-web",
-  "version": "0.14.1",
+  "version": "0.20.2",
   "type": "module",
   "description": "Lottie and DotLottie player for the web",
   "repository": {
@@ -15,9 +15,6 @@
     "Abdelrahman Ashraf <a.theashraf@gmail.com>"
   ],
   "license": "MIT",
-  "engines": {
-    "node": ">=18"
-  },
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -47,13 +44,13 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.5",
-    "@vitest/browser": "^1.1.0",
-    "@vitest/coverage-istanbul": "^1.1.0",
+    "@vitest/browser": "^1.2.2 ",
+    "@vitest/coverage-istanbul": "^1.2.2",
     "cross-env": "7.0.3",
     "tsup": "8.0.1",
     "typescript": "5.0.4",
-    "vitest": "^1.1.0",
-    "webdriverio": "^8.27.0"
+    "vitest": "^1.2.2",
+    "webdriverio": "^8.32.0"
   },
   "publishConfig": {
     "access": "public"

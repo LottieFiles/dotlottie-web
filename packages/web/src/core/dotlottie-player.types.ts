@@ -2,13 +2,23 @@
  * Copyright 2024 Design Barn Inc.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 export interface VectorFloat {
   delete(): void;
   get(_0: number): unknown;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   push_back(_0: number): void;
   resize(_0: number, _1: number): void;
   set(_0: number, _1: number): boolean;
+  size(): number;
+}
+
+export interface VectorMarker {
+  delete(): void;
+  get(_0: number): unknown;
+  push_back(_0: Marker): void;
+  resize(_0: number, _1: Marker): void;
+  set(_0: number, _1: Marker): boolean;
   size(): number;
 }
 
@@ -17,7 +27,19 @@ export interface ModeValue<T extends number> {
 }
 export type Mode = ModeValue<1> | ModeValue<2> | ModeValue<3> | ModeValue<4>;
 
+export interface FitValue<T extends number> {
+  value: T;
+}
+export type Fit = FitValue<1> | FitValue<3> | FitValue<2> | FitValue<4> | FitValue<5> | FitValue<6>;
+
+export interface Layout {
+  align: VectorFloat;
+  fit: Fit;
+}
+
 export interface DotLottiePlayer {
+  activeAnimationId(): string;
+  activeThemeId(): string;
   buffer(): unknown;
   clear(): void;
   config(): Config;
@@ -45,8 +67,11 @@ export interface DotLottiePlayer {
     _1: number,
     _2: number,
   ): boolean;
+  loadTheme(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
+  loadThemeData(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
   loopCount(): number;
   manifestString(): string;
+  markers(): VectorMarker;
   pause(): boolean;
   play(): boolean;
   render(): boolean;
@@ -59,18 +84,36 @@ export interface DotLottiePlayer {
   totalFrames(): number;
 }
 
+export interface Marker {
+  duration: number;
+  name: string;
+  time: number;
+}
+
 export interface Config {
   autoplay: boolean;
   backgroundColor: number;
+  layout: Layout;
   loopAnimation: boolean;
+  marker: string;
   mode: Mode;
-  segments: VectorFloat;
+  segment: VectorFloat;
   speed: number;
   useFrameInterpolation: boolean;
 }
 
 export interface MainModule {
   DotLottiePlayer: { new (_0: Config): DotLottiePlayer };
+  Fit: {
+    Contain: FitValue<1>;
+    Cover: FitValue<3>;
+    Fill: FitValue<2>;
+    FitHeight: FitValue<5>;
+    FitWidth: FitValue<4>;
+    None: FitValue<6>;
+  };
   Mode: { Bounce: ModeValue<3>; Forward: ModeValue<1>; Reverse: ModeValue<2>; ReverseBounce: ModeValue<4> };
   VectorFloat: { new (): VectorFloat };
+  VectorMarker: { new (): VectorMarker };
+  createDefaultLayout(): Layout;
 }

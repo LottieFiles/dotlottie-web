@@ -1,5 +1,68 @@
 # @lottiefiles/dotlottie-web
 
+## 0.20.2
+
+### Patch Changes
+
+- 9e7a046: fix: 🐛 improve content-type parsing when loading from a url
+
+## 0.20.1
+
+### Patch Changes
+
+- f91a4d6: chore: 🤖 remove node version check from package.json
+
+## 0.20.0
+
+### Minor Changes
+
+- aa102b0: feat(web): 🎸 add activeThemeId property
+
+### Patch Changes
+
+- aa102b0: fix(web): Resolve out-of-bounds table index error caused by invalid image asset embedding in WASM module
+
+  Resolves: [#170](https://github.com/LottieFiles/dotlottie-web/issues/170)
+
+## 0.19.0
+
+### Minor Changes
+
+- 0672481: feat: 🎸 integrate dotlottie-rs activeAnimationId getter
+
+## 0.18.1
+
+### Patch Changes
+
+- bcd014b: fix: 🐛 different rendering result compared to lottie-web
+
+## 0.18.0
+
+### Minor Changes
+
+- 65c0b29: feat: 🎸 update dotlottie-rs wasm with reset theme feature
+
+## 0.17.0
+
+### Minor Changes
+
+- 51ff0e9: refactor: 💡 update color space to `ABGR8888S`
+- 51ff0e9: refactor: 💡 rename `segments` to `segment`
+
+## 0.16.0
+
+### Minor Changes
+
+- 0e521aa: feat:🎸 layout config
+- 0e521aa: feat:🎸 markers
+- 0e521aa: feat:🎸 theming
+
+## 0.15.0
+
+### Minor Changes
+
+- 7f659f7: feat: 🎸 webp support
+
 ## 0.14.1
 
 ### Patch Changes

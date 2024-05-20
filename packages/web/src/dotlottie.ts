@@ -4,7 +4,7 @@
 
 import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER } from './constants';
-import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat } from './core';
+import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker, Fit as CoreFit } from './core';
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
@@ -17,15 +17,24 @@ export type Mode = 'forward' | 'reverse' | 'bounce' | 'reverse-bounce';
 
 export type Data = string | ArrayBuffer | Record<string, unknown>;
 
+export type Fit = 'contain' | 'cover' | 'fill' | 'none' | 'fit-width' | 'fit-height';
+
+export interface Layout {
+  align: [number, number];
+  fit: Fit;
+}
+
 export interface Config {
   autoplay?: boolean;
   backgroundColor?: string;
   canvas: HTMLCanvasElement;
   data?: Data;
+  layout?: Layout;
   loop?: boolean;
+  marker?: string;
   mode?: Mode;
   renderConfig?: RenderConfig;
-  segments?: [number, number];
+  segment?: [number, number];
   speed?: number;
   src?: string;
   useFrameInterpolation?: boolean;
@@ -68,15 +77,40 @@ const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
   }
 };
 
-const createCoreSegments = (segments: number[], module: MainModule): VectorFloat => {
-  const coreSegments = new module.VectorFloat();
+const createCoreFit = (fit: Fit, module: MainModule): CoreFit => {
+  if (fit === 'contain') {
+    return module.Fit.Contain;
+  } else if (fit === 'cover') {
+    return module.Fit.Cover;
+  } else if (fit === 'fill') {
+    return module.Fit.Fill;
+  } else if (fit === 'fit-height') {
+    return module.Fit.FitHeight;
+  } else if (fit === 'fit-width') {
+    return module.Fit.FitWidth;
+  } else {
+    return module.Fit.None;
+  }
+};
 
-  if (segments.length !== 2) return coreSegments;
+const createCoreAlign = (align: [number, number], module: MainModule): VectorFloat => {
+  const coreAlign = new module.VectorFloat();
 
-  coreSegments.push_back(segments[0] as number);
-  coreSegments.push_back(segments[1] as number);
+  coreAlign.push_back(align[0]);
+  coreAlign.push_back(align[1]);
 
-  return coreSegments;
+  return coreAlign;
+};
+
+const createCoreSegment = (segment: number[], module: MainModule): VectorFloat => {
+  const coresegment = new module.VectorFloat();
+
+  if (segment.length !== 2) return coresegment;
+
+  coresegment.push_back(segment[0] as number);
+  coresegment.push_back(segment[1] as number);
+
+  return coresegment;
 };
 
 export class DotLottie {
@@ -116,9 +150,16 @@ export class DotLottie {
           backgroundColor: 0,
           loopAnimation: config.loop ?? false,
           mode: createCoreMode(config.mode ?? 'forward', module),
-          segments: createCoreSegments(config.segments ?? [], module),
+          segment: createCoreSegment(config.segment ?? [], module),
           speed: config.speed ?? 1,
           useFrameInterpolation: config.useFrameInterpolation ?? true,
+          marker: config.marker ?? '',
+          layout: config.layout
+            ? {
+                align: createCoreAlign(config.layout.align, module),
+                fit: createCoreFit(config.layout.fit, module),
+              }
+            : module.createDefaultLayout(),
         });
 
         if (config.data) {
@@ -149,11 +190,11 @@ export class DotLottie {
         );
       }
 
-      const contentType = response.headers.get('content-type');
+      const contentType = (response.headers.get('content-type') ?? '').trim();
 
       let data: string | ArrayBuffer;
 
-      if (['application/json', 'text/plain'].includes(contentType ?? '')) {
+      if (['application/json', 'text/plain'].some((type) => contentType.startsWith(type))) {
         data = await response.text();
       } else {
         data = await response.arrayBuffer();
@@ -228,6 +269,56 @@ export class DotLottie {
     }
   }
 
+  public get activeAnimationId(): string | undefined {
+    return this._dotLottieCore?.activeAnimationId();
+  }
+
+  public get activeThemeId(): string | undefined {
+    return this._dotLottieCore?.activeThemeId();
+  }
+
+  public get layout(): Layout | undefined {
+    const layout = this._dotLottieCore?.config().layout;
+
+    if (layout) {
+      return {
+        align: [layout.align.get(0) as number, layout.align.get(1) as number],
+        fit: ((): Fit => {
+          switch (layout.fit) {
+            case this._wasmModule?.Fit.Contain:
+              return 'contain';
+
+            case this._wasmModule?.Fit.Cover:
+              return 'cover';
+
+            case this._wasmModule?.Fit.Fill:
+              return 'fill';
+
+            case this._wasmModule?.Fit.FitHeight:
+              return 'fit-height';
+
+            case this._wasmModule?.Fit.FitWidth:
+              return 'fit-width';
+
+            case this._wasmModule?.Fit.None:
+              return 'none';
+
+            default:
+              return 'contain';
+          }
+        })(),
+      };
+    }
+
+    return undefined;
+  }
+
+  public get marker(): string | undefined {
+    const marker = this._dotLottieCore?.config().marker as string | undefined;
+
+    return marker;
+  }
+
   public get manifest(): Manifest | null {
     try {
       const manifest = this._dotLottieCore?.manifestString();
@@ -248,11 +339,11 @@ export class DotLottie {
     return this._renderConfig;
   }
 
-  public get segments(): [number, number] | undefined {
-    const segments = this._dotLottieCore?.config().segments;
+  public get segment(): [number, number] | undefined {
+    const segment = this._dotLottieCore?.config().segment;
 
-    if (segments && segments.size() === 2) {
-      return [segments.get(0) as number, segments.get(1) as number];
+    if (segment && segment.size() === 2) {
+      return [segment.get(0) as number, segment.get(1) as number];
     }
 
     return undefined;
@@ -336,9 +427,16 @@ export class DotLottie {
       backgroundColor: 0,
       loopAnimation: config.loop ?? false,
       mode: createCoreMode(config.mode ?? 'forward', this._wasmModule),
-      segments: createCoreSegments(config.segments ?? [], this._wasmModule),
+      segment: createCoreSegment(config.segment ?? [], this._wasmModule),
       speed: config.speed ?? 1,
       useFrameInterpolation: config.useFrameInterpolation ?? true,
+      marker: config.marker ?? '',
+      layout: config.layout
+        ? {
+            align: createCoreAlign(config.layout.align, this._wasmModule),
+            fit: createCoreFit(config.layout.fit, this._wasmModule),
+          }
+        : this._wasmModule.createDefaultLayout(),
     });
 
     if (config.data) {
@@ -554,12 +652,12 @@ export class DotLottie {
     }
   }
 
-  public setSegments(startFrame: number, endFrame: number): void {
+  public setSegment(startFrame: number, endFrame: number): void {
     if (this._dotLottieCore === null || this._wasmModule === null) return;
 
     this._dotLottieCore.setConfig({
       ...this._dotLottieCore.config(),
-      segments: createCoreSegments([startFrame, endFrame], this._wasmModule),
+      segment: createCoreSegment([startFrame, endFrame], this._wasmModule),
     });
   }
 
@@ -590,6 +688,61 @@ export class DotLottie {
         error: new Error(`Failed to animation :${animationId}`),
       });
     }
+  }
+
+  public setMarker(marker: string): void {
+    if (this._dotLottieCore === null) return;
+
+    this._dotLottieCore.setConfig({
+      ...this._dotLottieCore.config(),
+      marker,
+    });
+  }
+
+  public markers(): Marker[] {
+    const markers = this._dotLottieCore?.markers();
+
+    if (markers) {
+      const result: Marker[] = [];
+
+      for (let i = 0; i < markers.size(); i += 1) {
+        const marker = markers.get(i) as Marker;
+
+        result.push({
+          name: marker.name,
+          time: marker.time,
+          duration: marker.duration,
+        });
+      }
+
+      return result;
+    }
+
+    return [];
+  }
+
+  public loadTheme(themeId: string): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    return this._dotLottieCore.loadTheme(themeId);
+  }
+
+  public loadThemeData(themeData: string): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    return this._dotLottieCore.loadThemeData(themeData);
+  }
+
+  public setLayout(layout: Layout): void {
+    if (this._dotLottieCore === null || this._wasmModule === null) return;
+
+    this._dotLottieCore.setConfig({
+      ...this._dotLottieCore.config(),
+      layout: {
+        align: createCoreAlign(layout.align, this._wasmModule),
+        fit: createCoreFit(layout.fit, this._wasmModule),
+      },
+    });
   }
 
   public static setWasmUrl(url: string): void {

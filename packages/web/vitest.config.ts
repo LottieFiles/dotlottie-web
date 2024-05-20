@@ -8,9 +8,9 @@ export default defineConfig({
   test: {
     browser: {
       enabled: true,
-      name: 'chrome',
+      name: 'firefox',
     },
-    // retry: 1,
+    retry: 1,
     coverage: {
       provider: 'istanbul',
       include: ['src/**/*.ts'],

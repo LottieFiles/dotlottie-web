@@ -12,7 +12,6 @@ canvas {
   margin-bottom: 20px;
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
   width: 100%; /* Full width of the container */
-  max-width: 500px;
   aspect-ratio: 1/1;
 }
 
@@ -61,7 +60,7 @@ canvas {
   cursor: pointer;
 }
 
-.segments-control {
+.segment-control {
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -72,12 +71,12 @@ canvas {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.segments-control label {
+.segment-control label {
   margin-right: 10px;
   font-weight: bold;
 }
 
-.segments-control input[type='number'] {
+.segment-control input[type='number'] {
   padding: 5px;
   border: 1px solid #ddd;
   border-radius: 4px;

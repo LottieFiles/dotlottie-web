@@ -4,7 +4,7 @@
 
 import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
-import type { Config, Mode } from '../src';
+import type { Config, Layout, Mode } from '../src';
 import { DotLottie } from '../src';
 
 import jsonSrc from './__fixtures__/test.json?url';
@@ -119,22 +119,22 @@ describe('play', () => {
     },
     {
       mode: 'bounce',
-      segments: [10, 30],
+      segment: [10, 30],
       speed: 2,
     },
     {
       mode: 'reverse-bounce',
-      segments: [5, 25],
+      segment: [5, 25],
       speed: 2,
     },
     {
       mode: 'reverse',
-      segments: [1, 5],
+      segment: [1, 5],
       speed: 0.5,
     },
     {
       mode: 'forward',
-      segments: [0, 10],
+      segment: [0, 10],
       speed: 0.5,
     },
   ])('config: %s', (config) => {
@@ -165,7 +165,7 @@ describe('play', () => {
         expect(onLoad).toHaveBeenCalledTimes(1);
       });
 
-      const totalFrames = (config.segments?.[1] ?? dotLottie.totalFrames) - (config.segments?.[0] ?? 0);
+      const totalFrames = (config.segment?.[1] ?? dotLottie.totalFrames) - (config.segment?.[0] ?? 0);
 
       const expectedDuration =
         ((config.mode?.includes('bounce') ? 2 : 1) *
@@ -175,21 +175,21 @@ describe('play', () => {
 
       const expectedEndFrame =
         config.mode === 'reverse' || config.mode === 'reverse-bounce'
-          ? config.segments?.[0] ?? 0
-          : config.segments?.[1] ?? dotLottie.totalFrames;
+          ? config.segment?.[0] ?? 0
+          : config.segment?.[1] ?? dotLottie.totalFrames;
       const expectedStartFrame =
         config.mode === 'reverse' || config.mode === 'reverse-bounce'
-          ? config.segments?.[1] ?? dotLottie.totalFrames
-          : config.segments?.[0] ?? 0;
+          ? config.segment?.[1] ?? dotLottie.totalFrames
+          : config.segment?.[0] ?? 0;
 
       const startFrame =
         config.mode === 'reverse' || config.mode === 'reverse-bounce'
-          ? dotLottie.segments?.[1] ?? dotLottie.totalFrames
-          : dotLottie.segments?.[0] ?? 0;
+          ? dotLottie.segment?.[1] ?? dotLottie.totalFrames
+          : dotLottie.segment?.[0] ?? 0;
       const endFrame =
         config.mode === 'reverse' || config.mode === 'reverse-bounce'
-          ? dotLottie.segments?.[0] ?? 0
-          : dotLottie.segments?.[1] ?? dotLottie.totalFrames;
+          ? dotLottie.segment?.[0] ?? 0
+          : dotLottie.segment?.[1] ?? dotLottie.totalFrames;
 
       expect(startFrame).toBe(expectedStartFrame);
       expect(endFrame).toBe(expectedEndFrame);
@@ -261,7 +261,7 @@ describe('play', () => {
         expect(onLoad).toHaveBeenCalledTimes(1);
       });
 
-      const totalFrames = (config.segments?.[1] ?? dotLottie.totalFrames) - (config.segments?.[0] ?? 0);
+      const totalFrames = (config.segment?.[1] ?? dotLottie.totalFrames) - (config.segment?.[0] ?? 0);
 
       const expectedDuration =
         ((config.mode?.includes('bounce') ? 2 : 1) *
@@ -271,21 +271,21 @@ describe('play', () => {
 
       const expectedEndFrame =
         config.mode === 'reverse' || config.mode === 'reverse-bounce'
-          ? config.segments?.[0] ?? 0
-          : config.segments?.[1] ?? dotLottie.totalFrames;
+          ? config.segment?.[0] ?? 0
+          : config.segment?.[1] ?? dotLottie.totalFrames;
       const expectedStartFrame =
         config.mode === 'reverse' || config.mode === 'reverse-bounce'
-          ? config.segments?.[1] ?? dotLottie.totalFrames
-          : config.segments?.[0] ?? 0;
+          ? config.segment?.[1] ?? dotLottie.totalFrames
+          : config.segment?.[0] ?? 0;
 
       const startFrame =
         config.mode === 'reverse' || config.mode === 'reverse-bounce'
-          ? dotLottie.segments?.[1] ?? dotLottie.totalFrames
-          : dotLottie.segments?.[0] ?? 0;
+          ? dotLottie.segment?.[1] ?? dotLottie.totalFrames
+          : dotLottie.segment?.[0] ?? 0;
       const endFrame =
         config.mode === 'reverse' || config.mode === 'reverse-bounce'
-          ? dotLottie.segments?.[0] ?? 0
-          : dotLottie.segments?.[1] ?? dotLottie.totalFrames;
+          ? dotLottie.segment?.[0] ?? 0
+          : dotLottie.segment?.[1] ?? dotLottie.totalFrames;
 
       expect(startFrame).toBe(expectedStartFrame);
       expect(endFrame).toBe(expectedEndFrame);
@@ -361,7 +361,7 @@ describe('play', () => {
         expect(onLoad).toHaveBeenCalledTimes(1);
       });
 
-      const totalFrames = (config.segments?.[1] ?? dotLottie.totalFrames) - (config.segments?.[0] ?? 0);
+      const totalFrames = (config.segment?.[1] ?? dotLottie.totalFrames) - (config.segment?.[0] ?? 0);
 
       const expectedDuration =
         ((config.mode?.includes('bounce') ? 2 : 1) *
@@ -435,12 +435,12 @@ describe('play', () => {
       });
 
       const startFrame = dotLottie.mode.includes('reverse')
-        ? dotLottie.segments?.[1] ?? dotLottie.totalFrames
-        : dotLottie.segments?.[0] ?? 0;
+        ? dotLottie.segment?.[1] ?? dotLottie.totalFrames
+        : dotLottie.segment?.[0] ?? 0;
       const endFrame = dotLottie.mode.includes('reverse')
-        ? dotLottie.segments?.[0] ?? 0
-        : dotLottie.segments?.[1] ?? dotLottie.totalFrames;
-      const totalFrames = (config.segments?.[1] ?? dotLottie.totalFrames) - (config.segments?.[0] ?? 0);
+        ? dotLottie.segment?.[0] ?? 0
+        : dotLottie.segment?.[1] ?? dotLottie.totalFrames;
+      const totalFrames = (config.segment?.[1] ?? dotLottie.totalFrames) - (config.segment?.[0] ?? 0);
 
       expect(onFrame).toHaveBeenNthCalledWith(1, {
         type: 'frame',
@@ -882,22 +882,22 @@ describe('stop', () => {
     },
     {
       mode: 'bounce',
-      segments: [10, 30],
+      segment: [10, 30],
       speed: 2,
     },
     {
       mode: 'reverse-bounce',
-      segments: [5, 25],
+      segment: [5, 25],
       speed: 2,
     },
     {
       mode: 'reverse',
-      segments: [1, 5],
+      segment: [1, 5],
       speed: 0.5,
     },
     {
       mode: 'forward',
-      segments: [0, 10],
+      segment: [0, 10],
       speed: 0.5,
     },
   ])('config: %s', (config) => {
@@ -921,12 +921,12 @@ describe('stop', () => {
         expect(onPlay).toHaveBeenCalledTimes(1);
       });
 
-      const totalFrames = (config.segments?.[1] ?? dotLottie.totalFrames) - (config.segments?.[0] ?? 0);
+      const totalFrames = (config.segment?.[1] ?? dotLottie.totalFrames) - (config.segment?.[0] ?? 0);
 
       const startFrame =
         config.mode === 'reverse' || config.mode === 'reverse-bounce'
-          ? config.segments?.[1] ?? dotLottie.totalFrames
-          : config.segments?.[0] ?? 0;
+          ? config.segment?.[1] ?? dotLottie.totalFrames
+          : config.segment?.[0] ?? 0;
 
       expect(onFrame).toHaveBeenNthCalledWith(1, {
         type: 'frame',
@@ -1300,6 +1300,8 @@ describe('loadAnimation', () => {
     dotLottie.loadAnimation(animationId);
 
     expect(onLoad).toHaveBeenCalledTimes(2);
+
+    expect(dotLottie.activeAnimationId).toEqual(animationId);
   });
 
   test('emits loadError when loading an animation by invalid id', async () => {
@@ -1355,5 +1357,354 @@ describe('loadAnimation', () => {
     await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
 
     expect(dotLottie.manifest).toBeNull();
+  });
+});
+
+describe('markers', () => {
+  test('return all markers in the animation', async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+    });
+
+    expect(dotLottie.marker).toBeUndefined();
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const markers = dotLottie.markers();
+
+    expect(markers.length).toBeGreaterThan(0);
+  });
+
+  test('loads an animation and play a specific marker', async () => {
+    const onPlay = vi.fn();
+    const onFrame = vi.fn();
+    const onCompelete = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+      autoplay: true,
+      marker: 'Marker_2',
+    });
+
+    dotLottie.addEventListener('play', onPlay);
+    dotLottie.addEventListener('frame', onFrame);
+    dotLottie.addEventListener('complete', onCompelete);
+
+    await vi.waitFor(() => {
+      expect(onPlay).toHaveBeenCalledTimes(1);
+    });
+
+    expect(dotLottie.marker).toBe('Marker_2');
+
+    await vi.waitFor(() => {
+      expect(onCompelete).toHaveBeenCalledTimes(1);
+    });
+
+    expect(onFrame).toHaveBeenNthCalledWith(1, {
+      type: 'frame',
+      currentFrame: 10,
+    });
+
+    expect(onFrame).toHaveBeenLastCalledWith({
+      type: 'frame',
+      currentFrame: 20,
+    });
+  });
+
+  test('setMarker() sets a new marker', async () => {
+    const onPlay = vi.fn();
+    const onFrame = vi.fn();
+    const onCompelete = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+      autoplay: true,
+      useFrameInterpolation: false,
+    });
+
+    dotLottie.addEventListener('play', onPlay);
+    dotLottie.addEventListener('frame', onFrame);
+    dotLottie.addEventListener('complete', onCompelete);
+
+    await vi.waitFor(() => {
+      expect(onPlay).toHaveBeenCalledTimes(1);
+    });
+
+    dotLottie.setMarker('Marker_3');
+    onFrame.mockClear();
+
+    await vi.waitFor(() => {
+      expect(onCompelete).toHaveBeenCalledTimes(1);
+    });
+
+    expect(onFrame).toHaveBeenLastCalledWith({
+      type: 'frame',
+      currentFrame: 30,
+    });
+  });
+
+  test("setMarker clears the marker when the marker doesn't exist", async () => {
+    const onPlay = vi.fn();
+    const onFrame = vi.fn();
+    const onCompelete = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+      autoplay: true,
+      marker: 'Marker_2',
+    });
+
+    dotLottie.addEventListener('play', onPlay);
+    dotLottie.addEventListener('frame', onFrame);
+    dotLottie.addEventListener('complete', onCompelete);
+
+    await vi.waitFor(() => {
+      expect(onPlay).toHaveBeenCalledTimes(1);
+    });
+
+    dotLottie.setMarker('invalid');
+    onFrame.mockClear();
+
+    await vi.waitFor(
+      () => {
+        expect(onCompelete).toHaveBeenCalledTimes(1);
+      },
+      {
+        timeout: dotLottie.duration * 1000 + 500,
+      },
+    );
+
+    expect(onFrame).toHaveBeenLastCalledWith({
+      type: 'frame',
+      currentFrame: dotLottie.totalFrames,
+    });
+
+    expect(dotLottie.marker).toBe('invalid');
+  });
+});
+
+describe('theming', () => {
+  test('fail to load a theme', async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const result = dotLottie.loadTheme('invalid');
+
+    expect(dotLottie.activeThemeId).toBeFalsy();
+
+    expect(result).toBe(false);
+  });
+
+  test('load a global theme', async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const themeId = 'global_theme';
+
+    const result = dotLottie.loadTheme(themeId);
+
+    expect(dotLottie.activeThemeId).toBe(themeId);
+
+    expect(result).toBe(true);
+  });
+
+  test("load an animation's theme", async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const themes = dotLottie.manifest?.themes ?? [];
+
+    expect(themes).toHaveLength(2);
+
+    const themeId = themes[0]?.id ?? '';
+
+    const result = dotLottie.loadTheme(themeId);
+
+    expect(dotLottie.activeThemeId).toBe(themeId);
+
+    expect(result).toBe(true);
+  });
+
+  test('load theme data', async () => {
+    const themeData = {
+      c0: {
+        p: {
+          a: 0,
+          k: [1, 0, 1],
+        },
+      },
+    };
+
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const result = dotLottie.loadThemeData(JSON.stringify(themeData));
+
+    expect(result).toBe(true);
+  });
+
+  test('fail to load theme data', async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const result = dotLottie.loadThemeData('invalid');
+
+    expect(result).toBe(false);
+  });
+});
+
+describe('layout', () => {
+  test('default layout', async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+    });
+
+    expect(dotLottie.layout).toBeUndefined();
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    expect(dotLottie.layout?.fit).toBe('contain');
+    expect(dotLottie.layout?.align).toEqual([0.5, 0.5]);
+  });
+
+  test.each<Layout>([
+    {
+      fit: 'cover',
+      align: [0.5, 0.5],
+    },
+    {
+      fit: 'fill',
+      align: [0.5, 0],
+    },
+    {
+      fit: 'none',
+      align: [0, 0],
+    },
+    {
+      fit: 'contain',
+      align: [0, 1],
+    },
+    {
+      fit: 'fit-height',
+      align: [1, 0],
+    },
+    {
+      fit: 'fit-width',
+      align: [0, 0.5],
+    },
+  ])('init DotLottie with different layout: %p', async (layout) => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+      layout,
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    expect(dotLottie.layout).toEqual(layout);
+  });
+
+  test("load a new animation with a different layout and it's applied", async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const layout: Layout = {
+      fit: 'cover',
+      align: [0.5, 0.5],
+    };
+
+    dotLottie.load({
+      src,
+      layout,
+    });
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(2);
+    });
+
+    expect(dotLottie.layout).toEqual(layout);
   });
 });

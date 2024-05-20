@@ -196,23 +196,23 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
     }
   }, [config?.useFrameInterpolation]);
 
-  // segments reactivity
+  // segment reactivity
   useEffect(() => {
     if (!dotLottie) return;
 
     if (
-      typeof config?.segments === 'object' &&
-      Array.isArray(config.segments) &&
+      typeof config?.segment === 'object' &&
+      Array.isArray(config.segment) &&
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      config.segments.length === 2 &&
+      config.segment.length === 2 &&
       dotLottie.isLoaded
     ) {
-      const startFrame = config.segments[0];
-      const endFrame = config.segments[1];
+      const startFrame = config.segment[0];
+      const endFrame = config.segment[1];
 
-      dotLottie.setSegments(startFrame, endFrame);
+      dotLottie.setSegment(startFrame, endFrame);
     }
-  }, [config?.segments]);
+  }, [config?.segment]);
 
   // background color reactivity
   useEffect(() => {
@@ -255,6 +255,14 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
       });
     }
   }, [config?.src]);
+
+  useEffect(() => {
+    if (!dotLottie) return;
+
+    if (typeof config?.marker === 'string') {
+      dotLottie.setMarker(config.marker);
+    }
+  }, [config?.marker]);
 
   useEffect(() => {
     if (config?.autoResizeCanvas && canvasRef.current) {

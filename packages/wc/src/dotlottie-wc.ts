@@ -20,7 +20,7 @@ export class DotLottieWC extends LitElement {
 
   @property({ type: Number }) public speed: Config['speed'];
 
-  @property({ type: Array }) public segments: Config['segments'];
+  @property({ type: Array }) public segment: Config['segment'];
 
   @property({ type: String }) public mode: Config['mode'];
 
@@ -98,7 +98,7 @@ export class DotLottieWC extends LitElement {
         loop: this.loop,
         autoplay: this.autoplay,
         speed: this.speed,
-        segments: this.segments,
+        segment: this.segment,
         mode: this.mode,
         renderConfig: this.renderConfig,
         useFrameInterpolation: this.useFrameInterpolation,

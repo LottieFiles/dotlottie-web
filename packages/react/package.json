@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-react",
-  "version": "0.3.0",
+  "version": "0.5.6",
   "type": "module",
   "description": "React wrapper around the dotlottie-web library",
   "repository": {
@@ -15,9 +15,6 @@
     "Abdelrahman Ashraf <a.theashraf@gmail.com>"
   ],
   "license": "MIT",
-  "engines": {
-    "node": ">=18"
-  },
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",

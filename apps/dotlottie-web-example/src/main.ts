@@ -5,7 +5,7 @@
 /* eslint-disable no-secrets/no-secrets */
 
 import './styles.css';
-import type { Mode } from '@lottiefiles/dotlottie-web';
+import type { Fit, Mode } from '@lottiefiles/dotlottie-web';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 
 import wasmUrl from '../../../packages/web/dist/dotlottie-player.wasm?url';
@@ -14,6 +14,7 @@ const app = document.getElementById('app') as HTMLDivElement;
 
 app.innerHTML = `
 <div class="grid">
+  <canvas data-src="https://lottie.host/b2d44b82-fd7e-401f-a4fa-77999147c0be/vqNwJryGBp.lottie"></canvas>
   <canvas data-bg-color="green" data-src="https://lottie.host/1cf72a35-6d88-4d9a-9961-f1bb88087f2c/miJIHiyH4Q.lottie"></canvas>
   <canvas data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"></canvas>
   <canvas data-src="https://lottie.host/a7421582-4733-49e5-9f77-e8d4cd792239/WZQjpo4uZR.lottie"></canvas>
@@ -32,11 +33,12 @@ app.innerHTML = `
 </div>
 
 <div class="container">
-  <canvas id="canvas"></canvas>
+  <canvas style="width: 800px; height: 400px;" id="canvas"></canvas>
   <div class="control-panel">
     <div class="status-panel">
       <div id="playbackStatus">Playback State: <span id="playback-state">Stopped</span></div>
       <div id="freezeStatus">Is Frozen: <span id="is-frozen">No</span></div>
+      <div>Active Animation ID: <span id="active-animation">None</span></div>
     </div>
     <div>
       <button id="playPause" class="control-button">Play</button>
@@ -71,14 +73,58 @@ app.innerHTML = `
       <label for="bg-color">Background Color: </label>
       <input type="color" id="bg-color" />
     </div>
-    <div class="segments-control">
+
+    <div>
+      <label for="marker">Marker: </label>
+      <select id="marker">
+        <option value="">None</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="theme">Theme: </label>
+      <select id="theme">
+        <option value="">None</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="fit">Fit: </label>
+      <select id="fit">
+        <option value="contain" selected>Contain</option>
+        <option value="cover">Cover</option>
+        <option value="fill">Fill</option>
+        <option value="fit-height">Fit Height</option>
+        <option value="fit-width">Fit Width</option>
+        <option value="none">None</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="align">Align: </label>
+      <select id="align">
+        <option value="0,0">Top Left</option>
+        <option value="0.5,0">Top Center</option>
+        <option value="1,0">Top Right</option>
+
+        <option value="0,0.5">Center Left</option>
+        <option value="0.5,0.5" selected>Center</option>
+        <option value="1,0.5">Center Right</option>
+
+        <option value="0,1">Bottom Left</option>
+        <option value="0.5,1">Bottom Center</option>
+        <option value="1,1">Bottom Right</option>
+      </select>
+    </div>
+
+    <div class="segment-control">
       <label for="startFrame">Start Frame: </label>
       <input type="number" id="startFrame" value="10" min="0" />
 
       <label for="endFrame">End Frame: </label>
       <input type="number" id="endFrame" value="90" min="0" />
 
-      <button id="setSegments" class="control-button">Set Segments</button>
+      <button id="setSegment" class="control-button">Set segment</button>
     </div>
   </div>
 </div>
@@ -114,9 +160,15 @@ allCanvas.forEach((canvas) => {
   });
 });
 
-fetch('https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lottie')
+fetch(
+  // '/theming_example.lottie',
+  // '/layout_example.lottie',
+  // '/multi.lottie',
+  '/markers_example.lottie',
+)
   .then(async (res) => res.arrayBuffer())
   .then((data): void => {
+    console.log(data);
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
     const dotLottie = new DotLottie({
@@ -127,7 +179,7 @@ fetch('https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lotti
       loop: true,
       autoplay: true,
       mode: 'bounce',
-      segments: [10, 90],
+      segment: [10, 90],
       speed: 1,
       backgroundColor: '#800080ff',
       // useFrameInterpolation: false,
@@ -148,12 +200,18 @@ fetch('https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lotti
     const modeSelect = document.getElementById('mode') as HTMLSelectElement;
     const startFrameInput = document.getElementById('startFrame') as HTMLInputElement;
     const endFrameInput = document.getElementById('endFrame') as HTMLInputElement;
-    const setSegmentsButton = document.getElementById('setSegments') as HTMLButtonElement;
+    const setSegmentButton = document.getElementById('setSegment') as HTMLButtonElement;
     const freezeButton = document.getElementById('freeze') as HTMLButtonElement;
     const unfreezeButton = document.getElementById('unfreeze') as HTMLButtonElement;
     const freezeStateSpan = document.getElementById('is-frozen') as HTMLSpanElement;
     const playbackStateSpan = document.getElementById('playback-state') as HTMLSpanElement;
     const nextAnimationButton = document.getElementById('next') as HTMLButtonElement;
+    const activeAnimationSpan = document.getElementById('active-animation') as HTMLSpanElement;
+
+    const markerSelect = document.getElementById('marker') as HTMLSelectElement;
+    const themeSelect = document.getElementById('theme') as HTMLSelectElement;
+    const fitSelect = document.getElementById('fit') as HTMLSelectElement;
+    const alignSelect = document.getElementById('align') as HTMLSelectElement;
 
     let animationIdx = 0;
 
@@ -187,11 +245,11 @@ fetch('https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lotti
       dotLottie.setBackgroundColor(bgColorInput.value);
     });
 
-    setSegmentsButton.addEventListener('click', () => {
+    setSegmentButton.addEventListener('click', () => {
       const startFrame = parseInt(startFrameInput.value, 10);
       const endFrame = parseInt(endFrameInput.value, 10);
 
-      dotLottie.setSegments(startFrame, endFrame);
+      dotLottie.setSegment(startFrame, endFrame);
     });
 
     modeSelect.addEventListener('change', () => {
@@ -199,10 +257,10 @@ fetch('https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lotti
     });
 
     jumpButton.addEventListener('click', () => {
-      if (!dotLottie.segments) return;
+      if (!dotLottie.segment) return;
 
-      const startFrame = parseInt(dotLottie.segments[0].toString(), 10);
-      const endFrame = parseInt(dotLottie.segments[1].toString(), 10);
+      const startFrame = parseInt(dotLottie.segment[0].toString(), 10);
+      const endFrame = parseInt(dotLottie.segment[1].toString(), 10);
 
       const midFrame = (endFrame - startFrame) / 2 + startFrame;
 
@@ -225,6 +283,37 @@ fetch('https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lotti
           devicePixelRatio: 0.2,
         },
       });
+    });
+
+    markerSelect.addEventListener('change', () => {
+      dotLottie.setMarker(markerSelect.value);
+    });
+
+    themeSelect.addEventListener('change', () => {
+      dotLottie.loadTheme(themeSelect.value);
+    });
+
+    fitSelect.addEventListener('change', () => {
+      const fit = fitSelect.value as Fit;
+      const align = dotLottie.layout?.align || [0.5, 0.5];
+
+      dotLottie.setLayout({
+        align,
+        fit,
+      });
+    });
+
+    alignSelect.addEventListener('change', () => {
+      const [x, y] = alignSelect.value.split(',');
+
+      if (x && y) {
+        const fit = dotLottie.layout?.fit || 'contain';
+
+        dotLottie.setLayout({
+          fit,
+          align: [parseFloat(x), parseFloat(y)],
+        });
+      }
     });
 
     playPauseButton.addEventListener('click', () => {
@@ -266,6 +355,33 @@ fetch('https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lotti
 
     dotLottie.addEventListener('load', (event) => {
       bgColorInput.value = dotLottie.backgroundColor || '#ffffff';
+
+      const themes = dotLottie.manifest?.themes || [];
+
+      for (const theme of themes) {
+        const id = theme.id;
+
+        const option = document.createElement('option');
+
+        option.value = id;
+        option.textContent = id;
+
+        themeSelect.appendChild(option);
+      }
+
+      const markers = dotLottie.markers();
+
+      for (const marker of markers) {
+        const option = document.createElement('option');
+
+        option.value = marker.name;
+
+        option.textContent = marker.name;
+
+        markerSelect.appendChild(option);
+      }
+
+      activeAnimationSpan.textContent = dotLottie.activeAnimationId ?? 'None';
 
       console.log(event);
     });
