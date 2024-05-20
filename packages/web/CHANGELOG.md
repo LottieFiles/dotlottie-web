@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.21.1
+
+### Patch Changes
+
+- 6b394ca: fix:🐛 update dotlottie-rs v0.1.18 WASM bindings
+
 ## 0.21.0
 
 ### Minor Changes
