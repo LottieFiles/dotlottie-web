@@ -3,10 +3,25 @@
  */
 
 /* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/no-namespace */
+
+declare namespace RuntimeExports {
+  let HEAPF64: unknown;
+  let HEAP_DATA_VIEW: unknown;
+  let HEAP8: unknown;
+  let HEAPU8: unknown;
+  let HEAP16: unknown;
+  let HEAPU16: unknown;
+  let HEAP32: unknown;
+  let HEAPU32: unknown;
+  let HEAP64: unknown;
+  let HEAPU64: unknown;
+}
+interface WasmModule {}
 
 export interface VectorFloat {
   delete(): void;
-  get(_0: number): unknown;
+  get(_0: number): number | undefined;
   push_back(_0: number): void;
   resize(_0: number, _1: number): void;
   set(_0: number, _1: number): boolean;
@@ -15,7 +30,7 @@ export interface VectorFloat {
 
 export interface VectorMarker {
   delete(): void;
-  get(_0: number): unknown;
+  get(_0: number): Marker | undefined;
   push_back(_0: Marker): void;
   resize(_0: number, _1: Marker): void;
   set(_0: number, _1: Marker): boolean;
@@ -102,7 +117,7 @@ export interface Config {
   useFrameInterpolation: boolean;
 }
 
-export interface MainModule {
+interface EmbindModule {
   DotLottiePlayer: { new (_0: Config): DotLottiePlayer };
   Fit: {
     Contain: FitValue<1>;
@@ -115,5 +130,7 @@ export interface MainModule {
   Mode: { Bounce: ModeValue<3>; Forward: ModeValue<1>; Reverse: ModeValue<2>; ReverseBounce: ModeValue<4> };
   VectorFloat: { new (): VectorFloat };
   VectorMarker: { new (): VectorMarker };
+  createDefaultConfig(): Config;
   createDefaultLayout(): Layout;
 }
+export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;
