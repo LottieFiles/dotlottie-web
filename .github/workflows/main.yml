@@ -1,9 +1,8 @@
 name: main
+
 on:
-  push:
-    branches:
-      - 'main'
   pull_request:
+    types: [opened, synchronize, reopened, closed, ready_for_review]
 
 jobs:
   validate:
