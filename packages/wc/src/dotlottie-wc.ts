@@ -132,3 +132,7 @@ export class DotLottieWC extends LitElement {
 if (!customElements.get('dotlottie-wc')) {
   customElements.define('dotlottie-wc', DotLottieWC);
 }
+
+export const setWasmUrl = (url: string): void => {
+  DotLottie.setWasmUrl(url);
+};

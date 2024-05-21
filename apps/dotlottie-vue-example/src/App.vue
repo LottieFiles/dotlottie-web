@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { Ref, onMounted, ref } from 'vue';
-import { DotLottieVue } from '@lottiefiles/dotlottie-vue';
+import { DotLottieVue, setWasmUrl } from '@lottiefiles/dotlottie-vue';
+import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
+
+setWasmUrl(wasmUrl);
+
 const player: Ref<typeof DotLottieVue | null> = ref(null);
 
 function toggleLoop() {

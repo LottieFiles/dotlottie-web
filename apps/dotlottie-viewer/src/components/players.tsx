@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import DotLottieNew from './dotlottie-new';
 import { DotLottiePlayer, DotLottieCommonPlayer } from '@dotlottie/react-player';
 import { DotLottie } from '@lottiefiles/dotlottie-react';
+import dotLottieWebPkg from '@lottiefiles/dotlottie-react/node_modules/@lottiefiles/dotlottie-web/package.json';
 import { Range, getTrackBackground } from 'react-range';
 import {
   setActiveAnimationId,
@@ -156,7 +157,7 @@ export default function Players() {
         <div className="flex justify-center h-full">
           <div className="flex flex-col dotlottie-player">
             <LoadTime
-              version="v0.20.0"
+              version={dotLottieWebPkg.version}
               rendererVersion="thorvg@0.13.0"
               className="mb-4"
               title="dotLottie Web"
