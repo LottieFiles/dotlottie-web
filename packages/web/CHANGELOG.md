@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-web
 
+## 0.22.0
+
+### Minor Changes
+
+- 80fe2f1: chore (web): 🤖 Update dotlottie-rs to version 0.1.19
+
+  Release details: [dotlottie-rs@0.1.19](https://github.com/LottieFiles/dotlottie-rs/releases/tag/v0.1.19)
+
 ## 0.21.1
 
 ### Patch Changes
