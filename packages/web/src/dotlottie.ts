@@ -454,11 +454,9 @@ export class DotLottie {
     const rendered = this._dotLottieCore.render();
 
     if (rendered) {
-      const buffer = this._dotLottieCore.buffer() as Uint8ClampedArray;
-
-      const imageData = this._context.createImageData(this._canvas.width, this._canvas.height);
-
-      imageData.data.set(buffer);
+      const buffer = this._dotLottieCore.buffer();
+      const clampedBuffer = new Uint8ClampedArray(buffer, 0, this._canvas.width * this._canvas.height * 4);
+      const imageData = new ImageData(clampedBuffer, this._canvas.width, this._canvas.height);
 
       this._context.putImageData(imageData, 0, 0);
 
