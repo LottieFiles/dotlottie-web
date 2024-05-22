@@ -1,6 +1,9 @@
 <script lang="ts">
-	import { DotLottieSvelte } from '../lib/index.js';
+	import { DotLottieSvelte, setWasmUrl } from '../lib/index.js';
 	import type { DotLottie } from '../lib/index.js';
+	import wasmUrl from "../../../web/src/core/dotlottie-player.wasm?url";
+
+	setWasmUrl(wasmUrl);
 
 	let dotLottie: DotLottie | undefined;
 	let isLoaded = false;

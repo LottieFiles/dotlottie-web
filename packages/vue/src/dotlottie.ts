@@ -154,3 +154,7 @@ export const DotLottieVue = defineComponent({
     return () => h('div', { ...attrs }, h('canvas', { style: 'height: 100%; width: 100%', ref: canvas }));
   },
 });
+
+export const setWasmUrl = (url: string): void => {
+  DotLottie.setWasmUrl(url);
+};

@@ -295,3 +295,7 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
     DotLottieComponent: Component,
   };
 };
+
+export const setWasmUrl = (url: string): void => {
+  DotLottie.setWasmUrl(url);
+};

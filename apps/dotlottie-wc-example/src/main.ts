@@ -2,10 +2,12 @@
  * Copyright 2023 Design Barn Inc.
  */
 
-// eslint-disable-next-line import/no-unassigned-import
-import '@lottiefiles/dotlottie-wc';
-
+import { setWasmUrl } from '@lottiefiles/dotlottie-wc';
 import type { DotLottieWC } from '@lottiefiles/dotlottie-wc';
+
+import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
+
+setWasmUrl(wasmUrl);
 
 const app = document.querySelector<HTMLDivElement>('#app');
 
