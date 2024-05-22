@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-react
 
+## 0.6.0
+
+### Minor Changes
+
+- e739e6e: feat: 🎸 enable self-hosting of WASM in dotlottie-web wrappers
+- f879652: feat(react): 🎸 optimize animation playback based on initial visibility
+
 ## 0.5.9
 
 ### Patch Changes

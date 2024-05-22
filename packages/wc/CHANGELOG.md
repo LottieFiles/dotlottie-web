@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.2.0
+
+### Minor Changes
+
+- e739e6e: feat: 🎸 enable self-hosting of WASM in dotlottie-web wrappers
+
 ## 0.1.9
 
 ### Patch Changes
