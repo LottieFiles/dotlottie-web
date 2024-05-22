@@ -115,6 +115,20 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
 
         setDotLottie(dotLottieInstance);
 
+        // Check if the canvas is initially in view
+        const initialEntry = canvas.getBoundingClientRect();
+
+        if (
+          initialEntry.top >= 0 &&
+          initialEntry.left >= 0 &&
+          initialEntry.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+          initialEntry.right <= (window.innerWidth || document.documentElement.clientWidth)
+        ) {
+          dotLottieInstance.unfreeze();
+        } else {
+          dotLottieInstance.freeze();
+        }
+
         intersectionObserver.observe(canvas);
         if (config?.autoResizeCanvas) {
           resizeObserver.observe(canvas);
