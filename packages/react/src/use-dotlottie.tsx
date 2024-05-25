@@ -5,7 +5,7 @@
 import type { Config } from '@lottiefiles/dotlottie-web';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 import debounce from 'debounce';
-import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import type { ComponentProps, RefCallback } from 'react';
 
 interface DotLottieComponentProps {
@@ -79,7 +79,9 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
     }
   }, []);
 
-  const intersectionObserver = useMemo(() => {
+  const [intersectionObserver, setIntersectionObserver] = useState<IntersectionObserver | null>(null);
+
+  useEffect(() => {
     const observerCallback = debounce((entries: IntersectionObserverEntry[]) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -90,23 +92,29 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
       });
     }, 150);
 
-    return new IntersectionObserver(observerCallback, {
-      threshold: 0,
-    });
+    setIntersectionObserver(
+      new IntersectionObserver(observerCallback, {
+        threshold: 0,
+      }),
+    );
   }, []);
 
-  const resizeObserver = useMemo(() => {
+  const [resizeObserver, setResizeObserver] = useState<ResizeObserver | null>(null);
+
+  useEffect(() => {
     const observerCallback = debounce(() => {
       if (configRef.current?.autoResizeCanvas) {
         dotLottieRef.current?.resize();
       }
     }, 150);
 
-    return new ResizeObserver(observerCallback);
+    setResizeObserver(new ResizeObserver(observerCallback));
   }, []);
 
   const setCanvasRef = useCallback(
     (canvas: HTMLCanvasElement | null) => {
+      if (!resizeObserver || !intersectionObserver) return;
+
       if (canvas) {
         const dotLottieInstance = new DotLottie({
           ...config,
@@ -145,7 +153,7 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
 
   useEffect(() => {
     return () => {
-      if (!dotLottie) return;
+      if (!dotLottie || !resizeObserver || !intersectionObserver) return;
 
       dotLottie.destroy();
       setDotLottie(null);
@@ -154,7 +162,7 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
       canvasRef.current?.removeEventListener('mouseenter', hoverHandler);
       canvasRef.current?.removeEventListener('mouseleave', hoverHandler);
     };
-  }, []);
+  }, [resizeObserver, intersectionObserver]);
 
   // speed reactivity
   useEffect(() => {
@@ -265,6 +273,8 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   }, [config?.marker]);
 
   useEffect(() => {
+    if (!resizeObserver) return;
+
     if (config?.autoResizeCanvas && canvasRef.current) {
       resizeObserver.observe(canvasRef.current);
     } else {
