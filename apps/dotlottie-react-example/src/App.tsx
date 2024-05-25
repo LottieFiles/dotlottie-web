@@ -1,4 +1,5 @@
-import { DotLottieReact, DotLottie } from '@lottiefiles/dotlottie-react';
+import { DotLottieReact, DotLottie, setWasmUrl } from '@lottiefiles/dotlottie-react';
+import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
 import React, { useState } from 'react';
 
 const animations = [
@@ -7,6 +8,8 @@ const animations = [
   'https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json',
   './dragon.json',
 ];
+
+setWasmUrl(wasmUrl);
 
 function App() {
   const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
@@ -22,6 +25,7 @@ function App() {
 
   React.useEffect(() => {
     function updateCurrentFrame(event: { currentFrame: number }) {
+      console.log('currentFrame', event.currentFrame);
       setCurrentFrame(event.currentFrame);
     }
 
@@ -32,6 +36,8 @@ function App() {
     }
 
     dotLottie?.addEventListener('play', console.log);
+    dotLottie?.addEventListener('freeze', console.log);
+    dotLottie?.addEventListener('unfreeze', console.log);
     dotLottie?.addEventListener('pause', console.log);
     dotLottie?.addEventListener('stop', console.log);
     dotLottie?.addEventListener('load', onLoad);
@@ -39,6 +45,8 @@ function App() {
 
     return () => {
       dotLottie?.removeEventListener('play', console.log);
+      dotLottie?.removeEventListener('freeze', console.log);
+      dotLottie?.removeEventListener('unfreeze', console.log);
       dotLottie?.addEventListener('pause', console.log);
       dotLottie?.addEventListener('stop', console.log);
       dotLottie?.removeEventListener('load', onLoad);
@@ -49,7 +57,12 @@ function App() {
   const progress = dotLottie?.isLoaded ? (currentFrame / dotLottie.totalFrames) * 100 : 0;
 
   return (
-    <>
+    <div>
+      <div
+        style={{
+          marginBottom: '1000px',
+        }}
+      ></div>
       <DotLottieReact
         dotLottieRefCallback={setDotLottie}
         useFrameInterpolation={useFrameInterpolation}
@@ -152,7 +165,7 @@ function App() {
         }}
       />
       Auto resize canvas
-    </>
+    </div>
   );
 }
 
