@@ -454,11 +454,21 @@ export class DotLottie {
     const rendered = this._dotLottieCore.render();
 
     if (rendered) {
-      const buffer = this._dotLottieCore.buffer() as Uint8ClampedArray;
+      const buffer = this._dotLottieCore.buffer() as Uint8Array;
+      const clampedBuffer = new Uint8ClampedArray(buffer, 0, this._canvas.width * this._canvas.height * 4);
 
-      const imageData = this._context.createImageData(this._canvas.width, this._canvas.height);
+      let imageData = null;
 
-      imageData.data.set(buffer);
+      /* 
+        In Node.js, the ImageData constructor is not available. 
+        You can use createImageData function in the canvas context to create ImageData object.
+      */
+      if (typeof ImageData === 'undefined') {
+        imageData = this._context.createImageData(this._canvas.width, this._canvas.height);
+        imageData.data.set(clampedBuffer);
+      } else {
+        imageData = new ImageData(clampedBuffer, this._canvas.width, this._canvas.height);
+      }
 
       this._context.putImageData(imageData, 0, 0);
 
