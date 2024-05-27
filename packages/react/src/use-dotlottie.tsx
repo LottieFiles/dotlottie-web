@@ -57,6 +57,8 @@ export interface UseDotLottieResult {
   setContainerRef: RefCallback<HTMLDivElement>;
 }
 
+const isServerSide = (): boolean => typeof window === 'undefined';
+
 export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
 
@@ -78,8 +80,6 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
       dotLottieRef.current.pause();
     }
   }, []);
-
-  const isServerSide: () => boolean = () => typeof window === 'undefined';
 
   const intersectionObserver = useMemo(() => {
     if (isServerSide()) return null;
@@ -113,8 +113,6 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
 
   const setCanvasRef = useCallback(
     (canvas: HTMLCanvasElement | null) => {
-      if (!resizeObserver || !intersectionObserver) return;
-
       if (canvas) {
         const dotLottieInstance = new DotLottie({
           ...config,
@@ -137,16 +135,16 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
           dotLottieInstance.freeze();
         }
 
-        intersectionObserver.observe(canvas);
+        intersectionObserver?.observe(canvas);
         if (config?.autoResizeCanvas) {
-          resizeObserver.observe(canvas);
+          resizeObserver?.observe(canvas);
         }
         canvas.addEventListener('mouseenter', hoverHandler);
         canvas.addEventListener('mouseleave', hoverHandler);
       } else {
         dotLottieRef.current?.destroy();
-        intersectionObserver.disconnect();
-        resizeObserver.disconnect();
+        intersectionObserver?.disconnect();
+        resizeObserver?.disconnect();
       }
 
       canvasRef.current = canvas;
@@ -167,12 +165,10 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
 
   useEffect(() => {
     return () => {
-      if (!dotLottie || !resizeObserver || !intersectionObserver) return;
-
-      dotLottie.destroy();
+      dotLottie?.destroy();
       setDotLottie(null);
-      resizeObserver.disconnect();
-      intersectionObserver.disconnect();
+      resizeObserver?.disconnect();
+      intersectionObserver?.disconnect();
       canvasRef.current?.removeEventListener('mouseenter', hoverHandler);
       canvasRef.current?.removeEventListener('mouseleave', hoverHandler);
     };
