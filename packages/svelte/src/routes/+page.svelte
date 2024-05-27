@@ -1,3 +1,5 @@
+<svelte:options runes={false} />
+
 <script lang="ts">
 	import { DotLottieSvelte, setWasmUrl } from '../lib/index.js';
 	import type { DotLottie } from '../lib/index.js';
