@@ -5,7 +5,7 @@
 import type { Config } from '@lottiefiles/dotlottie-web';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 import debounce from 'debounce';
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
 import type { ComponentProps, RefCallback } from 'react';
 
 interface DotLottieComponentProps {
@@ -79,9 +79,11 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
     }
   }, []);
 
-  const [intersectionObserver, setIntersectionObserver] = useState<IntersectionObserver | null>(null);
+  const isServerSide: () => boolean = () => typeof window === 'undefined';
 
-  useEffect(() => {
+  const intersectionObserver = useMemo(() => {
+    if (isServerSide()) return null;
+
     const observerCallback = debounce((entries: IntersectionObserverEntry[]) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -92,23 +94,21 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
       });
     }, 150);
 
-    setIntersectionObserver(
-      new IntersectionObserver(observerCallback, {
-        threshold: 0,
-      }),
-    );
+    return new IntersectionObserver(observerCallback, {
+      threshold: 0,
+    });
   }, []);
 
-  const [resizeObserver, setResizeObserver] = useState<ResizeObserver | null>(null);
+  const resizeObserver = useMemo(() => {
+    if (isServerSide()) return null;
 
-  useEffect(() => {
     const observerCallback = debounce(() => {
       if (configRef.current?.autoResizeCanvas) {
         dotLottieRef.current?.resize();
       }
     }, 150);
 
-    setResizeObserver(new ResizeObserver(observerCallback));
+    return new ResizeObserver(observerCallback);
   }, []);
 
   const setCanvasRef = useCallback(
@@ -176,7 +176,7 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
       canvasRef.current?.removeEventListener('mouseenter', hoverHandler);
       canvasRef.current?.removeEventListener('mouseleave', hoverHandler);
     };
-  }, [resizeObserver, intersectionObserver]);
+  }, []);
 
   // speed reactivity
   useEffect(() => {
