@@ -1,3 +1,5 @@
+<svelte:options runes={false} />
+
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import debounce from 'debounce';
