@@ -79,7 +79,11 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
     }
   }, []);
 
+  const isServerSide: () => boolean = () => typeof window === 'undefined';
+
   const intersectionObserver = useMemo(() => {
+    if (isServerSide()) return null;
+
     const observerCallback = debounce((entries: IntersectionObserverEntry[]) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -96,6 +100,8 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   }, []);
 
   const resizeObserver = useMemo(() => {
+    if (isServerSide()) return null;
+
     const observerCallback = debounce(() => {
       if (configRef.current?.autoResizeCanvas) {
         dotLottieRef.current?.resize();
@@ -107,6 +113,8 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
 
   const setCanvasRef = useCallback(
     (canvas: HTMLCanvasElement | null) => {
+      if (!resizeObserver || !intersectionObserver) return;
+
       if (canvas) {
         const dotLottieInstance = new DotLottie({
           ...config,
@@ -159,7 +167,7 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
 
   useEffect(() => {
     return () => {
-      if (!dotLottie) return;
+      if (!dotLottie || !resizeObserver || !intersectionObserver) return;
 
       dotLottie.destroy();
       setDotLottie(null);
@@ -279,6 +287,8 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   }, [config?.marker]);
 
   useEffect(() => {
+    if (!resizeObserver) return;
+
     if (config?.autoResizeCanvas && canvasRef.current) {
       resizeObserver.observe(canvasRef.current);
     } else {
