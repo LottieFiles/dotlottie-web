@@ -759,10 +759,10 @@ export class DotLottie {
     });
   }
 
-  public setViewport(x: number, y: number, width: number, height: number): void {
-    if (this._dotLottieCore === null) return;
+  public setViewport(x: number, y: number, width: number, height: number): boolean {
+    if (this._dotLottieCore === null) return false;
 
-    this._dotLottieCore.setViewport(x, y, width, height);
+    return this._dotLottieCore.setViewport(x, y, width, height);
   }
 
   public static setWasmUrl(url: string): void {
