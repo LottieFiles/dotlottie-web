@@ -93,8 +93,10 @@ export interface DotLottiePlayer {
   requestFrame(): number;
   resize(_0: number, _1: number): boolean;
   seek(_0: number): boolean;
+  segmentDuration(): number;
   setConfig(_0: Config): void;
   setFrame(_0: number): boolean;
+  setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
   stop(): boolean;
   totalFrames(): number;
 }
