@@ -738,13 +738,21 @@ export class DotLottie {
   public loadTheme(themeId: string): boolean {
     if (this._dotLottieCore === null) return false;
 
-    return this._dotLottieCore.loadTheme(themeId);
+    const loaded = this._dotLottieCore.loadTheme(themeId);
+
+    this._render();
+
+    return loaded;
   }
 
   public loadThemeData(themeData: string): boolean {
     if (this._dotLottieCore === null) return false;
 
-    return this._dotLottieCore.loadThemeData(themeData);
+    const loaded = this._dotLottieCore.loadThemeData(themeData);
+
+    this._render();
+
+    return loaded;
   }
 
   public setLayout(layout: Layout): void {
