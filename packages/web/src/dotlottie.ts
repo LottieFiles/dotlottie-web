@@ -419,6 +419,10 @@ export class DotLottie {
     return this._dotLottieCore?.duration() ?? 0;
   }
 
+  public get segmentDuration(): number {
+    return this._dotLottieCore?.segmentDuration() ?? 0;
+  }
+
   public load(config: Omit<Config, 'canvas'>): void {
     if (this._dotLottieCore === null || this._wasmModule === null) return;
 
@@ -753,6 +757,12 @@ export class DotLottie {
         fit: createCoreFit(layout.fit, this._wasmModule),
       },
     });
+  }
+
+  public setViewport(x: number, y: number, width: number, height: number): void {
+    if (this._dotLottieCore === null) return;
+
+    this._dotLottieCore.setViewport(x, y, width, height);
   }
 
   public static setWasmUrl(url: string): void {
