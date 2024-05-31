@@ -1,5 +1,19 @@
 # @lottiefiles/dotlottie-svelte
 
+## 0.3.0
+
+### Minor Changes
+
+- 8832676: fix(svelte): disable runes in component to prevent compiler issue on runes mode
+
+### Patch Changes
+
+- Updated dependencies [6d7673a]
+- Updated dependencies [274868e]
+- Updated dependencies [64214f7]
+- Updated dependencies [274868e]
+  - @lottiefiles/dotlottie-web@0.23.0
+
 ## 0.2.0
 
 ### Minor Changes
