@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.23.1
+
+### Patch Changes
+
+- 91be7a1: fix(web): 🐛 theme updates not triggered for paused/stopped animation (#227)
+
 ## 0.23.0
 
 ### Minor Changes
