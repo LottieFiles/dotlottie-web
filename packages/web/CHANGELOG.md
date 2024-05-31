@@ -1,5 +1,14 @@
 # @lottiefiles/dotlottie-web
 
+## 0.23.0
+
+### Minor Changes
+
+- 6d7673a: chore(web): 🤖 upgrade dotlottie-rs v0.1.20 wasm bindings (#224)
+- 274868e: feat: 🎸 added `segmentDuration` getter #225
+- 64214f7: perf: optimization tweak in the Uint8ClampedArray usage
+- 274868e: feat: 🎸 added `setViewport` method #225
+
 ## 0.22.0
 
 ### Minor Changes
