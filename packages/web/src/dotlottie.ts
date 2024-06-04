@@ -423,6 +423,10 @@ export class DotLottie {
     return this._dotLottieCore?.segmentDuration() ?? 0;
   }
 
+  public get canvas(): HTMLCanvasElement | OffscreenCanvas {
+    return this._canvas;
+  }
+
   public load(config: Omit<Config, 'canvas'>): void {
     if (this._dotLottieCore === null || this._wasmModule === null) return;
 
@@ -650,14 +654,14 @@ export class DotLottie {
   }
 
   public resize(): void {
-    if (!IS_BROWSER || !(this._canvas instanceof HTMLCanvasElement)) return;
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
 
-    const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
+      const { height: clientHeight, width: clientWidth } = this._canvas.getBoundingClientRect();
 
-    const { height: clientHeight, width: clientWidth } = this._canvas.getBoundingClientRect();
-
-    this._canvas.width = clientWidth * dpr;
-    this._canvas.height = clientHeight * dpr;
+      this._canvas.width = clientWidth * dpr;
+      this._canvas.height = clientHeight * dpr;
+    }
 
     const ok = this._dotLottieCore?.resize(this._canvas.width, this._canvas.height);
 
