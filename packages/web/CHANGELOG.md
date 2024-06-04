@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.23.2
+
+### Patch Changes
+
+- 6bb8561: fix(web): 🐛 ability to resize in non-browser environment
+
 ## 0.23.1
 
 ### Patch Changes
