@@ -2,18 +2,10 @@
  * Copyright 2024 Design Barn Inc.
  */
 
-import type { Config } from '@lottiefiles/dotlottie-web';
-import { DotLottie } from '@lottiefiles/dotlottie-web';
+import { type Config, DotLottie } from '@lottiefiles/dotlottie-web';
 import debounce from 'debounce';
-import {
-  type Accessor,
-  type ComponentProps,
-  type JSX,
-  createEffect,
-  createMemo,
-  createSignal,
-  onCleanup,
-} from 'solid-js';
+import type { Accessor, ComponentProps, JSX } from 'solid-js';
+import { createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
 import { isServer } from 'solid-js/web';
 
 interface DotLottieComponentProps {
