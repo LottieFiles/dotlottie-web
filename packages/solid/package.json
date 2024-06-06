@@ -1,0 +1,74 @@
+{
+  "name": "@lottiefiles/dotlottie-solid",
+  "version": "0.0.1",
+  "description": "Solid wrapper around the dotlottie-web library",
+  "license": "MIT",
+  "author": "LottieFiles",
+  "contributors": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LottieFiles/dotlottie-web.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://github.com/LottieFiles/dotlottie-web#readme",
+  "bugs": "https://github.com/LottieFiles/dotlottie-web/issues",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "development": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/dev.js"
+      }
+    },
+    "import": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "browser": {},
+  "typesVersions": {},
+  "scripts": {
+    "dev": "vite serve dev",
+    "build": "tsup",
+    "lint": "eslint --fix .",
+    "stats:eslint": "cross-env TIMING=1 eslint .",
+    "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.8.17"
+  },
+  "devDependencies": {
+    "cross-env": "7.0.3",
+    "solid-js": "^1.8.17",
+    "tsup": "^8.0.2",
+    "tsup-preset-solid": "^2.2.0",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.12",
+    "vite-plugin-solid": "^2.10.2"
+  },
+  "keywords": [
+    "solid",
+    "dotlottie",
+    "lottie",
+    "player",
+    "animation",
+    "web",
+    "canvas",
+    "javascript",
+    "thorvg"
+  ],
+  "dependencies": {
+    "@lottiefiles/dotlottie-web": "workspace:*",
+    "debounce": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
