@@ -1,24 +1,20 @@
 {
   "name": "@lottiefiles/dotlottie-solid",
   "version": "0.0.1",
+  "type": "module",
   "description": "Solid wrapper around the dotlottie-web library",
-  "license": "MIT",
-  "author": "LottieFiles",
-  "contributors": [],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LottieFiles/dotlottie-web.git",
-    "directory": "packages/react"
+    "directory": "packages/solid"
   },
   "homepage": "https://github.com/LottieFiles/dotlottie-web#readme",
   "bugs": "https://github.com/LottieFiles/dotlottie-web/issues",
-  "files": [
-    "dist"
-  ],
-  "type": "module",
+  "author": "LottieFiles",
+  "contributors": [],
+  "license": "MIT",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     "development": {
       "import": {
@@ -32,27 +28,11 @@
     }
   },
   "browser": {},
+  "types": "./dist/index.d.ts",
   "typesVersions": {},
-  "scripts": {
-    "dev": "vite serve dev",
-    "build": "tsup",
-    "lint": "eslint --fix .",
-    "stats:eslint": "cross-env TIMING=1 eslint .",
-    "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
-    "type-check": "tsc --noEmit"
-  },
-  "peerDependencies": {
-    "solid-js": "^1.8.17"
-  },
-  "devDependencies": {
-    "cross-env": "7.0.3",
-    "solid-js": "^1.8.17",
-    "tsup": "^8.0.2",
-    "tsup-preset-solid": "^2.2.0",
-    "typescript": "^5.4.5",
-    "vite": "^5.2.12",
-    "vite-plugin-solid": "^2.10.2"
-  },
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "solid",
     "dotlottie",
@@ -64,9 +44,29 @@
     "javascript",
     "thorvg"
   ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "vite serve dev",
+    "lint": "eslint --fix .",
+    "stats:eslint": "cross-env TIMING=1 eslint .",
+    "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.8.17"
+  },
   "dependencies": {
     "@lottiefiles/dotlottie-web": "workspace:*",
     "debounce": "^2.0.0"
+  },
+  "devDependencies": {
+    "cross-env": "7.0.3",
+    "solid-js": "^1.8.17",
+    "tsup": "^8.0.2",
+    "tsup-preset-solid": "^2.2.0",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.12",
+    "vite-plugin-solid": "^2.10.2"
   },
   "publishConfig": {
     "access": "public"
