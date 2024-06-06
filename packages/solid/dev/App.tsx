@@ -1,5 +1,5 @@
 import { createEffect, createSignal, onCleanup, type Component } from 'solid-js';
-import { type DotLottie, DotLottieSolid } from '.././dist';
+import { type DotLottie, DotLottieSolid } from 'src';
 
 const animations = [
 	'https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json',
