@@ -3,7 +3,8 @@
  */
 
 import { defineConfig } from 'tsup';
-import preset from 'tsup-preset-solid';
+// eslint-disable-next-line import/no-namespace
+import * as preset from 'tsup-preset-solid';
 
 const presetOptions: preset.PresetOptions = {
   entries: [
