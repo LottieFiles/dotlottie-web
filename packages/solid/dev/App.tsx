@@ -65,19 +65,27 @@ const App: Component = () => {
   }
 
   createEffect(() => {
-    dotLottie()?.addEventListener('play', console.log);
-    dotLottie()?.addEventListener('freeze', console.log);
-    dotLottie()?.addEventListener('unfreeze', console.log);
-    dotLottie()?.addEventListener('pause', console.log);
-    dotLottie()?.addEventListener('stop', console.log);
+    const dotLottieInstance = dotLottie();
+
+    if (!dotLottieInstance) return;
+
+    dotLottieInstance.addEventListener('play', console.log);
+    dotLottieInstance.addEventListener('freeze', console.log);
+    dotLottieInstance.addEventListener('unfreeze', console.log);
+    dotLottieInstance.addEventListener('pause', console.log);
+    dotLottieInstance.addEventListener('stop', console.log);
   });
 
   onCleanup(() => {
-    dotLottie()?.removeEventListener('play', console.log);
-    dotLottie()?.removeEventListener('freeze', console.log);
-    dotLottie()?.removeEventListener('unfreeze', console.log);
-    dotLottie()?.addEventListener('pause', console.log);
-    dotLottie()?.addEventListener('stop', console.log);
+    const dotLottieInstance = dotLottie();
+
+    if (!dotLottieInstance) return;
+
+    dotLottieInstance.removeEventListener('play', console.log);
+    dotLottieInstance.removeEventListener('freeze', console.log);
+    dotLottieInstance.removeEventListener('unfreeze', console.log);
+    dotLottieInstance.removeEventListener('pause', console.log);
+    dotLottieInstance.removeEventListener('stop', console.log);
   });
 
   return (
