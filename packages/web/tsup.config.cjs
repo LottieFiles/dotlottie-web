@@ -1,7 +1,3 @@
-/**
- * Copyright 2022 Design Barn Inc.
- */
-
 const fs = require('fs');
 const path = require('path');
 

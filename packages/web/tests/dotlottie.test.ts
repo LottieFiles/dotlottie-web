@@ -1,7 +1,3 @@
-/**
- * Copyright 2024 Design Barn Inc.
- */
-
 import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
 import type { Config, Layout, Mode } from '../src';

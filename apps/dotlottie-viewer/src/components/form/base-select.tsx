@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { useEffect, useState } from 'react';
 import { FaInfoCircle } from 'react-icons/fa';
 

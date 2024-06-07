@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import DotLottieNew from './dotlottie-new';
