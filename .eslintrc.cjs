@@ -1,7 +1,3 @@
-/**
- * Copyright 2022 Design Barn Inc.
- */
-
 module.exports = {
   root: true,
 
@@ -41,6 +37,9 @@ module.exports = {
     '@typescript-eslint/prefer-for-of': 'off',
     '@typescript-eslint/dot-notation': 'off',
     '@typescript-eslint/member-ordering': 'off',
+
+    // Disable the LottieFiles header rule
+    'header/header': 'off',
 
     // Disable the async generator warning
     'no-restricted-syntax': 'off',

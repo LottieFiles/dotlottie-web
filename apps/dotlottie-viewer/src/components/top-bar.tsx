@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { resetUserConfig, setSrc, setUserSrc } from '../store/viewer-slice';

@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 

@@ -1,7 +1,3 @@
-/**
- * Copyright 2024 Design Barn Inc.
- */
-
 import pkg from '../../package.json';
 
 import createDotLottiePlayerModule from './dotlottie-player';

@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 export function isHexColor(color: string): boolean {
   return /^#([\da-f]{6}|[\da-f]{8})$/iu.test(color);
 }

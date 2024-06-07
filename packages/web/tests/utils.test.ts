@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { describe, test, expect } from 'vitest';
 
 import { hexStringToRGBAInt, isHexColor } from '../src/utils';

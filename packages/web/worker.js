@@ -1,7 +1,3 @@
-/**
- * Copyright 2024 Design Barn Inc.
- */
-
 import { DotLottie } from './dist/index.js';
 
 const dotLottiesMap = new Map();

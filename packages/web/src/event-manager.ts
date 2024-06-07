@@ -1,8 +1,4 @@
 /**
- * Copyright 2023 Design Barn Inc.
- */
-
-/**
  * Represents the different types of events that can be dispatched.
  */
 export type EventType =

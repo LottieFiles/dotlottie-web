@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 interface SwitchProps {
   className?: string;
   items: { label: string; value: string }[];
