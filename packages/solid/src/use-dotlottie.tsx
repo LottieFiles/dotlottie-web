@@ -1,7 +1,3 @@
-/**
- * Copyright 2024 Design Barn Inc.
- */
-
 import { type Config, DotLottie } from '@lottiefiles/dotlottie-web';
 import debounce from 'debounce';
 import type { Accessor, ComponentProps, JSX } from 'solid-js';

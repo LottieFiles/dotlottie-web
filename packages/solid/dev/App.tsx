@@ -1,7 +1,3 @@
-/**
- * Copyright 2024 Design Barn Inc.
- */
-
 import { createEffect, createSignal, onCleanup, type Component } from 'solid-js';
 import { type DotLottie, DotLottieSolid } from 'src';
 

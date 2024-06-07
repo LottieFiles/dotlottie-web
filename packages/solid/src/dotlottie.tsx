@@ -1,7 +1,3 @@
-/**
- * Copyright 2024 Design Barn Inc.
- */
-
 import type { Config, DotLottie } from '@lottiefiles/dotlottie-web';
 import { type ComponentProps, type JSX, createEffect, splitProps } from 'solid-js';
 

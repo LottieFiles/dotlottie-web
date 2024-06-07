@@ -1,7 +1,3 @@
-/**
- * Copyright 2024 Design Barn Inc.
- */
-
 import path from 'node:path';
 
 import { defineConfig } from 'vite';

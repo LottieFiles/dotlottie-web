@@ -1,7 +1,3 @@
-/**
- * Copyright 2024 Design Barn Inc.
- */
-
 import { defineConfig } from 'tsup';
 // eslint-disable-next-line import/no-namespace
 import * as preset from 'tsup-preset-solid';
