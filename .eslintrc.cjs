@@ -42,6 +42,9 @@ module.exports = {
     '@typescript-eslint/dot-notation': 'off',
     '@typescript-eslint/member-ordering': 'off',
 
+    // Disable the LottieFiles header rule
+    'header/header': 'off',
+
     // Disable the async generator warning
     'no-restricted-syntax': 'off',
 
