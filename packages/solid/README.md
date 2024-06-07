@@ -1,10 +1,5 @@
 # @lottiefiles/dotlottie-solid
 
-![npm](https://img.shields.io/npm/v/@lottiefiles/dotlottie-react)
-![npm bundle size](https://img.shields.io/bundlephobia/minzip/%40lottiefiles%2Fdotlottie-react)
-![npm](https://img.shields.io/npm/dt/%40lottiefiles/dotlottie-react)
-![NPM](https://img.shields.io/npm/l/@lottiefiles/dotlottie-react)
-
 <p align="center">
   <img src="https://user-images.githubusercontent.com/23125742/201124166-c2a0bc2a-018b-463b-b291-944fb767b5c2.png" />
 </p>
@@ -58,9 +53,7 @@ const App = () => {
 ```
 
 ## Live Examples
-
-* <a href="https://codepen.io/lottiefiles/pen/vYPJpBN" target="_blank">Getting Started</a>
-* <a href="https://codepen.io/lottiefiles/pen/WNmEdxd" target="_blank">Custom Playback Controls</a>
+🚧 WIP
 
 ## APIs
 
