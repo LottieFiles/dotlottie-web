@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { createSlice } from '@reduxjs/toolkit';
 
 export const PlayerStates = ['idle', 'loading', 'playing', 'paused', 'stopped'] as const;

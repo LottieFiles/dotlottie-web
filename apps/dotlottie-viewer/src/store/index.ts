@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { configureStore } from '@reduxjs/toolkit';
 
 import viewerSlice from './viewer-slice';

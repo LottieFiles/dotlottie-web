@@ -1,7 +1,3 @@
-/**
- * Copyright 2024 Design Barn Inc.
- */
-
 import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER } from './constants';
 import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker, Fit as CoreFit } from './core';
