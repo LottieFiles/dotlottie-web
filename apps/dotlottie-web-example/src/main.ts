@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 /* eslint-disable no-secrets/no-secrets */
 
 import './styles.css';

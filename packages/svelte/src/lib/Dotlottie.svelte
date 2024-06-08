@@ -1,7 +1,13 @@
+<svelte:options runes={false} />
+
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import debounce from 'debounce';
 	import { DotLottie, type Config } from '@lottiefiles/dotlottie-web';
+
+	export function setWasmUrl(url: string): void {
+		DotLottie.setWasmUrl(url);
+	}
 
 	export let autoplay: Config['autoplay'] = false;
 	export let backgroundColor: Config['backgroundColor'] = undefined;

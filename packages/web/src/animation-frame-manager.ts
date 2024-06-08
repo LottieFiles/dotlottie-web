@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 /* eslint-disable max-classes-per-file */
 
 interface AnimationFrameStrategy {

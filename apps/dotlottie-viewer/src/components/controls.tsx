@@ -1,10 +1,7 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   setActiveAnimationId,
+  setActiveMarker,
   setActiveThemeId,
   setBackgroundColor,
   setMdode,
@@ -28,6 +25,8 @@ export default function Controls() {
   const totalFrames = useAppSelector((state) => state.viewer.totalFrames);
   const segmentInput = useAppSelector((state) => state.viewer.segmentInput);
   const useFrameInterpolation = useAppSelector((state) => state.viewer.useFrameInterpolation);
+  const markers = useAppSelector((state) => state.viewer.markers);
+
   const dispatch = useAppDispatch();
 
   return (
@@ -144,6 +143,20 @@ export default function Controls() {
             items={themes.map((theme) => ({
               value: theme.id,
               label: theme.id,
+            }))}
+          />
+        </InputLabel>
+        <InputLabel lablel="Markers">
+          <BaseSelect
+            className="w-full"
+            onChange={(event) => {
+              dispatch(setActiveMarker(event.target.value));
+            }}
+            placeholder="Select a marker"
+            emptyMessage="No markers available for this animation"
+            items={markers.map((marker) => ({
+              value: marker,
+              label: marker,
             }))}
           />
         </InputLabel>

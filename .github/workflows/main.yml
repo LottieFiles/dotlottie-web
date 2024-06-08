@@ -1,9 +1,8 @@
 name: main
+
 on:
-  push:
-    branches:
-      - 'main'
   pull_request:
+    types: [opened, synchronize, reopened, closed, ready_for_review]
 
 jobs:
   validate:
@@ -58,11 +57,13 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-  release:
-    name: release
+  npm-release:
+    name: npm-release
     needs: validate
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+    if:
+      github.event_name == 'pull_request' && github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'main'
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
@@ -107,6 +108,26 @@ jobs:
 
       - name: Remove existing NPM .npmrc
         run: rm -f "$HOME/.npmrc"
+
+  gpr-release:
+    name: gpr-release
+    needs: [validate, npm-release]
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'pull_request' && github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref == 'changeset-release/main'
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          # https://github.com/changesets/action/issues/201#issuecomment-1206088289
+          # check out all commits and tags so changeset can skip duplicate tags
+          fetch-depth: 0
+
+      - name: ⎔ Setup pnpm@v8
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
       - name: ⎔ Setup Node@v18 for Github Packages
         uses: actions/setup-node@v4

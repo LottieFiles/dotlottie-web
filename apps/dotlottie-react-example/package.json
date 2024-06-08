@@ -4,15 +4,20 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "tsc && vite build",
-    "dev": "vite",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "vite build --ssrManifest --outDir dist/client",
+    "build:server": "vite build --ssr src/server-entry.tsx --outDir dist/server",
+    "dev": "node server",
+    "lint": "eslint . --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "cross-env NODE_ENV=production node server"
   },
   "dependencies": {
     "@lottiefiles/dotlottie-react": "workspace:*",
+    "compression": "^1.7.4",
+    "express": "^4.19.2",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "sirv": "^2.0.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",
@@ -20,6 +25,7 @@
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8.53.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.4",

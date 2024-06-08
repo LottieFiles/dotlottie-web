@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-web",
-  "version": "0.20.0",
+  "version": "0.23.2",
   "type": "module",
   "description": "Lottie and DotLottie player for the web",
   "repository": {
@@ -15,9 +15,6 @@
     "Abdelrahman Ashraf <a.theashraf@gmail.com>"
   ],
   "license": "MIT",
-  "engines": {
-    "node": ">=18"
-  },
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",

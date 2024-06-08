@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import type { Config } from '@lottiefiles/dotlottie-web';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 import type { TemplateResult } from 'lit';
@@ -132,3 +128,7 @@ export class DotLottieWC extends LitElement {
 if (!customElements.get('dotlottie-wc')) {
   customElements.define('dotlottie-wc', DotLottieWC);
 }
+
+export const setWasmUrl = (url: string): void => {
+  DotLottie.setWasmUrl(url);
+};

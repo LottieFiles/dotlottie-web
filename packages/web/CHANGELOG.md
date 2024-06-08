@@ -1,5 +1,58 @@
 # @lottiefiles/dotlottie-web
 
+## 0.23.2
+
+### Patch Changes
+
+- 6bb8561: fix(web): 🐛 ability to resize in non-browser environment
+
+## 0.23.1
+
+### Patch Changes
+
+- 91be7a1: fix(web): 🐛 theme updates not triggered for paused/stopped animation (#227)
+
+## 0.23.0
+
+### Minor Changes
+
+- 6d7673a: chore(web): 🤖 upgrade dotlottie-rs v0.1.20 wasm bindings (#224)
+- 274868e: feat: 🎸 added `segmentDuration` getter #225
+- 64214f7: perf: optimization tweak in the Uint8ClampedArray usage
+- 274868e: feat: 🎸 added `setViewport` method #225
+
+## 0.22.0
+
+### Minor Changes
+
+- 80fe2f1: chore (web): 🤖 Update dotlottie-rs to version 0.1.19
+
+  Release details: [dotlottie-rs@0.1.19](https://github.com/LottieFiles/dotlottie-rs/releases/tag/v0.1.19)
+
+## 0.21.1
+
+### Patch Changes
+
+- 6b394ca: fix:🐛 update dotlottie-rs v0.1.18 WASM bindings
+
+## 0.21.0
+
+### Minor Changes
+
+- fe68ad3: chore: 🤖 update dotlottie-rs v0.1.18 WASM bindings
+
+## 0.20.2
+
+### Patch Changes
+
+- 9e7a046: fix: 🐛 improve content-type parsing when loading from a url
+
+## 0.20.1
+
+### Patch Changes
+
+- f91a4d6: chore: 🤖 remove node version check from package.json
+
 ## 0.20.0
 
 ### Minor Changes

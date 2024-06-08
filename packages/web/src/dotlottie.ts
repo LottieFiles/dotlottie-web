@@ -1,7 +1,3 @@
-/**
- * Copyright 2024 Design Barn Inc.
- */
-
 import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER } from './constants';
 import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker, Fit as CoreFit } from './core';
@@ -190,11 +186,11 @@ export class DotLottie {
         );
       }
 
-      const contentType = response.headers.get('content-type');
+      const contentType = (response.headers.get('content-type') ?? '').trim();
 
       let data: string | ArrayBuffer;
 
-      if (['application/json', 'text/plain'].includes(contentType ?? '')) {
+      if (['application/json', 'text/plain'].some((type) => contentType.startsWith(type))) {
         data = await response.text();
       } else {
         data = await response.arrayBuffer();
@@ -419,6 +415,14 @@ export class DotLottie {
     return this._dotLottieCore?.duration() ?? 0;
   }
 
+  public get segmentDuration(): number {
+    return this._dotLottieCore?.segmentDuration() ?? 0;
+  }
+
+  public get canvas(): HTMLCanvasElement | OffscreenCanvas {
+    return this._canvas;
+  }
+
   public load(config: Omit<Config, 'canvas'>): void {
     if (this._dotLottieCore === null || this._wasmModule === null) return;
 
@@ -454,11 +458,21 @@ export class DotLottie {
     const rendered = this._dotLottieCore.render();
 
     if (rendered) {
-      const buffer = this._dotLottieCore.buffer() as Uint8ClampedArray;
+      const buffer = this._dotLottieCore.buffer() as Uint8Array;
+      const clampedBuffer = new Uint8ClampedArray(buffer, 0, this._canvas.width * this._canvas.height * 4);
 
-      const imageData = this._context.createImageData(this._canvas.width, this._canvas.height);
+      let imageData = null;
 
-      imageData.data.set(buffer);
+      /* 
+        In Node.js, the ImageData constructor is not available. 
+        You can use createImageData function in the canvas context to create ImageData object.
+      */
+      if (typeof ImageData === 'undefined') {
+        imageData = this._context.createImageData(this._canvas.width, this._canvas.height);
+        imageData.data.set(clampedBuffer);
+      } else {
+        imageData = new ImageData(clampedBuffer, this._canvas.width, this._canvas.height);
+      }
 
       this._context.putImageData(imageData, 0, 0);
 
@@ -636,14 +650,14 @@ export class DotLottie {
   }
 
   public resize(): void {
-    if (!IS_BROWSER || !(this._canvas instanceof HTMLCanvasElement)) return;
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
 
-    const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
+      const { height: clientHeight, width: clientWidth } = this._canvas.getBoundingClientRect();
 
-    const { height: clientHeight, width: clientWidth } = this._canvas.getBoundingClientRect();
-
-    this._canvas.width = clientWidth * dpr;
-    this._canvas.height = clientHeight * dpr;
+      this._canvas.width = clientWidth * dpr;
+      this._canvas.height = clientHeight * dpr;
+    }
 
     const ok = this._dotLottieCore?.resize(this._canvas.width, this._canvas.height);
 
@@ -724,13 +738,21 @@ export class DotLottie {
   public loadTheme(themeId: string): boolean {
     if (this._dotLottieCore === null) return false;
 
-    return this._dotLottieCore.loadTheme(themeId);
+    const loaded = this._dotLottieCore.loadTheme(themeId);
+
+    this._render();
+
+    return loaded;
   }
 
   public loadThemeData(themeData: string): boolean {
     if (this._dotLottieCore === null) return false;
 
-    return this._dotLottieCore.loadThemeData(themeData);
+    const loaded = this._dotLottieCore.loadThemeData(themeData);
+
+    this._render();
+
+    return loaded;
   }
 
   public setLayout(layout: Layout): void {
@@ -743,6 +765,12 @@ export class DotLottie {
         fit: createCoreFit(layout.fit, this._wasmModule),
       },
     });
+  }
+
+  public setViewport(x: number, y: number, width: number, height: number): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    return this._dotLottieCore.setViewport(x, y, width, height);
   }
 
   public static setWasmUrl(url: string): void {

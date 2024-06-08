@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { type Config, DotLottie, type Mode } from '@lottiefiles/dotlottie-web';
 import {
   type VNode,
@@ -154,3 +150,7 @@ export const DotLottieVue = defineComponent({
     return () => h('div', { ...attrs }, h('canvas', { style: 'height: 100%; width: 100%', ref: canvas }));
   },
 });
+
+export const setWasmUrl = (url: string): void => {
+  DotLottie.setWasmUrl(url);
+};
