@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-solid",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "type": "module",
   "description": "Solid wrapper around the dotlottie-web library",
   "repository": {
@@ -53,7 +53,7 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "solid-js": "^1.8.17"
+    "solid-js": "^1.6.12"
   },
   "dependencies": {
     "@lottiefiles/dotlottie-web": "workspace:*",
