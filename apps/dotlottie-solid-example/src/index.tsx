@@ -1,6 +1,7 @@
-/* @refresh reload */
-import App from 'App';
 import { render } from 'solid-js/web';
+
+// eslint-disable-next-line @lottiefiles/import-filename-format
+import App from './App';
 
 import './index.css';
 
