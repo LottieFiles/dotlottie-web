@@ -1,7 +1,7 @@
 import { type Config, DotLottie } from '@lottiefiles/dotlottie-web';
 import debounce from 'debounce';
-import type { Accessor, ComponentProps, JSX } from 'solid-js';
-import { createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
+import type { Accessor, ComponentProps, JSX} from 'solid-js';
+import { on , createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
 import { isServer } from 'solid-js/web';
 
 interface DotLottieComponentProps {
@@ -56,8 +56,6 @@ export interface UseDotLottieReturn {
 
 export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
   const [dotLottie, setDotLottie] = createSignal<DotLottie | null>(null);
-
-  const configRef: DotLottieConfig | undefined = config;
 
   let canvasRef: HTMLCanvasElement | null = null;
   let containerRef: HTMLDivElement | null = null;
@@ -245,31 +243,41 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
     }
   });
   // data
-  createEffect(() => {
-    const dotLottieInstance = dotLottie();
+  createEffect(
+    on(
+      () => config.data,
+      () => {
+        const dotLottieInstance = dotLottie();
 
-    if (!dotLottieInstance) return;
+        if (!dotLottieInstance) return;
 
-    if (typeof config.data == 'string' || config.data instanceof ArrayBuffer) {
-      dotLottieInstance.load({
-        data: config.data,
-        ...configRef,
-      });
-    }
-  });
+        if (typeof config.data === 'string') {
+          dotLottieInstance.load({
+            data: config.data,
+            ...config,
+          });
+        }
+      },
+    ),
+  );
   // src
-  createEffect(() => {
-    const dotLottieInstance = dotLottie();
+  createEffect(
+    on(
+      () => config.src,
+      () => {
+        const dotLottieInstance = dotLottie();
 
-    if (!dotLottieInstance) return;
+        if (!dotLottieInstance) return;
 
-    if (typeof config.src === 'string') {
-      dotLottieInstance.load({
-        src: config.src,
-        ...configRef,
-      });
-    }
-  });
+        if (typeof config.src === 'string') {
+          dotLottieInstance.load({
+            src: config.src,
+            ...config,
+          });
+        }
+      },
+    ),
+  );
   // marker
   createEffect(() => {
     const dotLottieInstance = dotLottie();

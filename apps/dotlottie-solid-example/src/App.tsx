@@ -1,5 +1,8 @@
-import { createEffect, createSignal, onCleanup, type Component } from 'solid-js';
-import { type DotLottie, DotLottieSolid } from 'src';
+import { type DotLottie, DotLottieSolid, setWasmUrl } from '@lottiefiles/dotlottie-solid';
+import type { Component} from 'solid-js';
+import { createEffect, createSignal } from 'solid-js';
+
+import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
 
 const animations = [
   // eslint-disable-next-line no-secrets/no-secrets
@@ -7,6 +10,8 @@ const animations = [
   // eslint-disable-next-line no-secrets/no-secrets
   'https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie',
 ];
+
+setWasmUrl(wasmUrl);
 
 const App: Component = () => {
   const [dotLottie, setDotlottie] = createSignal<DotLottie>();
@@ -61,19 +66,13 @@ const App: Component = () => {
   }
 
   createEffect(() => {
-    dotLottie()?.addEventListener('play', console.log);
-    dotLottie()?.addEventListener('freeze', console.log);
-    dotLottie()?.addEventListener('unfreeze', console.log);
-    dotLottie()?.addEventListener('pause', console.log);
-    dotLottie()?.addEventListener('stop', console.log);
-  });
+    const dotLottieInstance = dotLottie();
 
-  onCleanup(() => {
-    dotLottie()?.removeEventListener('play', console.log);
-    dotLottie()?.removeEventListener('freeze', console.log);
-    dotLottie()?.removeEventListener('unfreeze', console.log);
-    dotLottie()?.removeEventListener('pause', console.log);
-    dotLottie()?.removeEventListener('stop', console.log);
+    if (dotLottieInstance) {
+      dotLottieInstance.addEventListener('play', console.log);
+      dotLottieInstance.addEventListener('pause', console.log);
+      dotLottieInstance.addEventListener('stop', console.log);
+    }
   });
 
   return (
