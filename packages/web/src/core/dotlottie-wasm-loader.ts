@@ -31,15 +31,14 @@ export class DotLottieWasmLoader {
       this._ModulePromise = this._tryLoad(this._wasmURL).catch(async (initialError): Promise<MainModule> => {
         const backupUrl = `https://unpkg.com/${pkg.name}@${pkg.version}/dist/dotlottie-player.wasm`;
 
-        console.warn(`Trying backup URL for WASM loading: ${backupUrl}`);
+        console.warn(`Primary WASM load failed from ${this._wasmURL}. Error: ${(initialError as Error).message}`);
+        console.warn(`Attempting to load WASM from backup URL: ${backupUrl}`);
+
         try {
           return await this._tryLoad(backupUrl);
         } catch (backupError) {
-          console.error(
-            `Both primary and backup WASM URLs failed. Primary error: ${
-              (initialError as Error).message
-            }, Backup error: ${(backupError as Error).message}`,
-          );
+          console.error(`Primary WASM URL failed: ${(initialError as Error).message}`);
+          console.error(`Backup WASM URL failed: ${(backupError as Error).message}`);
           throw new Error('WASM loading failed from all sources.');
         }
       });
