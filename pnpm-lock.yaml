@@ -377,12 +377,6 @@ importers:
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
-      vite:
-        specifier: ^5.2.12
-        version: 5.2.13(@types/node@20.5.1)
-      vite-plugin-solid:
-        specifier: ^2.10.2
-        version: 2.10.2(solid-js@1.8.17)(vite@5.2.13)
 
   packages/svelte:
     dependencies:
@@ -437,7 +431,7 @@ importers:
         version: 5.0.0-next.55
       svelte-check:
         specifier: ^3.6.0
-        version: 3.6.4(@babel/core@7.24.4)(postcss@8.4.32)(svelte@5.0.0-next.55)
+        version: 3.6.4(@babel/core@7.23.2)(postcss@8.4.32)(svelte@5.0.0-next.55)
       tslib:
         specifier: ^2.4.1
         version: 2.6.2
@@ -15422,7 +15416,7 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
-  /svelte-check@3.6.4(@babel/core@7.24.4)(postcss@8.4.32)(svelte@5.0.0-next.55):
+  /svelte-check@3.6.4(@babel/core@7.23.2)(postcss@8.4.32)(svelte@5.0.0-next.55):
     resolution: {integrity: sha512-mY/dqucqm46p72M8yZmn81WPZx9mN6uuw8UVfR3ZKQeLxQg5HDGO3HHm5AZuWZPYNMLJ+TRMn+TeN53HfQ/vsw==}
     hasBin: true
     peerDependencies:
@@ -15537,7 +15531,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@babel/core': 7.24.4
+      '@babel/core': 7.23.2
       '@types/pug': 2.0.10
       detect-indent: 6.1.0
       magic-string: 0.30.5
