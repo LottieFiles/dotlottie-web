@@ -107,46 +107,9 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
     return new ResizeObserver(observerCallback);
   }, []);
 
-  const setCanvasRef = useCallback(
-    (canvas: HTMLCanvasElement | null) => {
-      if (canvas) {
-        const dotLottieInstance = new DotLottie({
-          ...config,
-          canvas,
-        });
-
-        setDotLottie(dotLottieInstance);
-
-        // Check if the canvas is initially in view
-        const initialEntry = canvas.getBoundingClientRect();
-
-        if (
-          initialEntry.top >= 0 &&
-          initialEntry.left >= 0 &&
-          initialEntry.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-          initialEntry.right <= (window.innerWidth || document.documentElement.clientWidth)
-        ) {
-          dotLottieInstance.unfreeze();
-        } else {
-          dotLottieInstance.freeze();
-        }
-
-        intersectionObserver?.observe(canvas);
-        if (config?.autoResizeCanvas) {
-          resizeObserver?.observe(canvas);
-        }
-        canvas.addEventListener('mouseenter', hoverHandler);
-        canvas.addEventListener('mouseleave', hoverHandler);
-      } else {
-        dotLottieRef.current?.destroy();
-        intersectionObserver?.disconnect();
-        resizeObserver?.disconnect();
-      }
-
-      canvasRef.current = canvas;
-    },
-    [intersectionObserver, resizeObserver, hoverHandler],
-  );
+  const setCanvasRef = useCallback((canvas: HTMLCanvasElement | null) => {
+    canvasRef.current = canvas;
+  }, []);
 
   const setContainerRef = useCallback((container: HTMLDivElement | null) => {
     containerRef.current = container;
@@ -160,98 +123,134 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   );
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+
+    let dotLottieInstance: DotLottie | null = null;
+
+    if (canvas) {
+      dotLottieInstance = new DotLottie({
+        ...configRef.current,
+        canvas,
+      });
+
+      // Check if the canvas is initially in view
+      const initialEntry = canvas.getBoundingClientRect();
+
+      if (
+        initialEntry.top >= 0 &&
+        initialEntry.left >= 0 &&
+        initialEntry.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        initialEntry.right <= (window.innerWidth || document.documentElement.clientWidth)
+      ) {
+        dotLottieInstance.unfreeze();
+      } else {
+        dotLottieInstance.freeze();
+      }
+
+      intersectionObserver?.observe(canvas);
+
+      if (config?.autoResizeCanvas) {
+        resizeObserver?.observe(canvas);
+      }
+      canvas.addEventListener('mouseenter', hoverHandler);
+      canvas.addEventListener('mouseleave', hoverHandler);
+
+      setDotLottie(dotLottieInstance);
+    }
+
     return () => {
-      dotLottie?.destroy();
+      dotLottieInstance?.destroy();
       setDotLottie(null);
       resizeObserver?.disconnect();
       intersectionObserver?.disconnect();
-      canvasRef.current?.removeEventListener('mouseenter', hoverHandler);
-      canvasRef.current?.removeEventListener('mouseleave', hoverHandler);
+      canvas?.removeEventListener('mouseenter', hoverHandler);
+      canvas?.removeEventListener('mouseleave', hoverHandler);
     };
-  }, []);
+  }, [intersectionObserver, resizeObserver, hoverHandler]);
 
   // speed reactivity
   useEffect(() => {
-    if (!dotLottie) return;
+    if (!dotLottieRef.current) return;
 
-    if (typeof config?.speed === 'number' && config.speed !== dotLottie.speed && dotLottie.isLoaded) {
-      dotLottie.setSpeed(config.speed);
+    if (typeof config?.speed === 'number' && config.speed !== dotLottieRef.current.speed) {
+      dotLottieRef.current.setSpeed(config.speed);
     }
   }, [config?.speed]);
 
   // mode reactivity
   useEffect(() => {
-    if (!dotLottie) return;
+    if (!dotLottieRef.current) return;
 
-    if (typeof config?.mode === 'string' && config.mode !== dotLottie.mode && dotLottie.isLoaded) {
-      dotLottie.setMode(config.mode);
+    if (typeof config?.mode === 'string' && config.mode !== dotLottieRef.current.mode) {
+      dotLottieRef.current.setMode(config.mode);
     }
   }, [config?.mode]);
 
   // loop reactivity
   useEffect(() => {
-    if (!dotLottie) return;
+    if (!dotLottieRef.current) return;
 
-    if (typeof config?.loop === 'boolean' && config.loop !== dotLottie.loop && dotLottie.isLoaded) {
-      dotLottie.setLoop(config.loop);
+    if (typeof config?.loop === 'boolean' && config.loop !== dotLottieRef.current.loop) {
+      dotLottieRef.current.setLoop(config.loop);
     }
   }, [config?.loop]);
 
   // useFrameInterpolation reactivity
   useEffect(() => {
-    if (!dotLottie) return;
+    if (!dotLottieRef.current) return;
 
     if (
       typeof config?.useFrameInterpolation === 'boolean' &&
-      config.useFrameInterpolation !== dotLottie.useFrameInterpolation &&
-      dotLottie.isLoaded
+      config.useFrameInterpolation !== dotLottieRef.current.useFrameInterpolation
     ) {
-      dotLottie.setUseFrameInterpolation(config.useFrameInterpolation);
+      dotLottieRef.current.setUseFrameInterpolation(config.useFrameInterpolation);
     }
   }, [config?.useFrameInterpolation]);
 
   // segment reactivity
   useEffect(() => {
-    if (!dotLottie) return;
+    if (!dotLottieRef.current) return;
 
     if (
       typeof config?.segment === 'object' &&
       Array.isArray(config.segment) &&
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      config.segment.length === 2 &&
-      dotLottie.isLoaded
+      config.segment.length === 2
     ) {
       const startFrame = config.segment[0];
       const endFrame = config.segment[1];
 
-      dotLottie.setSegment(startFrame, endFrame);
+      dotLottieRef.current.setSegment(startFrame, endFrame);
     }
   }, [config?.segment]);
 
   // background color reactivity
   useEffect(() => {
-    if (!dotLottie) return;
+    if (!dotLottieRef.current) return;
 
-    if (typeof config?.backgroundColor === 'string' && config.backgroundColor !== dotLottie.backgroundColor) {
-      dotLottie.setBackgroundColor(config.backgroundColor);
+    if (
+      typeof config?.backgroundColor === 'string' &&
+      config.backgroundColor !== dotLottieRef.current.backgroundColor
+    ) {
+      dotLottieRef.current.setBackgroundColor(config.backgroundColor);
     }
   }, [config?.backgroundColor]);
 
   // render config reactivity
   useEffect(() => {
-    if (!dotLottie) return;
+    if (!dotLottieRef.current) return;
 
     if (typeof config?.renderConfig === 'object') {
-      dotLottie.setRenderConfig(config.renderConfig);
+      dotLottieRef.current.setRenderConfig(config.renderConfig);
     }
-  }, [config?.renderConfig]);
+  }, [JSON.stringify(config?.renderConfig)]);
 
   // data reactivity
   useEffect(() => {
-    if (!dotLottie) return;
+    if (!dotLottieRef.current) return;
 
     if (typeof config?.data === 'string' || config?.data instanceof ArrayBuffer) {
-      dotLottie.load({
+      dotLottieRef.current.load({
         data: config.data,
         ...(configRef.current || {}),
       });
@@ -260,10 +259,10 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
 
   // src reactivity
   useEffect(() => {
-    if (!dotLottie) return;
+    if (!dotLottieRef.current) return;
 
     if (typeof config?.src === 'string') {
-      dotLottie.load({
+      dotLottieRef.current.load({
         src: config.src,
         ...(configRef.current || {}),
       });
@@ -271,10 +270,10 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   }, [config?.src]);
 
   useEffect(() => {
-    if (!dotLottie) return;
+    if (!dotLottieRef.current) return;
 
     if (typeof config?.marker === 'string') {
-      dotLottie.setMarker(config.marker);
+      dotLottieRef.current.setMarker(config.marker);
     }
   }, [config?.marker]);
 
