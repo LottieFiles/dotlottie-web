@@ -1,5 +1,29 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [6bb8561]
+  - @lottiefiles/dotlottie-web@0.23.2
+
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [91be7a1]
+  - @lottiefiles/dotlottie-web@0.23.1
+
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [6d7673a]
+- Updated dependencies [274868e]
+- Updated dependencies [64214f7]
+- Updated dependencies [274868e]
+  - @lottiefiles/dotlottie-web@0.23.0
+
 ## 0.2.0
 
 ### Minor Changes

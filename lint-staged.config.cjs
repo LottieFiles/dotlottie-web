@@ -1,7 +1,3 @@
-/**
- * Copyright 2022 Design Barn Inc.
- */
-
 module.exports = {
   '*.{js,jsx,ts,tsx}': 'cross-env NODE_ENV=production eslint --cache --fix',
   '*.md': 'remark --output --ignore-path .remarkignore --silently-ignore',

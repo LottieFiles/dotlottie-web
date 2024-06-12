@@ -1,5 +1,30 @@
 # @lottiefiles/dotlottie-react
 
+## 0.6.3
+
+### Patch Changes
+
+- Updated dependencies [6bb8561]
+  - @lottiefiles/dotlottie-web@0.23.2
+
+## 0.6.2
+
+### Patch Changes
+
+- Updated dependencies [91be7a1]
+  - @lottiefiles/dotlottie-web@0.23.1
+
+## 0.6.1
+
+### Patch Changes
+
+- 2913555: fix(react): 🐛 avoid creating browser-specific objects in SSR environment
+- Updated dependencies [6d7673a]
+- Updated dependencies [274868e]
+- Updated dependencies [64214f7]
+- Updated dependencies [274868e]
+  - @lottiefiles/dotlottie-web@0.23.0
+
 ## 0.6.0
 
 ### Minor Changes

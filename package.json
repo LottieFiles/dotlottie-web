@@ -50,7 +50,7 @@
     "prettier": "2.8.8",
     "remark-cli": "11.0.0",
     "size-limit": "^11.0.2",
-    "svelte-loader": "^3.1.9",
+    "svelte-loader": "^3.2.3",
     "syncpack": "9.8.6",
     "turbo": "1.10.16",
     "typescript": "5.0.4",

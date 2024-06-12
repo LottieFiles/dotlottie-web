@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 interface LoadTimeProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
   loadTime: number;

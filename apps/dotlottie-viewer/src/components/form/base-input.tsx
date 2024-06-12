@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { useRef } from 'react';
 
 interface ColorInputProps {

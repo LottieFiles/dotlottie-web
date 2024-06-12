@@ -1,7 +1,3 @@
-/**
- * Copyright 2022 Design Barn Inc.
- */
-
 const { defineConfig } = require('tsup');
 
 const pkg = require('./package.json');

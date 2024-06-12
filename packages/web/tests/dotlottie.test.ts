@@ -1,7 +1,3 @@
-/**
- * Copyright 2024 Design Barn Inc.
- */
-
 import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
 import type { Config, Layout, Mode } from '../src';
@@ -165,13 +161,8 @@ describe('play', () => {
         expect(onLoad).toHaveBeenCalledTimes(1);
       });
 
-      const totalFrames = (config.segment?.[1] ?? dotLottie.totalFrames) - (config.segment?.[0] ?? 0);
-
       const expectedDuration =
-        ((config.mode?.includes('bounce') ? 2 : 1) *
-          ((dotLottie.duration * totalFrames) / dotLottie.totalFrames) *
-          1000) /
-        dotLottie.speed;
+        ((config.mode?.includes('bounce') ? 2 : 1) * dotLottie.segmentDuration * 1000) / dotLottie.speed;
 
       const expectedEndFrame =
         config.mode === 'reverse' || config.mode === 'reverse-bounce'
@@ -1707,4 +1698,23 @@ describe('layout', () => {
 
     expect(dotLottie.layout).toEqual(layout);
   });
+});
+
+test('setViewport() sets the viewport', async () => {
+  const onLoad = vi.fn();
+
+  dotLottie = new DotLottie({
+    canvas,
+    src,
+  });
+
+  dotLottie.addEventListener('load', onLoad);
+
+  await vi.waitFor(() => {
+    expect(onLoad).toHaveBeenCalledTimes(1);
+  });
+
+  const updated = dotLottie.setViewport(0, 0, 100, 100);
+
+  expect(updated).toBe(true);
 });

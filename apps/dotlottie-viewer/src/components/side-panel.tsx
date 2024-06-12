@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import logo from '../assets/brand-logo.svg';
 import AnimationList from './animation-list';
 

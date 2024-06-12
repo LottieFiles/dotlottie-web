@@ -1,7 +1,3 @@
-/**
- * Copyright 2021 Design Barn Inc.
- */
-
 import { $, chalk, globby, fs } from 'zx';
 
 // Files to remove

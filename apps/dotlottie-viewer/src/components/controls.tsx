@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   setActiveAnimationId,

@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { type TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
 import type { RootState, AppDispatch } from '.';

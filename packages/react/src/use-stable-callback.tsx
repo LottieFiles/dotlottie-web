@@ -1,7 +1,3 @@
-/**
- * Copyright 2024 Design Barn Inc.
- */
-
 import { useCallback, useLayoutEffect, useRef, useEffect } from 'react';
 
 // eslint-disable-next-line no-negated-condition

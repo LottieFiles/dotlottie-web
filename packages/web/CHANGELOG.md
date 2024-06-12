@@ -1,5 +1,26 @@
 # @lottiefiles/dotlottie-web
 
+## 0.23.2
+
+### Patch Changes
+
+- 6bb8561: fix(web): 🐛 ability to resize in non-browser environment
+
+## 0.23.1
+
+### Patch Changes
+
+- 91be7a1: fix(web): 🐛 theme updates not triggered for paused/stopped animation (#227)
+
+## 0.23.0
+
+### Minor Changes
+
+- 6d7673a: chore(web): 🤖 upgrade dotlottie-rs v0.1.20 wasm bindings (#224)
+- 274868e: feat: 🎸 added `segmentDuration` getter #225
+- 64214f7: perf: optimization tweak in the Uint8ClampedArray usage
+- 274868e: feat: 🎸 added `setViewport` method #225
+
 ## 0.22.0
 
 ### Minor Changes
