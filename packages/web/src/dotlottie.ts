@@ -27,7 +27,7 @@ export interface Layout {
 export interface Config {
   autoplay?: boolean;
   backgroundColor?: string;
-  canvas: HTMLCanvasElement;
+  canvas: HTMLCanvasElement | OffscreenCanvas;
   data?: Data;
   layout?: Layout;
   loop?: boolean;
@@ -116,7 +116,7 @@ const createCoreSegment = (segment: number[], module: MainModule): VectorFloat =
 export class DotLottie {
   private readonly _canvas: HTMLCanvasElement | OffscreenCanvas;
 
-  private _context: CanvasRenderingContext2D | null;
+  private _context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
 
   private readonly _eventManager: EventManager;
 

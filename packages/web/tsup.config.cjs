@@ -19,7 +19,24 @@ function copyFileSync(src, dest) {
   });
 }
 
-module.exports = defineConfig({
+const workerBuildConfig = defineConfig({
+  bundle: true,
+  metafile: false,
+  splitting: false,
+  treeshake: true,
+  clean: false,
+  dts: false,
+  minify: false,
+  sourcemap: false,
+  entry: ['./src/worker/dotlottie.worker.ts'],
+  format: ['esm'],
+  platform: 'neutral',
+  target: ['es2020', 'node18'],
+  tsconfig: 'tsconfig.build.json',
+  outDir: './src/worker/dist/',
+});
+
+const libBuildConfig = defineConfig({
   bundle: true,
   metafile: false,
   splitting: false,
@@ -28,11 +45,14 @@ module.exports = defineConfig({
   dts: true,
   minify: true,
   sourcemap: true,
-  entry: ['./src/index.ts'],
+  entry: ['./src/index.ts', './src/worker/index.ts'],
   format: ['esm', 'cjs'],
   platform: 'neutral',
   target: ['es2020', 'node18'],
   tsconfig: 'tsconfig.build.json',
+  loader: {
+    '.worker.js': 'text',
+  },
   onSuccess: () => {
     copyFileSync(
       path.resolve(__dirname, 'src/core/dotlottie-player.wasm'),
@@ -42,3 +62,9 @@ module.exports = defineConfig({
     });
   },
 });
+
+module.exports = (config) => {
+  const isWorker = config['--'][0] === 'worker';
+
+  return isWorker ? [workerBuildConfig] : [libBuildConfig];
+};

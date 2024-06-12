@@ -33,6 +33,7 @@
   ],
   "scripts": {
     "build": "tsup",
+    "build:worker": "tsup -- worker",
     "dev": "tsup --watch",
     "lint": "eslint --fix .",
     "stats:eslint": "cross-env TIMING=1 eslint .",

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <h1>dotLottie Worker</h1>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <canvas
+            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
+            style="width: 300px; height: 300px"
+        ></canvas>
+        <script type="module">
+            import { DotLottieWorker as DotLottie } from './dist/worker/index.js';
+            // import { DotLottie } from './dist/index.js';
+
+            const worker = new DotLottieWorker();
+
+            worker.add(new DotLottie());
+            worker.add(new DotLottie());
+            worker.add(new DotLottie());
+
+            worker.terminate();
+
+            for (const canvas of document.querySelectorAll('canvas')) {
+                // const worker = new DotLottieWorker({
+                const dotLottie = new DotLottie({
+                    canvas,
+                    src: canvas.getAttribute('data-src'),
+                    autoplay: true,
+                    loop: true,
+                });
+            }
+        </script>
+        <script>
+            var script = document.createElement('script');
+            script.onload = function () {
+                var stats = new Stats();
+                document.body.appendChild(stats.dom);
+                requestAnimationFrame(function loop() {
+                    stats.update();
+                    requestAnimationFrame(loop);
+                });
+            };
+            script.src = 'https://mrdoob.github.io/stats.js/build/stats.min.js';
+            document.head.appendChild(script);
+        </script>
+    </body>
+</html>
