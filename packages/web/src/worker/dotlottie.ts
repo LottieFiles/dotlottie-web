@@ -1,7 +1,9 @@
-import type { Config } from '../dotlottie';
+import type { Config, Mode } from '../dotlottie';
+import type { EventType, EventListener } from '../event-manager';
+import { EventManager } from '../event-manager';
 
-import workerString from './dist/dotlottie.worker.js';
-import type { WorkerMessage } from './dotlottie.worker.types';
+import { WorkerManager } from './worker-manager';
+import type { WorkerMessage, WorkerParams, WorkerResponse } from './worker-manager';
 
 function getCanvasSize(canvas: HTMLCanvasElement): { height: number; width: number } {
   const { height, width } = canvas.getBoundingClientRect();
@@ -10,17 +12,16 @@ function getCanvasSize(canvas: HTMLCanvasElement): { height: number; width: numb
 }
 
 export class DotLottieWorker {
-  private readonly _worker: Worker;
+  private static readonly _workerManager = new WorkerManager();
 
-  private readonly _id: string = '';
+  private readonly _eventManager = new EventManager();
 
-  private readonly _canvas: HTMLCanvasElement | null = null;
+  private readonly _id: string;
 
-  public constructor(config: Config) {
+  private readonly _canvas: HTMLCanvasElement | null;
+
+  public constructor(config: Config & { workerId?: string }) {
     this._canvas = null;
-
-    const blob = new Blob([workerString], { type: 'application/javascript' });
-
     let offscreen: OffscreenCanvas;
 
     if (config.canvas instanceof HTMLCanvasElement) {
@@ -30,62 +31,95 @@ export class DotLottieWorker {
       offscreen = config.canvas;
     }
 
-    // eslint-disable-next-line node/no-unsupported-features/node-builtins
-    this._worker = new Worker(URL.createObjectURL(blob), {
-      type: 'module',
-    });
+    this._id = this._generateUniqueId();
 
-    this._worker.onmessage = this._handleWorkerMessage.bind(this);
+    const workerId = config.workerId || 'defaultWorker';
 
-    this._id = Date.now().toString();
+    const worker = DotLottieWorker._workerManager.getWorker(workerId);
 
-    this._worker.postMessage(
-      {
-        type: 'create',
-        payload: {
-          id: this._id,
-          config: {
-            ...config,
-            canvas: offscreen,
-          },
-        },
-      } as WorkerMessage,
-      [offscreen],
-    );
+    DotLottieWorker._workerManager.assignAnimationToWorker(this._id, workerId);
+
+    const message: WorkerMessage = {
+      method: 'create',
+      params: { id: this._id, config: { ...config, canvas: offscreen } },
+      id: this._generateUniqueId(),
+    };
+
+    DotLottieWorker._workerManager.sendMessage(workerId, message, [offscreen]);
+
+    worker.addEventListener('message', this._handleWorkerEvent.bind(this));
   }
 
-  private _handleWorkerMessage(event: MessageEvent): void {
-    // const data = event.data as WorkerMessage;
-    if (event.data.type === 'load') {
-      if (this._canvas instanceof HTMLCanvasElement) {
-        const size = getCanvasSize(this._canvas);
-
-        this.resizeTo(size.width, size.height);
-      }
-    }
+  private _generateUniqueId(): string {
+    return `dotlottie_animation_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   public play(): void {
-    this._worker.postMessage({
-      type: 'play',
-      payload: {
-        id: this._id,
-      },
-    });
+    this._sendMessage('play');
   }
 
   public pause(): void {
-    this._worker.postMessage({
-      type: 'pause',
-      payload: { id: this._id },
-    });
+    this._sendMessage('pause');
   }
 
   public stop(): void {
-    this._worker.postMessage({ type: 'stop', payload: { id: this._id } });
+    this._sendMessage('stop');
   }
 
-  public resizeTo(width: number, height: number): void {
-    this._worker.postMessage({ type: 'resize', payload: { width, height, id: this._id } });
+  public setSpeed(speed: number): void {
+    this._sendMessage('setSpeed', { speed });
+  }
+
+  public setMode(mode: Mode): void {
+    this._sendMessage('setMode', { mode });
+  }
+
+  public setFrame(frame: number): void {
+    this._sendMessage('setFrame', { frame });
+  }
+
+  public load(_config: Omit<Config, 'canvas'>): void {
+    // this._sendMessage('load', { config });
+  }
+
+  public resize(): void {
+    const canvasElement = this._canvas;
+
+    if (!canvasElement) return;
+
+    const { height, width } = getCanvasSize(canvasElement);
+
+    this._sendMessage('resize', { width, height });
+  }
+
+  public destroy(): void {
+    this._sendMessage('destroy');
+    DotLottieWorker._workerManager.unassignAnimationFromWorker(this._id);
+  }
+
+  private _sendMessage(method: WorkerMessage['method'], params?: WorkerParams): void {
+    const message: WorkerMessage = {
+      method,
+      params: { ...params, id: this._id },
+      id: this._generateUniqueId(),
+    };
+
+    DotLottieWorker._workerManager.sendMessageToAnimation(this._id, message);
+  }
+
+  private _handleWorkerEvent(event: MessageEvent<WorkerResponse>): void {
+    const { data } = event;
+
+    if (data.id !== this._id) return;
+
+    console.log(event);
+  }
+
+  public addEventListener<T extends EventType>(type: T, listener: EventListener<T>): void {
+    this._eventManager.addEventListener(type, listener);
+  }
+
+  public removeEventListener<T extends EventType>(type: T, listener?: EventListener<T>): void {
+    this._eventManager.removeEventListener(type, listener);
   }
 }

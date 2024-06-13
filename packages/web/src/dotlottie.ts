@@ -133,6 +133,7 @@ export class DotLottie {
   public constructor(config: Config) {
     this._canvas = config.canvas;
     this._context = this._canvas.getContext('2d');
+
     this._eventManager = new EventManager();
     this._frameManager = new AnimationFrameManager();
     this._renderConfig = config.renderConfig ?? {};

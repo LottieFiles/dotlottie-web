@@ -73,24 +73,17 @@
         ></canvas>
         <script type="module">
             import { DotLottieWorker as DotLottie } from './dist/worker/index.js';
-            // import { DotLottie } from './dist/index.js';
 
-            const worker = new DotLottieWorker();
-
-            worker.add(new DotLottie());
-            worker.add(new DotLottie());
-            worker.add(new DotLottie());
-
-            worker.terminate();
-
-            for (const canvas of document.querySelectorAll('canvas')) {
-                // const worker = new DotLottieWorker({
+            for (const canvas of [document.querySelectorAll('canvas')[0]]) {
                 const dotLottie = new DotLottie({
                     canvas,
                     src: canvas.getAttribute('data-src'),
                     autoplay: true,
                     loop: true,
                 });
+
+                dotLottie.addEventListener('load', console.log);
+                dotLottie.addEventListener('play', console.log);
             }
         </script>
         <script>

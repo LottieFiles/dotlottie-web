@@ -7,8 +7,3 @@ declare module '*.json?url' {
   const value: string;
   export default value;
 }
-
-declare module './dist/dotlottie.worker.js' {
-  const value: string;
-  export default value;
-}
