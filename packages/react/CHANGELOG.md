@@ -1,5 +1,14 @@
 # @lottiefiles/dotlottie-react
 
+## 0.6.4
+
+### Patch Changes
+
+- a79c540: fix(react): 🐛 dotlottieRefCallback null instance in strict mode
+- Updated dependencies [663fab2]
+- Updated dependencies [b72a4d7]
+  - @lottiefiles/dotlottie-web@0.24.0
+
 ## 0.6.3
 
 ### Patch Changes
