@@ -1,5 +1,15 @@
 # @lottiefiles/dotlottie-web
 
+## 0.24.0
+
+### Minor Changes
+
+- b72a4d7: chore: 🤖 upgrade dotlottie-rs v0.1.21 wasm bindings
+
+### Patch Changes
+
+- 663fab2: chore(web): 🤖 log error of loading the initial WASM URL
+
 ## 0.23.2
 
 ### Patch Changes
