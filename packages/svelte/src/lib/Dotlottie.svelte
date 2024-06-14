@@ -19,6 +19,8 @@
 	export let speed: Config['speed'] = 1;
 	export let src: Config['src'] = undefined;
 	export let useFrameInterpolation: Config['useFrameInterpolation'] = true;
+	export let marker: Config['marker'] = undefined;
+	export let layout: Config['layout'] = undefined;
 
 	export let autoResizeCanvas: boolean = false;
 	export let dotLottieRefCallback: (dotLottie: DotLottie) => void = () => {};
@@ -76,6 +78,18 @@
 	});
 
 	$: {
+		if (dotLottie && typeof layout === 'object') {
+			dotLottie.setLayout(layout);
+		}
+	}
+
+	$: {
+		if (dotLottie && typeof marker === 'string') {
+			dotLottie.setMarker(marker);
+		}
+	}
+
+	$: {
 		if (dotLottie &&  dotLottie.isLoaded && typeof speed == 'number') {
 			dotLottie.setSpeed(speed);
 		}
@@ -124,7 +138,9 @@
             segment,
             useFrameInterpolation,
             backgroundColor,
-            mode
+            mode,
+			marker,
+			layout
         });
         prevSrc = src; 
     }
@@ -140,7 +156,9 @@
 			segment,
 			useFrameInterpolation,
 			backgroundColor,
-			mode
+			mode,
+			marker,
+			layout
 		});
 		prevData = data;
 	}
