@@ -292,10 +292,10 @@ var createDotLottiePlayerModule = (() => {
       };
       /** @param {WebAssembly.Module=} module*/ function receiveInstance(instance, module) {
         wasmExports = instance.exports;
-        wasmMemory = wasmExports['la'];
+        wasmMemory = wasmExports['ka'];
         updateMemoryViews();
-        wasmTable = wasmExports['pa'];
-        addOnInit(wasmExports['ma']);
+        wasmTable = wasmExports['oa'];
+        addOnInit(wasmExports['la']);
         removeRunDependency('wasm-instantiate');
         return wasmExports;
       }
@@ -2846,78 +2846,77 @@ var createDotLottiePlayerModule = (() => {
       /** @export */ d: ___cxa_find_matching_catch_2,
       /** @export */ q: ___cxa_throw,
       /** @export */ h: ___resumeException,
-      /** @export */ E: ___syscall_fcntl64,
-      /** @export */ W: ___syscall_fstat64,
-      /** @export */ T: ___syscall_getcwd,
-      /** @export */ X: ___syscall_ioctl,
-      /** @export */ U: ___syscall_newfstatat,
-      /** @export */ D: ___syscall_openat,
-      /** @export */ V: ___syscall_stat64,
+      /** @export */ F: ___syscall_fcntl64,
+      /** @export */ V: ___syscall_fstat64,
+      /** @export */ S: ___syscall_getcwd,
+      /** @export */ W: ___syscall_ioctl,
+      /** @export */ T: ___syscall_newfstatat,
+      /** @export */ E: ___syscall_openat,
+      /** @export */ U: ___syscall_stat64,
       /** @export */ A: __embind_finalize_value_object,
-      /** @export */ O: __embind_register_bigint,
-      /** @export */ ea: __embind_register_bool,
-      /** @export */ z: __embind_register_class,
-      /** @export */ x: __embind_register_class_constructor,
+      /** @export */ N: __embind_register_bigint,
+      /** @export */ da: __embind_register_bool,
+      /** @export */ v: __embind_register_class,
+      /** @export */ u: __embind_register_class_constructor,
       /** @export */ i: __embind_register_class_function,
-      /** @export */ da: __embind_register_emval,
-      /** @export */ B: __embind_register_enum,
+      /** @export */ ca: __embind_register_emval,
+      /** @export */ C: __embind_register_enum,
       /** @export */ n: __embind_register_enum_value,
       /** @export */ I: __embind_register_float,
       /** @export */ K: __embind_register_function,
       /** @export */ p: __embind_register_integer,
       /** @export */ k: __embind_register_memory_view,
-      /** @export */ L: __embind_register_optional,
-      /** @export */ ka: __embind_register_smart_ptr,
+      /** @export */ B: __embind_register_optional,
+      /** @export */ ja: __embind_register_smart_ptr,
       /** @export */ J: __embind_register_std_string,
-      /** @export */ y: __embind_register_std_wstring,
-      /** @export */ u: __embind_register_value_object,
+      /** @export */ z: __embind_register_std_wstring,
+      /** @export */ w: __embind_register_value_object,
       /** @export */ m: __embind_register_value_object_field,
-      /** @export */ fa: __embind_register_void,
-      /** @export */ Y: __emscripten_memcpy_js,
-      /** @export */ P: __emscripten_throw_longjmp,
-      /** @export */ ia: __emval_call,
-      /** @export */ R: __emval_decref,
-      /** @export */ ha: __emval_get_method_caller,
-      /** @export */ ja: __emval_incref,
-      /** @export */ ga: __emval_run_destructors,
-      /** @export */ t: __emval_take_value,
-      /** @export */ ca: _abort,
+      /** @export */ ea: __embind_register_void,
+      /** @export */ X: __emscripten_memcpy_js,
+      /** @export */ O: __emscripten_throw_longjmp,
+      /** @export */ ha: __emval_call,
+      /** @export */ P: __emval_decref,
+      /** @export */ ga: __emval_get_method_caller,
+      /** @export */ ia: __emval_incref,
+      /** @export */ fa: __emval_run_destructors,
+      /** @export */ r: __emval_take_value,
+      /** @export */ ba: _abort,
       /** @export */ l: _emscripten_get_now,
-      /** @export */ S: _emscripten_resize_heap,
-      /** @export */ Z: _environ_get,
-      /** @export */ _: _environ_sizes_get,
-      /** @export */ w: _fd_close,
-      /** @export */ C: _fd_read,
-      /** @export */ N: _fd_seek,
-      /** @export */ v: _fd_write,
-      /** @export */ $: _getentropy,
-      /** @export */ F: invoke_i,
+      /** @export */ R: _emscripten_resize_heap,
+      /** @export */ Y: _environ_get,
+      /** @export */ Z: _environ_sizes_get,
+      /** @export */ y: _fd_close,
+      /** @export */ D: _fd_read,
+      /** @export */ M: _fd_seek,
+      /** @export */ x: _fd_write,
+      /** @export */ _: _getentropy,
       /** @export */ j: invoke_ii,
       /** @export */ g: invoke_iii,
-      /** @export */ e: invoke_iiii,
-      /** @export */ ba: invoke_iiiii,
+      /** @export */ f: invoke_iiii,
+      /** @export */ aa: invoke_iiiii,
       /** @export */ s: invoke_iiiiii,
       /** @export */ G: invoke_iiiiiiii,
-      /** @export */ r: invoke_v,
+      /** @export */ t: invoke_v,
       /** @export */ b: invoke_vi,
       /** @export */ a: invoke_vii,
-      /** @export */ f: invoke_viii,
+      /** @export */ e: invoke_viii,
       /** @export */ o: invoke_viiii,
       /** @export */ H: invoke_viiiii,
-      /** @export */ aa: invoke_viiiiii,
-      /** @export */ M: invoke_viiij,
+      /** @export */ $: invoke_viiiiii,
+      /** @export */ L: invoke_viiij,
       /** @export */ Q: _strftime_l,
     };
 
     var wasmExports = createWasm();
 
-    var ___wasm_call_ctors = () => (___wasm_call_ctors = wasmExports['ma'])();
+    var ___wasm_call_ctors = () => (___wasm_call_ctors = wasmExports['la'])();
 
-    var _malloc = (a0) => (_malloc = wasmExports['na'])(a0);
+    var _malloc = (a0) => (_malloc = wasmExports['ma'])(a0);
 
-    var ___getTypeName = (a0) => (___getTypeName = wasmExports['oa'])(a0);
+    var ___getTypeName = (a0) => (___getTypeName = wasmExports['na'])(a0);
 
-    var _free = (a0) => (_free = wasmExports['qa'])(a0);
+    var _free = (a0) => (_free = wasmExports['pa'])(a0);
 
     var _htonl = (a0) => (_htonl = wasmExports['htonl'])(a0);
 
@@ -2925,52 +2924,52 @@ var createDotLottiePlayerModule = (() => {
 
     var _ntohs = (a0) => (_ntohs = wasmExports['ntohs'])(a0);
 
-    var _setThrew = (a0, a1) => (_setThrew = wasmExports['ra'])(a0, a1);
+    var _setThrew = (a0, a1) => (_setThrew = wasmExports['qa'])(a0, a1);
 
-    var __emscripten_tempret_set = (a0) => (__emscripten_tempret_set = wasmExports['sa'])(a0);
+    var __emscripten_tempret_set = (a0) => (__emscripten_tempret_set = wasmExports['ra'])(a0);
 
-    var __emscripten_stack_restore = (a0) => (__emscripten_stack_restore = wasmExports['ta'])(a0);
+    var __emscripten_stack_restore = (a0) => (__emscripten_stack_restore = wasmExports['sa'])(a0);
 
     var __emscripten_stack_alloc = (a0) => (__emscripten_stack_alloc = wasmExports['_emscripten_stack_alloc'])(a0);
 
-    var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmExports['ua'])();
+    var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmExports['ta'])();
 
     var ___cxa_increment_exception_refcount = (a0) =>
       (___cxa_increment_exception_refcount = wasmExports['__cxa_increment_exception_refcount'])(a0);
 
-    var ___cxa_can_catch = (a0, a1, a2) => (___cxa_can_catch = wasmExports['va'])(a0, a1, a2);
+    var ___cxa_can_catch = (a0, a1, a2) => (___cxa_can_catch = wasmExports['ua'])(a0, a1, a2);
 
-    var ___cxa_is_pointer_type = (a0) => (___cxa_is_pointer_type = wasmExports['wa'])(a0);
+    var ___cxa_is_pointer_type = (a0) => (___cxa_is_pointer_type = wasmExports['va'])(a0);
 
     var dynCall_iijj = (Module['dynCall_iijj'] = (a0, a1, a2, a3, a4, a5) =>
-      (dynCall_iijj = Module['dynCall_iijj'] = wasmExports['xa'])(a0, a1, a2, a3, a4, a5));
+      (dynCall_iijj = Module['dynCall_iijj'] = wasmExports['wa'])(a0, a1, a2, a3, a4, a5));
 
     var dynCall_vijj = (Module['dynCall_vijj'] = (a0, a1, a2, a3, a4, a5) =>
-      (dynCall_vijj = Module['dynCall_vijj'] = wasmExports['ya'])(a0, a1, a2, a3, a4, a5));
+      (dynCall_vijj = Module['dynCall_vijj'] = wasmExports['xa'])(a0, a1, a2, a3, a4, a5));
 
     var dynCall_jiii = (Module['dynCall_jiii'] = (a0, a1, a2, a3) =>
-      (dynCall_jiii = Module['dynCall_jiii'] = wasmExports['za'])(a0, a1, a2, a3));
+      (dynCall_jiii = Module['dynCall_jiii'] = wasmExports['ya'])(a0, a1, a2, a3));
 
     var dynCall_jii = (Module['dynCall_jii'] = (a0, a1, a2) =>
-      (dynCall_jii = Module['dynCall_jii'] = wasmExports['Aa'])(a0, a1, a2));
+      (dynCall_jii = Module['dynCall_jii'] = wasmExports['za'])(a0, a1, a2));
 
     var dynCall_viiij = (Module['dynCall_viiij'] = (a0, a1, a2, a3, a4, a5) =>
-      (dynCall_viiij = Module['dynCall_viiij'] = wasmExports['Ba'])(a0, a1, a2, a3, a4, a5));
+      (dynCall_viiij = Module['dynCall_viiij'] = wasmExports['Aa'])(a0, a1, a2, a3, a4, a5));
 
     var dynCall_jiji = (Module['dynCall_jiji'] = (a0, a1, a2, a3, a4) =>
-      (dynCall_jiji = Module['dynCall_jiji'] = wasmExports['Ca'])(a0, a1, a2, a3, a4));
+      (dynCall_jiji = Module['dynCall_jiji'] = wasmExports['Ba'])(a0, a1, a2, a3, a4));
 
     var dynCall_viijii = (Module['dynCall_viijii'] = (a0, a1, a2, a3, a4, a5, a6) =>
-      (dynCall_viijii = Module['dynCall_viijii'] = wasmExports['Da'])(a0, a1, a2, a3, a4, a5, a6));
+      (dynCall_viijii = Module['dynCall_viijii'] = wasmExports['Ca'])(a0, a1, a2, a3, a4, a5, a6));
 
     var dynCall_iiiiij = (Module['dynCall_iiiiij'] = (a0, a1, a2, a3, a4, a5, a6) =>
-      (dynCall_iiiiij = Module['dynCall_iiiiij'] = wasmExports['Ea'])(a0, a1, a2, a3, a4, a5, a6));
+      (dynCall_iiiiij = Module['dynCall_iiiiij'] = wasmExports['Da'])(a0, a1, a2, a3, a4, a5, a6));
 
     var dynCall_iiiiijj = (Module['dynCall_iiiiijj'] = (a0, a1, a2, a3, a4, a5, a6, a7, a8) =>
-      (dynCall_iiiiijj = Module['dynCall_iiiiijj'] = wasmExports['Fa'])(a0, a1, a2, a3, a4, a5, a6, a7, a8));
+      (dynCall_iiiiijj = Module['dynCall_iiiiijj'] = wasmExports['Ea'])(a0, a1, a2, a3, a4, a5, a6, a7, a8));
 
     var dynCall_iiiiiijj = (Module['dynCall_iiiiiijj'] = (a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) =>
-      (dynCall_iiiiiijj = Module['dynCall_iiiiiijj'] = wasmExports['Ga'])(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9));
+      (dynCall_iiiiiijj = Module['dynCall_iiiiiijj'] = wasmExports['Fa'])(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9));
 
     function invoke_vi(index, a1) {
       var sp = stackSave();
@@ -3009,17 +3008,6 @@ var createDotLottiePlayerModule = (() => {
       var sp = stackSave();
       try {
         getWasmTableEntry(index)(a1, a2, a3);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0) throw e;
-        _setThrew(1, 0);
-      }
-    }
-
-    function invoke_iii(index, a1, a2) {
-      var sp = stackSave();
-      try {
-        return getWasmTableEntry(index)(a1, a2);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0) throw e;
@@ -3104,10 +3092,10 @@ var createDotLottiePlayerModule = (() => {
       }
     }
 
-    function invoke_i(index) {
+    function invoke_iii(index, a1, a2) {
       var sp = stackSave();
       try {
-        return getWasmTableEntry(index)();
+        return getWasmTableEntry(index)(a1, a2);
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0) throw e;
