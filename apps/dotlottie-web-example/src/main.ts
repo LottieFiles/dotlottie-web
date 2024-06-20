@@ -170,7 +170,8 @@ fetch(
   // '/layout_example.lottie',
   // '/multi.lottie',
   // '/markers_example.lottie',
-  './toggle.lottie',
+  // './toggle.lottie',
+  './exploding_pigeon.lottie',
 )
   .then(async (res) => res.arrayBuffer())
   .then((data): void => {
@@ -189,6 +190,10 @@ fetch(
       speed: 1,
       backgroundColor: '#800080ff',
       // useFrameInterpolation: false,
+    });
+
+    canvas.addEventListener('mousedown', () => {
+      dotLottie.postStateMachineEvent('OnPointerDown: 0.0 0.0');
     });
 
     dotLottie.addEventListener('loadError', console.error);
