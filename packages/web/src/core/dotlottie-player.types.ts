@@ -33,6 +33,15 @@ export interface VectorMarker {
   size(): number;
 }
 
+export interface VectorString {
+  delete(): void;
+  get(_0: number): ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string | undefined;
+  push_back(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): void;
+  resize(_0: number, _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): void;
+  set(_0: number, _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
+  size(): number;
+}
+
 export interface ModeValue<T extends number> {
   value: T;
 }
@@ -78,6 +87,7 @@ export interface DotLottiePlayer {
     _1: number,
     _2: number,
   ): boolean;
+  loadStateMachine(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
   loadTheme(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
   loadThemeData(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
   loopCount(): number;
@@ -85,6 +95,7 @@ export interface DotLottiePlayer {
   markers(): VectorMarker;
   pause(): boolean;
   play(): boolean;
+  postEventPayload(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
   render(): boolean;
   requestFrame(): number;
   resize(_0: number, _1: number): boolean;
@@ -93,7 +104,10 @@ export interface DotLottiePlayer {
   setConfig(_0: Config): void;
   setFrame(_0: number): boolean;
   setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
+  startStateMachine(): boolean;
+  stateMachineFrameworkSetup(): VectorString;
   stop(): boolean;
+  stopStateMachine(): boolean;
   totalFrames(): number;
 }
 
@@ -128,6 +142,7 @@ interface EmbindModule {
   Mode: { Bounce: ModeValue<3>; Forward: ModeValue<1>; Reverse: ModeValue<2>; ReverseBounce: ModeValue<4> };
   VectorFloat: { new (): VectorFloat };
   VectorMarker: { new (): VectorMarker };
+  VectorString: { new (): VectorString };
   createDefaultConfig(): Config;
   createDefaultLayout(): Layout;
 }

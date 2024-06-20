@@ -626,6 +626,7 @@ export class DotLottie {
     });
 
     this._eventManager.removeAllEventListeners();
+    this._cleanupStateMachineListeners();
   }
 
   public freeze(): void {
@@ -775,5 +776,134 @@ export class DotLottie {
 
   public static setWasmUrl(url: string): void {
     DotLottieWasmLoader.setWasmUrl(url);
+  }
+
+  public loadStateMachine(stateMachineId: string): boolean {
+    return this._dotLottieCore?.loadStateMachine(stateMachineId) ?? false;
+  }
+
+  public startStateMachine(): boolean {
+    const started = this._dotLottieCore?.startStateMachine() ?? false;
+
+    if (started) {
+      this._setupStateMachineListeners();
+    }
+
+    return started;
+  }
+
+  public stopStateMachine(): boolean {
+    const stopped = this._dotLottieCore?.stopStateMachine() ?? false;
+
+    if (stopped) {
+      this._cleanupStateMachineListeners();
+    }
+
+    return stopped;
+  }
+
+  private _getPointerPosition(event: PointerEvent): { x: number; y: number } {
+    const rect = (this._canvas as HTMLCanvasElement).getBoundingClientRect();
+    const scaleX = this._canvas.width / rect.width;
+    const scaleY = this._canvas.height / rect.height;
+
+    const devicePixelRatio = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
+    const x = ((event.clientX - rect.left) * scaleX) / devicePixelRatio;
+    const y = ((event.clientY - rect.top) * scaleY) / devicePixelRatio;
+
+    return {
+      x,
+      y,
+    };
+  }
+
+  private _onPointerUp(event: PointerEvent): void {
+    const { x, y } = this._getPointerPosition(event);
+
+    this.postStateMachineEvent(`OnPointerUp: ${x} ${y}`);
+  }
+
+  private _onPointerDown(event: PointerEvent): void {
+    const { x, y } = this._getPointerPosition(event);
+
+    this.postStateMachineEvent(`OnPointerDown: ${x} ${y}`);
+  }
+
+  private _onPointerMove(event: PointerEvent): void {
+    const { x, y } = this._getPointerPosition(event);
+
+    this.postStateMachineEvent(`OnPointerMove: ${x} ${y}`);
+  }
+
+  private _onPointerEnter(event: PointerEvent): void {
+    const { x, y } = this._getPointerPosition(event);
+
+    this.postStateMachineEvent(`OnPointerEnter: ${x} ${y}`);
+  }
+
+  private _onPointerLeave(event: PointerEvent): void {
+    const { x, y } = this._getPointerPosition(event);
+
+    this.postStateMachineEvent(`OnPointerExit: ${x} ${y}`);
+  }
+
+  private _onComplete(): void {
+    this.postStateMachineEvent('OnComplete');
+  }
+
+  /**
+   * @experimental
+   * @param event - The event to be posted to the state machine
+   * @returns boolean - true if the event was posted successfully, false otherwise
+   */
+  public postStateMachineEvent(event: string): boolean {
+    return this._dotLottieCore?.postEventPayload(event) ?? false;
+  }
+
+  private _setupStateMachineListeners(): void {
+    if (this._canvas instanceof HTMLCanvasElement && this._dotLottieCore !== null && this.isLoaded) {
+      const listenersVector = this._dotLottieCore.stateMachineFrameworkSetup();
+
+      const listeners = [];
+
+      for (let i = 0; i < listenersVector.size(); i += 1) {
+        listeners.push(listenersVector.get(i));
+      }
+
+      if (listeners.includes('PointerUp')) {
+        this._canvas.addEventListener('pointerup', this._onPointerUp.bind(this));
+      }
+
+      if (listeners.includes('PointerDown')) {
+        this._canvas.addEventListener('pointerdown', this._onPointerDown.bind(this));
+      }
+
+      if (listeners.includes('PointerMove')) {
+        this._canvas.addEventListener('pointermove', this._onPointerMove.bind(this));
+      }
+
+      if (listeners.includes('PointerEnter')) {
+        this._canvas.addEventListener('pointerenter', this._onPointerEnter.bind(this));
+      }
+
+      if (listeners.includes('PointerExit')) {
+        this._canvas.addEventListener('pointerleave', this._onPointerLeave.bind(this));
+      }
+
+      if (listeners.includes('Complete')) {
+        this.addEventListener('complete', this._onComplete.bind(this));
+      }
+    }
+  }
+
+  private _cleanupStateMachineListeners(): void {
+    if (this._canvas instanceof HTMLCanvasElement) {
+      this._canvas.removeEventListener('pointerup', this._onPointerUp.bind(this));
+      this._canvas.removeEventListener('pointerdown', this._onPointerDown.bind(this));
+      this._canvas.removeEventListener('pointermove', this._onPointerMove.bind(this));
+      this._canvas.removeEventListener('pointerenter', this._onPointerEnter.bind(this));
+      this._canvas.removeEventListener('pointerleave', this._onPointerLeave.bind(this));
+      this.removeEventListener('complete', this._onComplete.bind(this));
+    }
   }
 }

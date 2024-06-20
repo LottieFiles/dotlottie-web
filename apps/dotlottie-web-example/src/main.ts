@@ -122,6 +122,15 @@ app.innerHTML = `
 
       <button id="setSegment" class="control-button">Set segment</button>
     </div>
+
+    <div>
+      <label for="states">State Machines: </label>
+      <select id="states">
+        <option value="none">None</option>
+      </select>
+      <button id="start_sm">Start State Machine</button>
+      <button id="end_sm">End State Machine</button>
+    </div>
   </div>
 </div>
 `;
@@ -160,7 +169,9 @@ fetch(
   // '/theming_example.lottie',
   // '/layout_example.lottie',
   // '/multi.lottie',
-  '/markers_example.lottie',
+  // '/markers_example.lottie',
+  // './toggle.lottie',
+  './exploding_pigeon.lottie',
 )
   .then(async (res) => res.arrayBuffer())
   .then((data): void => {
@@ -179,6 +190,10 @@ fetch(
       speed: 1,
       backgroundColor: '#800080ff',
       // useFrameInterpolation: false,
+    });
+
+    canvas.addEventListener('mousedown', () => {
+      dotLottie.postStateMachineEvent('OnPointerDown: 0.0 0.0');
     });
 
     dotLottie.addEventListener('loadError', console.error);
@@ -203,11 +218,14 @@ fetch(
     const playbackStateSpan = document.getElementById('playback-state') as HTMLSpanElement;
     const nextAnimationButton = document.getElementById('next') as HTMLButtonElement;
     const activeAnimationSpan = document.getElementById('active-animation') as HTMLSpanElement;
+    const startStateMachineButton = document.getElementById('start_sm') as HTMLButtonElement;
+    const endStateMachineButton = document.getElementById('end_sm') as HTMLButtonElement;
 
     const markerSelect = document.getElementById('marker') as HTMLSelectElement;
     const themeSelect = document.getElementById('theme') as HTMLSelectElement;
     const fitSelect = document.getElementById('fit') as HTMLSelectElement;
     const alignSelect = document.getElementById('align') as HTMLSelectElement;
+    const stateMachinesSelect = document.getElementById('states') as HTMLSelectElement;
 
     let animationIdx = 0;
 
@@ -281,6 +299,12 @@ fetch(
       });
     });
 
+    stateMachinesSelect.addEventListener('change', () => {
+      const stateMachineId = stateMachinesSelect.value;
+
+      dotLottie.loadStateMachine(stateMachineId);
+    });
+
     markerSelect.addEventListener('change', () => {
       dotLottie.setMarker(markerSelect.value);
     });
@@ -310,6 +334,14 @@ fetch(
           align: [parseFloat(x), parseFloat(y)],
         });
       }
+    });
+
+    startStateMachineButton.addEventListener('click', () => {
+      dotLottie.startStateMachine();
+    });
+
+    endStateMachineButton.addEventListener('click', () => {
+      dotLottie.stopStateMachine();
     });
 
     playPauseButton.addEventListener('click', () => {
@@ -353,6 +385,18 @@ fetch(
       bgColorInput.value = dotLottie.backgroundColor || '#ffffff';
 
       const themes = dotLottie.manifest?.themes || [];
+      const states = dotLottie.manifest?.states || [];
+
+      for (const state of states) {
+        const id = state;
+
+        const option = document.createElement('option');
+
+        option.value = id;
+        option.textContent = id;
+
+        stateMachinesSelect.appendChild(option);
+      }
 
       for (const theme of themes) {
         const id = theme.id;
