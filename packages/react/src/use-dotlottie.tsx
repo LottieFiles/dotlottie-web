@@ -55,6 +55,28 @@ export interface UseDotLottieResult {
 
 const isServerSide = (): boolean => typeof window === 'undefined';
 
+const getCanvasViewport = (
+  canvas: HTMLCanvasElement,
+  dpr: number,
+): { height: number; width: number; x: number; y: number } => {
+  const rect = canvas.getBoundingClientRect();
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+
+  // Calculate visible area
+  const visibleLeft = Math.max(0, -rect.left);
+  const visibleTop = Math.max(0, -rect.top);
+  const visibleRight = Math.min(rect.width, windowWidth - rect.left);
+  const visibleBottom = Math.min(rect.height, windowHeight - rect.top);
+
+  const x = visibleLeft * dpr;
+  const y = visibleTop * dpr;
+  const width = (visibleRight - visibleLeft) * dpr;
+  const height = (visibleBottom - visibleTop) * dpr;
+
+  return { x, y, width, height };
+};
+
 export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
 
@@ -75,6 +97,20 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
     } else if (event.type === 'mouseleave') {
       dotLottieRef.current.pause();
     }
+  }, []);
+
+  const updateViewport = useCallback(() => {
+    if (!dotLottieRef.current) return;
+
+    const canvas = canvasRef.current;
+
+    if (!canvas) return;
+
+    const dpr = configRef.current?.renderConfig?.devicePixelRatio || window.devicePixelRatio || 1;
+
+    const { height, width, x, y } = getCanvasViewport(canvas, dpr);
+
+    dotLottieRef.current.setViewport(x, y, width, height);
   }, []);
 
   const intersectionObserver = useMemo(() => {
@@ -154,7 +190,9 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
       }
       canvas.addEventListener('mouseenter', hoverHandler);
       canvas.addEventListener('mouseleave', hoverHandler);
+      dotLottieInstance.addEventListener('frame', updateViewport);
 
+      updateViewport();
       setDotLottie(dotLottieInstance);
     }
 
@@ -166,7 +204,7 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
       canvas?.removeEventListener('mouseenter', hoverHandler);
       canvas?.removeEventListener('mouseleave', hoverHandler);
     };
-  }, [intersectionObserver, resizeObserver, hoverHandler]);
+  }, [intersectionObserver, resizeObserver, hoverHandler, updateViewport]);
 
   // speed reactivity
   useEffect(() => {

@@ -73,6 +73,10 @@ function App() {
         playOnHover={playOnHover}
         autoResizeCanvas={autoResizeCanvas}
         marker={marker}
+        style={{
+          margin: '2px',
+          border: '1px solid white',
+        }}
       />
       <input type="range" min="0" max="100" defaultValue="0" value={progress} />
       <label>
