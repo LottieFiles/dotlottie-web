@@ -63,7 +63,6 @@ const getCanvasViewport = (
   const windowWidth = window.innerWidth;
   const windowHeight = window.innerHeight;
 
-  // Calculate visible area
   const visibleLeft = Math.max(0, -rect.left);
   const visibleTop = Math.max(0, -rect.top);
   const visibleRight = Math.min(rect.width, windowWidth - rect.left);
