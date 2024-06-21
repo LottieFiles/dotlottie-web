@@ -294,7 +294,11 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   useEffect(() => {
     if (!dotLottieRef.current) return;
 
-    if (dotLottieRef.current.isLoaded && config?.animationId && config.animationId !== configRef.current?.animationId) {
+    if (
+      dotLottieRef.current.isLoaded &&
+      config?.animationId &&
+      dotLottieRef.current.activeAnimationId !== config.animationId
+    ) {
       dotLottieRef.current.loadAnimation(config.animationId);
     }
   }, [config?.animationId]);
@@ -303,7 +307,7 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   useEffect(() => {
     if (!dotLottieRef.current) return;
 
-    if (dotLottieRef.current.isLoaded && config?.themeId !== configRef.current?.themeId) {
+    if (dotLottieRef.current.isLoaded && dotLottieRef.current.activeThemeId !== config?.themeId) {
       dotLottieRef.current.loadTheme(config?.themeId || '');
     }
   }, [config?.themeId]);
@@ -312,7 +316,7 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   useEffect(() => {
     if (!dotLottieRef.current) return;
 
-    if (dotLottieRef.current.isLoaded && config?.themeData !== configRef.current?.themeData) {
+    if (dotLottieRef.current.isLoaded) {
       dotLottieRef.current.loadThemeData(config?.themeData || '');
     }
   }, [config?.themeData]);
