@@ -34,7 +34,7 @@
     "type-check": "turbo run type-check"
   },
   "devDependencies": {
-    "@changesets/cli": "2.26.2",
+    "@changesets/cli": "2.27.5",
     "@commitlint/cli": "17.6.1",
     "@lottiefiles/commitlint-config": "2.0.0",
     "@lottiefiles/eslint-plugin": "3.0.0",
@@ -56,5 +56,5 @@
     "typescript": "5.0.4",
     "zx": "7.0.7"
   },
-  "packageManager": "pnpm@8.10.3"
+  "packageManager": "pnpm@9.4.0"
 }
