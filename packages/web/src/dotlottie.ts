@@ -690,7 +690,7 @@ export class DotLottie {
   }
 
   public loadAnimation(animationId: string): void {
-    if (this._dotLottieCore === null) return;
+    if (this._dotLottieCore === null || this._dotLottieCore.activeAnimationId() === animationId) return;
 
     const loaded = this._dotLottieCore.loadAnimation(animationId, this._canvas.width, this._canvas.height);
 
