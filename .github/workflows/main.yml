@@ -15,15 +15,15 @@ jobs:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
 
-      - name: ⎔ Setup pnpm@v8
+      - name: ⎔ Setup pnpm@v9
         uses: pnpm/action-setup@v2
         with:
-          version: 8
+          version: 9
 
-      - name: ⎔ Setup Node@v18
+      - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: 📥 Download deps
         run: pnpm install
@@ -58,8 +58,8 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-  release:
-    name: release
+  npm-release:
+    name: npm-release
     needs: validate
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
@@ -71,16 +71,16 @@ jobs:
           # check out all commits and tags so changeset can skip duplicate tags
           fetch-depth: 0
 
-      - name: ⎔ Setup pnpm@v8
+      - name: ⎔ Setup pnpm@v9
         uses: pnpm/action-setup@v2
         with:
-          version: 8
+          version: 9
 
-      - name: ⎔ Setup Node@v18
+      - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: 18
+          node-version: 20
           registry-url: 'https://registry.npmjs.org'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -108,11 +108,27 @@ jobs:
       - name: Remove existing NPM .npmrc
         run: rm -f "$HOME/.npmrc"
 
-      - name: ⎔ Setup Node@v18 for Github Packages
+  gpr-release:
+    name: gpr-release
+    needs: validate
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ⎔ Setup pnpm@v9
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: 18
+          node-version: 20
           registry-url: 'https://npm.pkg.github.com/'
 
       - name: 📥 Install dependencies
@@ -132,7 +148,38 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets. NPM_TOKEN }}
 
-      - name: 🌐Publish dotLottie-viewer
+  publish-viewer:
+    name: publish-viewer
+    needs: validate
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ⎔ Setup pnpm@v9
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: ⎔ Setup Node@v20
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version: 20
+          registry-url: 'https://npm.pkg.github.com/'
+
+      - name: 📥 Install dependencies
+        run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GPR_TOKEN }}
+
+      - name: 🏗 Build
+        run: pnpm build
+
+      - name: 🌐Publish
         if: success()
         uses: peaceiris/actions-gh-pages@v3
         with:
