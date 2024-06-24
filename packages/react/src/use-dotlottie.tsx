@@ -40,8 +40,11 @@ function DotLottieComponent({
 }
 
 export type DotLottieConfig = Omit<Config, 'canvas'> & {
+  animationId?: string;
   autoResizeCanvas?: boolean;
   playOnHover?: boolean;
+  themeData?: string;
+  themeId?: string;
 };
 
 export interface UseDotLottieResult {
@@ -286,6 +289,37 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
       resizeObserver.disconnect();
     }
   }, [config?.autoResizeCanvas, resizeObserver]);
+
+  // animationId reactivity
+  useEffect(() => {
+    if (!dotLottieRef.current) return;
+
+    if (
+      dotLottieRef.current.isLoaded &&
+      config?.animationId &&
+      dotLottieRef.current.activeAnimationId !== config.animationId
+    ) {
+      dotLottieRef.current.loadAnimation(config.animationId);
+    }
+  }, [config?.animationId]);
+
+  // themeId reactivity
+  useEffect(() => {
+    if (!dotLottieRef.current) return;
+
+    if (dotLottieRef.current.isLoaded && dotLottieRef.current.activeThemeId !== config?.themeId) {
+      dotLottieRef.current.loadTheme(config?.themeId || '');
+    }
+  }, [config?.themeId]);
+
+  // themeData reactivity
+  useEffect(() => {
+    if (!dotLottieRef.current) return;
+
+    if (dotLottieRef.current.isLoaded) {
+      dotLottieRef.current.loadThemeData(config?.themeData || '');
+    }
+  }, [config?.themeData]);
 
   return {
     dotLottie,

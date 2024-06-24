@@ -3,6 +3,7 @@ import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
 import React, { useState } from 'react';
 
 const animations = [
+  'https://lottie.host/e641272e-039b-4612-96de-138acfbede6e/bc0sW78EeR.lottie',
   './markers_example.json',
   'https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie',
   'https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json',
@@ -22,16 +23,20 @@ function App() {
   const [autoResizeCanvas, setAutoResizeCanvas] = useState(true);
   const [marker, setMarker] = useState('');
   const [allMarkers, setAllMarkers] = useState<string[]>([]);
+  const [animationsIds, setAnimationsIds] = useState<string[]>([]);
+  const [currentAnimationId, setCurrentAnimationId] = useState<string>('');
 
   React.useEffect(() => {
     function updateCurrentFrame(event: { currentFrame: number }) {
-      console.log('currentFrame', event.currentFrame);
+      // console.log('currentFrame', event.currentFrame);
       setCurrentFrame(event.currentFrame);
     }
 
     function onLoad() {
       if (dotLottie) {
         setAllMarkers(dotLottie.markers().map((marker) => marker.name));
+        setAnimationsIds(dotLottie.manifest?.animations.map((animation) => animation.id) || []);
+        setCurrentAnimationId(dotLottie.activeAnimationId || '');
       }
     }
 
@@ -60,7 +65,7 @@ function App() {
     <div>
       <div
         style={{
-          marginBottom: '1000px',
+          marginBottom: '2000px',
         }}
       ></div>
       <DotLottieReact
@@ -73,6 +78,7 @@ function App() {
         playOnHover={playOnHover}
         autoResizeCanvas={autoResizeCanvas}
         marker={marker}
+        animationId={currentAnimationId}
       />
       <input type="range" min="0" max="100" defaultValue="0" value={progress} />
       <label>
@@ -84,7 +90,7 @@ function App() {
         >
           <option value="">Select a marker</option>
           {allMarkers.map((markerName) => (
-            <option id={markerName} value={markerName}>
+            <option key={markerName} id={markerName} value={markerName}>
               {markerName}
             </option>
           ))}
@@ -165,6 +171,18 @@ function App() {
         }}
       />
       Auto resize canvas
+      <div>
+        <label>
+          Animation ID:
+          <select value={currentAnimationId} onChange={(event) => setCurrentAnimationId(event.target.value)}>
+            {animationsIds.map((animationId) => (
+              <option key={animationId} value={animationId}>
+                {animationId}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
     </div>
   );
 }
