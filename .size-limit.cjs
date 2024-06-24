@@ -43,4 +43,9 @@ module.exports = [
       return config;
     },
   },
+  {
+    name: '@lottiefiles/dotlottie-solid',
+    path: 'packages/solid/dist/index.js',
+    import: '*',
+  },
 ];
