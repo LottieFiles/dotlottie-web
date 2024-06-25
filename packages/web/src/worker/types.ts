@@ -1,0 +1,256 @@
+import type { Config, Mode, RenderConfig } from '../types';
+
+interface CreateParams {
+  config: Config;
+  height: number;
+  instanceId: string;
+  width: number;
+}
+
+interface PlayParams {
+  instanceId: string;
+}
+
+interface PauseParams {
+  instanceId: string;
+}
+
+interface StopParams {
+  instanceId: string;
+}
+
+interface DestroyParams {
+  instanceId: string;
+}
+
+interface SetSpeedParams {
+  instanceId: string;
+  speed: number;
+}
+
+interface SetModeParams {
+  instanceId: string;
+  mode: Mode;
+}
+
+interface SetFrameParams {
+  frame: number;
+  instanceId: string;
+}
+
+interface SetSegmentParams {
+  instanceId: string;
+  segment: [number, number];
+}
+
+interface LoadParams {
+  config: Omit<Config, 'canvas'>;
+  instanceId: string;
+}
+
+interface ResizeParams {
+  height: number;
+  instanceId: string;
+  width: number;
+}
+
+interface SetBackgroundColorParams {
+  backgroundColor: string;
+  instanceId: string;
+}
+
+interface FreezeParams {
+  instanceId: string;
+}
+
+interface UnfreezeParams {
+  instanceId: string;
+}
+
+interface LoadAnimationParams {
+  animationId: string;
+  instanceId: string;
+}
+
+interface LoadThemeParams {
+  instanceId: string;
+  themeId: string;
+}
+
+interface LoadThemeDataParams {
+  instanceId: string;
+  themeData: string;
+}
+
+interface SetUseFrameInterpolationParams {
+  instanceId: string;
+  useFrameInterpolation: boolean;
+}
+
+interface SetRenderConfigParams {
+  instanceId: string;
+  renderConfig: RenderConfig;
+}
+
+interface SetWasmUrlParams {
+  wasmUrl: string;
+}
+
+interface SetViewportParams {
+  height: number;
+  instanceId: string;
+  width: number;
+  x: number;
+  y: number;
+}
+
+export interface MethodParamsMap {
+  create: CreateParams;
+  destroy: DestroyParams;
+  freeze: FreezeParams;
+  load: LoadParams;
+  loadAnimation: LoadAnimationParams;
+  loadTheme: LoadThemeParams;
+  loadThemeData: LoadThemeDataParams;
+  pause: PauseParams;
+  play: PlayParams;
+  resize: ResizeParams;
+  setBackgroundColor: SetBackgroundColorParams;
+  setFrame: SetFrameParams;
+  setMode: SetModeParams;
+  setRenderConfig: SetRenderConfigParams;
+  setSegment: SetSegmentParams;
+  setSpeed: SetSpeedParams;
+  setUseFrameInterpolation: SetUseFrameInterpolationParams;
+  setViewport: SetViewportParams;
+  setWasmUrl: SetWasmUrlParams;
+  stop: StopParams;
+  unfreeze: UnfreezeParams;
+}
+
+export interface RpcRequest<T extends keyof MethodParamsMap> {
+  id: string;
+  method: T;
+  params: MethodParamsMap[T];
+}
+
+interface CreateResult {
+  instanceId: string;
+  success: boolean;
+}
+
+interface PlayResult {
+  success: boolean;
+}
+
+interface PauseResult {
+  success: boolean;
+}
+
+interface StopResult {
+  success: boolean;
+}
+
+interface DestroyResult {
+  success: boolean;
+}
+
+interface SetSpeedResult {
+  success: boolean;
+}
+
+interface SetModeResult {
+  success: boolean;
+}
+
+interface SetFrameResult {
+  success: boolean;
+}
+
+interface SetSegmentResult {
+  success: boolean;
+}
+
+interface LoadResult {
+  success: boolean;
+}
+
+interface ResizeResult {
+  success: boolean;
+}
+
+interface SetBackgroundColorResult {
+  success: boolean;
+}
+
+interface FreezeResult {
+  success: boolean;
+}
+
+interface UnfreezeResult {
+  success: boolean;
+}
+
+interface LoadAnimationResult {
+  success: boolean;
+}
+
+interface LoadThemeResult {
+  success: boolean;
+}
+
+interface LoadThemeDataResult {
+  success: boolean;
+}
+
+interface SetUseFrameInterpolationResult {
+  success: boolean;
+}
+
+interface SetRenderConfigResult {
+  success: boolean;
+}
+
+interface SetWasmUrlResult {
+  success: boolean;
+}
+
+interface SetViewportResult {
+  success: boolean;
+}
+
+export interface MethodResultMap {
+  create: CreateResult;
+  destroy: DestroyResult;
+  freeze: FreezeResult;
+  load: LoadResult;
+  loadAnimation: LoadAnimationResult;
+  loadTheme: LoadThemeResult;
+  loadThemeData: LoadThemeDataResult;
+  pause: PauseResult;
+  play: PlayResult;
+  resize: ResizeResult;
+  setBackgroundColor: SetBackgroundColorResult;
+  setFrame: SetFrameResult;
+  setMode: SetModeResult;
+  setRenderConfig: SetRenderConfigResult;
+  setSegment: SetSegmentResult;
+  setSpeed: SetSpeedResult;
+  setUseFrameInterpolation: SetUseFrameInterpolationResult;
+  setViewport: SetViewportResult;
+  setWasmUrl: SetWasmUrlResult;
+  stop: StopResult;
+  unfreeze: UnfreezeResult;
+}
+
+interface RpcError {
+  code: number;
+  message: string;
+}
+
+export interface RpcResponse<U extends keyof MethodResultMap> {
+  error?: RpcError;
+  id: string;
+  method: U;
+  result: MethodResultMap[U];
+}

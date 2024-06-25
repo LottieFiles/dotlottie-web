@@ -74,7 +74,9 @@
         <script type="module">
             import { DotLottieWorker as DotLottie } from './dist/worker/index.js';
 
-            for (const canvas of [document.querySelectorAll('canvas')[0]]) {
+            DotLottie.setWasmUrl('http://127.0.0.1:5500/packages/web/dist/dotlottie-player.wasm');
+
+            for (const canvas of document.querySelectorAll('canvas')) {
                 const dotLottie = new DotLottie({
                     canvas,
                     src: canvas.getAttribute('data-src'),
@@ -84,6 +86,8 @@
 
                 dotLottie.addEventListener('load', console.log);
                 dotLottie.addEventListener('play', console.log);
+                dotLottie.addEventListener('load', console.log);
+                dotLottie.addEventListener('frame', console.log);
             }
         </script>
         <script>

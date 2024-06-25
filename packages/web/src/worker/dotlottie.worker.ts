@@ -1,197 +1,382 @@
 /* eslint-disable no-restricted-globals */
-
-import type { Mode } from '../dotlottie';
 import { DotLottie } from '../dotlottie';
-import type { EventType } from '../event-manager';
 
-import type { WorkerError, WorkerMessage, WorkerResponse } from './worker-manager';
+import type { MethodParamsMap, RpcRequest, MethodResultMap, RpcResponse } from './types';
 
-const dotLottieMap = new Map<string, DotLottie>();
+const instancesMap = new Map<string, DotLottie>();
 
-// eslint-disable-next-line consistent-return
-const handleWorkerMessage = (workerMessageEvent: MessageEvent): void => {
-  const data: WorkerMessage = workerMessageEvent.data;
-  const { id, method, params } = data;
+const commands: {
+  [K in keyof MethodParamsMap]: (request: RpcRequest<K>) => MethodResultMap[K];
+} = {
+  create: (request) => {
+    const instanceId = request.params.instanceId;
+    const config = request.params.config;
+    const width = request.params.width;
+    const height = request.params.height;
 
-  const respond = (result: unknown): void => {
-    const response: WorkerResponse = { result, id };
-
-    self.postMessage(response);
-  };
-
-  const respondError = (error: WorkerError): void => {
-    const response: WorkerResponse = { error, id };
-
-    self.postMessage(response);
-  };
-
-  try {
-    if (method === 'create') {
-      if (params?.config) {
-        if (!params.id) return respondError({ message: 'Missing id', code: -32602 });
-
-        const dotLottie = new DotLottie(params.config);
-
-        dotLottieMap.set(params.id, dotLottie);
-
-        const events: EventType[] = [
-          'complete',
-          'frame',
-          'load',
-          'loadError',
-          'loop',
-          'pause',
-          'play',
-          'stop',
-          'destroy',
-          'freeze',
-          'unfreeze',
-          'render',
-        ];
-
-        events.forEach((eventName) => {
-          dotLottie.addEventListener(eventName, (event) => {
-            const response: WorkerResponse = { id, result: { event: eventName, details: event } };
-
-            self.postMessage(response);
-          });
-        });
-
-        respond({ success: true });
-      }
+    if (instancesMap.has(instanceId)) {
+      throw new Error(`Instance with id ${instanceId} already exists.`);
     }
 
-    if (method === 'play') {
-      if (!params?.id) return respondError({ message: 'Missing id', code: -32602 });
+    const instance = new DotLottie(config);
 
-      const dotLottieInstance = dotLottieMap.get(params.id);
+    instance.canvas.height = height;
+    instance.canvas.width = width;
 
-      if (!dotLottieInstance) return respondError({ message: 'DotLottie instance not found', code: -32602 });
+    instancesMap.set(instanceId, instance);
 
-      dotLottieInstance.play();
+    return {
+      instanceId,
+      success: true,
+    };
+  },
+  destroy: (request) => {
+    const instanceId = request.params.instanceId;
 
-      respond({ success: true });
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    if (method === 'pause') {
-      if (!params?.id) return respondError({ message: 'Missing id', code: -32602 });
+    instance.destroy();
 
-      const dotLottieInstance = dotLottieMap.get(params.id);
+    instancesMap.delete(instanceId);
 
-      if (!dotLottieInstance) return respondError({ message: 'DotLottie instance not found', code: -32602 });
+    return {
+      success: true,
+    };
+  },
+  freeze: (request) => {
+    const instanceId = request.params.instanceId;
 
-      dotLottieInstance.pause();
+    const instance = instancesMap.get(instanceId);
 
-      respond({ success: true });
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    if (method === 'stop') {
-      if (!params?.id) return respondError({ message: 'Missing id', code: -32602 });
+    instance.freeze();
 
-      const dotLottieInstance = dotLottieMap.get(params.id);
+    return {
+      success: true,
+    };
+  },
+  load: (request) => {
+    const instanceId = request.params.instanceId;
+    const config = request.params.config;
 
-      if (!dotLottieInstance) return respondError({ message: 'DotLottie instance not found', code: -32602 });
-
-      dotLottieInstance.stop();
-
-      respond({ success: true });
+    if (!instancesMap.has(instanceId)) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    if (method === 'destroy') {
-      if (!params?.id) return respondError({ message: 'Missing id', code: -32602 });
+    const instance = instancesMap.get(instanceId);
 
-      const dotLottieInstance = dotLottieMap.get(params.id);
+    instance?.load(config);
 
-      if (!dotLottieInstance) return respondError({ message: 'DotLottie instance not found', code: -32602 });
+    return {
+      success: true,
+    };
+  },
+  loadAnimation: (request) => {
+    const instanceId = request.params.instanceId;
+    const animationId = request.params.animationId;
 
-      dotLottieInstance.destroy();
+    const instance = instancesMap.get(instanceId);
 
-      dotLottieMap.delete(params.id);
-
-      respond({ success: true });
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    if (method === 'setSpeed') {
-      if (!params?.id) return respondError({ message: 'Missing id', code: -32602 });
+    instance.loadAnimation(animationId);
 
-      const dotLottieInstance = dotLottieMap.get(params.id);
+    return {
+      success: true,
+    };
+  },
+  loadTheme: (request) => {
+    const instanceId = request.params.instanceId;
+    const themeId = request.params.themeId;
 
-      if (!dotLottieInstance) return respondError({ message: 'DotLottie instance not found', code: -32602 });
+    const instance = instancesMap.get(instanceId);
 
-      if (typeof params.speed !== 'number') return respondError({ message: 'Missing speed', code: -32602 });
-
-      dotLottieInstance.setSpeed(params.speed);
-
-      respond({ success: true });
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    if (method === 'setMode') {
-      if (!params?.id) return respondError({ message: 'Missing id', code: -32602 });
+    instance.loadTheme(themeId);
 
-      const dotLottieInstance = dotLottieMap.get(params.id);
+    return {
+      success: true,
+    };
+  },
+  loadThemeData: (request) => {
+    const instanceId = request.params.instanceId;
+    const themeData = request.params.themeData;
 
-      if (!dotLottieInstance) return respondError({ message: 'DotLottie instance not found', code: -32602 });
+    const instance = instancesMap.get(instanceId);
 
-      if (typeof params.mode !== 'string') return respondError({ message: 'Missing mode', code: -32602 });
-
-      dotLottieInstance.setMode(params.mode as Mode);
-
-      respond({ success: true });
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    if (method === 'setFrame') {
-      if (!params?.id) return respondError({ message: 'Missing id', code: -32602 });
+    instance.loadThemeData(themeData);
 
-      const dotLottieInstance = dotLottieMap.get(params.id);
+    return {
+      success: true,
+    };
+  },
+  pause: (request) => {
+    const instanceId = request.params.instanceId;
 
-      if (!dotLottieInstance) return respondError({ message: 'DotLottie instance not found', code: -32602 });
+    const instance = instancesMap.get(instanceId);
 
-      if (typeof params.frame !== 'number') return respondError({ message: 'Missing frame', code: -32602 });
-
-      dotLottieInstance.setFrame(params.frame);
-
-      respond({ success: true });
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    if (method === 'load') {
-      if (!params?.id) return respondError({ message: 'Missing id', code: -32602 });
+    instance.pause();
 
-      const dotLottieInstance = dotLottieMap.get(params.id);
+    return {
+      success: true,
+    };
+  },
+  play: (request) => {
+    const instanceId = request.params.instanceId;
 
-      if (!dotLottieInstance) return respondError({ message: 'DotLottie instance not found', code: -32602 });
+    const instance = instancesMap.get(instanceId);
 
-      if (!params.config) return respondError({ message: 'Missing config', code: -32602 });
-
-      dotLottieInstance.load(params.config);
-
-      respond({ success: true });
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    if (method === 'resize') {
-      if (!params?.id) return respondError({ message: 'Missing id', code: -32602 });
+    instance.play();
 
-      const dotLottieInstance = dotLottieMap.get(params.id);
+    return {
+      success: true,
+    };
+  },
+  resize: (request) => {
+    const instanceId = request.params.instanceId;
+    const width = request.params.width;
+    const height = request.params.height;
 
-      if (!dotLottieInstance) return respondError({ message: 'DotLottie instance not found', code: -32602 });
+    const instance = instancesMap.get(instanceId);
 
-      if (typeof params.width !== 'number') return respondError({ message: 'Missing width', code: -32602 });
-      if (typeof params.height !== 'number') return respondError({ message: 'Missing height', code: -32602 });
-
-      dotLottieInstance.canvas.width = params.width;
-      dotLottieInstance.canvas.height = params.height;
-
-      dotLottieInstance.resize();
-
-      respond({ success: true });
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    respondError({ message: 'Method not found', code: -32601 });
-  } catch (error) {
-    respondError({ message: 'Internal error', data: error instanceof Error ? error.message : error, code: -32603 });
-  }
+    instance.canvas.height = height;
+    instance.canvas.width = width;
+
+    instance.resize();
+
+    return {
+      success: true,
+    };
+  },
+  setBackgroundColor: (request) => {
+    const instanceId = request.params.instanceId;
+    const backgroundColor = request.params.backgroundColor;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.setBackgroundColor(backgroundColor);
+
+    return {
+      success: true,
+    };
+  },
+  setFrame: (request) => {
+    const instanceId = request.params.instanceId;
+    const frame = request.params.frame;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.setFrame(frame);
+
+    return {
+      success: true,
+    };
+  },
+  setMode: (request) => {
+    const instanceId = request.params.instanceId;
+    const mode = request.params.mode;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.setMode(mode);
+
+    return {
+      success: true,
+    };
+  },
+  setRenderConfig: (request) => {
+    const instanceId = request.params.instanceId;
+    const renderConfig = request.params.renderConfig;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.setRenderConfig(renderConfig);
+
+    return {
+      success: true,
+    };
+  },
+  setSegment: (request) => {
+    const instanceId = request.params.instanceId;
+    const segment = request.params.segment;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.setSegment(segment[0], segment[1]);
+
+    return {
+      success: true,
+    };
+  },
+  setSpeed: (request) => {
+    const instanceId = request.params.instanceId;
+    const speed = request.params.speed;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.setSpeed(speed);
+
+    return {
+      success: true,
+    };
+  },
+  setUseFrameInterpolation: (request) => {
+    const instanceId = request.params.instanceId;
+    const useFrameInterpolation = request.params.useFrameInterpolation;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.setUseFrameInterpolation(useFrameInterpolation);
+
+    return {
+      success: true,
+    };
+  },
+  setWasmUrl: (request) => {
+    DotLottie.setWasmUrl(request.params.wasmUrl);
+
+    return {
+      success: true,
+    };
+  },
+  stop: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.stop();
+
+    return {
+      success: true,
+    };
+  },
+  unfreeze: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.unfreeze();
+
+    return {
+      success: true,
+    };
+  },
+  setViewport(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+    const width = request.params.width;
+    const height = request.params.height;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return {
+      success: instance.setViewport(x, y, width, height),
+    };
+  },
 };
 
-self.addEventListener('message', handleWorkerMessage);
+function executeCommand<T extends keyof MethodParamsMap>(rpcRequest: RpcRequest<T>): MethodResultMap[T] {
+  const method = rpcRequest.method;
+
+  if (typeof commands[method] === 'function') {
+    return commands[method](rpcRequest as RpcRequest<typeof method>);
+  } else {
+    throw new Error(`Method ${method} is not implemented in commands.`);
+  }
+}
+
+self.onmessage = (event: { data: RpcRequest<keyof MethodParamsMap> }): void => {
+  try {
+    const result = executeCommand(event.data);
+
+    const response: RpcResponse<keyof MethodResultMap> = {
+      id: event.data.id,
+      method: event.data.method,
+      result,
+    };
+
+    self.postMessage(response);
+  } catch (error) {
+    const errorResponse = {
+      id: event.data.id,
+      method: event.data.method,
+      error: {
+        message: (error as Error).message,
+      },
+    };
+
+    self.postMessage(errorResponse);
+  }
+};
 
 const dummy = '';
 
