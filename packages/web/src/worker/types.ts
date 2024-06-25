@@ -104,6 +104,11 @@ interface SetViewportParams {
   y: number;
 }
 
+interface SetMarkerParams {
+  instanceId: string;
+  marker: string;
+}
+
 export interface MethodParamsMap {
   create: CreateParams;
   destroy: DestroyParams;
@@ -117,6 +122,7 @@ export interface MethodParamsMap {
   resize: ResizeParams;
   setBackgroundColor: SetBackgroundColorParams;
   setFrame: SetFrameParams;
+  setMarker: SetMarkerParams;
   setMode: SetModeParams;
   setRenderConfig: SetRenderConfigParams;
   setSegment: SetSegmentParams;
@@ -219,6 +225,10 @@ interface SetViewportResult {
   success: boolean;
 }
 
+interface SetMarkerResult {
+  success: boolean;
+}
+
 export interface MethodResultMap {
   create: CreateResult;
   destroy: DestroyResult;
@@ -232,6 +242,7 @@ export interface MethodResultMap {
   resize: ResizeResult;
   setBackgroundColor: SetBackgroundColorResult;
   setFrame: SetFrameResult;
+  setMarker: SetMarkerResult;
   setMode: SetModeResult;
   setRenderConfig: SetRenderConfigResult;
   setSegment: SetSegmentResult;

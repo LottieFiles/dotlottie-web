@@ -4,90 +4,41 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Document</title>
+        <style>
+            canvas {
+                width: 100px;
+                height: 100px;
+                margin: 10px;
+            }
+        </style>
     </head>
     <body>
         <h1>dotLottie Worker</h1>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
-        <canvas
-            data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"
-            style="width: 300px; height: 300px"
-        ></canvas>
+        <div></div>
         <script type="module">
             import { DotLottieWorker as DotLottie } from './dist/worker/index.js';
 
             DotLottie.setWasmUrl('http://127.0.0.1:5500/packages/web/dist/dotlottie-player.wasm');
 
-            for (const canvas of document.querySelectorAll('canvas')) {
+            const allCanvas = new Array(100).fill().map(() => {
+                const canvas = document.createElement('canvas');
+                canvas.setAttribute(
+                    'data-src',
+                    'https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json',
+                );
+
+                document.body.appendChild(canvas);
+
+                return canvas;
+            });
+
+            for (const canvas of allCanvas) {
                 const dotLottie = new DotLottie({
                     canvas,
                     src: canvas.getAttribute('data-src'),
                     autoplay: true,
                     loop: true,
                 });
-
-                dotLottie.addEventListener('load', console.log);
-                dotLottie.addEventListener('play', console.log);
-                dotLottie.addEventListener('load', console.log);
-                dotLottie.addEventListener('frame', console.log);
             }
         </script>
         <script>

@@ -2,7 +2,7 @@ import type { EventType, EventListener } from '../event-manager';
 import { EventManager } from '../event-manager';
 import type { Config, Layout, Manifest, Mode, RenderConfig } from '../types';
 
-import type { MethodParamsMap, MethodResultMap, RpcRequest } from './types';
+import type { MethodParamsMap, MethodResultMap, RpcRequest, RpcResponse } from './types';
 import { WorkerManager } from './worker-manager';
 
 function getCanvasSize(canvas: HTMLCanvasElement | OffscreenCanvas): { height: number; width: number } {
@@ -13,6 +13,10 @@ function getCanvasSize(canvas: HTMLCanvasElement | OffscreenCanvas): { height: n
   const { height, width } = canvas.getBoundingClientRect();
 
   return { width: width * window.devicePixelRatio, height: height * window.devicePixelRatio };
+}
+
+function generateUniqueId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 }
 
 interface DotLottieInstanceState {
@@ -46,9 +50,7 @@ export class DotLottieWorker {
 
   private readonly _id: string;
 
-  private readonly _isLoaded: boolean = false;
-
-  private readonly _state: 'playing' | 'paused' | 'stopped' = 'stopped';
+  private readonly _worker: Worker;
 
   private readonly _canvas: HTMLCanvasElement;
 
@@ -86,36 +88,40 @@ export class DotLottieWorker {
   public constructor(config: Config & { workerId?: string }) {
     this._canvas = config.canvas;
 
-    let offscreen: OffscreenCanvas;
-
-    if (config.canvas instanceof HTMLCanvasElement) {
-      offscreen = config.canvas.transferControlToOffscreen();
-    } else {
-      offscreen = config.canvas;
-    }
-
-    this._id = this._generateUniqueId();
+    this._id = `dotlottie-${generateUniqueId()}`;
     const workerId = config.workerId || 'defaultWorker';
-    const worker = DotLottieWorker._workerManager.getWorker(workerId);
+
+    // creates or gets the worker
+    this._worker = DotLottieWorker._workerManager.getWorker(workerId);
 
     DotLottieWorker._workerManager.assignAnimationToWorker(this._id, workerId);
     if (DotLottieWorker._wasmUrl) this._sendMessage('setWasmUrl', { wasmUrl: DotLottieWorker._wasmUrl });
 
-    this._sendMessage(
+    this._create(config);
+  }
+
+  private async _create(config: Config): Promise<void> {
+    let offscreen: OffscreenCanvas;
+
+    if (this._canvas instanceof HTMLCanvasElement) {
+      offscreen = this._canvas.transferControlToOffscreen();
+    } else {
+      offscreen = this._canvas;
+    }
+
+    await this._sendMessage(
       'create',
       {
+        instanceId: this._id,
         config: {
           ...config,
+          // @ts-ignore
           canvas: offscreen,
         },
         ...getCanvasSize(this._canvas),
       },
       [offscreen],
     );
-  }
-
-  private _generateUniqueId(): string {
-    return `dotlottie_animation_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   public get isLoaded(): boolean {
@@ -210,56 +216,127 @@ export class DotLottieWorker {
     return this._dotLottieInstanceState.layout;
   }
 
-  public async play(): Promise<void> {}
+  public async play(): Promise<void> {
+    await this._sendMessage('play', { instanceId: this._id });
+  }
 
-  public async pause(): Promise<void> {}
+  public async pause(): Promise<void> {
+    await this._sendMessage('pause', { instanceId: this._id });
+  }
 
-  public async stop(): Promise<void> {}
+  public async stop(): Promise<void> {
+    await this._sendMessage('stop', { instanceId: this._id });
+  }
 
-  public async setSpeed(speed: number): Promise<void> {}
+  public async setSpeed(speed: number): Promise<void> {
+    await this._sendMessage('setSpeed', { instanceId: this._id, speed });
+  }
 
-  public async setMode(mode: Mode): Promise<void> {}
+  public async setMode(mode: Mode): Promise<void> {
+    await this._sendMessage('setMode', { instanceId: this._id, mode });
+  }
 
-  public async setFrame(frame: number): Promise<void> {}
+  public async setFrame(frame: number): Promise<void> {
+    await this._sendMessage('setFrame', { frame, instanceId: this._id });
+  }
 
-  public async setSegment(start: number, end: number): Promise<void> {}
+  public async setSegment(start: number, end: number): Promise<void> {
+    await this._sendMessage('setSegment', { instanceId: this._id, segment: [start, end] });
+  }
 
-  public async setRenderConfig(renderConfig: RenderConfig): Promise<void> {}
+  public async setRenderConfig(renderConfig: RenderConfig): Promise<void> {
+    await this._sendMessage('setRenderConfig', { instanceId: this._id, renderConfig });
+  }
 
-  public async setUseFrameInterpolation(useFrameInterpolation: boolean): Promise<void> {}
+  public async setUseFrameInterpolation(useFrameInterpolation: boolean): Promise<void> {
+    await this._sendMessage('setUseFrameInterpolation', { instanceId: this._id, useFrameInterpolation });
+  }
 
-  public async loadTheme(themeId: string): Promise<boolean> {}
+  public async loadTheme(themeId: string): Promise<boolean> {
+    const result = await this._sendMessage('loadTheme', { instanceId: this._id, themeId });
 
-  public async load(config: Omit<Config, 'canvas'>): Promise<void> {}
+    return result.success;
+  }
 
-  public async resize(): Promise<void> {}
+  public async load(config: Omit<Config, 'canvas'>): Promise<void> {
+    await this._sendMessage('load', { config, instanceId: this._id });
+  }
 
-  public async destroy(): Promise<void> {}
+  public async resize(): Promise<void> {
+    const { height, width } = getCanvasSize(this._canvas);
 
-  public async freeze(): Promise<void> {}
+    await this._sendMessage('resize', { height, instanceId: this._id, width });
+  }
 
-  public async unfreeze(): Promise<void> {}
+  public async destroy(): Promise<void> {
+    await this._sendMessage('destroy', { instanceId: this._id });
+  }
 
-  public async setBackgroundColor(backgroundColor: string): Promise<void> {}
+  public async freeze(): Promise<void> {
+    await this._sendMessage('freeze', { instanceId: this._id });
+  }
 
-  public async loadAnimation(animationId: string): Promise<void> {}
+  public async unfreeze(): Promise<void> {
+    await this._sendMessage('unfreeze', { instanceId: this._id });
+  }
+
+  public async setBackgroundColor(backgroundColor: string): Promise<void> {
+    await this._sendMessage('setBackgroundColor', { instanceId: this._id, backgroundColor });
+  }
+
+  public async loadAnimation(animationId: string): Promise<void> {
+    await this._sendMessage('loadAnimation', { animationId, instanceId: this._id });
+  }
 
   public markers(): string[] {
     return [];
   }
 
-  public async setMarker(marker: string): Promise<void> {}
+  public async setMarker(marker: string): Promise<void> {
+    await this._sendMessage('setMarker', { instanceId: this._id, marker });
+  }
 
-  public async loadThemeData(themeData: string): Promise<boolean> {}
+  public async loadThemeData(themeData: string): Promise<boolean> {
+    const result = await this._sendMessage('loadThemeData', { instanceId: this._id, themeData });
 
-  public async setViewport(x: number, y: number, width: number, height: number): Promise<void> {}
+    return result.success;
+  }
 
-  private async _sendMessage(
-    method: RpcRequest<keyof MethodParamsMap>['method'],
-    params: RpcRequest<keyof MethodParamsMap>['params'],
+  public async setViewport(x: number, y: number, width: number, height: number): Promise<void> {
+    await this._sendMessage('setViewport', { x, y, width, height, instanceId: this._id });
+  }
+
+  private async _sendMessage<T extends keyof MethodParamsMap>(
+    method: T,
+    params: MethodParamsMap[T],
     transfer?: Transferable[],
-  ): Promise<keyof MethodResultMap> {
-    // TODO: implement
+  ): Promise<MethodResultMap[T]> {
+    const rpcRequest: RpcRequest<T> = {
+      id: `dotlottie-request-${generateUniqueId()}`,
+      method,
+      params,
+    };
+
+    this._worker.postMessage(rpcRequest, transfer || []);
+
+    return new Promise((resolve, reject) => {
+      const onMessage = (event: MessageEvent): void => {
+        const rpcResponse: RpcResponse<T> = event.data;
+
+        // Check if the response corresponds to the request
+        if (rpcResponse.id === rpcRequest.id) {
+          this._worker.removeEventListener('message', onMessage);
+
+          if (rpcResponse.error) {
+            reject(rpcResponse.error);
+          } else {
+            resolve(rpcResponse.result);
+          }
+        }
+      };
+
+      this._worker.addEventListener('message', onMessage);
+    });
   }
 
   public addEventListener<T extends EventType>(type: T, listener: EventListener<T>): void {

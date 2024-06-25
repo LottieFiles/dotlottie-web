@@ -342,6 +342,22 @@ const commands: {
       success: instance.setViewport(x, y, width, height),
     };
   },
+  setMarker(request) {
+    const instanceId = request.params.instanceId;
+    const marker = request.params.marker;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.setMarker(marker);
+
+    return {
+      success: true,
+    };
+  },
 };
 
 function executeCommand<T extends keyof MethodParamsMap>(rpcRequest: RpcRequest<T>): MethodResultMap[T] {
