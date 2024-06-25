@@ -1,4 +1,4 @@
-import type { EventType, EventListener } from '../event-manager';
+import type { EventType, EventListener, FrameEvent } from '../event-manager';
 import { EventManager } from '../event-manager';
 import type { Config, Layout, Manifest, Mode, RenderConfig } from '../types';
 
@@ -95,9 +95,89 @@ export class DotLottieWorker {
     this._worker = DotLottieWorker._workerManager.getWorker(workerId);
 
     DotLottieWorker._workerManager.assignAnimationToWorker(this._id, workerId);
-    if (DotLottieWorker._wasmUrl) this._sendMessage('setWasmUrl', { wasmUrl: DotLottieWorker._wasmUrl });
+    if (DotLottieWorker._wasmUrl) {
+      this._sendMessage('setWasmUrl', { wasmUrl: DotLottieWorker._wasmUrl });
+    }
 
     this._create(config);
+
+    this._worker.addEventListener('message', this._handleWorkerEvent.bind(this));
+  }
+
+  private _handleWorkerEvent(event: MessageEvent): void {
+    const rpcResponse: RpcResponse<
+      | 'onComplete'
+      | 'onLoad'
+      | 'onDestroy'
+      | 'onUnfreeze'
+      | 'onFrame'
+      | 'onRender'
+      | 'onFreeze'
+      | 'onPause'
+      | 'onPlay'
+      | 'onStop'
+      | 'onLoadError'
+    > = event.data;
+
+    if (!rpcResponse.id) {
+      if (rpcResponse.method === 'onLoad' && rpcResponse.result.instanceId === this._id) {
+        this._dotLottieInstanceState.isLoaded = true;
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onComplete' && rpcResponse.result.instanceId === this._id) {
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onDestroy' && rpcResponse.result.instanceId === this._id) {
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onUnfreeze' && rpcResponse.result.instanceId === this._id) {
+        this._dotLottieInstanceState.isFrozen = false;
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onFrame' && rpcResponse.result.instanceId === this._id) {
+        this._dotLottieInstanceState.currentFrame = (rpcResponse.result.event as FrameEvent).currentFrame;
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onRender' && rpcResponse.result.instanceId === this._id) {
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onFreeze' && rpcResponse.result.instanceId === this._id) {
+        this._dotLottieInstanceState.isFrozen = true;
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onPause' && rpcResponse.result.instanceId === this._id) {
+        this._dotLottieInstanceState.isPaused = true;
+        this._dotLottieInstanceState.isPlaying = false;
+        this._dotLottieInstanceState.isStopped = false;
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onPlay' && rpcResponse.result.instanceId === this._id) {
+        this._dotLottieInstanceState.isPaused = false;
+        this._dotLottieInstanceState.isPlaying = true;
+        this._dotLottieInstanceState.isStopped = false;
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStop' && rpcResponse.result.instanceId === this._id) {
+        this._dotLottieInstanceState.isPaused = false;
+        this._dotLottieInstanceState.isPlaying = false;
+        this._dotLottieInstanceState.isStopped = true;
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onLoadError' && rpcResponse.result.instanceId === this._id) {
+        this._dotLottieInstanceState.isLoaded = false;
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+    }
   }
 
   private async _create(config: Config): Promise<void> {

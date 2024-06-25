@@ -1,3 +1,17 @@
+import type {
+  CompleteEvent,
+  DestroyEvent,
+  FrameEvent,
+  FreezeEvent,
+  LoadErrorEvent,
+  LoadEvent,
+  LoopEvent,
+  PauseEvent,
+  PlayEvent,
+  RenderEvent,
+  StopEvent,
+  UnfreezeEvent,
+} from '../event-manager';
 import type { Config, Mode, RenderConfig } from '../types';
 
 interface CreateParams {
@@ -237,6 +251,54 @@ export interface MethodResultMap {
   loadAnimation: LoadAnimationResult;
   loadTheme: LoadThemeResult;
   loadThemeData: LoadThemeDataResult;
+  onComplete: {
+    event: CompleteEvent;
+    instanceId: string;
+  };
+  onDestroy: {
+    event: DestroyEvent;
+    instanceId: string;
+  };
+  onFrame: {
+    event: FrameEvent;
+    instanceId: string;
+  };
+  onFreeze: {
+    event: FreezeEvent;
+    instanceId: string;
+  };
+  onLoad: {
+    event: LoadEvent;
+    instanceId: string;
+  };
+  onLoadError: {
+    event: LoadErrorEvent;
+    instanceId: string;
+  };
+  onLoop: {
+    event: LoopEvent;
+    instanceId: string;
+  };
+  onPause: {
+    event: PauseEvent;
+    instanceId: string;
+  };
+  onPlay: {
+    event: PlayEvent;
+    instanceId: string;
+  };
+  onRender: {
+    event: RenderEvent;
+    instanceId: string;
+  };
+  onStop: {
+    event: StopEvent;
+    instanceId: string;
+  };
+  onUnfreeze: {
+    event: UnfreezeEvent;
+    instanceId: string;
+  };
   pause: PauseResult;
   play: PlayResult;
   resize: ResizeResult;

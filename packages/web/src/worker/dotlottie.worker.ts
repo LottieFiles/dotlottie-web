@@ -1,9 +1,183 @@
 /* eslint-disable no-restricted-globals */
 import { DotLottie } from '../dotlottie';
+import type {
+  CompleteEvent,
+  DestroyEvent,
+  Event,
+  EventType,
+  FrameEvent,
+  FreezeEvent,
+  LoadErrorEvent,
+  LoadEvent,
+  LoopEvent,
+  PauseEvent,
+  PlayEvent,
+  RenderEvent,
+  StopEvent,
+  UnfreezeEvent,
+} from '../event-manager';
 
 import type { MethodParamsMap, RpcRequest, MethodResultMap, RpcResponse } from './types';
 
 const instancesMap = new Map<string, DotLottie>();
+
+const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) => void> = {
+  complete: (instanceId: string) => (event: Event) => {
+    const response: RpcResponse<'onComplete'> = {
+      id: '',
+      method: 'onComplete',
+      result: {
+        instanceId,
+        event: event as CompleteEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  load: (instanceId: string) => (event: Event) => {
+    const loadEvent = event as LoadEvent;
+    const response: RpcResponse<'onLoad'> = {
+      id: '',
+      method: 'onLoad',
+      result: {
+        instanceId,
+        event: loadEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  loadError: (instanceId: string) => (event: Event) => {
+    const loadErrorEvent = event as LoadErrorEvent;
+    const response: RpcResponse<'onLoadError'> = {
+      id: '',
+      method: 'onLoadError',
+      result: {
+        instanceId,
+        event: loadErrorEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  loop: (instanceId: string) => (event: Event) => {
+    const loopEvent = event as LoopEvent;
+    const response: RpcResponse<'onLoop'> = {
+      id: '',
+      method: 'onLoop',
+      result: {
+        instanceId,
+        event: loopEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  play: (instanceId: string) => (event: Event) => {
+    const playEvent = event as PlayEvent;
+    const response: RpcResponse<'onPlay'> = {
+      id: '',
+      method: 'onPlay',
+      result: {
+        instanceId,
+        event: playEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  pause: (instanceId: string) => (event: Event) => {
+    const pauseEvent = event as PauseEvent;
+    const response: RpcResponse<'onPause'> = {
+      id: '',
+      method: 'onPause',
+      result: {
+        instanceId,
+        event: pauseEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stop: (instanceId: string) => (event: Event) => {
+    const stopEvent = event as StopEvent;
+    const response: RpcResponse<'onStop'> = {
+      id: '',
+      method: 'onStop',
+      result: {
+        instanceId,
+        event: stopEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  frame: (instanceId: string) => (event: Event) => {
+    const frameEvent = event as FrameEvent;
+    const response: RpcResponse<'onFrame'> = {
+      id: '',
+      method: 'onFrame',
+      result: {
+        instanceId,
+        event: frameEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  render: (instanceId: string) => (event: Event) => {
+    const renderEvent = event as RenderEvent;
+    const response: RpcResponse<'onRender'> = {
+      id: '',
+      method: 'onRender',
+      result: {
+        instanceId,
+        event: renderEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  freeze: (instanceId: string) => (event: Event) => {
+    const freezeEvent = event as FreezeEvent;
+    const response: RpcResponse<'onFreeze'> = {
+      id: '',
+      method: 'onFreeze',
+      result: {
+        instanceId,
+        event: freezeEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  unfreeze: (instanceId: string) => (event: Event) => {
+    const unfreezeEvent = event as UnfreezeEvent;
+    const response: RpcResponse<'onUnfreeze'> = {
+      id: '',
+      method: 'onUnfreeze',
+      result: {
+        instanceId,
+        event: unfreezeEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  destroy: (instanceId: string) => (event: Event) => {
+    const destroyEvent = event as DestroyEvent;
+    const response: RpcResponse<'onDestroy'> = {
+      id: '',
+      method: 'onDestroy',
+      result: {
+        instanceId,
+        event: destroyEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+};
 
 const commands: {
   [K in keyof MethodParamsMap]: (request: RpcRequest<K>) => MethodResultMap[K];
@@ -24,6 +198,25 @@ const commands: {
     instance.canvas.width = width;
 
     instancesMap.set(instanceId, instance);
+
+    const events: EventType[] = [
+      'complete',
+      'frame',
+      'load',
+      'loadError',
+      'loop',
+      'pause',
+      'play',
+      'stop',
+      'destroy',
+      'freeze',
+      'unfreeze',
+      'render',
+    ];
+
+    events.forEach((event) => {
+      instance.addEventListener(event, eventHandlerMap[event](instanceId));
+    });
 
     return {
       instanceId,
