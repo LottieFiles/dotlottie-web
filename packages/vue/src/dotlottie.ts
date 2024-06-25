@@ -16,6 +16,10 @@ export { type DotLottie };
 
 export interface DotLottieVueProps extends Omit<Config, 'canvas'> {}
 
+interface DotLottieVueExposed {
+  getDotLottieInstance: () => DotLottie | null;
+}
+
 export const DotLottieVue = defineComponent({
   props: {
     autoplay: { type: Boolean, required: false },
@@ -145,11 +149,13 @@ export const DotLottieVue = defineComponent({
 
     expose({
       getDotLottieInstance: (): DotLottie | null => dotLottie,
-    });
+    } as DotLottieVueExposed);
 
     return () => h('div', { ...attrs }, h('canvas', { style: 'height: 100%; width: 100%', ref: canvas }));
   },
 });
+
+export type DotLottieVueInstance = InstanceType<typeof DotLottieVue> & DotLottieVueExposed;
 
 export const setWasmUrl = (url: string): void => {
   DotLottie.setWasmUrl(url);
