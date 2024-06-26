@@ -5,6 +5,7 @@ import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import type { Mode, Fit, Data, Config, Layout, Manifest, RenderConfig } from './types';
+import { hexStringToRGBAInt } from './utils';
 
 const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
   if (mode === 'reverse') {
@@ -529,8 +530,13 @@ export class DotLottie {
   public setBackgroundColor(color: string): void {
     if (this._dotLottieCore === null) return;
 
-    if (this._canvas instanceof HTMLCanvasElement) {
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       this._canvas.style.backgroundColor = color;
+    } else {
+      this._dotLottieCore.setConfig({
+        ...this._dotLottieCore.config(),
+        backgroundColor: hexStringToRGBAInt(color),
+      });
     }
 
     this._backgroundColor = color;
@@ -806,15 +812,23 @@ export class DotLottie {
     return this._dotLottieCore?.postEventPayload(event) ?? false;
   }
 
-  private _setupStateMachineListeners(): void {
-    if (this._canvas instanceof HTMLCanvasElement && this._dotLottieCore !== null && this.isLoaded) {
-      const listenersVector = this._dotLottieCore.stateMachineFrameworkSetup();
+  public getStateMachineListeners(): string[] {
+    if (!this._dotLottieCore) return [];
 
-      const listeners = [];
+    const listenersVector = this._dotLottieCore.stateMachineFrameworkSetup();
 
-      for (let i = 0; i < listenersVector.size(); i += 1) {
-        listeners.push(listenersVector.get(i));
-      }
+    const listeners = [];
+
+    for (let i = 0; i < listenersVector.size(); i += 1) {
+      listeners.push(listenersVector.get(i) as string);
+    }
+
+    return listeners;
+  }
+
+  public _setupStateMachineListeners(): void {
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      const listeners = this.getStateMachineListeners();
 
       if (listeners.includes('PointerUp')) {
         this._canvas.addEventListener('pointerup', this._onPointerUp.bind(this));
@@ -843,7 +857,7 @@ export class DotLottie {
   }
 
   private _cleanupStateMachineListeners(): void {
-    if (this._canvas instanceof HTMLCanvasElement) {
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       this._canvas.removeEventListener('pointerup', this._onPointerUp.bind(this));
       this._canvas.removeEventListener('pointerdown', this._onPointerDown.bind(this));
       this._canvas.removeEventListener('pointermove', this._onPointerMove.bind(this));

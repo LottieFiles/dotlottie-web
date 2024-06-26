@@ -1,3 +1,4 @@
+import { IS_BROWSER } from '../constants';
 import type { EventType, EventListener, FrameEvent } from '../event-manager';
 import { EventManager } from '../event-manager';
 import type { Config, Layout, Manifest, Mode, RenderConfig } from '../types';
@@ -126,6 +127,10 @@ export class DotLottieWorker {
       }
 
       if (rpcResponse.method === 'onComplete' && rpcResponse.result.instanceId === this._id) {
+        this._dotLottieInstanceState.isStopped = true;
+        this._dotLottieInstanceState.isPlaying = false;
+        this._dotLottieInstanceState.isPaused = false;
+
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
@@ -342,6 +347,10 @@ export class DotLottieWorker {
     await this._sendMessage('load', { config, instanceId: this._id });
   }
 
+  public async setLoop(loop: boolean): Promise<void> {
+    await this._sendMessage('setLoop', { instanceId: this._id, loop });
+  }
+
   public async resize(): Promise<void> {
     const { height, width } = getCanvasSize(this._canvas);
 
@@ -349,7 +358,14 @@ export class DotLottieWorker {
   }
 
   public async destroy(): Promise<void> {
-    await this._sendMessage('destroy', { instanceId: this._id });
+    const result = await this._sendMessage('destroy', { instanceId: this._id });
+
+    if (result.success) {
+      this._cleanupStateMachineListeners();
+
+      DotLottieWorker._workerManager.unassignAnimationFromWorker(this._id);
+      this._eventManager.removeAllEventListeners();
+    }
   }
 
   public async freeze(): Promise<void> {
@@ -429,5 +445,129 @@ export class DotLottieWorker {
 
   public static setWasmUrl(url: string): void {
     this._wasmUrl = url;
+  }
+
+  public async loadStateMachine(stateMachineId: string): Promise<boolean> {
+    const result = await this._sendMessage('loadStateMachine', { instanceId: this._id, stateMachineId });
+
+    return result.success;
+  }
+
+  public async startStateMachine(): Promise<boolean> {
+    this._setupStateMachineListeners();
+
+    const result = await this._sendMessage('startStateMachine', { instanceId: this._id });
+
+    return result.success;
+  }
+
+  public async stopStateMachine(): Promise<boolean> {
+    this._cleanupStateMachineListeners();
+
+    const result = await this._sendMessage('stopStateMachine', { instanceId: this._id });
+
+    return result.success;
+  }
+
+  public async postStateMachineEvent(event: string): Promise<boolean> {
+    const result = await this._sendMessage('postStateMachineEvent', { event, instanceId: this._id });
+
+    return result.success;
+  }
+
+  public async getStateMachineListeners(): Promise<string[]> {
+    const { listeners } = await this._sendMessage('getStateMachineListeners', { instanceId: this._id });
+
+    return listeners;
+  }
+
+  private _getPointerPosition(event: PointerEvent): { x: number; y: number } {
+    const rect = (this._canvas as HTMLCanvasElement).getBoundingClientRect();
+    const scaleX = this._canvas.width / rect.width;
+    const scaleY = this._canvas.height / rect.height;
+
+    const devicePixelRatio = this._dotLottieInstanceState.renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
+    const x = ((event.clientX - rect.left) * scaleX) / devicePixelRatio;
+    const y = ((event.clientY - rect.top) * scaleY) / devicePixelRatio;
+
+    return {
+      x,
+      y,
+    };
+  }
+
+  private _onPointerUp(event: PointerEvent): void {
+    const { x, y } = this._getPointerPosition(event);
+
+    this.postStateMachineEvent(`OnPointerUp: ${x} ${y}`);
+  }
+
+  private _onPointerDown(event: PointerEvent): void {
+    const { x, y } = this._getPointerPosition(event);
+
+    this.postStateMachineEvent(`OnPointerDown: ${x} ${y}`);
+  }
+
+  private _onPointerMove(event: PointerEvent): void {
+    const { x, y } = this._getPointerPosition(event);
+
+    this.postStateMachineEvent(`OnPointerMove: ${x} ${y}`);
+  }
+
+  private _onPointerEnter(event: PointerEvent): void {
+    const { x, y } = this._getPointerPosition(event);
+
+    this.postStateMachineEvent(`OnPointerEnter: ${x} ${y}`);
+  }
+
+  private _onPointerLeave(event: PointerEvent): void {
+    const { x, y } = this._getPointerPosition(event);
+
+    this.postStateMachineEvent(`OnPointerExit: ${x} ${y}`);
+  }
+
+  private _onComplete(): void {
+    this.postStateMachineEvent('OnComplete');
+  }
+
+  private async _setupStateMachineListeners(): Promise<void> {
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this.isLoaded) {
+      const { listeners } = await this._sendMessage('getStateMachineListeners', { instanceId: this._id });
+
+      if (listeners.includes('PointerUp')) {
+        this._canvas.addEventListener('pointerup', this._onPointerUp.bind(this));
+      }
+
+      if (listeners.includes('PointerDown')) {
+        this._canvas.addEventListener('pointerdown', this._onPointerDown.bind(this));
+      }
+
+      if (listeners.includes('PointerMove')) {
+        this._canvas.addEventListener('pointermove', this._onPointerMove.bind(this));
+      }
+
+      if (listeners.includes('PointerEnter')) {
+        this._canvas.addEventListener('pointerenter', this._onPointerEnter.bind(this));
+      }
+
+      if (listeners.includes('PointerExit')) {
+        this._canvas.addEventListener('pointerleave', this._onPointerLeave.bind(this));
+      }
+
+      if (listeners.includes('Complete')) {
+        this.addEventListener('complete', this._onComplete.bind(this));
+      }
+    }
+  }
+
+  private _cleanupStateMachineListeners(): void {
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      this._canvas.removeEventListener('pointerup', this._onPointerUp.bind(this));
+      this._canvas.removeEventListener('pointerdown', this._onPointerDown.bind(this));
+      this._canvas.removeEventListener('pointermove', this._onPointerMove.bind(this));
+      this._canvas.removeEventListener('pointerenter', this._onPointerEnter.bind(this));
+      this._canvas.removeEventListener('pointerleave', this._onPointerLeave.bind(this));
+      this.removeEventListener('complete', this._onComplete.bind(this));
+    }
   }
 }

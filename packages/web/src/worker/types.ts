@@ -127,15 +127,30 @@ export interface MethodParamsMap {
   create: CreateParams;
   destroy: DestroyParams;
   freeze: FreezeParams;
+  getStateMachineListeners: {
+    instanceId: string;
+  };
   load: LoadParams;
   loadAnimation: LoadAnimationParams;
+  loadStateMachine: {
+    instanceId: string;
+    stateMachineId: string;
+  };
   loadTheme: LoadThemeParams;
   loadThemeData: LoadThemeDataParams;
   pause: PauseParams;
   play: PlayParams;
+  postStateMachineEvent: {
+    event: string;
+    instanceId: string;
+  };
   resize: ResizeParams;
   setBackgroundColor: SetBackgroundColorParams;
   setFrame: SetFrameParams;
+  setLoop: {
+    instanceId: string;
+    loop: boolean;
+  };
   setMarker: SetMarkerParams;
   setMode: SetModeParams;
   setRenderConfig: SetRenderConfigParams;
@@ -144,7 +159,13 @@ export interface MethodParamsMap {
   setUseFrameInterpolation: SetUseFrameInterpolationParams;
   setViewport: SetViewportParams;
   setWasmUrl: SetWasmUrlParams;
+  startStateMachine: {
+    instanceId: string;
+  };
   stop: StopParams;
+  stopStateMachine: {
+    instanceId: string;
+  };
   unfreeze: UnfreezeParams;
 }
 
@@ -247,8 +268,14 @@ export interface MethodResultMap {
   create: CreateResult;
   destroy: DestroyResult;
   freeze: FreezeResult;
+  getStateMachineListeners: {
+    listeners: string[];
+  };
   load: LoadResult;
   loadAnimation: LoadAnimationResult;
+  loadStateMachine: {
+    success: boolean;
+  };
   loadTheme: LoadThemeResult;
   loadThemeData: LoadThemeDataResult;
   onComplete: {
@@ -301,9 +328,15 @@ export interface MethodResultMap {
   };
   pause: PauseResult;
   play: PlayResult;
+  postStateMachineEvent: {
+    success: boolean;
+  };
   resize: ResizeResult;
   setBackgroundColor: SetBackgroundColorResult;
   setFrame: SetFrameResult;
+  setLoop: {
+    success: boolean;
+  };
   setMarker: SetMarkerResult;
   setMode: SetModeResult;
   setRenderConfig: SetRenderConfigResult;
@@ -312,7 +345,13 @@ export interface MethodResultMap {
   setUseFrameInterpolation: SetUseFrameInterpolationResult;
   setViewport: SetViewportResult;
   setWasmUrl: SetWasmUrlResult;
+  startStateMachine: {
+    success: boolean;
+  };
   stop: StopResult;
+  stopStateMachine: {
+    success: boolean;
+  };
   unfreeze: UnfreezeResult;
 }
 

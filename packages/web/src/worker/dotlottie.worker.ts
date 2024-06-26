@@ -182,6 +182,73 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
 const commands: {
   [K in keyof MethodParamsMap]: (request: RpcRequest<K>) => MethodResultMap[K];
 } = {
+  getStateMachineListeners(request) {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return {
+      listeners: instance.getStateMachineListeners(),
+    };
+  },
+  postStateMachineEvent(request) {
+    const instanceId = request.params.instanceId;
+    const event = request.params.event;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return {
+      success: instance.postStateMachineEvent(event),
+    };
+  },
+  startStateMachine(request) {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return {
+      success: instance.startStateMachine(),
+    };
+  },
+  stopStateMachine(request) {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return {
+      success: instance.stopStateMachine(),
+    };
+  },
+  loadStateMachine(request) {
+    const instanceId = request.params.instanceId;
+    const stateMachineId = request.params.stateMachineId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return {
+      success: instance.loadStateMachine(stateMachineId),
+    };
+  },
   create: (request) => {
     const instanceId = request.params.instanceId;
     const config = request.params.config;
@@ -546,6 +613,22 @@ const commands: {
     }
 
     instance.setMarker(marker);
+
+    return {
+      success: true,
+    };
+  },
+  setLoop(request) {
+    const instanceId = request.params.instanceId;
+    const loop = request.params.loop;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.setLoop(loop);
 
     return {
       success: true,
