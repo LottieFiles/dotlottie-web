@@ -14,7 +14,10 @@ import {
 
 export { type DotLottie };
 
-export interface DotLottieVueProps extends Omit<Config, 'canvas'> {}
+export interface DotLottieVueProps extends Omit<Config, 'canvas'> {
+  autoResizeCanvas?: boolean;
+  playOnHover?: boolean;
+}
 
 interface DotLottieVueExposed {
   getDotLottieInstance: () => DotLottie | null;
@@ -32,11 +35,24 @@ export const DotLottieVue = defineComponent({
     speed: { type: Number, required: false },
     src: { type: String, required: false },
     useFrameInterpolation: { type: Boolean, required: false },
+    marker: { type: String, required: false },
+    autoResizeCanvas: { type: Boolean, required: false, default: true },
+    playOnHover: { type: Boolean, required: false },
   },
 
   setup(props: DotLottieVueProps, { attrs, expose }: SetupContext): () => VNode {
     const canvas: Ref<HTMLCanvasElement | undefined> = ref(undefined);
-    const { backgroundColor, loop, mode, segment, speed, useFrameInterpolation } = toRefs(props);
+    const {
+      autoResizeCanvas,
+      backgroundColor,
+      loop,
+      marker,
+      mode,
+      playOnHover,
+      segment,
+      speed,
+      useFrameInterpolation,
+    } = toRefs(props);
     let dotLottie: DotLottie | null = null;
     let intersectionObserver: IntersectionObserver | null = null;
     let resizeObserver: ResizeObserver | null = null;
@@ -47,6 +63,14 @@ export const DotLottieVue = defineComponent({
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
           dotLottie.setBackgroundColor(newVal);
+        }
+      },
+    );
+    watch(
+      () => marker?.value,
+      (newVal) => {
+        if (dotLottie && typeof newVal !== 'undefined') {
+          dotLottie.setMarker(newVal);
         }
       },
     );
@@ -92,6 +116,27 @@ export const DotLottieVue = defineComponent({
       },
     );
 
+    function hoverHandler(event: MouseEvent): void {
+      if (event.type === 'mouseenter') {
+        dotLottie?.play();
+      } else {
+        dotLottie?.pause();
+      }
+    }
+
+    watch(
+      () => playOnHover?.value,
+      (newVal) => {
+        if (dotLottie && typeof newVal !== 'undefined' && newVal) {
+          canvas.value?.addEventListener('mouseenter', hoverHandler);
+          canvas.value?.addEventListener('mouseleave', hoverHandler);
+        } else {
+          canvas.value?.removeEventListener('mouseenter', hoverHandler);
+          canvas.value?.removeEventListener('mouseleave', hoverHandler);
+        }
+      },
+    );
+
     function getIntersectionObserver(): IntersectionObserver {
       return new IntersectionObserver(
         (entries) => {
@@ -128,22 +173,37 @@ export const DotLottieVue = defineComponent({
     onMounted(() => {
       if (!canvas.value) return;
 
+      let shouldAutoplay = props.autoplay;
+
+      if (typeof playOnHover?.value !== 'undefined' && playOnHover.value) {
+        shouldAutoplay = false;
+      }
+
       dotLottie = new DotLottie({
         canvas: canvas.value,
         ...props,
+        autoplay: shouldAutoplay,
       });
 
       intersectionObserver = getIntersectionObserver();
-      resizeObserver = getResizeObserver();
       intersectionObserver.observe(canvas.value);
-      resizeObserver.observe(canvas.value);
+      if (typeof autoResizeCanvas?.value === 'boolean' && autoResizeCanvas.value) {
+        resizeObserver = getResizeObserver();
+        resizeObserver.observe(canvas.value);
+      }
       document.addEventListener('visibilitychange', onVisibilityChange);
+      if (playOnHover?.value) {
+        canvas.value.addEventListener('mouseenter', hoverHandler);
+        canvas.value.addEventListener('mouseleave', hoverHandler);
+      }
     });
 
     onBeforeUnmount(() => {
       resizeObserver?.disconnect();
       intersectionObserver?.disconnect();
       document.removeEventListener('visibilitychange', onVisibilityChange);
+      canvas.value?.addEventListener('mouseenter', hoverHandler);
+      canvas.value?.addEventListener('mouseleave', hoverHandler);
       dotLottie?.destroy();
     });
 
