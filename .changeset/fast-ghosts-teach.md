@@ -2,4 +2,4 @@
 '@lottiefiles/dotlottie-vue': minor
 ---
 
-feat: 🎸 added markers, autoResizeCanvas and playOnHover
+feat(vue): 🎸 added markers, animationId, themeId, themeData, autoResizeCanvas and playOnHover props

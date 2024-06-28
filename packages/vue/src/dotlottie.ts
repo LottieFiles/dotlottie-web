@@ -15,8 +15,11 @@ import {
 export { type DotLottie };
 
 export interface DotLottieVueProps extends Omit<Config, 'canvas'> {
+  animationId?: string;
   autoResizeCanvas?: boolean;
   playOnHover?: boolean;
+  themeData?: string;
+  themeId?: string;
 }
 
 interface DotLottieVueExposed {
@@ -25,6 +28,7 @@ interface DotLottieVueExposed {
 
 export const DotLottieVue = defineComponent({
   props: {
+    animationId: { type: String, required: false },
     autoplay: { type: Boolean, required: false },
     backgroundColor: { type: String, required: false },
     data: { type: [String, ArrayBuffer], required: false },
@@ -38,6 +42,8 @@ export const DotLottieVue = defineComponent({
     marker: { type: String, required: false },
     autoResizeCanvas: { type: Boolean, required: false, default: true },
     playOnHover: { type: Boolean, required: false },
+    themeData: { type: String, required: false },
+    themeId: { type: String, required: false },
   },
 
   setup(props: DotLottieVueProps, { attrs, expose }: SetupContext): () => VNode {
@@ -115,6 +121,35 @@ export const DotLottieVue = defineComponent({
         }
       },
     );
+    watch(
+      () => props.animationId,
+      (newVal) => {
+        if (
+          dotLottie &&
+          dotLottie.isLoaded &&
+          typeof newVal !== 'undefined' &&
+          newVal !== dotLottie.activeAnimationId
+        ) {
+          dotLottie.loadAnimation(newVal);
+        }
+      },
+    );
+    watch(
+      () => props.themeData,
+      (newVal) => {
+        if (dotLottie && typeof newVal !== 'undefined') {
+          dotLottie.loadTheme(newVal);
+        }
+      },
+    );
+    watch(
+      () => props.themeId,
+      (newVal) => {
+        if (dotLottie && typeof newVal !== 'undefined') {
+          dotLottie.loadThemeData(newVal);
+        }
+      },
+    );
 
     function hoverHandler(event: MouseEvent): void {
       if (event.type === 'mouseenter') {
@@ -162,14 +197,6 @@ export const DotLottieVue = defineComponent({
       });
     }
 
-    function onVisibilityChange(): void {
-      if (document.hidden) {
-        dotLottie?.freeze();
-      } else {
-        dotLottie?.unfreeze();
-      }
-    }
-
     onMounted(() => {
       if (!canvas.value) return;
 
@@ -191,7 +218,6 @@ export const DotLottieVue = defineComponent({
         resizeObserver = getResizeObserver();
         resizeObserver.observe(canvas.value);
       }
-      document.addEventListener('visibilitychange', onVisibilityChange);
       if (playOnHover?.value) {
         canvas.value.addEventListener('mouseenter', hoverHandler);
         canvas.value.addEventListener('mouseleave', hoverHandler);
@@ -201,7 +227,6 @@ export const DotLottieVue = defineComponent({
     onBeforeUnmount(() => {
       resizeObserver?.disconnect();
       intersectionObserver?.disconnect();
-      document.removeEventListener('visibilitychange', onVisibilityChange);
       canvas.value?.addEventListener('mouseenter', hoverHandler);
       canvas.value?.addEventListener('mouseleave', hoverHandler);
       dotLottie?.destroy();
