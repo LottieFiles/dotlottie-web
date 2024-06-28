@@ -1,4 +1,5 @@
 import { IS_BROWSER } from '../constants';
+import type { Marker } from '../core';
 import type { EventType, EventListener, FrameEvent } from '../event-manager';
 import { EventManager } from '../event-manager';
 import type { Config, Layout, Manifest, Mode, RenderConfig } from '../types';
@@ -20,9 +21,9 @@ function generateUniqueId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 }
 
-interface DotLottieInstanceState {
-  activeAnimationId: string;
-  activeThemeId: string;
+export interface DotLottieInstanceState {
+  activeAnimationId: string | undefined;
+  activeThemeId: string | undefined;
   autoplay: boolean;
   backgroundColor: string;
   currentFrame: number;
@@ -32,12 +33,13 @@ interface DotLottieInstanceState {
   isPaused: boolean;
   isPlaying: boolean;
   isStopped: boolean;
-  layout: Layout;
+  layout: Layout | undefined;
   loop: boolean;
-  marker: string;
+  marker: string | undefined;
+  markers: Marker[];
   mode: Mode;
   renderConfig: RenderConfig;
-  segment: [number, number];
+  segment: [number, number] | undefined;
   segmentDuration: number;
   speed: number;
   totalFrames: number;
@@ -55,7 +57,8 @@ export class DotLottieWorker {
 
   private readonly _canvas: HTMLCanvasElement;
 
-  private readonly _dotLottieInstanceState: DotLottieInstanceState = {
+  private _dotLottieInstanceState: DotLottieInstanceState = {
+    markers: [],
     autoplay: false,
     backgroundColor: '',
     currentFrame: 0,
@@ -123,14 +126,12 @@ export class DotLottieWorker {
     if (!rpcResponse.id) {
       if (rpcResponse.method === 'onLoad' && rpcResponse.result.instanceId === this._id) {
         this._dotLottieInstanceState.isLoaded = true;
+        this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
       if (rpcResponse.method === 'onComplete' && rpcResponse.result.instanceId === this._id) {
-        this._dotLottieInstanceState.isStopped = true;
-        this._dotLottieInstanceState.isPlaying = false;
-        this._dotLottieInstanceState.isPaused = false;
-
+        this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
@@ -139,7 +140,7 @@ export class DotLottieWorker {
       }
 
       if (rpcResponse.method === 'onUnfreeze' && rpcResponse.result.instanceId === this._id) {
-        this._dotLottieInstanceState.isFrozen = false;
+        this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
@@ -153,33 +154,27 @@ export class DotLottieWorker {
       }
 
       if (rpcResponse.method === 'onFreeze' && rpcResponse.result.instanceId === this._id) {
-        this._dotLottieInstanceState.isFrozen = true;
+        this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
       if (rpcResponse.method === 'onPause' && rpcResponse.result.instanceId === this._id) {
-        this._dotLottieInstanceState.isPaused = true;
-        this._dotLottieInstanceState.isPlaying = false;
-        this._dotLottieInstanceState.isStopped = false;
+        this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
       if (rpcResponse.method === 'onPlay' && rpcResponse.result.instanceId === this._id) {
-        this._dotLottieInstanceState.isPaused = false;
-        this._dotLottieInstanceState.isPlaying = true;
-        this._dotLottieInstanceState.isStopped = false;
+        this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
       if (rpcResponse.method === 'onStop' && rpcResponse.result.instanceId === this._id) {
-        this._dotLottieInstanceState.isPaused = false;
-        this._dotLottieInstanceState.isPlaying = false;
-        this._dotLottieInstanceState.isStopped = true;
+        this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
       if (rpcResponse.method === 'onLoadError' && rpcResponse.result.instanceId === this._id) {
-        this._dotLottieInstanceState.isLoaded = false;
+        this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
     }
@@ -241,8 +236,8 @@ export class DotLottieWorker {
     return this._dotLottieInstanceState.totalFrames;
   }
 
-  public get segment(): [number, number] {
-    return [0, 0];
+  public get segment(): [number, number] | undefined {
+    return this._dotLottieInstanceState.segment;
   }
 
   public get speed(): number {
@@ -285,19 +280,19 @@ export class DotLottieWorker {
     return null;
   }
 
-  public get activeAnimationId(): string {
+  public get activeAnimationId(): string | undefined {
     return this._dotLottieInstanceState.activeAnimationId;
   }
 
-  public get marker(): string {
+  public get marker(): string | undefined {
     return this._dotLottieInstanceState.marker;
   }
 
-  public get activeThemeId(): string {
+  public get activeThemeId(): string | undefined {
     return this._dotLottieInstanceState.activeThemeId;
   }
 
-  public get layout(): Layout {
+  public get layout(): Layout | undefined {
     return this._dotLottieInstanceState.layout;
   }
 
@@ -384,8 +379,18 @@ export class DotLottieWorker {
     await this._sendMessage('loadAnimation', { animationId, instanceId: this._id });
   }
 
-  public markers(): string[] {
-    return [];
+  public async setLayout(layout: Layout): Promise<void> {
+    await this._sendMessage('setLayout', { instanceId: this._id, layout });
+  }
+
+  private async _updateDotLottieInstanceState(): Promise<void> {
+    const result = await this._sendMessage('getDotLottieInstanceState', { instanceId: this._id });
+
+    this._dotLottieInstanceState = result.state;
+  }
+
+  public markers(): Marker[] {
+    return this._dotLottieInstanceState.markers;
   }
 
   public async setMarker(marker: string): Promise<void> {

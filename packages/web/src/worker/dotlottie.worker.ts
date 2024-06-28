@@ -17,6 +17,7 @@ import type {
   UnfreezeEvent,
 } from '../event-manager';
 
+import type { DotLottieInstanceState } from './dotlottie';
 import type { MethodParamsMap, RpcRequest, MethodResultMap, RpcResponse } from './types';
 
 const instancesMap = new Map<string, DotLottie>();
@@ -182,6 +183,60 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
 const commands: {
   [K in keyof MethodParamsMap]: (request: RpcRequest<K>) => MethodResultMap[K];
 } = {
+  getDotLottieInstanceState(request) {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    const state: DotLottieInstanceState = {
+      isLoaded: instance.isLoaded,
+      isPaused: instance.isPaused,
+      isPlaying: instance.isPlaying,
+      isStopped: instance.isStopped,
+      isFrozen: instance.isFrozen,
+      loop: instance.loop,
+      mode: instance.mode,
+      speed: instance.speed,
+      currentFrame: instance.currentFrame,
+      totalFrames: instance.totalFrames,
+      duration: instance.duration,
+      useFrameInterpolation: instance.useFrameInterpolation,
+      renderConfig: instance.renderConfig,
+      marker: instance.marker,
+      backgroundColor: instance.backgroundColor,
+      markers: instance.markers(),
+      activeAnimationId: instance.activeAnimationId,
+      activeThemeId: instance.activeThemeId,
+      autoplay: instance.autoplay,
+      segment: instance.segment,
+      layout: instance.layout,
+      segmentDuration: instance.segmentDuration,
+    };
+
+    return {
+      state,
+    };
+  },
+  setLayout(request) {
+    const instanceId = request.params.instanceId;
+    const layout = request.params.layout;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.setLayout(layout);
+
+    return {
+      success: true,
+    };
+  },
   getStateMachineListeners(request) {
     const instanceId = request.params.instanceId;
 

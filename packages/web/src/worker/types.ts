@@ -12,7 +12,9 @@ import type {
   StopEvent,
   UnfreezeEvent,
 } from '../event-manager';
-import type { Config, Mode, RenderConfig } from '../types';
+import type { Config, Layout, Mode, RenderConfig } from '../types';
+
+import type { DotLottieInstanceState } from './dotlottie';
 
 interface CreateParams {
   config: Config;
@@ -127,6 +129,9 @@ export interface MethodParamsMap {
   create: CreateParams;
   destroy: DestroyParams;
   freeze: FreezeParams;
+  getDotLottieInstanceState: {
+    instanceId: string;
+  };
   getStateMachineListeners: {
     instanceId: string;
   };
@@ -147,6 +152,10 @@ export interface MethodParamsMap {
   resize: ResizeParams;
   setBackgroundColor: SetBackgroundColorParams;
   setFrame: SetFrameParams;
+  setLayout: {
+    instanceId: string;
+    layout: Layout;
+  };
   setLoop: {
     instanceId: string;
     loop: boolean;
@@ -268,6 +277,9 @@ export interface MethodResultMap {
   create: CreateResult;
   destroy: DestroyResult;
   freeze: FreezeResult;
+  getDotLottieInstanceState: {
+    state: DotLottieInstanceState;
+  };
   getStateMachineListeners: {
     listeners: string[];
   };
@@ -334,6 +346,9 @@ export interface MethodResultMap {
   resize: ResizeResult;
   setBackgroundColor: SetBackgroundColorResult;
   setFrame: SetFrameResult;
+  setLayout: {
+    success: boolean;
+  };
   setLoop: {
     success: boolean;
   };
