@@ -60,6 +60,7 @@ export interface Layout {
 export interface DotLottiePlayer {
   activeAnimationId(): string;
   activeThemeId(): string;
+  animationSize(): VectorFloat;
   buffer(): unknown;
   clear(): void;
   config(): Config;
@@ -88,6 +89,7 @@ export interface DotLottiePlayer {
     _2: number,
   ): boolean;
   loadStateMachine(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
+  loadStateMachineData(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
   loadTheme(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
   loadThemeData(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
   loopCount(): number;
@@ -103,6 +105,18 @@ export interface DotLottiePlayer {
   segmentDuration(): number;
   setConfig(_0: Config): void;
   setFrame(_0: number): boolean;
+  setStateMachineBooleanContext(
+    _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
+    _1: boolean,
+  ): boolean;
+  setStateMachineNumericContext(
+    _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
+    _1: number,
+  ): boolean;
+  setStateMachineStringContext(
+    _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
+    _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
+  ): boolean;
   setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
   startStateMachine(): boolean;
   stateMachineFrameworkSetup(): VectorString;

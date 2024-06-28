@@ -906,4 +906,30 @@ export class DotLottie {
       this.removeEventListener('complete', this._onComplete.bind(this));
     }
   }
+
+  public loadStateMachineData(stateMachineData: string): boolean {
+    return this._dotLottieCore?.loadStateMachineData(stateMachineData) ?? false;
+  }
+
+  public animationSize(): { height: number; width: number } {
+    const width = this._dotLottieCore?.animationSize().get(0) ?? 0;
+    const height = this._dotLottieCore?.animationSize().get(1) ?? 0;
+
+    return {
+      width,
+      height,
+    };
+  }
+
+  public setStateMachineBooleanContext(name: string, value: boolean): boolean {
+    return this._dotLottieCore?.setStateMachineBooleanContext(name, value) ?? false;
+  }
+
+  public setStateMachineNumericContext(name: string, value: number): boolean {
+    return this._dotLottieCore?.setStateMachineNumericContext(name, value) ?? false;
+  }
+
+  public setStateMachineStringContext(name: string, value: string): boolean {
+    return this._dotLottieCore?.setStateMachineStringContext(name, value) ?? false;
+  }
 }
