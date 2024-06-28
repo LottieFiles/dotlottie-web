@@ -2,10 +2,10 @@
 '@lottiefiles/dotlottie-web': minor
 ---
 
-feat(web): 🎸 Added load state machine data & animation size & state machine context methods
+feat(web): 🎸 added `loadStateMachineData` & `animationSize` & state machine context related methods
 
-* Integrated dotlottie-rs v0.1.24 WASM bindings.
-* Added new methods to `DotLottie`:
+* Integrated [dotlottie-rs v0.1.24](https://github.com/LottieFiles/dotlottie-rs/releases/tag/v0.1.24) WASM bindings.
+* New methods added to `DotLottie`:
   * `loadStateMachineData(stateMachineData: string): boolean`: Loads the state machine data as a json string.
   * `animationSize(): {width: number, height: number}`: Retrieves the original lottie animation size.
   * `setStateMachineBooleanContext(name: string, value: boolean): boolean`: Sets the state machine context with a boolean value.
