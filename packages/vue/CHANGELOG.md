@@ -1,5 +1,18 @@
 # @lottiefiles/dotlottie-vue
 
+## 0.4.0
+
+### Minor Changes
+
+- e292df8: feat(vue): 🎸 added markers, animationId, themeId, themeData, autoResizeCanvas and playOnHover props
+  perf(vue): ⚡️ added setViewport to render visible canvas
+
+### Patch Changes
+
+- Updated dependencies [ba46fd1]
+- Updated dependencies [d7c2c20]
+  - @lottiefiles/dotlottie-web@0.26.0
+
 ## 0.3.6
 
 ### Patch Changes
