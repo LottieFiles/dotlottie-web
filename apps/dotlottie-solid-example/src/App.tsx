@@ -1,5 +1,5 @@
 import { type DotLottie, DotLottieSolid, setWasmUrl } from '@lottiefiles/dotlottie-solid';
-import type { Component} from 'solid-js';
+import type { Component } from 'solid-js';
 import { createEffect, createSignal } from 'solid-js';
 
 import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';

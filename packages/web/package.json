@@ -47,7 +47,7 @@
     "@vitest/browser": "^1.2.2 ",
     "@vitest/coverage-istanbul": "^1.2.2",
     "cross-env": "7.0.3",
-    "tsup": "8.0.1",
+    "tsup": "8.1.0",
     "typescript": "5.0.4",
     "vitest": "^1.2.2",
     "webdriverio": "^8.32.0"

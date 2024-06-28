@@ -141,7 +141,11 @@ export type Event =
   | CompleteEvent
   | PauseEvent
   | PlayEvent
-  | StopEvent;
+  | StopEvent
+  | DestroyEvent
+  | FreezeEvent
+  | UnfreezeEvent
+  | RenderEvent;
 
 /**
  * Type for event listener callbacks.

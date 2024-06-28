@@ -1,7 +1,7 @@
 import { type Config, DotLottie } from '@lottiefiles/dotlottie-web';
 import debounce from 'debounce';
-import type { Accessor, ComponentProps, JSX} from 'solid-js';
-import { on , createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
+import type { Accessor, ComponentProps, JSX } from 'solid-js';
+import { on, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
 import { isServer } from 'solid-js/web';
 
 interface DotLottieComponentProps {

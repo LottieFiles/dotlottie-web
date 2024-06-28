@@ -1,40 +1,44 @@
-var createDotLottiePlayerModule = (() => {
-  var _scriptDir = typeof document != 'undefined' ? document.currentScript?.src : undefined;
+const createDotLottiePlayerModule = (() => {
+  const _scriptDir = typeof document != 'undefined' ? document.currentScript?.src : undefined;
 
   return function (moduleArg = {}) {
-    var Module = moduleArg;
+    const Module = moduleArg;
 
-    var readyPromiseResolve, readyPromiseReject;
+    let readyPromiseResolve;
+    let readyPromiseReject;
 
-    var readyPromise = new Promise((resolve, reject) => {
+    const readyPromise = new Promise((resolve, reject) => {
       readyPromiseResolve = resolve;
       readyPromiseReject = reject;
     });
 
-    var moduleOverrides = Object.assign({}, Module);
+    let moduleOverrides = { ...Module };
 
-    var arguments_ = [];
+    let arguments_ = [];
 
-    var thisProgram = './this.program';
+    let thisProgram = './this.program';
 
-    var quit_ = (status, toThrow) => {
+    let quit_ = (status, toThrow) => {
       throw toThrow;
     };
 
-    var ENVIRONMENT_IS_WEB = true;
+    const ENVIRONMENT_IS_WEB = true;
 
-    var ENVIRONMENT_IS_WORKER = false;
+    const ENVIRONMENT_IS_WORKER = false;
 
-    var scriptDirectory = '';
+    let scriptDirectory = '';
 
     function locateFile(path) {
-      if (Module['locateFile']) {
-        return Module['locateFile'](path, scriptDirectory);
+      if (Module.locateFile) {
+        return Module.locateFile(path, scriptDirectory);
       }
+
       return scriptDirectory + path;
     }
 
-    var read_, readAsync, readBinary;
+    let read_;
+    let readAsync;
+    let readBinary;
 
     if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
       if (ENVIRONMENT_IS_WORKER) {
@@ -48,31 +52,37 @@ var createDotLottiePlayerModule = (() => {
       if (scriptDirectory.startsWith('blob:')) {
         scriptDirectory = '';
       } else {
-        scriptDirectory = scriptDirectory.substr(0, scriptDirectory.replace(/[?#].*/, '').lastIndexOf('/') + 1);
+        scriptDirectory = scriptDirectory.substr(0, scriptDirectory.replace(/[#?].*/, '').lastIndexOf('/') + 1);
       }
       {
         read_ = (url) => {
-          var xhr = new XMLHttpRequest();
+          const xhr = new XMLHttpRequest();
+
           xhr.open('GET', url, false);
           xhr.send(null);
+
           return xhr.responseText;
         };
         if (ENVIRONMENT_IS_WORKER) {
           readBinary = (url) => {
-            var xhr = new XMLHttpRequest();
+            const xhr = new XMLHttpRequest();
+
             xhr.open('GET', url, false);
             xhr.responseType = 'arraybuffer';
             xhr.send(null);
+
             return new Uint8Array(/** @type{!ArrayBuffer} */ (xhr.response));
           };
         }
         readAsync = (url, onload, onerror) => {
-          var xhr = new XMLHttpRequest();
+          const xhr = new XMLHttpRequest();
+
           xhr.open('GET', url, true);
           xhr.responseType = 'arraybuffer';
           xhr.onload = () => {
             if (xhr.status == 200 || (xhr.status == 0 && xhr.response)) {
               onload(xhr.response);
+
               return;
             }
             onerror();
@@ -84,64 +94,65 @@ var createDotLottiePlayerModule = (() => {
     } else {
     }
 
-    var out = Module['print'] || console.log.bind(console);
+    const out = Module.print || console.log.bind(console);
 
-    var err = Module['printErr'] || console.error.bind(console);
+    const err = Module.printErr || console.error.bind(console);
 
     Object.assign(Module, moduleOverrides);
 
     moduleOverrides = null;
 
-    if (Module['arguments']) arguments_ = Module['arguments'];
+    if (Module.arguments) arguments_ = Module.arguments;
 
-    if (Module['thisProgram']) thisProgram = Module['thisProgram'];
+    if (Module.thisProgram) thisProgram = Module.thisProgram;
 
-    if (Module['quit']) quit_ = Module['quit'];
+    if (Module.quit) quit_ = Module.quit;
 
-    var wasmBinary;
+    let wasmBinary;
 
-    if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
+    if (Module.wasmBinary) wasmBinary = Module.wasmBinary;
 
-    var wasmMemory;
+    let wasmMemory;
 
-    var ABORT = false;
+    let ABORT = false;
 
-    var EXITSTATUS;
+    let EXITSTATUS;
 
-    var /** @type {!Int8Array} */ HEAP8,
-      /** @type {!Uint8Array} */ HEAPU8,
-      /** @type {!Int16Array} */ HEAP16,
-      /** @type {!Uint16Array} */ HEAPU16,
-      /** @type {!Int32Array} */ HEAP32,
-      /** @type {!Uint32Array} */ HEAPU32,
-      /** @type {!Float32Array} */ HEAPF32,
-      /** @type {!Float64Array} */ HEAPF64;
+    let /** @type {!Int8Array} */ HEAP8;
+    /** @type {!Uint8Array} */ let HEAPU8;
+    /** @type {!Int16Array} */ let HEAP16;
+    /** @type {!Uint16Array} */ let HEAPU16;
+    /** @type {!Int32Array} */ let HEAP32;
+    /** @type {!Uint32Array} */ let HEAPU32;
+    /** @type {!Float32Array} */ let HEAPF32;
+    /** @type {!Float64Array} */ let HEAPF64;
 
     function updateMemoryViews() {
-      var b = wasmMemory.buffer;
-      Module['HEAP8'] = HEAP8 = new Int8Array(b);
-      Module['HEAP16'] = HEAP16 = new Int16Array(b);
-      Module['HEAPU8'] = HEAPU8 = new Uint8Array(b);
-      Module['HEAPU16'] = HEAPU16 = new Uint16Array(b);
-      Module['HEAP32'] = HEAP32 = new Int32Array(b);
-      Module['HEAPU32'] = HEAPU32 = new Uint32Array(b);
-      Module['HEAPF32'] = HEAPF32 = new Float32Array(b);
-      Module['HEAPF64'] = HEAPF64 = new Float64Array(b);
+      const b = wasmMemory.buffer;
+
+      Module.HEAP8 = HEAP8 = new Int8Array(b);
+      Module.HEAP16 = HEAP16 = new Int16Array(b);
+      Module.HEAPU8 = HEAPU8 = new Uint8Array(b);
+      Module.HEAPU16 = HEAPU16 = new Uint16Array(b);
+      Module.HEAP32 = HEAP32 = new Int32Array(b);
+      Module.HEAPU32 = HEAPU32 = new Uint32Array(b);
+      Module.HEAPF32 = HEAPF32 = new Float32Array(b);
+      Module.HEAPF64 = HEAPF64 = new Float64Array(b);
     }
 
-    var __ATPRERUN__ = [];
+    const __ATPRERUN__ = [];
 
-    var __ATINIT__ = [];
+    const __ATINIT__ = [];
 
-    var __ATPOSTRUN__ = [];
+    const __ATPOSTRUN__ = [];
 
-    var runtimeInitialized = false;
+    let runtimeInitialized = false;
 
     function preRun() {
-      if (Module['preRun']) {
-        if (typeof Module['preRun'] == 'function') Module['preRun'] = [Module['preRun']];
-        while (Module['preRun'].length) {
-          addOnPreRun(Module['preRun'].shift());
+      if (Module.preRun) {
+        if (typeof Module.preRun == 'function') Module.preRun = [Module.preRun];
+        while (Module.preRun.length) {
+          addOnPreRun(Module.preRun.shift());
         }
       }
       callRuntimeCallbacks(__ATPRERUN__);
@@ -153,10 +164,10 @@ var createDotLottiePlayerModule = (() => {
     }
 
     function postRun() {
-      if (Module['postRun']) {
-        if (typeof Module['postRun'] == 'function') Module['postRun'] = [Module['postRun']];
-        while (Module['postRun'].length) {
-          addOnPostRun(Module['postRun'].shift());
+      if (Module.postRun) {
+        if (typeof Module.postRun == 'function') Module.postRun = [Module.postRun];
+        while (Module.postRun.length) {
+          addOnPostRun(Module.postRun.shift());
         }
       }
       callRuntimeCallbacks(__ATPOSTRUN__);
@@ -174,27 +185,28 @@ var createDotLottiePlayerModule = (() => {
       __ATPOSTRUN__.unshift(cb);
     }
 
-    var runDependencies = 0;
+    let runDependencies = 0;
 
-    var runDependencyWatcher = null;
+    let runDependencyWatcher = null;
 
-    var dependenciesFulfilled = null;
+    let dependenciesFulfilled = null;
 
     function addRunDependency(id) {
       runDependencies++;
-      Module['monitorRunDependencies']?.(runDependencies);
+      Module.monitorRunDependencies?.(runDependencies);
     }
 
     function removeRunDependency(id) {
       runDependencies--;
-      Module['monitorRunDependencies']?.(runDependencies);
+      Module.monitorRunDependencies?.(runDependencies);
       if (runDependencies == 0) {
         if (runDependencyWatcher !== null) {
           clearInterval(runDependencyWatcher);
           runDependencyWatcher = null;
         }
         if (dependenciesFulfilled) {
-          var callback = dependenciesFulfilled;
+          const callback = dependenciesFulfilled;
+
           dependenciesFulfilled = null;
           callback();
         }
@@ -202,25 +214,26 @@ var createDotLottiePlayerModule = (() => {
     }
 
     /** @param {string|number=} what */ function abort(what) {
-      Module['onAbort']?.(what);
-      what = 'Aborted(' + what + ')';
+      Module.onAbort?.(what);
+      what = `Aborted(${what})`;
       err(what);
       ABORT = true;
       EXITSTATUS = 1;
       what += '. Build with -sASSERTIONS for more info.';
-      /** @suppress {checkTypes} */ var e = new WebAssembly.RuntimeError(what);
+      /** @suppress {checkTypes} */ const e = new WebAssembly.RuntimeError(what);
+
       readyPromiseReject(e);
       throw e;
     }
 
-    var dataURIPrefix = 'data:application/octet-stream;base64,';
+    const dataURIPrefix = 'data:application/octet-stream;base64,';
 
     /**
      * Indicates whether filename is a base64 data URI.
      * @noinline
-     */ var isDataURI = (filename) => filename.startsWith(dataURIPrefix);
+     */ const isDataURI = (filename) => filename.startsWith(dataURIPrefix);
 
-    var wasmBinaryFile;
+    let wasmBinaryFile;
 
     wasmBinaryFile = 'DotLottiePlayer.wasm';
 
@@ -245,14 +258,16 @@ var createDotLottiePlayerModule = (() => {
             credentials: 'same-origin',
           })
             .then((response) => {
-              if (!response['ok']) {
+              if (!response.ok) {
                 throw `failed to load wasm binary file at '${binaryFile}'`;
               }
-              return response['arrayBuffer']();
+
+              return response.arrayBuffer();
             })
             .catch(() => getBinarySync(binaryFile));
         }
       }
+
       return Promise.resolve().then(() => getBinarySync(binaryFile));
     }
 
@@ -275,21 +290,25 @@ var createDotLottiePlayerModule = (() => {
         return fetch(binaryFile, {
           credentials: 'same-origin',
         }).then((response) => {
-          /** @suppress {checkTypes} */ var result = WebAssembly.instantiateStreaming(response, imports);
+          /** @suppress {checkTypes} */ const result = WebAssembly.instantiateStreaming(response, imports);
+
           return result.then(callback, function (reason) {
             err(`wasm streaming compile failed: ${reason}`);
             err('falling back to ArrayBuffer instantiation');
+
             return instantiateArrayBuffer(binaryFile, imports, callback);
           });
         });
       }
+
       return instantiateArrayBuffer(binaryFile, imports, callback);
     }
 
     function createWasm() {
-      var info = {
+      const info = {
         a: wasmImports,
       };
+
       /** @param {WebAssembly.Module=} module*/ function receiveInstance(instance, module) {
         wasmExports = instance.exports;
         wasmMemory = wasmExports['ka'];
@@ -297,21 +316,23 @@ var createDotLottiePlayerModule = (() => {
         wasmTable = wasmExports['oa'];
         addOnInit(wasmExports['la']);
         removeRunDependency('wasm-instantiate');
+
         return wasmExports;
       }
       addRunDependency('wasm-instantiate');
       function receiveInstantiationResult(result) {
-        receiveInstance(result['instance']);
+        receiveInstance(result.instance);
       }
-      if (Module['instantiateWasm']) {
+      if (Module.instantiateWasm) {
         try {
-          return Module['instantiateWasm'](info, receiveInstance);
+          return Module.instantiateWasm(info, receiveInstance);
         } catch (e) {
           err(`Module.instantiateWasm callback failed with error: ${e}`);
           readyPromiseReject(e);
         }
       }
       instantiateAsync(wasmBinary, wasmBinaryFile, info, receiveInstantiationResult).catch(readyPromiseReject);
+
       return {};
     }
 
@@ -321,13 +342,13 @@ var createDotLottiePlayerModule = (() => {
       }
     };
 
-    var noExitRuntime = Module['noExitRuntime'] || true;
+    const noExitRuntime = Module.noExitRuntime || true;
 
-    var stackRestore = (val) => __emscripten_stack_restore(val);
+    const stackRestore = (val) => __emscripten_stack_restore(val);
 
-    var stackSave = () => _emscripten_stack_get_current();
+    const stackSave = () => _emscripten_stack_get_current();
 
-    var UTF8Decoder = typeof TextDecoder != 'undefined' ? new TextDecoder('utf8') : undefined;
+    const UTF8Decoder = typeof TextDecoder != 'undefined' ? new TextDecoder('utf8') : undefined;
 
     /**
      * Given a pointer 'idx' to a null-terminated UTF8-encoded string in the given
@@ -337,26 +358,31 @@ var createDotLottiePlayerModule = (() => {
      * @param {number} idx
      * @param {number=} maxBytesToRead
      * @return {string}
-     */ var UTF8ArrayToString = (heapOrArray, idx, maxBytesToRead) => {
-      var endIdx = idx + maxBytesToRead;
-      var endPtr = idx;
+     */ const UTF8ArrayToString = (heapOrArray, idx, maxBytesToRead) => {
+      const endIdx = idx + maxBytesToRead;
+      let endPtr = idx;
+
       while (heapOrArray[endPtr] && !(endPtr >= endIdx)) ++endPtr;
       if (endPtr - idx > 16 && heapOrArray.buffer && UTF8Decoder) {
         return UTF8Decoder.decode(heapOrArray.subarray(idx, endPtr));
       }
-      var str = '';
+      let str = '';
+
       while (idx < endPtr) {
-        var u0 = heapOrArray[idx++];
+        let u0 = heapOrArray[idx++];
+
         if (!(u0 & 128)) {
           str += String.fromCharCode(u0);
           continue;
         }
-        var u1 = heapOrArray[idx++] & 63;
+        const u1 = heapOrArray[idx++] & 63;
+
         if ((u0 & 224) == 192) {
           str += String.fromCharCode(((u0 & 31) << 6) | u1);
           continue;
         }
-        var u2 = heapOrArray[idx++] & 63;
+        const u2 = heapOrArray[idx++] & 63;
+
         if ((u0 & 240) == 224) {
           u0 = ((u0 & 15) << 12) | (u1 << 6) | u2;
         } else {
@@ -365,10 +391,12 @@ var createDotLottiePlayerModule = (() => {
         if (u0 < 65536) {
           str += String.fromCharCode(u0);
         } else {
-          var ch = u0 - 65536;
+          const ch = u0 - 65536;
+
           str += String.fromCharCode(55296 | (ch >> 10), 56320 | (ch & 1023));
         }
       }
+
       return str;
     };
 
@@ -386,142 +414,170 @@ var createDotLottiePlayerModule = (() => {
      *   frequent uses of UTF8ToString() with and without maxBytesToRead may throw
      *   JS JIT optimizations off, so it is worth to consider consistently using one
      * @return {string}
-     */ var UTF8ToString = (ptr, maxBytesToRead) => (ptr ? UTF8ArrayToString(HEAPU8, ptr, maxBytesToRead) : '');
+     */ const UTF8ToString = (ptr, maxBytesToRead) => (ptr ? UTF8ArrayToString(HEAPU8, ptr, maxBytesToRead) : '');
 
-    var ___assert_fail = (condition, filename, line, func) => {
+    const ___assert_fail = (condition, filename, line, func) => {
       abort(
-        `Assertion failed: ${UTF8ToString(condition)}, at: ` +
-          [
-            filename ? UTF8ToString(filename) : 'unknown filename',
-            line,
-            func ? UTF8ToString(func) : 'unknown function',
-          ],
+        `Assertion failed: ${UTF8ToString(condition)}, at: ${[
+          filename ? UTF8ToString(filename) : 'unknown filename',
+          line,
+          func ? UTF8ToString(func) : 'unknown function',
+        ]}`,
       );
     };
 
-    var exceptionLast = 0;
+    let exceptionLast = 0;
 
     class ExceptionInfo {
       constructor(excPtr) {
         this.excPtr = excPtr;
         this.ptr = excPtr - 24;
       }
-      set_type(type) {
-        HEAPU32[(this.ptr + 4) >> 2] = type;
+
+      get_adjusted_ptr() {
+        return HEAPU32[(this.ptr + 16) >> 2];
       }
-      get_type() {
-        return HEAPU32[(this.ptr + 4) >> 2];
+
+      get_caught() {
+        return HEAP8[this.ptr + 12] != 0;
       }
-      set_destructor(destructor) {
-        HEAPU32[(this.ptr + 8) >> 2] = destructor;
-      }
+
       get_destructor() {
         return HEAPU32[(this.ptr + 8) >> 2];
       }
+
+      get_exception_ptr() {
+        const isPointer = ___cxa_is_pointer_type(this.get_type());
+
+        if (isPointer) {
+          return HEAPU32[this.excPtr >> 2];
+        }
+        const adjusted = this.get_adjusted_ptr();
+
+        if (adjusted !== 0) return adjusted;
+
+        return this.excPtr;
+      }
+
+      get_rethrown() {
+        return HEAP8[this.ptr + 13] != 0;
+      }
+
+      get_type() {
+        return HEAPU32[(this.ptr + 4) >> 2];
+      }
+
+      set_adjusted_ptr(adjustedPtr) {
+        HEAPU32[(this.ptr + 16) >> 2] = adjustedPtr;
+      }
+
       set_caught(caught) {
         caught = caught ? 1 : 0;
         HEAP8[this.ptr + 12] = caught;
       }
-      get_caught() {
-        return HEAP8[this.ptr + 12] != 0;
+
+      set_destructor(destructor) {
+        HEAPU32[(this.ptr + 8) >> 2] = destructor;
       }
+
       set_rethrown(rethrown) {
         rethrown = rethrown ? 1 : 0;
         HEAP8[this.ptr + 13] = rethrown;
       }
-      get_rethrown() {
-        return HEAP8[this.ptr + 13] != 0;
+
+      set_type(type) {
+        HEAPU32[(this.ptr + 4) >> 2] = type;
       }
+
       init(type, destructor) {
         this.set_adjusted_ptr(0);
         this.set_type(type);
         this.set_destructor(destructor);
       }
-      set_adjusted_ptr(adjustedPtr) {
-        HEAPU32[(this.ptr + 16) >> 2] = adjustedPtr;
-      }
-      get_adjusted_ptr() {
-        return HEAPU32[(this.ptr + 16) >> 2];
-      }
-      get_exception_ptr() {
-        var isPointer = ___cxa_is_pointer_type(this.get_type());
-        if (isPointer) {
-          return HEAPU32[this.excPtr >> 2];
-        }
-        var adjusted = this.get_adjusted_ptr();
-        if (adjusted !== 0) return adjusted;
-        return this.excPtr;
-      }
     }
 
-    var ___resumeException = (ptr) => {
+    const ___resumeException = (ptr) => {
       if (!exceptionLast) {
         exceptionLast = ptr;
       }
       throw exceptionLast;
     };
 
-    var setTempRet0 = (val) => __emscripten_tempret_set(val);
+    const setTempRet0 = (val) => __emscripten_tempret_set(val);
 
-    var findMatchingCatch = (args) => {
-      var thrown = exceptionLast;
+    const findMatchingCatch = (args) => {
+      const thrown = exceptionLast;
+
       if (!thrown) {
         setTempRet0(0);
+
         return 0;
       }
-      var info = new ExceptionInfo(thrown);
+      const info = new ExceptionInfo(thrown);
+
       info.set_adjusted_ptr(thrown);
-      var thrownType = info.get_type();
+      const thrownType = info.get_type();
+
       if (!thrownType) {
         setTempRet0(0);
+
         return thrown;
       }
-      for (var arg in args) {
-        var caughtType = args[arg];
+      for (const arg in args) {
+        const caughtType = args[arg];
+
         if (caughtType === 0 || caughtType === thrownType) {
           break;
         }
-        var adjusted_ptr_addr = info.ptr + 16;
+        const adjusted_ptr_addr = info.ptr + 16;
+
         if (___cxa_can_catch(caughtType, thrownType, adjusted_ptr_addr)) {
           setTempRet0(caughtType);
+
           return thrown;
         }
       }
       setTempRet0(thrownType);
+
       return thrown;
     };
 
-    var ___cxa_find_matching_catch_2 = () => findMatchingCatch([]);
+    const ___cxa_find_matching_catch_2 = () => findMatchingCatch([]);
 
-    var uncaughtExceptionCount = 0;
+    let uncaughtExceptionCount = 0;
 
-    var ___cxa_throw = (ptr, type, destructor) => {
-      var info = new ExceptionInfo(ptr);
+    const ___cxa_throw = (ptr, type, destructor) => {
+      const info = new ExceptionInfo(ptr);
+
       info.init(type, destructor);
       exceptionLast = ptr;
       uncaughtExceptionCount++;
       throw exceptionLast;
     };
 
-    var SYSCALLS = {
+    const SYSCALLS = {
       varargs: undefined,
       getStr(ptr) {
-        var ret = UTF8ToString(ptr);
+        const ret = UTF8ToString(ptr);
+
         return ret;
       },
     };
 
     function ___syscall_fcntl64(fd, cmd, varargs) {
       SYSCALLS.varargs = varargs;
+
       return 0;
     }
 
-    var ___syscall_fstat64 = (fd, buf) => {};
+    const ___syscall_fstat64 = (fd, buf) => {};
 
-    var lengthBytesUTF8 = (str) => {
-      var len = 0;
-      for (var i = 0; i < str.length; ++i) {
-        var c = str.charCodeAt(i);
+    const lengthBytesUTF8 = (str) => {
+      let len = 0;
+
+      for (let i = 0; i < str.length; ++i) {
+        const c = str.charCodeAt(i);
+
         if (c <= 127) {
           len++;
         } else if (c <= 2047) {
@@ -533,17 +589,21 @@ var createDotLottiePlayerModule = (() => {
           len += 3;
         }
       }
+
       return len;
     };
 
-    var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
+    const stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
       if (!(maxBytesToWrite > 0)) return 0;
-      var startIdx = outIdx;
-      var endIdx = outIdx + maxBytesToWrite - 1;
-      for (var i = 0; i < str.length; ++i) {
-        var u = str.charCodeAt(i);
+      const startIdx = outIdx;
+      const endIdx = outIdx + maxBytesToWrite - 1;
+
+      for (let i = 0; i < str.length; ++i) {
+        let u = str.charCodeAt(i);
+
         if (u >= 55296 && u <= 57343) {
-          var u1 = str.charCodeAt(++i);
+          const u1 = str.charCodeAt(++i);
+
           u = (65536 + ((u & 1023) << 10)) | (u1 & 1023);
         }
         if (u <= 127) {
@@ -567,68 +627,73 @@ var createDotLottiePlayerModule = (() => {
         }
       }
       heap[outIdx] = 0;
+
       return outIdx - startIdx;
     };
 
-    var stringToUTF8 = (str, outPtr, maxBytesToWrite) => stringToUTF8Array(str, HEAPU8, outPtr, maxBytesToWrite);
+    const stringToUTF8 = (str, outPtr, maxBytesToWrite) => stringToUTF8Array(str, HEAPU8, outPtr, maxBytesToWrite);
 
-    var ___syscall_getcwd = (buf, size) => {};
+    const ___syscall_getcwd = (buf, size) => {};
 
     function ___syscall_ioctl(fd, op, varargs) {
       SYSCALLS.varargs = varargs;
+
       return 0;
     }
 
-    var ___syscall_newfstatat = (dirfd, path, buf, flags) => {};
+    const ___syscall_newfstatat = (dirfd, path, buf, flags) => {};
 
     function ___syscall_openat(dirfd, path, flags, varargs) {
       SYSCALLS.varargs = varargs;
     }
 
-    var ___syscall_stat64 = (path, buf) => {};
+    const ___syscall_stat64 = (path, buf) => {};
 
-    var structRegistrations = {};
+    const structRegistrations = {};
 
-    var runDestructors = (destructors) => {
+    const runDestructors = (destructors) => {
       while (destructors.length) {
-        var ptr = destructors.pop();
-        var del = destructors.pop();
+        const ptr = destructors.pop();
+        const del = destructors.pop();
+
         del(ptr);
       }
     };
 
     /** @suppress {globalThis} */ function readPointer(pointer) {
-      return this['fromWireType'](HEAPU32[pointer >> 2]);
+      return this.fromWireType(HEAPU32[pointer >> 2]);
     }
 
-    var awaitingDependencies = {};
+    const awaitingDependencies = {};
 
-    var registeredTypes = {};
+    const registeredTypes = {};
 
-    var typeDependencies = {};
+    const typeDependencies = {};
 
-    var InternalError;
+    let InternalError;
 
-    var throwInternalError = (message) => {
+    const throwInternalError = (message) => {
       throw new InternalError(message);
     };
 
-    var whenDependentTypesAreResolved = (myTypes, dependentTypes, getTypeConverters) => {
+    const whenDependentTypesAreResolved = (myTypes, dependentTypes, getTypeConverters) => {
       myTypes.forEach(function (type) {
         typeDependencies[type] = dependentTypes;
       });
       function onComplete(typeConverters) {
-        var myTypeConverters = getTypeConverters(typeConverters);
+        const myTypeConverters = getTypeConverters(typeConverters);
+
         if (myTypeConverters.length !== myTypes.length) {
           throwInternalError('Mismatched type converter count');
         }
-        for (var i = 0; i < myTypes.length; ++i) {
+        for (let i = 0; i < myTypes.length; ++i) {
           registerType(myTypes[i], myTypeConverters[i]);
         }
       }
-      var typeConverters = new Array(dependentTypes.length);
-      var unregisteredTypes = [];
-      var registered = 0;
+      const typeConverters = new Array(dependentTypes.length);
+      const unregisteredTypes = [];
+      let registered = 0;
+
       dependentTypes.forEach((dt, i) => {
         if (registeredTypes.hasOwnProperty(dt)) {
           typeConverters[i] = registeredTypes[dt];
@@ -646,48 +711,56 @@ var createDotLottiePlayerModule = (() => {
           });
         }
       });
-      if (0 === unregisteredTypes.length) {
+      if (unregisteredTypes.length === 0) {
         onComplete(typeConverters);
       }
     };
 
-    var __embind_finalize_value_object = (structType) => {
-      var reg = structRegistrations[structType];
+    const __embind_finalize_value_object = (structType) => {
+      const reg = structRegistrations[structType];
+
       delete structRegistrations[structType];
-      var rawConstructor = reg.rawConstructor;
-      var rawDestructor = reg.rawDestructor;
-      var fieldRecords = reg.fields;
-      var fieldTypes = fieldRecords
+      const rawConstructor = reg.rawConstructor;
+      const rawDestructor = reg.rawDestructor;
+      const fieldRecords = reg.fields;
+      const fieldTypes = fieldRecords
         .map((field) => field.getterReturnType)
         .concat(fieldRecords.map((field) => field.setterArgumentType));
+
       whenDependentTypesAreResolved([structType], fieldTypes, (fieldTypes) => {
-        var fields = {};
+        const fields = {};
+
         fieldRecords.forEach((field, i) => {
-          var fieldName = field.fieldName;
-          var getterReturnType = fieldTypes[i];
-          var getter = field.getter;
-          var getterContext = field.getterContext;
-          var setterArgumentType = fieldTypes[i + fieldRecords.length];
-          var setter = field.setter;
-          var setterContext = field.setterContext;
+          const fieldName = field.fieldName;
+          const getterReturnType = fieldTypes[i];
+          const getter = field.getter;
+          const getterContext = field.getterContext;
+          const setterArgumentType = fieldTypes[i + fieldRecords.length];
+          const setter = field.setter;
+          const setterContext = field.setterContext;
+
           fields[fieldName] = {
-            read: (ptr) => getterReturnType['fromWireType'](getter(getterContext, ptr)),
+            read: (ptr) => getterReturnType.fromWireType(getter(getterContext, ptr)),
             write: (ptr, o) => {
-              var destructors = [];
-              setter(setterContext, ptr, setterArgumentType['toWireType'](destructors, o));
+              const destructors = [];
+
+              setter(setterContext, ptr, setterArgumentType.toWireType(destructors, o));
               runDestructors(destructors);
             },
           };
         });
+
         return [
           {
             name: reg.name,
             fromWireType: (ptr) => {
-              var rv = {};
-              for (var i in fields) {
+              const rv = {};
+
+              for (const i in fields) {
                 rv[i] = fields[i].read(ptr);
               }
               rawDestructor(ptr);
+
               return rv;
             },
             toWireType: (destructors, o) => {
@@ -696,13 +769,15 @@ var createDotLottiePlayerModule = (() => {
                   throw new TypeError(`Missing field: "${fieldName}"`);
                 }
               }
-              var ptr = rawConstructor();
+              const ptr = rawConstructor();
+
               for (fieldName in fields) {
                 fields[fieldName].write(ptr, o[fieldName]);
               }
               if (destructors !== null) {
                 destructors.push(rawDestructor, ptr);
               }
+
               return ptr;
             },
             argPackAdvance: GenericWireTypeSize,
@@ -713,35 +788,39 @@ var createDotLottiePlayerModule = (() => {
       });
     };
 
-    var __embind_register_bigint = (primitiveType, name, size, minRange, maxRange) => {};
+    const __embind_register_bigint = (primitiveType, name, size, minRange, maxRange) => {};
 
-    var embind_init_charCodes = () => {
-      var codes = new Array(256);
-      for (var i = 0; i < 256; ++i) {
+    const embind_init_charCodes = () => {
+      const codes = new Array(256);
+
+      for (let i = 0; i < 256; ++i) {
         codes[i] = String.fromCharCode(i);
       }
       embind_charCodes = codes;
     };
 
-    var embind_charCodes;
+    let embind_charCodes;
 
-    var readLatin1String = (ptr) => {
-      var ret = '';
-      var c = ptr;
+    const readLatin1String = (ptr) => {
+      let ret = '';
+      let c = ptr;
+
       while (HEAPU8[c]) {
         ret += embind_charCodes[HEAPU8[c++]];
       }
+
       return ret;
     };
 
-    var BindingError;
+    let BindingError;
 
-    var throwBindingError = (message) => {
+    const throwBindingError = (message) => {
       throw new BindingError(message);
     };
 
     /** @param {Object=} options */ function sharedRegisterType(rawType, registeredInstance, options = {}) {
-      var name = registeredInstance.name;
+      const name = registeredInstance.name;
+
       if (!rawType) {
         throwBindingError(`type "${name}" must have a positive integer typeid pointer`);
       }
@@ -755,7 +834,8 @@ var createDotLottiePlayerModule = (() => {
       registeredTypes[rawType] = registeredInstance;
       delete typeDependencies[rawType];
       if (awaitingDependencies.hasOwnProperty(rawType)) {
-        var callbacks = awaitingDependencies[rawType];
+        const callbacks = awaitingDependencies[rawType];
+
         delete awaitingDependencies[rawType];
         callbacks.forEach((cb) => cb());
       }
@@ -765,30 +845,31 @@ var createDotLottiePlayerModule = (() => {
       if (!('argPackAdvance' in registeredInstance)) {
         throw new TypeError('registerType registeredInstance requires argPackAdvance');
       }
+
       return sharedRegisterType(rawType, registeredInstance, options);
     }
 
     var GenericWireTypeSize = 8;
 
-    /** @suppress {globalThis} */ var __embind_register_bool = (rawType, name, trueValue, falseValue) => {
+    /** @suppress {globalThis} */ const __embind_register_bool = (rawType, name, trueValue, falseValue) => {
       name = readLatin1String(name);
       registerType(rawType, {
-        name: name,
-        fromWireType: function (wt) {
-          return !!wt;
+        name,
+        fromWireType(wt) {
+          return Boolean(wt);
         },
-        toWireType: function (destructors, o) {
+        toWireType(destructors, o) {
           return o ? trueValue : falseValue;
         },
         argPackAdvance: GenericWireTypeSize,
-        readValueFromPointer: function (pointer) {
-          return this['fromWireType'](HEAPU8[pointer]);
+        readValueFromPointer(pointer) {
+          return this.fromWireType(HEAPU8[pointer]);
         },
         destructorFunction: null,
       });
     };
 
-    var shallowCopyInternalPointer = (o) => ({
+    const shallowCopyInternalPointer = (o) => ({
       count: o.count,
       deleteScheduled: o.deleteScheduled,
       preservePointerOnDelete: o.preservePointerOnDelete,
@@ -798,18 +879,18 @@ var createDotLottiePlayerModule = (() => {
       smartPtrType: o.smartPtrType,
     });
 
-    var throwInstanceAlreadyDeleted = (obj) => {
+    const throwInstanceAlreadyDeleted = (obj) => {
       function getInstanceTypeName(handle) {
         return handle.$$.ptrType.registeredClass.name;
       }
-      throwBindingError(getInstanceTypeName(obj) + ' instance already deleted');
+      throwBindingError(`${getInstanceTypeName(obj)} instance already deleted`);
     };
 
-    var finalizationRegistry = false;
+    let finalizationRegistry = false;
 
-    var detachFinalizer = (handle) => {};
+    let detachFinalizer = (handle) => {};
 
-    var runDestructor = ($$) => {
+    const runDestructor = ($$) => {
       if ($$.smartPtr) {
         $$.smartPtrType.rawDestructor($$.smartPtr);
       } else {
@@ -817,9 +898,10 @@ var createDotLottiePlayerModule = (() => {
       }
     };
 
-    var releaseClassHandle = ($$) => {
+    const releaseClassHandle = ($$) => {
       $$.count.value -= 1;
-      var toDelete = 0 === $$.count.value;
+      const toDelete = $$.count.value === 0;
+
       if (toDelete) {
         runDestructor($$);
       }
@@ -832,56 +914,61 @@ var createDotLottiePlayerModule = (() => {
       if (undefined === desiredClass.baseClass) {
         return null;
       }
-      var rv = downcastPointer(ptr, ptrClass, desiredClass.baseClass);
+      const rv = downcastPointer(ptr, ptrClass, desiredClass.baseClass);
+
       if (rv === null) {
         return null;
       }
+
       return desiredClass.downcast(rv);
     };
 
-    var registeredPointers = {};
+    const registeredPointers = {};
 
-    var getInheritedInstanceCount = () => Object.keys(registeredInstances).length;
+    const getInheritedInstanceCount = () => Object.keys(registeredInstances).length;
 
-    var getLiveInheritedInstances = () => {
-      var rv = [];
-      for (var k in registeredInstances) {
+    const getLiveInheritedInstances = () => {
+      const rv = [];
+
+      for (const k in registeredInstances) {
         if (registeredInstances.hasOwnProperty(k)) {
           rv.push(registeredInstances[k]);
         }
       }
+
       return rv;
     };
 
-    var deletionQueue = [];
+    const deletionQueue = [];
 
-    var flushPendingDeletes = () => {
+    const flushPendingDeletes = () => {
       while (deletionQueue.length) {
-        var obj = deletionQueue.pop();
+        const obj = deletionQueue.pop();
+
         obj.$$.deleteScheduled = false;
-        obj['delete']();
+        obj.delete();
       }
     };
 
-    var delayFunction;
+    let delayFunction;
 
-    var setDelayFunction = (fn) => {
+    const setDelayFunction = (fn) => {
       delayFunction = fn;
       if (deletionQueue.length && delayFunction) {
         delayFunction(flushPendingDeletes);
       }
     };
 
-    var init_embind = () => {
-      Module['getInheritedInstanceCount'] = getInheritedInstanceCount;
-      Module['getLiveInheritedInstances'] = getLiveInheritedInstances;
-      Module['flushPendingDeletes'] = flushPendingDeletes;
-      Module['setDelayFunction'] = setDelayFunction;
+    const init_embind = () => {
+      Module.getInheritedInstanceCount = getInheritedInstanceCount;
+      Module.getLiveInheritedInstances = getLiveInheritedInstances;
+      Module.flushPendingDeletes = flushPendingDeletes;
+      Module.setDelayFunction = setDelayFunction;
     };
 
     var registeredInstances = {};
 
-    var getBasestPointer = (class_, ptr) => {
+    const getBasestPointer = (class_, ptr) => {
       if (ptr === undefined) {
         throwBindingError('ptr should not be undefined');
       }
@@ -889,26 +976,30 @@ var createDotLottiePlayerModule = (() => {
         ptr = class_.upcast(ptr);
         class_ = class_.baseClass;
       }
+
       return ptr;
     };
 
-    var getInheritedInstance = (class_, ptr) => {
+    const getInheritedInstance = (class_, ptr) => {
       ptr = getBasestPointer(class_, ptr);
+
       return registeredInstances[ptr];
     };
 
-    var makeClassHandle = (prototype, record) => {
+    const makeClassHandle = (prototype, record) => {
       if (!record.ptrType || !record.ptr) {
         throwInternalError('makeClassHandle requires ptr and ptrType');
       }
-      var hasSmartPtrType = !!record.smartPtrType;
-      var hasSmartPtr = !!record.smartPtr;
+      const hasSmartPtrType = Boolean(record.smartPtrType);
+      const hasSmartPtr = Boolean(record.smartPtr);
+
       if (hasSmartPtrType !== hasSmartPtr) {
         throwInternalError('Both smartPtrType and smartPtr must be specified');
       }
       record.count = {
         value: 1,
       };
+
       return attachFinalizer(
         Object.create(prototype, {
           $$: {
@@ -920,20 +1011,26 @@ var createDotLottiePlayerModule = (() => {
     };
 
     /** @suppress {globalThis} */ function RegisteredPointer_fromWireType(ptr) {
-      var rawPointer = this.getPointee(ptr);
+      const rawPointer = this.getPointee(ptr);
+
       if (!rawPointer) {
         this.destructor(ptr);
+
         return null;
       }
-      var registeredInstance = getInheritedInstance(this.registeredClass, rawPointer);
+      const registeredInstance = getInheritedInstance(this.registeredClass, rawPointer);
+
       if (undefined !== registeredInstance) {
-        if (0 === registeredInstance.$$.count.value) {
+        if (registeredInstance.$$.count.value === 0) {
           registeredInstance.$$.ptr = rawPointer;
           registeredInstance.$$.smartPtr = ptr;
-          return registeredInstance['clone']();
+
+          return registeredInstance.clone();
         } else {
-          var rv = registeredInstance['clone']();
+          const rv = registeredInstance.clone();
+
           this.destructor(ptr);
+
           return rv;
         }
       }
@@ -948,22 +1045,25 @@ var createDotLottiePlayerModule = (() => {
         } else {
           return makeClassHandle(this.registeredClass.instancePrototype, {
             ptrType: this,
-            ptr: ptr,
+            ptr,
           });
         }
       }
-      var actualType = this.registeredClass.getActualType(rawPointer);
-      var registeredPointerRecord = registeredPointers[actualType];
+      const actualType = this.registeredClass.getActualType(rawPointer);
+      const registeredPointerRecord = registeredPointers[actualType];
+
       if (!registeredPointerRecord) {
         return makeDefaultHandle.call(this);
       }
-      var toType;
+      let toType;
+
       if (this.isConst) {
         toType = registeredPointerRecord.constPointerType;
       } else {
         toType = registeredPointerRecord.pointerType;
       }
-      var dp = downcastPointer(rawPointer, this.registeredClass, toType.registeredClass);
+      const dp = downcastPointer(rawPointer, this.registeredClass, toType.registeredClass);
+
       if (dp === null) {
         return makeDefaultHandle.call(this);
       }
@@ -983,29 +1083,34 @@ var createDotLottiePlayerModule = (() => {
     }
 
     var attachFinalizer = (handle) => {
-      if ('undefined' === typeof FinalizationRegistry) {
+      if (typeof FinalizationRegistry === 'undefined') {
         attachFinalizer = (handle) => handle;
+
         return handle;
       }
       finalizationRegistry = new FinalizationRegistry((info) => {
         releaseClassHandle(info.$$);
       });
       attachFinalizer = (handle) => {
-        var $$ = handle.$$;
-        var hasSmartPtr = !!$$.smartPtr;
+        const $$ = handle.$$;
+        const hasSmartPtr = Boolean($$.smartPtr);
+
         if (hasSmartPtr) {
-          var info = {
-            $$: $$,
+          const info = {
+            $$,
           };
+
           finalizationRegistry.register(handle, info, handle);
         }
+
         return handle;
       };
       detachFinalizer = (handle) => finalizationRegistry.unregister(handle);
+
       return attachFinalizer(handle);
     };
 
-    var init_ClassHandle = () => {
+    const init_ClassHandle = () => {
       Object.assign(ClassHandle.prototype, {
         isAliasOf(other) {
           if (!(this instanceof ClassHandle)) {
@@ -1014,11 +1119,13 @@ var createDotLottiePlayerModule = (() => {
           if (!(other instanceof ClassHandle)) {
             return false;
           }
-          var leftClass = this.$$.ptrType.registeredClass;
-          var left = this.$$.ptr;
+          let leftClass = this.$$.ptrType.registeredClass;
+          let left = this.$$.ptr;
+
           other.$$ = /** @type {Object} */ (other.$$);
-          var rightClass = other.$$.ptrType.registeredClass;
-          var right = other.$$.ptr;
+          let rightClass = other.$$.ptrType.registeredClass;
+          let right = other.$$.ptr;
+
           while (leftClass.baseClass) {
             left = leftClass.upcast(left);
             leftClass = leftClass.baseClass;
@@ -1027,6 +1134,7 @@ var createDotLottiePlayerModule = (() => {
             right = rightClass.upcast(right);
             rightClass = rightClass.baseClass;
           }
+
           return leftClass === rightClass && left === right;
         },
         clone() {
@@ -1035,17 +1143,20 @@ var createDotLottiePlayerModule = (() => {
           }
           if (this.$$.preservePointerOnDelete) {
             this.$$.count.value += 1;
+
             return this;
           } else {
-            var clone = attachFinalizer(
+            const clone = attachFinalizer(
               Object.create(Object.getPrototypeOf(this), {
                 $$: {
                   value: shallowCopyInternalPointer(this.$$),
                 },
               }),
             );
+
             clone.$$.count.value += 1;
             clone.$$.deleteScheduled = false;
+
             return clone;
           }
         },
@@ -1078,6 +1189,7 @@ var createDotLottiePlayerModule = (() => {
             delayFunction(flushPendingDeletes);
           }
           this.$$.deleteScheduled = true;
+
           return this;
         },
       });
@@ -1085,20 +1197,22 @@ var createDotLottiePlayerModule = (() => {
 
     /** @constructor */ function ClassHandle() {}
 
-    var createNamedFunction = (name, body) =>
+    const createNamedFunction = (name, body) =>
       Object.defineProperty(body, 'name', {
         value: name,
       });
 
-    var ensureOverloadTable = (proto, methodName, humanName) => {
+    const ensureOverloadTable = (proto, methodName, humanName) => {
       if (undefined === proto[methodName].overloadTable) {
-        var prevFunc = proto[methodName];
+        const prevFunc = proto[methodName];
+
         proto[methodName] = function (...args) {
           if (!proto[methodName].overloadTable.hasOwnProperty(args.length)) {
             throwBindingError(
               `Function '${humanName}' called with an invalid number of arguments (${args.length}) - expects one of (${proto[methodName].overloadTable})!`,
             );
           }
+
           return proto[methodName].overloadTable[args.length].apply(this, args);
         };
         proto[methodName].overloadTable = [];
@@ -1106,7 +1220,7 @@ var createDotLottiePlayerModule = (() => {
       }
     };
 
-    /** @param {number=} numArguments */ var exposePublicSymbol = (name, value, numArguments) => {
+    /** @param {number=} numArguments */ const exposePublicSymbol = (name, value, numArguments) => {
       if (Module.hasOwnProperty(name)) {
         if (
           undefined === numArguments ||
@@ -1129,19 +1243,21 @@ var createDotLottiePlayerModule = (() => {
       }
     };
 
-    var char_0 = 48;
+    const char_0 = 48;
 
-    var char_9 = 57;
+    const char_9 = 57;
 
-    var makeLegalFunctionName = (name) => {
+    const makeLegalFunctionName = (name) => {
       if (undefined === name) {
         return '_unknown';
       }
-      name = name.replace(/[^a-zA-Z0-9_]/g, '$');
-      var f = name.charCodeAt(0);
+      name = name.replace(/\W/g, '$');
+      const f = name.charCodeAt(0);
+
       if (f >= char_0 && f <= char_9) {
         return `_${name}`;
       }
+
       return name;
     };
 
@@ -1166,7 +1282,7 @@ var createDotLottiePlayerModule = (() => {
       this.pureVirtualFunctions = [];
     }
 
-    var upcastPointer = (ptr, ptrClass, desiredClass) => {
+    const upcastPointer = (ptr, ptrClass, desiredClass) => {
       while (ptrClass !== desiredClass) {
         if (!ptrClass.upcast) {
           throwBindingError(`Expected null or instance of ${desiredClass.name}, got an instance of ${ptrClass.name}`);
@@ -1174,6 +1290,7 @@ var createDotLottiePlayerModule = (() => {
         ptr = ptrClass.upcast(ptr);
         ptrClass = ptrClass.baseClass;
       }
+
       return ptr;
     };
 
@@ -1182,6 +1299,7 @@ var createDotLottiePlayerModule = (() => {
         if (this.isReference) {
           throwBindingError(`null is not a valid ${this.name}`);
         }
+
         return 0;
       }
       if (!handle.$$) {
@@ -1190,13 +1308,15 @@ var createDotLottiePlayerModule = (() => {
       if (!handle.$$.ptr) {
         throwBindingError(`Cannot pass deleted object as a pointer of type ${this.name}`);
       }
-      var handleClass = handle.$$.ptrType.registeredClass;
-      var ptr = upcastPointer(handle.$$.ptr, handleClass, this.registeredClass);
+      const handleClass = handle.$$.ptrType.registeredClass;
+      const ptr = upcastPointer(handle.$$.ptr, handleClass, this.registeredClass);
+
       return ptr;
     }
 
     /** @suppress {globalThis} */ function genericPointerToWireType(destructors, handle) {
-      var ptr;
+      let ptr;
+
       if (handle === null) {
         if (this.isReference) {
           throwBindingError(`null is not a valid ${this.name}`);
@@ -1206,6 +1326,7 @@ var createDotLottiePlayerModule = (() => {
           if (destructors !== null) {
             destructors.push(this.rawDestructor, ptr);
           }
+
           return ptr;
         } else {
           return 0;
@@ -1224,7 +1345,8 @@ var createDotLottiePlayerModule = (() => {
           } to parameter type ${this.name}`,
         );
       }
-      var handleClass = handle.$$.ptrType.registeredClass;
+      const handleClass = handle.$$.ptrType.registeredClass;
+
       ptr = upcastPointer(handle.$$.ptr, handleClass, this.registeredClass);
       if (this.isSmartPointer) {
         if (undefined === handle.$$.smartPtr) {
@@ -1251,10 +1373,11 @@ var createDotLottiePlayerModule = (() => {
             if (handle.$$.smartPtrType === this) {
               ptr = handle.$$.smartPtr;
             } else {
-              var clonedHandle = handle['clone']();
+              const clonedHandle = handle.clone();
+
               ptr = this.rawShare(
                 ptr,
-                Emval.toHandle(() => clonedHandle['delete']()),
+                Emval.toHandle(() => clonedHandle.delete()),
               );
               if (destructors !== null) {
                 destructors.push(this.rawDestructor, ptr);
@@ -1266,6 +1389,7 @@ var createDotLottiePlayerModule = (() => {
             throwBindingError('Unsupporting sharing policy');
         }
       }
+
       return ptr;
     }
 
@@ -1274,6 +1398,7 @@ var createDotLottiePlayerModule = (() => {
         if (this.isReference) {
           throwBindingError(`null is not a valid ${this.name}`);
         }
+
         return 0;
       }
       if (!handle.$$) {
@@ -1285,17 +1410,19 @@ var createDotLottiePlayerModule = (() => {
       if (handle.$$.ptrType.isConst) {
         throwBindingError(`Cannot convert argument of type ${handle.$$.ptrType.name} to parameter type ${this.name}`);
       }
-      var handleClass = handle.$$.ptrType.registeredClass;
-      var ptr = upcastPointer(handle.$$.ptr, handleClass, this.registeredClass);
+      const handleClass = handle.$$.ptrType.registeredClass;
+      const ptr = upcastPointer(handle.$$.ptr, handleClass, this.registeredClass);
+
       return ptr;
     }
 
-    var init_RegisteredPointer = () => {
+    const init_RegisteredPointer = () => {
       Object.assign(RegisteredPointer.prototype, {
         getPointee(ptr) {
           if (this.rawGetPointee) {
             ptr = this.rawGetPointee(ptr);
           }
+
           return ptr;
         },
         destructor(ptr) {
@@ -1340,18 +1467,18 @@ var createDotLottiePlayerModule = (() => {
       this.rawDestructor = rawDestructor;
       if (!isSmartPointer && registeredClass.baseClass === undefined) {
         if (isConst) {
-          this['toWireType'] = constNoSmartPtrRawPointerToWireType;
+          this.toWireType = constNoSmartPtrRawPointerToWireType;
           this.destructorFunction = null;
         } else {
-          this['toWireType'] = nonConstNoSmartPtrRawPointerToWireType;
+          this.toWireType = nonConstNoSmartPtrRawPointerToWireType;
           this.destructorFunction = null;
         }
       } else {
-        this['toWireType'] = genericPointerToWireType;
+        this.toWireType = genericPointerToWireType;
       }
     }
 
-    /** @param {number=} numArguments */ var replacePublicSymbol = (name, value, numArguments) => {
+    /** @param {number=} numArguments */ const replacePublicSymbol = (name, value, numArguments) => {
       if (!Module.hasOwnProperty(name)) {
         throwInternalError('Replacing nonexistent public symbol');
       }
@@ -1363,53 +1490,60 @@ var createDotLottiePlayerModule = (() => {
       }
     };
 
-    var dynCallLegacy = (sig, ptr, args) => {
+    const dynCallLegacy = (sig, ptr, args) => {
       sig = sig.replace(/p/g, 'i');
-      var f = Module['dynCall_' + sig];
+      const f = Module[`dynCall_${sig}`];
+
       return f(ptr, ...args);
     };
 
-    var wasmTable;
+    let wasmTable;
 
-    var getWasmTableEntry = (funcPtr) => wasmTable.get(funcPtr);
+    const getWasmTableEntry = (funcPtr) => wasmTable.get(funcPtr);
 
-    var dynCall = (sig, ptr, args = []) => {
+    const dynCall = (sig, ptr, args = []) => {
       if (sig.includes('j')) {
         return dynCallLegacy(sig, ptr, args);
       }
-      var rtn = getWasmTableEntry(ptr)(...args);
+      const rtn = getWasmTableEntry(ptr)(...args);
+
       return rtn;
     };
 
-    var getDynCaller =
+    const getDynCaller =
       (sig, ptr) =>
       (...args) =>
         dynCall(sig, ptr, args);
 
-    var embind__requireFunction = (signature, rawFunction) => {
+    const embind__requireFunction = (signature, rawFunction) => {
       signature = readLatin1String(signature);
       function makeDynCaller() {
         if (signature.includes('j')) {
           return getDynCaller(signature, rawFunction);
         }
+
         return getWasmTableEntry(rawFunction);
       }
-      var fp = makeDynCaller();
+      const fp = makeDynCaller();
+
       if (typeof fp != 'function') {
         throwBindingError(`unknown function pointer with signature ${signature}: ${rawFunction}`);
       }
+
       return fp;
     };
 
-    var extendError = (baseErrorType, errorName) => {
-      var errorClass = createNamedFunction(errorName, function (message) {
+    const extendError = (baseErrorType, errorName) => {
+      const errorClass = createNamedFunction(errorName, function (message) {
         this.name = errorName;
         this.message = message;
-        var stack = new Error(message).stack;
+        const stack = new Error(message).stack;
+
         if (stack !== undefined) {
-          this.stack = this.toString() + '\n' + stack.replace(/^Error(:[^\n]*)?\n/, '');
+          this.stack = `${this.toString()}\n${stack.replace(/^Error(:[^\n]*)?\n/, '')}`;
         }
       });
+
       errorClass.prototype = Object.create(baseErrorType.prototype);
       errorClass.prototype.constructor = errorClass;
       errorClass.prototype.toString = function () {
@@ -1419,21 +1553,25 @@ var createDotLottiePlayerModule = (() => {
           return `${this.name}: ${this.message}`;
         }
       };
+
       return errorClass;
     };
 
-    var UnboundTypeError;
+    let UnboundTypeError;
 
-    var getTypeName = (type) => {
-      var ptr = ___getTypeName(type);
-      var rv = readLatin1String(ptr);
+    const getTypeName = (type) => {
+      const ptr = ___getTypeName(type);
+      const rv = readLatin1String(ptr);
+
       _free(ptr);
+
       return rv;
     };
 
-    var throwUnboundTypeError = (message, types) => {
-      var unboundTypes = [];
-      var seen = {};
+    const throwUnboundTypeError = (message, types) => {
+      const unboundTypes = [];
+      const seen = {};
+
       function visit(type) {
         if (seen[type]) {
           return;
@@ -1443,16 +1581,17 @@ var createDotLottiePlayerModule = (() => {
         }
         if (typeDependencies[type]) {
           typeDependencies[type].forEach(visit);
+
           return;
         }
         unboundTypes.push(type);
         seen[type] = true;
       }
       types.forEach(visit);
-      throw new UnboundTypeError(`${message}: ` + unboundTypes.map(getTypeName).join([', ']));
+      throw new UnboundTypeError(`${message}: ${unboundTypes.map(getTypeName).join([', '])}`);
     };
 
-    var __embind_register_class = (
+    const __embind_register_class = (
       rawType,
       rawPointerType,
       rawConstPointerType,
@@ -1472,7 +1611,8 @@ var createDotLottiePlayerModule = (() => {
       upcast &&= embind__requireFunction(upcastSignature, upcast);
       downcast &&= embind__requireFunction(downcastSignature, downcast);
       rawDestructor = embind__requireFunction(destructorSignature, rawDestructor);
-      var legalFunctionName = makeLegalFunctionName(name);
+      const legalFunctionName = makeLegalFunctionName(name);
+
       exposePublicSymbol(legalFunctionName, function () {
         throwUnboundTypeError(`Cannot construct ${name} due to unbound types`, [baseClassRawType]);
       });
@@ -1481,22 +1621,24 @@ var createDotLottiePlayerModule = (() => {
         baseClassRawType ? [baseClassRawType] : [],
         (base) => {
           base = base[0];
-          var baseClass;
-          var basePrototype;
+          let baseClass;
+          let basePrototype;
+
           if (baseClassRawType) {
             baseClass = base.registeredClass;
             basePrototype = baseClass.instancePrototype;
           } else {
             basePrototype = ClassHandle.prototype;
           }
-          var constructor = createNamedFunction(name, function (...args) {
+          const constructor = createNamedFunction(name, function (...args) {
             if (Object.getPrototypeOf(this) !== instancePrototype) {
-              throw new BindingError("Use 'new' to construct " + name);
+              throw new BindingError(`Use 'new' to construct ${name}`);
             }
             if (undefined === registeredClass.constructor_body) {
-              throw new BindingError(name + ' has no accessible constructor');
+              throw new BindingError(`${name} has no accessible constructor`);
             }
-            var body = registeredClass.constructor_body[args.length];
+            const body = registeredClass.constructor_body[args.length];
+
             if (undefined === body) {
               throw new BindingError(
                 `Tried to invoke ctor of ${name} with invalid number of parameters (${
@@ -1504,6 +1646,7 @@ var createDotLottiePlayerModule = (() => {
                 }) - expected (${Object.keys(registeredClass.constructor_body).toString()}) parameters instead!`,
               );
             }
+
             return body.apply(this, args);
           });
           var instancePrototype = Object.create(basePrototype, {
@@ -1511,6 +1654,7 @@ var createDotLottiePlayerModule = (() => {
               value: constructor,
             },
           });
+
           constructor.prototype = instancePrototype;
           var registeredClass = new RegisteredClass(
             name,
@@ -1522,37 +1666,43 @@ var createDotLottiePlayerModule = (() => {
             upcast,
             downcast,
           );
+
           if (registeredClass.baseClass) {
             registeredClass.baseClass.__derivedClasses ??= [];
             registeredClass.baseClass.__derivedClasses.push(registeredClass);
           }
-          var referenceConverter = new RegisteredPointer(name, registeredClass, true, false, false);
-          var pointerConverter = new RegisteredPointer(name + '*', registeredClass, false, false, false);
-          var constPointerConverter = new RegisteredPointer(name + ' const*', registeredClass, false, true, false);
+          const referenceConverter = new RegisteredPointer(name, registeredClass, true, false, false);
+          const pointerConverter = new RegisteredPointer(`${name}*`, registeredClass, false, false, false);
+          const constPointerConverter = new RegisteredPointer(`${name} const*`, registeredClass, false, true, false);
+
           registeredPointers[rawType] = {
             pointerType: pointerConverter,
             constPointerType: constPointerConverter,
           };
           replacePublicSymbol(legalFunctionName, constructor);
+
           return [referenceConverter, pointerConverter, constPointerConverter];
         },
       );
     };
 
-    var heap32VectorToArray = (count, firstElement) => {
-      var array = [];
-      for (var i = 0; i < count; i++) {
+    const heap32VectorToArray = (count, firstElement) => {
+      const array = [];
+
+      for (let i = 0; i < count; i++) {
         array.push(HEAPU32[(firstElement + i * 4) >> 2]);
       }
+
       return array;
     };
 
     function usesDestructorStack(argTypes) {
-      for (var i = 1; i < argTypes.length; ++i) {
+      for (let i = 1; i < argTypes.length; ++i) {
         if (argTypes[i] !== null && argTypes[i].destructorFunction === undefined) {
           return true;
         }
       }
+
       return false;
     }
 
@@ -1564,55 +1714,61 @@ var createDotLottiePlayerModule = (() => {
       cppTargetFunc,
       /** boolean= */ isAsync,
     ) {
-      var argCount = argTypes.length;
+      const argCount = argTypes.length;
+
       if (argCount < 2) {
         throwBindingError("argTypes array size mismatch! Must at least get return value and 'this' types!");
       }
-      var isClassMethodFunc = argTypes[1] !== null && classType !== null;
-      var needsDestructorStack = usesDestructorStack(argTypes);
-      var returns = argTypes[0].name !== 'void';
-      var expectedArgCount = argCount - 2;
-      var argsWired = new Array(expectedArgCount);
-      var invokerFuncArgs = [];
-      var destructors = [];
-      var invokerFn = function (...args) {
+      const isClassMethodFunc = argTypes[1] !== null && classType !== null;
+      const needsDestructorStack = usesDestructorStack(argTypes);
+      const returns = argTypes[0].name !== 'void';
+      const expectedArgCount = argCount - 2;
+      const argsWired = new Array(expectedArgCount);
+      const invokerFuncArgs = [];
+      const destructors = [];
+      const invokerFn = function (...args) {
         if (args.length !== expectedArgCount) {
           throwBindingError(`function ${humanName} called with ${args.length} arguments, expected ${expectedArgCount}`);
         }
         destructors.length = 0;
-        var thisWired;
+        let thisWired;
+
         invokerFuncArgs.length = isClassMethodFunc ? 2 : 1;
         invokerFuncArgs[0] = cppTargetFunc;
         if (isClassMethodFunc) {
-          thisWired = argTypes[1]['toWireType'](destructors, this);
+          thisWired = argTypes[1].toWireType(destructors, this);
           invokerFuncArgs[1] = thisWired;
         }
-        for (var i = 0; i < expectedArgCount; ++i) {
-          argsWired[i] = argTypes[i + 2]['toWireType'](destructors, args[i]);
+        for (let i = 0; i < expectedArgCount; ++i) {
+          argsWired[i] = argTypes[i + 2].toWireType(destructors, args[i]);
           invokerFuncArgs.push(argsWired[i]);
         }
-        var rv = cppInvokerFunc(...invokerFuncArgs);
+        const rv = cppInvokerFunc(...invokerFuncArgs);
+
         function onDone(rv) {
           if (needsDestructorStack) {
             runDestructors(destructors);
           } else {
-            for (var i = isClassMethodFunc ? 1 : 2; i < argTypes.length; i++) {
-              var param = i === 1 ? thisWired : argsWired[i - 2];
+            for (let i = isClassMethodFunc ? 1 : 2; i < argTypes.length; i++) {
+              const param = i === 1 ? thisWired : argsWired[i - 2];
+
               if (argTypes[i].destructorFunction !== null) {
                 argTypes[i].destructorFunction(param);
               }
             }
           }
           if (returns) {
-            return argTypes[0]['fromWireType'](rv);
+            return argTypes[0].fromWireType(rv);
           }
         }
+
         return onDone(rv);
       };
+
       return createNamedFunction(humanName, invokerFn);
     }
 
-    var __embind_register_class_constructor = (
+    const __embind_register_class_constructor = (
       rawClassType,
       argCount,
       rawArgTypesAddr,
@@ -1620,11 +1776,13 @@ var createDotLottiePlayerModule = (() => {
       invoker,
       rawConstructor,
     ) => {
-      var rawArgTypes = heap32VectorToArray(argCount, rawArgTypesAddr);
+      const rawArgTypes = heap32VectorToArray(argCount, rawArgTypesAddr);
+
       invoker = embind__requireFunction(invokerSignature, invoker);
       whenDependentTypesAreResolved([], [rawClassType], (classType) => {
         classType = classType[0];
-        var humanName = `constructor ${classType.name}`;
+        const humanName = `constructor ${classType.name}`;
+
         if (undefined === classType.registeredClass.constructor_body) {
           classType.registeredClass.constructor_body = [];
         }
@@ -1647,15 +1805,18 @@ var createDotLottiePlayerModule = (() => {
             invoker,
             rawConstructor,
           );
+
           return [];
         });
+
         return [];
       });
     };
 
-    var getFunctionName = (signature) => {
+    const getFunctionName = (signature) => {
       signature = signature.trim();
       const argsIndex = signature.indexOf('(');
+
       if (argsIndex !== -1) {
         return signature.substr(0, argsIndex);
       } else {
@@ -1663,7 +1824,7 @@ var createDotLottiePlayerModule = (() => {
       }
     };
 
-    var __embind_register_class_function = (
+    const __embind_register_class_function = (
       rawClassType,
       methodName,
       argCount,
@@ -1674,13 +1835,15 @@ var createDotLottiePlayerModule = (() => {
       isPureVirtual,
       isAsync,
     ) => {
-      var rawArgTypes = heap32VectorToArray(argCount, rawArgTypesAddr);
+      const rawArgTypes = heap32VectorToArray(argCount, rawArgTypesAddr);
+
       methodName = readLatin1String(methodName);
       methodName = getFunctionName(methodName);
       rawInvoker = embind__requireFunction(invokerSignature, rawInvoker);
       whenDependentTypesAreResolved([], [rawClassType], (classType) => {
         classType = classType[0];
-        var humanName = `${classType.name}.${methodName}`;
+        const humanName = `${classType.name}.${methodName}`;
+
         if (methodName.startsWith('@@')) {
           methodName = Symbol[methodName.substring(2)];
         }
@@ -1690,8 +1853,9 @@ var createDotLottiePlayerModule = (() => {
         function unboundTypesHandler() {
           throwUnboundTypeError(`Cannot call ${humanName} due to unbound types`, rawArgTypes);
         }
-        var proto = classType.registeredClass.instancePrototype;
-        var method = proto[methodName];
+        const proto = classType.registeredClass.instancePrototype;
+        const method = proto[methodName];
+
         if (
           undefined === method ||
           (undefined === method.overloadTable &&
@@ -1706,42 +1870,46 @@ var createDotLottiePlayerModule = (() => {
           proto[methodName].overloadTable[argCount - 2] = unboundTypesHandler;
         }
         whenDependentTypesAreResolved([], rawArgTypes, (argTypes) => {
-          var memberFunction = craftInvokerFunction(humanName, argTypes, classType, rawInvoker, context, isAsync);
+          const memberFunction = craftInvokerFunction(humanName, argTypes, classType, rawInvoker, context, isAsync);
+
           if (undefined === proto[methodName].overloadTable) {
             memberFunction.argCount = argCount - 2;
             proto[methodName] = memberFunction;
           } else {
             proto[methodName].overloadTable[argCount - 2] = memberFunction;
           }
+
           return [];
         });
+
         return [];
       });
     };
 
-    var emval_freelist = [];
+    const emval_freelist = [];
 
-    var emval_handles = [];
+    const emval_handles = [];
 
-    var __emval_decref = (handle) => {
-      if (handle > 9 && 0 === --emval_handles[handle + 1]) {
+    const __emval_decref = (handle) => {
+      if (handle > 9 && --emval_handles[handle + 1] === 0) {
         emval_handles[handle] = undefined;
         emval_freelist.push(handle);
       }
     };
 
-    var count_emval_handles = () => emval_handles.length / 2 - 5 - emval_freelist.length;
+    const count_emval_handles = () => emval_handles.length / 2 - 5 - emval_freelist.length;
 
-    var init_emval = () => {
+    const init_emval = () => {
       emval_handles.push(0, 1, undefined, 1, null, 1, true, 1, false, 1);
-      Module['count_emval_handles'] = count_emval_handles;
+      Module.count_emval_handles = count_emval_handles;
     };
 
     var Emval = {
       toValue: (handle) => {
         if (!handle) {
-          throwBindingError('Cannot use deleted val. handle = ' + handle);
+          throwBindingError(`Cannot use deleted val. handle = ${handle}`);
         }
+
         return emval_handles[handle];
       },
       toHandle: (value) => {
@@ -1760,19 +1928,23 @@ var createDotLottiePlayerModule = (() => {
 
           default: {
             const handle = emval_freelist.pop() || emval_handles.length;
+
             emval_handles[handle] = value;
             emval_handles[handle + 1] = 1;
+
             return handle;
           }
         }
       },
     };
 
-    var EmValType = {
+    const EmValType = {
       name: 'emscripten::val',
       fromWireType: (handle) => {
-        var rv = Emval.toValue(handle);
+        const rv = Emval.toValue(handle);
+
         __emval_decref(handle);
+
         return rv;
       },
       toWireType: (destructors, value) => Emval.toHandle(value),
@@ -1781,35 +1953,35 @@ var createDotLottiePlayerModule = (() => {
       destructorFunction: null,
     };
 
-    var __embind_register_emval = (rawType) => registerType(rawType, EmValType);
+    const __embind_register_emval = (rawType) => registerType(rawType, EmValType);
 
-    var enumReadValueFromPointer = (name, width, signed) => {
+    const enumReadValueFromPointer = (name, width, signed) => {
       switch (width) {
         case 1:
           return signed
             ? function (pointer) {
-                return this['fromWireType'](HEAP8[pointer]);
+                return this.fromWireType(HEAP8[pointer]);
               }
             : function (pointer) {
-                return this['fromWireType'](HEAPU8[pointer]);
+                return this.fromWireType(HEAPU8[pointer]);
               };
 
         case 2:
           return signed
             ? function (pointer) {
-                return this['fromWireType'](HEAP16[pointer >> 1]);
+                return this.fromWireType(HEAP16[pointer >> 1]);
               }
             : function (pointer) {
-                return this['fromWireType'](HEAPU16[pointer >> 1]);
+                return this.fromWireType(HEAPU16[pointer >> 1]);
               };
 
         case 4:
           return signed
             ? function (pointer) {
-                return this['fromWireType'](HEAP32[pointer >> 2]);
+                return this.fromWireType(HEAP32[pointer >> 2]);
               }
             : function (pointer) {
-                return this['fromWireType'](HEAPU32[pointer >> 2]);
+                return this.fromWireType(HEAPU32[pointer >> 2]);
               };
 
         default:
@@ -1817,14 +1989,14 @@ var createDotLottiePlayerModule = (() => {
       }
     };
 
-    /** @suppress {globalThis} */ var __embind_register_enum = (rawType, name, size, isSigned) => {
+    /** @suppress {globalThis} */ const __embind_register_enum = (rawType, name, size, isSigned) => {
       name = readLatin1String(name);
       function ctor() {}
       ctor.values = {};
       registerType(rawType, {
-        name: name,
+        name,
         constructor: ctor,
-        fromWireType: function (c) {
+        fromWireType(c) {
           return this.constructor.values[c];
         },
         toWireType: (destructors, c) => c.value,
@@ -1835,19 +2007,22 @@ var createDotLottiePlayerModule = (() => {
       exposePublicSymbol(name, ctor);
     };
 
-    var requireRegisteredType = (rawType, humanName) => {
-      var impl = registeredTypes[rawType];
+    const requireRegisteredType = (rawType, humanName) => {
+      const impl = registeredTypes[rawType];
+
       if (undefined === impl) {
         throwBindingError(`${humanName} has unknown type ${getTypeName(rawType)}`);
       }
+
       return impl;
     };
 
-    var __embind_register_enum_value = (rawEnumType, name, enumValue) => {
-      var enumType = requireRegisteredType(rawEnumType, 'enum');
+    const __embind_register_enum_value = (rawEnumType, name, enumValue) => {
+      const enumType = requireRegisteredType(rawEnumType, 'enum');
+
       name = readLatin1String(name);
-      var Enum = enumType.constructor;
-      var Value = Object.create(enumType.constructor.prototype, {
+      const Enum = enumType.constructor;
+      const Value = Object.create(enumType.constructor.prototype, {
         value: {
           value: enumValue,
         },
@@ -1855,6 +2030,7 @@ var createDotLottiePlayerModule = (() => {
           value: createNamedFunction(`${enumType.name}_${name}`, function () {}),
         },
       });
+
       Enum.values[enumValue] = Value;
       Enum[name] = Value;
     };
@@ -1863,24 +2039,25 @@ var createDotLottiePlayerModule = (() => {
       if (v === null) {
         return 'null';
       }
-      var t = typeof v;
+      const t = typeof v;
+
       if (t === 'object' || t === 'array' || t === 'function') {
         return v.toString();
       } else {
-        return '' + v;
+        return `${v}`;
       }
     };
 
-    var floatReadValueFromPointer = (name, width) => {
+    const floatReadValueFromPointer = (name, width) => {
       switch (width) {
         case 4:
           return function (pointer) {
-            return this['fromWireType'](HEAPF32[pointer >> 2]);
+            return this.fromWireType(HEAPF32[pointer >> 2]);
           };
 
         case 8:
           return function (pointer) {
-            return this['fromWireType'](HEAPF64[pointer >> 3]);
+            return this.fromWireType(HEAPF64[pointer >> 3]);
           };
 
         default:
@@ -1888,10 +2065,10 @@ var createDotLottiePlayerModule = (() => {
       }
     };
 
-    var __embind_register_float = (rawType, name, size) => {
+    const __embind_register_float = (rawType, name, size) => {
       name = readLatin1String(name);
       registerType(rawType, {
-        name: name,
+        name,
         fromWireType: (value) => value,
         toWireType: (destructors, value) => value,
         argPackAdvance: GenericWireTypeSize,
@@ -1900,8 +2077,9 @@ var createDotLottiePlayerModule = (() => {
       });
     };
 
-    var __embind_register_function = (name, argCount, rawArgTypesAddr, signature, rawInvoker, fn, isAsync) => {
-      var argTypes = heap32VectorToArray(argCount, rawArgTypesAddr);
+    const __embind_register_function = (name, argCount, rawArgTypesAddr, signature, rawInvoker, fn, isAsync) => {
+      const argTypes = heap32VectorToArray(argCount, rawArgTypesAddr);
+
       name = readLatin1String(name);
       name = getFunctionName(name);
       rawInvoker = embind__requireFunction(signature, rawInvoker);
@@ -1913,17 +2091,19 @@ var createDotLottiePlayerModule = (() => {
         argCount - 1,
       );
       whenDependentTypesAreResolved([], argTypes, (argTypes) => {
-        var invokerArgsArray = [argTypes[0], /* return value */ null].concat(/* no class 'this'*/ argTypes.slice(1));
+        const invokerArgsArray = [argTypes[0], /* return value */ null].concat(/* no class 'this'*/ argTypes.slice(1));
+
         /* actual params */ replacePublicSymbol(
           name,
           craftInvokerFunction(name, invokerArgsArray, null, /* no class 'this'*/ rawInvoker, fn, isAsync),
           argCount - 1,
         );
+
         return [];
       });
     };
 
-    var integerReadValueFromPointer = (name, width, signed) => {
+    const integerReadValueFromPointer = (name, width, signed) => {
       switch (width) {
         case 1:
           return signed ? (pointer) => HEAP8[pointer] : (pointer) => HEAPU8[pointer];
@@ -1939,42 +2119,47 @@ var createDotLottiePlayerModule = (() => {
       }
     };
 
-    /** @suppress {globalThis} */ var __embind_register_integer = (primitiveType, name, size, minRange, maxRange) => {
+    /** @suppress {globalThis} */ const __embind_register_integer = (primitiveType, name, size, minRange, maxRange) => {
       name = readLatin1String(name);
       if (maxRange === -1) {
         maxRange = 4294967295;
       }
-      var fromWireType = (value) => value;
+      let fromWireType = (value) => value;
+
       if (minRange === 0) {
-        var bitshift = 32 - 8 * size;
+        const bitshift = 32 - 8 * size;
+
         fromWireType = (value) => (value << bitshift) >>> bitshift;
       }
-      var isUnsignedType = name.includes('unsigned');
-      var checkAssertions = (value, toTypeName) => {};
-      var toWireType;
+      const isUnsignedType = name.includes('unsigned');
+      const checkAssertions = (value, toTypeName) => {};
+      let toWireType;
+
       if (isUnsignedType) {
         toWireType = function (destructors, value) {
           checkAssertions(value, this.name);
+
           return value >>> 0;
         };
       } else {
         toWireType = function (destructors, value) {
           checkAssertions(value, this.name);
+
           return value;
         };
       }
       registerType(primitiveType, {
-        name: name,
-        fromWireType: fromWireType,
-        toWireType: toWireType,
+        name,
+        fromWireType,
+        toWireType,
         argPackAdvance: GenericWireTypeSize,
         readValueFromPointer: integerReadValueFromPointer(name, size, minRange !== 0),
         destructorFunction: null,
       });
     };
 
-    var __embind_register_memory_view = (rawType, dataTypeIndex, name) => {
-      var typeMapping = [
+    const __embind_register_memory_view = (rawType, dataTypeIndex, name) => {
+      const typeMapping = [
         Int8Array,
         Uint8Array,
         Int16Array,
@@ -1984,17 +2169,19 @@ var createDotLottiePlayerModule = (() => {
         Float32Array,
         Float64Array,
       ];
-      var TA = typeMapping[dataTypeIndex];
+      const TA = typeMapping[dataTypeIndex];
+
       function decodeMemoryView(handle) {
-        var size = HEAPU32[handle >> 2];
-        var data = HEAPU32[(handle + 4) >> 2];
+        const size = HEAPU32[handle >> 2];
+        const data = HEAPU32[(handle + 4) >> 2];
+
         return new TA(HEAP8.buffer, data, size);
       }
       name = readLatin1String(name);
       registerType(
         rawType,
         {
-          name: name,
+          name,
           fromWireType: decodeMemoryView,
           argPackAdvance: GenericWireTypeSize,
           readValueFromPointer: decodeMemoryView,
@@ -2005,11 +2192,11 @@ var createDotLottiePlayerModule = (() => {
       );
     };
 
-    var __embind_register_optional = (rawOptionalType, rawType) => {
+    const __embind_register_optional = (rawOptionalType, rawType) => {
       __embind_register_emval(rawOptionalType);
     };
 
-    var __embind_register_smart_ptr = (
+    const __embind_register_smart_ptr = (
       rawType,
       rawPointeeType,
       name,
@@ -2030,7 +2217,7 @@ var createDotLottiePlayerModule = (() => {
       rawDestructor = embind__requireFunction(destructorSignature, rawDestructor);
       whenDependentTypesAreResolved([rawType], [rawPointeeType], (pointeeType) => {
         pointeeType = pointeeType[0];
-        var registeredPointer = new RegisteredPointer(
+        const registeredPointer = new RegisteredPointer(
           name,
           pointeeType.registeredClass,
           false,
@@ -2043,26 +2230,32 @@ var createDotLottiePlayerModule = (() => {
           rawShare,
           rawDestructor,
         );
+
         return [registeredPointer];
       });
     };
 
-    var __embind_register_std_string = (rawType, name) => {
+    const __embind_register_std_string = (rawType, name) => {
       name = readLatin1String(name);
-      var stdStringIsUTF8 = name === 'std::string';
+      const stdStringIsUTF8 = name === 'std::string';
+
       registerType(rawType, {
-        name: name,
+        name,
         fromWireType(value) {
-          var length = HEAPU32[value >> 2];
-          var payload = value + 4;
-          var str;
+          const length = HEAPU32[value >> 2];
+          const payload = value + 4;
+          let str;
+
           if (stdStringIsUTF8) {
-            var decodeStartPtr = payload;
+            let decodeStartPtr = payload;
+
             for (var i = 0; i <= length; ++i) {
-              var currentBytePtr = payload + i;
+              const currentBytePtr = payload + i;
+
               if (i == length || HEAPU8[currentBytePtr] == 0) {
-                var maxRead = currentBytePtr - decodeStartPtr;
-                var stringSegment = UTF8ToString(decodeStartPtr, maxRead);
+                const maxRead = currentBytePtr - decodeStartPtr;
+                const stringSegment = UTF8ToString(decodeStartPtr, maxRead);
+
                 if (str === undefined) {
                   str = stringSegment;
                 } else {
@@ -2073,21 +2266,24 @@ var createDotLottiePlayerModule = (() => {
               }
             }
           } else {
-            var a = new Array(length);
+            const a = new Array(length);
+
             for (var i = 0; i < length; ++i) {
               a[i] = String.fromCharCode(HEAPU8[payload + i]);
             }
             str = a.join('');
           }
           _free(value);
+
           return str;
         },
         toWireType(destructors, value) {
           if (value instanceof ArrayBuffer) {
             value = new Uint8Array(value);
           }
-          var length;
-          var valueIsOfTypeString = typeof value == 'string';
+          let length;
+          const valueIsOfTypeString = typeof value == 'string';
+
           if (
             !(
               valueIsOfTypeString ||
@@ -2103,30 +2299,31 @@ var createDotLottiePlayerModule = (() => {
           } else {
             length = value.length;
           }
-          var base = _malloc(4 + length + 1);
-          var ptr = base + 4;
+          const base = _malloc(4 + length + 1);
+          const ptr = base + 4;
+
           HEAPU32[base >> 2] = length;
           if (stdStringIsUTF8 && valueIsOfTypeString) {
             stringToUTF8(value, ptr, length + 1);
+          } else if (valueIsOfTypeString) {
+            for (var i = 0; i < length; ++i) {
+              const charCode = value.charCodeAt(i);
+
+              if (charCode > 255) {
+                _free(ptr);
+                throwBindingError('String has UTF-16 code units that do not fit in 8 bits');
+              }
+              HEAPU8[ptr + i] = charCode;
+            }
           } else {
-            if (valueIsOfTypeString) {
-              for (var i = 0; i < length; ++i) {
-                var charCode = value.charCodeAt(i);
-                if (charCode > 255) {
-                  _free(ptr);
-                  throwBindingError('String has UTF-16 code units that do not fit in 8 bits');
-                }
-                HEAPU8[ptr + i] = charCode;
-              }
-            } else {
-              for (var i = 0; i < length; ++i) {
-                HEAPU8[ptr + i] = value[i];
-              }
+            for (var i = 0; i < length; ++i) {
+              HEAPU8[ptr + i] = value[i];
             }
           }
           if (destructors !== null) {
             destructors.push(_free, base);
           }
+
           return base;
         },
         argPackAdvance: GenericWireTypeSize,
@@ -2137,67 +2334,81 @@ var createDotLottiePlayerModule = (() => {
       });
     };
 
-    var UTF16Decoder = typeof TextDecoder != 'undefined' ? new TextDecoder('utf-16le') : undefined;
+    const UTF16Decoder = typeof TextDecoder != 'undefined' ? new TextDecoder('utf-16le') : undefined;
 
-    var UTF16ToString = (ptr, maxBytesToRead) => {
-      var endPtr = ptr;
-      var idx = endPtr >> 1;
-      var maxIdx = idx + maxBytesToRead / 2;
+    const UTF16ToString = (ptr, maxBytesToRead) => {
+      let endPtr = ptr;
+      let idx = endPtr >> 1;
+      const maxIdx = idx + maxBytesToRead / 2;
+
       while (!(idx >= maxIdx) && HEAPU16[idx]) ++idx;
       endPtr = idx << 1;
       if (endPtr - ptr > 32 && UTF16Decoder) return UTF16Decoder.decode(HEAPU8.subarray(ptr, endPtr));
-      var str = '';
-      for (var i = 0; !(i >= maxBytesToRead / 2); ++i) {
-        var codeUnit = HEAP16[(ptr + i * 2) >> 1];
+      let str = '';
+
+      for (let i = 0; !(i >= maxBytesToRead / 2); ++i) {
+        const codeUnit = HEAP16[(ptr + i * 2) >> 1];
+
         if (codeUnit == 0) break;
         str += String.fromCharCode(codeUnit);
       }
+
       return str;
     };
 
-    var stringToUTF16 = (str, outPtr, maxBytesToWrite) => {
+    const stringToUTF16 = (str, outPtr, maxBytesToWrite) => {
       maxBytesToWrite ??= 2147483647;
       if (maxBytesToWrite < 2) return 0;
       maxBytesToWrite -= 2;
-      var startPtr = outPtr;
-      var numCharsToWrite = maxBytesToWrite < str.length * 2 ? maxBytesToWrite / 2 : str.length;
-      for (var i = 0; i < numCharsToWrite; ++i) {
-        var codeUnit = str.charCodeAt(i);
+      const startPtr = outPtr;
+      const numCharsToWrite = maxBytesToWrite < str.length * 2 ? maxBytesToWrite / 2 : str.length;
+
+      for (let i = 0; i < numCharsToWrite; ++i) {
+        const codeUnit = str.charCodeAt(i);
+
         HEAP16[outPtr >> 1] = codeUnit;
         outPtr += 2;
       }
       HEAP16[outPtr >> 1] = 0;
+
       return outPtr - startPtr;
     };
 
-    var lengthBytesUTF16 = (str) => str.length * 2;
+    const lengthBytesUTF16 = (str) => str.length * 2;
 
-    var UTF32ToString = (ptr, maxBytesToRead) => {
-      var i = 0;
-      var str = '';
+    const UTF32ToString = (ptr, maxBytesToRead) => {
+      let i = 0;
+      let str = '';
+
       while (!(i >= maxBytesToRead / 4)) {
-        var utf32 = HEAP32[(ptr + i * 4) >> 2];
+        const utf32 = HEAP32[(ptr + i * 4) >> 2];
+
         if (utf32 == 0) break;
         ++i;
         if (utf32 >= 65536) {
-          var ch = utf32 - 65536;
+          const ch = utf32 - 65536;
+
           str += String.fromCharCode(55296 | (ch >> 10), 56320 | (ch & 1023));
         } else {
           str += String.fromCharCode(utf32);
         }
       }
+
       return str;
     };
 
-    var stringToUTF32 = (str, outPtr, maxBytesToWrite) => {
+    const stringToUTF32 = (str, outPtr, maxBytesToWrite) => {
       maxBytesToWrite ??= 2147483647;
       if (maxBytesToWrite < 4) return 0;
-      var startPtr = outPtr;
-      var endPtr = startPtr + maxBytesToWrite - 4;
-      for (var i = 0; i < str.length; ++i) {
-        var codeUnit = str.charCodeAt(i);
+      const startPtr = outPtr;
+      const endPtr = startPtr + maxBytesToWrite - 4;
+
+      for (let i = 0; i < str.length; ++i) {
+        let codeUnit = str.charCodeAt(i);
+
         if (codeUnit >= 55296 && codeUnit <= 57343) {
-          var trailSurrogate = str.charCodeAt(++i);
+          const trailSurrogate = str.charCodeAt(++i);
+
           codeUnit = (65536 + ((codeUnit & 1023) << 10)) | (trailSurrogate & 1023);
         }
         HEAP32[outPtr >> 2] = codeUnit;
@@ -2205,22 +2416,30 @@ var createDotLottiePlayerModule = (() => {
         if (outPtr + 4 > endPtr) break;
       }
       HEAP32[outPtr >> 2] = 0;
+
       return outPtr - startPtr;
     };
 
-    var lengthBytesUTF32 = (str) => {
-      var len = 0;
-      for (var i = 0; i < str.length; ++i) {
-        var codeUnit = str.charCodeAt(i);
+    const lengthBytesUTF32 = (str) => {
+      let len = 0;
+
+      for (let i = 0; i < str.length; ++i) {
+        const codeUnit = str.charCodeAt(i);
+
         if (codeUnit >= 55296 && codeUnit <= 57343) ++i;
         len += 4;
       }
+
       return len;
     };
 
-    var __embind_register_std_wstring = (rawType, charSize, name) => {
+    const __embind_register_std_wstring = (rawType, charSize, name) => {
       name = readLatin1String(name);
-      var decodeString, encodeString, readCharAt, lengthBytesUTF;
+      let decodeString;
+      let encodeString;
+      let readCharAt;
+      let lengthBytesUTF;
+
       if (charSize === 2) {
         decodeString = UTF16ToString;
         encodeString = stringToUTF16;
@@ -2233,16 +2452,19 @@ var createDotLottiePlayerModule = (() => {
         readCharAt = (pointer) => HEAPU32[pointer >> 2];
       }
       registerType(rawType, {
-        name: name,
+        name,
         fromWireType: (value) => {
-          var length = HEAPU32[value >> 2];
-          var str;
-          var decodeStartPtr = value + 4;
-          for (var i = 0; i <= length; ++i) {
-            var currentBytePtr = value + 4 + i * charSize;
+          const length = HEAPU32[value >> 2];
+          let str;
+          let decodeStartPtr = value + 4;
+
+          for (let i = 0; i <= length; ++i) {
+            const currentBytePtr = value + 4 + i * charSize;
+
             if (i == length || readCharAt(currentBytePtr) == 0) {
-              var maxReadBytes = currentBytePtr - decodeStartPtr;
-              var stringSegment = decodeString(decodeStartPtr, maxReadBytes);
+              const maxReadBytes = currentBytePtr - decodeStartPtr;
+              const stringSegment = decodeString(decodeStartPtr, maxReadBytes);
+
               if (str === undefined) {
                 str = stringSegment;
               } else {
@@ -2253,19 +2475,22 @@ var createDotLottiePlayerModule = (() => {
             }
           }
           _free(value);
+
           return str;
         },
         toWireType: (destructors, value) => {
           if (!(typeof value == 'string')) {
             throwBindingError(`Cannot pass non-string to C++ string type ${name}`);
           }
-          var length = lengthBytesUTF(value);
-          var ptr = _malloc(4 + length + charSize);
+          const length = lengthBytesUTF(value);
+          const ptr = _malloc(4 + length + charSize);
+
           HEAPU32[ptr >> 2] = length / charSize;
           encodeString(value, ptr + 4, length + charSize);
           if (destructors !== null) {
             destructors.push(_free, ptr);
           }
+
           return ptr;
         },
         argPackAdvance: GenericWireTypeSize,
@@ -2276,7 +2501,7 @@ var createDotLottiePlayerModule = (() => {
       });
     };
 
-    var __embind_register_value_object = (
+    const __embind_register_value_object = (
       rawType,
       name,
       constructorSignature,
@@ -2292,7 +2517,7 @@ var createDotLottiePlayerModule = (() => {
       };
     };
 
-    var __embind_register_value_object_field = (
+    const __embind_register_value_object_field = (
       structType,
       fieldName,
       getterReturnType,
@@ -2306,151 +2531,173 @@ var createDotLottiePlayerModule = (() => {
     ) => {
       structRegistrations[structType].fields.push({
         fieldName: readLatin1String(fieldName),
-        getterReturnType: getterReturnType,
+        getterReturnType,
         getter: embind__requireFunction(getterSignature, getter),
-        getterContext: getterContext,
-        setterArgumentType: setterArgumentType,
+        getterContext,
+        setterArgumentType,
         setter: embind__requireFunction(setterSignature, setter),
-        setterContext: setterContext,
+        setterContext,
       });
     };
 
-    var __embind_register_void = (rawType, name) => {
+    const __embind_register_void = (rawType, name) => {
       name = readLatin1String(name);
       registerType(rawType, {
         isVoid: true,
-        name: name,
+        name,
         argPackAdvance: 0,
         fromWireType: () => undefined,
         toWireType: (destructors, o) => undefined,
       });
     };
 
-    var __emscripten_memcpy_js = (dest, src, num) => HEAPU8.copyWithin(dest, src, src + num);
+    const __emscripten_memcpy_js = (dest, src, num) => HEAPU8.copyWithin(dest, src, src + num);
 
-    var __emscripten_throw_longjmp = () => {
+    const __emscripten_throw_longjmp = () => {
       throw Infinity;
     };
 
-    var emval_methodCallers = [];
+    const emval_methodCallers = [];
 
-    var __emval_call = (caller, handle, destructorsRef, args) => {
+    const __emval_call = (caller, handle, destructorsRef, args) => {
       caller = emval_methodCallers[caller];
       handle = Emval.toValue(handle);
+
       return caller(null, handle, destructorsRef, args);
     };
 
-    var emval_addMethodCaller = (caller) => {
-      var id = emval_methodCallers.length;
+    const emval_addMethodCaller = (caller) => {
+      const id = emval_methodCallers.length;
+
       emval_methodCallers.push(caller);
+
       return id;
     };
 
-    var emval_lookupTypes = (argCount, argTypes) => {
-      var a = new Array(argCount);
-      for (var i = 0; i < argCount; ++i) {
-        a[i] = requireRegisteredType(HEAPU32[(argTypes + i * 4) >> 2], 'parameter ' + i);
+    const emval_lookupTypes = (argCount, argTypes) => {
+      const a = new Array(argCount);
+
+      for (let i = 0; i < argCount; ++i) {
+        a[i] = requireRegisteredType(HEAPU32[(argTypes + i * 4) >> 2], `parameter ${i}`);
       }
+
       return a;
     };
 
-    var reflectConstruct = Reflect.construct;
+    const reflectConstruct = Reflect.construct;
 
-    var emval_returnValue = (returnType, destructorsRef, handle) => {
-      var destructors = [];
-      var result = returnType['toWireType'](destructors, handle);
+    const emval_returnValue = (returnType, destructorsRef, handle) => {
+      const destructors = [];
+      const result = returnType.toWireType(destructors, handle);
+
       if (destructors.length) {
         HEAPU32[destructorsRef >> 2] = Emval.toHandle(destructors);
       }
+
       return result;
     };
 
-    var __emval_get_method_caller = (argCount, argTypes, kind) => {
-      var types = emval_lookupTypes(argCount, argTypes);
-      var retType = types.shift();
+    const __emval_get_method_caller = (argCount, argTypes, kind) => {
+      const types = emval_lookupTypes(argCount, argTypes);
+      const retType = types.shift();
+
       argCount--;
-      var argN = new Array(argCount);
-      var invokerFunction = (obj, func, destructorsRef, args) => {
-        var offset = 0;
-        for (var i = 0; i < argCount; ++i) {
-          argN[i] = types[i]['readValueFromPointer'](args + offset);
-          offset += types[i]['argPackAdvance'];
+      const argN = new Array(argCount);
+      const invokerFunction = (obj, func, destructorsRef, args) => {
+        let offset = 0;
+
+        for (let i = 0; i < argCount; ++i) {
+          argN[i] = types[i].readValueFromPointer(args + offset);
+          offset += types[i].argPackAdvance;
         }
-        var rv = kind === /* CONSTRUCTOR */ 1 ? reflectConstruct(func, argN) : func.apply(obj, argN);
+        const rv = kind === /* CONSTRUCTOR */ 1 ? reflectConstruct(func, argN) : func.apply(obj, argN);
+
         return emval_returnValue(retType, destructorsRef, rv);
       };
-      var functionName = `methodCaller<(${types.map((t) => t.name).join(', ')}) => ${retType.name}>`;
+      const functionName = `methodCaller<(${types.map((t) => t.name).join(', ')}) => ${retType.name}>`;
+
       return emval_addMethodCaller(createNamedFunction(functionName, invokerFunction));
     };
 
-    var __emval_incref = (handle) => {
+    const __emval_incref = (handle) => {
       if (handle > 9) {
         emval_handles[handle + 1] += 1;
       }
     };
 
-    var __emval_run_destructors = (handle) => {
-      var destructors = Emval.toValue(handle);
+    const __emval_run_destructors = (handle) => {
+      const destructors = Emval.toValue(handle);
+
       runDestructors(destructors);
       __emval_decref(handle);
     };
 
-    var __emval_take_value = (type, arg) => {
+    const __emval_take_value = (type, arg) => {
       type = requireRegisteredType(type, '_emval_take_value');
-      var v = type['readValueFromPointer'](arg);
+      const v = type.readValueFromPointer(arg);
+
       return Emval.toHandle(v);
     };
 
-    var _abort = () => {
+    const _abort = () => {
       abort('');
     };
 
-    var _emscripten_get_now;
+    let _emscripten_get_now;
 
     _emscripten_get_now = () => performance.now();
 
-    var getHeapMax = () => 2147483648;
+    const getHeapMax = () => 2147483648;
 
-    var growMemory = (size) => {
-      var b = wasmMemory.buffer;
-      var pages = (size - b.byteLength + 65535) / 65536;
+    const growMemory = (size) => {
+      const b = wasmMemory.buffer;
+      const pages = (size - b.byteLength + 65535) / 65536;
+
       try {
         wasmMemory.grow(pages);
         updateMemoryViews();
+
         return 1;
-      } /*success*/ catch (e) {}
+      } /* success*/ catch (e) {}
     };
 
-    var _emscripten_resize_heap = (requestedSize) => {
-      var oldSize = HEAPU8.length;
+    const _emscripten_resize_heap = (requestedSize) => {
+      const oldSize = HEAPU8.length;
+
       requestedSize >>>= 0;
-      var maxHeapSize = getHeapMax();
+      const maxHeapSize = getHeapMax();
+
       if (requestedSize > maxHeapSize) {
         return false;
       }
-      var alignUp = (x, multiple) => x + ((multiple - (x % multiple)) % multiple);
-      for (var cutDown = 1; cutDown <= 4; cutDown *= 2) {
-        var overGrownHeapSize = oldSize * (1 + 0.2 / cutDown);
+      const alignUp = (x, multiple) => x + ((multiple - (x % multiple)) % multiple);
+
+      for (let cutDown = 1; cutDown <= 4; cutDown *= 2) {
+        let overGrownHeapSize = oldSize * (1 + 0.2 / cutDown);
+
         overGrownHeapSize = Math.min(overGrownHeapSize, requestedSize + 100663296);
-        var newSize = Math.min(maxHeapSize, alignUp(Math.max(requestedSize, overGrownHeapSize), 65536));
-        var replacement = growMemory(newSize);
+        const newSize = Math.min(maxHeapSize, alignUp(Math.max(requestedSize, overGrownHeapSize), 65536));
+        const replacement = growMemory(newSize);
+
         if (replacement) {
           return true;
         }
       }
+
       return false;
     };
 
-    var ENV = {};
+    const ENV = {};
 
-    var getExecutableName = () => thisProgram || './this.program';
+    const getExecutableName = () => thisProgram || './this.program';
 
     var getEnvStrings = () => {
       if (!getEnvStrings.strings) {
-        var lang =
-          ((typeof navigator == 'object' && navigator.languages && navigator.languages[0]) || 'C').replace('-', '_') +
-          '.UTF-8';
-        var env = {
+        const lang = `${(
+          (typeof navigator == 'object' && navigator.languages && navigator.languages[0]) ||
+          'C'
+        ).replace('-', '_')}.UTF-8`;
+        const env = {
           USER: 'web_user',
           LOGNAME: 'web_user',
           PATH: '/',
@@ -2459,62 +2706,73 @@ var createDotLottiePlayerModule = (() => {
           LANG: lang,
           _: getExecutableName(),
         };
+
         for (var x in ENV) {
           if (ENV[x] === undefined) delete env[x];
           else env[x] = ENV[x];
         }
-        var strings = [];
+        const strings = [];
+
         for (var x in env) {
           strings.push(`${x}=${env[x]}`);
         }
         getEnvStrings.strings = strings;
       }
+
       return getEnvStrings.strings;
     };
 
-    var stringToAscii = (str, buffer) => {
-      for (var i = 0; i < str.length; ++i) {
+    const stringToAscii = (str, buffer) => {
+      for (let i = 0; i < str.length; ++i) {
         HEAP8[buffer++] = str.charCodeAt(i);
       }
       HEAP8[buffer] = 0;
     };
 
-    var _environ_get = (__environ, environ_buf) => {
-      var bufSize = 0;
+    const _environ_get = (__environ, environ_buf) => {
+      let bufSize = 0;
+
       getEnvStrings().forEach((string, i) => {
-        var ptr = environ_buf + bufSize;
+        const ptr = environ_buf + bufSize;
+
         HEAPU32[(__environ + i * 4) >> 2] = ptr;
         stringToAscii(string, ptr);
         bufSize += string.length + 1;
       });
+
       return 0;
     };
 
-    var _environ_sizes_get = (penviron_count, penviron_buf_size) => {
-      var strings = getEnvStrings();
+    const _environ_sizes_get = (penviron_count, penviron_buf_size) => {
+      const strings = getEnvStrings();
+
       HEAPU32[penviron_count >> 2] = strings.length;
-      var bufSize = 0;
+      let bufSize = 0;
+
       strings.forEach((string) => (bufSize += string.length + 1));
       HEAPU32[penviron_buf_size >> 2] = bufSize;
+
       return 0;
     };
 
-    var _fd_close = (fd) => 52;
+    const _fd_close = (fd) => 52;
 
-    var _fd_read = (fd, iov, iovcnt, pnum) => 52;
+    const _fd_read = (fd, iov, iovcnt, pnum) => 52;
 
-    var convertI32PairToI53Checked = (lo, hi) =>
-      (hi + 2097152) >>> 0 < 4194305 - !!lo ? (lo >>> 0) + hi * 4294967296 : NaN;
+    const convertI32PairToI53Checked = (lo, hi) =>
+      (hi + 2097152) >>> 0 < 4194305 - Boolean(lo) ? (lo >>> 0) + hi * 4294967296 : NaN;
 
     function _fd_seek(fd, offset_low, offset_high, whence, newOffset) {
-      var offset = convertI32PairToI53Checked(offset_low, offset_high);
+      const offset = convertI32PairToI53Checked(offset_low, offset_high);
+
       return 70;
     }
 
-    var printCharBuffers = [null, [], []];
+    const printCharBuffers = [null, [], []];
 
-    var printChar = (stream, curr) => {
-      var buffer = printCharBuffers[stream];
+    const printChar = (stream, curr) => {
+      const buffer = printCharBuffers[stream];
+
       if (curr === 0 || curr === 10) {
         (stream === 1 ? out : err)(UTF8ArrayToString(buffer, 0));
         buffer.length = 0;
@@ -2523,52 +2781,60 @@ var createDotLottiePlayerModule = (() => {
       }
     };
 
-    var _fd_write = (fd, iov, iovcnt, pnum) => {
-      var num = 0;
-      for (var i = 0; i < iovcnt; i++) {
-        var ptr = HEAPU32[iov >> 2];
-        var len = HEAPU32[(iov + 4) >> 2];
+    const _fd_write = (fd, iov, iovcnt, pnum) => {
+      let num = 0;
+
+      for (let i = 0; i < iovcnt; i++) {
+        const ptr = HEAPU32[iov >> 2];
+        const len = HEAPU32[(iov + 4) >> 2];
+
         iov += 8;
-        for (var j = 0; j < len; j++) {
+        for (let j = 0; j < len; j++) {
           printChar(fd, HEAPU8[ptr + j]);
         }
         num += len;
       }
       HEAPU32[pnum >> 2] = num;
+
       return 0;
     };
 
-    var initRandomFill = () => {
-      if (typeof crypto == 'object' && typeof crypto['getRandomValues'] == 'function') {
+    const initRandomFill = () => {
+      if (typeof crypto == 'object' && typeof crypto.getRandomValues == 'function') {
         return (view) => crypto.getRandomValues(view);
       } else abort('initRandomDevice');
     };
 
     var randomFill = (view) => (randomFill = initRandomFill())(view);
 
-    var _getentropy = (buffer, size) => {
+    const _getentropy = (buffer, size) => {
       randomFill(HEAPU8.subarray(buffer, buffer + size));
+
       return 0;
     };
 
-    var isLeapYear = (year) => year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+    const isLeapYear = (year) => year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
 
-    var arraySum = (array, index) => {
-      var sum = 0;
-      for (var i = 0; i <= index; sum += array[i++]) {}
+    const arraySum = (array, index) => {
+      let sum = 0;
+
+      for (let i = 0; i <= index; sum += array[i++]) {}
+
       return sum;
     };
 
-    var MONTH_DAYS_LEAP = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    const MONTH_DAYS_LEAP = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-    var MONTH_DAYS_REGULAR = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    const MONTH_DAYS_REGULAR = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-    var addDays = (date, days) => {
-      var newDate = new Date(date.getTime());
+    const addDays = (date, days) => {
+      const newDate = new Date(date.getTime());
+
       while (days > 0) {
-        var leap = isLeapYear(newDate.getFullYear());
-        var currentMonth = newDate.getMonth();
-        var daysInCurrentMonth = (leap ? MONTH_DAYS_LEAP : MONTH_DAYS_REGULAR)[currentMonth];
+        const leap = isLeapYear(newDate.getFullYear());
+        const currentMonth = newDate.getMonth();
+        const daysInCurrentMonth = (leap ? MONTH_DAYS_LEAP : MONTH_DAYS_REGULAR)[currentMonth];
+
         if (days > daysInCurrentMonth - newDate.getDate()) {
           days -= daysInCurrentMonth - newDate.getDate() + 1;
           newDate.setDate(1);
@@ -2580,27 +2846,31 @@ var createDotLottiePlayerModule = (() => {
           }
         } else {
           newDate.setDate(newDate.getDate() + days);
+
           return newDate;
         }
       }
+
       return newDate;
     };
 
     /** @type {function(string, boolean=, number=)} */ function intArrayFromString(stringy, dontAddNull, length) {
-      var len = length > 0 ? length : lengthBytesUTF8(stringy) + 1;
-      var u8array = new Array(len);
-      var numBytesWritten = stringToUTF8Array(stringy, u8array, 0, u8array.length);
+      const len = length > 0 ? length : lengthBytesUTF8(stringy) + 1;
+      const u8array = new Array(len);
+      const numBytesWritten = stringToUTF8Array(stringy, u8array, 0, u8array.length);
+
       if (dontAddNull) u8array.length = numBytesWritten;
+
       return u8array;
     }
 
-    var writeArrayToMemory = (array, buffer) => {
+    const writeArrayToMemory = (array, buffer) => {
       HEAP8.set(array, buffer);
     };
 
-    var _strftime = (s, maxsize, format, tm) => {
-      var tm_zone = HEAPU32[(tm + 40) >> 2];
-      var date = {
+    const _strftime = (s, maxsize, format, tm) => {
+      const tm_zone = HEAPU32[(tm + 40) >> 2];
+      const date = {
         tm_sec: HEAP32[tm >> 2],
         tm_min: HEAP32[(tm + 4) >> 2],
         tm_hour: HEAP32[(tm + 8) >> 2],
@@ -2613,8 +2883,8 @@ var createDotLottiePlayerModule = (() => {
         tm_gmtoff: HEAP32[(tm + 36) >> 2],
         tm_zone: tm_zone ? UTF8ToString(tm_zone) : '',
       };
-      var pattern = UTF8ToString(format);
-      var EXPANSION_RULES_1 = {
+      let pattern = UTF8ToString(format);
+      const EXPANSION_RULES_1 = {
         '%c': '%a %b %d %H:%M:%S %Y',
         '%D': '%m/%d/%y',
         '%F': '%Y-%m-%d',
@@ -2644,11 +2914,12 @@ var createDotLottiePlayerModule = (() => {
         '%OW': '%W',
         '%Oy': '%y',
       };
+
       for (var rule in EXPANSION_RULES_1) {
         pattern = pattern.replace(new RegExp(rule, 'g'), EXPANSION_RULES_1[rule]);
       }
-      var WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      var MONTHS = [
+      const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const MONTHS = [
         'January',
         'February',
         'March',
@@ -2662,11 +2933,14 @@ var createDotLottiePlayerModule = (() => {
         'November',
         'December',
       ];
+
       function leadingSomething(value, digits, character) {
-        var str = typeof value == 'number' ? value.toString() : value || '';
+        let str = typeof value == 'number' ? value.toString() : value || '';
+
         while (str.length < digits) {
           str = character[0] + str;
         }
+
         return str;
       }
       function leadingNulls(value, digits) {
@@ -2676,12 +2950,14 @@ var createDotLottiePlayerModule = (() => {
         function sgn(value) {
           return value < 0 ? -1 : value > 0 ? 1 : 0;
         }
-        var compare;
+        let compare;
+
         if ((compare = sgn(date1.getFullYear() - date2.getFullYear())) === 0) {
           if ((compare = sgn(date1.getMonth() - date2.getMonth())) === 0) {
             compare = sgn(date1.getDate() - date2.getDate());
           }
         }
+
         return compare;
       }
       function getFirstWeekStartDate(janFourth) {
@@ -2709,26 +2985,30 @@ var createDotLottiePlayerModule = (() => {
         }
       }
       function getWeekBasedYear(date) {
-        var thisDate = addDays(new Date(date.tm_year + 1900, 0, 1), date.tm_yday);
-        var janFourthThisYear = new Date(thisDate.getFullYear(), 0, 4);
-        var janFourthNextYear = new Date(thisDate.getFullYear() + 1, 0, 4);
-        var firstWeekStartThisYear = getFirstWeekStartDate(janFourthThisYear);
-        var firstWeekStartNextYear = getFirstWeekStartDate(janFourthNextYear);
+        const thisDate = addDays(new Date(date.tm_year + 1900, 0, 1), date.tm_yday);
+        const janFourthThisYear = new Date(thisDate.getFullYear(), 0, 4);
+        const janFourthNextYear = new Date(thisDate.getFullYear() + 1, 0, 4);
+        const firstWeekStartThisYear = getFirstWeekStartDate(janFourthThisYear);
+        const firstWeekStartNextYear = getFirstWeekStartDate(janFourthNextYear);
+
         if (compareByDay(firstWeekStartThisYear, thisDate) <= 0) {
           if (compareByDay(firstWeekStartNextYear, thisDate) <= 0) {
             return thisDate.getFullYear() + 1;
           }
+
           return thisDate.getFullYear();
         }
+
         return thisDate.getFullYear() - 1;
       }
-      var EXPANSION_RULES_2 = {
+      const EXPANSION_RULES_2 = {
         '%a': (date) => WEEKDAYS[date.tm_wday].substring(0, 3),
         '%A': (date) => WEEKDAYS[date.tm_wday],
         '%b': (date) => MONTHS[date.tm_mon].substring(0, 3),
         '%B': (date) => MONTHS[date.tm_mon],
         '%C': (date) => {
-          var year = date.tm_year + 1900;
+          const year = date.tm_year + 1900;
+
           return leadingNulls((year / 100) | 0, 2);
         },
         '%d': (date) => leadingNulls(date.tm_mday, 2),
@@ -2737,9 +3017,11 @@ var createDotLottiePlayerModule = (() => {
         '%G': getWeekBasedYear,
         '%H': (date) => leadingNulls(date.tm_hour, 2),
         '%I': (date) => {
-          var twelveHour = date.tm_hour;
+          let twelveHour = date.tm_hour;
+
           if (twelveHour == 0) twelveHour = 12;
           else if (twelveHour > 12) twelveHour -= 12;
+
           return leadingNulls(twelveHour, 2);
         },
         '%j': (date) =>
@@ -2755,49 +3037,59 @@ var createDotLottiePlayerModule = (() => {
           if (date.tm_hour >= 0 && date.tm_hour < 12) {
             return 'AM';
           }
+
           return 'PM';
         },
         '%S': (date) => leadingNulls(date.tm_sec, 2),
         '%t': () => '\t',
         '%u': (date) => date.tm_wday || 7,
         '%U': (date) => {
-          var days = date.tm_yday + 7 - date.tm_wday;
+          const days = date.tm_yday + 7 - date.tm_wday;
+
           return leadingNulls(Math.floor(days / 7), 2);
         },
         '%V': (date) => {
-          var val = Math.floor((date.tm_yday + 7 - ((date.tm_wday + 6) % 7)) / 7);
+          let val = Math.floor((date.tm_yday + 7 - ((date.tm_wday + 6) % 7)) / 7);
+
           if ((date.tm_wday + 371 - date.tm_yday - 2) % 7 <= 2) {
             val++;
           }
           if (!val) {
             val = 52;
-            var dec31 = (date.tm_wday + 7 - date.tm_yday - 1) % 7;
+            const dec31 = (date.tm_wday + 7 - date.tm_yday - 1) % 7;
+
             if (dec31 == 4 || (dec31 == 5 && isLeapYear((date.tm_year % 400) - 1))) {
               val++;
             }
           } else if (val == 53) {
-            var jan1 = (date.tm_wday + 371 - date.tm_yday) % 7;
+            const jan1 = (date.tm_wday + 371 - date.tm_yday) % 7;
+
             if (jan1 != 4 && (jan1 != 3 || !isLeapYear(date.tm_year))) val = 1;
           }
+
           return leadingNulls(val, 2);
         },
         '%w': (date) => date.tm_wday,
         '%W': (date) => {
-          var days = date.tm_yday + 7 - ((date.tm_wday + 6) % 7);
+          const days = date.tm_yday + 7 - ((date.tm_wday + 6) % 7);
+
           return leadingNulls(Math.floor(days / 7), 2);
         },
         '%y': (date) => (date.tm_year + 1900).toString().substring(2),
         '%Y': (date) => date.tm_year + 1900,
         '%z': (date) => {
-          var off = date.tm_gmtoff;
-          var ahead = off >= 0;
+          let off = date.tm_gmtoff;
+          const ahead = off >= 0;
+
           off = Math.abs(off) / 60;
           off = (off / 60) * 100 + (off % 60);
-          return (ahead ? '+' : '-') + String('0000' + off).slice(-4);
+
+          return (ahead ? '+' : '-') + String(`0000${off}`).slice(-4);
         },
         '%Z': (date) => date.tm_zone,
         '%%': () => '%',
       };
+
       pattern = pattern.replace(/%%/g, '\0\0');
       for (var rule in EXPANSION_RULES_2) {
         if (pattern.includes(rule)) {
@@ -2805,17 +3097,19 @@ var createDotLottiePlayerModule = (() => {
         }
       }
       pattern = pattern.replace(/\0\0/g, '%');
-      var bytes = intArrayFromString(pattern, false);
+      const bytes = intArrayFromString(pattern, false);
+
       if (bytes.length > maxsize) {
         return 0;
       }
       writeArrayToMemory(bytes, s);
+
       return bytes.length - 1;
     };
 
-    var _strftime_l = (s, maxsize, format, tm, loc) => _strftime(s, maxsize, format, tm);
+    const _strftime_l = (s, maxsize, format, tm, loc) => _strftime(s, maxsize, format, tm);
 
-    InternalError = Module['InternalError'] = class InternalError extends Error {
+    InternalError = Module.InternalError = class InternalError extends Error {
       constructor(message) {
         super(message);
         this.name = 'InternalError';
@@ -2824,7 +3118,7 @@ var createDotLottiePlayerModule = (() => {
 
     embind_init_charCodes();
 
-    BindingError = Module['BindingError'] = class BindingError extends Error {
+    BindingError = Module.BindingError = class BindingError extends Error {
       constructor(message) {
         super(message);
         this.name = 'BindingError';
@@ -2837,7 +3131,7 @@ var createDotLottiePlayerModule = (() => {
 
     init_RegisteredPointer();
 
-    UnboundTypeError = Module['UnboundTypeError'] = extendError(Error, 'UnboundTypeError');
+    UnboundTypeError = Module.UnboundTypeError = extendError(Error, 'UnboundTypeError');
 
     init_emval();
 
@@ -2918,11 +3212,11 @@ var createDotLottiePlayerModule = (() => {
 
     var _free = (a0) => (_free = wasmExports['pa'])(a0);
 
-    var _htonl = (a0) => (_htonl = wasmExports['htonl'])(a0);
+    var _htonl = (a0) => (_htonl = wasmExports.htonl)(a0);
 
-    var _htons = (a0) => (_htons = wasmExports['htons'])(a0);
+    var _htons = (a0) => (_htons = wasmExports.htons)(a0);
 
-    var _ntohs = (a0) => (_ntohs = wasmExports['ntohs'])(a0);
+    var _ntohs = (a0) => (_ntohs = wasmExports.ntohs)(a0);
 
     var _setThrew = (a0, a1) => (_setThrew = wasmExports['qa'])(a0, a1);
 
@@ -2930,12 +3224,12 @@ var createDotLottiePlayerModule = (() => {
 
     var __emscripten_stack_restore = (a0) => (__emscripten_stack_restore = wasmExports['sa'])(a0);
 
-    var __emscripten_stack_alloc = (a0) => (__emscripten_stack_alloc = wasmExports['_emscripten_stack_alloc'])(a0);
+    var __emscripten_stack_alloc = (a0) => (__emscripten_stack_alloc = wasmExports._emscripten_stack_alloc)(a0);
 
     var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmExports['ta'])();
 
     var ___cxa_increment_exception_refcount = (a0) =>
-      (___cxa_increment_exception_refcount = wasmExports['__cxa_increment_exception_refcount'])(a0);
+      (___cxa_increment_exception_refcount = wasmExports.__cxa_increment_exception_refcount)(a0);
 
     var ___cxa_can_catch = (a0, a1, a2) => (___cxa_can_catch = wasmExports['ua'])(a0, a1, a2);
 
@@ -2972,7 +3266,8 @@ var createDotLottiePlayerModule = (() => {
       (dynCall_iiiiiijj = Module['dynCall_iiiiiijj'] = wasmExports['Fa'])(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9));
 
     function invoke_vi(index, a1) {
-      var sp = stackSave();
+      const sp = stackSave();
+
       try {
         getWasmTableEntry(index)(a1);
       } catch (e) {
@@ -2983,7 +3278,8 @@ var createDotLottiePlayerModule = (() => {
     }
 
     function invoke_iiiii(index, a1, a2, a3, a4) {
-      var sp = stackSave();
+      const sp = stackSave();
+
       try {
         return getWasmTableEntry(index)(a1, a2, a3, a4);
       } catch (e) {
@@ -2994,7 +3290,8 @@ var createDotLottiePlayerModule = (() => {
     }
 
     function invoke_vii(index, a1, a2) {
-      var sp = stackSave();
+      const sp = stackSave();
+
       try {
         getWasmTableEntry(index)(a1, a2);
       } catch (e) {
@@ -3005,7 +3302,8 @@ var createDotLottiePlayerModule = (() => {
     }
 
     function invoke_viii(index, a1, a2, a3) {
-      var sp = stackSave();
+      const sp = stackSave();
+
       try {
         getWasmTableEntry(index)(a1, a2, a3);
       } catch (e) {
@@ -3016,7 +3314,8 @@ var createDotLottiePlayerModule = (() => {
     }
 
     function invoke_ii(index, a1) {
-      var sp = stackSave();
+      const sp = stackSave();
+
       try {
         return getWasmTableEntry(index)(a1);
       } catch (e) {
@@ -3027,7 +3326,8 @@ var createDotLottiePlayerModule = (() => {
     }
 
     function invoke_viiiii(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
+      const sp = stackSave();
+
       try {
         getWasmTableEntry(index)(a1, a2, a3, a4, a5);
       } catch (e) {
@@ -3038,7 +3338,8 @@ var createDotLottiePlayerModule = (() => {
     }
 
     function invoke_v(index) {
-      var sp = stackSave();
+      const sp = stackSave();
+
       try {
         getWasmTableEntry(index)();
       } catch (e) {
@@ -3049,7 +3350,8 @@ var createDotLottiePlayerModule = (() => {
     }
 
     function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
-      var sp = stackSave();
+      const sp = stackSave();
+
       try {
         return getWasmTableEntry(index)(a1, a2, a3, a4, a5, a6, a7);
       } catch (e) {
@@ -3060,7 +3362,8 @@ var createDotLottiePlayerModule = (() => {
     }
 
     function invoke_viiii(index, a1, a2, a3, a4) {
-      var sp = stackSave();
+      const sp = stackSave();
+
       try {
         getWasmTableEntry(index)(a1, a2, a3, a4);
       } catch (e) {
@@ -3071,7 +3374,8 @@ var createDotLottiePlayerModule = (() => {
     }
 
     function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
+      const sp = stackSave();
+
       try {
         return getWasmTableEntry(index)(a1, a2, a3, a4, a5);
       } catch (e) {
@@ -3082,7 +3386,8 @@ var createDotLottiePlayerModule = (() => {
     }
 
     function invoke_iiii(index, a1, a2, a3) {
-      var sp = stackSave();
+      const sp = stackSave();
+
       try {
         return getWasmTableEntry(index)(a1, a2, a3);
       } catch (e) {
@@ -3104,7 +3409,8 @@ var createDotLottiePlayerModule = (() => {
     }
 
     function invoke_viiiiii(index, a1, a2, a3, a4, a5, a6) {
-      var sp = stackSave();
+      const sp = stackSave();
+
       try {
         getWasmTableEntry(index)(a1, a2, a3, a4, a5, a6);
       } catch (e) {
@@ -3115,7 +3421,8 @@ var createDotLottiePlayerModule = (() => {
     }
 
     function invoke_viiij(index, a1, a2, a3, a4, a5) {
-      var sp = stackSave();
+      const sp = stackSave();
+
       try {
         dynCall_viiij(index, a1, a2, a3, a4, a5);
       } catch (e) {
@@ -3125,7 +3432,7 @@ var createDotLottiePlayerModule = (() => {
       }
     }
 
-    var calledRun;
+    let calledRun;
 
     dependenciesFulfilled = function runCaller() {
       if (!calledRun) run();
@@ -3143,18 +3450,18 @@ var createDotLottiePlayerModule = (() => {
       function doRun() {
         if (calledRun) return;
         calledRun = true;
-        Module['calledRun'] = true;
+        Module.calledRun = true;
         if (ABORT) return;
         initRuntime();
         readyPromiseResolve(Module);
-        if (Module['onRuntimeInitialized']) Module['onRuntimeInitialized']();
+        if (Module.onRuntimeInitialized) Module.onRuntimeInitialized();
         postRun();
       }
-      if (Module['setStatus']) {
-        Module['setStatus']('Running...');
+      if (Module.setStatus) {
+        Module.setStatus('Running...');
         setTimeout(function () {
           setTimeout(function () {
-            Module['setStatus']('');
+            Module.setStatus('');
           }, 1);
           doRun();
         }, 1);
@@ -3163,10 +3470,10 @@ var createDotLottiePlayerModule = (() => {
       }
     }
 
-    if (Module['preInit']) {
-      if (typeof Module['preInit'] == 'function') Module['preInit'] = [Module['preInit']];
-      while (Module['preInit'].length > 0) {
-        Module['preInit'].pop()();
+    if (Module.preInit) {
+      if (typeof Module.preInit == 'function') Module.preInit = [Module.preInit];
+      while (Module.preInit.length > 0) {
+        Module.preInit.pop()();
       }
     }
 
@@ -3175,4 +3482,5 @@ var createDotLottiePlayerModule = (() => {
     return readyPromise;
   };
 })();
+
 export default createDotLottiePlayerModule;
