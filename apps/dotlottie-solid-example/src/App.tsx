@@ -111,12 +111,10 @@ const App: Component = () => {
       dotLottieInstance.addEventListener('stop', console.log);
       dotLottieInstance.addEventListener('load', handleOnLoad);
     }
+  });
 
-    onCleanup(() => {
-      if (dotLottieInstance) {
-        dotLottieInstance.removeEventListener('load', handleOnLoad);
-      }
-    });
+  onCleanup(() => {
+    dotLottie()?.removeEventListener('load', handleOnLoad);
   });
 
   return (
