@@ -2,4 +2,4 @@
 '@lottiefiles/dotlottie-solid': patch
 ---
 
-chore: 🤖 updated props for solid component
+chore(solid): 🤖 updated props for solid component
