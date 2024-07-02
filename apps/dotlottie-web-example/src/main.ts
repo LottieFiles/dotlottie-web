@@ -381,6 +381,10 @@ fetch(
       dotLottie.setSpeed(parseFloat(speedSlider.value));
     });
 
+    dotLottie.addEventListener('ready', () => {
+      console.log(dotLottie.isReady);
+    });
+
     dotLottie.addEventListener('load', (event) => {
       bgColorInput.value = dotLottie.backgroundColor || '#ffffff';
 

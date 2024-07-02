@@ -122,7 +122,7 @@ export class DotLottie {
 
   private _dotLottieCore: DotLottiePlayer | null = null;
 
-  private _wasmModule: MainModule | null = null;
+  private static _wasmModule: MainModule | null = null;
 
   private _renderConfig: RenderConfig = {};
 
@@ -139,7 +139,7 @@ export class DotLottie {
 
     DotLottieWasmLoader.load()
       .then((module) => {
-        this._wasmModule = module;
+        DotLottie._wasmModule = module;
 
         this._dotLottieCore = new module.DotLottiePlayer({
           autoplay: config.autoplay ?? false,
@@ -157,6 +157,8 @@ export class DotLottie {
               }
             : module.createDefaultLayout(),
         });
+
+        this._eventManager.dispatch({ type: 'ready' });
 
         if (config.data) {
           this._loadFromData(config.data);
@@ -281,22 +283,22 @@ export class DotLottie {
         align: [layout.align.get(0) as number, layout.align.get(1) as number],
         fit: ((): Fit => {
           switch (layout.fit) {
-            case this._wasmModule?.Fit.Contain:
+            case DotLottie._wasmModule?.Fit.Contain:
               return 'contain';
 
-            case this._wasmModule?.Fit.Cover:
+            case DotLottie._wasmModule?.Fit.Cover:
               return 'cover';
 
-            case this._wasmModule?.Fit.Fill:
+            case DotLottie._wasmModule?.Fit.Fill:
               return 'fill';
 
-            case this._wasmModule?.Fit.FitHeight:
+            case DotLottie._wasmModule?.Fit.FitHeight:
               return 'fit-height';
 
-            case this._wasmModule?.Fit.FitWidth:
+            case DotLottie._wasmModule?.Fit.FitWidth:
               return 'fit-width';
 
-            case this._wasmModule?.Fit.None:
+            case DotLottie._wasmModule?.Fit.None:
               return 'none';
 
             default:
@@ -352,11 +354,11 @@ export class DotLottie {
   public get mode(): Mode {
     const mode = this._dotLottieCore?.config().mode;
 
-    if (mode === this._wasmModule?.Mode.Reverse) {
+    if (mode === DotLottie._wasmModule?.Mode.Reverse) {
       return 'reverse';
-    } else if (mode === this._wasmModule?.Mode.Bounce) {
+    } else if (mode === DotLottie._wasmModule?.Mode.Bounce) {
       return 'bounce';
-    } else if (mode === this._wasmModule?.Mode.ReverseBounce) {
+    } else if (mode === DotLottie._wasmModule?.Mode.ReverseBounce) {
       return 'reverse-bounce';
     } else {
       return 'forward';
@@ -381,6 +383,10 @@ export class DotLottie {
 
   public get speed(): number {
     return this._dotLottieCore?.config().speed ?? 0;
+  }
+
+  public get isReady(): boolean {
+    return this._dotLottieCore !== null;
   }
 
   public get isLoaded(): boolean {
@@ -424,23 +430,23 @@ export class DotLottie {
   }
 
   public load(config: Omit<Config, 'canvas'>): void {
-    if (this._dotLottieCore === null || this._wasmModule === null) return;
+    if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 
     this._dotLottieCore.setConfig({
       autoplay: config.autoplay ?? false,
       backgroundColor: 0,
       loopAnimation: config.loop ?? false,
-      mode: createCoreMode(config.mode ?? 'forward', this._wasmModule),
-      segment: createCoreSegment(config.segment ?? [], this._wasmModule),
+      mode: createCoreMode(config.mode ?? 'forward', DotLottie._wasmModule),
+      segment: createCoreSegment(config.segment ?? [], DotLottie._wasmModule),
       speed: config.speed ?? 1,
       useFrameInterpolation: config.useFrameInterpolation ?? true,
       marker: config.marker ?? '',
       layout: config.layout
         ? {
-            align: createCoreAlign(config.layout.align, this._wasmModule),
-            fit: createCoreFit(config.layout.fit, this._wasmModule),
+            align: createCoreAlign(config.layout.align, DotLottie._wasmModule),
+            fit: createCoreFit(config.layout.fit, DotLottie._wasmModule),
           }
-        : this._wasmModule.createDefaultLayout(),
+        : DotLottie._wasmModule.createDefaultLayout(),
     });
 
     if (config.data) {
@@ -668,20 +674,20 @@ export class DotLottie {
   }
 
   public setSegment(startFrame: number, endFrame: number): void {
-    if (this._dotLottieCore === null || this._wasmModule === null) return;
+    if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 
     this._dotLottieCore.setConfig({
       ...this._dotLottieCore.config(),
-      segment: createCoreSegment([startFrame, endFrame], this._wasmModule),
+      segment: createCoreSegment([startFrame, endFrame], DotLottie._wasmModule),
     });
   }
 
   public setMode(mode: Mode): void {
-    if (this._dotLottieCore === null || this._wasmModule === null) return;
+    if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 
     this._dotLottieCore.setConfig({
       ...this._dotLottieCore.config(),
-      mode: createCoreMode(mode, this._wasmModule),
+      mode: createCoreMode(mode, DotLottie._wasmModule),
     });
   }
 
@@ -757,13 +763,13 @@ export class DotLottie {
   }
 
   public setLayout(layout: Layout): void {
-    if (this._dotLottieCore === null || this._wasmModule === null) return;
+    if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 
     this._dotLottieCore.setConfig({
       ...this._dotLottieCore.config(),
       layout: {
-        align: createCoreAlign(layout.align, this._wasmModule),
-        fit: createCoreFit(layout.fit, this._wasmModule),
+        align: createCoreAlign(layout.align, DotLottie._wasmModule),
+        fit: createCoreFit(layout.fit, DotLottie._wasmModule),
       },
     });
   }
