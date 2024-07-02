@@ -2,4 +2,5 @@
 '@lottiefiles/dotlottie-svelte': patch
 ---
 
-chore(svelte): updated props
+feat(svelte): added animationId, themeId and themeData props
+perf(svelte): renders only visible canvas area
