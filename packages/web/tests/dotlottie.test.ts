@@ -535,13 +535,18 @@ describe('load', () => {
     });
 
     const onLoad = vi.fn();
+    const onReady = vi.fn();
 
+    dotLottie.addEventListener('ready', onReady);
     dotLottie.addEventListener('load', onLoad);
 
+    expect(dotLottie.isReady).toBe(false);
     expect(dotLottie.isLoaded).toBe(false);
 
     await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(onReady).toHaveBeenCalledTimes(1));
 
+    expect(dotLottie.isReady).toBe(true);
     expect(dotLottie.isLoaded).toBe(true);
     expect(dotLottie.isPlaying).toBe(false);
     expect(dotLottie.isStopped).toBe(true);

@@ -1,10 +1,13 @@
 import { type DotLottie, DotLottieSolid, setWasmUrl } from '@lottiefiles/dotlottie-solid';
-import type { Component} from 'solid-js';
-import { createEffect, createSignal } from 'solid-js';
+import type { Component } from 'solid-js';
+import { createEffect, createSignal, onCleanup } from 'solid-js';
 
 import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
 
 const animations = [
+  'https://lottie.host/b06d1336-2c08-4156-aa6f-96f08ff511e0/4itF1pXb1i.lottie',
+  // eslint-disable-next-line no-secrets/no-secrets
+  'https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lottie',
   // eslint-disable-next-line no-secrets/no-secrets
   'https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json',
   // eslint-disable-next-line no-secrets/no-secrets
@@ -21,6 +24,10 @@ const App: Component = () => {
   const [useFrameInterpolation, setUseFrameInterpolation] = createSignal(false);
   const [playOnHover, setPlayOnHover] = createSignal(false);
   const [autoResizeCanvas, setAutoResizeCanvas] = createSignal(true);
+  const [animationIds, setAnimationIds] = createSignal<string[]>([]);
+  const [themes, setThemes] = createSignal<string[]>([]);
+  const [activeAnimationId, setActiveAnimationId] = createSignal('');
+  const [themeId, setThemeId] = createSignal('');
 
   function play(): void {
     dotLottie()?.play();
@@ -65,6 +72,36 @@ const App: Component = () => {
     setAutoResizeCanvas((prev) => !prev);
   }
 
+  function handleActiveAnimationChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    const value = target.value;
+
+    setActiveAnimationId(value);
+  }
+
+  function handleActiveThemeChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    const value = target.value;
+
+    setThemeId(value);
+  }
+
+  function handleOnLoad(): void {
+    const dotLottieInstance = dotLottie();
+
+    if (!dotLottieInstance) return;
+
+    const animIds = dotLottieInstance.manifest?.animations.map((animation) => {
+      return animation.id;
+    });
+    const _themes = dotLottieInstance.manifest?.themes?.map((theme) => {
+      return theme.id;
+    });
+
+    setAnimationIds(animIds || []);
+    setThemes(_themes || []);
+  }
+
   createEffect(() => {
     const dotLottieInstance = dotLottie();
 
@@ -72,7 +109,12 @@ const App: Component = () => {
       dotLottieInstance.addEventListener('play', console.log);
       dotLottieInstance.addEventListener('pause', console.log);
       dotLottieInstance.addEventListener('stop', console.log);
+      dotLottieInstance.addEventListener('load', handleOnLoad);
     }
+  });
+
+  onCleanup(() => {
+    dotLottie()?.removeEventListener('load', handleOnLoad);
   });
 
   return (
@@ -90,6 +132,8 @@ const App: Component = () => {
         src={animations[srcIdx()]}
         autoplay
         loop={loop()}
+        animationId={activeAnimationId()}
+        themeId={themeId()}
         speed={speed()}
         playOnHover={playOnHover()}
         autoResizeCanvas={autoResizeCanvas()}
@@ -100,6 +144,7 @@ const App: Component = () => {
       <div
         style={{
           display: 'flex',
+          'flex-wrap': 'wrap',
           gap: '10px',
         }}
       >
@@ -117,6 +162,23 @@ const App: Component = () => {
         <label>
           <input type="checkbox" checked={autoResizeCanvas()} onChange={handleAutoResizeCanvas} />
           Auto Resize
+        </label>
+        <label>
+          Animations
+          <select onChange={handleActiveAnimationChange}>
+            {animationIds().map((id) => (
+              <option value={id}>{id}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Themes
+          <select onChange={handleActiveThemeChange}>
+            <option value="">Default theme</option>
+            {themes().map((id) => (
+              <option value={id}>{id}</option>
+            ))}
+          </select>
         </label>
       </div>
     </div>
