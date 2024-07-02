@@ -31,7 +31,7 @@
 	export let dotLottieRefCallback: (dotLottie: DotLottie) => void = () => {};
 
 
-  export const getCanvasViewport = (
+  const getCanvasViewport = (
     canvas: HTMLCanvasElement,
     dpr: number,
   ): { height: number; width: number; x: number; y: number } => {
@@ -53,7 +53,7 @@
   };
 
 
-  export const hoverHandler = (event: MouseEvent) => {
+  const hoverHandler = (event: MouseEvent) => {
     if (!playOnHover || !dotLottie.isLoaded) return;
 
     if (event.type === 'mouseenter') {
@@ -79,10 +79,11 @@
   };
 
 	onMount(() => {
+    const shouldAutoplay = autoplay && !playOnHover;
 		dotLottie = new DotLottie({
 			canvas,
 			src,
-			autoplay,
+			autoplay: shouldAutoplay,
 			loop,
 			speed,
 			data,
@@ -221,16 +222,6 @@
 		});
 		prevData = data;
 	}
-
-  $: if (dotLottie && typeof playOnHover === 'boolean') {
-    if (playOnHover) {
-      //playonhover
-      // dotLottie.playOnHover();
-    } else {
-      //playonhover
-      // dotLottie.stopOnHover();
-    }
-  }
 
   $: if (dotLottie && dotLottie.isLoaded && dotLottie.activeAnimationId !== animationId) {
     dotLottie.loadAnimation(animationId);
