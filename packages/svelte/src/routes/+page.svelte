@@ -17,10 +17,10 @@
 	let hasMultipleAnimations = false;
 	let src = "https://lottie.host/b06d1336-2c08-4156-aa6f-96f08ff511e0/4itF1pXb1i.lottie";
 	let activeAnimationIdx = 0;
-  let animations: string[] = [];
-  let themes: string[] = [];
-  let activeAnimationId = "";
-  let activeThemeId = "";
+	let animations: string[] = [];
+	let themes: string[] = [];
+	let activeAnimationId = "";
+	let activeThemeId = "";
 
 	function dotLottieRefCallback(ref: DotLottie) {
 		dotLottie = ref;
@@ -77,8 +77,8 @@
 	{dotLottieRefCallback}
 	autoplay
 	backgroundColor={backgroundColor}
-  animationId={activeAnimationId}
-  themeId={activeThemeId}
+	animationId={activeAnimationId}
+	themeId={activeThemeId}
 	src={src}
 	loop={loop}
 	speed={speed}
@@ -97,18 +97,18 @@
 <select on:change={(event) => {
   activeAnimationId = event.currentTarget.value || '';
 }}>
-  <option value="">Default animation</option>
-  {#each animations as animation}
-    <option value={animation}>{animation}</option>
-  {/each}
+	<option value="">Default animation</option>
+	{#each animations as animation}
+		<option value={animation}>{animation}</option>
+	{/each}
 </select>
 <select on:change={(event) => {
-  activeThemeId = event.currentTarget.value || '';
+	activeThemeId = event.currentTarget.value || '';
 }}>
-  <option value="">Default theme</option>
-  {#each themes as theme}
-    <option value={theme}>{theme}</option>
-  {/each}
+	<option value="">Default theme</option>
+	{#each themes as theme}
+		<option value={theme}>{theme}</option>
+	{/each}
 </select>
 <input type="color" bind:value={backgroundColor} />
 <ul>
