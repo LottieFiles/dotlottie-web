@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-react
 
+## 0.7.1
+
+### Patch Changes
+
+- 8cdff81: fix(react): 🐛 container gap at the bottom
+- Updated dependencies [6e15246]
+  - @lottiefiles/dotlottie-web@0.27.0
+
 ## 0.7.0
 
 ### Minor Changes

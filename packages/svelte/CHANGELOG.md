@@ -1,5 +1,14 @@
 # @lottiefiles/dotlottie-svelte
 
+## 0.3.6
+
+### Patch Changes
+
+- 47413cd: \* feat(svelte): added `animationId`, `themeId`, `themeData` and `playOnHover` props
+  - perf(svelte): renders only visible canvas area
+- Updated dependencies [6e15246]
+  - @lottiefiles/dotlottie-web@0.27.0
+
 ## 0.3.5
 
 ### Patch Changes
