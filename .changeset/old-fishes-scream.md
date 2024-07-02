@@ -2,4 +2,5 @@
 '@lottiefiles/dotlottie-solid': patch
 ---
 
-chore(solid): 🤖 updated props for solid component
+feat(solid): added animationId, themeId and themeData props
+perf(solid): renders only visible canvas area
