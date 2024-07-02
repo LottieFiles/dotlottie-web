@@ -1,13 +1,34 @@
 import { type Config, DotLottie } from '@lottiefiles/dotlottie-web';
 import debounce from 'debounce';
-import type { Accessor, ComponentProps, JSX} from 'solid-js';
-import { on , createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
+import type { Accessor, ComponentProps, JSX } from 'solid-js';
+import { on, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
 import { isServer } from 'solid-js/web';
 
 interface DotLottieComponentProps {
   setCanvasRef: (el: HTMLCanvasElement) => void;
   setContainerRef: (el: HTMLDivElement) => void;
 }
+
+const getCanvasViewport = (
+  canvas: HTMLCanvasElement,
+  dpr: number,
+): { height: number; width: number; x: number; y: number } => {
+  const rect = canvas.getBoundingClientRect();
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+
+  const visibleLeft = Math.max(0, -rect.left);
+  const visibleTop = Math.max(0, -rect.top);
+  const visibleRight = Math.min(rect.width, windowWidth - rect.left);
+  const visibleBottom = Math.min(rect.height, windowHeight - rect.top);
+
+  const x = visibleLeft * dpr;
+  const y = visibleTop * dpr;
+  const width = (visibleRight - visibleLeft) * dpr;
+  const height = (visibleBottom - visibleTop) * dpr;
+
+  return { x, y, width, height };
+};
 
 function DotLottieComponent({
   children,
@@ -41,8 +62,11 @@ function DotLottieComponent({
 
 export type DotLottieConfig = Omit<Config, 'canvas'> &
   Partial<{
+    animationId?: string;
     autoResizeCanvas: boolean;
     playOnHover: boolean;
+    themeData?: string;
+    themeId?: string;
   }>;
 
 export interface UseDotLottieReturn {
@@ -71,6 +95,18 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
       dotLottieInstance.pause();
     }
   };
+
+  function updateViewport(): void {
+    const dotLottieInstance = dotLottie();
+
+    if (!canvasRef || !dotLottieInstance) return;
+
+    const dpr = config.renderConfig?.devicePixelRatio || window.devicePixelRatio || 1;
+
+    const { height, width, x, y } = getCanvasViewport(canvasRef, dpr);
+
+    dotLottieInstance.setViewport(x, y, width, height);
+  }
 
   const intersectionObserver = createMemo(() => {
     if (isServer) return null;
@@ -132,6 +168,7 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
 
       canvas.addEventListener('mouseenter', hoverHandler);
       canvas.addEventListener('mouseleave', hoverHandler);
+      dotLottieInstance.addEventListener('frame', updateViewport);
     } else {
       dotLottie()?.destroy();
       intersectionObserver()?.disconnect();
@@ -150,6 +187,7 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
   };
 
   onCleanup(() => {
+    dotLottie()?.removeEventListener('frame', updateViewport);
     dotLottie()?.destroy();
     setDotLottie(null);
     resizeObserver()?.disconnect();
@@ -298,6 +336,58 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
       resizeObserver()?.disconnect();
     }
   });
+
+  // animationId reactivity
+  createEffect(
+    on(
+      () => config.animationId,
+      () => {
+        const dotLottieInstance = dotLottie();
+
+        if (!dotLottieInstance) return;
+
+        if (
+          dotLottieInstance.isLoaded &&
+          config.animationId &&
+          dotLottieInstance.activeAnimationId !== config.animationId
+        ) {
+          dotLottieInstance.loadAnimation(config.animationId);
+        }
+      },
+    ),
+  );
+
+  // themeId reactivity
+  createEffect(
+    on(
+      () => config.themeId,
+      () => {
+        const dotLottieInstance = dotLottie();
+
+        if (!dotLottieInstance) return;
+
+        if (dotLottieInstance.isLoaded && dotLottieInstance.activeThemeId !== config.themeId) {
+          dotLottieInstance.loadTheme(config.themeId || '');
+        }
+      },
+    ),
+  );
+
+  // themeData reactivity
+  createEffect(
+    on(
+      () => config.themeData,
+      () => {
+        const dotLottieInstance = dotLottie();
+
+        if (!dotLottieInstance) return;
+
+        if (dotLottieInstance.isLoaded) {
+          dotLottieInstance.loadThemeData(config.themeData || '');
+        }
+      },
+    ),
+  );
 
   return {
     dotLottie,
