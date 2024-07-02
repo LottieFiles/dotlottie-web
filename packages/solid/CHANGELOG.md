@@ -1,5 +1,14 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.0.4
+
+### Patch Changes
+
+- 862e590: \* feat(solid): added `animationId`, `themeId` and `themeData` props to `DotLottieSolid` component.
+  - perf(solid): renders only visible canvas area.
+- Updated dependencies [6e15246]
+  - @lottiefiles/dotlottie-web@0.27.0
+
 ## 0.0.3
 
 ### Patch Changes
