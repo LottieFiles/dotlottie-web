@@ -10,7 +10,7 @@ const presetOptions: preset.PresetOptions = {
   ],
   // Set to `true` to remove all `console.*` calls and `debugger` statements in prod builds
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  drop_console: true,
+  drop_console: false,
   // Set to `true` to generate a CommonJS build alongside ESM
   // cjs: true,
 };

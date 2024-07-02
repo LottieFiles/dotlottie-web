@@ -7,9 +7,12 @@ import useStableCallback from './use-stable-callback';
 export type DotLottieSolidProps = Omit<Config, 'canvas'> &
   ComponentProps<'canvas'> &
   Partial<{
+    animationId?: string;
     autoResizeCanvas: boolean;
     dotLottieRefCallback: (dotLottie: DotLottie) => void;
     playOnHover: boolean;
+    themeData?: string;
+    themeId?: string;
   }>;
 
 export const DotLottieSolid = (props: DotLottieSolidProps): JSX.Element => {
@@ -21,13 +24,17 @@ export const DotLottieSolid = (props: DotLottieSolidProps): JSX.Element => {
     'speed',
     'marker',
     'segment',
+    'themeId',
     'autoplay',
+    'themeData',
     'playOnHover',
+    'animationId',
     'renderConfig',
     'autoResizeCanvas',
     'dotLottieRefCallback',
     'useFrameInterpolation',
   ]);
+
   const { DotLottieComponent, dotLottie } = useDotLottie(dotLottieProps);
 
   const stableDotLottieRefCallback =
