@@ -119,7 +119,7 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   const intersectionObserver = useMemo(() => {
     if (isServerSide()) return null;
 
-    const observerCallback = debounce((entries: IntersectionObserverEntry[]) => {
+    const observerCallback = (entries: IntersectionObserverEntry[]): void => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           dotLottieRef.current?.unfreeze();
@@ -127,7 +127,7 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
           dotLottieRef.current?.freeze();
         }
       });
-    }, 150);
+    };
 
     return new IntersectionObserver(observerCallback, {
       threshold: 0,
