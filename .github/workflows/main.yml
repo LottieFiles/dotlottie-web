@@ -17,8 +17,6 @@ jobs:
 
       - name: ⎔ Setup pnpm@v9
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
@@ -73,8 +71,6 @@ jobs:
 
       - name: ⎔ Setup pnpm@v9
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
@@ -121,8 +117,6 @@ jobs:
 
       - name: ⎔ Setup pnpm@v9
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
@@ -161,8 +155,6 @@ jobs:
 
       - name: ⎔ Setup pnpm@v9
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
