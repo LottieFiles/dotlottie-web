@@ -140,7 +140,7 @@ app.innerHTML = `
 /**
  * This is only required for testing the local version of the renderer
  */
-DotLottie.setWasmUrl(wasmUrl);
+DotLottie.setWasmUrl(`${baseUrl}${wasmUrl}`);
 
 /**
  * Load all canvas elements with data-src attribute
@@ -383,8 +383,8 @@ fetch(
       dotLottie.setSpeed(parseFloat(speedSlider.value));
     });
 
-    dotLottie.addEventListener('ready', () => {
-      console.log(dotLottie.isReady);
+    dotLottie.addEventListener('ready', (event) => {
+      console.log(event, dotLottie.isReady);
     });
 
     dotLottie.addEventListener('load', (event) => {

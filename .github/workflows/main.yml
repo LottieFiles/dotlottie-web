@@ -16,9 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: ⎔ Setup pnpm@v9
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
+        uses: pnpm/action-setup@v4
 
       - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
@@ -72,9 +70,7 @@ jobs:
           fetch-depth: 0
 
       - name: ⎔ Setup pnpm@v9
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
+        uses: pnpm/action-setup@v4
 
       - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
@@ -120,9 +116,7 @@ jobs:
           fetch-depth: 0
 
       - name: ⎔ Setup pnpm@v9
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
+        uses: pnpm/action-setup@v4
 
       - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
@@ -160,9 +154,7 @@ jobs:
           fetch-depth: 0
 
       - name: ⎔ Setup pnpm@v9
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
+        uses: pnpm/action-setup@v4
 
       - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
