@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import fs from 'node:fs';
 import path from 'node:path';
 

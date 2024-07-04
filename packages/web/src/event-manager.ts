@@ -1,8 +1,4 @@
 /**
- * Copyright 2023 Design Barn Inc.
- */
-
-/**
  * Represents the different types of events that can be dispatched.
  */
 export type EventType =
@@ -17,7 +13,8 @@ export type EventType =
   | 'destroy'
   | 'freeze'
   | 'unfreeze'
-  | 'render';
+  | 'render'
+  | 'ready';
 
 /**
  * Maps an event type string to its respective event interface.
@@ -46,6 +43,8 @@ type EventByType<T> = T extends 'complete'
   ? UnfreezeEvent
   : T extends 'render'
   ? RenderEvent
+  : T extends 'ready'
+  ? ReadyEvent
   : never;
 
 /**
@@ -135,7 +134,14 @@ export interface StopEvent extends BaseEvent {
 }
 
 /**
- * Represents all possible event types.
+ * Event fired when a WASM module is initialized and ready.
+ */
+export interface ReadyEvent extends BaseEvent {
+  type: 'ready';
+}
+
+/**
+ * Type representing all possible event types.
  */
 export type Event =
   | LoopEvent
@@ -145,11 +151,13 @@ export type Event =
   | CompleteEvent
   | PauseEvent
   | PlayEvent
-  | StopEvent;
+  | StopEvent
+  | DestroyEvent
+  | FreezeEvent
+  | UnfreezeEvent
+  | RenderEvent
+  | ReadyEvent;
 
-/**
- * Type for event listener callbacks.
- */
 export interface EventListener<T extends EventType> {
   (event: EventByType<T>): void;
 }

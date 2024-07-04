@@ -1,43 +1,43 @@
 <script setup lang="ts">
 import { Ref, onMounted, ref } from 'vue';
-import { DotLottieVue, setWasmUrl } from '@lottiefiles/dotlottie-vue';
+import { type DotLottieVueInstance, DotLottieVue, setWasmUrl } from '@lottiefiles/dotlottie-vue';
 import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
 
 setWasmUrl(wasmUrl);
 
-const player: Ref<typeof DotLottieVue | null> = ref(null);
+const player: Ref<DotLottieVueInstance | null> = ref(null);
 
 function toggleLoop() {
   const dotLottie = player.value?.getDotLottieInstance();
-  dotLottie.setLoop(!dotLottie.loop);
+  dotLottie?.setLoop(!dotLottie?.loop);
 }
 
 function play() {
-  player.value?.getDotLottieInstance().play();
+  player.value?.getDotLottieInstance()?.play();
 }
 function pause() {
-  player.value?.getDotLottieInstance().pause();
+  player.value?.getDotLottieInstance()?.pause();
 }
 function stop() {
-  player.value?.getDotLottieInstance().stop();
+  player.value?.getDotLottieInstance()?.stop();
 }
 
 onMounted(() => {
   if (player.value) {
     const dotLottie = player.value?.getDotLottieInstance();
-    dotLottie.addEventListener('play', () => {
+    dotLottie?.addEventListener('play', () => {
       console.log('play');
     });
-    dotLottie.addEventListener('stop', () => {
+    dotLottie?.addEventListener('stop', () => {
       console.log('stop');
     });
-    dotLottie.addEventListener('pause', () => {
+    dotLottie?.addEventListener('pause', () => {
       console.log('paused');
     });
     // dotLottie.addEventListener('frame', ({currentFrame}) => {
     //   console.log('Frame:', currentFrame)
     // });
-    dotLottie.addEventListener('complete', () => {
+    dotLottie?.addEventListener('complete', () => {
       console.log('completed');
     });
   }

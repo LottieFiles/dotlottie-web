@@ -15,8 +15,12 @@
 	let backgroundColor = "#00000000";
 	let speed = 1;
 	let hasMultipleAnimations = false;
-	let src = "https://lottie.host/e641272e-039b-4612-96de-138acfbede6e/bc0sW78EeR.lottie";
+	let src = "https://lottie.host/b06d1336-2c08-4156-aa6f-96f08ff511e0/4itF1pXb1i.lottie";
 	let activeAnimationIdx = 0;
+	let animations: string[] = [];
+	let themes: string[] = [];
+	let activeAnimationId = "";
+	let activeThemeId = "";
 
 	function dotLottieRefCallback(ref: DotLottie) {
 		dotLottie = ref;
@@ -37,6 +41,8 @@
 				isLoaded = true;
 
 				hasMultipleAnimations = (dotLottie?.manifest?.animations?.length ?? 0) > 1;
+        animations = dotLottie?.manifest?.animations?.map((animation) => animation.id) ?? [];
+        themes = dotLottie?.manifest?.themes?.map((theme) => theme.id) ?? [];
 			});
 			dotLottie.addEventListener('play', () => {
 				isPlaying = true;
@@ -71,6 +77,8 @@
 	{dotLottieRefCallback}
 	autoplay
 	backgroundColor={backgroundColor}
+	animationId={activeAnimationId}
+	themeId={activeThemeId}
 	src={src}
 	loop={loop}
 	speed={speed}
@@ -86,6 +94,22 @@
 <button on:click={() => speed += 0.5}>Increase speed</button>
 <button on:click={() => speed -= 0.5}>Decrease speed</button>
 <button on:click={next} disabled={!hasMultipleAnimations}>Next animation</button>
+<select on:change={(event) => {
+  activeAnimationId = event.currentTarget.value || '';
+}}>
+	<option value="">Default animation</option>
+	{#each animations as animation}
+		<option value={animation}>{animation}</option>
+	{/each}
+</select>
+<select on:change={(event) => {
+	activeThemeId = event.currentTarget.value || '';
+}}>
+	<option value="">Default theme</option>
+	{#each themes as theme}
+		<option value={theme}>{theme}</option>
+	{/each}
+</select>
 <input type="color" bind:value={backgroundColor} />
 <ul>
 	<li>Speed: {speed}</li>

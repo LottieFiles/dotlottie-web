@@ -1,16 +1,14 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 /* eslint-disable no-secrets/no-secrets */
 
 import './styles.css';
 import type { Fit, Mode } from '@lottiefiles/dotlottie-web';
-import { DotLottie } from '@lottiefiles/dotlottie-web';
+import { DotLottieWorker as DotLottie } from '@lottiefiles/dotlottie-web';
 
 import wasmUrl from '../../../packages/web/dist/dotlottie-player.wasm?url';
 
 const app = document.getElementById('app') as HTMLDivElement;
+
+const baseUrl = window.location.origin + import.meta.env.BASE_URL;
 
 app.innerHTML = `
 <div class="grid">
@@ -21,15 +19,15 @@ app.innerHTML = `
   <canvas data-src="https://lottie.host/e2a24b6f-df7f-4fc5-94ea-30f0846f85dc/1RLOR2g0m3.lottie"></canvas>
   <canvas data-src="https://lottie.host/35326116-a8ca-4219-81ca-df9ce56a3f22/zCGFevEA23.lottie"></canvas>
   <canvas data-src="https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie"></canvas>
-  <canvas data-src="/down.json"></canvas>
-  <canvas data-src="/editor.json"></canvas>
-  <canvas data-src="/growup.json"></canvas>
-  <canvas data-src="/hamster.lottie"></canvas>
-  <canvas data-src="/like.json"></canvas>
-  <canvas data-src="/lolo.json"></canvas>
-  <canvas data-src="/walker.json"></canvas>
-  <canvas data-src="/waves.json"></canvas>
-  <canvas data-src="/woman.json"></canvas>
+  <canvas data-src="${baseUrl}/down.json"></canvas>
+  <canvas data-src="${baseUrl}/editor.json"></canvas>
+  <canvas data-src="${baseUrl}/growup.json"></canvas>
+  <canvas data-src="${baseUrl}/hamster.lottie"></canvas>
+  <canvas data-src="${baseUrl}/like.json"></canvas>
+  <canvas data-src="${baseUrl}/lolo.json"></canvas>
+  <canvas data-src="${baseUrl}/walker.json"></canvas>
+  <canvas data-src="${baseUrl}/waves.json"></canvas>
+  <canvas data-src="${baseUrl}/woman.json"></canvas>
 </div>
 
 <div class="container">
@@ -126,6 +124,15 @@ app.innerHTML = `
 
       <button id="setSegment" class="control-button">Set segment</button>
     </div>
+
+    <div>
+      <label for="states">State Machines: </label>
+      <select id="states">
+        <option value="none">None</option>
+      </select>
+      <button id="start_sm">Start State Machine</button>
+      <button id="end_sm">End State Machine</button>
+    </div>
   </div>
 </div>
 `;
@@ -164,7 +171,9 @@ fetch(
   // '/theming_example.lottie',
   // '/layout_example.lottie',
   // '/multi.lottie',
-  '/markers_example.lottie',
+  // '/markers_example.lottie',
+  // './toggle.lottie',
+  './exploding_pigeon.lottie',
 )
   .then(async (res) => res.arrayBuffer())
   .then((data): void => {
@@ -183,6 +192,10 @@ fetch(
       speed: 1,
       backgroundColor: '#800080ff',
       // useFrameInterpolation: false,
+    });
+
+    canvas.addEventListener('mousedown', () => {
+      dotLottie.postStateMachineEvent('OnPointerDown: 0.0 0.0');
     });
 
     dotLottie.addEventListener('loadError', console.error);
@@ -207,11 +220,14 @@ fetch(
     const playbackStateSpan = document.getElementById('playback-state') as HTMLSpanElement;
     const nextAnimationButton = document.getElementById('next') as HTMLButtonElement;
     const activeAnimationSpan = document.getElementById('active-animation') as HTMLSpanElement;
+    const startStateMachineButton = document.getElementById('start_sm') as HTMLButtonElement;
+    const endStateMachineButton = document.getElementById('end_sm') as HTMLButtonElement;
 
     const markerSelect = document.getElementById('marker') as HTMLSelectElement;
     const themeSelect = document.getElementById('theme') as HTMLSelectElement;
     const fitSelect = document.getElementById('fit') as HTMLSelectElement;
     const alignSelect = document.getElementById('align') as HTMLSelectElement;
+    const stateMachinesSelect = document.getElementById('states') as HTMLSelectElement;
 
     let animationIdx = 0;
 
@@ -285,6 +301,12 @@ fetch(
       });
     });
 
+    stateMachinesSelect.addEventListener('change', () => {
+      const stateMachineId = stateMachinesSelect.value;
+
+      dotLottie.loadStateMachine(stateMachineId);
+    });
+
     markerSelect.addEventListener('change', () => {
       dotLottie.setMarker(markerSelect.value);
     });
@@ -314,6 +336,14 @@ fetch(
           align: [parseFloat(x), parseFloat(y)],
         });
       }
+    });
+
+    startStateMachineButton.addEventListener('click', () => {
+      dotLottie.startStateMachine();
+    });
+
+    endStateMachineButton.addEventListener('click', () => {
+      dotLottie.stopStateMachine();
     });
 
     playPauseButton.addEventListener('click', () => {
@@ -353,10 +383,26 @@ fetch(
       dotLottie.setSpeed(parseFloat(speedSlider.value));
     });
 
+    dotLottie.addEventListener('ready', () => {
+      console.log(dotLottie.isReady);
+    });
+
     dotLottie.addEventListener('load', (event) => {
       bgColorInput.value = dotLottie.backgroundColor || '#ffffff';
 
       const themes = dotLottie.manifest?.themes || [];
+      const states = dotLottie.manifest?.states || [];
+
+      for (const state of states) {
+        const id = state;
+
+        const option = document.createElement('option');
+
+        option.value = id;
+        option.textContent = id;
+
+        stateMachinesSelect.appendChild(option);
+      }
 
       for (const theme of themes) {
         const id = theme.id;

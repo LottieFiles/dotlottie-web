@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { describe, test, expect, vi } from 'vitest';
 
 import { EventManager } from '../src/event-manager';

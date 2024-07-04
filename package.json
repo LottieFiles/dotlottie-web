@@ -34,14 +34,14 @@
     "type-check": "turbo run type-check"
   },
   "devDependencies": {
-    "@changesets/cli": "2.26.2",
+    "@changesets/cli": "2.27.5",
     "@commitlint/cli": "17.6.1",
     "@lottiefiles/commitlint-config": "2.0.0",
     "@lottiefiles/eslint-plugin": "3.0.0",
     "@lottiefiles/prettier-config": "3.0.0",
     "@lottiefiles/remark-preset": "1.0.0",
     "@lottiefiles/tsconfig": "2.0.0",
-    "@size-limit/preset-big-lib": "^11.0.2",
+    "@size-limit/preset-big-lib": "^11.1.4",
     "cross-env": "7.0.3",
     "eslint": "7.32.0",
     "husky": "8.0.3",
@@ -49,12 +49,12 @@
     "npm-check-updates": "16.10.9",
     "prettier": "2.8.8",
     "remark-cli": "11.0.0",
-    "size-limit": "^11.0.2",
-    "svelte-loader": "^3.1.9",
+    "size-limit": "^11.1.4",
+    "svelte-loader": "^3.2.3",
     "syncpack": "9.8.6",
-    "turbo": "1.10.16",
+    "turbo": "2.0.4",
     "typescript": "5.0.4",
     "zx": "7.0.7"
   },
-  "packageManager": "pnpm@8.10.3"
+  "packageManager": "pnpm@9.4.0"
 }

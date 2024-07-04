@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { type Config, DotLottie, type Mode } from '@lottiefiles/dotlottie-web';
 import {
   type VNode,
@@ -18,10 +14,42 @@ import {
 
 export { type DotLottie };
 
-export interface DotLottieVueProps extends Omit<Config, 'canvas'> {}
+export interface DotLottieVueProps extends Omit<Config, 'canvas'> {
+  animationId?: string;
+  autoResizeCanvas?: boolean;
+  playOnHover?: boolean;
+  themeData?: string;
+  themeId?: string;
+}
+
+interface DotLottieVueExposed {
+  getDotLottieInstance: () => DotLottie | null;
+}
+
+const getCanvasViewport = (
+  canvas: HTMLCanvasElement,
+  dpr: number,
+): { height: number; width: number; x: number; y: number } => {
+  const rect = canvas.getBoundingClientRect();
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+
+  const visibleLeft = Math.max(0, -rect.left);
+  const visibleTop = Math.max(0, -rect.top);
+  const visibleRight = Math.min(rect.width, windowWidth - rect.left);
+  const visibleBottom = Math.min(rect.height, windowHeight - rect.top);
+
+  const x = visibleLeft * dpr;
+  const y = visibleTop * dpr;
+  const width = (visibleRight - visibleLeft) * dpr;
+  const height = (visibleBottom - visibleTop) * dpr;
+
+  return { x, y, width, height };
+};
 
 export const DotLottieVue = defineComponent({
   props: {
+    animationId: { type: String, required: false },
     autoplay: { type: Boolean, required: false },
     backgroundColor: { type: String, required: false },
     data: { type: [String, ArrayBuffer], required: false },
@@ -32,11 +60,26 @@ export const DotLottieVue = defineComponent({
     speed: { type: Number, required: false },
     src: { type: String, required: false },
     useFrameInterpolation: { type: Boolean, required: false },
+    marker: { type: String, required: false },
+    autoResizeCanvas: { type: Boolean, required: false, default: true },
+    playOnHover: { type: Boolean, required: false },
+    themeData: { type: String, required: false },
+    themeId: { type: String, required: false },
   },
 
   setup(props: DotLottieVueProps, { attrs, expose }: SetupContext): () => VNode {
     const canvas: Ref<HTMLCanvasElement | undefined> = ref(undefined);
-    const { backgroundColor, loop, mode, segment, speed, useFrameInterpolation } = toRefs(props);
+    const {
+      autoResizeCanvas,
+      backgroundColor,
+      loop,
+      marker,
+      mode,
+      playOnHover,
+      segment,
+      speed,
+      useFrameInterpolation,
+    } = toRefs(props);
     let dotLottie: DotLottie | null = null;
     let intersectionObserver: IntersectionObserver | null = null;
     let resizeObserver: ResizeObserver | null = null;
@@ -47,6 +90,14 @@ export const DotLottieVue = defineComponent({
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
           dotLottie.setBackgroundColor(newVal);
+        }
+      },
+    );
+    watch(
+      () => marker?.value,
+      (newVal) => {
+        if (dotLottie && typeof newVal !== 'undefined') {
+          dotLottie.setMarker(newVal);
         }
       },
     );
@@ -91,6 +142,65 @@ export const DotLottieVue = defineComponent({
         }
       },
     );
+    watch(
+      () => props.animationId,
+      (newVal) => {
+        if (
+          dotLottie &&
+          dotLottie.isLoaded &&
+          typeof newVal !== 'undefined' &&
+          newVal !== dotLottie.activeAnimationId
+        ) {
+          dotLottie.loadAnimation(newVal);
+        }
+      },
+    );
+    watch(
+      () => props.themeData,
+      (newVal) => {
+        if (dotLottie && typeof newVal !== 'undefined') {
+          dotLottie.loadTheme(newVal);
+        }
+      },
+    );
+    watch(
+      () => props.themeId,
+      (newVal) => {
+        if (dotLottie && typeof newVal !== 'undefined') {
+          dotLottie.loadThemeData(newVal);
+        }
+      },
+    );
+
+    function hoverHandler(event: MouseEvent): void {
+      if (event.type === 'mouseenter') {
+        dotLottie?.play();
+      } else {
+        dotLottie?.pause();
+      }
+    }
+
+    watch(
+      () => playOnHover?.value,
+      (newVal) => {
+        if (dotLottie && typeof newVal !== 'undefined' && newVal) {
+          canvas.value?.addEventListener('mouseenter', hoverHandler);
+          canvas.value?.addEventListener('mouseleave', hoverHandler);
+        } else {
+          canvas.value?.removeEventListener('mouseenter', hoverHandler);
+          canvas.value?.removeEventListener('mouseleave', hoverHandler);
+        }
+      },
+    );
+
+    function updateViewport(): void {
+      if (!canvas.value || !dotLottie) return;
+      const dpr = props.renderConfig?.devicePixelRatio || window.devicePixelRatio || 1;
+
+      const { height, width, x, y } = getCanvasViewport(canvas.value, dpr);
+
+      dotLottie.setViewport(x, y, width, height);
+    }
 
     function getIntersectionObserver(): IntersectionObserver {
       return new IntersectionObserver(
@@ -117,43 +227,52 @@ export const DotLottieVue = defineComponent({
       });
     }
 
-    function onVisibilityChange(): void {
-      if (document.hidden) {
-        dotLottie?.freeze();
-      } else {
-        dotLottie?.unfreeze();
-      }
-    }
-
     onMounted(() => {
       if (!canvas.value) return;
+
+      let shouldAutoplay = props.autoplay;
+
+      if (typeof playOnHover?.value !== 'undefined' && playOnHover.value) {
+        shouldAutoplay = false;
+      }
 
       dotLottie = new DotLottie({
         canvas: canvas.value,
         ...props,
+        autoplay: shouldAutoplay,
       });
 
       intersectionObserver = getIntersectionObserver();
-      resizeObserver = getResizeObserver();
       intersectionObserver.observe(canvas.value);
-      resizeObserver.observe(canvas.value);
-      document.addEventListener('visibilitychange', onVisibilityChange);
+      if (typeof autoResizeCanvas?.value === 'boolean' && autoResizeCanvas.value) {
+        resizeObserver = getResizeObserver();
+        resizeObserver.observe(canvas.value);
+      }
+      if (playOnHover?.value) {
+        canvas.value.addEventListener('mouseenter', hoverHandler);
+        canvas.value.addEventListener('mouseleave', hoverHandler);
+      }
+      dotLottie.addEventListener('frame', updateViewport);
     });
 
     onBeforeUnmount(() => {
       resizeObserver?.disconnect();
       intersectionObserver?.disconnect();
-      document.removeEventListener('visibilitychange', onVisibilityChange);
+      canvas.value?.addEventListener('mouseenter', hoverHandler);
+      canvas.value?.addEventListener('mouseleave', hoverHandler);
+      dotLottie?.removeEventListener('frame', updateViewport);
       dotLottie?.destroy();
     });
 
     expose({
       getDotLottieInstance: (): DotLottie | null => dotLottie,
-    });
+    } as DotLottieVueExposed);
 
     return () => h('div', { ...attrs }, h('canvas', { style: 'height: 100%; width: 100%', ref: canvas }));
   },
 });
+
+export type DotLottieVueInstance = InstanceType<typeof DotLottieVue> & DotLottieVueExposed;
 
 export const setWasmUrl = (url: string): void => {
   DotLottie.setWasmUrl(url);

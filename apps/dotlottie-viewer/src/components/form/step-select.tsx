@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { Range, getTrackBackground } from 'react-range';
 
 interface StepSelect {

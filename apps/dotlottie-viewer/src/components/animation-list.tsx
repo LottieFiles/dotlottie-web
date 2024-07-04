@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { useAppDispatch } from '../store/hooks';
 import { setSrc } from '../store/viewer-slice';
 import { DotLottiePlayer } from '@dotlottie/react-player';

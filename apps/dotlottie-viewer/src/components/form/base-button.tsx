@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 interface BaseButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;
 }

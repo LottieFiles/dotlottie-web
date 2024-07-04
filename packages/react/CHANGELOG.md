@@ -1,5 +1,145 @@
 # @lottiefiles/dotlottie-react
 
+## 0.7.1
+
+### Patch Changes
+
+- e7a7829: fix: 🐛 remove the unncessary intersection observer debounce
+- 8cdff81: fix(react): 🐛 container gap at the bottom
+- Updated dependencies [6e15246]
+  - @lottiefiles/dotlottie-web@0.27.0
+
+## 0.7.0
+
+### Minor Changes
+
+- f0226ec: **Feature Update: 🎸 Add optional `animationId`, `themeId`, and `themeData` props to `DotLottieReact`
+  component**
+
+  We are excited to introduce new optional props to the `DotLottieReact` component: `animationId`, `themeId`, and
+  `themeData`.
+
+  **New Features:**
+
+  - **`animationId`**: Allows you to specify and render a particular animation from a `.lottie` file containing multiple
+    animations.
+  - **`themeId`**: Enables the application of a particular theme from the loaded `.lottie` file to the currently active
+    animation.
+  - **`themeData`**: Allows you to pass custom theme data to the currently active animation.
+
+  **Usage Example:**
+
+  ```jsx
+  import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+  import React, { useState, useEffect } from 'react';
+
+  const App = () => {
+    const [dotLottie, setDotLottie] = useState(null);
+    const [animations, setAnimations] = useState([]);
+    const [themes, setThemes] = useState([]);
+    const [currentThemeId, setCurrentThemeId] = useState('');
+    const [currentAnimationId, setCurrentAnimationId] = useState('');
+
+    useEffect(() => {
+      const onLoad = () => {
+        if (dotLottie) {
+          setAnimations(dotLottie.manifest.animations || []);
+          setThemes(dotLottie.manifest.themes || []);
+          setCurrentAnimationId(dotLottie.activeAnimationId);
+          setCurrentThemeId(dotLottie.activeThemeId);
+        }
+      };
+
+      dotLottie?.addEventListener('load', onLoad);
+
+      return () => {
+        dotLottie?.removeEventListener('load', onLoad);
+      };
+    }, [dotLottie]);
+
+    return (
+      <div>
+        <DotLottieReact dotLottieRefCallback={setDotLottie} animationId={currentAnimationId} />
+        <label>Theme:</label>
+        {currentThemeId && (
+          <select value={currentThemeId} onChange={(e) => setCurrentThemeId(e.target.value)}>
+            {themes.map((theme) => (
+              <option key={theme.id} value={theme.id}>
+                {theme.id}
+              </option>
+            ))}
+          </select>
+        )}
+        <label>Animation:</label>
+        {currentAnimationId && (
+          <select value={currentAnimationId} onChange={(e) => setCurrentAnimationId(e.target.value)}>
+            {animations.map((animation) => (
+              <option key={animation.id} value={animation.id}>
+                {animation.id}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+    );
+  };
+  ```
+
+- a564ff0: perf(react): ⚡️ render only visible canvas area
+
+  This update optimizes the rendering performance by ensuring that only the visible portion of the canvas is rendered,
+  utilizing the dotlottie-web `setViewport` API.
+
+  > Note: No changes are required for existing usage. The optimization is applied internally within the `DotLottieReact`
+  > component.
+
+### Patch Changes
+
+- Updated dependencies [ba46fd1]
+- Updated dependencies [d7c2c20]
+  - @lottiefiles/dotlottie-web@0.26.0
+
+## 0.6.5
+
+### Patch Changes
+
+- Updated dependencies [5b942aa]
+  - @lottiefiles/dotlottie-web@0.25.0
+
+## 0.6.4
+
+### Patch Changes
+
+- a79c540: fix(react): 🐛 dotlottieRefCallback null instance in strict mode
+- Updated dependencies [663fab2]
+- Updated dependencies [b72a4d7]
+  - @lottiefiles/dotlottie-web@0.24.0
+
+## 0.6.3
+
+### Patch Changes
+
+- Updated dependencies [6bb8561]
+  - @lottiefiles/dotlottie-web@0.23.2
+
+## 0.6.2
+
+### Patch Changes
+
+- Updated dependencies [91be7a1]
+  - @lottiefiles/dotlottie-web@0.23.1
+
+## 0.6.1
+
+### Patch Changes
+
+- 2913555: fix(react): 🐛 avoid creating browser-specific objects in SSR environment
+- Updated dependencies [6d7673a]
+- Updated dependencies [274868e]
+- Updated dependencies [64214f7]
+- Updated dependencies [274868e]
+  - @lottiefiles/dotlottie-web@0.23.0
+
 ## 0.6.0
 
 ### Minor Changes

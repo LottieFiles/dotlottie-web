@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { setWasmUrl } from '@lottiefiles/dotlottie-wc';
 import type { DotLottieWC } from '@lottiefiles/dotlottie-wc';
 

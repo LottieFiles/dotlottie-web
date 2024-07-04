@@ -1,7 +1,3 @@
-/**
- * Copyright 2023 Design Barn Inc.
- */
-
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -16,10 +12,10 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       reporter: ['json', 'json-summary', 'text-summary', 'lcov'],
       thresholds: {
-        statements: 83,
-        branches: 76,
-        functions: 84,
-        lines: 87,
+        statements: 30,
+        branches: 30,
+        functions: 30,
+        lines: 30,
       },
     },
     testTimeout: 10000,

@@ -1,5 +1,65 @@
 # @lottiefiles/dotlottie-svelte
 
+## 0.3.6
+
+### Patch Changes
+
+- 47413cd: \* feat(svelte): added `animationId`, `themeId`, `themeData` and `playOnHover` props
+  - perf(svelte): renders only visible canvas area
+- Updated dependencies [6e15246]
+  - @lottiefiles/dotlottie-web@0.27.0
+
+## 0.3.5
+
+### Patch Changes
+
+- Updated dependencies [ba46fd1]
+- Updated dependencies [d7c2c20]
+  - @lottiefiles/dotlottie-web@0.26.0
+
+## 0.3.4
+
+### Patch Changes
+
+- Updated dependencies [5b942aa]
+  - @lottiefiles/dotlottie-web@0.25.0
+
+## 0.3.3
+
+### Patch Changes
+
+- Updated dependencies [663fab2]
+- Updated dependencies [b72a4d7]
+  - @lottiefiles/dotlottie-web@0.24.0
+
+## 0.3.2
+
+### Patch Changes
+
+- Updated dependencies [6bb8561]
+  - @lottiefiles/dotlottie-web@0.23.2
+
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [91be7a1]
+  - @lottiefiles/dotlottie-web@0.23.1
+
+## 0.3.0
+
+### Minor Changes
+
+- 8832676: fix(svelte): disable runes in component to prevent compiler issue on runes mode
+
+### Patch Changes
+
+- Updated dependencies [6d7673a]
+- Updated dependencies [274868e]
+- Updated dependencies [64214f7]
+- Updated dependencies [274868e]
+  - @lottiefiles/dotlottie-web@0.23.0
+
 ## 0.2.0
 
 ### Minor Changes

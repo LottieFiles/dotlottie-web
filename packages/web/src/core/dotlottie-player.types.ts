@@ -1,7 +1,3 @@
-/**
- * Copyright 2024 Design Barn Inc.
- */
-
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-namespace */
 
@@ -37,6 +33,15 @@ export interface VectorMarker {
   size(): number;
 }
 
+export interface VectorString {
+  delete(): void;
+  get(_0: number): ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string | undefined;
+  push_back(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): void;
+  resize(_0: number, _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): void;
+  set(_0: number, _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
+  size(): number;
+}
+
 export interface ModeValue<T extends number> {
   value: T;
 }
@@ -55,6 +60,7 @@ export interface Layout {
 export interface DotLottiePlayer {
   activeAnimationId(): string;
   activeThemeId(): string;
+  animationSize(): VectorFloat;
   buffer(): unknown;
   clear(): void;
   config(): Config;
@@ -82,6 +88,8 @@ export interface DotLottiePlayer {
     _1: number,
     _2: number,
   ): boolean;
+  loadStateMachine(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
+  loadStateMachineData(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
   loadTheme(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
   loadThemeData(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
   loopCount(): number;
@@ -89,13 +97,31 @@ export interface DotLottiePlayer {
   markers(): VectorMarker;
   pause(): boolean;
   play(): boolean;
+  postEventPayload(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
   render(): boolean;
   requestFrame(): number;
   resize(_0: number, _1: number): boolean;
   seek(_0: number): boolean;
+  segmentDuration(): number;
   setConfig(_0: Config): void;
   setFrame(_0: number): boolean;
+  setStateMachineBooleanContext(
+    _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
+    _1: boolean,
+  ): boolean;
+  setStateMachineNumericContext(
+    _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
+    _1: number,
+  ): boolean;
+  setStateMachineStringContext(
+    _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
+    _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
+  ): boolean;
+  setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
+  startStateMachine(): boolean;
+  stateMachineFrameworkSetup(): VectorString;
   stop(): boolean;
+  stopStateMachine(): boolean;
   totalFrames(): number;
 }
 
@@ -130,6 +156,7 @@ interface EmbindModule {
   Mode: { Bounce: ModeValue<3>; Forward: ModeValue<1>; Reverse: ModeValue<2>; ReverseBounce: ModeValue<4> };
   VectorFloat: { new (): VectorFloat };
   VectorMarker: { new (): VectorMarker };
+  VectorString: { new (): VectorString };
   createDefaultConfig(): Config;
   createDefaultLayout(): Layout;
 }
