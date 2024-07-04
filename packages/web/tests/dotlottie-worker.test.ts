@@ -2,11 +2,14 @@ import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
 import { DotLottieWorker as DotLottie } from '../dist';
 import type { Config, Layout, Mode } from '../dist';
+import wasmUrl from '../src/core/dotlottie-player.wasm?url';
 
 import baseJsonSrc from './__fixtures__/test.json?url';
 import baseSrc from './__fixtures__/test.lottie?url';
 import { createCanvas, sleep } from './test-utils';
 
+
+DotLottie.setWasmUrl(`http://localhost:5173/${wasmUrl}`);
 const jsonSrc = `http://localhost:5173/${baseJsonSrc}`;
 const src = `http://localhost:5173/${baseSrc}`;
 

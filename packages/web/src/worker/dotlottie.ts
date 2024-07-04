@@ -543,7 +543,7 @@ export class DotLottieWorker {
   }
 
   public static setWasmUrl(url: string): void {
-    this._wasmUrl = url;
+    DotLottieWorker._wasmUrl = url;
   }
 
   public async loadStateMachine(stateMachineId: string): Promise<boolean> {
