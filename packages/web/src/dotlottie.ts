@@ -4,62 +4,8 @@ import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
-
-export interface RenderConfig {
-  devicePixelRatio?: number;
-}
-
-export type Mode = 'forward' | 'reverse' | 'bounce' | 'reverse-bounce';
-
-export type Data = string | ArrayBuffer | Record<string, unknown>;
-
-export type Fit = 'contain' | 'cover' | 'fill' | 'none' | 'fit-width' | 'fit-height';
-
-export interface Layout {
-  align: [number, number];
-  fit: Fit;
-}
-
-export interface Config {
-  autoplay?: boolean;
-  backgroundColor?: string;
-  canvas: HTMLCanvasElement;
-  data?: Data;
-  layout?: Layout;
-  loop?: boolean;
-  marker?: string;
-  mode?: Mode;
-  renderConfig?: RenderConfig;
-  segment?: [number, number];
-  speed?: number;
-  src?: string;
-  useFrameInterpolation?: boolean;
-}
-
-export interface Manifest {
-  activeAnimationId?: string;
-  animations: Array<{
-    autoplay?: boolean;
-    defaultTheme?: string;
-    direction?: 1 | -1;
-    hover?: boolean;
-    id: string;
-    intermission?: number;
-    loop?: boolean | number;
-    playMode?: 'bounce' | 'normal';
-    speed?: number;
-    themeColor?: string;
-  }>;
-  author?: string;
-  custom?: Record<string, unknown>;
-  description?: string;
-  generator?: string;
-  keywords?: string;
-  revision?: number;
-  states?: string[];
-  themes?: Array<{ animations: string[]; id: string }>;
-  version?: string;
-}
+import type { Mode, Fit, Data, Config, Layout, Manifest, RenderConfig } from './types';
+import { hexStringToRGBAInt } from './utils';
 
 const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
   if (mode === 'reverse') {
@@ -112,7 +58,7 @@ const createCoreSegment = (segment: number[], module: MainModule): VectorFloat =
 export class DotLottie {
   private readonly _canvas: HTMLCanvasElement | OffscreenCanvas;
 
-  private _context: CanvasRenderingContext2D | null;
+  private _context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
 
   private readonly _eventManager: EventManager;
 
@@ -133,6 +79,7 @@ export class DotLottie {
   public constructor(config: Config) {
     this._canvas = config.canvas;
     this._context = this._canvas.getContext('2d');
+
     this._eventManager = new EventManager();
     this._frameManager = new AnimationFrameManager();
     this._renderConfig = config.renderConfig ?? {};
@@ -589,8 +536,13 @@ export class DotLottie {
   public setBackgroundColor(color: string): void {
     if (this._dotLottieCore === null) return;
 
-    if (this._canvas instanceof HTMLCanvasElement) {
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       this._canvas.style.backgroundColor = color;
+    } else {
+      this._dotLottieCore.setConfig({
+        ...this._dotLottieCore.config(),
+        backgroundColor: hexStringToRGBAInt(color),
+      });
     }
 
     this._backgroundColor = color;
@@ -866,15 +818,23 @@ export class DotLottie {
     return this._dotLottieCore?.postEventPayload(event) ?? false;
   }
 
+  public getStateMachineListeners(): string[] {
+    if (!this._dotLottieCore) return [];
+
+    const listenersVector = this._dotLottieCore.stateMachineFrameworkSetup();
+
+    const listeners = [];
+
+    for (let i = 0; i < listenersVector.size(); i += 1) {
+      listeners.push(listenersVector.get(i) as string);
+    }
+
+    return listeners;
+  }
+
   private _setupStateMachineListeners(): void {
-    if (this._canvas instanceof HTMLCanvasElement && this._dotLottieCore !== null && this.isLoaded) {
-      const listenersVector = this._dotLottieCore.stateMachineFrameworkSetup();
-
-      const listeners = [];
-
-      for (let i = 0; i < listenersVector.size(); i += 1) {
-        listeners.push(listenersVector.get(i));
-      }
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this._dotLottieCore !== null && this.isLoaded) {
+      const listeners = this.getStateMachineListeners();
 
       if (listeners.includes('PointerUp')) {
         this._canvas.addEventListener('pointerup', this._onPointerUp.bind(this));
@@ -903,7 +863,7 @@ export class DotLottie {
   }
 
   private _cleanupStateMachineListeners(): void {
-    if (this._canvas instanceof HTMLCanvasElement) {
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       this._canvas.removeEventListener('pointerup', this._onPointerUp.bind(this));
       this._canvas.removeEventListener('pointerdown', this._onPointerDown.bind(this));
       this._canvas.removeEventListener('pointermove', this._onPointerMove.bind(this));
