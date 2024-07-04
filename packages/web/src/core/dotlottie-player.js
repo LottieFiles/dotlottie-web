@@ -336,6 +336,113 @@ const createDotLottiePlayerModule = (() => {
         a = b.Na(a);
         b = b.Ca;
       }
+      M[a] = b;
+      delete Ha[a];
+      L.hasOwnProperty(a) && ((b = L[a]), delete L[a], b.forEach((e) => e()));
+    };
+    function O(a, b, c = {}) {
+      if (!('argPackAdvance' in b)) throw new TypeError('registerType registeredInstance requires argPackAdvance');
+      return Ka(a, b, c);
+    }
+    var La = (a) => {
+        throw new R(a.ma.za.xa.name + ' instance already deleted');
+      },
+      Ma = !1,
+      Oa = () => {},
+      Pa = (a, b, c) => {
+        if (b === c) return a;
+        if (void 0 === c.Ca) return null;
+        a = Pa(a, b, c.Ca);
+        return null === a ? null : c.ab(a);
+      },
+      Qa = {},
+      Ra = [],
+      Sa = () => {
+        for (; Ra.length; ) {
+          var a = Ra.pop();
+          a.ma.Ka = !1;
+          a['delete']();
+        }
+      },
+      Ta,
+      Ua = {},
+      Va = (a, b) => {
+        if (void 0 === b) throw new R('ptr should not be undefined');
+        for (; a.Ca; ) (b = a.Na(b)), (a = a.Ca);
+        return Ua[b];
+      },
+      Xa = (a, b) => {
+        if (!b.za || !b.ya) throw new Ia('makeClassHandle requires ptr and ptrType');
+        if (!!b.Da !== !!b.Aa) throw new Ia('Both smartPtrType and smartPtr must be specified');
+        b.count = { value: 1 };
+        return Wa(Object.create(a, { ma: { value: b, writable: !0 } }));
+      },
+      Wa = (a) => {
+        if ('undefined' === typeof FinalizationRegistry) return (Wa = (b) => b), a;
+        Ma = new FinalizationRegistry((b) => {
+          b = b.ma;
+          --b.count.value;
+          0 === b.count.value && (b.Aa ? b.Da.Fa(b.Aa) : b.za.xa.Fa(b.ya));
+        });
+        Wa = (b) => {
+          var c = b.ma;
+          c.Aa && Ma.register(b, { ma: c }, b);
+          return b;
+        };
+        Oa = (b) => {
+          Ma.unregister(b);
+        };
+        return Wa(a);
+      };
+    function Ya() {}
+    var Za = (a, b) => Object.defineProperty(b, 'name', { value: a }),
+      $a = (a, b, c) => {
+        if (void 0 === a[b].Ba) {
+          var d = a[b];
+          a[b] = function (...e) {
+            if (!a[b].Ba.hasOwnProperty(e.length))
+              throw new R(
+                `Function '${c}' called with an invalid number of arguments (${e.length}) - expects one of (${a[b].Ba})!`,
+              );
+            return a[b].Ba[e.length].apply(this, e);
+          };
+          a[b].Ba = [];
+          a[b].Ba[d.Oa] = d;
+        }
+      },
+      ab = (a, b, c) => {
+        if (k.hasOwnProperty(a)) {
+          if (void 0 === c || (void 0 !== k[a].Ba && void 0 !== k[a].Ba[c]))
+            throw new R(`Cannot register public name '${a}' twice`);
+          $a(k, a, a);
+          if (k.hasOwnProperty(c))
+            throw new R(`Cannot register multiple overloads of a function with the same number of arguments (${c})!`);
+          k[a].Ba[c] = b;
+        } else (k[a] = b), void 0 !== c && (k[a].vb = c);
+      },
+      bb = (a) => {
+        if (void 0 === a) return '_unknown';
+        a = a.replace(/[^a-zA-Z0-9_]/g, '$');
+        var b = a.charCodeAt(0);
+        return 48 <= b && 57 >= b ? `_${a}` : a;
+      };
+    function cb(a, b, c, d, e, f, l, h) {
+      this.name = a;
+      this.constructor = b;
+      this.La = c;
+      this.Fa = d;
+      this.Ca = e;
+      this.cb = f;
+      this.Na = l;
+      this.ab = h;
+      this.kb = [];
+    }
+    var db = (a, b, c) => {
+      for (; b !== c; ) {
+        if (!b.Na) throw new R(`Expected null or instance of ${c.name}, got an instance of ${b.name}`);
+        a = b.Na(a);
+        b = b.Ca;
+      }
 
       return a;
     };
