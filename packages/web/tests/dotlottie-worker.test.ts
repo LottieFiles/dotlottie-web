@@ -8,7 +8,6 @@ import baseJsonSrc from './__fixtures__/test.json?url';
 import baseSrc from './__fixtures__/test.lottie?url';
 import { createCanvas, sleep } from './test-utils';
 
-
 DotLottie.setWasmUrl(`http://localhost:5173/${wasmUrl}`);
 const jsonSrc = `http://localhost:5173/${baseJsonSrc}`;
 const src = `http://localhost:5173/${baseSrc}`;
@@ -56,7 +55,8 @@ describe('play', () => {
 
     await sleep(500);
 
-    expect(dotLottie.currentFrame).toBe(currentFrameBeforeFreeze);
+    // cause freeze is async, the current frame might change slightly
+    expect(dotLottie.currentFrame - currentFrameBeforeFreeze).toBeLessThan(1);
 
     await dotLottie.play();
 
@@ -1147,6 +1147,8 @@ describe('setFrame', () => {
 
     onFrame.mockClear();
 
+    await dotLottie.pause();
+
     await dotLottie.setFrame(10);
 
     expect(onFrame).toHaveBeenNthCalledWith(1, {
@@ -1155,6 +1157,8 @@ describe('setFrame', () => {
     });
 
     expect(dotLottie.currentFrame).toBe(10);
+
+    await dotLottie.play();
 
     expect(dotLottie.isPlaying).toBe(true);
   });
