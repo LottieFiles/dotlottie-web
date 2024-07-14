@@ -1,5 +1,5 @@
 // This file would be inlined as a string, checkout the tsup config in the root of the project
-import MyWorker from './dotlottie.worker?worker&inline';
+import workerString from './dotlottie.worker.js';
 import type { MethodParamsMap, RpcRequest } from './types.js';
 
 export class WorkerManager {
@@ -7,8 +7,11 @@ export class WorkerManager {
 
   private readonly _animationWorkerMap: Map<string, string> = new Map();
 
-  private _createWorker(_workerName: string): Worker {
-    return new MyWorker();
+  private _createWorker(workerName: string): Worker {
+    const blob = new Blob([workerString], { type: 'application/javascript' });
+
+    // eslint-disable-next-line node/no-unsupported-features/node-builtins
+    return new Worker(URL.createObjectURL(blob), { type: 'module', name: workerName });
   }
 
   public getWorker(workerId: string): Worker {
