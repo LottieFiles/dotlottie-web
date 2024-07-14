@@ -2532,7 +2532,7 @@ var E = new Map(),
       d.setUseFrameInterpolation(a);
     },
     setWasmUrl: (s) => {
-      console.log('Setting wasm url', s.params.url), fe.setWasmUrl(s.params.url);
+      fe.setWasmUrl(s.params.url);
     },
     stop: (s) => {
       let n = s.params.instanceId,

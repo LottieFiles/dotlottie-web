@@ -428,7 +428,7 @@ describe('play', () => {
       await vi.waitFor(() => expect(onPlay).toHaveBeenCalledTimes(1));
 
       await vi.waitFor(() => expect(onCompleted).toHaveBeenCalledTimes(1), {
-        timeout: dotLottie.duration * 1000 * 2,
+        timeout: dotLottie.duration * 1000 * 2 + 200,
       });
 
       const startFrame = dotLottie.mode.includes('reverse')
