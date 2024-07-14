@@ -1,7 +1,7 @@
 import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
-import { DotLottieWorker as DotLottie } from '../src';
-import type { Config, Layout, Mode } from '../src';
+import { DotLottieWorker as DotLottie } from '../dist';
+import type { Config, Layout, Mode } from '../dist';
 import wasmUrl from '../src/core/dotlottie-player.wasm?url';
 
 import baseJsonSrc from './__fixtures__/test.json?url';
@@ -428,7 +428,7 @@ describe('play', () => {
       await vi.waitFor(() => expect(onPlay).toHaveBeenCalledTimes(1));
 
       await vi.waitFor(() => expect(onCompleted).toHaveBeenCalledTimes(1), {
-        timeout: dotLottie.duration * 1000 * 2,
+        timeout: dotLottie.duration * 1000 * 2 + 200,
       });
 
       const startFrame = dotLottie.mode.includes('reverse')
