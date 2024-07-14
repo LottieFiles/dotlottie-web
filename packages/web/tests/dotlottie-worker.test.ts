@@ -1,7 +1,7 @@
 import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
-import { DotLottieWorker as DotLottie } from '../src';
-import type { Config, Layout, Mode } from '../src';
+import { DotLottieWorker as DotLottie } from '../dist';
+import type { Config, Layout, Mode } from '../dist';
 import wasmUrl from '../src/core/dotlottie-player.wasm?url';
 
 import baseJsonSrc from './__fixtures__/test.json?url';
