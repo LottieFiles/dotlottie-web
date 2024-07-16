@@ -48,6 +48,10 @@ export interface MethodParamsMap {
     instanceId: string;
     stateMachineId: string;
   };
+  loadStateMachineData: {
+    instanceId: string;
+    stateMachineData: string;
+  };
   loadTheme: {
     instanceId: string;
     themeId: string;
@@ -154,6 +158,7 @@ export interface MethodResultMap {
   load: void;
   loadAnimation: void;
   loadStateMachine: boolean;
+  loadStateMachineData: boolean;
   loadTheme: boolean;
   loadThemeData: boolean;
   onComplete: {
