@@ -1,22 +1,22 @@
 import type { Config } from '@lottiefiles/dotlottie-web';
-import { DotLottie } from '@lottiefiles/dotlottie-web';
+import { DotLottieWorker } from '@lottiefiles/dotlottie-web';
 import debounce from 'debounce';
 import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
 import type { ComponentProps, RefCallback } from 'react';
 
-interface DotLottieComponentProps {
+interface DotLottieWorkerComponentProps {
   setCanvasRef: RefCallback<HTMLCanvasElement>;
   setContainerRef: RefCallback<HTMLElement>;
 }
 
-function DotLottieComponent({
+function DotLottieWorkerComponent({
   children,
   className = '',
   setCanvasRef,
   setContainerRef,
   style,
   ...rest
-}: DotLottieComponentProps & ComponentProps<'canvas'>): JSX.Element {
+}: DotLottieWorkerComponentProps & ComponentProps<'canvas'>): JSX.Element {
   const containerStyle = {
     width: '100%',
     height: '100%',
@@ -40,19 +40,20 @@ function DotLottieComponent({
   );
 }
 
-export type DotLottieConfig = Omit<Config, 'canvas'> & {
+export type DotLottieWorkerConfig = Omit<Config, 'canvas'> & {
   animationId?: string;
   autoResizeCanvas?: boolean;
   playOnHover?: boolean;
   themeData?: string;
   themeId?: string;
+  workerId?: string;
 };
 
-export interface UseDotLottieResult {
+export interface UseDotLottieWorkerResult {
   DotLottieComponent: (props: ComponentProps<'canvas'>) => JSX.Element;
   canvas: HTMLCanvasElement | null;
   container: HTMLDivElement | null;
-  dotLottie: DotLottie | null;
+  dotLottie: DotLottieWorker | null;
   setCanvasRef: RefCallback<HTMLCanvasElement>;
   setContainerRef: RefCallback<HTMLDivElement>;
 }
@@ -80,11 +81,11 @@ const getCanvasViewport = (
   return { x, y, width, height };
 };
 
-export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
-  const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
+export const useDotLottieWorker = (config?: DotLottieWorkerConfig): UseDotLottieWorkerResult => {
+  const [dotLottie, setDotLottie] = useState<DotLottieWorker | null>(null);
 
-  const dotLottieRef = useRef<DotLottie | null>(null);
-  const configRef = useRef<DotLottieConfig | undefined>(config);
+  const dotLottieRef = useRef<DotLottieWorker | null>(null);
+  const configRef = useRef<DotLottieWorkerConfig | undefined>(config);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -156,7 +157,7 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
 
   const Component = useCallback(
     (props: ComponentProps<'canvas'>): JSX.Element => {
-      return <DotLottieComponent setContainerRef={setContainerRef} setCanvasRef={setCanvasRef} {...props} />;
+      return <DotLottieWorkerComponent setContainerRef={setContainerRef} setCanvasRef={setCanvasRef} {...props} />;
     },
     [setCanvasRef, setContainerRef],
   );
@@ -164,10 +165,10 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   useEffect(() => {
     const canvas = canvasRef.current;
 
-    let dotLottieInstance: DotLottie | null = null;
+    let dotLottieInstance: DotLottieWorker | null = null;
 
     if (canvas) {
-      dotLottieInstance = new DotLottie({
+      dotLottieInstance = new DotLottieWorker({
         ...configRef.current,
         canvas,
       });
