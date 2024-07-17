@@ -1,5 +1,17 @@
 # @lottiefiles/dotlottie-react
 
+## 0.8.0
+
+### Minor Changes
+
+- eebb307: feat(react): 🎸 add DotLottieWorkerReact component
+
+### Patch Changes
+
+- Updated dependencies [400c333]
+- Updated dependencies [ca7bb5a]
+  - @lottiefiles/dotlottie-web@0.29.0
+
 ## 0.7.2
 
 ### Patch Changes
