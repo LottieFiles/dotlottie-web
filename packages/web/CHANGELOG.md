@@ -1,5 +1,15 @@
 # @lottiefiles/dotlottie-web
 
+## 0.29.0
+
+### Minor Changes
+
+- 400c333: adds loadStateMachineData to web worker.
+
+### Patch Changes
+
+- ca7bb5a: chore(web): 🤖 upgrade dotlottie-rs\@v0.1.25 wasm bindings
+
 ## 0.28.0
 
 ### Minor Changes
