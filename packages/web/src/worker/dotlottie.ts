@@ -556,6 +556,16 @@ export class DotLottieWorker {
     return result;
   }
 
+  public async loadStateMachineData(stateMachineData: string): Promise<boolean> {
+    if (!this._created) return false;
+
+    const result = await this._sendMessage('loadStateMachineData', { instanceId: this._id, stateMachineData });
+
+    await this._updateDotLottieInstanceState();
+
+    return result;
+  }
+
   public async startStateMachine(): Promise<boolean> {
     if (!this._created) return false;
 

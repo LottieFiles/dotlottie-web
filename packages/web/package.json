@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-web",
-  "version": "0.28.0",
+  "version": "0.29.1",
   "type": "module",
   "description": "Lottie and DotLottie player for the web",
   "repository": {
@@ -43,14 +43,14 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "^20.10.5",
-    "@vitest/browser": "^1.2.2 ",
-    "@vitest/coverage-istanbul": "^1.2.2",
+    "@types/node": "^20.14.11",
+    "@vitest/browser": "^2.0.3",
+    "@vitest/coverage-istanbul": "^2.0.3",
     "cross-env": "7.0.3",
+    "playwright": "^1.45.2",
     "tsup": "8.1.0",
     "typescript": "5.0.4",
-    "vitest": "^1.2.2",
-    "webdriverio": "^8.32.0"
+    "vitest": "^2.0.3"
   },
   "publishConfig": {
     "access": "public"

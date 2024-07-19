@@ -734,6 +734,11 @@ describe('load', () => {
 
     await vi.waitFor(() => expect(onLoadError).toHaveBeenCalledTimes(1));
 
+    expect(onLoadError).toHaveBeenCalledWith({
+      type: 'loadError',
+      error: new Error('Invalid Lottie JSON string: The provided string does not conform to the Lottie JSON format.'),
+    });
+
     expect(dotLottie.isLoaded).toBe(false);
   });
 
@@ -750,6 +755,13 @@ describe('load', () => {
     expect(dotLottie.isLoaded).toBe(false);
 
     await vi.waitFor(() => expect(onLoadError).toHaveBeenCalledTimes(1));
+
+    expect(onLoadError).toHaveBeenCalledWith({
+      type: 'loadError',
+      error: new Error(
+        'Invalid dotLottie ArrayBuffer: The provided ArrayBuffer does not conform to the dotLottie format.',
+      ),
+    });
 
     expect(dotLottie.isLoaded).toBe(false);
   });
@@ -768,7 +780,11 @@ describe('load', () => {
 
     expect(onLoadError).toHaveBeenCalledWith({
       type: 'loadError',
-      error: new Error('Unsupported data type for animation data. Expected a string or ArrayBuffer.'),
+      error: new Error(`Unsupported data type for animation data. Expected: 
+          - string (Lottie JSON),
+          - ArrayBuffer (dotLottie),
+          - object (Lottie JSON). 
+          Received: number`),
     });
   });
 

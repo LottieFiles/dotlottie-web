@@ -39,7 +39,10 @@ jobs:
         run: pnpm format
 
       - name: 🛡️ Test
-        run: pnpm test:coverage
+        run: |
+          npx playwright install --with-deps
+          pnpm test:coverage
+        working-directory: packages/web
 
       - name: 📏 Report coverage
         if: always() && github.event_name == 'pull_request'

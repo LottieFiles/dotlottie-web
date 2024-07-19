@@ -1,5 +1,21 @@
 # @lottiefiles/dotlottie-svelte
 
+## 0.3.9
+
+### Patch Changes
+
+- Updated dependencies [dc66e8e]
+  - @lottiefiles/dotlottie-web@0.29.1
+
+## 0.3.8
+
+### Patch Changes
+
+- 5b83f06: fix(svelte): 🐛 compatibility with Svelte v4 by disabling runes mode
+- Updated dependencies [400c333]
+- Updated dependencies [ca7bb5a]
+  - @lottiefiles/dotlottie-web@0.29.0
+
 ## 0.3.7
 
 ### Patch Changes

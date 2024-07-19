@@ -309,6 +309,18 @@ const commands: {
 
     return instance.loadStateMachine(stateMachineId);
   },
+  loadStateMachineData(request) {
+    const instanceId = request.params.instanceId;
+    const stateMachineData = request.params.stateMachineData;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.loadStateMachineData(stateMachineData);
+  },
   create: (request) => {
     const instanceId = request.params.instanceId;
     const config = request.params.config;
