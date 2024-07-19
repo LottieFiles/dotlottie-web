@@ -1,4 +1,4 @@
-import { LOTTIE_JSON_MANDATORY_KEYS, ZIP_SIGNATURE } from './constants';
+import { LOTTIE_JSON_MANDATORY_FIELDS, ZIP_SIGNATURE } from './constants';
 
 export function isHexColor(color: string): boolean {
   return /^#([\da-f]{6}|[\da-f]{8})$/iu.test(color);
@@ -33,8 +33,11 @@ export function isDotLottie(fileData: ArrayBuffer): boolean {
   return true;
 }
 
-function isLottieJSON(fileData: Record<string, unknown>): boolean {
-  return LOTTIE_JSON_MANDATORY_KEYS.every((key) => key in fileData);
+/**
+ * Returns whether the given object looks like a valid Lottie JSON structure.
+ */
+export function isLottieJSON(json: Record<string, unknown>): boolean {
+  return LOTTIE_JSON_MANDATORY_FIELDS.every((field) => Object.prototype.hasOwnProperty.call(json, field));
 }
 
 export function isLottie(fileData: string | Record<string, unknown>): boolean {

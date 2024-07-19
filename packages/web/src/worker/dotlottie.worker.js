@@ -48,7 +48,7 @@ var Xe = class {
   };
 var te = typeof window < 'u' && typeof window.document < 'u';
 var xe = new Uint8Array([80, 75, 3, 4]),
-  jt = ['v', 'ip', 'op', 'fr', 'w', 'h', 'nm'];
+  jt = ['v', 'ip', 'op', 'fr', 'w', 'h'];
 var fe = {
   name: '@lottiefiles/dotlottie-web',
   version: '0.29.1',

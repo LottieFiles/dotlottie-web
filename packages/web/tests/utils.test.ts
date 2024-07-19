@@ -66,10 +66,10 @@ describe('isDotLottie', () => {
 });
 
 describe('isLottie', () => {
-  const validLottieJSON = '{"v":"5.5.9","ip":0,"op":300,"fr":30, "w":100, "h":100, "nm":"test"}';
-  const invalidLottieJSON = '{"v":"5.5.9","ip":0,"op":300}, "fr":30, "w":100, "h":100, "nm":"test"}';
-  const validLottieObject = { v: '5.5.9', ip: 0, op: 300, fr: 30, w: 100, h: 100, nm: 'test' };
-  const invalidLottieObject = { v: '5.5.9', ip: 0, op: 300, fr: 30, w: 100, h: 100 };
+  const validLottieObject = { v: '5.5.9', ip: 0, op: 300, fr: 30, w: 100, h: 100, layers: [] };
+  const invalidLottieObject = { v: '5.5.9', ip: 0, op: 300 };
+  const validLottieJSON = JSON.stringify(validLottieObject);
+  const invalidLottieJSON = JSON.stringify(invalidLottieObject);
 
   test.each([
     [validLottieJSON, true],
