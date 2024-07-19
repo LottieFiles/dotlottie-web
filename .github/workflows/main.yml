@@ -40,6 +40,7 @@ jobs:
 
       - name: 🛡️ Test
         run: pnpm test:coverage
+        working-directory: packages/web
 
       - name: 📏 Report coverage
         if: always() && github.event_name == 'pull_request'
