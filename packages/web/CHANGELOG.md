@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.29.1
+
+### Patch Changes
+
+- dc66e8e: Revert "chore(web): 🤖 upgrade dotlottie-rs\@v0.1.25 wasm bindings (#284)"
+
 ## 0.29.0
 
 ### Minor Changes
