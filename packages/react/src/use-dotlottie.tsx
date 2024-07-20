@@ -116,24 +116,6 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
     dotLottieRef.current.setViewport(x, y, width, height);
   }, []);
 
-  const intersectionObserver = useMemo(() => {
-    if (isServerSide()) return null;
-
-    const observerCallback = (entries: IntersectionObserverEntry[]): void => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          dotLottieRef.current?.unfreeze();
-        } else {
-          dotLottieRef.current?.freeze();
-        }
-      });
-    };
-
-    return new IntersectionObserver(observerCallback, {
-      threshold: 0,
-    });
-  }, []);
-
   const resizeObserver = useMemo(() => {
     if (isServerSide()) return null;
 
@@ -186,8 +168,6 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
         dotLottieInstance.freeze();
       }
 
-      intersectionObserver?.observe(canvas);
-
       if (config?.autoResizeCanvas) {
         resizeObserver?.observe(canvas);
       }
@@ -203,11 +183,10 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
       dotLottieInstance?.destroy();
       setDotLottie(null);
       resizeObserver?.disconnect();
-      intersectionObserver?.disconnect();
       canvas?.removeEventListener('mouseenter', hoverHandler);
       canvas?.removeEventListener('mouseleave', hoverHandler);
     };
-  }, [intersectionObserver, resizeObserver, hoverHandler, updateViewport]);
+  }, [resizeObserver, hoverHandler, updateViewport]);
 
   // speed reactivity
   useEffect(() => {

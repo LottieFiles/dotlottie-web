@@ -117,24 +117,6 @@ export const useDotLottieWorker = (config?: DotLottieWorkerConfig): UseDotLottie
     dotLottieRef.current.setViewport(x, y, width, height);
   }, []);
 
-  const intersectionObserver = useMemo(() => {
-    if (isServerSide()) return null;
-
-    const observerCallback = (entries: IntersectionObserverEntry[]): void => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          dotLottieRef.current?.unfreeze();
-        } else {
-          dotLottieRef.current?.freeze();
-        }
-      });
-    };
-
-    return new IntersectionObserver(observerCallback, {
-      threshold: 0,
-    });
-  }, []);
-
   const resizeObserver = useMemo(() => {
     if (isServerSide()) return null;
 
@@ -173,22 +155,6 @@ export const useDotLottieWorker = (config?: DotLottieWorkerConfig): UseDotLottie
         canvas,
       });
 
-      // Check if the canvas is initially in view
-      const initialEntry = canvas.getBoundingClientRect();
-
-      if (
-        initialEntry.top >= 0 &&
-        initialEntry.left >= 0 &&
-        initialEntry.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        initialEntry.right <= (window.innerWidth || document.documentElement.clientWidth)
-      ) {
-        dotLottieInstance.unfreeze();
-      } else {
-        dotLottieInstance.freeze();
-      }
-
-      intersectionObserver?.observe(canvas);
-
       if (config?.autoResizeCanvas) {
         resizeObserver?.observe(canvas);
       }
@@ -204,11 +170,10 @@ export const useDotLottieWorker = (config?: DotLottieWorkerConfig): UseDotLottie
       dotLottieInstance?.destroy();
       setDotLottie(null);
       resizeObserver?.disconnect();
-      intersectionObserver?.disconnect();
       canvas?.removeEventListener('mouseenter', hoverHandler);
       canvas?.removeEventListener('mouseleave', hoverHandler);
     };
-  }, [intersectionObserver, resizeObserver, hoverHandler, updateViewport]);
+  }, [resizeObserver, hoverHandler, updateViewport]);
 
   // speed reactivity
   useEffect(() => {

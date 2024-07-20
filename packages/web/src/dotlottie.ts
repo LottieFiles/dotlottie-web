@@ -4,6 +4,7 @@ import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
+import { OffscreenObserver } from './offscreen-observer';
 import type { Mode, Fit, Data, Config, Layout, Manifest, RenderConfig } from './types';
 import { hexStringToRGBAInt } from './utils';
 
@@ -82,7 +83,9 @@ export class DotLottie {
 
     this._eventManager = new EventManager();
     this._frameManager = new AnimationFrameManager();
-    this._renderConfig = config.renderConfig ?? {};
+    this._renderConfig = config.renderConfig ?? {
+      freezeOnOffscreen: true,
+    };
 
     DotLottieWasmLoader.load()
       .then((module) => {
@@ -205,6 +208,10 @@ export class DotLottie {
         } else {
           console.error('something went wrong, the animation was suppose to autoplay');
         }
+      }
+
+      if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this._renderConfig.freezeOnOffscreen) {
+        OffscreenObserver.observe(this._canvas, this);
       }
     } else {
       this._eventManager.dispatch({
@@ -575,6 +582,10 @@ export class DotLottie {
   }
 
   public destroy(): void {
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      OffscreenObserver.unobserve(this._canvas);
+    }
+
     this._dotLottieCore?.delete();
     this._dotLottieCore = null;
     this._context = null;

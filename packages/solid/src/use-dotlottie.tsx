@@ -108,24 +108,6 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
     dotLottieInstance.setViewport(x, y, width, height);
   }
 
-  const intersectionObserver = createMemo(() => {
-    if (isServer) return null;
-
-    const observerCallback = debounce((entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          dotLottie()?.unfreeze();
-        } else {
-          dotLottie()?.freeze();
-        }
-      });
-    }, 150);
-
-    return new IntersectionObserver(observerCallback, {
-      threshold: 0,
-    });
-  });
-
   const resizeObserver = createMemo(() => {
     if (isServer) return null;
 
@@ -147,21 +129,6 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
 
       setDotLottie(dotLottieInstance);
 
-      // check if canvas is initially in view
-      const initialEntry = canvas.getBoundingClientRect();
-
-      if (
-        initialEntry.top >= 0 &&
-        initialEntry.left >= 0 &&
-        initialEntry.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        initialEntry.right <= (window.innerWidth || document.documentElement.clientWidth)
-      ) {
-        dotLottie()?.unfreeze();
-      } else {
-        dotLottie()?.freeze();
-      }
-
-      intersectionObserver()?.observe(canvas);
       if (config.autoResizeCanvas) {
         resizeObserver()?.observe(canvas);
       }
@@ -171,7 +138,6 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
       dotLottieInstance.addEventListener('frame', updateViewport);
     } else {
       dotLottie()?.destroy();
-      intersectionObserver()?.disconnect();
       resizeObserver()?.disconnect();
     }
 
@@ -191,7 +157,6 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
     dotLottie()?.destroy();
     setDotLottie(null);
     resizeObserver()?.disconnect();
-    intersectionObserver()?.disconnect();
     if (canvasRef) {
       canvasRef.removeEventListener('mouseenter', hoverHandler);
       canvasRef.removeEventListener('mouseleave', hoverHandler);
