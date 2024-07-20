@@ -81,7 +81,6 @@ export const DotLottieVue = defineComponent({
       useFrameInterpolation,
     } = toRefs(props);
     let dotLottie: DotLottie | null = null;
-    let intersectionObserver: IntersectionObserver | null = null;
     let resizeObserver: ResizeObserver | null = null;
 
     // Prop change
@@ -202,23 +201,6 @@ export const DotLottieVue = defineComponent({
       dotLottie.setViewport(x, y, width, height);
     }
 
-    function getIntersectionObserver(): IntersectionObserver {
-      return new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              dotLottie?.unfreeze();
-            } else {
-              dotLottie?.freeze();
-            }
-          });
-        },
-        {
-          threshold: 0,
-        },
-      );
-    }
-
     function getResizeObserver(): ResizeObserver {
       return new ResizeObserver((entries) => {
         entries.forEach(() => {
@@ -242,8 +224,6 @@ export const DotLottieVue = defineComponent({
         autoplay: shouldAutoplay,
       });
 
-      intersectionObserver = getIntersectionObserver();
-      intersectionObserver.observe(canvas.value);
       if (typeof autoResizeCanvas?.value === 'boolean' && autoResizeCanvas.value) {
         resizeObserver = getResizeObserver();
         resizeObserver.observe(canvas.value);
@@ -257,7 +237,6 @@ export const DotLottieVue = defineComponent({
 
     onBeforeUnmount(() => {
       resizeObserver?.disconnect();
-      intersectionObserver?.disconnect();
       canvas.value?.addEventListener('mouseenter', hoverHandler);
       canvas.value?.addEventListener('mouseleave', hoverHandler);
       dotLottie?.removeEventListener('frame', updateViewport);
