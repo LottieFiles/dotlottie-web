@@ -1,22 +1,15 @@
-// This file would be inlined as a string, checkout the tsup config in the root of the project
-import workerString from './dotlottie.worker.js';
-import type { MethodParamsMap, RpcRequest } from './types.js';
+// resolved to a Worker constructor by plugin-inline-worker
+import DotLottieWebWorker from './dotlottie.worker?worker&inline';
+import type { MethodParamsMap, RpcRequest } from './types';
 
 export class WorkerManager {
-  private readonly _workers: Map<string, Worker> = new Map();
+  private readonly _workers = new Map<string, Worker>();
 
-  private readonly _animationWorkerMap: Map<string, string> = new Map();
-
-  private _createWorker(workerName: string): Worker {
-    const blob = new Blob([workerString], { type: 'application/javascript' });
-
-    // eslint-disable-next-line node/no-unsupported-features/node-builtins
-    return new Worker(URL.createObjectURL(blob), { type: 'module', name: workerName });
-  }
+  private readonly _animationWorkerMap = new Map<string, string>();
 
   public getWorker(workerId: string): Worker {
     if (!this._workers.has(workerId)) {
-      this._workers.set(workerId, this._createWorker(workerId));
+      this._workers.set(workerId, new DotLottieWebWorker());
     }
 
     return this._workers.get(workerId) as Worker;
