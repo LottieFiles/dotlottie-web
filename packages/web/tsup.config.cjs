@@ -1,9 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 
+const { replace } = require('esbuild-plugin-replace');
 const { defineConfig } = require('tsup');
 
 const { PluginInlineWorker } = require('./esbuild-plugins/plugin-inline-worker.cjs');
+const pkg = require('./package.json');
 
 function copyFileSync(src, dest) {
   const readStream = fs.createReadStream(src);
@@ -35,6 +37,10 @@ module.exports = defineConfig({
   esbuildPlugins: [
     // This plugin is used to inline the workers as base64 strings in the output bundle
     PluginInlineWorker(),
+    replace({
+      __PACKAGE_VERSION__: pkg.version,
+      __PACKAGE_NAME__: pkg.name,
+    }),
   ],
   onSuccess: async () => {
     await copyFileSync(
