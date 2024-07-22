@@ -81,7 +81,7 @@ describe('isLottie', () => {
     expect(isLottie(fileData)).toBe(expected);
   });
 
-  test('returns true for a valid .lottie URL', async () => {
+  test('returns true for a valid Lottie URL', async () => {
     const response = await fetch(lottieUrl);
     const buffer = await response.json();
 
