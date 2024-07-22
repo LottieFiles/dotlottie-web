@@ -4,8 +4,8 @@ import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
-import type { Mode, Fit, Data, Config, Layout, Manifest, RenderConfig } from './types';
-import { hexStringToRGBAInt } from './utils';
+import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data } from './types';
+import { hexStringToRGBAInt, isDotLottie, isLottie } from './utils';
 
 const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
   if (mode === 'reverse') {
@@ -125,39 +125,26 @@ export class DotLottie {
       });
   }
 
-  private _loadFromSrc(src: string): void {
-    async function load(): Promise<string | ArrayBuffer> {
-      const response = await fetch(src);
+  private _dispatchError(message: string): void {
+    console.error(message);
+    this._eventManager.dispatch({ type: 'loadError', error: new Error(message) });
+  }
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch the animation data from URL: ${src}. ${response.status}: ${response.statusText}`,
-        );
-      }
+  private async _fetchData(src: string): Promise<string | ArrayBuffer> {
+    const response = await fetch(src);
 
-      const contentType = (response.headers.get('content-type') ?? '').trim();
+    if (!response.ok) {
+      throw new Error(`Failed to fetch animation data from URL: ${src}. ${response.status}: ${response.statusText}`);
+    }
 
-      let data: string | ArrayBuffer;
+    const data = await response.arrayBuffer();
 
-      if (['application/json', 'text/plain'].some((type) => contentType.startsWith(type))) {
-        data = await response.text();
-      } else {
-        data = await response.arrayBuffer();
-      }
-
+    if (isDotLottie(data)) {
       return data;
     }
 
-    load()
-      .then((data) => {
-        this._loadFromData(data);
-      })
-      .catch((error) => {
-        this._eventManager.dispatch({
-          type: 'loadError',
-          error: new Error(`Failed to load animation data from URL: ${src}. ${error}`),
-        });
-      });
+    // eslint-disable-next-line node/no-unsupported-features/node-builtins
+    return new TextDecoder().decode(data);
   }
 
   private _loadFromData(data: Data): void {
@@ -169,16 +156,40 @@ export class DotLottie {
     let loaded = false;
 
     if (typeof data === 'string') {
+      if (!isLottie(data)) {
+        this._dispatchError(
+          'Invalid Lottie JSON string: The provided string does not conform to the Lottie JSON format.',
+        );
+
+        return;
+      }
       loaded = this._dotLottieCore.loadAnimationData(data, width, height);
     } else if (data instanceof ArrayBuffer) {
+      if (!isDotLottie(data)) {
+        this._dispatchError(
+          'Invalid dotLottie ArrayBuffer: The provided ArrayBuffer does not conform to the dotLottie format.',
+        );
+
+        return;
+      }
       loaded = this._dotLottieCore.loadDotLottieData(data, width, height);
     } else if (typeof data === 'object') {
+      if (!isLottie(data as Record<string, unknown>)) {
+        this._dispatchError(
+          'Invalid Lottie JSON object: The provided object does not conform to the Lottie JSON format.',
+        );
+
+        return;
+      }
       loaded = this._dotLottieCore.loadAnimationData(JSON.stringify(data), width, height);
     } else {
-      this._eventManager.dispatch({
-        type: 'loadError',
-        error: new Error('Unsupported data type for animation data. Expected a string or ArrayBuffer.'),
-      });
+      this._dispatchError(
+        `Unsupported data type for animation data. Expected: 
+          - string (Lottie JSON),
+          - ArrayBuffer (dotLottie),
+          - object (Lottie JSON). 
+          Received: ${typeof data}`,
+      );
 
       return;
     }
@@ -207,11 +218,14 @@ export class DotLottie {
         }
       }
     } else {
-      this._eventManager.dispatch({
-        type: 'loadError',
-        error: new Error('Failed to load animation data'),
-      });
+      this._dispatchError('Failed to load animation data');
     }
+  }
+
+  private _loadFromSrc(src: string): void {
+    this._fetchData(src)
+      .then((data) => this._loadFromData(data))
+      .catch((error) => this._dispatchError(`Failed to load animation data from URL: ${src}. ${error}`));
   }
 
   public get activeAnimationId(): string | undefined {
