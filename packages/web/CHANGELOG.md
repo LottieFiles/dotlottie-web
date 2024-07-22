@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.29.2
+
+### Patch Changes
+
+- d942dd2: fix(web): animation file type detection and improved error handling for dotLottie and Lottie JSON files.
+
 ## 0.29.1
 
 ### Patch Changes
