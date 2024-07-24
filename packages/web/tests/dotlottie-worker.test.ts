@@ -1,7 +1,7 @@
 import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
-import { DotLottieWorker as DotLottie } from '../dist';
-import type { Config, Layout, Mode } from '../dist';
+import { DotLottieWorker as DotLottie } from '../src';
+import type { Config, Layout, Mode } from '../src';
 import wasmUrl from '../src/core/dotlottie-player.wasm?url';
 
 import baseJsonSrc from './__fixtures__/test.json?url';
@@ -766,7 +766,11 @@ describe('load', () => {
 
     expect(onLoadError).toHaveBeenCalledWith({
       type: 'loadError',
-      error: new Error('Unsupported data type for animation data. Expected a string or ArrayBuffer.'),
+      error: new Error(`Unsupported data type for animation data. Expected: 
+          - string (Lottie JSON),
+          - ArrayBuffer (dotLottie),
+          - object (Lottie JSON). 
+          Received: number`),
     });
   });
 
