@@ -828,8 +828,19 @@ export class DotLottie {
    * @param event - The event to be posted to the state machine
    * @returns boolean - true if the event was posted successfully, false otherwise
    */
-  public postStateMachineEvent(event: string): boolean {
-    return this._dotLottieCore?.postEventPayload(event) ?? false;
+  public postStateMachineEvent(event: string): number {
+    const rt = this._dotLottieCore?.postEventPayload(event) ?? 1;
+
+    if (rt === 2) {
+      this.play();
+    } else if (rt === 3) {
+      this.pause();
+    } else if (rt === 4) {
+      this._draw();
+    }
+
+    return rt;
+    // return this._dotLottieCore?.postEventPayload(event) ?? false;
   }
 
   public getStateMachineListeners(): string[] {

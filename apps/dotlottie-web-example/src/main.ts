@@ -167,13 +167,41 @@ allCanvas.forEach((canvas) => {
   });
 });
 
+async function handleMouseDown(dotLottie: unknown): Promise<void> {
+  const r = await dotLottie.postStateMachineEvent('OnPointerDown: 0.0 0.0');
+  // const r = await dotLottie.postStateMachineEvent('SetNumericContext: sync_key 10');
+
+  if (r === 0) {
+    console.log('Success');
+  } else if (r === 1) {
+    console.error('Error');
+  } else if (r === 2) {
+    console.log('R 2');
+    // const p = dotLottie.play();
+
+    // console.log(p);
+  } else if (r === 3) {
+    console.log('R 3');
+    // dotLottie.pause();
+  } else if (r === 4) {
+    console.log('R 4');
+    // dotLottie.pause();
+    console.log('Set frame');
+  } else {
+    console.log('R >> ', r);
+  }
+  // if (r === 4) {
+
+  // }
+}
+
 fetch(
   // '/theming_example.lottie',
   // '/layout_example.lottie',
   // '/multi.lottie',
   // '/markers_example.lottie',
-  // './toggle.lottie',
-  './exploding_pigeon.lottie',
+  './toggle.lottie',
+  // './exploding_pigeon.lottie',
 )
   .then(async (res) => res.arrayBuffer())
   .then((data): void => {
@@ -195,7 +223,7 @@ fetch(
     });
 
     canvas.addEventListener('mousedown', () => {
-      dotLottie.postStateMachineEvent('OnPointerDown: 0.0 0.0');
+      handleMouseDown(dotLottie);
     });
 
     dotLottie.addEventListener('loadError', console.error);
@@ -302,9 +330,44 @@ fetch(
     });
 
     stateMachinesSelect.addEventListener('change', () => {
-      const stateMachineId = stateMachinesSelect.value;
+      // const stateMachineId = stateMachinesSelect.value;
 
-      dotLottie.loadStateMachine(stateMachineId);
+      // dotLottie.loadStateMachine(stateMachineId);
+      //       const stateMachine = `{
+      //     "descriptor": {
+      //         "id": "multi_animation_slideshow",
+      //         "initial": 0
+      //     },
+      //     "states": [
+      //         {
+      //             "name": "SyncTest",
+      //             "type": "SyncState",
+      //             "frame_context_key": "sync_key"
+      //         }
+      //     ],
+      //     "transitions": [
+      //     ],
+      //     "listeners": [
+      //         {
+      //             "type": "PointerDown"
+      //         }
+      //     ],
+      //     "context_variables": [
+      //         {
+      //             "key": "sync_key",
+      //             "type": "Numeric",
+      //             "value": 30
+      //         }
+      //     ]
+      // }
+      //       `;
+
+      const stateMachine = `
+{"descriptor":{"id":"state_toggle","initial":0},"states":[{"name":"wait","type":"PlaybackState","autoplay":false,"loop":false,"segments":[0,1]},{"name":"play_forward","type":"PlaybackState","autoplay":true,"loop":false,"segments":[0,30]},{"name":"play_reverse","type":"PlaybackState","autoplay":true,"loop":false,"mode":"Reverse","segments":[30,0]}],"transitions":[{"type":"Transition","from_state":0,"to_state":1,"on_pointer_down_event":{}},{"type":"Transition","from_state":1,"to_state":2,"on_pointer_down_event":{}},{"type":"Transition","from_state":2,"to_state":1,"on_pointer_down_event":{}}],"context_variables":[],"listeners":[{"type":"PointerDown"}]}
+    `;
+
+      console.log('stateMachine', stateMachine);
+      dotLottie.loadStateMachineData(stateMachine);
     });
 
     markerSelect.addEventListener('change', () => {
