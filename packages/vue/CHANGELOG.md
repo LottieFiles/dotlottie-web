@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-vue
 
+## 0.4.6
+
+### Patch Changes
+
+- b4c4c6b: fix: 🐛 temporarily disable unstable partial canvas rendering optimization in dotLottie-web wrappers
+
 ## 0.4.5
 
 ### Patch Changes
