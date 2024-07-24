@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.8.3
+
+### Patch Changes
+
+- b4c4c6b: fix: 🐛 temporarily disable unstable partial canvas rendering optimization in dotLottie-web wrappers
+
 ## 0.8.2
 
 ### Patch Changes

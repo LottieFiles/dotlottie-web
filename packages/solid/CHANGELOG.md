@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.0.9
+
+### Patch Changes
+
+- b4c4c6b: fix: 🐛 temporarily disable unstable partial canvas rendering optimization in dotLottie-web wrappers
+
 ## 0.0.8
 
 ### Patch Changes
