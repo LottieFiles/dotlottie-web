@@ -766,7 +766,11 @@ describe('load', () => {
 
     expect(onLoadError).toHaveBeenCalledWith({
       type: 'loadError',
-      error: new Error('Unsupported data type for animation data. Expected a string or ArrayBuffer.'),
+      error: new Error(`Unsupported data type for animation data. Expected: 
+          - string (Lottie JSON),
+          - ArrayBuffer (dotLottie),
+          - object (Lottie JSON). 
+          Received: number`),
     });
   });
 
