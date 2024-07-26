@@ -199,10 +199,10 @@ const App = () => {
     return () => {
       // Remove event listeners when the component is unmounted.
       if (dotLottie) {
-        dotLottie.addEventListener('play', onPlay);
-        dotLottie.addEventListener('pause', onPause);
-        dotLottie.addEventListener('complete', onComplete);
-        dotLottie.addEventListener('frame', onFrameChange);
+        dotLottie.removeEventListener('play', onPlay);
+        dotLottie.removeEventListener('pause', onPause);
+        dotLottie.removeEventListener('complete', onComplete);
+        dotLottie.removeEventListener('frame', onFrameChange);
       }
     };
   }, [dotLottie]);
