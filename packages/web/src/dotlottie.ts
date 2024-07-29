@@ -488,15 +488,28 @@ export class DotLottie {
   }
 
   public play(): void {
-    if (this._dotLottieCore === null) return;
+    if (this._dotLottieCore === null) {
+      return;
+    }
 
     const ok = this._dotLottieCore.play();
 
     this._isFrozen = false;
+    this._eventManager.dispatch({ type: 'play' });
+    this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
 
     if (ok) {
+      this._isFrozen = false;
       this._eventManager.dispatch({ type: 'play' });
       this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
+    } else if (this._dotLottieCore.isPlaying()) {
+      this._isFrozen = false;
+      this._eventManager.dispatch({ type: 'play' });
+      this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
+    } else {
+      console.log("[core] Couldn't play the animation");
+      console.log('[core] isPlaying: ', this._dotLottieCore.isPlaying());
+      console.log('[core] animationFrameId: ', this._animationFrameId);
     }
   }
 
@@ -507,6 +520,8 @@ export class DotLottie {
 
     if (ok) {
       this._eventManager.dispatch({ type: 'pause' });
+    } else {
+      console.log('PAUSE NOT OK');
     }
   }
 
@@ -829,7 +844,13 @@ export class DotLottie {
    * @returns boolean - true if the event was posted successfully, false otherwise
    */
   public postStateMachineEvent(event: string): number {
+    console.log('[core] Posting state machine event..');
     const rt = this._dotLottieCore?.postEventPayload(event) ?? 1;
+
+    // console.log('> RT: ', rt);
+    // console.log('> SM STATE isPaused: ', this._dotLottieCore?.isPaused());
+    // console.log('> SM STATE isPlaying: ', this._dotLottieCore?.isPlaying());
+    // console.log('> SM STATE isStopped: ', this._dotLottieCore?.isStopped());
 
     if (rt === 2) {
       this.play();
@@ -838,6 +859,10 @@ export class DotLottie {
     } else if (rt === 4) {
       this._draw();
     }
+
+    // console.log('SM STATE isPaused: ', this._dotLottieCore?.isPaused());
+    // console.log('SM STATE isPlaying: ', this._dotLottieCore?.isPlaying());
+    // console.log('SM STATE isStopped: ', this._dotLottieCore?.isStopped());
 
     return rt;
     // return this._dotLottieCore?.postEventPayload(event) ?? false;
