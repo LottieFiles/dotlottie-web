@@ -587,36 +587,8 @@ export class DotLottieWorker {
   }
 
   public async postStateMachineEvent(event: string): Promise<number> {
-    console.log('[WORKER] Posting state machine event..');
-    const rt = await this._sendMessage('postStateMachineEvent', { event, instanceId: this._id });
-
-    console.log('[WORKER] RT: ', rt);
-    console.log('[WORKER] is Paused : ', this.isPaused);
-    console.log('[WORKER] is Playing : ', this.isPlaying);
-    console.log('[WORKER] is Stopped : ', this.isStopped);
-
-    // if (rt === 2) {
-    //   // Start rendering
-    //   await this.play();
-    // } else if (rt === 3) {
-    //   // Stop rendering
-    //   await this.pause();
-    // } else if (rt === 4) {
-    //   // this._draw();
-    // }
-    await this._updateDotLottieInstanceState();
-
-    return rt;
-
-    // return this._sendMessage('postStateMachineEvent', { event, instanceId: this._id });
-    // return this._dotLottieCore?.postEventPayload(event) ?? false;
+    return this._sendMessage('postStateMachineEvent', { event, instanceId: this._id });
   }
-
-  // public async postStateMachineEvent(event: string): Promise<boolean> {
-  //   if (!this._created) return false;
-
-  //   return this._sendMessage('postStateMachineEvent', { event, instanceId: this._id });
-  // }
 
   public async getStateMachineListeners(): Promise<string[]> {
     if (!this._created) return [];
