@@ -2,7 +2,7 @@
 
 import './styles.css';
 import type { Fit, Mode } from '@lottiefiles/dotlottie-web';
-import { DotLottie } from '@lottiefiles/dotlottie-web';
+import { DotLottieWorker as DotLottie } from '@lottiefiles/dotlottie-web';
 
 import wasmUrl from '../../../packages/web/dist/dotlottie-player.wasm?url';
 
@@ -30,7 +30,7 @@ app.innerHTML = `
   <canvas data-src="${baseUrl}/woman.json"></canvas>
 </div>
 
-<div class="container" id="animation_container">
+<div class="container">
   <canvas style="width: 800px; height: 400px;" id="canvas"></canvas>
   <div class="control-panel">
     <div class="status-panel">
@@ -132,7 +132,6 @@ app.innerHTML = `
       </select>
       <button id="start_sm">Start State Machine</button>
       <button id="end_sm">End State Machine</button>
-      <button id="post_event">Post event</button>
     </div>
   </div>
 </div>
@@ -163,40 +162,41 @@ allCanvas.forEach((canvas) => {
 
   dotLottie.addEventListener('loadError', console.error);
 
-  // window.addEventListener('resize', () => {
-  //   dotLottie.resize();
-  // });
+  window.addEventListener('resize', () => {
+    dotLottie.resize();
+  });
 });
-
-async function handleMouseDown(dotLottie: unknown): Promise<void> {
-  console.log('mousedown');
-  await dotLottie.postStateMachineEvent('OnPointerDown: 0.0 0.0');
-}
 
 fetch(
   // '/theming_example.lottie',
   // '/layout_example.lottie',
   // '/multi.lottie',
   // '/markers_example.lottie',
-  './toggle.lottie',
-  // './exploding_pigeon.lottie',
+  // './toggle.lottie',
+  './exploding_pigeon.lottie',
 )
   .then(async (res) => res.arrayBuffer())
   .then((data): void => {
+    console.log(data);
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
     const dotLottie = new DotLottie({
       canvas,
+      // src: 'https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie',
+      // src: '/lolo.json',
       data,
-      loop: false,
-      autoplay: false,
+      loop: true,
+      autoplay: true,
+      mode: 'bounce',
+      segment: [10, 90],
       speed: 1,
+      backgroundColor: '#800080ff',
+      // useFrameInterpolation: false,
     });
 
-    // canvas.addEventListener('mousedown', () => {
-    //   console.log('mouse down');
-    //   dotLottie.postStateMachineEvent('OnPointerDown: 0.0 0.0');
-    // });
+    canvas.addEventListener('mousedown', () => {
+      dotLottie.postStateMachineEvent('OnPointerDown: 0.0 0.0');
+    });
 
     dotLottie.addEventListener('loadError', console.error);
 
@@ -222,7 +222,6 @@ fetch(
     const activeAnimationSpan = document.getElementById('active-animation') as HTMLSpanElement;
     const startStateMachineButton = document.getElementById('start_sm') as HTMLButtonElement;
     const endStateMachineButton = document.getElementById('end_sm') as HTMLButtonElement;
-    const postEventStateMachineButton = document.getElementById('post_event') as HTMLButtonElement;
 
     const markerSelect = document.getElementById('marker') as HTMLSelectElement;
     const themeSelect = document.getElementById('theme') as HTMLSelectElement;
@@ -303,110 +302,9 @@ fetch(
     });
 
     stateMachinesSelect.addEventListener('change', () => {
-      // const stateMachineId = stateMachinesSelect.value;
+      const stateMachineId = stateMachinesSelect.value;
 
-      // dotLottie.loadStateMachine(stateMachineId);
-      //       const stateMachine = `{
-      //     "descriptor": {
-      //         "id": "multi_animation_slideshow",
-      //         "initial": 0
-      //     },
-      //     "states": [
-      //         {
-      //             "name": "SyncTest",
-      //             "type": "SyncState",
-      //             "frame_context_key": "sync_key"
-      //         }
-      //     ],
-      //     "transitions": [
-      //     ],
-      //     "listeners": [
-      //         {
-      //             "type": "PointerDown"
-      //         }
-      //     ],
-      //     "context_variables": [
-      //         {
-      //             "key": "sync_key",
-      //             "type": "Numeric",
-      //             "value": 30
-      //         }
-      //     ]
-      // }
-      //       `;
-
-      const stateMachine = `
-{
-  "descriptor": {
-    "id": "state_toggle",
-    "initial": 0
-  },
-  "states": [
-    {
-      "name": "wait",
-      "type": "PlaybackState",
-      "autoplay": false,
-      "loop": false,
-      "segments": [
-        0,
-        1
-      ]
-    },
-    {
-      "name": "play_forward",
-      "type": "PlaybackState",
-      "autoplay": true,
-      "loop": false,
-      "segments": [
-        0,
-        30
-      ]
-    },
-    {
-      "name": "play_reverse",
-      "type": "PlaybackState",
-      "autoplay": true,
-      "loop": false,
-      "mode": "Reverse",
-      "segments": [
-        30,
-        0
-      ]
-    }
-  ],
-  "transitions": [
-    {
-      "type": "Transition",
-      "from_state": 0,
-      "to_state": 1,
-      "on_pointer_down_event": {}
-    },
-    {
-      "type": "Transition",
-      "from_state": 1,
-      "to_state": 2,
-      "on_pointer_down_event": {}
-    },
-    {
-      "type": "Transition",
-      "from_state": 2,
-      "to_state": 1,
-      "on_pointer_down_event": {}
-    }
-  ],
-  "context_variables": [],
-  "listeners": [
-    {
-      "type": "PointerDown"
-    }
-  ]
-}
-    `;
-
-      console.log('stateMachine', stateMachine);
-      const sm = dotLottie.loadStateMachineData(stateMachine);
-
-      console.log('LOAD SM ', sm);
+      dotLottie.loadStateMachine(stateMachineId);
     });
 
     markerSelect.addEventListener('change', () => {
@@ -441,38 +339,12 @@ fetch(
     });
 
     startStateMachineButton.addEventListener('click', () => {
-      const sm = dotLottie.startStateMachine();
-
-      dotLottie.stop();
-
-      console.log('STARTING SM ', sm);
+      dotLottie.startStateMachine();
     });
 
     endStateMachineButton.addEventListener('click', () => {
       dotLottie.stopStateMachine();
     });
-
-    postEventStateMachineButton.addEventListener('click', () => {
-      // dotLottie.postStateMachineEvent('OnPointerDown: 0.0 0.0');
-      handleMouseDown(dotLottie);
-    });
-
-    // console.log('Adding event listener for canvas');
-    // const container = document.getElementById('animation_container');
-
-    // container!.addEventListener('mousedown', () => {
-    // handleMouseDown(dotLottie);
-    // console.log('mouse down');
-    // dotLottie.postStateMachineEvent('OnPointerDown: 0.0 0.0');
-
-    // if (r === 4) {
-    //   if (dotLottie.isPlaying) {
-    //     dotLottie.pause();
-    //   } else {
-    //     dotLottie.play();
-    //   }
-    // }
-    // });
 
     playPauseButton.addEventListener('click', () => {
       if (dotLottie.isPlaying) {

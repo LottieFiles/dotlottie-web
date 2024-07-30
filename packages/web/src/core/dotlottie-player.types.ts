@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-namespace */
-
+/* eslint-disable typescript-sort-keys/interface */
+// TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
   let HEAPF64: unknown;
   let HEAP_DATA_VIEW: unknown;
@@ -61,18 +62,30 @@ export interface DotLottiePlayer {
   activeAnimationId(): string;
   activeThemeId(): string;
   animationSize(): VectorFloat;
-  buffer(): unknown;
   clear(): void;
-  config(): Config;
-  currentFrame(): number;
-  delete(): void;
-  duration(): number;
-  isComplete(): boolean;
   isLoaded(): boolean;
   isPaused(): boolean;
   isPlaying(): boolean;
   isStopped(): boolean;
-  loadAnimation(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string, _1: number, _2: number): boolean;
+  pause(): boolean;
+  play(): boolean;
+  render(): boolean;
+  stop(): boolean;
+  isComplete(): boolean;
+  startStateMachine(): boolean;
+  stopStateMachine(): boolean;
+  setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
+  loopCount(): number;
+  resize(_0: number, _1: number): boolean;
+  currentFrame(): number;
+  duration(): number;
+  requestFrame(): number;
+  setFrame(_0: number): boolean;
+  seek(_0: number): boolean;
+  totalFrames(): number;
+  segmentDuration(): number;
+  config(): Config;
+  setConfig(_0: Config): void;
   loadAnimationData(
     _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
     _1: number,
@@ -88,27 +101,17 @@ export interface DotLottiePlayer {
     _1: number,
     _2: number,
   ): boolean;
-  loadStateMachine(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
-  loadStateMachineData(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
+  loadAnimation(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string, _1: number, _2: number): boolean;
+  manifestString(): string;
   loadTheme(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
   loadThemeData(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
-  loopCount(): number;
-  manifestString(): string;
   markers(): VectorMarker;
-  pause(): boolean;
-  play(): boolean;
-  postEventPayload(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
-  render(): boolean;
-  requestFrame(): number;
-  resize(_0: number, _1: number): boolean;
-  seek(_0: number): boolean;
-  segmentDuration(): number;
-  setConfig(_0: Config): void;
-  setFrame(_0: number): boolean;
   setStateMachineBooleanContext(
     _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
     _1: boolean,
   ): boolean;
+  loadStateMachine(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
+  postEventPayload(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): number;
   setStateMachineNumericContext(
     _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
     _1: number,
@@ -117,17 +120,15 @@ export interface DotLottiePlayer {
     _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
     _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
   ): boolean;
-  setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
-  startStateMachine(): boolean;
   stateMachineFrameworkSetup(): VectorString;
-  stop(): boolean;
-  stopStateMachine(): boolean;
-  totalFrames(): number;
+  loadStateMachineData(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
+  buffer(): unknown;
+  delete(): void;
 }
 
 export interface Marker {
   duration: number;
-  name: string;
+  name: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string;
   time: number;
 }
 
@@ -136,11 +137,11 @@ export interface Config {
   backgroundColor: number;
   layout: Layout;
   loopAnimation: boolean;
-  marker: string;
-  mode: Mode;
+  useFrameInterpolation: boolean;
   segment: VectorFloat;
   speed: number;
-  useFrameInterpolation: boolean;
+  mode: Mode;
+  marker: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string;
 }
 
 interface EmbindModule {
@@ -153,11 +154,11 @@ interface EmbindModule {
     FitWidth: FitValue<4>;
     None: FitValue<6>;
   };
-  Mode: { Bounce: ModeValue<3>; Forward: ModeValue<1>; Reverse: ModeValue<2>; ReverseBounce: ModeValue<4> };
-  VectorFloat: { new (): VectorFloat };
-  VectorMarker: { new (): VectorMarker };
+  Mode: { Forward: ModeValue<1>; Reverse: ModeValue<2>; Bounce: ModeValue<3>; ReverseBounce: ModeValue<4> };
   VectorString: { new (): VectorString };
-  createDefaultConfig(): Config;
+  VectorMarker: { new (): VectorMarker };
   createDefaultLayout(): Layout;
+  VectorFloat: { new (): VectorFloat };
+  createDefaultConfig(): Config;
 }
 export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;

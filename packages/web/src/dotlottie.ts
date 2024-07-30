@@ -488,9 +488,7 @@ export class DotLottie {
   }
 
   public play(): void {
-    if (this._dotLottieCore === null) {
-      return;
-    }
+    if (this._dotLottieCore === null) return;
 
     const ok = this._dotLottieCore.play();
 
