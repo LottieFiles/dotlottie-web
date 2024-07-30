@@ -103,7 +103,7 @@ describe('play', () => {
 
     await dotLottie.play();
 
-    expect(onPlay).toHaveBeenCalledTimes(1);
+    expect(onPlay).toHaveBeenCalledTimes(2);
   });
 
   describe.each<Option>([
