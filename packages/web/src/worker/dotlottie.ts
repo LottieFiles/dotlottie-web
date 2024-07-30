@@ -586,8 +586,8 @@ export class DotLottieWorker {
     return this._sendMessage('stopStateMachine', { instanceId: this._id });
   }
 
-  public async postStateMachineEvent(event: string): Promise<boolean> {
-    if (!this._created) return false;
+  public async postStateMachineEvent(event: string): Promise<number> {
+    if (!this._created) return 1;
 
     return this._sendMessage('postStateMachineEvent', { event, instanceId: this._id });
   }
