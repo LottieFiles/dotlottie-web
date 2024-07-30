@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.30.0
+
+### Minor Changes
+
+- 77a56bc: Implemented postEvent return codes so that the state machine can control player playback.
+
 ## 0.29.2
 
 ### Patch Changes
