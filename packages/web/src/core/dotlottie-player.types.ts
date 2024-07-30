@@ -127,7 +127,7 @@ export interface DotLottiePlayer {
 
 export interface Marker {
   duration: number;
-  name: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string;
+  name: string;
   time: number;
 }
 
@@ -136,7 +136,7 @@ export interface Config {
   backgroundColor: number;
   layout: Layout;
   loopAnimation: boolean;
-  marker: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string;
+  marker: string;
   mode: Mode;
   segment: VectorFloat;
   speed: number;
