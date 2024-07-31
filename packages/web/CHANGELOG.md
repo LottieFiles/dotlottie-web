@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.30.1
+
+### Patch Changes
+
+- 78bb656: Fixed adding / removing state machine specific event listeners getting duplicated on startStateMachine.
+
 ## 0.30.0
 
 ### Minor Changes
