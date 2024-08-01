@@ -1023,17 +1023,17 @@ var createDotLottiePlayerModule = (() => {
           Ca++;
           throw Ba;
         },
-        C: function () {
+        B: function () {
           return 0;
         },
-        Q: () => {},
-        N: () => {},
+        P: () => {},
+        M: () => {},
         R: function () {
           return 0;
         },
+        N: () => {},
+        A: function () {},
         O: () => {},
-        B: function () {},
-        P: () => {},
         v: (a) => {
           var b = Fa[a];
           delete Fa[a];
@@ -1083,7 +1083,7 @@ var createDotLottiePlayerModule = (() => {
             ];
           });
         },
-        J: () => {},
+        I: () => {},
         Y: (a, b, c, d) => {
           b = Q(b);
           O(a, {
@@ -1224,7 +1224,7 @@ var createDotLottiePlayerModule = (() => {
           a.values[c] = d;
           a[b] = d;
         },
-        D: (a, b, c) => {
+        C: (a, b, c) => {
           b = Q(b);
           O(a, {
             name: b,
@@ -1235,7 +1235,7 @@ var createDotLottiePlayerModule = (() => {
             Ea: null,
           });
         },
-        F: (a, b, c, d, e, f) => {
+        E: (a, b, c, d, e, f) => {
           var l = rb(b, c);
           a = Q(a);
           a = ub(a);
@@ -1300,7 +1300,7 @@ var createDotLottiePlayerModule = (() => {
             return [new jb(c, v.xa, !1, !1, !0, v, d, f, h, m, u)];
           });
         },
-        E: (a, b) => {
+        D: (a, b) => {
           b = Q(b);
           var c = 'std::string' === b;
           O(a, {
@@ -1398,7 +1398,7 @@ var createDotLottiePlayerModule = (() => {
           b = Q(b);
           O(a, { ub: !0, name: b, argPackAdvance: 0, fromWireType: () => {}, toWireType: () => {} });
         },
-        K: () => {
+        J: () => {
           throw Infinity;
         },
         aa: (a, b, c, d) => {
@@ -1406,7 +1406,7 @@ var createDotLottiePlayerModule = (() => {
           b = yb(b);
           return a(null, b, c, d);
         },
-        G: wb,
+        F: wb,
         $: (a, b, c) => {
           var d = Nb(a, b),
             e = d.shift();
@@ -1441,7 +1441,7 @@ var createDotLottiePlayerModule = (() => {
           ra('');
         },
         V: () => performance.now(),
-        M: (a) => {
+        L: (a) => {
           var b = A.length;
           a >>>= 0;
           if (2147483648 < a) return !1;
@@ -1485,11 +1485,11 @@ var createDotLottiePlayerModule = (() => {
           return 0;
         },
         t: () => 52,
-        A: () => 52,
-        I: function () {
+        z: () => 52,
+        H: function () {
           return 70;
         },
-        z: (a, b, c, d) => {
+        Q: (a, b, c, d) => {
           for (var e = 0, f = 0; f < c; f++) {
             var l = F[b >> 2],
               h = F[(b + 4) >> 2];
@@ -1517,8 +1517,8 @@ var createDotLottiePlayerModule = (() => {
         a: ic,
         h: jc,
         n: kc,
-        H: lc,
-        L: (a, b, c, d) => Zb(a, b, c, d),
+        G: lc,
+        K: (a, b, c, d) => Zb(a, b, c, d),
       },
       W = (function () {
         function a(c) {
