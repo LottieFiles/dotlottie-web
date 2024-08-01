@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define version and other variables
-VERSION="0.1.29"
+VERSION="0.1.30"
 URL="https://github.com/LottieFiles/dotlottie-rs/releases/download/v${VERSION}/dotlottie-player.wasm.tar.gz"
 TARGET_DIR="./src/core"
 TEMP_DIR="./.tmp/wasm"
