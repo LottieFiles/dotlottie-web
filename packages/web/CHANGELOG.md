@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.30.2
+
+### Patch Changes
+
+- 8419a48: updated runtime to remove internal logs
+
 ## 0.30.1
 
 ### Patch Changes
