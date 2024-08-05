@@ -78,12 +78,37 @@ export class DotLottieWC extends LitElement {
     });
   }
 
-  public override firstUpdated(): void {
+  public override connectedCallback(): void {
+    super.connectedCallback();
+    this._initializeCanvas();
+    this._createDotLottieInstance();
+  }
+
+  public override disconnectedCallback(): void {
+    super.disconnectedCallback();
+
     if (this.dotLottie) {
       this.dotLottie.destroy();
       this.dotLottie = null;
     }
 
+    this._intersectionObserver.disconnect();
+    this._resizeObserver.disconnect();
+  }
+
+  private _initializeCanvas(): void {
+    if (!this.shadowRoot) {
+      this.attachShadow({ mode: 'open' });
+    }
+
+    if (!this.shadowRoot?.querySelector('canvas')) {
+      const canvas = document.createElement('canvas');
+
+      this.shadowRoot?.appendChild(canvas);
+    }
+  }
+
+  private _createDotLottieInstance(): void {
     const canvas = this.shadowRoot?.querySelector('canvas');
 
     if (canvas) {
@@ -104,20 +129,8 @@ export class DotLottieWC extends LitElement {
     }
   }
 
-  public override disconnectedCallback(): void {
-    super.disconnectedCallback();
-
-    if (this.dotLottie) {
-      this.dotLottie.destroy();
-      this.dotLottie = null;
-    }
-
-    this._intersectionObserver.disconnect();
-    this._resizeObserver.disconnect();
-  }
-
   public override render(): TemplateResult {
-    return html`<canvas part="canvas"></canvas>`;
+    return html`<slot></slot>`;
   }
 }
 
