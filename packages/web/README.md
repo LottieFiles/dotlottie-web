@@ -113,6 +113,7 @@ const dotLottie = new DotLottie({
 * <a href="https://codepen.io/lottiefiles/pen/LYvZveR" target="_blank">Advanced Animation Layout</a>
 * <a href="https://codepen.io/lottiefiles/pen/RwOROKp" target="_blank">Named Markers</a>
 * <a href="https://codepen.io/lottiefiles/pen/BaEzEeq" target="_blank">dotLottie theming</a>
+* <a href="https://codepen.io/lottiefiles/pen/VwJvdRN" target="_blank">dotLottie Interactivity</a>
 
 ## APIs
 
