@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.8.7
+
+### Patch Changes
+
+- 18f8015: fix(react): 🐛 "Worker is not defined" error in Next.js SSR
+
 ## 0.8.6
 
 ### Patch Changes

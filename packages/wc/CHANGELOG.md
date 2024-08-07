@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.2.15
+
+### Patch Changes
+
+- ceae57f: fix(wc): 🐛 recreate DotLottie instance on reconnect
+
 ## 0.2.14
 
 ### Patch Changes
