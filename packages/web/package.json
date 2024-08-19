@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-web",
-  "version": "0.30.2",
+  "version": "0.30.3",
   "type": "module",
   "description": "Lottie and DotLottie player for the web",
   "repository": {

@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.30.3
+
+### Patch Changes
+
+- 04fc781: fix(web): 🐛 Prevent Worker instantiation during SSR in Next.js environment
+
 ## 0.30.2
 
 ### Patch Changes

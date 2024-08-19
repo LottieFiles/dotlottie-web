@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.0.13
+
+### Patch Changes
+
+- Updated dependencies [04fc781]
+  - @lottiefiles/dotlottie-web@0.30.3
+
 ## 0.0.12
 
 ### Patch Changes
