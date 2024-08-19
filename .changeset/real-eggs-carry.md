@@ -2,4 +2,4 @@
 '@lottiefiles/dotlottie-web': patch
 ---
 
-fix(web): 🐛 ReferenceError: Worker is not defined
+fix(web): 🐛 Prevent Worker instantiation during SSR in Next.js environment
