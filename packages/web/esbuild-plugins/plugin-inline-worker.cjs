@@ -43,9 +43,13 @@ const PluginInlineWorker = (opt = {}, filter = /\?worker&inline$/u) => {
         return {
           loader: 'js',
           contents: `
-            export default class InlinedWorker extends Worker {
+            "use client";
+            export default class InlinedWorker {
               constructor() {
-                super('data:application/javascript;base64,${base64}', {
+                if (typeof window === 'undefined') {
+                  throw new Error('Worker is not available in this environment.');
+                }
+                return new Worker('data:application/javascript;base64,${base64}', {
                   type: '${opt.format === 'esm' ? 'module' : 'classic'}'
                 });
               }
