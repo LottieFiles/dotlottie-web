@@ -435,9 +435,6 @@ export class DotLottieWorker {
 
     const { height, width } = getCanvasSize(this._canvas);
 
-    this._canvas.width = width;
-    this._canvas.height = height;
-
     await this._sendMessage('resize', { height, instanceId: this._id, width });
     await this._updateDotLottieInstanceState();
   }
