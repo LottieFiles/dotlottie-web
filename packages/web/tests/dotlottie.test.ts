@@ -1263,7 +1263,7 @@ describe('addEventListener', () => {
   });
 });
 
-describe.only('setRenderConfig', () => {
+describe('setRenderConfig', () => {
   test('sets custom render config and verifies default behavior', async () => {
     const onLoad = vi.fn();
     const defaultDPR = getDefaultDPR();
