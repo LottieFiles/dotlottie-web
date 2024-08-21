@@ -506,8 +506,10 @@ describe('resize', () => {
 
     await vi.waitFor(() => expect(dotLottie.isPlaying).toBe(true));
 
-    const originalCanvasWidth = canvas.getBoundingClientRect().width * window.devicePixelRatio;
-    const originalCanvasHeight = canvas.getBoundingClientRect().height * window.devicePixelRatio;
+    const originalCanvasWidth =
+      canvas.getBoundingClientRect().width * (dotLottie.renderConfig.devicePixelRatio || window.devicePixelRatio);
+    const originalCanvasHeight =
+      canvas.getBoundingClientRect().height * (dotLottie.renderConfig.devicePixelRatio || window.devicePixelRatio);
 
     expect(canvas.width).toBe(originalCanvasWidth);
     expect(canvas.height).toBe(originalCanvasHeight);
