@@ -1,6 +1,6 @@
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, vi } from 'vitest';
 
-import { hexStringToRGBAInt, isHexColor, isLottie, isDotLottie } from '../src/utils';
+import { hexStringToRGBAInt, isHexColor, isLottie, isDotLottie, getDefaultDPR } from '../src/utils';
 
 import lottieUrl from './__fixtures__/test.json?url';
 import dotLottieUrl from './__fixtures__/test.lottie?url';
@@ -86,5 +86,11 @@ describe('isLottie', () => {
     const buffer = await response.json();
 
     expect(isLottie(buffer)).toBe(true);
+  });
+});
+
+describe('getDefaultDotLottieDPR', () => {
+  test('return 75% of device pixel ratio', () => {
+    expect(getDefaultDPR()).toBe((1 + ((window.devicePixelRatio || 1) - 1)) * 0.75);
   });
 });

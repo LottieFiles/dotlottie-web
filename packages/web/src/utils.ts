@@ -1,4 +1,4 @@
-import { LOTTIE_JSON_MANDATORY_FIELDS, ZIP_SIGNATURE } from './constants';
+import { DEFAULT_DPR_FACTOR, IS_BROWSER, LOTTIE_JSON_MANDATORY_FIELDS, ZIP_SIGNATURE } from './constants';
 
 export function isHexColor(color: string): boolean {
   return /^#([\da-f]{6}|[\da-f]{8})$/iu.test(color);
@@ -50,4 +50,10 @@ export function isLottie(fileData: string | Record<string, unknown>): boolean {
   } else {
     return isLottieJSON(fileData);
   }
+}
+
+export function getDefaultDPR(): number {
+  const dpr = IS_BROWSER ? window.devicePixelRatio : 1;
+
+  return (1 + (dpr - 1)) * DEFAULT_DPR_FACTOR;
 }
