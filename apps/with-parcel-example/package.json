@@ -1,0 +1,17 @@
+{
+  "name": "@lottiefiles/with-parcel-example",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "parcel build index.html --no-cache",
+    "dev": "parcel index.html --no-cache --open",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@lottiefiles/dotlottie-web": "workspace:*"
+  },
+  "devDependencies": {
+    "parcel": "^2.12.0"
+  }
+}
