@@ -38,22 +38,25 @@ const PluginInlineWorker = (opt = {}, filter = /\?worker&inline$/u) => {
         }
 
         const { contents } = outputFiles[0];
-        const base64 = Buffer.from(contents).toString('base64');
+        const uint8Array = new Uint8Array(contents);
 
         return {
           loader: 'js',
           contents: `
             "use client";
-            export default class InlinedWorker {
+            class InlineWorker {
               constructor() {
-                if (typeof window === 'undefined') {
-                  throw new Error('Worker is not available in this environment.');
+                if (typeof Worker === 'undefined') {
+                  throw new Error('Worker is not supported in this environment.');
                 }
-                return new Worker('data:application/javascript;base64,${base64}', {
-                  type: '${opt.format === 'esm' ? 'module' : 'classic'}'
-                });
+                const blob = new Blob([new Uint8Array([${uint8Array.join(',')}])], { type: 'application/javascript' });
+                const url = URL.createObjectURL(blob);
+                const worker = new Worker(url);
+                URL.revokeObjectURL(url);
+                return worker;
               }
             }
+            export default InlineWorker;
           `,
         };
       });
