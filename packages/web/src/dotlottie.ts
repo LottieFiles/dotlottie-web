@@ -5,7 +5,7 @@ import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data } from './types';
-import { hexStringToRGBAInt, isDotLottie, isLottie } from './utils';
+import { getDefaultDPR, hexStringToRGBAInt, isDotLottie, isLottie } from './utils';
 
 const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
   if (mode === 'reverse') {
@@ -94,7 +94,9 @@ export class DotLottie {
 
     this._eventManager = new EventManager();
     this._frameManager = new AnimationFrameManager();
-    this._renderConfig = config.renderConfig ?? {};
+    this._renderConfig = {
+      devicePixelRatio: config.renderConfig?.devicePixelRatio || getDefaultDPR(),
+    };
 
     DotLottieWasmLoader.load()
       .then((module) => {
@@ -681,7 +683,12 @@ export class DotLottie {
   }
 
   public setRenderConfig(config: RenderConfig): void {
-    this._renderConfig = config;
+    this._renderConfig = {
+      ...this._renderConfig,
+      ...config,
+      // devicePixelRatio is a special case, it should be set to the default value if it's not provided
+      devicePixelRatio: config.devicePixelRatio || getDefaultDPR(),
+    };
   }
 
   public loadAnimation(animationId: string): void {

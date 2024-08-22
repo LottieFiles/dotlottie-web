@@ -3,6 +3,7 @@ import type { Marker } from '../core';
 import type { EventType, EventListener, FrameEvent } from '../event-manager';
 import { EventManager } from '../event-manager';
 import type { Config, Layout, Manifest, Mode, RenderConfig } from '../types';
+import { getDefaultDPR } from '../utils';
 
 import type { MethodParamsMap, MethodResultMap, RpcRequest, RpcResponse } from './types';
 import { WorkerManager } from './worker-manager';
@@ -78,7 +79,7 @@ export class DotLottieWorker {
     isFrozen: false,
     useFrameInterpolation: false,
     renderConfig: {
-      devicePixelRatio: window.devicePixelRatio,
+      devicePixelRatio: getDefaultDPR(),
     },
     activeAnimationId: '',
     activeThemeId: '',
@@ -119,7 +120,13 @@ export class DotLottieWorker {
       this._sendMessage('setWasmUrl', { url: DotLottieWorker._wasmUrl });
     }
 
-    this._create(config);
+    this._create({
+      ...config,
+      renderConfig: {
+        ...config.renderConfig,
+        devicePixelRatio: config.renderConfig?.devicePixelRatio || getDefaultDPR(),
+      },
+    });
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this._worker.addEventListener('message', this._handleWorkerEvent.bind(this));
@@ -395,7 +402,15 @@ export class DotLottieWorker {
   public async setRenderConfig(renderConfig: RenderConfig): Promise<void> {
     if (!this._created) return;
 
-    await this._sendMessage('setRenderConfig', { instanceId: this._id, renderConfig });
+    await this._sendMessage('setRenderConfig', {
+      instanceId: this._id,
+      renderConfig: {
+        ...this._dotLottieInstanceState.renderConfig,
+        ...renderConfig,
+        // devicePixelRatio is a special case, it should be set to the default value if it's not provided
+        devicePixelRatio: renderConfig.devicePixelRatio || getDefaultDPR(),
+      },
+    });
     await this._updateDotLottieInstanceState();
   }
 
