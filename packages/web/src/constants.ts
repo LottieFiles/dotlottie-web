@@ -7,3 +7,5 @@ export const LOTTIE_JSON_MANDATORY_FIELDS = ['v', 'ip', 'op', 'layers', 'fr', 'w
 // These values are replace during the build process with the package version and name
 export const PACKAGE_VERSION = '__PACKAGE_VERSION__';
 export const PACKAGE_NAME = '__PACKAGE_NAME__';
+
+export const DEFAULT_DPR_FACTOR = 0.75;

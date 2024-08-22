@@ -2,6 +2,7 @@ import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
 import type { Config, Layout, Mode } from '../src';
 import { DotLottie } from '../src';
+import { getDefaultDPR } from '../src/utils';
 
 import jsonSrc from './__fixtures__/test.json?url';
 import src from './__fixtures__/test.lottie?url';
@@ -505,8 +506,10 @@ describe('resize', () => {
 
     await vi.waitFor(() => expect(dotLottie.isPlaying).toBe(true));
 
-    const originalCanvasWidth = canvas.getBoundingClientRect().width * window.devicePixelRatio;
-    const originalCanvasHeight = canvas.getBoundingClientRect().height * window.devicePixelRatio;
+    const originalCanvasWidth =
+      canvas.getBoundingClientRect().width * (dotLottie.renderConfig.devicePixelRatio || window.devicePixelRatio);
+    const originalCanvasHeight =
+      canvas.getBoundingClientRect().height * (dotLottie.renderConfig.devicePixelRatio || window.devicePixelRatio);
 
     expect(canvas.width).toBe(originalCanvasWidth);
     expect(canvas.height).toBe(originalCanvasHeight);
@@ -1263,8 +1266,9 @@ describe('addEventListener', () => {
 });
 
 describe('setRenderConfig', () => {
-  test('setRenderConfig() sets the render config', async () => {
+  test('sets custom render config and verifies default behavior', async () => {
     const onLoad = vi.fn();
+    const defaultDPR = getDefaultDPR();
 
     dotLottie = new DotLottie({
       canvas,
@@ -1277,11 +1281,42 @@ describe('setRenderConfig', () => {
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
 
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(defaultDPR);
+
     dotLottie.setRenderConfig({
       devicePixelRatio: 0.2,
     });
 
     expect(dotLottie.renderConfig.devicePixelRatio).toBe(0.2);
+  });
+
+  test('reverts to default devicePixelRatio when set to 0 and reset', async () => {
+    const onLoad = vi.fn();
+    const defaultDPR = getDefaultDPR();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+      renderConfig: {
+        devicePixelRatio: 0.5,
+      },
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(0.5);
+
+    dotLottie.setRenderConfig({
+      devicePixelRatio: 0.2,
+    });
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(0.2);
+
+    dotLottie.setRenderConfig({});
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(defaultDPR);
   });
 });
 

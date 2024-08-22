@@ -3,6 +3,7 @@ import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 import { DotLottieWorker as DotLottie } from '../src';
 import type { Config, Layout, Mode } from '../src';
 import wasmUrl from '../src/core/dotlottie-player.wasm?url';
+import { getDefaultDPR } from '../src/utils';
 
 import baseJsonSrc from './__fixtures__/test.json?url';
 import baseSrc from './__fixtures__/test.lottie?url';
@@ -1253,8 +1254,9 @@ describe('addEventListener', () => {
 });
 
 describe('setRenderConfig', () => {
-  test('setRenderConfig() sets the render config', async () => {
+  test('sets custom render config and verifies default behavior', async () => {
     const onLoad = vi.fn();
+    const defaultDPR = getDefaultDPR();
 
     dotLottie = new DotLottie({
       canvas,
@@ -1267,11 +1269,42 @@ describe('setRenderConfig', () => {
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
 
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(defaultDPR);
+
     await dotLottie.setRenderConfig({
       devicePixelRatio: 0.2,
     });
 
     expect(dotLottie.renderConfig.devicePixelRatio).toBe(0.2);
+  });
+
+  test('reverts to default devicePixelRatio when set to 0 and reset', async () => {
+    const onLoad = vi.fn();
+    const defaultDPR = getDefaultDPR();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+      renderConfig: {
+        devicePixelRatio: 0.5,
+      },
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(0.5);
+
+    await dotLottie.setRenderConfig({
+      devicePixelRatio: 0.2,
+    });
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(0.2);
+
+    await dotLottie.setRenderConfig({});
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(defaultDPR);
   });
 });
 
