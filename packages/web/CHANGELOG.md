@@ -1,5 +1,16 @@
 # @lottiefiles/dotlottie-web
 
+## 0.31.0
+
+### Minor Changes
+
+- 03311db: feat(web): 🎸 adjust default dpr to 75% of the machine dpr if greater than 1
+
+### Patch Changes
+
+- e34ac54: fix(web): 🐛 Resolved Parcel build failure by creating Worker using a Blob instead of a string literal.
+- 8e6f572: fix(web): address canvas resizing issue in DotLottieWorker after transferControlToOffscreen()
+
 ## 0.30.3
 
 ### Patch Changes
