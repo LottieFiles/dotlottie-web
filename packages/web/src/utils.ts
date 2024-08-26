@@ -55,5 +55,5 @@ export function isLottie(fileData: string | Record<string, unknown>): boolean {
 export function getDefaultDPR(): number {
   const dpr = IS_BROWSER ? window.devicePixelRatio : 1;
 
-  return (1 + (dpr - 1)) * DEFAULT_DPR_FACTOR;
+  return 1 + (dpr - 1) * DEFAULT_DPR_FACTOR;
 }
