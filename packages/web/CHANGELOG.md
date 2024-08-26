@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.31.1
+
+### Patch Changes
+
+- dd70edf: fix(web): 🐛 incorrect default dpr
+
 ## 0.31.0
 
 ### Minor Changes
