@@ -91,6 +91,6 @@ describe('isLottie', () => {
 
 describe('getDefaultDotLottieDPR', () => {
   test('return 75% of device pixel ratio', () => {
-    expect(getDefaultDPR()).toBe((1 + ((window.devicePixelRatio || 1) - 1)) * 0.75);
+    expect(getDefaultDPR()).toBe(1 + (window.devicePixelRatio - 1) * 0.75);
   });
 });
