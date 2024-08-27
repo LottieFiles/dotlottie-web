@@ -194,14 +194,10 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   useEffect(() => {
     if (!dotLottieRef.current) return;
 
-    if (
-      typeof config?.segment === 'object' &&
-      Array.isArray(config.segment) &&
-      config.segment.length === 2
-    ) {
-      const startFrame = config.segment[0];
-      const endFrame = config.segment[1];
+    const startFrame = config?.segment?.[0];
+    const endFrame = config?.segment?.[1];
 
+    if (typeof startFrame === 'number' && typeof endFrame === 'number') {
       dotLottieRef.current.setSegment(startFrame, endFrame);
     }
   }, [config?.segment]);
