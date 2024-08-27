@@ -2,6 +2,7 @@ import { IS_BROWSER } from '../constants';
 import type { Marker } from '../core';
 import type { EventType, EventListener, FrameEvent } from '../event-manager';
 import { EventManager } from '../event-manager';
+import { OffscreenObserver } from '../offscreen-observer';
 import type { Config, Layout, Manifest, Mode, RenderConfig } from '../types';
 import { getDefaultDPR } from '../utils';
 
@@ -125,6 +126,8 @@ export class DotLottieWorker {
       renderConfig: {
         ...config.renderConfig,
         devicePixelRatio: config.renderConfig?.devicePixelRatio || getDefaultDPR(),
+        // freezeOnOffscreen is true by default to prevent unnecessary rendering when the canvas is offscreen
+        freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
       },
     });
 
@@ -203,6 +206,15 @@ export class DotLottieWorker {
       if (rpcResponse.method === 'onPlay' && rpcResponse.result.instanceId === this._id) {
         await this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
+
+        // start observing the canvas for offscreen changes
+        if (
+          IS_BROWSER &&
+          this._canvas instanceof HTMLCanvasElement &&
+          this._dotLottieInstanceState.renderConfig.freezeOnOffscreen
+        ) {
+          OffscreenObserver.observe(this._canvas, this);
+        }
       }
 
       if (rpcResponse.method === 'onStop' && rpcResponse.result.instanceId === this._id) {
@@ -402,16 +414,28 @@ export class DotLottieWorker {
   public async setRenderConfig(renderConfig: RenderConfig): Promise<void> {
     if (!this._created) return;
 
+    const { devicePixelRatio, freezeOnOffscreen, ...restConfig } = renderConfig;
+
     await this._sendMessage('setRenderConfig', {
       instanceId: this._id,
       renderConfig: {
         ...this._dotLottieInstanceState.renderConfig,
-        ...renderConfig,
+        ...restConfig,
         // devicePixelRatio is a special case, it should be set to the default value if it's not provided
-        devicePixelRatio: renderConfig.devicePixelRatio || getDefaultDPR(),
+        devicePixelRatio: devicePixelRatio || getDefaultDPR(),
+        freezeOnOffscreen: freezeOnOffscreen ?? true,
       },
     });
+
     await this._updateDotLottieInstanceState();
+
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      if (this._dotLottieInstanceState.renderConfig.freezeOnOffscreen) {
+        OffscreenObserver.observe(this._canvas, this);
+      } else {
+        OffscreenObserver.unobserve(this._canvas);
+      }
+    }
   }
 
   public async setUseFrameInterpolation(useFrameInterpolation: boolean): Promise<void> {
@@ -465,6 +489,10 @@ export class DotLottieWorker {
 
     DotLottieWorker._workerManager.unassignAnimationFromWorker(this._id);
     this._eventManager.removeAllEventListeners();
+
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      OffscreenObserver.unobserve(this._canvas);
+    }
   }
 
   public async freeze(): Promise<void> {

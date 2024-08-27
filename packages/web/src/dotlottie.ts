@@ -97,6 +97,8 @@ export class DotLottie {
     this._frameManager = new AnimationFrameManager();
     this._renderConfig = {
       devicePixelRatio: config.renderConfig?.devicePixelRatio || getDefaultDPR(),
+      // freezeOnOffscreen is true by default to prevent unnecessary rendering when the canvas is offscreen
+      freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
     };
 
     DotLottieWasmLoader.load()
@@ -692,12 +694,23 @@ export class DotLottie {
   }
 
   public setRenderConfig(config: RenderConfig): void {
+    const { devicePixelRatio, freezeOnOffscreen, ...restConfig } = config;
+
     this._renderConfig = {
       ...this._renderConfig,
-      ...config,
+      ...restConfig,
       // devicePixelRatio is a special case, it should be set to the default value if it's not provided
-      devicePixelRatio: config.devicePixelRatio || getDefaultDPR(),
+      devicePixelRatio: devicePixelRatio || getDefaultDPR(),
+      freezeOnOffscreen: freezeOnOffscreen ?? true,
     };
+
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      if (this._renderConfig.freezeOnOffscreen) {
+        OffscreenObserver.observe(this._canvas, this);
+      } else {
+        OffscreenObserver.unobserve(this._canvas);
+      }
+    }
   }
 
   public loadAnimation(animationId: string): void {
