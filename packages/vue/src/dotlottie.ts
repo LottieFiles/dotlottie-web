@@ -98,8 +98,13 @@ export const DotLottieVue = defineComponent({
     watch(
       () => segment?.value,
       (newVal) => {
-        if (dotLottie && Array.isArray(newVal) && newVal.length === 2) {
-          dotLottie.setSegment(newVal[0], newVal[1]);
+        if (!dotLottie) return;
+
+        const startFrame = newVal?.[0];
+        const endFrame = newVal?.[1];
+
+        if (typeof startFrame === 'number' && typeof endFrame === 'number') {
+          dotLottie.setSegment(startFrame, endFrame);
         }
       },
     );
