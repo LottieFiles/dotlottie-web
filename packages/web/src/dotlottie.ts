@@ -6,7 +6,7 @@ import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
 import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data } from './types';
-import { getDefaultDPR, hexStringToRGBAInt, isDotLottie, isLottie } from './utils';
+import { getDefaultDPR, hexStringToRGBAInt, isDotLottie, isElementInViewport, isLottie } from './utils';
 
 const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
   if (mode === 'reverse') {
@@ -530,6 +530,20 @@ export class DotLottie {
       this._eventManager.dispatch({ type: 'play' });
       this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
     }
+
+    /* 
+      Check if the canvas is offscreen and freezing is enabled
+      If freezeOnOffscreen is true and the canvas is currently outside the viewport,
+      we immediately freeze the animation to avoid unnecessary rendering and performance overhead.
+    */
+    if (
+      IS_BROWSER &&
+      this._canvas instanceof HTMLCanvasElement &&
+      this._renderConfig.freezeOnOffscreen &&
+      !isElementInViewport(this._canvas)
+    ) {
+      this.freeze();
+    }
   }
 
   public pause(): void {
@@ -709,6 +723,11 @@ export class DotLottie {
         OffscreenObserver.observe(this._canvas, this);
       } else {
         OffscreenObserver.unobserve(this._canvas);
+        // If the animation was previously frozen, we need to unfreeze it now
+        // to ensure it resumes rendering when the canvas is back onscreen.
+        if (this._isFrozen) {
+          this.unfreeze();
+        }
       }
     }
   }
