@@ -58,3 +58,5 @@ tsdoc-metadata.json
 
 # Typescript
 *.tsbuildinfo
+
+.parcel-cache/

@@ -3,6 +3,7 @@ import type { Marker } from '../core';
 import type { EventType, EventListener, FrameEvent } from '../event-manager';
 import { EventManager } from '../event-manager';
 import type { Config, Layout, Manifest, Mode, RenderConfig } from '../types';
+import { getDefaultDPR } from '../utils';
 
 import type { MethodParamsMap, MethodResultMap, RpcRequest, RpcResponse } from './types';
 import { WorkerManager } from './worker-manager';
@@ -78,7 +79,7 @@ export class DotLottieWorker {
     isFrozen: false,
     useFrameInterpolation: false,
     renderConfig: {
-      devicePixelRatio: window.devicePixelRatio,
+      devicePixelRatio: getDefaultDPR(),
     },
     activeAnimationId: '',
     activeThemeId: '',
@@ -91,6 +92,18 @@ export class DotLottieWorker {
   private static _wasmUrl: string = '';
 
   private _created: boolean = false;
+
+  private readonly _pointerUpMethod: (event: PointerEvent) => void;
+
+  private readonly _pointerDownMethod: (event: PointerEvent) => void;
+
+  private readonly _pointerMoveMethod: (event: PointerEvent) => void;
+
+  private readonly _pointerEnterMethod: (event: PointerEvent) => void;
+
+  private readonly _pointerExitMethod: (event: PointerEvent) => void;
+
+  private readonly _onCompleteMethod: EventListener<'complete'>;
 
   public constructor(config: Config & { workerId?: string }) {
     this._canvas = config.canvas;
@@ -107,10 +120,28 @@ export class DotLottieWorker {
       this._sendMessage('setWasmUrl', { url: DotLottieWorker._wasmUrl });
     }
 
-    this._create(config);
+    this._create({
+      ...config,
+      renderConfig: {
+        ...config.renderConfig,
+        devicePixelRatio: config.renderConfig?.devicePixelRatio || getDefaultDPR(),
+      },
+    });
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this._worker.addEventListener('message', this._handleWorkerEvent.bind(this));
+
+    this._pointerUpMethod = this._onPointerUp.bind(this);
+
+    this._pointerDownMethod = this._onPointerDown.bind(this);
+
+    this._pointerMoveMethod = this._onPointerMove.bind(this);
+
+    this._pointerEnterMethod = this._onPointerEnter.bind(this);
+
+    this._pointerExitMethod = this._onPointerLeave.bind(this);
+
+    this._onCompleteMethod = this._onComplete.bind(this);
   }
 
   private async _handleWorkerEvent(event: MessageEvent): Promise<void> {
@@ -371,7 +402,15 @@ export class DotLottieWorker {
   public async setRenderConfig(renderConfig: RenderConfig): Promise<void> {
     if (!this._created) return;
 
-    await this._sendMessage('setRenderConfig', { instanceId: this._id, renderConfig });
+    await this._sendMessage('setRenderConfig', {
+      instanceId: this._id,
+      renderConfig: {
+        ...this._dotLottieInstanceState.renderConfig,
+        ...renderConfig,
+        // devicePixelRatio is a special case, it should be set to the default value if it's not provided
+        devicePixelRatio: renderConfig.devicePixelRatio || getDefaultDPR(),
+      },
+    });
     await this._updateDotLottieInstanceState();
   }
 
@@ -410,9 +449,6 @@ export class DotLottieWorker {
     if (!this._created) return;
 
     const { height, width } = getCanvasSize(this._canvas);
-
-    this._canvas.width = width;
-    this._canvas.height = height;
 
     await this._sendMessage('resize', { height, instanceId: this._id, width });
     await this._updateDotLottieInstanceState();
@@ -586,8 +622,8 @@ export class DotLottieWorker {
     return this._sendMessage('stopStateMachine', { instanceId: this._id });
   }
 
-  public async postStateMachineEvent(event: string): Promise<boolean> {
-    if (!this._created) return false;
+  public async postStateMachineEvent(event: string): Promise<number> {
+    if (!this._created) return 1;
 
     return this._sendMessage('postStateMachineEvent', { event, instanceId: this._id });
   }
@@ -652,39 +688,39 @@ export class DotLottieWorker {
       const listeners = await this._sendMessage('getStateMachineListeners', { instanceId: this._id });
 
       if (listeners.includes('PointerUp')) {
-        this._canvas.addEventListener('pointerup', this._onPointerUp.bind(this));
+        this._canvas.addEventListener('pointerup', this._pointerUpMethod);
       }
 
       if (listeners.includes('PointerDown')) {
-        this._canvas.addEventListener('pointerdown', this._onPointerDown.bind(this));
+        this._canvas.addEventListener('pointerdown', this._pointerDownMethod);
       }
 
       if (listeners.includes('PointerMove')) {
-        this._canvas.addEventListener('pointermove', this._onPointerMove.bind(this));
+        this._canvas.addEventListener('pointermove', this._pointerMoveMethod);
       }
 
       if (listeners.includes('PointerEnter')) {
-        this._canvas.addEventListener('pointerenter', this._onPointerEnter.bind(this));
+        this._canvas.addEventListener('pointerenter', this._pointerEnterMethod);
       }
 
       if (listeners.includes('PointerExit')) {
-        this._canvas.addEventListener('pointerleave', this._onPointerLeave.bind(this));
+        this._canvas.addEventListener('pointerleave', this._pointerExitMethod);
       }
 
       if (listeners.includes('Complete')) {
-        this.addEventListener('complete', this._onComplete.bind(this));
+        this.addEventListener('complete', this._onCompleteMethod);
       }
     }
   }
 
   private _cleanupStateMachineListeners(): void {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
-      this._canvas.removeEventListener('pointerup', this._onPointerUp.bind(this));
-      this._canvas.removeEventListener('pointerdown', this._onPointerDown.bind(this));
-      this._canvas.removeEventListener('pointermove', this._onPointerMove.bind(this));
-      this._canvas.removeEventListener('pointerenter', this._onPointerEnter.bind(this));
-      this._canvas.removeEventListener('pointerleave', this._onPointerLeave.bind(this));
-      this.removeEventListener('complete', this._onComplete.bind(this));
+      this._canvas.removeEventListener('pointerup', this._pointerUpMethod);
+      this._canvas.removeEventListener('pointerdown', this._pointerDownMethod);
+      this._canvas.removeEventListener('pointermove', this._pointerMoveMethod);
+      this._canvas.removeEventListener('pointerenter', this._pointerEnterMethod);
+      this._canvas.removeEventListener('pointerleave', this._pointerExitMethod);
+      this.removeEventListener('complete', this._onCompleteMethod);
     }
   }
 }

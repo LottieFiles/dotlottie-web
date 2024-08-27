@@ -215,7 +215,7 @@ export interface MethodResultMap {
   };
   pause: void;
   play: void;
-  postStateMachineEvent: boolean;
+  postStateMachineEvent: number;
   resize: void;
   setBackgroundColor: void;
   setFrame: void;

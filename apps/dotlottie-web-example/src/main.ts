@@ -133,6 +133,10 @@ app.innerHTML = `
       <button id="start_sm">Start State Machine</button>
       <button id="end_sm">End State Machine</button>
     </div>
+
+    <div>
+      <button id="resize" class="control-button">Resize</button>
+    </div>
   </div>
 </div>
 `;
@@ -229,6 +233,8 @@ fetch(
     const alignSelect = document.getElementById('align') as HTMLSelectElement;
     const stateMachinesSelect = document.getElementById('states') as HTMLSelectElement;
 
+    const resizeButton = document.getElementById('resize') as HTMLButtonElement;
+
     let animationIdx = 0;
 
     nextAnimationButton.addEventListener('click', () => {
@@ -245,6 +251,10 @@ fetch(
           dotLottie.loadAnimation(animationId);
         }
       }
+    });
+
+    resizeButton.addEventListener('click', () => {
+      dotLottie.resize();
     });
 
     freezeButton.addEventListener('click', () => {

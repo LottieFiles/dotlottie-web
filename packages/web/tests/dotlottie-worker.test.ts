@@ -1,8 +1,9 @@
 import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
-import { DotLottieWorker as DotLottie } from '../dist';
-import type { Config, Layout, Mode } from '../dist';
+import { DotLottieWorker as DotLottie } from '../src';
+import type { Config, Layout, Mode } from '../src';
 import wasmUrl from '../src/core/dotlottie-player.wasm?url';
+import { getDefaultDPR } from '../src/utils';
 
 import baseJsonSrc from './__fixtures__/test.json?url';
 import baseSrc from './__fixtures__/test.lottie?url';
@@ -103,7 +104,7 @@ describe('play', () => {
 
     await dotLottie.play();
 
-    expect(onPlay).toHaveBeenCalledTimes(1);
+    expect(onPlay).toHaveBeenCalledTimes(2);
   });
 
   describe.each<Option>([
@@ -766,7 +767,11 @@ describe('load', () => {
 
     expect(onLoadError).toHaveBeenCalledWith({
       type: 'loadError',
-      error: new Error('Unsupported data type for animation data. Expected a string or ArrayBuffer.'),
+      error: new Error(`Unsupported data type for animation data. Expected: 
+          - string (Lottie JSON),
+          - ArrayBuffer (dotLottie),
+          - object (Lottie JSON). 
+          Received: number`),
     });
   });
 
@@ -1249,8 +1254,9 @@ describe('addEventListener', () => {
 });
 
 describe('setRenderConfig', () => {
-  test('setRenderConfig() sets the render config', async () => {
+  test('sets custom render config and verifies default behavior', async () => {
     const onLoad = vi.fn();
+    const defaultDPR = getDefaultDPR();
 
     dotLottie = new DotLottie({
       canvas,
@@ -1263,11 +1269,42 @@ describe('setRenderConfig', () => {
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
 
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(defaultDPR);
+
     await dotLottie.setRenderConfig({
       devicePixelRatio: 0.2,
     });
 
     expect(dotLottie.renderConfig.devicePixelRatio).toBe(0.2);
+  });
+
+  test('reverts to default devicePixelRatio when set to 0 and reset', async () => {
+    const onLoad = vi.fn();
+    const defaultDPR = getDefaultDPR();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+      renderConfig: {
+        devicePixelRatio: 0.5,
+      },
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(0.5);
+
+    await dotLottie.setRenderConfig({
+      devicePixelRatio: 0.2,
+    });
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(0.2);
+
+    await dotLottie.setRenderConfig({});
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(defaultDPR);
   });
 });
 

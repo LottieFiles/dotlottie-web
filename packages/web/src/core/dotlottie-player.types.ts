@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-namespace */
-
+// TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
   let HEAPF64: unknown;
   let HEAP_DATA_VIEW: unknown;
@@ -97,7 +97,7 @@ export interface DotLottiePlayer {
   markers(): VectorMarker;
   pause(): boolean;
   play(): boolean;
-  postEventPayload(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
+  postEventPayload(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): number;
   render(): boolean;
   requestFrame(): number;
   resize(_0: number, _1: number): boolean;

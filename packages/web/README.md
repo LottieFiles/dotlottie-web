@@ -113,6 +113,7 @@ const dotLottie = new DotLottie({
 * <a href="https://codepen.io/lottiefiles/pen/LYvZveR" target="_blank">Advanced Animation Layout</a>
 * <a href="https://codepen.io/lottiefiles/pen/RwOROKp" target="_blank">Named Markers</a>
 * <a href="https://codepen.io/lottiefiles/pen/BaEzEeq" target="_blank">dotLottie theming</a>
+* <a href="https://codepen.io/lottiefiles/pen/VwJvdRN" target="_blank">dotLottie Interactivity</a>
 
 ## APIs
 
@@ -142,8 +143,8 @@ The `layout` object accepts the following properties:
 
 | Property name | Type              | Required | Default     | Description                                                                                                                                                 |
 | ------------- | ----------------- | :------: | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fit`         | string            |          | "contain"   | The fit mode of the animation. Accepts "contain", "cover", "fill", "fit-width", "fit-height" and "none".                                                    |
-| `align`       | \[number, number] |          | \[0.5, 0.5] | The alignment of the animation in the canvas. Origin is at the top-left corner where \[0, 0] is the top-left corner and \[1, 1] is the bottom-right corner. |
+| `fit`         | string            |    ✔️     | "contain"   | The fit mode of the animation. Accepts "contain", "cover", "fill", "fit-width", "fit-height" and "none".                                                    |
+| `align`       | \[number, number] |    ✔️     | \[0.5, 0.5] | The alignment of the animation in the canvas. Origin is at the top-left corner where \[0, 0] is the top-left corner and \[1, 1] is the bottom-right corner. |
 
 #### RenderConfig
 

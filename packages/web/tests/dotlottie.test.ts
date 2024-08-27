@@ -2,6 +2,7 @@ import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
 import type { Config, Layout, Mode } from '../src';
 import { DotLottie } from '../src';
+import { getDefaultDPR } from '../src/utils';
 
 import jsonSrc from './__fixtures__/test.json?url';
 import src from './__fixtures__/test.lottie?url';
@@ -97,7 +98,7 @@ describe('play', () => {
 
     dotLottie.play();
 
-    expect(onPlay).toHaveBeenCalledTimes(1);
+    expect(onPlay).toHaveBeenCalledTimes(2);
   });
 
   describe.each<Option>([
@@ -505,8 +506,10 @@ describe('resize', () => {
 
     await vi.waitFor(() => expect(dotLottie.isPlaying).toBe(true));
 
-    const originalCanvasWidth = canvas.getBoundingClientRect().width * window.devicePixelRatio;
-    const originalCanvasHeight = canvas.getBoundingClientRect().height * window.devicePixelRatio;
+    const originalCanvasWidth =
+      canvas.getBoundingClientRect().width * (dotLottie.renderConfig.devicePixelRatio || window.devicePixelRatio);
+    const originalCanvasHeight =
+      canvas.getBoundingClientRect().height * (dotLottie.renderConfig.devicePixelRatio || window.devicePixelRatio);
 
     expect(canvas.width).toBe(originalCanvasWidth);
     expect(canvas.height).toBe(originalCanvasHeight);
@@ -734,6 +737,11 @@ describe('load', () => {
 
     await vi.waitFor(() => expect(onLoadError).toHaveBeenCalledTimes(1));
 
+    expect(onLoadError).toHaveBeenCalledWith({
+      type: 'loadError',
+      error: new Error('Invalid Lottie JSON string: The provided string does not conform to the Lottie JSON format.'),
+    });
+
     expect(dotLottie.isLoaded).toBe(false);
   });
 
@@ -750,6 +758,13 @@ describe('load', () => {
     expect(dotLottie.isLoaded).toBe(false);
 
     await vi.waitFor(() => expect(onLoadError).toHaveBeenCalledTimes(1));
+
+    expect(onLoadError).toHaveBeenCalledWith({
+      type: 'loadError',
+      error: new Error(
+        'Invalid dotLottie ArrayBuffer: The provided ArrayBuffer does not conform to the dotLottie format.',
+      ),
+    });
 
     expect(dotLottie.isLoaded).toBe(false);
   });
@@ -768,7 +783,11 @@ describe('load', () => {
 
     expect(onLoadError).toHaveBeenCalledWith({
       type: 'loadError',
-      error: new Error('Unsupported data type for animation data. Expected a string or ArrayBuffer.'),
+      error: new Error(`Unsupported data type for animation data. Expected: 
+          - string (Lottie JSON),
+          - ArrayBuffer (dotLottie),
+          - object (Lottie JSON). 
+          Received: number`),
     });
   });
 
@@ -1247,8 +1266,9 @@ describe('addEventListener', () => {
 });
 
 describe('setRenderConfig', () => {
-  test('setRenderConfig() sets the render config', async () => {
+  test('sets custom render config and verifies default behavior', async () => {
     const onLoad = vi.fn();
+    const defaultDPR = getDefaultDPR();
 
     dotLottie = new DotLottie({
       canvas,
@@ -1261,11 +1281,42 @@ describe('setRenderConfig', () => {
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
 
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(defaultDPR);
+
     dotLottie.setRenderConfig({
       devicePixelRatio: 0.2,
     });
 
     expect(dotLottie.renderConfig.devicePixelRatio).toBe(0.2);
+  });
+
+  test('reverts to default devicePixelRatio when set to 0 and reset', async () => {
+    const onLoad = vi.fn();
+    const defaultDPR = getDefaultDPR();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+      renderConfig: {
+        devicePixelRatio: 0.5,
+      },
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(0.5);
+
+    dotLottie.setRenderConfig({
+      devicePixelRatio: 0.2,
+    });
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(0.2);
+
+    dotLottie.setRenderConfig({});
+    expect(dotLottie.renderConfig.devicePixelRatio).toBe(defaultDPR);
   });
 });
 

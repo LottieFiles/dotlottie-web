@@ -5,8 +5,8 @@ import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
-import type { Mode, Fit, Data, Config, Layout, Manifest, RenderConfig } from './types';
-import { hexStringToRGBAInt } from './utils';
+import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data } from './types';
+import { getDefaultDPR, hexStringToRGBAInt, isDotLottie, isLottie } from './utils';
 
 const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
   if (mode === 'reverse') {
@@ -77,14 +77,26 @@ export class DotLottie {
 
   private _backgroundColor: string | null = null;
 
+  private readonly _pointerUpMethod: (event: PointerEvent) => void;
+
+  private readonly _pointerDownMethod: (event: PointerEvent) => void;
+
+  private readonly _pointerMoveMethod: (event: PointerEvent) => void;
+
+  private readonly _pointerEnterMethod: (event: PointerEvent) => void;
+
+  private readonly _pointerExitMethod: (event: PointerEvent) => void;
+
+  private readonly _onCompleteMethod: EventListener<'complete'>;
+
   public constructor(config: Config) {
     this._canvas = config.canvas;
     this._context = this._canvas.getContext('2d');
 
     this._eventManager = new EventManager();
     this._frameManager = new AnimationFrameManager();
-    this._renderConfig = config.renderConfig ?? {
-      freezeOnOffscreen: true,
+    this._renderConfig = {
+      devicePixelRatio: config.renderConfig?.devicePixelRatio || getDefaultDPR(),
     };
 
     DotLottieWasmLoader.load()
@@ -126,41 +138,40 @@ export class DotLottie {
           error: new Error(`Failed to load wasm module: ${error}`),
         });
       });
+
+    this._pointerUpMethod = this._onPointerUp.bind(this);
+
+    this._pointerDownMethod = this._onPointerDown.bind(this);
+
+    this._pointerMoveMethod = this._onPointerMove.bind(this);
+
+    this._pointerEnterMethod = this._onPointerEnter.bind(this);
+
+    this._pointerExitMethod = this._onPointerLeave.bind(this);
+
+    this._onCompleteMethod = this._onComplete.bind(this);
   }
 
-  private _loadFromSrc(src: string): void {
-    async function load(): Promise<string | ArrayBuffer> {
-      const response = await fetch(src);
+  private _dispatchError(message: string): void {
+    console.error(message);
+    this._eventManager.dispatch({ type: 'loadError', error: new Error(message) });
+  }
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch the animation data from URL: ${src}. ${response.status}: ${response.statusText}`,
-        );
-      }
+  private async _fetchData(src: string): Promise<string | ArrayBuffer> {
+    const response = await fetch(src);
 
-      const contentType = (response.headers.get('content-type') ?? '').trim();
+    if (!response.ok) {
+      throw new Error(`Failed to fetch animation data from URL: ${src}. ${response.status}: ${response.statusText}`);
+    }
 
-      let data: string | ArrayBuffer;
+    const data = await response.arrayBuffer();
 
-      if (['application/json', 'text/plain'].some((type) => contentType.startsWith(type))) {
-        data = await response.text();
-      } else {
-        data = await response.arrayBuffer();
-      }
-
+    if (isDotLottie(data)) {
       return data;
     }
 
-    load()
-      .then((data) => {
-        this._loadFromData(data);
-      })
-      .catch((error) => {
-        this._eventManager.dispatch({
-          type: 'loadError',
-          error: new Error(`Failed to load animation data from URL: ${src}. ${error}`),
-        });
-      });
+    // eslint-disable-next-line node/no-unsupported-features/node-builtins
+    return new TextDecoder().decode(data);
   }
 
   private _loadFromData(data: Data): void {
@@ -172,16 +183,40 @@ export class DotLottie {
     let loaded = false;
 
     if (typeof data === 'string') {
+      if (!isLottie(data)) {
+        this._dispatchError(
+          'Invalid Lottie JSON string: The provided string does not conform to the Lottie JSON format.',
+        );
+
+        return;
+      }
       loaded = this._dotLottieCore.loadAnimationData(data, width, height);
     } else if (data instanceof ArrayBuffer) {
+      if (!isDotLottie(data)) {
+        this._dispatchError(
+          'Invalid dotLottie ArrayBuffer: The provided ArrayBuffer does not conform to the dotLottie format.',
+        );
+
+        return;
+      }
       loaded = this._dotLottieCore.loadDotLottieData(data, width, height);
     } else if (typeof data === 'object') {
+      if (!isLottie(data as Record<string, unknown>)) {
+        this._dispatchError(
+          'Invalid Lottie JSON object: The provided object does not conform to the Lottie JSON format.',
+        );
+
+        return;
+      }
       loaded = this._dotLottieCore.loadAnimationData(JSON.stringify(data), width, height);
     } else {
-      this._eventManager.dispatch({
-        type: 'loadError',
-        error: new Error('Unsupported data type for animation data. Expected a string or ArrayBuffer.'),
-      });
+      this._dispatchError(
+        `Unsupported data type for animation data. Expected: 
+          - string (Lottie JSON),
+          - ArrayBuffer (dotLottie),
+          - object (Lottie JSON). 
+          Received: ${typeof data}`,
+      );
 
       return;
     }
@@ -214,11 +249,14 @@ export class DotLottie {
         OffscreenObserver.observe(this._canvas, this);
       }
     } else {
-      this._eventManager.dispatch({
-        type: 'loadError',
-        error: new Error('Failed to load animation data'),
-      });
+      this._dispatchError('Failed to load animation data');
     }
+  }
+
+  private _loadFromSrc(src: string): void {
+    this._fetchData(src)
+      .then((data) => this._loadFromData(data))
+      .catch((error) => this._dispatchError(`Failed to load animation data from URL: ${src}. ${error}`));
   }
 
   public get activeAnimationId(): string | undefined {
@@ -485,9 +523,8 @@ export class DotLottie {
 
     const ok = this._dotLottieCore.play();
 
-    this._isFrozen = false;
-
-    if (ok) {
+    if (ok || this._dotLottieCore.isPlaying()) {
+      this._isFrozen = false;
       this._eventManager.dispatch({ type: 'play' });
       this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
     }
@@ -498,7 +535,7 @@ export class DotLottie {
 
     const ok = this._dotLottieCore.pause();
 
-    if (ok) {
+    if (ok || this._dotLottieCore.isPaused()) {
       this._eventManager.dispatch({ type: 'pause' });
     }
   }
@@ -655,7 +692,12 @@ export class DotLottie {
   }
 
   public setRenderConfig(config: RenderConfig): void {
-    this._renderConfig = config;
+    this._renderConfig = {
+      ...this._renderConfig,
+      ...config,
+      // devicePixelRatio is a special case, it should be set to the default value if it's not provided
+      devicePixelRatio: config.devicePixelRatio || getDefaultDPR(),
+    };
   }
 
   public loadAnimation(animationId: string): void {
@@ -825,8 +867,18 @@ export class DotLottie {
    * @param event - The event to be posted to the state machine
    * @returns boolean - true if the event was posted successfully, false otherwise
    */
-  public postStateMachineEvent(event: string): boolean {
-    return this._dotLottieCore?.postEventPayload(event) ?? false;
+  public postStateMachineEvent(event: string): number {
+    const rt = this._dotLottieCore?.postEventPayload(event) ?? 1;
+
+    if (rt === 2) {
+      this.play();
+    } else if (rt === 3) {
+      this.pause();
+    } else if (rt === 4) {
+      this._render();
+    }
+
+    return rt;
   }
 
   public getStateMachineListeners(): string[] {
@@ -848,39 +900,39 @@ export class DotLottie {
       const listeners = this.getStateMachineListeners();
 
       if (listeners.includes('PointerUp')) {
-        this._canvas.addEventListener('pointerup', this._onPointerUp.bind(this));
+        this._canvas.addEventListener('pointerup', this._pointerUpMethod);
       }
 
       if (listeners.includes('PointerDown')) {
-        this._canvas.addEventListener('pointerdown', this._onPointerDown.bind(this));
+        this._canvas.addEventListener('pointerdown', this._pointerDownMethod);
       }
 
       if (listeners.includes('PointerMove')) {
-        this._canvas.addEventListener('pointermove', this._onPointerMove.bind(this));
+        this._canvas.addEventListener('pointermove', this._pointerMoveMethod);
       }
 
       if (listeners.includes('PointerEnter')) {
-        this._canvas.addEventListener('pointerenter', this._onPointerEnter.bind(this));
+        this._canvas.addEventListener('pointerenter', this._pointerEnterMethod);
       }
 
       if (listeners.includes('PointerExit')) {
-        this._canvas.addEventListener('pointerleave', this._onPointerLeave.bind(this));
+        this._canvas.addEventListener('pointerleave', this._pointerExitMethod);
       }
 
       if (listeners.includes('Complete')) {
-        this.addEventListener('complete', this._onComplete.bind(this));
+        this.addEventListener('complete', this._onCompleteMethod);
       }
     }
   }
 
   private _cleanupStateMachineListeners(): void {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
-      this._canvas.removeEventListener('pointerup', this._onPointerUp.bind(this));
-      this._canvas.removeEventListener('pointerdown', this._onPointerDown.bind(this));
-      this._canvas.removeEventListener('pointermove', this._onPointerMove.bind(this));
-      this._canvas.removeEventListener('pointerenter', this._onPointerEnter.bind(this));
-      this._canvas.removeEventListener('pointerleave', this._onPointerLeave.bind(this));
-      this.removeEventListener('complete', this._onComplete.bind(this));
+      this._canvas.removeEventListener('pointerup', this._pointerUpMethod);
+      this._canvas.removeEventListener('pointerdown', this._pointerDownMethod);
+      this._canvas.removeEventListener('pointermove', this._pointerMoveMethod);
+      this._canvas.removeEventListener('pointerenter', this._pointerEnterMethod);
+      this._canvas.removeEventListener('pointerleave', this._pointerExitMethod);
+      this.removeEventListener('complete', this._onCompleteMethod);
     }
   }
 

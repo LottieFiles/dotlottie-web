@@ -1,5 +1,62 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.0.15
+
+### Patch Changes
+
+- Updated dependencies [dd70edf]
+  - @lottiefiles/dotlottie-web@0.31.1
+
+## 0.0.14
+
+### Patch Changes
+
+- Updated dependencies [03311db]
+- Updated dependencies [e34ac54]
+- Updated dependencies [8e6f572]
+  - @lottiefiles/dotlottie-web@0.31.0
+
+## 0.0.13
+
+### Patch Changes
+
+- Updated dependencies [04fc781]
+  - @lottiefiles/dotlottie-web@0.30.3
+
+## 0.0.12
+
+### Patch Changes
+
+- Updated dependencies [8419a48]
+  - @lottiefiles/dotlottie-web@0.30.2
+
+## 0.0.11
+
+### Patch Changes
+
+- Updated dependencies [78bb656]
+  - @lottiefiles/dotlottie-web@0.30.1
+
+## 0.0.10
+
+### Patch Changes
+
+- Updated dependencies [77a56bc]
+  - @lottiefiles/dotlottie-web@0.30.0
+
+## 0.0.9
+
+### Patch Changes
+
+- b4c4c6b: fix: 🐛 temporarily disable unstable partial canvas rendering optimization in dotLottie-web wrappers
+
+## 0.0.8
+
+### Patch Changes
+
+- Updated dependencies [d942dd2]
+  - @lottiefiles/dotlottie-web@0.29.2
+
 ## 0.0.7
 
 ### Patch Changes

@@ -26,27 +26,6 @@ interface DotLottieVueExposed {
   getDotLottieInstance: () => DotLottie | null;
 }
 
-const getCanvasViewport = (
-  canvas: HTMLCanvasElement,
-  dpr: number,
-): { height: number; width: number; x: number; y: number } => {
-  const rect = canvas.getBoundingClientRect();
-  const windowWidth = window.innerWidth;
-  const windowHeight = window.innerHeight;
-
-  const visibleLeft = Math.max(0, -rect.left);
-  const visibleTop = Math.max(0, -rect.top);
-  const visibleRight = Math.min(rect.width, windowWidth - rect.left);
-  const visibleBottom = Math.min(rect.height, windowHeight - rect.top);
-
-  const x = visibleLeft * dpr;
-  const y = visibleTop * dpr;
-  const width = (visibleRight - visibleLeft) * dpr;
-  const height = (visibleBottom - visibleTop) * dpr;
-
-  return { x, y, width, height };
-};
-
 export const DotLottieVue = defineComponent({
   props: {
     animationId: { type: String, required: false },
@@ -119,7 +98,6 @@ export const DotLottieVue = defineComponent({
     watch(
       () => segment?.value,
       (newVal) => {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (dotLottie && Array.isArray(newVal) && newVal.length === 2) {
           dotLottie.setSegment(newVal[0], newVal[1]);
         }
@@ -192,15 +170,6 @@ export const DotLottieVue = defineComponent({
       },
     );
 
-    function updateViewport(): void {
-      if (!canvas.value || !dotLottie) return;
-      const dpr = props.renderConfig?.devicePixelRatio || window.devicePixelRatio || 1;
-
-      const { height, width, x, y } = getCanvasViewport(canvas.value, dpr);
-
-      dotLottie.setViewport(x, y, width, height);
-    }
-
     function getResizeObserver(): ResizeObserver {
       return new ResizeObserver((entries) => {
         entries.forEach(() => {
@@ -232,14 +201,12 @@ export const DotLottieVue = defineComponent({
         canvas.value.addEventListener('mouseenter', hoverHandler);
         canvas.value.addEventListener('mouseleave', hoverHandler);
       }
-      dotLottie.addEventListener('frame', updateViewport);
     });
 
     onBeforeUnmount(() => {
       resizeObserver?.disconnect();
       canvas.value?.addEventListener('mouseenter', hoverHandler);
       canvas.value?.addEventListener('mouseleave', hoverHandler);
-      dotLottie?.removeEventListener('frame', updateViewport);
       dotLottie?.destroy();
     });
 
