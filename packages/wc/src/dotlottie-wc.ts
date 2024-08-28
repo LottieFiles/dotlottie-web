@@ -28,8 +28,6 @@ export class DotLottieWC extends LitElement {
 
   @state() public dotLottie: DotLottie | null = null;
 
-  private readonly _intersectionObserver: IntersectionObserver;
-
   private readonly _resizeObserver: ResizeObserver;
 
   public static override styles = css`
@@ -46,20 +44,6 @@ export class DotLottieWC extends LitElement {
 
   public constructor() {
     super();
-    this._intersectionObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (this.dotLottie) {
-            if (entry.isIntersecting) {
-              this.dotLottie.unfreeze();
-            } else {
-              this.dotLottie.freeze();
-            }
-          }
-        });
-      },
-      { threshold: 0.1 },
-    );
 
     this._resizeObserver = new ResizeObserver((entries) => {
       if (this.dotLottie && entries[0]) {
@@ -92,7 +76,6 @@ export class DotLottieWC extends LitElement {
       this.dotLottie = null;
     }
 
-    this._intersectionObserver.disconnect();
     this._resizeObserver.disconnect();
   }
 
@@ -124,7 +107,6 @@ export class DotLottieWC extends LitElement {
         renderConfig: this.renderConfig,
         useFrameInterpolation: this.useFrameInterpolation,
       });
-      this._intersectionObserver.observe(canvas);
       this._resizeObserver.observe(canvas);
     }
   }

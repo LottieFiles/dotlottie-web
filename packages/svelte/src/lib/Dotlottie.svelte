@@ -69,27 +69,15 @@
 			}
 		}, 150));
 
-		const intersectionObserver = new IntersectionObserver(debounce((entries: IntersectionObserverEntry[]) => {
-			entries.forEach(entry => {
-				if (entry.isIntersecting) {
-					dotLottie.unfreeze();
-				} else {
-					dotLottie.freeze();
-				}
-			});
-		}, 150), { threshold: 0 });
-
 		if (autoResizeCanvas) {
 			resizeObserver.observe(canvas);
 		}
-		intersectionObserver.observe(canvas);
 
 		canvas.addEventListener('mouseenter', hoverHandler);
 		canvas.addEventListener('mouseleave', hoverHandler);
 
 		return () => {
 			resizeObserver.disconnect();
-			intersectionObserver.disconnect();
 			canvas.removeEventListener('mouseenter', hoverHandler);
 			canvas.removeEventListener('mouseleave', hoverHandler);
 			dotLottie.destroy();

@@ -4,8 +4,9 @@ import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
+import { OffscreenObserver } from './offscreen-observer';
 import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data } from './types';
-import { getDefaultDPR, hexStringToRGBAInt, isDotLottie, isLottie } from './utils';
+import { getDefaultDPR, hexStringToRGBAInt, isDotLottie, isElementInViewport, isLottie } from './utils';
 
 const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
   if (mode === 'reverse') {
@@ -96,6 +97,8 @@ export class DotLottie {
     this._frameManager = new AnimationFrameManager();
     this._renderConfig = {
       devicePixelRatio: config.renderConfig?.devicePixelRatio || getDefaultDPR(),
+      // freezeOnOffscreen is true by default to prevent unnecessary rendering when the canvas is offscreen
+      freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
     };
 
     DotLottieWasmLoader.load()
@@ -242,6 +245,10 @@ export class DotLottie {
         } else {
           console.error('something went wrong, the animation was suppose to autoplay');
         }
+      }
+
+      if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this._renderConfig.freezeOnOffscreen) {
+        OffscreenObserver.observe(this._canvas, this);
       }
     } else {
       this._dispatchError('Failed to load animation data');
@@ -523,6 +530,20 @@ export class DotLottie {
       this._eventManager.dispatch({ type: 'play' });
       this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
     }
+
+    /* 
+      Check if the canvas is offscreen and freezing is enabled
+      If freezeOnOffscreen is true and the canvas is currently outside the viewport,
+      we immediately freeze the animation to avoid unnecessary rendering and performance overhead.
+    */
+    if (
+      IS_BROWSER &&
+      this._canvas instanceof HTMLCanvasElement &&
+      this._renderConfig.freezeOnOffscreen &&
+      !isElementInViewport(this._canvas)
+    ) {
+      this.freeze();
+    }
   }
 
   public pause(): void {
@@ -614,6 +635,10 @@ export class DotLottie {
   }
 
   public destroy(): void {
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      OffscreenObserver.unobserve(this._canvas);
+    }
+
     this._dotLottieCore?.delete();
     this._dotLottieCore = null;
     this._context = null;
@@ -683,12 +708,28 @@ export class DotLottie {
   }
 
   public setRenderConfig(config: RenderConfig): void {
+    const { devicePixelRatio, freezeOnOffscreen, ...restConfig } = config;
+
     this._renderConfig = {
       ...this._renderConfig,
-      ...config,
+      ...restConfig,
       // devicePixelRatio is a special case, it should be set to the default value if it's not provided
-      devicePixelRatio: config.devicePixelRatio || getDefaultDPR(),
+      devicePixelRatio: devicePixelRatio || getDefaultDPR(),
+      freezeOnOffscreen: freezeOnOffscreen ?? true,
     };
+
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      if (this._renderConfig.freezeOnOffscreen) {
+        OffscreenObserver.observe(this._canvas, this);
+      } else {
+        OffscreenObserver.unobserve(this._canvas);
+        // If the animation was previously frozen, we need to unfreeze it now
+        // to ensure it resumes rendering when the canvas is back onscreen.
+        if (this._isFrozen) {
+          this.unfreeze();
+        }
+      }
+    }
   }
 
   public loadAnimation(animationId: string): void {

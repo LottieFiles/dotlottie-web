@@ -81,24 +81,6 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
     }
   }, []);
 
-  const intersectionObserver = useMemo(() => {
-    if (isServerSide()) return null;
-
-    const observerCallback = (entries: IntersectionObserverEntry[]): void => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          dotLottieRef.current?.unfreeze();
-        } else {
-          dotLottieRef.current?.freeze();
-        }
-      });
-    };
-
-    return new IntersectionObserver(observerCallback, {
-      threshold: 0,
-    });
-  }, []);
-
   const resizeObserver = useMemo(() => {
     if (isServerSide()) return null;
 
@@ -137,22 +119,6 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
         canvas,
       });
 
-      // Check if the canvas is initially in view
-      const initialEntry = canvas.getBoundingClientRect();
-
-      if (
-        initialEntry.top >= 0 &&
-        initialEntry.left >= 0 &&
-        initialEntry.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        initialEntry.right <= (window.innerWidth || document.documentElement.clientWidth)
-      ) {
-        dotLottieInstance.unfreeze();
-      } else {
-        dotLottieInstance.freeze();
-      }
-
-      intersectionObserver?.observe(canvas);
-
       if (config?.autoResizeCanvas) {
         resizeObserver?.observe(canvas);
       }
@@ -166,11 +132,10 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
       dotLottieInstance?.destroy();
       setDotLottie(null);
       resizeObserver?.disconnect();
-      intersectionObserver?.disconnect();
       canvas?.removeEventListener('mouseenter', hoverHandler);
       canvas?.removeEventListener('mouseleave', hoverHandler);
     };
-  }, [intersectionObserver, resizeObserver, hoverHandler]);
+  }, [resizeObserver, hoverHandler]);
 
   // speed reactivity
   useEffect(() => {
@@ -215,15 +180,10 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   useEffect(() => {
     if (!dotLottieRef.current) return;
 
-    if (
-      typeof config?.segment === 'object' &&
-      Array.isArray(config.segment) &&
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      config.segment.length === 2
-    ) {
-      const startFrame = config.segment[0];
-      const endFrame = config.segment[1];
+    const startFrame = config?.segment?.[0];
+    const endFrame = config?.segment?.[1];
 
+    if (typeof startFrame === 'number' && typeof endFrame === 'number') {
       dotLottieRef.current.setSegment(startFrame, endFrame);
     }
   }, [config?.segment]);
