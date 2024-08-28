@@ -20,7 +20,6 @@
 	export let marker: Config['marker'] = undefined;
 	export let layout: Config['layout'] = undefined;
 
-	export let autoResizeCanvas: boolean = false;
 	export let playOnHover: boolean = false;
 	export let animationId: string = '';
 	export let themeId: string = '';
@@ -63,12 +62,6 @@
 			dotLottieRefCallback(dotLottie);
 		}
 
-		const resizeObserver = new ResizeObserver(debounce(() => {
-			if (autoResizeCanvas) {
-				dotLottie.resize();
-			}
-		}, 150));
-
 		const intersectionObserver = new IntersectionObserver(debounce((entries: IntersectionObserverEntry[]) => {
 			entries.forEach(entry => {
 				if (entry.isIntersecting) {
@@ -79,16 +72,12 @@
 			});
 		}, 150), { threshold: 0 });
 
-		if (autoResizeCanvas) {
-			resizeObserver.observe(canvas);
-		}
 		intersectionObserver.observe(canvas);
 
 		canvas.addEventListener('mouseenter', hoverHandler);
 		canvas.addEventListener('mouseleave', hoverHandler);
 
 		return () => {
-			resizeObserver.disconnect();
 			intersectionObserver.disconnect();
 			canvas.removeEventListener('mouseenter', hoverHandler);
 			canvas.removeEventListener('mouseleave', hoverHandler);

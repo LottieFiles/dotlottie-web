@@ -42,7 +42,6 @@ function DotLottieComponent({
 export type DotLottieConfig = Omit<Config, 'canvas'> &
   Partial<{
     animationId?: string;
-    autoResizeCanvas: boolean;
     playOnHover: boolean;
     themeData?: string;
     themeId?: string;
@@ -93,18 +92,6 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
     });
   });
 
-  const resizeObserver = createMemo(() => {
-    if (isServer) return null;
-
-    const observerCallback = debounce(() => {
-      if (config.autoResizeCanvas) {
-        dotLottie()?.resize();
-      }
-    }, 150);
-
-    return new ResizeObserver(observerCallback);
-  });
-
   const setCanvasRef = (canvas: HTMLCanvasElement | null): void => {
     if (canvas) {
       const dotLottieInstance = new DotLottie({
@@ -129,16 +116,12 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
       }
 
       intersectionObserver()?.observe(canvas);
-      if (config.autoResizeCanvas) {
-        resizeObserver()?.observe(canvas);
-      }
 
       canvas.addEventListener('mouseenter', hoverHandler);
       canvas.addEventListener('mouseleave', hoverHandler);
     } else {
       dotLottie()?.destroy();
       intersectionObserver()?.disconnect();
-      resizeObserver()?.disconnect();
     }
 
     canvasRef = canvas;
@@ -155,7 +138,6 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
   onCleanup(() => {
     dotLottie()?.destroy();
     setDotLottie(null);
-    resizeObserver()?.disconnect();
     intersectionObserver()?.disconnect();
     if (canvasRef) {
       canvasRef.removeEventListener('mouseenter', hoverHandler);
@@ -289,16 +271,6 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
 
     if (typeof config.marker === 'string') {
       dotLottieInstance.setMarker(config.marker);
-    }
-  });
-  // resizeObserver
-  createEffect(() => {
-    if (!resizeObserver()) return;
-
-    if (config.autoResizeCanvas && canvasRef) {
-      resizeObserver()?.observe(canvasRef);
-    } else {
-      resizeObserver()?.disconnect();
     }
   });
 

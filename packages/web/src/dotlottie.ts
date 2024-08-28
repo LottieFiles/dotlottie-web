@@ -4,6 +4,7 @@ import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
+import { CanvasResizeObserver } from './resize-observer';
 import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data } from './types';
 import { getDefaultDPR, hexStringToRGBAInt, isDotLottie, isLottie } from './utils';
 
@@ -95,6 +96,7 @@ export class DotLottie {
     this._eventManager = new EventManager();
     this._frameManager = new AnimationFrameManager();
     this._renderConfig = {
+      ...config.renderConfig,
       devicePixelRatio: config.renderConfig?.devicePixelRatio || getDefaultDPR(),
     };
 
@@ -223,10 +225,6 @@ export class DotLottie {
     if (loaded) {
       this._eventManager.dispatch({ type: 'load' });
 
-      if (IS_BROWSER) {
-        this.resize();
-      }
-
       this._eventManager.dispatch({
         type: 'frame',
         currentFrame: this._dotLottieCore.currentFrame(),
@@ -242,6 +240,10 @@ export class DotLottie {
         } else {
           console.error('something went wrong, the animation was suppose to autoplay');
         }
+      }
+
+      if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this.renderConfig.autoResize) {
+        CanvasResizeObserver.observe(this._canvas, this);
       }
     } else {
       this._dispatchError('Failed to load animation data');
@@ -624,6 +626,10 @@ export class DotLottie {
 
     this._eventManager.removeAllEventListeners();
     this._cleanupStateMachineListeners();
+
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      CanvasResizeObserver.unobserve(this._canvas);
+    }
   }
 
   public freeze(): void {
@@ -648,6 +654,8 @@ export class DotLottie {
   }
 
   public resize(): void {
+    if (!this._dotLottieCore || !this.isLoaded) return;
+
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
 
@@ -657,7 +665,7 @@ export class DotLottie {
       this._canvas.height = clientHeight * dpr;
     }
 
-    const ok = this._dotLottieCore?.resize(this._canvas.width, this._canvas.height);
+    const ok = this._dotLottieCore.resize(this._canvas.width, this._canvas.height);
 
     if (ok) {
       this._render();
@@ -689,6 +697,14 @@ export class DotLottie {
       // devicePixelRatio is a special case, it should be set to the default value if it's not provided
       devicePixelRatio: config.devicePixelRatio || getDefaultDPR(),
     };
+
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      if (this._renderConfig.autoResize) {
+        CanvasResizeObserver.observe(this._canvas, this);
+      } else {
+        CanvasResizeObserver.unobserve(this._canvas);
+      }
+    }
   }
 
   public loadAnimation(animationId: string): void {

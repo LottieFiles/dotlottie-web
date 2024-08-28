@@ -77,7 +77,9 @@ function App() {
         loop={loop}
         speed={speed}
         playOnHover={playOnHover}
-        autoResizeCanvas={autoResizeCanvas}
+        renderConfig={{
+          autoResize: autoResizeCanvas,
+        }}
         marker={marker}
         style={{
           margin: '2px',

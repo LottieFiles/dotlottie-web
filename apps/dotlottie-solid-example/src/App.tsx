@@ -136,7 +136,9 @@ const App: Component = () => {
         themeId={themeId()}
         speed={speed()}
         playOnHover={playOnHover()}
-        autoResizeCanvas={autoResizeCanvas()}
+        renderConfig={{
+          autoResize: autoResizeCanvas(),
+        }}
         style={{
           height: '500px',
         }}

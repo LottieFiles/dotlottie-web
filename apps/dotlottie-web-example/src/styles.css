@@ -1,24 +1,24 @@
 body {
   font-family: 'Arial', sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 50px;
+  /* display: flex; */
+  /* flex-direction: column; */
+  /* align-items: center; */
+  /* padding: 50px; */
   background-color: #f4f4f4;
 }
 
 canvas {
   border: 2px solid #333;
-  margin-bottom: 20px;
-  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
-  width: 100%; /* Full width of the container */
-  aspect-ratio: 1/1;
+  /* margin-bottom: 20px; */
+  /* box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1); */
+  /* width: 100%; Full width of the container */
+  /* aspect-ratio: 1/1; */
 }
 
 .grid {
   display: grid;
-  grid-template-rows: repeat(1, 1fr);
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  grid-template-columns: repeat(9, 1fr);
   gap: 10px;
 }
 

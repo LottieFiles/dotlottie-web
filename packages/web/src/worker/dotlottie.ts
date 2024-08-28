@@ -2,6 +2,7 @@ import { IS_BROWSER } from '../constants';
 import type { Marker } from '../core';
 import type { EventType, EventListener, FrameEvent } from '../event-manager';
 import { EventManager } from '../event-manager';
+import { CanvasResizeObserver } from '../resize-observer';
 import type { Config, Layout, Manifest, Mode, RenderConfig } from '../types';
 import { getDefaultDPR } from '../utils';
 
@@ -164,6 +165,10 @@ export class DotLottieWorker {
       if (rpcResponse.method === 'onLoad' && rpcResponse.result.instanceId === this._id) {
         await this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
+
+        if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this.renderConfig.autoResize) {
+          CanvasResizeObserver.observe(this._canvas, this);
+        }
       }
 
       if (rpcResponse.method === 'onComplete' && rpcResponse.result.instanceId === this._id) {
@@ -412,6 +417,14 @@ export class DotLottieWorker {
       },
     });
     await this._updateDotLottieInstanceState();
+
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      if (this._dotLottieInstanceState.renderConfig.autoResize) {
+        CanvasResizeObserver.observe(this._canvas, this);
+      } else {
+        CanvasResizeObserver.unobserve(this._canvas);
+      }
+    }
   }
 
   public async setUseFrameInterpolation(useFrameInterpolation: boolean): Promise<void> {
@@ -465,6 +478,10 @@ export class DotLottieWorker {
 
     DotLottieWorker._workerManager.unassignAnimationFromWorker(this._id);
     this._eventManager.removeAllEventListeners();
+
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this.renderConfig.autoResize) {
+      CanvasResizeObserver.unobserve(this._canvas);
+    }
   }
 
   public async freeze(): Promise<void> {

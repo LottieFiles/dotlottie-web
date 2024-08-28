@@ -8,7 +8,6 @@ export type DotLottieSolidProps = Omit<Config, 'canvas'> &
   ComponentProps<'canvas'> &
   Partial<{
     animationId?: string;
-    autoResizeCanvas: boolean;
     dotLottieRefCallback: (dotLottie: DotLottie) => void;
     playOnHover: boolean;
     themeData?: string;
@@ -30,7 +29,6 @@ export const DotLottieSolid = (props: DotLottieSolidProps): JSX.Element => {
     'playOnHover',
     'animationId',
     'renderConfig',
-    'autoResizeCanvas',
     'dotLottieRefCallback',
     'useFrameInterpolation',
   ]);
