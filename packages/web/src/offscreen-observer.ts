@@ -10,26 +10,30 @@ export class OffscreenObserver {
   private static _initializeObserver(): void {
     if (this._observer) return;
 
-    this._observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const instance = this._observedCanvases.get(entry.target as HTMLCanvasElement);
+    const intersectionObserverCallback = (entries: IntersectionObserverEntry[]): void => {
+      entries.forEach((entry) => {
+        const instance = this._observedCanvases.get(entry.target as HTMLCanvasElement);
 
-          if (instance) {
-            if (entry.isIntersecting) {
-              instance.unfreeze();
-            } else {
-              instance.freeze();
-            }
+        if (instance) {
+          if (entry.isIntersecting) {
+            instance.unfreeze();
+          } else {
+            instance.freeze();
           }
-        });
-      },
-      { threshold: 0 },
-    );
+        }
+      });
+    };
+
+    this._observer = new IntersectionObserver(intersectionObserverCallback, {
+      threshold: 0,
+    });
   }
 
   public static observe(canvas: HTMLCanvasElement, dotLottieInstance: DotLottie | DotLottieWorker): void {
     this._initializeObserver();
+
+    if (this._observedCanvases.has(canvas)) return;
+
     this._observedCanvases.set(canvas, dotLottieInstance);
     this._observer?.observe(canvas);
   }
@@ -37,5 +41,10 @@ export class OffscreenObserver {
   public static unobserve(canvas: HTMLCanvasElement): void {
     this._observer?.unobserve(canvas);
     this._observedCanvases.delete(canvas);
+
+    if (this._observedCanvases.size === 0) {
+      this._observer?.disconnect();
+      this._observer = null;
+    }
   }
 }
