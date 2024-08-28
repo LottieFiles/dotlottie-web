@@ -1776,7 +1776,7 @@ test('setViewport() sets the viewport', async () => {
   expect(updated).toBe(true);
 });
 
-test.only('freezeOnOffscreen defaults to true when not defined', async () => {
+test('freezeOnOffscreen defaults to true when not defined', async () => {
   const onFreeze = vi.fn();
 
   canvas.style.marginTop = '100vh';
@@ -1797,7 +1797,7 @@ test.only('freezeOnOffscreen defaults to true when not defined', async () => {
   expect(dotLottie.isFrozen).toBe(true);
 });
 
-test.only('freeze when canvas is initially offscreen and freezeOnOffscreen is true', async () => {
+test('freeze when canvas is initially offscreen and freezeOnOffscreen is true', async () => {
   const onFreeze = vi.fn();
 
   canvas.style.marginTop = '100vh';
@@ -1820,7 +1820,7 @@ test.only('freeze when canvas is initially offscreen and freezeOnOffscreen is tr
   expect(dotLottie.isFrozen).toBe(true);
 });
 
-test.only('do not freeze when canvas is initially offscreen and freezeOnOffscreen is false', async () => {
+test('do not freeze when canvas is initially offscreen and freezeOnOffscreen is false', async () => {
   const onFreeze = vi.fn();
 
   canvas.style.marginTop = '100vh';
@@ -1842,7 +1842,7 @@ test.only('do not freeze when canvas is initially offscreen and freezeOnOffscree
   expect(dotLottie.isFrozen).toBe(false);
 });
 
-test.only('freeze when canvas goes offscreen during animation', async () => {
+test('freeze when canvas goes offscreen during animation', async () => {
   const onFreeze = vi.fn();
   const onUnfreeze = vi.fn();
 
@@ -1871,7 +1871,7 @@ test.only('freeze when canvas goes offscreen during animation', async () => {
   expect(dotLottie.isFrozen).toBe(true);
 });
 
-test.only('unfreeze when canvas comes back into the viewport', async () => {
+test('unfreeze when canvas comes back into the viewport', async () => {
   const onFreeze = vi.fn();
   const onUnfreeze = vi.fn();
 
@@ -1903,7 +1903,7 @@ test.only('unfreeze when canvas comes back into the viewport', async () => {
   expect(dotLottie.isFrozen).toBe(false);
 });
 
-test.only('stay frozen if canvas remains offscreen and freezeOnOffscreen is true', async () => {
+test('stay frozen if canvas remains offscreen and freezeOnOffscreen is true', async () => {
   const onFreeze = vi.fn();
   const onUnfreeze = vi.fn();
 
@@ -1933,7 +1933,7 @@ test.only('stay frozen if canvas remains offscreen and freezeOnOffscreen is true
   expect(dotLottie.isFrozen).toBe(true);
 });
 
-test.only('update freezeOnOffscreen using setRenderConfig', async () => {
+test('update freezeOnOffscreen using setRenderConfig', async () => {
   const onFreeze = vi.fn();
   const onUnfreeze = vi.fn();
 
