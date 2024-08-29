@@ -1,6 +1,6 @@
 import type { Config } from '@lottiefiles/dotlottie-web';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
-import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import type { ComponentProps, RefCallback } from 'react';
 
 interface DotLottieComponentProps {
@@ -55,8 +55,6 @@ export interface UseDotLottieResult {
   setContainerRef: RefCallback<HTMLDivElement>;
 }
 
-const isServerSide = (): boolean => typeof window === 'undefined';
-
 export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
 
@@ -77,24 +75,6 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
     } else if (event.type === 'mouseleave') {
       dotLottieRef.current.pause();
     }
-  }, []);
-
-  const intersectionObserver = useMemo(() => {
-    if (isServerSide()) return null;
-
-    const observerCallback = (entries: IntersectionObserverEntry[]): void => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          dotLottieRef.current?.unfreeze();
-        } else {
-          dotLottieRef.current?.freeze();
-        }
-      });
-    };
-
-    return new IntersectionObserver(observerCallback, {
-      threshold: 0,
-    });
   }, []);
 
   const setCanvasRef = useCallback((canvas: HTMLCanvasElement | null) => {
@@ -123,22 +103,6 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
         canvas,
       });
 
-      // Check if the canvas is initially in view
-      const initialEntry = canvas.getBoundingClientRect();
-
-      if (
-        initialEntry.top >= 0 &&
-        initialEntry.left >= 0 &&
-        initialEntry.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        initialEntry.right <= (window.innerWidth || document.documentElement.clientWidth)
-      ) {
-        dotLottieInstance.unfreeze();
-      } else {
-        dotLottieInstance.freeze();
-      }
-
-      intersectionObserver?.observe(canvas);
-
       canvas.addEventListener('mouseenter', hoverHandler);
       canvas.addEventListener('mouseleave', hoverHandler);
 
@@ -148,11 +112,10 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
     return () => {
       dotLottieInstance?.destroy();
       setDotLottie(null);
-      intersectionObserver?.disconnect();
       canvas?.removeEventListener('mouseenter', hoverHandler);
       canvas?.removeEventListener('mouseleave', hoverHandler);
     };
-  }, [intersectionObserver, hoverHandler]);
+  }, [hoverHandler]);
 
   // speed reactivity
   useEffect(() => {
@@ -197,15 +160,10 @@ export const useDotLottie = (config?: DotLottieConfig): UseDotLottieResult => {
   useEffect(() => {
     if (!dotLottieRef.current) return;
 
-    if (
-      typeof config?.segment === 'object' &&
-      Array.isArray(config.segment) &&
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      config.segment.length === 2
-    ) {
-      const startFrame = config.segment[0];
-      const endFrame = config.segment[1];
+    const startFrame = config?.segment?.[0];
+    const endFrame = config?.segment?.[1];
 
+    if (typeof startFrame === 'number' && typeof endFrame === 'number') {
       dotLottieRef.current.setSegment(startFrame, endFrame);
     }
   }, [config?.segment]);

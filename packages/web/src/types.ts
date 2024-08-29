@@ -1,6 +1,7 @@
 export interface RenderConfig {
   autoResize?: boolean;
   devicePixelRatio?: number;
+  freezeOnOffscreen?: boolean;
 }
 
 export type Mode = 'forward' | 'reverse' | 'bounce' | 'reverse-bounce';

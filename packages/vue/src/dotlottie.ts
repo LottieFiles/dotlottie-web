@@ -48,7 +48,6 @@ export const DotLottieVue = defineComponent({
     const canvas: Ref<HTMLCanvasElement | undefined> = ref(undefined);
     const { backgroundColor, loop, marker, mode, playOnHover, segment, speed, useFrameInterpolation } = toRefs(props);
     let dotLottie: DotLottie | null = null;
-    let intersectionObserver: IntersectionObserver | null = null;
 
     // Prop change
     watch(
@@ -86,9 +85,13 @@ export const DotLottieVue = defineComponent({
     watch(
       () => segment?.value,
       (newVal) => {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (dotLottie && Array.isArray(newVal) && newVal.length === 2) {
-          dotLottie.setSegment(newVal[0], newVal[1]);
+        if (!dotLottie) return;
+
+        const startFrame = newVal?.[0];
+        const endFrame = newVal?.[1];
+
+        if (typeof startFrame === 'number' && typeof endFrame === 'number') {
+          dotLottie.setSegment(startFrame, endFrame);
         }
       },
     );
@@ -159,23 +162,6 @@ export const DotLottieVue = defineComponent({
       },
     );
 
-    function getIntersectionObserver(): IntersectionObserver {
-      return new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              dotLottie?.unfreeze();
-            } else {
-              dotLottie?.freeze();
-            }
-          });
-        },
-        {
-          threshold: 0,
-        },
-      );
-    }
-
     onMounted(() => {
       if (!canvas.value) return;
 
@@ -191,9 +177,6 @@ export const DotLottieVue = defineComponent({
         autoplay: shouldAutoplay,
       });
 
-      intersectionObserver = getIntersectionObserver();
-      intersectionObserver.observe(canvas.value);
-
       if (playOnHover?.value) {
         canvas.value.addEventListener('mouseenter', hoverHandler);
         canvas.value.addEventListener('mouseleave', hoverHandler);
@@ -201,7 +184,6 @@ export const DotLottieVue = defineComponent({
     });
 
     onBeforeUnmount(() => {
-      intersectionObserver?.disconnect();
       canvas.value?.addEventListener('mouseenter', hoverHandler);
       canvas.value?.addEventListener('mouseleave', hoverHandler);
       dotLottie?.destroy();

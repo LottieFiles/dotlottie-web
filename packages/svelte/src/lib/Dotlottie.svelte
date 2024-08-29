@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import debounce from 'debounce';
 	import { DotLottie, type Config } from '@lottiefiles/dotlottie-web';
 
 	export function setWasmUrl(url: string): void {
@@ -61,24 +60,11 @@
 		if (dotLottieRefCallback) {
 			dotLottieRefCallback(dotLottie);
 		}
-
-		const intersectionObserver = new IntersectionObserver(debounce((entries: IntersectionObserverEntry[]) => {
-			entries.forEach(entry => {
-				if (entry.isIntersecting) {
-					dotLottie.unfreeze();
-				} else {
-					dotLottie.freeze();
-				}
-			});
-		}, 150), { threshold: 0 });
-
-		intersectionObserver.observe(canvas);
-
+		
 		canvas.addEventListener('mouseenter', hoverHandler);
 		canvas.addEventListener('mouseleave', hoverHandler);
 
 		return () => {
-			intersectionObserver.disconnect();
 			canvas.removeEventListener('mouseenter', hoverHandler);
 			canvas.removeEventListener('mouseleave', hoverHandler);
 			dotLottie.destroy();

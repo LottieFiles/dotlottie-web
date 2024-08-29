@@ -1,8 +1,6 @@
 import { type Config, DotLottie } from '@lottiefiles/dotlottie-web';
-import debounce from 'debounce';
 import type { Accessor, ComponentProps, JSX } from 'solid-js';
-import { on, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
-import { isServer } from 'solid-js/web';
+import { on, createEffect, createSignal, onCleanup } from 'solid-js';
 
 interface DotLottieComponentProps {
   setCanvasRef: (el: HTMLCanvasElement) => void;
@@ -74,24 +72,6 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
     }
   };
 
-  const intersectionObserver = createMemo(() => {
-    if (isServer) return null;
-
-    const observerCallback = debounce((entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          dotLottie()?.unfreeze();
-        } else {
-          dotLottie()?.freeze();
-        }
-      });
-    }, 150);
-
-    return new IntersectionObserver(observerCallback, {
-      threshold: 0,
-    });
-  });
-
   const setCanvasRef = (canvas: HTMLCanvasElement | null): void => {
     if (canvas) {
       const dotLottieInstance = new DotLottie({
@@ -101,27 +81,10 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
 
       setDotLottie(dotLottieInstance);
 
-      // check if canvas is initially in view
-      const initialEntry = canvas.getBoundingClientRect();
-
-      if (
-        initialEntry.top >= 0 &&
-        initialEntry.left >= 0 &&
-        initialEntry.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        initialEntry.right <= (window.innerWidth || document.documentElement.clientWidth)
-      ) {
-        dotLottie()?.unfreeze();
-      } else {
-        dotLottie()?.freeze();
-      }
-
-      intersectionObserver()?.observe(canvas);
-
       canvas.addEventListener('mouseenter', hoverHandler);
       canvas.addEventListener('mouseleave', hoverHandler);
     } else {
       dotLottie()?.destroy();
-      intersectionObserver()?.disconnect();
     }
 
     canvasRef = canvas;
@@ -138,7 +101,6 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
   onCleanup(() => {
     dotLottie()?.destroy();
     setDotLottie(null);
-    intersectionObserver()?.disconnect();
     if (canvasRef) {
       canvasRef.removeEventListener('mouseenter', hoverHandler);
       canvasRef.removeEventListener('mouseleave', hoverHandler);

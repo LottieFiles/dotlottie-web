@@ -30,7 +30,7 @@ interface AnimationSlice {
   activeMarker: string;
 }
 
-export const DEFAULT_SRC = `https://lottie.host/9ac9c440-c19e-4ac9-b60e-869b6d0ef8cb/7h97gYMCNE.lottie`;
+export const DEFAULT_SRC = 'https://lottie.host/779299c1-d174-4359-a66b-6253897b33e7/yRJTT0fCfq.lottie';
 
 const initialState: AnimationSlice = {
   src: DEFAULT_SRC,

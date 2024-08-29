@@ -2,9 +2,10 @@ import { IS_BROWSER } from '../constants';
 import type { Marker } from '../core';
 import type { EventType, EventListener, FrameEvent } from '../event-manager';
 import { EventManager } from '../event-manager';
+import { OffscreenObserver } from '../offscreen-observer';
 import { CanvasResizeObserver } from '../resize-observer';
 import type { Config, Layout, Manifest, Mode, RenderConfig } from '../types';
-import { getDefaultDPR } from '../utils';
+import { getDefaultDPR, isElementInViewport } from '../utils';
 
 import type { MethodParamsMap, MethodResultMap, RpcRequest, RpcResponse } from './types';
 import { WorkerManager } from './worker-manager';
@@ -126,6 +127,8 @@ export class DotLottieWorker {
       renderConfig: {
         ...config.renderConfig,
         devicePixelRatio: config.renderConfig?.devicePixelRatio || getDefaultDPR(),
+        // freezeOnOffscreen is true by default to prevent unnecessary rendering when the canvas is offscreen
+        freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
       },
     });
 
@@ -166,8 +169,14 @@ export class DotLottieWorker {
         await this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
 
-        if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this.renderConfig.autoResize) {
-          CanvasResizeObserver.observe(this._canvas, this);
+        if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+          if (this.renderConfig.autoResize) {
+            CanvasResizeObserver.observe(this._canvas, this);
+          }
+
+          if (this._dotLottieInstanceState.renderConfig.freezeOnOffscreen) {
+            OffscreenObserver.observe(this._canvas, this);
+          }
         }
       }
 
@@ -360,6 +369,20 @@ export class DotLottieWorker {
 
     await this._sendMessage('play', { instanceId: this._id });
     await this._updateDotLottieInstanceState();
+
+    /* 
+      Check if the canvas is offscreen and freezing is enabled
+      If freezeOnOffscreen is true and the canvas is currently outside the viewport,
+      we immediately freeze the animation to avoid unnecessary rendering and performance overhead.
+    */
+    if (
+      IS_BROWSER &&
+      this._canvas instanceof HTMLCanvasElement &&
+      this._dotLottieInstanceState.renderConfig.freezeOnOffscreen &&
+      !isElementInViewport(this._canvas)
+    ) {
+      await this.freeze();
+    }
   }
 
   public async pause(): Promise<void> {
@@ -407,15 +430,19 @@ export class DotLottieWorker {
   public async setRenderConfig(renderConfig: RenderConfig): Promise<void> {
     if (!this._created) return;
 
+    const { devicePixelRatio, freezeOnOffscreen, ...restConfig } = renderConfig;
+
     await this._sendMessage('setRenderConfig', {
       instanceId: this._id,
       renderConfig: {
         ...this._dotLottieInstanceState.renderConfig,
-        ...renderConfig,
+        ...restConfig,
         // devicePixelRatio is a special case, it should be set to the default value if it's not provided
-        devicePixelRatio: renderConfig.devicePixelRatio || getDefaultDPR(),
+        devicePixelRatio: devicePixelRatio || getDefaultDPR(),
+        freezeOnOffscreen: freezeOnOffscreen ?? true,
       },
     });
+
     await this._updateDotLottieInstanceState();
 
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
@@ -423,6 +450,17 @@ export class DotLottieWorker {
         CanvasResizeObserver.observe(this._canvas, this);
       } else {
         CanvasResizeObserver.unobserve(this._canvas);
+      }
+
+      if (this._dotLottieInstanceState.renderConfig.freezeOnOffscreen) {
+        OffscreenObserver.observe(this._canvas, this);
+      } else {
+        OffscreenObserver.unobserve(this._canvas);
+        // If the animation was previously frozen, we need to unfreeze it now
+        // to ensure it resumes rendering when the canvas is back onscreen.
+        if (this._dotLottieInstanceState.isFrozen) {
+          await this.unfreeze();
+        }
       }
     }
   }
@@ -481,6 +519,10 @@ export class DotLottieWorker {
 
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this.renderConfig.autoResize) {
       CanvasResizeObserver.unobserve(this._canvas);
+    }
+
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      OffscreenObserver.unobserve(this._canvas);
     }
   }
 
