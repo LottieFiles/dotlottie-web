@@ -1,14 +1,14 @@
 import { DotLottie } from '@lottiefiles/dotlottie-react';
-import { useAppDispatch, useAppSelector } from './store/hooks';
-import { setSrc, setUserSrc } from './store/viewer-slice';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { setSrc, setUserSrc } from '../store/viewer-slice';
 import { useEffect, useRef } from 'react';
 import Dropzone, { type FileError, type FileRejection, ErrorCode } from 'react-dropzone';
-import Controls from './components/controls';
-import Players from './components/players';
-import SidePanel from './components/side-panel';
-import TopBar from './components/top-bar';
+import Controls from '../components/controls';
+import Players from '../components/players';
+import SidePanel from '../components/side-panel';
+import TopBar from '../components/top-bar';
 
-function App() {
+export const Home = (): JSX.Element => {
   const theme = useAppSelector((state) => state.viewer.theme);
   const dispatch = useAppDispatch();
 
@@ -83,6 +83,4 @@ function App() {
       </Dropzone>
     </>
   );
-}
-
-export default App;
+};
