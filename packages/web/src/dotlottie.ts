@@ -641,6 +641,7 @@ export class DotLottie {
   public destroy(): void {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       OffscreenObserver.unobserve(this._canvas);
+      CanvasResizeObserver.unobserve(this._canvas);
     }
 
     this._dotLottieCore?.delete();
@@ -653,10 +654,6 @@ export class DotLottie {
 
     this._eventManager.removeAllEventListeners();
     this._cleanupStateMachineListeners();
-
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
-      CanvasResizeObserver.unobserve(this._canvas);
-    }
   }
 
   public freeze(): void {

@@ -170,12 +170,12 @@ export class DotLottieWorker {
         this._eventManager.dispatch(rpcResponse.result.event);
 
         if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
-          if (this.renderConfig.autoResize) {
-            CanvasResizeObserver.observe(this._canvas, this);
-          }
-
           if (this._dotLottieInstanceState.renderConfig.freezeOnOffscreen) {
             OffscreenObserver.observe(this._canvas, this);
+          }
+
+          if (this._dotLottieInstanceState.renderConfig.autoResize) {
+            CanvasResizeObserver.observe(this._canvas, this);
           }
         }
       }
@@ -517,12 +517,9 @@ export class DotLottieWorker {
     DotLottieWorker._workerManager.unassignAnimationFromWorker(this._id);
     this._eventManager.removeAllEventListeners();
 
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this.renderConfig.autoResize) {
-      CanvasResizeObserver.unobserve(this._canvas);
-    }
-
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       OffscreenObserver.unobserve(this._canvas);
+      CanvasResizeObserver.unobserve(this._canvas);
     }
   }
 
