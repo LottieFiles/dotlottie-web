@@ -50,8 +50,7 @@
     "solid-js": "^1.6.12"
   },
   "dependencies": {
-    "@lottiefiles/dotlottie-web": "workspace:*",
-    "debounce": "^2.0.0"
+    "@lottiefiles/dotlottie-web": "workspace:*"
   },
   "devDependencies": {
     "cross-env": "7.0.3",

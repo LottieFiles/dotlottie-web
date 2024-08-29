@@ -46,8 +46,7 @@
 		"svelte": "^4.0.0"
 	},
 	"dependencies": {
-		"@lottiefiles/dotlottie-web": "workspace:*",
-		"debounce": "^2.0.0"
+		"@lottiefiles/dotlottie-web": "workspace:*"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.0.0",
