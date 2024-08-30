@@ -19,6 +19,9 @@ export default function Home(): JSX.Element {
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
         <DotLottieReact
+          style={{
+            minWidth: '100px',
+          }}
           src={src}
           loop
           autoplay
