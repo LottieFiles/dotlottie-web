@@ -228,6 +228,10 @@ export class DotLottie {
     if (loaded) {
       this._eventManager.dispatch({ type: 'load' });
 
+      if (IS_BROWSER) {
+        this.resize();
+      }
+
       this._eventManager.dispatch({
         type: 'frame',
         currentFrame: this._dotLottieCore.currentFrame(),
