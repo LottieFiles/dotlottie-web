@@ -113,7 +113,7 @@ const animations = [
   'yarn_loading.json',
 ];
 
-const urlPrefix = `${import.meta.env.BASE_URL}lottie/`;
+const urlPrefix = `${window.location.origin + import.meta.env.BASE_URL}lottie/`;
 
 const countOptions = [
   { id: 0, name: '10' },
@@ -173,7 +173,7 @@ export const Perf = (): JSX.Element => {
 
   const loadProfiler = useCallback(() => {
     const script = document.createElement('script');
-    script.src = `${import.meta.env.BASE_URL}profiler.js`;
+    script.src = `${window.location.origin + import.meta.env.BASE_URL}profiler.js`;
     document.body.appendChild(script);
   }, []);
 
