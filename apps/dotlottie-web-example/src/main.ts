@@ -2,8 +2,8 @@
 
 import './styles.css';
 import type { Fit, Mode } from '@lottiefiles/dotlottie-web';
-import { DotLottieWorker as DotLottie } from '@lottiefiles/dotlottie-web';
-// import { DotLottie } from '@lottiefiles/dotlottie-web';
+// import { DotLottieWorker as DotLottie } from '@lottiefiles/dotlottie-web';
+import { DotLottie } from '@lottiefiles/dotlottie-web';
 
 import wasmUrl from '../../../packages/web/dist/dotlottie-player.wasm?url';
 
@@ -163,9 +163,9 @@ allCanvas.forEach((canvas) => {
     autoplay: true,
     backgroundColor,
     renderConfig: {
-      autoResize: false,
+      autoResize: true,
     },
-    // useFrameInterpolation: false,
+    useFrameInterpolation: false,
   });
 
   dotLottie.addEventListener('loadError', console.error);

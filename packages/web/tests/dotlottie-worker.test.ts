@@ -4,6 +4,7 @@ import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 import { DotLottieWorker as DotLottie } from '../src';
 import type { Config, Layout, Mode } from '../src';
 import wasmUrl from '../src/core/dotlottie-player.wasm?url';
+import { RESIZE_DEBOUNCE_TIME } from '../src/resize-observer';
 import { getDefaultDPR } from '../src/utils';
 
 import baseJsonSrc from './__fixtures__/test.json?url';
@@ -2047,7 +2048,7 @@ describe('autoResize', () => {
     canvas.style.height = `${canvas.getBoundingClientRect().height * scale}px`;
 
     // wait for the canvas to resize
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, RESIZE_DEBOUNCE_TIME + 10));
 
     const updatedWidth = canvas.width;
     const updatedHeight = canvas.height;
@@ -2082,7 +2083,7 @@ describe('autoResize', () => {
     canvas.style.height = `${canvas.getBoundingClientRect().height * scale}px`;
 
     // wait for the canvas to resize
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, RESIZE_DEBOUNCE_TIME + 10));
 
     const updatedWidth = canvas.width;
     const updatedHeight = canvas.height;
@@ -2117,7 +2118,7 @@ describe('autoResize', () => {
     canvas.style.height = `${canvas.getBoundingClientRect().height * scale}px`;
 
     // wait for the canvas to resize
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, RESIZE_DEBOUNCE_TIME + 10));
 
     const updatedWidth = canvas.width;
     const updatedHeight = canvas.height;
@@ -2133,7 +2134,7 @@ describe('autoResize', () => {
     canvas.style.height = `${canvas.getBoundingClientRect().height * scale}px`;
 
     // wait for the canvas to resize
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, RESIZE_DEBOUNCE_TIME + 10));
 
     const finalWidth = canvas.width;
     const finalHeight = canvas.height;
