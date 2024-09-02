@@ -2,8 +2,8 @@
 
 import './styles.css';
 import type { Fit, Mode } from '@lottiefiles/dotlottie-web';
-import { DotLottieWorker as DotLottie } from '@lottiefiles/dotlottie-web';
-// import { DotLottie } from '@lottiefiles/dotlottie-web';
+// import { DotLottieWorker as DotLottie } from '@lottiefiles/dotlottie-web';
+import { DotLottie } from '@lottiefiles/dotlottie-web';
 
 import wasmUrl from '../../../packages/web/dist/dotlottie-player.wasm?url';
 
@@ -162,16 +162,19 @@ allCanvas.forEach((canvas) => {
     loop: true,
     autoplay: true,
     backgroundColor,
-    // useFrameInterpolation: false,
+    renderConfig: {
+      autoResize: true,
+    },
+    useFrameInterpolation: false,
   });
 
   dotLottie.addEventListener('loadError', console.error);
   dotLottie.addEventListener('freeze', console.log);
   dotLottie.addEventListener('unfreeze', console.log);
 
-  window.addEventListener('resize', () => {
-    dotLottie.resize();
-  });
+  // window.addEventListener('resize', () => {
+  //   dotLottie.resize();
+  // });
 });
 
 fetch(
@@ -236,7 +239,7 @@ fetch(
     const alignSelect = document.getElementById('align') as HTMLSelectElement;
     const stateMachinesSelect = document.getElementById('states') as HTMLSelectElement;
 
-    const resizeButton = document.getElementById('resize') as HTMLButtonElement;
+    // const resizeButton = document.getElementById('resize') as HTMLButtonElement;
 
     let animationIdx = 0;
 
@@ -256,9 +259,9 @@ fetch(
       }
     });
 
-    resizeButton.addEventListener('click', () => {
-      dotLottie.resize();
-    });
+    // resizeButton.addEventListener('click', () => {
+    //   dotLottie.resize();
+    // });
 
     freezeButton.addEventListener('click', () => {
       dotLottie.freeze();

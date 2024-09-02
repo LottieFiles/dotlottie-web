@@ -1,4 +1,5 @@
 export interface RenderConfig {
+  autoResize?: boolean;
   devicePixelRatio?: number;
   freezeOnOffscreen?: boolean;
 }

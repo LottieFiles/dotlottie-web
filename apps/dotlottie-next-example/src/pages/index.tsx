@@ -18,7 +18,17 @@ export default function Home(): JSX.Element {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
-        <DotLottieReact src={src} loop autoplay />
+        <DotLottieReact
+          style={{
+            minWidth: '100px',
+          }}
+          src={src}
+          loop
+          autoplay
+          renderConfig={{
+            autoResize: true,
+          }}
+        />
       </main>
     </>
   );

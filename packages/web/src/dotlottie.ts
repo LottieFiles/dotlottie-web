@@ -5,6 +5,7 @@ import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
+import { CanvasResizeObserver } from './resize-observer';
 import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data } from './types';
 import { getDefaultDPR, hexStringToRGBAInt, isDotLottie, isElementInViewport, isLottie } from './utils';
 
@@ -96,6 +97,7 @@ export class DotLottie {
     this._eventManager = new EventManager();
     this._frameManager = new AnimationFrameManager();
     this._renderConfig = {
+      ...config.renderConfig,
       devicePixelRatio: config.renderConfig?.devicePixelRatio || getDefaultDPR(),
       // freezeOnOffscreen is true by default to prevent unnecessary rendering when the canvas is offscreen
       freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
@@ -247,8 +249,14 @@ export class DotLottie {
         }
       }
 
-      if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this._renderConfig.freezeOnOffscreen) {
-        OffscreenObserver.observe(this._canvas, this);
+      if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+        if (this._renderConfig.freezeOnOffscreen) {
+          OffscreenObserver.observe(this._canvas, this);
+        }
+
+        if (this._renderConfig.autoResize) {
+          CanvasResizeObserver.observe(this._canvas, this);
+        }
       }
     } else {
       this._dispatchError('Failed to load animation data');
@@ -637,6 +645,7 @@ export class DotLottie {
   public destroy(): void {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       OffscreenObserver.unobserve(this._canvas);
+      CanvasResizeObserver.unobserve(this._canvas);
     }
 
     this._dotLottieCore?.delete();
@@ -673,6 +682,8 @@ export class DotLottie {
   }
 
   public resize(): void {
+    if (!this._dotLottieCore || !this.isLoaded) return;
+
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
 
@@ -682,7 +693,7 @@ export class DotLottie {
       this._canvas.height = clientHeight * dpr;
     }
 
-    const ok = this._dotLottieCore?.resize(this._canvas.width, this._canvas.height);
+    const ok = this._dotLottieCore.resize(this._canvas.width, this._canvas.height);
 
     if (ok) {
       this._render();
@@ -719,6 +730,12 @@ export class DotLottie {
     };
 
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      if (this._renderConfig.autoResize) {
+        CanvasResizeObserver.observe(this._canvas, this);
+      } else {
+        CanvasResizeObserver.unobserve(this._canvas);
+      }
+
       if (this._renderConfig.freezeOnOffscreen) {
         OffscreenObserver.observe(this._canvas, this);
       } else {

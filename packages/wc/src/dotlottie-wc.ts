@@ -28,8 +28,6 @@ export class DotLottieWC extends LitElement {
 
   @state() public dotLottie: DotLottie | null = null;
 
-  private readonly _resizeObserver: ResizeObserver;
-
   public static override styles = css`
     :host {
       display: block;
@@ -44,12 +42,6 @@ export class DotLottieWC extends LitElement {
 
   public constructor() {
     super();
-
-    this._resizeObserver = new ResizeObserver((entries) => {
-      if (this.dotLottie && entries[0]) {
-        this.dotLottie.resize();
-      }
-    });
 
     window.addEventListener('visibilitychange', () => {
       if (this.dotLottie) {
@@ -75,8 +67,6 @@ export class DotLottieWC extends LitElement {
       this.dotLottie.destroy();
       this.dotLottie = null;
     }
-
-    this._resizeObserver.disconnect();
   }
 
   private _initializeCanvas(): void {
@@ -107,7 +97,6 @@ export class DotLottieWC extends LitElement {
         renderConfig: this.renderConfig,
         useFrameInterpolation: this.useFrameInterpolation,
       });
-      this._resizeObserver.observe(canvas);
     }
   }
 

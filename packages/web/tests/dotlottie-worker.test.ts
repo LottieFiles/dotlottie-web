@@ -4,6 +4,7 @@ import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 import { DotLottieWorker as DotLottie } from '../src';
 import type { Config, Layout, Mode } from '../src';
 import wasmUrl from '../src/core/dotlottie-player.wasm?url';
+import { RESIZE_DEBOUNCE_TIME } from '../src/resize-observer';
 import { getDefaultDPR } from '../src/utils';
 
 import baseJsonSrc from './__fixtures__/test.json?url';
@@ -1961,4 +1962,184 @@ test('update freezeOnOffscreen using setRenderConfig', async () => {
   expect(onFreeze).toHaveBeenCalledTimes(1);
 
   expect(dotLottie.isFrozen).toBe(false);
+});
+
+describe('autoResize', () => {
+  test('should have autoResize disabled by default', async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalled();
+    });
+
+    expect(dotLottie.renderConfig.autoResize).toBeFalsy();
+  });
+
+  test('should enable autoResize when explicitly set to true', async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+      renderConfig: {
+        autoResize: true,
+      },
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalled();
+    });
+
+    expect(dotLottie.renderConfig.autoResize).toBeTruthy();
+  });
+
+  test('should disable autoResize when explicitly set to false', async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+      renderConfig: {
+        autoResize: false,
+      },
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalled();
+    });
+
+    expect(dotLottie.renderConfig.autoResize).toBeFalsy();
+  });
+
+  test('should automatically resize the canvas when autoResize is enabled and the canvas element size changes', async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+      renderConfig: {
+        autoResize: true,
+      },
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalled();
+    });
+
+    const initialWidth = canvas.width;
+    const initialHeight = canvas.height;
+
+    const scale = 2;
+
+    canvas.style.width = `${canvas.getBoundingClientRect().width * scale}px`;
+    canvas.style.height = `${canvas.getBoundingClientRect().height * scale}px`;
+
+    // wait for the canvas to resize
+    await new Promise((resolve) => setTimeout(resolve, RESIZE_DEBOUNCE_TIME + 10));
+
+    const updatedWidth = canvas.width;
+    const updatedHeight = canvas.height;
+
+    expect(updatedWidth).toBe(initialWidth * scale);
+    expect(updatedHeight).toBe(initialHeight * scale);
+  });
+
+  test('should not resize the canvas when autoResize is disabled, even if the canvas element size changes', async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+      renderConfig: {
+        autoResize: false,
+      },
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalled();
+    });
+
+    const initialWidth = canvas.width;
+    const initialHeight = canvas.height;
+
+    const scale = 2;
+
+    canvas.style.width = `${canvas.getBoundingClientRect().width * scale}px`;
+    canvas.style.height = `${canvas.getBoundingClientRect().height * scale}px`;
+
+    // wait for the canvas to resize
+    await new Promise((resolve) => setTimeout(resolve, RESIZE_DEBOUNCE_TIME + 10));
+
+    const updatedWidth = canvas.width;
+    const updatedHeight = canvas.height;
+
+    expect(updatedWidth).toBe(initialWidth);
+    expect(updatedHeight).toBe(initialHeight);
+  });
+
+  test('should stop resizing the canvas when autoResize is disabled dynamically after being enabled', async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+      renderConfig: {
+        autoResize: true,
+      },
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalled();
+    });
+
+    const initialWidth = canvas.width;
+    const initialHeight = canvas.height;
+
+    const scale = 2;
+
+    canvas.style.width = `${canvas.getBoundingClientRect().width * scale}px`;
+    canvas.style.height = `${canvas.getBoundingClientRect().height * scale}px`;
+
+    // wait for the canvas to resize
+    await new Promise((resolve) => setTimeout(resolve, RESIZE_DEBOUNCE_TIME + 10));
+
+    const updatedWidth = canvas.width;
+    const updatedHeight = canvas.height;
+
+    expect(updatedWidth).toBe(initialWidth * scale);
+    expect(updatedHeight).toBe(initialHeight * scale);
+
+    await dotLottie.setRenderConfig({
+      autoResize: false,
+    });
+
+    canvas.style.width = `${canvas.getBoundingClientRect().width * scale}px`;
+    canvas.style.height = `${canvas.getBoundingClientRect().height * scale}px`;
+
+    // wait for the canvas to resize
+    await new Promise((resolve) => setTimeout(resolve, RESIZE_DEBOUNCE_TIME + 10));
+
+    const finalWidth = canvas.width;
+    const finalHeight = canvas.height;
+
+    expect(finalWidth).toBe(updatedWidth);
+    expect(finalHeight).toBe(updatedHeight);
+  });
 });

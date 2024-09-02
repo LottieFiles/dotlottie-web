@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import debounce from 'debounce';
 	import { DotLottie, type Config } from '@lottiefiles/dotlottie-web';
 
 	export function setWasmUrl(url: string): void {
@@ -20,7 +19,6 @@
 	export let marker: Config['marker'] = undefined;
 	export let layout: Config['layout'] = undefined;
 
-	export let autoResizeCanvas: boolean = false;
 	export let playOnHover: boolean = false;
 	export let animationId: string = '';
 	export let themeId: string = '';
@@ -62,22 +60,11 @@
 		if (dotLottieRefCallback) {
 			dotLottieRefCallback(dotLottie);
 		}
-
-		const resizeObserver = new ResizeObserver(debounce(() => {
-			if (autoResizeCanvas) {
-				dotLottie.resize();
-			}
-		}, 150));
-
-		if (autoResizeCanvas) {
-			resizeObserver.observe(canvas);
-		}
-
+		
 		canvas.addEventListener('mouseenter', hoverHandler);
 		canvas.addEventListener('mouseleave', hoverHandler);
 
 		return () => {
-			resizeObserver.disconnect();
 			canvas.removeEventListener('mouseenter', hoverHandler);
 			canvas.removeEventListener('mouseleave', hoverHandler);
 			dotLottie.destroy();

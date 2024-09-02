@@ -1,7 +1,6 @@
 import type { Config } from '@lottiefiles/dotlottie-web';
 import { DotLottieWorker } from '@lottiefiles/dotlottie-web';
-import debounce from 'debounce';
-import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import type { ComponentProps, RefCallback } from 'react';
 
 interface DotLottieWorkerComponentProps {
@@ -42,7 +41,6 @@ function DotLottieWorkerComponent({
 
 export type DotLottieWorkerConfig = Omit<Config, 'canvas'> & {
   animationId?: string;
-  autoResizeCanvas?: boolean;
   playOnHover?: boolean;
   themeData?: string;
   themeId?: string;
@@ -57,8 +55,6 @@ export interface UseDotLottieWorkerResult {
   setCanvasRef: RefCallback<HTMLCanvasElement>;
   setContainerRef: RefCallback<HTMLDivElement>;
 }
-
-const isServerSide = (): boolean => typeof window === 'undefined';
 
 export const useDotLottieWorker = (config?: DotLottieWorkerConfig): UseDotLottieWorkerResult => {
   const [dotLottie, setDotLottie] = useState<DotLottieWorker | null>(null);
@@ -80,18 +76,6 @@ export const useDotLottieWorker = (config?: DotLottieWorkerConfig): UseDotLottie
     } else if (event.type === 'mouseleave') {
       dotLottieRef.current.pause();
     }
-  }, []);
-
-  const resizeObserver = useMemo(() => {
-    if (isServerSide()) return null;
-
-    const observerCallback = debounce(() => {
-      if (configRef.current?.autoResizeCanvas) {
-        dotLottieRef.current?.resize();
-      }
-    }, 150);
-
-    return new ResizeObserver(observerCallback);
   }, []);
 
   const setCanvasRef = useCallback((canvas: HTMLCanvasElement | null) => {
@@ -120,9 +104,6 @@ export const useDotLottieWorker = (config?: DotLottieWorkerConfig): UseDotLottie
         canvas,
       });
 
-      if (config?.autoResizeCanvas) {
-        resizeObserver?.observe(canvas);
-      }
       canvas.addEventListener('mouseenter', hoverHandler);
       canvas.addEventListener('mouseleave', hoverHandler);
 
@@ -132,11 +113,10 @@ export const useDotLottieWorker = (config?: DotLottieWorkerConfig): UseDotLottie
     return () => {
       dotLottieInstance?.destroy();
       setDotLottie(null);
-      resizeObserver?.disconnect();
       canvas?.removeEventListener('mouseenter', hoverHandler);
       canvas?.removeEventListener('mouseleave', hoverHandler);
     };
-  }, [resizeObserver, hoverHandler]);
+  }, [hoverHandler]);
 
   // speed reactivity
   useEffect(() => {
@@ -241,16 +221,6 @@ export const useDotLottieWorker = (config?: DotLottieWorkerConfig): UseDotLottie
       dotLottieRef.current.setMarker(config.marker);
     }
   }, [config?.marker]);
-
-  useEffect(() => {
-    if (!resizeObserver) return;
-
-    if (config?.autoResizeCanvas && canvasRef.current) {
-      resizeObserver.observe(canvasRef.current);
-    } else {
-      resizeObserver.disconnect();
-    }
-  }, [config?.autoResizeCanvas, resizeObserver]);
 
   // animationId reactivity
   useEffect(() => {

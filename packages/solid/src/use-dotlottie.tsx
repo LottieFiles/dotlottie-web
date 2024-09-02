@@ -1,8 +1,6 @@
 import { type Config, DotLottie } from '@lottiefiles/dotlottie-web';
-import debounce from 'debounce';
 import type { Accessor, ComponentProps, JSX } from 'solid-js';
-import { on, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
-import { isServer } from 'solid-js/web';
+import { on, createEffect, createSignal, onCleanup } from 'solid-js';
 
 interface DotLottieComponentProps {
   setCanvasRef: (el: HTMLCanvasElement) => void;
@@ -42,7 +40,6 @@ function DotLottieComponent({
 export type DotLottieConfig = Omit<Config, 'canvas'> &
   Partial<{
     animationId?: string;
-    autoResizeCanvas: boolean;
     playOnHover: boolean;
     themeData?: string;
     themeId?: string;
@@ -75,18 +72,6 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
     }
   };
 
-  const resizeObserver = createMemo(() => {
-    if (isServer) return null;
-
-    const observerCallback = debounce(() => {
-      if (config.autoResizeCanvas) {
-        dotLottie()?.resize();
-      }
-    }, 150);
-
-    return new ResizeObserver(observerCallback);
-  });
-
   const setCanvasRef = (canvas: HTMLCanvasElement | null): void => {
     if (canvas) {
       const dotLottieInstance = new DotLottie({
@@ -96,15 +81,10 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
 
       setDotLottie(dotLottieInstance);
 
-      if (config.autoResizeCanvas) {
-        resizeObserver()?.observe(canvas);
-      }
-
       canvas.addEventListener('mouseenter', hoverHandler);
       canvas.addEventListener('mouseleave', hoverHandler);
     } else {
       dotLottie()?.destroy();
-      resizeObserver()?.disconnect();
     }
 
     canvasRef = canvas;
@@ -121,7 +101,6 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
   onCleanup(() => {
     dotLottie()?.destroy();
     setDotLottie(null);
-    resizeObserver()?.disconnect();
     if (canvasRef) {
       canvasRef.removeEventListener('mouseenter', hoverHandler);
       canvasRef.removeEventListener('mouseleave', hoverHandler);
@@ -254,16 +233,6 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
 
     if (typeof config.marker === 'string') {
       dotLottieInstance.setMarker(config.marker);
-    }
-  });
-  // resizeObserver
-  createEffect(() => {
-    if (!resizeObserver()) return;
-
-    if (config.autoResizeCanvas && canvasRef) {
-      resizeObserver()?.observe(canvasRef);
-    } else {
-      resizeObserver()?.disconnect();
     }
   });
 

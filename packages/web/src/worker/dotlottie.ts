@@ -3,6 +3,7 @@ import type { Marker } from '../core';
 import type { EventType, EventListener, FrameEvent } from '../event-manager';
 import { EventManager } from '../event-manager';
 import { OffscreenObserver } from '../offscreen-observer';
+import { CanvasResizeObserver } from '../resize-observer';
 import type { Config, Layout, Manifest, Mode, RenderConfig } from '../types';
 import { getDefaultDPR, isElementInViewport } from '../utils';
 
@@ -168,13 +169,14 @@ export class DotLottieWorker {
         await this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
 
-        // start observing the canvas for offscreen changes
-        if (
-          IS_BROWSER &&
-          this._canvas instanceof HTMLCanvasElement &&
-          this._dotLottieInstanceState.renderConfig.freezeOnOffscreen
-        ) {
-          OffscreenObserver.observe(this._canvas, this);
+        if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+          if (this._dotLottieInstanceState.renderConfig.freezeOnOffscreen) {
+            OffscreenObserver.observe(this._canvas, this);
+          }
+
+          if (this._dotLottieInstanceState.renderConfig.autoResize) {
+            CanvasResizeObserver.observe(this._canvas, this);
+          }
         }
       }
 
@@ -444,6 +446,12 @@ export class DotLottieWorker {
     await this._updateDotLottieInstanceState();
 
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      if (this._dotLottieInstanceState.renderConfig.autoResize) {
+        CanvasResizeObserver.observe(this._canvas, this);
+      } else {
+        CanvasResizeObserver.unobserve(this._canvas);
+      }
+
       if (this._dotLottieInstanceState.renderConfig.freezeOnOffscreen) {
         OffscreenObserver.observe(this._canvas, this);
       } else {
@@ -511,6 +519,7 @@ export class DotLottieWorker {
 
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       OffscreenObserver.unobserve(this._canvas);
+      CanvasResizeObserver.unobserve(this._canvas);
     }
   }
 
