@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-web
 
+## 0.32.0
+
+### Minor Changes
+
+- 1900885: feat(web): 🎸 add autoResize to render config
+- b7148b9: feat: 🎸 added freezeOnOffscreen option to renderConfig
+
 ## 0.31.1
 
 ### Patch Changes
