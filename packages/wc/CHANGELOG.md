@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.2.20
+
+### Patch Changes
+
+- Updated dependencies [8540831]
+  - @lottiefiles/dotlottie-web@0.33.0
+
 ## 0.2.19
 
 ### Patch Changes
