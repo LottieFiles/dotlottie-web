@@ -101,7 +101,7 @@ onMounted(() => {
     dotLottie.addEventListener('pause', () => {
       console.log('paused')
     });
-    dotlottie.addEventListener('frame', ({ currentFrame }) => {
+    dotLottie.addEventListener('frame', ({ currentFrame }) => {
       console.log('Frame:', currentFrame)
     });
   }
