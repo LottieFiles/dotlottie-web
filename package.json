@@ -2,10 +2,6 @@
   "name": "@lottiefiles/dotlottie-web-monorepo",
   "license": "MIT",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
     "build": "turbo run build",
     "changelog": "changeset add",
