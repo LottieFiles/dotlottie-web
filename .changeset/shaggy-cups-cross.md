@@ -3,4 +3,4 @@
 '@lottiefiles/dotlottie-web': minor
 ---
 
-chore(web|react): update build target from ES2020 to ES2015
+chore: update build target from ES2020 to ES2015
