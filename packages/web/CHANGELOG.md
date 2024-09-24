@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.34.0
+
+### Minor Changes
+
+- 40b19ef: chore: update build target from ES2020 to ES2015
+
 ## 0.33.0
 
 ### Minor Changes

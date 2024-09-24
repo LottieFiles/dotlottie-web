@@ -1,5 +1,16 @@
 # @lottiefiles/dotlottie-react
 
+## 0.9.0
+
+### Minor Changes
+
+- 40b19ef: chore: update build target from ES2020 to ES2015
+
+### Patch Changes
+
+- Updated dependencies [40b19ef]
+  - @lottiefiles/dotlottie-web@0.34.0
+
 ## 0.8.12
 
 ### Patch Changes
