@@ -12,7 +12,7 @@ export default function SidePanel() {
         <p className="text-secondary">Create captivating product experiences with dotLottie animations.</p>
 
         <a
-          href="https://developers.lottiefiles.com/docs/dotlottie-web/dotlottie-web/getting-started/"
+          href="https://developers.lottiefiles.com/docs/dotlottie-player/dotlottie-web/"
           className="bg-lottie hover:bg-lottie/90 rounded-lg p-4 text-white font-bold w-fit"
         >
           Get Started
