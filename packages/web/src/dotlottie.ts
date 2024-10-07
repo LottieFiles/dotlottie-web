@@ -88,8 +88,6 @@ export class DotLottie {
 
   private readonly _pointerExitMethod: (event: PointerEvent) => void;
 
-  private readonly _onCompleteMethod: EventListener<'complete'>;
-
   public constructor(config: Config) {
     this._canvas = config.canvas;
     this._context = this._canvas.getContext('2d');
@@ -152,8 +150,6 @@ export class DotLottie {
     this._pointerEnterMethod = this._onPointerEnter.bind(this);
 
     this._pointerExitMethod = this._onPointerLeave.bind(this);
-
-    this._onCompleteMethod = this._onComplete.bind(this);
   }
 
   private _dispatchError(message: string): void {
@@ -880,54 +876,51 @@ export class DotLottie {
   private _onPointerUp(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this.postStateMachineEvent(`OnPointerUp: ${x} ${y}`);
+    this.postPointerUpEvent(x, y);
   }
 
   private _onPointerDown(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this.postStateMachineEvent(`OnPointerDown: ${x} ${y}`);
+    this.postPointerDownEvent(x, y);
   }
 
   private _onPointerMove(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this.postStateMachineEvent(`OnPointerMove: ${x} ${y}`);
+    this.postPointerMoveEvent(x, y);
   }
 
   private _onPointerEnter(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this.postStateMachineEvent(`OnPointerEnter: ${x} ${y}`);
+    this.postPointerEnterEvent(x, y);
   }
 
   private _onPointerLeave(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this.postStateMachineEvent(`OnPointerExit: ${x} ${y}`);
+    this.postPointerExitEvent(x, y);
   }
 
-  private _onComplete(): void {
-    this.postStateMachineEvent('OnComplete');
+  public postPointerUpEvent(x: number, y: number): number | undefined {
+    return this._dotLottieCore?.postPointerUpEvent(x, y);
   }
 
-  /**
-   * @experimental
-   * @param event - The event to be posted to the state machine
-   * @returns boolean - true if the event was posted successfully, false otherwise
-   */
-  public postStateMachineEvent(event: string): number {
-    const rt = this._dotLottieCore?.postEventPayload(event) ?? 1;
+  public postPointerDownEvent(x: number, y: number): number | undefined {
+    return this._dotLottieCore?.postPointerDownEvent(x, y);
+  }
 
-    if (rt === 2) {
-      this.play();
-    } else if (rt === 3) {
-      this.pause();
-    } else if (rt === 4) {
-      this._render();
-    }
+  public postPointerMoveEvent(x: number, y: number): number | undefined {
+    return this._dotLottieCore?.postPointerMoveEvent(x, y);
+  }
 
-    return rt;
+  public postPointerEnterEvent(x: number, y: number): number | undefined {
+    return this._dotLottieCore?.postPointerEnterEvent(x, y);
+  }
+
+  public postPointerExitEvent(x: number, y: number): number | undefined {
+    return this._dotLottieCore?.postPointerExitEvent(x, y);
   }
 
   public getStateMachineListeners(): string[] {
@@ -967,10 +960,6 @@ export class DotLottie {
       if (listeners.includes('PointerExit')) {
         this._canvas.addEventListener('pointerleave', this._pointerExitMethod);
       }
-
-      if (listeners.includes('Complete')) {
-        this.addEventListener('complete', this._onCompleteMethod);
-      }
     }
   }
 
@@ -981,7 +970,6 @@ export class DotLottie {
       this._canvas.removeEventListener('pointermove', this._pointerMoveMethod);
       this._canvas.removeEventListener('pointerenter', this._pointerEnterMethod);
       this._canvas.removeEventListener('pointerleave', this._pointerExitMethod);
-      this.removeEventListener('complete', this._onCompleteMethod);
     }
   }
 

@@ -66,9 +66,30 @@ export interface MethodParamsMap {
   play: {
     instanceId: string;
   };
-  postStateMachineEvent: {
-    event: string;
+  postPointerDownEvent: {
     instanceId: string;
+    x: number;
+    y: number;
+  };
+  postPointerEnterEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  postPointerExitEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  postPointerMoveEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  postPointerUpEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
   };
   resize: {
     height: number;
@@ -215,7 +236,11 @@ export interface MethodResultMap {
   };
   pause: void;
   play: void;
-  postStateMachineEvent: number;
+  postPointerDownEvent: number | undefined;
+  postPointerEnterEvent: number | undefined;
+  postPointerExitEvent: number | undefined;
+  postPointerMoveEvent: number | undefined;
+  postPointerUpEvent: number | undefined;
   resize: void;
   setBackgroundColor: void;
   setFrame: void;

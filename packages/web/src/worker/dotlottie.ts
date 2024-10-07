@@ -105,8 +105,6 @@ export class DotLottieWorker {
 
   private readonly _pointerExitMethod: (event: PointerEvent) => void;
 
-  private readonly _onCompleteMethod: EventListener<'complete'>;
-
   public constructor(config: Config & { workerId?: string }) {
     this._canvas = config.canvas;
 
@@ -144,8 +142,6 @@ export class DotLottieWorker {
     this._pointerEnterMethod = this._onPointerEnter.bind(this);
 
     this._pointerExitMethod = this._onPointerLeave.bind(this);
-
-    this._onCompleteMethod = this._onComplete.bind(this);
   }
 
   private async _handleWorkerEvent(event: MessageEvent): Promise<void> {
@@ -678,12 +674,6 @@ export class DotLottieWorker {
     return this._sendMessage('stopStateMachine', { instanceId: this._id });
   }
 
-  public async postStateMachineEvent(event: string): Promise<number> {
-    if (!this._created) return 1;
-
-    return this._sendMessage('postStateMachineEvent', { event, instanceId: this._id });
-  }
-
   public async getStateMachineListeners(): Promise<string[]> {
     if (!this._created) return [];
 
@@ -708,35 +698,31 @@ export class DotLottieWorker {
   private _onPointerUp(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this.postStateMachineEvent(`OnPointerUp: ${x} ${y}`);
+    this._sendMessage('postPointerUpEvent', { instanceId: this._id, x, y });
   }
 
   private _onPointerDown(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this.postStateMachineEvent(`OnPointerDown: ${x} ${y}`);
+    this._sendMessage('postPointerDownEvent', { instanceId: this._id, x, y });
   }
 
   private _onPointerMove(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this.postStateMachineEvent(`OnPointerMove: ${x} ${y}`);
+    this._sendMessage('postPointerMoveEvent', { instanceId: this._id, x, y });
   }
 
   private _onPointerEnter(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this.postStateMachineEvent(`OnPointerEnter: ${x} ${y}`);
+    this._sendMessage('postPointerEnterEvent', { instanceId: this._id, x, y });
   }
 
   private _onPointerLeave(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this.postStateMachineEvent(`OnPointerExit: ${x} ${y}`);
-  }
-
-  private _onComplete(): void {
-    this.postStateMachineEvent('OnComplete');
+    this._sendMessage('postPointerExitEvent', { instanceId: this._id, x, y });
   }
 
   private async _setupStateMachineListeners(): Promise<void> {
@@ -762,10 +748,6 @@ export class DotLottieWorker {
       if (listeners.includes('PointerExit')) {
         this._canvas.addEventListener('pointerleave', this._pointerExitMethod);
       }
-
-      if (listeners.includes('Complete')) {
-        this.addEventListener('complete', this._onCompleteMethod);
-      }
     }
   }
 
@@ -776,7 +758,6 @@ export class DotLottieWorker {
       this._canvas.removeEventListener('pointermove', this._pointerMoveMethod);
       this._canvas.removeEventListener('pointerenter', this._pointerEnterMethod);
       this._canvas.removeEventListener('pointerleave', this._pointerExitMethod);
-      this.removeEventListener('complete', this._onCompleteMethod);
     }
   }
 }
