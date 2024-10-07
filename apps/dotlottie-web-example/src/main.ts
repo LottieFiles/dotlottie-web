@@ -205,7 +205,8 @@ fetch(
     });
 
     canvas.addEventListener('mousedown', () => {
-      dotLottie.postStateMachineEvent('OnPointerDown: 0.0 0.0');
+      // dotLottie.postStateMachineEvent('OnPointerDown: 0.0 0.0');
+      dotLottie.postPointerDownEvent(0, 0);
     });
 
     dotLottie.addEventListener('loadError', console.error);

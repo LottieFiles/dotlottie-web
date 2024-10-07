@@ -117,7 +117,7 @@ export interface DotLottiePlayer {
 
 export interface Marker {
   duration: number;
-  name: EmbindString;
+  name: string;
   time: number;
 }
 
