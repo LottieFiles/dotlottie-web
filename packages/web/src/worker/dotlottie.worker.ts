@@ -263,9 +263,10 @@ const commands: {
 
     return instance.getStateMachineListeners();
   },
-  postStateMachineEvent(request) {
+  postPointerDownEvent(request) {
     const instanceId = request.params.instanceId;
-    const event = request.params.event;
+    const x = request.params.x;
+    const y = request.params.y;
 
     const instance = instancesMap.get(instanceId);
 
@@ -273,7 +274,59 @@ const commands: {
       throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    return instance.postStateMachineEvent(event);
+    return instance.postPointerDownEvent(x, y);
+  },
+  postPointerEnterEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.postPointerEnterEvent(x, y);
+  },
+  postPointerExitEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.postPointerExitEvent(x, y);
+  },
+  postPointerMoveEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.postPointerMoveEvent(x, y);
+  },
+  postPointerUpEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.postPointerUpEvent(x, y);
   },
   startStateMachine(request) {
     const instanceId = request.params.instanceId;
