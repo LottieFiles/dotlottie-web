@@ -145,6 +145,25 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets. NPM_TOKEN }}
 
+  jsr-release:
+    name: jsr-release
+    needs: validate
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🚀 Release to JSR
+        run: npx jsr publish
+
   publish-viewer:
     name: publish-viewer
     needs: validate
