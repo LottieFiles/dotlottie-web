@@ -161,6 +161,7 @@ jobs:
         with:
           fetch-depth: 0
 
+      # related issue https://github.com/denoland/deno/issues/26152
       - name: ⎔ Setup .npmrc (NPM) in web package
         run: |
           echo "@lottiefiles:registry=https://registry.npmjs.org/" >> ./packages/web/.npmrc
