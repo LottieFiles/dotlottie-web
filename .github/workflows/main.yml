@@ -175,7 +175,7 @@ jobs:
           cat ./packages/web/jsr.json
 
       - name: 🚀 Release to JSR
-        run: npx jsr publish
+        run: npx jsr publish --allow-dirty
         working-directory: packages/web
 
   publish-viewer:
