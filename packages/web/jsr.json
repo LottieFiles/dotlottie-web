@@ -1,0 +1,5 @@
+{
+  "name": "@lottiefiles/dotlottie-web",
+  "exports": "./src/index.ts",
+  "license": "MIT"
+}

@@ -145,6 +145,39 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets. NPM_TOKEN }}
 
+  jsr-release:
+    name: jsr-release
+    needs: validate
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # related issue https://github.com/denoland/deno/issues/26152
+      - name: ⎔ Setup .npmrc (NPM) in web package
+        run: |
+          echo "@lottiefiles:registry=https://registry.npmjs.org/" >> ./packages/web/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPMJS_TOKEN }}" >> ./packages/web/.npmrc
+
+      - name: 🔄 Sync version to jsr.json
+        run: |
+          VERSION=$(jq -r '.version' ./packages/web/package.json)
+          jq '.version = $newVersion' --arg newVersion "$VERSION" ./packages/web/jsr.json > temp.json
+          mv temp.json ./packages/web/jsr.json
+          cat ./packages/web/jsr.json
+
+      - name: 🚀 Release to JSR
+        run: npx jsr publish
+        working-directory: packages/web
+
   publish-viewer:
     name: publish-viewer
     needs: validate
