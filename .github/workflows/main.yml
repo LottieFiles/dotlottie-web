@@ -161,8 +161,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: ⎔ Setup .npmrc (NPM) in web package
+        run: |
+          echo "@lottiefiles:registry=https://registry.npmjs.org/" >> ./packages/web/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPMJS_TOKEN }}" >> ./packages/web/.npmrc
+
       - name: 🚀 Release to JSR
         run: npx jsr publish
+        working-directory: packages/web
 
   publish-viewer:
     name: publish-viewer
