@@ -1,6 +1,7 @@
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { Inter } from 'next/font/google';
 import Head from 'next/head';
+import { useEffect } from 'react';
 
 import styles from '@/styles/Home.module.css';
 
@@ -9,6 +10,14 @@ const inter = Inter({ subsets: ['latin'] });
 const src = 'https://lottie.host/e641272e-039b-4612-96de-138acfbede6e/bc0sW78EeR.lottie';
 
 export default function Home(): JSX.Element {
+  useEffect(() => {
+    console.log('useEffect');
+
+    return () => {
+      console.log('useEffect cleanup');
+    };
+  }, []);
+
   return (
     <>
       <Head>
@@ -20,14 +29,12 @@ export default function Home(): JSX.Element {
       <main className={`${styles.main} ${inter.className}`}>
         <DotLottieReact
           style={{
-            minWidth: '100px',
+            width: '100px',
+            height: '100px',
           }}
           src={src}
           loop
           autoplay
-          renderConfig={{
-            autoResize: true,
-          }}
         />
       </main>
     </>

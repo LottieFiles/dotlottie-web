@@ -37,7 +37,9 @@ export const DotLottieWorkerReact = ({
   workerId,
   ...props
 }: DotLottieWorkerReactProps): JSX.Element => {
-  const { DotLottieComponent, dotLottie } = useDotLottieWorker({
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+
+  const { dotLottie } = useDotLottieWorker({
     workerId,
     data,
     mode,
@@ -54,6 +56,7 @@ export const DotLottieWorkerReact = ({
     themeId,
     animationId,
     themeData,
+    canvasRef,
   });
 
   const stableDotLottieRefCallback =
@@ -65,5 +68,5 @@ export const DotLottieWorkerReact = ({
     }
   }, [stableDotLottieRefCallback, dotLottie]);
 
-  return <DotLottieComponent {...props} />;
+  return <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} {...props} />;
 };
