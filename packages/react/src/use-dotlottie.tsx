@@ -38,22 +38,15 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieResult => {
   useEffect(() => {
     let dotLottieInstance: DotLottie | null = null;
 
-    if (config.canvasRef.current) {
-      // wait for canvas to be ready before initializing dotLottie
-      const interval = setInterval(() => {
-        if (
-          config.canvasRef.current &&
-          config.canvasRef.current.offsetWidth > 0 &&
-          config.canvasRef.current.offsetHeight > 0
-        ) {
-          clearInterval(interval);
-          dotLottieInstance = new DotLottie({
-            ...config,
-            canvas: config.canvasRef.current,
-          });
-          setDotLottie(dotLottieInstance);
-        }
-      }, 1);
+    const canvas = configRef.current?.canvasRef.current;
+
+    if (canvas) {
+      dotLottieInstance = new DotLottie({
+        ...config,
+        canvas,
+      });
+
+      setDotLottie(dotLottieInstance);
     }
 
     return () => {
@@ -62,15 +55,7 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieResult => {
         setDotLottie(null);
       }
     };
-  }, [config.canvasRef]);
-
-  // hover reactivity
-  useEffect(() => {
-    if (config.canvasRef.current) {
-      config.canvasRef.current.addEventListener('mouseenter', hoverHandler);
-      config.canvasRef.current.addEventListener('mouseleave', hoverHandler);
-    }
-  }, [config.canvasRef, hoverHandler]);
+  }, []);
 
   // hover reactivity
   useEffect(() => {

@@ -39,10 +39,12 @@ export const useDotLottieWorker = (config: DotLottieWorkerConfig): UseDotLottieW
   useEffect(() => {
     let dotLottieInstance: DotLottieWorker | null = null;
 
-    if (config.canvasRef.current) {
+    const canvas = configRef.current?.canvasRef.current;
+
+    if (canvas) {
       dotLottieInstance = new DotLottieWorker({
         ...config,
-        canvas: config.canvasRef.current,
+        canvas,
       });
 
       setDotLottie(dotLottieInstance);
@@ -54,15 +56,7 @@ export const useDotLottieWorker = (config: DotLottieWorkerConfig): UseDotLottieW
         setDotLottie(null);
       }
     };
-  }, [config.canvasRef]);
-
-  // hover reactivity
-  useEffect(() => {
-    if (config.canvasRef.current) {
-      config.canvasRef.current.addEventListener('mouseenter', hoverHandler);
-      config.canvasRef.current.addEventListener('mouseleave', hoverHandler);
-    }
-  }, [config.canvasRef, hoverHandler]);
+  }, []);
 
   // hover reactivity
   useEffect(() => {
@@ -77,7 +71,7 @@ export const useDotLottieWorker = (config: DotLottieWorkerConfig): UseDotLottieW
         config.canvasRef.current.removeEventListener('mouseleave', hoverHandler);
       }
     };
-  }, [config.canvasRef]);
+  }, [config.canvasRef, hoverHandler]);
 
   // speed reactivity
   useEffect(() => {
