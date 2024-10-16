@@ -1,6 +1,8 @@
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import type { DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-react';
+import { DotLottieWorkerReact, DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { Inter } from 'next/font/google';
 import Head from 'next/head';
+import { useEffect, useRef } from 'react';
 
 import styles from '@/styles/Home.module.css';
 
@@ -9,6 +11,17 @@ const inter = Inter({ subsets: ['latin'] });
 const src = 'https://lottie.host/e641272e-039b-4612-96de-138acfbede6e/bc0sW78EeR.lottie';
 
 export default function Home(): JSX.Element {
+  const dotLottieWorkerRef = useRef<DotLottieWorker | null>(null);
+  const dotLottieRef = useRef<DotLottie | null>(null);
+
+  useEffect(() => {
+    console.log('useEffect');
+
+    return () => {
+      console.log('useEffect cleanup');
+    };
+  }, []);
+
   return (
     <>
       <Head>
@@ -18,16 +31,45 @@ export default function Home(): JSX.Element {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
-        <DotLottieReact
+        <button
+          onClick={(): void => {
+            dotLottieWorkerRef.current?.stop();
+            dotLottieRef.current?.stop();
+          }}
+        >
+          stop
+        </button>
+        <button
+          onClick={(): void => {
+            dotLottieWorkerRef.current?.play();
+            dotLottieRef.current?.play();
+          }}
+        >
+          play
+        </button>
+        <DotLottieWorkerReact
+          dotLottieRefCallback={(dotLottieWorker): void => {
+            dotLottieWorkerRef.current = dotLottieWorker;
+          }}
           style={{
-            minWidth: '100px',
+            width: '100px',
+            height: '100px',
           }}
           src={src}
           loop
           autoplay
-          renderConfig={{
-            autoResize: true,
+        />
+        <DotLottieReact
+          dotLottieRefCallback={(dotLottie): void => {
+            dotLottieRef.current = dotLottie;
           }}
+          style={{
+            width: '100px',
+            height: '100px',
+          }}
+          src={src}
+          loop
+          autoplay
         />
       </main>
     </>

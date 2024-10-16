@@ -35,7 +35,9 @@ export const DotLottieReact = ({
   useFrameInterpolation,
   ...props
 }: DotLottieReactProps): JSX.Element => {
-  const { DotLottieComponent, dotLottie } = useDotLottie({
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+
+  const { dotLottie } = useDotLottie({
     data,
     mode,
     speed,
@@ -51,6 +53,7 @@ export const DotLottieReact = ({
     themeId,
     animationId,
     themeData,
+    canvasRef,
   });
 
   const stableDotLottieRefCallback =
@@ -62,5 +65,5 @@ export const DotLottieReact = ({
     }
   }, [stableDotLottieRefCallback, dotLottie]);
 
-  return <DotLottieComponent {...props} />;
+  return <canvas ref={canvasRef} {...props} />;
 };

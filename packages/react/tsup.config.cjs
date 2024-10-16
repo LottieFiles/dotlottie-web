@@ -12,9 +12,7 @@ module.exports = defineConfig({
   entry: ['./src/index.ts'],
   format: ['esm'],
   platform: 'browser',
-  target: ['es2015', 'node18'],
+  target: ['es2020', 'node18'],
   tsconfig: 'tsconfig.build.json',
-  // To provide an esm build without any external dependencies
-  noExternal: Object.keys(require('./package.json').dependencies),
   external: ['react'],
 });
