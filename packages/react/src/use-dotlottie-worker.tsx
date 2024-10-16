@@ -35,24 +35,23 @@ export const useDotLottieWorker = (config: DotLottieWorkerConfig): UseDotLottieW
     }
   }, []);
 
-  // initialize dotLottie
   useEffect(() => {
-    let dotLottieInstance: DotLottieWorker | null = null;
+    const { canvasRef, ...configWithoutCanvas } = config;
 
-    const canvas = configRef.current?.canvasRef.current;
-
-    if (canvas) {
-      dotLottieInstance = new DotLottieWorker({
-        ...config,
-        canvas,
+    if (canvasRef.current) {
+      const dotLottieInstance = new DotLottieWorker({
+        ...configWithoutCanvas,
+        canvas: canvasRef.current,
       });
 
+      dotLottieRef.current = dotLottieInstance;
       setDotLottie(dotLottieInstance);
     }
 
     return () => {
-      if (dotLottieInstance) {
-        dotLottieInstance.destroy();
+      if (dotLottieRef.current) {
+        dotLottieRef.current.destroy();
+        dotLottieRef.current = null;
         setDotLottie(null);
       }
     };
