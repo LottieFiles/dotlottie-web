@@ -1,3 +1,4 @@
+import { solidPlugin } from 'esbuild-plugin-solid';
 import { defineConfig, type Options } from 'tsup';
 
 export default defineConfig((options: Options) => ({
@@ -9,5 +10,6 @@ export default defineConfig((options: Options) => ({
   external: ['solid-js'],
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   noExternal: Object.keys(require('./package.json').dependencies),
+  esbuildPlugins: [solidPlugin()],
   ...options,
 }));

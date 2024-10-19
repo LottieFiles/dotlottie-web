@@ -47,6 +47,7 @@
   "devDependencies": {
     "@types/node": "^22.7.6",
     "cross-env": "7.0.3",
+    "esbuild-plugin-solid": "^0.6.0",
     "solid-js": "^1.8.17",
     "tsup": "^8.0.2",
     "typescript": "^5.4.5"
