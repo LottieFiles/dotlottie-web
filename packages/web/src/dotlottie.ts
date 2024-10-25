@@ -998,4 +998,49 @@ export class DotLottie {
   public setStateMachineStringContext(name: string, value: string): boolean {
     return this._dotLottieCore?.setStateMachineStringContext(name, value) ?? false;
   }
+
+  /**
+   * Get the bounds of a layer by its name
+   * @param layerName - The name of the layer
+   * @returns The bounds of the layer
+   *
+   * @example
+   * ```typescript
+   * // Draw a rectangle around the layer 'Layer 1'
+   * dotLottie.addEventListener('render', () => {
+   *   const boundingBox = dotLottie.getLayerBoundingBox('Layer 1');
+   *
+   *   if (boundingBox) {
+   *     const { x, y, width, height } = boundingBox;
+   *     context.strokeRect(x, y, width, height);
+   *   }
+   * });
+   * ```
+   */
+  public getLayerBoundingBox(layerName: string):
+    | {
+        height: number;
+        width: number;
+        x: number;
+        y: number;
+      }
+    | undefined {
+    const bounds = this._dotLottieCore?.getLayerBounds(layerName);
+
+    if (!bounds) return undefined;
+
+    if (bounds.size() !== 4) return undefined;
+
+    const x = bounds.get(0) as number;
+    const y = bounds.get(1) as number;
+    const width = bounds.get(2) as number;
+    const height = bounds.get(3) as number;
+
+    return {
+      x,
+      y,
+      width,
+      height,
+    };
+  }
 }
