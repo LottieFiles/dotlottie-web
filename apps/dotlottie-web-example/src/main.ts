@@ -188,7 +188,7 @@ fetch(
 )
   .then(async (res) => res.json())
   .then((data): void => {
-    const allLayers = data.layers.map((layer) => layer.nm);
+    const allLayers: string[] = data.layers.map((layer: { nm: string }) => layer.nm);
 
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
