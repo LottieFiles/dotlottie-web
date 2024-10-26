@@ -1,61 +1,24 @@
 import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER } from './constants';
-import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker, Fit as CoreFit } from './core';
+import type { DotLottiePlayer, MainModule, Marker } from './core';
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
 import { CanvasResizeObserver } from './resize-observer';
 import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data } from './types';
-import { getDefaultDPR, hexStringToRGBAInt, isDotLottie, isElementInViewport, isLottie } from './utils';
-
-const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
-  if (mode === 'reverse') {
-    return module.Mode.Reverse;
-  } else if (mode === 'bounce') {
-    return module.Mode.Bounce;
-  } else if (mode === 'reverse-bounce') {
-    return module.Mode.ReverseBounce;
-  } else {
-    return module.Mode.Forward;
-  }
-};
-
-const createCoreFit = (fit: Fit, module: MainModule): CoreFit => {
-  if (fit === 'contain') {
-    return module.Fit.Contain;
-  } else if (fit === 'cover') {
-    return module.Fit.Cover;
-  } else if (fit === 'fill') {
-    return module.Fit.Fill;
-  } else if (fit === 'fit-height') {
-    return module.Fit.FitHeight;
-  } else if (fit === 'fit-width') {
-    return module.Fit.FitWidth;
-  } else {
-    return module.Fit.None;
-  }
-};
-
-const createCoreAlign = (align: [number, number], module: MainModule): VectorFloat => {
-  const coreAlign = new module.VectorFloat();
-
-  coreAlign.push_back(align[0]);
-  coreAlign.push_back(align[1]);
-
-  return coreAlign;
-};
-
-const createCoreSegment = (segment: number[], module: MainModule): VectorFloat => {
-  const coresegment = new module.VectorFloat();
-
-  if (segment.length !== 2) return coresegment;
-
-  coresegment.push_back(segment[0] as number);
-  coresegment.push_back(segment[1] as number);
-
-  return coresegment;
-};
+import {
+  getDefaultDPR,
+  hexStringToRGBAInt,
+  isDotLottie,
+  isElementInViewport,
+  isLottie,
+  createCoreMode,
+  createCoreFit,
+  createCoreAlign,
+  createCoreSegment,
+  fetchAnimationData,
+} from './utils';
 
 export class DotLottie {
   private readonly _canvas: HTMLCanvasElement | OffscreenCanvas;
@@ -90,7 +53,6 @@ export class DotLottie {
 
   public constructor(config: Config) {
     this._canvas = config.canvas;
-    this._context = this._canvas.getContext('2d');
 
     this._eventManager = new EventManager();
     this._frameManager = new AnimationFrameManager();
@@ -155,23 +117,6 @@ export class DotLottie {
   private _dispatchError(message: string): void {
     console.error(message);
     this._eventManager.dispatch({ type: 'loadError', error: new Error(message) });
-  }
-
-  private async _fetchData(src: string): Promise<string | ArrayBuffer> {
-    const response = await fetch(src);
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch animation data from URL: ${src}. ${response.status}: ${response.statusText}`);
-    }
-
-    const data = await response.arrayBuffer();
-
-    if (isDotLottie(data)) {
-      return data;
-    }
-
-    // eslint-disable-next-line node/no-unsupported-features/node-builtins
-    return new TextDecoder().decode(data);
   }
 
   private _loadFromData(data: Data): void {
@@ -260,7 +205,7 @@ export class DotLottie {
   }
 
   private _loadFromSrc(src: string): void {
-    this._fetchData(src)
+    fetchAnimationData(src)
       .then((data) => this._loadFromData(data))
       .catch((error) => this._dispatchError(`Failed to load animation data from URL: ${src}. ${error}`));
   }
@@ -457,7 +402,11 @@ export class DotLottie {
   }
 
   private _render(): boolean {
-    if (this._dotLottieCore === null || this._context === null) return false;
+    if (this._dotLottieCore === null) return false;
+
+    this._context = this._canvas.getContext('2d');
+
+    if (!this._context) return false;
 
     const rendered = this._dotLottieCore.render();
 
@@ -492,7 +441,8 @@ export class DotLottie {
   }
 
   private _draw(): void {
-    if (this._dotLottieCore === null || this._context === null || !this._dotLottieCore.isPlaying()) return;
+    if (this._dotLottieCore === null || this._context === null || !this._dotLottieCore.isPlaying() || this._isFrozen)
+      return;
 
     const nextFrame = this._dotLottieCore.requestFrame();
 
@@ -639,18 +589,25 @@ export class DotLottie {
   }
 
   public destroy(): void {
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
-      OffscreenObserver.unobserve(this._canvas);
-      CanvasResizeObserver.unobserve(this._canvas);
+    this._dotLottieCore?.stop();
+    this._dotLottieCore?.delete();
+
+    if (this._animationFrameId) {
+      this._frameManager.cancelAnimationFrame(this._animationFrameId);
+      this._animationFrameId = null;
     }
 
-    this._dotLottieCore?.delete();
     this._dotLottieCore = null;
     this._context = null;
 
     this._eventManager.dispatch({
       type: 'destroy',
     });
+
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      OffscreenObserver.unobserve(this._canvas);
+      CanvasResizeObserver.unobserve(this._canvas);
+    }
 
     this._eventManager.removeAllEventListeners();
     this._cleanupStateMachineListeners();
