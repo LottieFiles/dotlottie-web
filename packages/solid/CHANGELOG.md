@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.0.21
+
+### Patch Changes
+
+- 9846566: refactor(solid): unnecessary `useStableCallback`
+
 ## 0.0.20
 
 ### Patch Changes
