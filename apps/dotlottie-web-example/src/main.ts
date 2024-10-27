@@ -183,11 +183,13 @@ fetch(
   // '/multi.lottie',
   // '/markers_example.lottie',
   // './toggle.lottie',
-  './exploding_pigeon.lottie',
+  // './exploding_pigeon.lottie',
+  './lolo.json',
 )
-  .then(async (res) => res.arrayBuffer())
+  .then(async (res) => res.json())
   .then((data): void => {
-    console.log(data);
+    const allLayers: string[] = data.layers.map((layer: { nm: string }) => layer.nm);
+
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
     const dotLottie = new DotLottie({
@@ -202,6 +204,20 @@ fetch(
       speed: 1,
       backgroundColor: '#800080ff',
       // useFrameInterpolation: false,
+    });
+
+    dotLottie.addEventListener('render', () => {
+      allLayers.forEach((layer) => {
+        const bounds = dotLottie.getLayerBoundingBox(layer);
+
+        if (!bounds) return;
+
+        const { height, width, x, y } = bounds;
+
+        const context = canvas.getContext('2d');
+
+        context?.strokeRect(x, y, width, height);
+      });
     });
 
     canvas.addEventListener('mousedown', () => {
