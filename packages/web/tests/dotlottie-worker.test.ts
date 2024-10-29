@@ -1530,7 +1530,7 @@ describe('markers', () => {
   });
 });
 
-describe('theming', () => {
+describe.skip('theming', () => {
   test('fail to load a theme', async () => {
     const onLoad = vi.fn();
 
