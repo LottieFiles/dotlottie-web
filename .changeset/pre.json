@@ -1,0 +1,13 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "@lottiefiles/dotlottie-react": "0.9.2",
+    "@lottiefiles/dotlottie-solid": "0.0.20",
+    "@lottiefiles/dotlottie-svelte": "0.3.22",
+    "@lottiefiles/dotlottie-vue": "0.4.17",
+    "@lottiefiles/dotlottie-wc": "0.2.23",
+    "@lottiefiles/dotlottie-web": "0.36.0"
+  },
+  "changesets": []
+}
