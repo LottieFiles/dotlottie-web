@@ -872,17 +872,17 @@ var createDotLottiePlayerModule = (() => {
           Ja++;
           throw Ia;
         },
-        C: function () {
+        B: function () {
           return 0;
         },
-        S: () => {},
-        P: () => {},
+        R: () => {},
+        O: () => {},
         T: function () {
           return 0;
         },
+        P: () => {},
+        A: function () {},
         Q: () => {},
-        B: function () {},
-        R: () => {},
         U: () => {
           wa('');
         },
@@ -935,7 +935,7 @@ var createDotLottiePlayerModule = (() => {
             ];
           });
         },
-        J: () => {},
+        I: () => {},
         _: (a, b, c, d) => {
           b = P(b);
           N(a, {
@@ -1076,7 +1076,7 @@ var createDotLottiePlayerModule = (() => {
           a.values[c] = d;
           a[b] = d;
         },
-        D: (a, b, c) => {
+        C: (a, b, c) => {
           b = P(b);
           N(a, {
             name: b,
@@ -1087,7 +1087,7 @@ var createDotLottiePlayerModule = (() => {
             Ja: null,
           });
         },
-        F: (a, b, c, d, e, f) => {
+        E: (a, b, c, d, e, f) => {
           var h = ub(b, c);
           a = P(a);
           a = xb(a);
@@ -1145,7 +1145,7 @@ var createDotLottiePlayerModule = (() => {
             return [new mb(c, r.Ba, !1, !1, !0, r, d, f, g, m, q)];
           });
         },
-        E: (a, b) => {
+        D: (a, b) => {
           b = P(b);
           var c = 'std::string' === b;
           N(a, {
@@ -1249,11 +1249,11 @@ var createDotLottiePlayerModule = (() => {
           b = P(b);
           N(a, { pb: !0, name: b, Ia: 0, fromWireType: () => {}, toWireType: () => {} });
         },
-        O: () => {
+        N: () => {
           Fa = !1;
           Vb = 0;
         },
-        K: () => {
+        J: () => {
           throw Infinity;
         },
         ca: (a, b, c, d) => {
@@ -1261,7 +1261,7 @@ var createDotLottiePlayerModule = (() => {
           b = Bb(b);
           return a(null, b, c, d);
         },
-        G: zb,
+        F: zb,
         ba: (a, b, c) => {
           var d = Rb(a, b),
             e = d.shift();
@@ -1292,7 +1292,7 @@ var createDotLottiePlayerModule = (() => {
           a = a.readValueFromPointer(b);
           return kb(a);
         },
-        L: (a, b) => {
+        K: (a, b) => {
           Tb[a] && (clearTimeout(Tb[a].id), delete Tb[a]);
           if (!b) return 0;
           var c = setTimeout(() => {
@@ -1302,7 +1302,7 @@ var createDotLottiePlayerModule = (() => {
           Tb[a] = { id: c, rb: b };
           return 0;
         },
-        M: (a, b, c, d) => {
+        L: (a, b, c, d) => {
           var e = new Date().getFullYear(),
             f = new Date(e, 0, 1).getTimezoneOffset();
           e = new Date(e, 6, 1).getTimezoneOffset();
@@ -1320,7 +1320,7 @@ var createDotLottiePlayerModule = (() => {
           e < f ? (I(a, c, 17), I(b, d, 17)) : (I(a, d, 17), I(b, c, 17));
         },
         fa: () => performance.now(),
-        N: (a) => {
+        M: (a) => {
           var b = x.length;
           a >>>= 0;
           if (2147483648 < a) return !1;
@@ -1363,11 +1363,11 @@ var createDotLottiePlayerModule = (() => {
           return 0;
         },
         s: () => 52,
-        A: () => 52,
-        I: function () {
+        z: () => 52,
+        H: function () {
           return 70;
         },
-        z: (a, b, c, d) => {
+        S: (a, b, c, d) => {
           for (var e = 0, f = 0; f < c; f++) {
             var h = D[b >> 2],
               g = D[(b + 4) >> 2];
@@ -1396,7 +1396,7 @@ var createDotLottiePlayerModule = (() => {
         a: nc,
         g: oc,
         n: pc,
-        H: qc,
+        G: qc,
         V: Wb,
       },
       W = (function () {
