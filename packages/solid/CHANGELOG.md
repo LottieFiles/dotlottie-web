@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.0.21-beta.0
+
+### Patch Changes
+
+- 9846566: refactor(solid): unnecessary `useStableCallback`
+- Updated dependencies [0af137b]
+  - @lottiefiles/dotlottie-web@0.37.0-beta.0
+
 ## 0.0.20
 
 ### Patch Changes
