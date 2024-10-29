@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.37.0-beta.0
+
+### Minor Changes
+
+- 0af137b: feat(web): 🔄 handle v2 dotLottie specs
+
 ## 0.36.0
 
 ### Minor Changes
