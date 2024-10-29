@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 'main'
+      - 'beta'
   pull_request:
 
 jobs:
@@ -182,7 +183,9 @@ jobs:
     name: publish-viewer
     needs: validate
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+    if:
+      ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' && github.ref ==
+      'refs/heads/main' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
