@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.37.0-beta.1
+
+### Patch Changes
+
+- 39af9a8: fix: update dotLottie version check
+
 ## 0.37.0-beta.0
 
 ### Minor Changes
