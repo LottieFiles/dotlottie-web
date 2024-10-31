@@ -18,5 +18,11 @@
     "dotlottie-web-node-example": "0.0.0",
     "with-parcel-example": "0.0.0"
   },
-  "changesets": ["famous-waves-attend", "friendly-dots-reflect", "smooth-buttons-battle", "tough-cows-smell"]
+  "changesets": [
+    "chatty-pillows-retire",
+    "famous-waves-attend",
+    "friendly-dots-reflect",
+    "smooth-buttons-battle",
+    "tough-cows-smell"
+  ]
 }
