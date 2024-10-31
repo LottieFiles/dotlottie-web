@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.0.21-beta.2
+
+### Patch Changes
+
+- 995b0dd: added provenance
+
 ## 0.0.21-beta.1
 
 ### Patch Changes
