@@ -65,6 +65,10 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+
+    permissions:
+      id-token: write
+
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
