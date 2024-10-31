@@ -812,6 +812,12 @@ export class DotLottie {
     return loaded;
   }
 
+  public setSlots(slots: string): void {
+    if (this._dotLottieCore === null) return;
+
+    this._dotLottieCore.setSlots(slots);
+  }
+
   public setLayout(layout: Layout): void {
     if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 
@@ -1042,5 +1048,9 @@ export class DotLottie {
       width,
       height,
     };
+  }
+
+  public static transformThemeToLottieSlots(theme: string, slots: string): string {
+    return DotLottie._wasmModule?.transformThemeToLottieSlots(theme, slots) ?? '';
   }
 }
