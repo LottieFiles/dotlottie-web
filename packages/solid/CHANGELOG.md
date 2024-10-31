@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.0.21-beta.3
+
+### Patch Changes
+
+- c041521: added id-token write
+
 ## 0.0.21-beta.2
 
 ### Patch Changes
