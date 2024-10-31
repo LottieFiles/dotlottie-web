@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.37.0-beta.2
+
+### Minor Changes
+
+- 76d9b5e: feat: add dotLottie v2 theming support
+
 ## 0.37.0-beta.1
 
 ### Patch Changes
