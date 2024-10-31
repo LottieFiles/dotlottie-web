@@ -104,6 +104,7 @@ export interface DotLottiePlayer {
   segmentDuration(): number;
   setConfig(_0: Config): void;
   setFrame(_0: number): boolean;
+  setSlots(_0: EmbindString): boolean;
   setStateMachineBooleanContext(_0: EmbindString, _1: boolean): boolean;
   setStateMachineNumericContext(_0: EmbindString, _1: number): boolean;
   setStateMachineStringContext(_0: EmbindString, _1: EmbindString): boolean;
@@ -157,6 +158,7 @@ interface EmbindModule {
   };
   createDefaultConfig(): Config;
   createDefaultLayout(): Layout;
+  transformThemeToLottieSlots(_0: string, _1: string): string;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;

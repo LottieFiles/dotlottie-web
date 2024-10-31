@@ -872,7 +872,7 @@ var createDotLottiePlayerModule = (() => {
           Ja++;
           throw Ia;
         },
-        B: function () {
+        C: function () {
           return 0;
         },
         R: () => {},
@@ -881,12 +881,12 @@ var createDotLottiePlayerModule = (() => {
           return 0;
         },
         P: () => {},
-        A: function () {},
+        B: function () {},
         Q: () => {},
         U: () => {
           wa('');
         },
-        v: (a) => {
+        w: (a) => {
           var b = Ka[a];
           delete Ka[a];
           var c = b.Ua,
@@ -1048,7 +1048,7 @@ var createDotLottiePlayerModule = (() => {
           });
         },
         Z: (a) => N(a, Cb),
-        x: (a, b, c, d) => {
+        y: (a, b, c, d) => {
           function e() {}
           b = P(b);
           e.values = {};
@@ -1076,7 +1076,7 @@ var createDotLottiePlayerModule = (() => {
           a.values[c] = d;
           a[b] = d;
         },
-        C: (a, b, c) => {
+        D: (a, b, c) => {
           b = P(b);
           N(a, {
             name: b,
@@ -1087,7 +1087,7 @@ var createDotLottiePlayerModule = (() => {
             Ja: null,
           });
         },
-        E: (a, b, c, d, e, f) => {
+        v: (a, b, c, d, e, f) => {
           var h = ub(b, c);
           a = P(a);
           a = xb(a);
@@ -1145,7 +1145,7 @@ var createDotLottiePlayerModule = (() => {
             return [new mb(c, r.Ba, !1, !1, !0, r, d, f, g, m, q)];
           });
         },
-        D: (a, b) => {
+        E: (a, b) => {
           b = P(b);
           var c = 'std::string' === b;
           N(a, {
@@ -1239,7 +1239,7 @@ var createDotLottiePlayerModule = (() => {
             },
           });
         },
-        w: (a, b, c, d, e, f) => {
+        x: (a, b, c, d, e, f) => {
           Ka[a] = { name: P(b), Ua: T(c, d), Ka: T(e, f), Xa: [] };
         },
         j: (a, b, c, d, e, f, h, g, l, m) => {
@@ -1363,7 +1363,7 @@ var createDotLottiePlayerModule = (() => {
           return 0;
         },
         s: () => 52,
-        z: () => 52,
+        A: () => 52,
         H: function () {
           return 70;
         },
@@ -1391,7 +1391,7 @@ var createDotLottiePlayerModule = (() => {
         d: ic,
         e: jc,
         p: kc,
-        y: lc,
+        z: lc,
         b: mc,
         a: nc,
         g: oc,
