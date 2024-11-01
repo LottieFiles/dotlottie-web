@@ -90,7 +90,8 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GPR_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPMJS_TOKEN }}
 
       - name: ⎔ Setup .npmrc (NPM)
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPMJS_TOKEN }}" >> ~/.npmrc
@@ -106,8 +107,9 @@ jobs:
           publish: pnpm release:publish
           version: pnpm release:version
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GPR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GPR_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPMJS_TOKEN }}
 
       - name: Remove existing NPM .npmrc
         run: rm -f "$HOME/.npmrc"
@@ -152,7 +154,8 @@ jobs:
           version: pnpm release:version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GPR_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets. NPM_TOKEN }}
 
   jsr-release:
     name: jsr-release
