@@ -1,5 +1,15 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.0.21-beta.5
+
+### Patch Changes
+
+- 6234fe1: reverting token changes
+- 892597e: attempt fix for actions creating tags
+- f7881ca: token fixes
+- a6c1323: fix: reverting token changes
+- 9c2b579: changed tokens
+
 ## 0.0.21-beta.4
 
 ### Patch Changes

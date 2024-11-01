@@ -19,11 +19,16 @@
     "with-parcel-example": "0.0.0"
   },
   "changesets": [
+    "blue-oranges-check",
     "chatty-pillows-retire",
     "famous-waves-attend",
+    "few-eels-yell",
     "friendly-dots-reflect",
+    "hungry-jokes-share",
     "nervous-jars-obey",
     "smooth-buttons-battle",
-    "tough-cows-smell"
+    "spotty-singers-sleep",
+    "tough-cows-smell",
+    "witty-tools-jam"
   ]
 }
