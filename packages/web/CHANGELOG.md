@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.37.0-beta.3
+
+### Patch Changes
+
+- 0dcc26c: fix: setSlot with animated color property
+
 ## 0.36.1
 
 ### Patch Changes
