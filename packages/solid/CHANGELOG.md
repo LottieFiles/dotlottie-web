@@ -1,5 +1,14 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.0.21
+
+### Patch Changes
+
+- 10670ee: added provenance to all packages
+- 9846566: refactor(solid): unnecessary `useStableCallback`
+- Updated dependencies [10670ee]
+  - @lottiefiles/dotlottie-web@0.36.1
+
 ## 0.0.20
 
 ### Patch Changes

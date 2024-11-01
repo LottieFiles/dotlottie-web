@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.36.1
+
+### Patch Changes
+
+- 10670ee: added provenance to all packages
+
 ## 0.36.0
 
 ### Minor Changes
