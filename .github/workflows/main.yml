@@ -160,6 +160,7 @@ jobs:
     if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
 
     permissions:
+      contents: read
       id-token: write
 
     steps:
