@@ -6,25 +6,15 @@
 		DotLottie.setWasmUrl(url);
 	}
 
-	type Props = Partial<{
-		autoplay: Config['autoplay'];
-		backgroundColor: Config['backgroundColor'];
-		data: Config['data'];
-		loop: Config['loop'];
-		mode: Config['mode'];
-		renderConfig: Config['renderConfig'];
-		segment: Config['segment'];
-		speed: Config['speed'];
-		src: Config['src'];
-		useFrameInterpolation: Config['useFrameInterpolation'];
-		marker: Config['marker'];
-		layout: Config['layout'];
-		playOnHover: boolean;
-		animationId: string;
-		themeId: string;
-		themeData: string;
-		dotLottieRefCallback: (dotLottie: DotLottie) => void;
-	}>;
+	type Props = Partial<
+		Omit<Config, 'canvas'> & {
+			playOnHover: boolean;
+			animationId: string;
+			themeId: string;
+			themeData: string;
+			dotLottieRefCallback: (dotLottie: DotLottie) => void;
+		}
+	>;
 
 	let {
 		autoplay = false,
@@ -50,16 +40,16 @@
 		if (!playOnHover || !dotLottie?.isLoaded) return;
 
 		if (event.type === 'mouseenter') {
-			dotLottie?.play();
+			dotLottie.play();
 		} else if (event.type === 'mouseleave') {
-			dotLottie?.pause();
+			dotLottie.pause();
 		}
 	};
 
-	let dotLottie: DotLottie | null = $state(null);
-	let canvas: HTMLCanvasElement | null = $state(null);
-	let prevSrc: string | undefined = $state(undefined);
-	let prevData: Config['data'] = $state(undefined);
+	let dotLottie: DotLottie | undefined = $state();
+	let canvas: Config['canvas'] | undefined = $state();
+	let prevSrc: string | undefined = $state();
+	let prevData: Config['data'] = $state();
 
 	onMount(() => {
 		if (!dotLottie || !canvas) return;
