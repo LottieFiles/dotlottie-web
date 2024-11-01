@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-react
 
+## 0.9.3
+
+### Patch Changes
+
+- 10670ee: added provenance to all packages
+- Updated dependencies [10670ee]
+  - @lottiefiles/dotlottie-web@0.36.1
+
 ## 0.9.2
 
 ### Patch Changes

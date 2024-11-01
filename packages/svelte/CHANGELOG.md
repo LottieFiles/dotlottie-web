@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-svelte
 
+## 0.3.23
+
+### Patch Changes
+
+- 10670ee: added provenance to all packages
+- Updated dependencies [10670ee]
+  - @lottiefiles/dotlottie-web@0.36.1
+
 ## 0.3.22
 
 ### Patch Changes
