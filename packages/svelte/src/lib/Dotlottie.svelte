@@ -6,45 +6,67 @@
 		DotLottie.setWasmUrl(url);
 	}
 
-	export let autoplay: Config['autoplay'] = false;
-	export let backgroundColor: Config['backgroundColor'] = undefined;
-	export let data: Config['data'] = undefined;
-	export let loop: Config['loop'] = false;
-	export let mode: Config['mode'] = 'forward';
-	export let renderConfig: Config['renderConfig'] = undefined;
-	export let segment: Config['segment'] = undefined;
-	export let speed: Config['speed'] = 1;
-	export let src: Config['src'] = undefined;
-	export let useFrameInterpolation: Config['useFrameInterpolation'] = true;
-	export let marker: Config['marker'] = undefined;
-	export let layout: Config['layout'] = undefined;
+	type Props = Partial<{
+		autoplay: Config['autoplay'];
+		backgroundColor: Config['backgroundColor'];
+		data: Config['data'];
+		loop: Config['loop'];
+		mode: Config['mode'];
+		renderConfig: Config['renderConfig'];
+		segment: Config['segment'];
+		speed: Config['speed'];
+		src: Config['src'];
+		useFrameInterpolation: Config['useFrameInterpolation'];
+		marker: Config['marker'];
+		layout: Config['layout'];
+		playOnHover: boolean;
+		animationId: string;
+		themeId: string;
+		themeData: string;
+		dotLottieRefCallback: (dotLottie: DotLottie) => void;
+	}>;
 
-	export let playOnHover: boolean = false;
-	export let animationId: string = '';
-	export let themeId: string = '';
-	export let themeData: string = '';
-
-	export let dotLottieRefCallback: (dotLottie: DotLottie) => void = () => {};
+	let {
+		autoplay = false,
+		backgroundColor = undefined,
+		data = undefined,
+		loop = false,
+		mode = 'forward',
+		renderConfig = undefined,
+		segment = undefined,
+		speed = 1,
+		src = undefined,
+		useFrameInterpolation = true,
+		marker = undefined,
+		layout = undefined,
+		playOnHover = false,
+		animationId = '',
+		themeId = '',
+		themeData = '',
+		dotLottieRefCallback = () => {}
+	}: Props = $props();
 
 	const hoverHandler = (event: MouseEvent) => {
-		if (!playOnHover || !dotLottie.isLoaded) return;
+		if (!playOnHover || !dotLottie?.isLoaded) return;
 
 		if (event.type === 'mouseenter') {
-		dotLottie.play();
+			dotLottie?.play();
 		} else if (event.type === 'mouseleave') {
-		dotLottie.pause();
+			dotLottie?.pause();
 		}
 	};
 
-	let dotLottie: DotLottie;
-	let canvas: HTMLCanvasElement;
-	let prevSrc: string | undefined = undefined;
-	let prevData: Config['data'] = undefined;
+	let dotLottie: DotLottie | null = $state(null);
+	let canvas: HTMLCanvasElement | null = $state(null);
+	let prevSrc: string | undefined = $state(undefined);
+	let prevData: Config['data'] = $state(undefined);
 
 	onMount(() => {
+		if (!dotLottie || !canvas) return;
+
 		const shouldAutoplay = autoplay && !playOnHover;
 		dotLottie = new DotLottie({
-			canvas,
+			canvas: canvas as HTMLCanvasElement,
 			src,
 			autoplay: shouldAutoplay,
 			loop,
@@ -60,114 +82,132 @@
 		if (dotLottieRefCallback) {
 			dotLottieRefCallback(dotLottie);
 		}
-		
+
 		canvas.addEventListener('mouseenter', hoverHandler);
 		canvas.addEventListener('mouseleave', hoverHandler);
 
 		return () => {
-			canvas.removeEventListener('mouseenter', hoverHandler);
-			canvas.removeEventListener('mouseleave', hoverHandler);
-			dotLottie.destroy();
+			if (canvas) {
+				canvas.removeEventListener('mouseenter', hoverHandler);
+				canvas.removeEventListener('mouseleave', hoverHandler);
+			}
+			if (dotLottie) dotLottie.destroy();
 		};
 	});
 
-	$: {
+	$effect(() => {
 		if (dotLottie && typeof layout === 'object') {
 			dotLottie.setLayout(layout);
 		}
-	}
+	});
 
-	$: {
+	$effect(() => {
 		if (dotLottie && typeof marker === 'string') {
 			dotLottie.setMarker(marker);
 		}
-	}
+	});
 
-	$: {
-		if (dotLottie &&  dotLottie.isLoaded && typeof speed == 'number') {
+	$effect(() => {
+		if (dotLottie && dotLottie.isLoaded && typeof speed == 'number') {
 			dotLottie.setSpeed(speed);
 		}
-	}
+	});
 
-	$: {
+	$effect(() => {
 		if (dotLottie && dotLottie.isLoaded && typeof useFrameInterpolation == 'boolean') {
 			dotLottie.setUseFrameInterpolation(useFrameInterpolation);
 		}
-	}
+	});
 
-	$: {
-		if (dotLottie && dotLottie.isLoaded && Array.isArray(segment) && segment.length === 2 && typeof segment[0] === 'number' && typeof segment[1] === 'number') {
+	$effect(() => {
+		if (
+			dotLottie &&
+			dotLottie.isLoaded &&
+			Array.isArray(segment) &&
+			segment.length === 2 &&
+			typeof segment[0] === 'number' &&
+			typeof segment[1] === 'number'
+		) {
 			let [start, end] = segment;
 			dotLottie.setSegment(start, end);
 		}
-	}
+	});
 
-	$: {
+	$effect(() => {
 		if (dotLottie && dotLottie.isLoaded && typeof loop == 'boolean') {
 			dotLottie.setLoop(loop);
 		}
-	}
+	});
 
-	$: {
+	$effect(() => {
 		if (dotLottie) {
-			dotLottie.setBackgroundColor(backgroundColor || "");
+			dotLottie.setBackgroundColor(backgroundColor || '');
 		}
-	}
+	});
 
-	$: {
+	$effect(() => {
 		if (dotLottie && dotLottie.isLoaded && typeof mode == 'string') {
 			dotLottie.setMode(mode);
 		}
-	}
+	});
 
+	$effect(() => {
+		if (dotLottie && src !== prevSrc) {
+			dotLottie.load({
+				src,
+				autoplay,
+				loop,
+				speed,
+				data,
+				renderConfig,
+				segment,
+				useFrameInterpolation,
+				backgroundColor,
+				mode,
+				marker,
+				layout
+			});
+			prevSrc = src;
+		}
+	});
 
-    $: if (dotLottie && src !== prevSrc) {
-        dotLottie.load({
-            src,
-            autoplay,
-            loop,
-            speed,
-            data,
-            renderConfig,
-            segment,
-            useFrameInterpolation,
-            backgroundColor,
-            mode,
-			marker,
-			layout
-        });
-        prevSrc = src; 
-    }
+	$effect(() => {
+		if (dotLottie && data !== prevData) {
+			dotLottie.load({
+				src,
+				autoplay,
+				loop,
+				speed,
+				data,
+				renderConfig,
+				segment,
+				useFrameInterpolation,
+				backgroundColor,
+				mode,
+				marker,
+				layout
+			});
+			prevData = data;
+		}
+	});
 
-	$: if (dotLottie && data !== prevData) {
-		dotLottie.load({
-			src,
-			autoplay,
-			loop,
-			speed,
-			data,
-			renderConfig,
-			segment,
-			useFrameInterpolation,
-			backgroundColor,
-			mode,
-			marker,
-			layout
-		});
-		prevData = data;
-	}
+	$effect(() => {
+		if (dotLottie && dotLottie.isLoaded && dotLottie.activeAnimationId !== animationId) {
+			dotLottie.loadAnimation(animationId);
+		}
+	});
 
-	$: if (dotLottie && dotLottie.isLoaded && dotLottie.activeAnimationId !== animationId) {
-		dotLottie.loadAnimation(animationId);
-	}
+	$effect(() => {
+		if (dotLottie && dotLottie.isLoaded && dotLottie.activeThemeId !== themeId) {
+			dotLottie.loadTheme(themeId);
+		}
+	});
 
-	$: if (dotLottie && dotLottie.isLoaded && dotLottie.activeThemeId !== themeId) {
-		dotLottie.loadTheme(themeId);
-	}
-
-	$: if (dotLottie && dotLottie.isLoaded) {
-		dotLottie.loadThemeData(themeData);
-	}
+	$effect(() => {
+		if (dotLottie && dotLottie.isLoaded) {
+			dotLottie.loadThemeData(themeData);
+		}
+	});
 </script>
 
 <div>
