@@ -93,7 +93,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GPR_TOKEN }}
 
       - name: ⎔ Setup .npmrc (NPM)
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.GPR_TOKEN }}" >> ~/.npmrc
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPMJS_TOKEN }}" >> ~/.npmrc
 
       - name: 📥 Install dependencies
         run: pnpm install
@@ -174,7 +174,7 @@ jobs:
       - name: ⎔ Setup .npmrc (NPM) in web package
         run: |
           echo "@lottiefiles:registry=https://registry.npmjs.org/" >> ./packages/web/.npmrc
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.GPR_TOKEN }}" >> ./packages/web/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPMJS_TOKEN }}" >> ./packages/web/.npmrc
 
       - name: 🔄 Sync version to jsr.json
         run: |
