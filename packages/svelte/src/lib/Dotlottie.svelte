@@ -18,17 +18,17 @@
 
 	let {
 		autoplay = false,
-		backgroundColor = undefined,
-		data = undefined,
+		backgroundColor,
+		data,
 		loop = false,
 		mode = 'forward',
-		renderConfig = undefined,
-		segment = undefined,
+		renderConfig,
+		segment,
 		speed = 1,
-		src = undefined,
+		src,
 		useFrameInterpolation = true,
-		marker = undefined,
-		layout = undefined,
+		marker,
+		layout,
 		playOnHover = false,
 		animationId = '',
 		themeId = '',
@@ -52,7 +52,7 @@
 	let prevData: Config['data'] = $state();
 
 	onMount(() => {
-		if (!dotLottie || !canvas) return;
+		if (!canvas) return;
 
 		const shouldAutoplay = autoplay && !playOnHover;
 		dotLottie = new DotLottie({
@@ -98,6 +98,7 @@
 	});
 
 	$effect(() => {
+		console.log(speed);
 		if (dotLottie && dotLottie.isLoaded && typeof speed == 'number') {
 			dotLottie.setSpeed(speed);
 		}

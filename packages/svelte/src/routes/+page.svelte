@@ -2,6 +2,7 @@
 	import { DotLottieSvelte, setWasmUrl } from '../lib/index.js';
 	import type { DotLottie } from '../lib/index.js';
 	import wasmUrl from '../../../web/src/core/dotlottie-player.wasm?url';
+	import { onMount } from 'svelte';
 
 	setWasmUrl(wasmUrl);
 
@@ -35,7 +36,7 @@
 		}
 	};
 
-	$effect(() => {
+	onMount(() => {
 		if (dotLottie) {
 			dotLottie.addEventListener('load', () => {
 				isLoaded = true;
@@ -84,6 +85,7 @@
 	{loop}
 	{speed}
 />
+
 <button
 	onclick={() => {
 		src = 'https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json';
