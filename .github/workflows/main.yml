@@ -22,6 +22,7 @@ jobs:
       - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: 20
 
       - name: 📥 Download deps
