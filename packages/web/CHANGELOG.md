@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.37.0-beta.4
+
+### Minor Changes
+
+- 7ef3025: feat: add name property to animations/themes/state machines assets in the manifest
+
 ## 0.37.0-beta.3
 
 ### Patch Changes
