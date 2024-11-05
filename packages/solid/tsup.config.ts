@@ -8,8 +8,6 @@ export default defineConfig((options: Options) => ({
   format: ['esm'],
   tsconfig: './tsconfig.build.json',
   external: ['solid-js'],
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  noExternal: Object.keys(require('./package.json').dependencies),
   esbuildPlugins: [solidPlugin()],
   ...options,
 }));
