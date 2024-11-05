@@ -2,17 +2,18 @@ name: main
 on:
   push:
     branches:
-      - 'main'
-      - 'beta'
+      - main
+      - beta
   pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - name: 🛑 Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.12.0
-
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
 
@@ -22,7 +23,7 @@ jobs:
       - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: pnpm
           node-version: 20
 
       - name: 📥 Download deps
@@ -31,35 +32,35 @@ jobs:
       - name: 🏗 Build
         run: pnpm build
 
-      # - name: 🔍 Verify types
-      #   run: pnpm type-check
+      - name: 🔍 Verify types
+        run: pnpm type-check
 
-      # - name: 🕵️ Lint
-      #   run: pnpm lint:prod
+      - name: 🕵️ Lint
+        run: pnpm lint:prod
 
-      # - name: 💅 Verify format (`pnpm format` committed?)
-      #   run: pnpm format
+      - name: 💅 Verify format (`pnpm format` committed?)
+        run: pnpm format
 
-      # - name: 🛡️ Test
-      #   run: |
-      #     npx playwright install --with-deps
-      #     pnpm test:coverage
-      #   working-directory: packages/web
+      - name: 🛡️ Test
+        run: |
+          npx playwright install --with-deps
+          pnpm test:coverage
+        working-directory: packages/web
 
-      # - name: 📏 Report coverage
-      #   if: always() && github.event_name == 'pull_request'
-      #   uses: davelosert/vitest-coverage-report-action@v2.1.1
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     working-directory: packages/web
-      #     name: '@lottiefiles/dotlottie-web'
+      - name: 📏 Report coverage
+        if: always() && github.event_name == 'pull_request'
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: packages/web
+          name: '@lottiefiles/dotlottie-web'
 
-      # - name: 📏 Report bundle size
-      #   if: github.event_name == 'pull_request'
-      #   uses: andresz1/size-limit-action@v1
-      #   continue-on-error: true
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: 📏 Report bundle size
+        if: github.event_name == 'pull_request'
+        uses: andresz1/size-limit-action@v1
+        continue-on-error: true
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
   npm-release:
     name: npm-release
@@ -67,7 +68,13 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
 
-    permissions: write-all
+    permissions:
+      # Allow creating a release in the repository
+      contents: write
+
+      # Required for provenance
+      id-token: write
+      packages: write
 
     steps:
       - name: ⬇️ Checkout repo
@@ -83,19 +90,14 @@ jobs:
       - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: pnpm
           node-version: 20
-          registry-url: 'https://registry.npmjs.org'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPMJS_TOKEN }}
-
-      - name: ⎔ Setup .npmrc (NPM)
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPMJS_TOKEN }}" >> ~/.npmrc
+          registry-url: https://registry.npmjs.org
 
       - name: 📥 Install dependencies
         run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
 
       - name: 🚀 Release to NPM
         uses: changesets/action@v1
@@ -104,10 +106,10 @@ jobs:
           title: 'chore: 🤖 update versions'
           publish: pnpm release:publish
           version: pnpm release:version
+          createGithubReleases: false
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GPR_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPMJS_TOKEN }}
 
       - name: Remove existing NPM .npmrc
         run: rm -f "$HOME/.npmrc"
@@ -118,7 +120,13 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
 
-    permissions: write-all
+    permissions:
+      # Allow creating a release in the repository
+      contents: write
+
+      # Required for provenance
+      id-token: write
+      packages: write
 
     steps:
       - name: ⬇️ Checkout repo
@@ -132,14 +140,14 @@ jobs:
       - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: pnpm
           node-version: 20
-          registry-url: 'https://npm.pkg.github.com/'
+          registry-url: https://npm.pkg.github.com/
 
       - name: 📥 Install dependencies
         run: pnpm install
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GPR_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🚀 Release to Github Packages
         uses: changesets/action@v1
@@ -148,10 +156,10 @@ jobs:
           title: 'chore: update versions'
           publish: pnpm release:publish
           version: pnpm release:version
+          createGithubReleases: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GPR_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   jsr-release:
     name: jsr-release
@@ -159,7 +167,8 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
 
-    permissions: write-all
+    permissions:
+      contents: read
 
     steps:
       - name: ⬇️ Checkout repo
@@ -189,8 +198,12 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     if:
-      ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' && github.ref ==
-      'refs/heads/main' }}
+      ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+
+    permissions:
+      contents: read
+      pages: write
+
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
@@ -203,21 +216,23 @@ jobs:
       - name: ⎔ Setup Node@v20
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: pnpm
           node-version: 20
-          registry-url: 'https://npm.pkg.github.com/'
+          registry-url: https://npm.pkg.github.com/
 
       - name: 📥 Install dependencies
         run: pnpm install
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GPR_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🏗 Build
         run: pnpm build
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🌐Publish
+      - name: 🌐 Publish
         if: success()
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./apps/dotlottie-viewer/dist
