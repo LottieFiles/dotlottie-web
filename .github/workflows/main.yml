@@ -76,6 +76,9 @@ jobs:
       id-token: write
       packages: write
 
+      # Required for creating a release PR
+      pull-requests: write
+
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
@@ -127,6 +130,9 @@ jobs:
       # Required for provenance
       id-token: write
       packages: write
+
+      # Required for creating a release PR
+      pull-requests: write
 
     steps:
       - name: ⬇️ Checkout repo
