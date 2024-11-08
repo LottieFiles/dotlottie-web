@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.37.0-beta.5
+
+### Patch Changes
+
+- 5192b23: fix: apply default slots in loaded lottie json/.lottie
+
 ## 0.37.0-beta.4
 
 ### Minor Changes
