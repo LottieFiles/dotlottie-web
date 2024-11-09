@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.37.0-beta.6
+
+### Minor Changes
+
+- 6a6db41: fix(theming): gradient & expression
+
 ## 0.37.0-beta.5
 
 ### Patch Changes
