@@ -134,7 +134,7 @@ export default function Players() {
 
   useEffect(() => {
     if (!dotLottie) return;
-    dotLottie?.loadTheme(activeThemeId);
+    dotLottie?.setTheme(activeThemeId);
   }, [activeThemeId, dotLottie]);
 
   useEffect(() => {

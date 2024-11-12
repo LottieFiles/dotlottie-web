@@ -81,8 +81,6 @@ export interface DotLottiePlayer {
   loadDotLottieData(_0: EmbindString, _1: number, _2: number): boolean;
   loadStateMachine(_0: EmbindString): boolean;
   loadStateMachineData(_0: EmbindString): boolean;
-  loadTheme(_0: EmbindString): boolean;
-  loadThemeData(_0: EmbindString): boolean;
   loopCount(): number;
   manifestString(): string;
   markers(): VectorMarker;
@@ -99,6 +97,7 @@ export interface DotLottiePlayer {
   postStringEvent(_0: EmbindString): number;
   render(): boolean;
   requestFrame(): number;
+  resetTheme(): boolean;
   resize(_0: number, _1: number): boolean;
   seek(_0: number): boolean;
   segmentDuration(): number;
@@ -108,6 +107,8 @@ export interface DotLottiePlayer {
   setStateMachineBooleanContext(_0: EmbindString, _1: boolean): boolean;
   setStateMachineNumericContext(_0: EmbindString, _1: number): boolean;
   setStateMachineStringContext(_0: EmbindString, _1: EmbindString): boolean;
+  setTheme(_0: EmbindString): boolean;
+  setThemeData(_0: EmbindString): boolean;
   setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
   startStateMachine(): boolean;
   stateMachineFrameworkSetup(): VectorString;
@@ -158,7 +159,7 @@ interface EmbindModule {
   };
   createDefaultConfig(): Config;
   createDefaultLayout(): Layout;
-  transformThemeToLottieSlots(_0: string, _1: string): string;
+  transformThemeToLottieSlots(_0: EmbindString, _1: EmbindString): string;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;

@@ -345,7 +345,7 @@ fetch(
     });
 
     themeSelect.addEventListener('change', () => {
-      dotLottie.loadTheme(themeSelect.value);
+      dotLottie.setTheme(themeSelect.value);
     });
 
     fitSelect.addEventListener('change', () => {

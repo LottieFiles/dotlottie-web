@@ -162,11 +162,11 @@
 	}
 
 	$: if (dotLottie && dotLottie.isLoaded && dotLottie.activeThemeId !== themeId) {
-		dotLottie.loadTheme(themeId);
+		dotLottie.setTheme(themeId);
 	}
 
 	$: if (dotLottie && dotLottie.isLoaded) {
-		dotLottie.loadThemeData(themeData);
+		dotLottie.setThemeData(themeData);
 	}
 </script>
 

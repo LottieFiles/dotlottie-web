@@ -792,20 +792,26 @@ export class DotLottie {
     return [];
   }
 
-  public loadTheme(themeId: string): boolean {
+  public setTheme(themeId: string): boolean {
     if (this._dotLottieCore === null) return false;
 
-    const loaded = this._dotLottieCore.loadTheme(themeId);
+    const loaded = this._dotLottieCore.setTheme(themeId);
 
     this._render();
 
     return loaded;
   }
 
-  public loadThemeData(themeData: string): boolean {
+  public resetTheme(): boolean {
     if (this._dotLottieCore === null) return false;
 
-    const loaded = this._dotLottieCore.loadThemeData(themeData);
+    return this._dotLottieCore.resetTheme();
+  }
+
+  public setThemeData(themeData: string): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    const loaded = this._dotLottieCore.setThemeData(themeData);
 
     this._render();
 

@@ -1545,7 +1545,7 @@ describe.skip('theming', () => {
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
 
-    const result = await dotLottie.loadTheme('invalid');
+    const result = await dotLottie.setTheme('invalid');
 
     expect(dotLottie.activeThemeId).toBeFalsy();
 
@@ -1568,7 +1568,7 @@ describe.skip('theming', () => {
 
     const themeId = 'global_theme';
 
-    const result = await dotLottie.loadTheme(themeId);
+    const result = await dotLottie.setTheme(themeId);
 
     expect(dotLottie.activeThemeId).toBe(themeId);
 
@@ -1595,7 +1595,7 @@ describe.skip('theming', () => {
 
     const themeId = themes[0]?.id ?? '';
 
-    const result = await dotLottie.loadTheme(themeId);
+    const result = await dotLottie.setTheme(themeId);
 
     expect(dotLottie.activeThemeId).toBe(themeId);
 
@@ -1625,7 +1625,7 @@ describe.skip('theming', () => {
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
 
-    const result = await dotLottie.loadThemeData(JSON.stringify(themeData));
+    const result = await dotLottie.setThemeData(JSON.stringify(themeData));
 
     expect(result).toBe(true);
   });
@@ -1644,7 +1644,7 @@ describe.skip('theming', () => {
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
 
-    const result = await dotLottie.loadThemeData('invalid');
+    const result = await dotLottie.setThemeData('invalid');
 
     expect(result).toBe(false);
   });
