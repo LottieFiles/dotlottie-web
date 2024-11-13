@@ -204,7 +204,7 @@ fetch(
       segment: [10, 90],
       speed: 1,
       backgroundColor: '#800080ff',
-      themeId: 'sky',
+      themeId: 'animated_light',
       // useFrameInterpolation: false,
     });
 
