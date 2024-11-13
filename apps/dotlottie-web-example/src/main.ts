@@ -184,11 +184,12 @@ fetch(
   // '/markers_example.lottie',
   // './toggle.lottie',
   // './exploding_pigeon.lottie',
-  './lolo.json',
+  // './lolo.json',
+  './multi_themes.lottie',
 )
-  .then(async (res) => res.json())
+  .then(async (res) => res.arrayBuffer())
   .then((data): void => {
-    const allLayers: string[] = data.layers.map((layer: { nm: string }) => layer.nm);
+    // const allLayers: string[] = data.layers.map((layer: { nm: string }) => layer.nm);
 
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
@@ -206,19 +207,15 @@ fetch(
       // useFrameInterpolation: false,
     });
 
-    dotLottie.addEventListener('render', () => {
-      allLayers.forEach((layer) => {
-        const bounds = dotLottie.getLayerBoundingBox(layer);
-
-        if (!bounds) return;
-
-        const { height, width, x, y } = bounds;
-
-        const context = canvas.getContext('2d');
-
-        context?.strokeRect(x, y, width, height);
-      });
-    });
+    // dotLottie.addEventListener('render', () => {
+    // allLayers.forEach((layer) => {
+    //   const bounds = dotLottie.getLayerBoundingBox(layer);
+    //   if (!bounds) return;
+    //   const { height, width, x, y } = bounds;
+    //   const context = canvas.getContext('2d');
+    //   context?.strokeRect(x, y, width, height);
+    // });
+    // });
 
     canvas.addEventListener('mousedown', () => {
       // dotLottie.postStateMachineEvent('OnPointerDown: 0.0 0.0');
@@ -345,7 +342,11 @@ fetch(
     });
 
     themeSelect.addEventListener('change', () => {
-      dotLottie.setTheme(themeSelect.value);
+      if (themeSelect.value) {
+        console.log(dotLottie.setTheme(themeSelect.value));
+      } else {
+        console.log(dotLottie.resetTheme());
+      }
     });
 
     fitSelect.addEventListener('change', () => {
