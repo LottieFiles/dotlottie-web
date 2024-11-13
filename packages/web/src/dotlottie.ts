@@ -106,6 +106,7 @@ export class DotLottie {
         DotLottie._wasmModule = module;
 
         this._dotLottieCore = new module.DotLottiePlayer({
+          themeId: config.themeId ?? '',
           autoplay: config.autoplay ?? false,
           backgroundColor: 0,
           loopAnimation: config.loop ?? false,
@@ -431,6 +432,7 @@ export class DotLottie {
     if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 
     this._dotLottieCore.setConfig({
+      themeId: config.themeId ?? '',
       autoplay: config.autoplay ?? false,
       backgroundColor: 0,
       loopAnimation: config.loop ?? false,

@@ -28,30 +28,19 @@ export interface Config {
   segment?: [number, number];
   speed?: number;
   src?: string;
+  themeId?: string;
   useFrameInterpolation?: boolean;
 }
 
 export interface Manifest {
-  activeAnimationId?: string;
   animations: Array<{
-    autoplay?: boolean;
-    defaultTheme?: string;
-    direction?: 1 | -1;
-    hover?: boolean;
+    background?: string;
     id: string;
-    intermission?: number;
-    loop?: boolean | number;
-    playMode?: 'bounce' | 'normal';
-    speed?: number;
-    themeColor?: string;
+    initialTheme?: string;
+    themes?: string[];
   }>;
-  author?: string;
-  custom?: Record<string, unknown>;
-  description?: string;
   generator?: string;
-  keywords?: string;
-  revision?: number;
-  states?: string[];
-  themes?: Array<{ animations: string[]; id: string }>;
+  stateMachines?: Array<{ id: string }>;
+  themes?: Array<{ id: string }>;
   version?: string;
 }

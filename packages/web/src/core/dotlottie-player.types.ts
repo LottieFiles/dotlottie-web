@@ -132,6 +132,7 @@ export interface Config {
   mode: Mode;
   segment: VectorFloat;
   speed: number;
+  themeId: EmbindString;
   useFrameInterpolation: boolean;
 }
 

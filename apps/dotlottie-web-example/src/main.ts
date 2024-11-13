@@ -204,6 +204,7 @@ fetch(
       segment: [10, 90],
       speed: 1,
       backgroundColor: '#800080ff',
+      themeId: 'sky',
       // useFrameInterpolation: false,
     });
 
@@ -425,10 +426,10 @@ fetch(
       bgColorInput.value = dotLottie.backgroundColor || '#ffffff';
 
       const themes = dotLottie.manifest?.themes || [];
-      const states = dotLottie.manifest?.states || [];
+      const stateMachines = dotLottie.manifest?.stateMachines || [];
 
-      for (const state of states) {
-        const id = state;
+      for (const stateMachine of stateMachines) {
+        const id = stateMachine.id;
 
         const option = document.createElement('option');
 
