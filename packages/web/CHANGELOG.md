@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.37.0-beta.8
+
+### Minor Changes
+
+- c0927ea: feat: add themeId to the DotLottie config
+
 ## 0.37.0-beta.7
 
 ### Minor Changes
