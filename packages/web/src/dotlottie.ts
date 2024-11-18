@@ -850,11 +850,11 @@ export class DotLottie {
     DotLottieWasmLoader.setWasmUrl(url);
   }
 
-  public loadStateMachine(stateMachineId: string): boolean {
+  public stateMachineLoad(stateMachineId: string): boolean {
     return this._dotLottieCore?.stateMachineLoad(stateMachineId) ?? false;
   }
 
-  public startStateMachine(): boolean {
+  public stateMachineStart(): boolean {
     const started = this._dotLottieCore?.stateMachineStart() ?? false;
 
     if (started) {
@@ -868,7 +868,7 @@ export class DotLottie {
     return started;
   }
 
-  public stopStateMachine(): boolean {
+  public stateMachineStop(): boolean {
     const stopped = this._dotLottieCore?.stateMachineStop() ?? false;
 
     if (stopped) {
@@ -895,13 +895,13 @@ export class DotLottie {
   private _onPointerUp(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this.postPointerUpEvent(x, y);
+    this.stateMachinePostPointerUpEvent(x, y);
   }
 
   private _onPointerDown(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this.postPointerDownEvent(x, y);
+    this.stateMachinePostPointerDownEvent(x, y);
 
     // To test: If there is no segment set, this will play through the whole animation which is not what we want
     this.play();
@@ -910,42 +910,42 @@ export class DotLottie {
   private _onPointerMove(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this.postPointerMoveEvent(x, y);
+    this.stateMachinePostPointerMoveEvent(x, y);
   }
 
   private _onPointerEnter(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this.postPointerEnterEvent(x, y);
+    this.stateMachinePostPointerEnterEvent(x, y);
   }
 
   private _onPointerLeave(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this.postPointerExitEvent(x, y);
+    this.stateMachinePostPointerExitEvent(x, y);
   }
 
-  public postPointerDownEvent(x: number, y: number): number | undefined {
+  public stateMachinePostPointerDownEvent(x: number, y: number): number | undefined {
     return this._dotLottieCore?.stateMachinePostPointerDownEvent(x, y);
   }
 
-  public postPointerUpEvent(x: number, y: number): number | undefined {
+  public stateMachinePostPointerUpEvent(x: number, y: number): number | undefined {
     return this._dotLottieCore?.stateMachinePostPointerUpEvent(x, y);
   }
 
-  public postPointerMoveEvent(x: number, y: number): number | undefined {
+  public stateMachinePostPointerMoveEvent(x: number, y: number): number | undefined {
     return this._dotLottieCore?.stateMachinePostPointerMoveEvent(x, y);
   }
 
-  public postPointerEnterEvent(x: number, y: number): number | undefined {
+  public stateMachinePostPointerEnterEvent(x: number, y: number): number | undefined {
     return this._dotLottieCore?.stateMachinePostPointerEnterEvent(x, y);
   }
 
-  public postPointerExitEvent(x: number, y: number): number | undefined {
+  public stateMachinePostPointerExitEvent(x: number, y: number): number | undefined {
     return this._dotLottieCore?.stateMachinePostPointerExitEvent(x, y);
   }
 
-  public getStateMachineListeners(): string[] {
+  public stateMachineGetListeners(): string[] {
     if (!this._dotLottieCore) return [];
 
     const listenersVector = this._dotLottieCore.stateMachineFrameworkSetup();
@@ -961,7 +961,7 @@ export class DotLottie {
 
   private _setupStateMachineListeners(): void {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this._dotLottieCore !== null && this.isLoaded) {
-      const listeners = this.getStateMachineListeners();
+      const listeners = this.stateMachineGetListeners();
 
       if (listeners.includes('PointerUp')) {
         this._canvas.addEventListener('pointerup', this._pointerUpMethod);
@@ -995,7 +995,7 @@ export class DotLottie {
     }
   }
 
-  public loadStateMachineData(stateMachineData: string): boolean {
+  public stateMachineLoadData(stateMachineData: string): boolean {
     return this._dotLottieCore?.stateMachineLoadData(stateMachineData) ?? false;
   }
 
@@ -1009,16 +1009,20 @@ export class DotLottie {
     };
   }
 
-  public setStateMachineBooleanContext(name: string, value: boolean): boolean {
+  public stateMachineSetBooleanTrigger(name: string, value: boolean): boolean {
     return this._dotLottieCore?.stateMachineSetBooleanTrigger(name, value) ?? false;
   }
 
-  public setStateMachineNumericContext(name: string, value: number): boolean {
+  public stateMachineSetNumericTrigger(name: string, value: number): boolean {
     return this._dotLottieCore?.stateMachineSetNumericTrigger(name, value) ?? false;
   }
 
-  public setStateMachineStringContext(name: string, value: string): boolean {
+  public stateMachineSetStringTrigger(name: string, value: string): boolean {
     return this._dotLottieCore?.stateMachineSetStringTrigger(name, value) ?? false;
+  }
+
+  public stateMachineFire(eventName: string): void {
+    this._dotLottieCore?.stateMachineFireEvent(eventName);
   }
 
   /**

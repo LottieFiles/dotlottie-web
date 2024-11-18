@@ -1,0 +1,114 @@
+{
+  "descriptor": {
+    "id": "global_state_sm",
+    "initial": 0
+  },
+  "states": [
+    {
+      "name": "global",
+      "type": "GlobalState"
+    },
+    {
+      "name": "star1",
+      "type": "PlaybackState",
+      "loop": false,
+      "autoplay": true,
+      "mode": "Forward",
+      "segment": [0, 10]
+    },
+    {
+      "name": "star2",
+      "type": "PlaybackState",
+      "loop": false,
+      "autoplay": true,
+      "mode": "Forward",
+      "segment": [12, 20]
+    },
+    {
+      "name": "star3",
+      "type": "PlaybackState",
+      "loop": false,
+      "autoplay": true,
+      "mode": "Forward",
+      "segment": [22, 30]
+    },
+    {
+      "name": "star4",
+      "type": "PlaybackState",
+      "loop": false,
+      "autoplay": true,
+      "mode": "Forward",
+      "segment": [32, 40]
+    },
+    {
+      "name": "star5",
+      "type": "PlaybackState",
+      "loop": false,
+      "autoplay": true,
+      "mode": "Forward",
+      "segment": [42, 65]
+    },
+    {
+      "name": "exit_state",
+      "type": "PlaybackState",
+      "loop": false,
+      "autoplay": true,
+      "mode": "Forward",
+      "segment": [0, 1]
+    }
+  ],
+  "transitions": [
+    {
+      "type": "Transition",
+      "from_state": 0,
+      "to_state": 6,
+      "on_pointer_exit_event": {}
+    },
+    {
+      "type": "Transition",
+      "from_state": 0,
+      "to_state": 1,
+      "on_pointer_down_event": {
+        "target": "star1"
+      }
+    },
+    {
+      "type": "Transition",
+      "from_state": 0,
+      "to_state": 2,
+      "on_pointer_down_event": {
+        "target": "star2"
+      }
+    },
+    {
+      "type": "Transition",
+      "from_state": 0,
+      "to_state": 3,
+      "on_pointer_down_event": {
+        "target": "star3"
+      }
+    },
+    {
+      "type": "Transition",
+      "from_state": 0,
+      "to_state": 4,
+      "on_pointer_down_event": {
+        "target": "star4"
+      }
+    },
+    {
+      "type": "Transition",
+      "from_state": 0,
+      "to_state": 5,
+      "on_pointer_down_event": {
+        "target": "star5"
+      }
+    }
+  ],
+  "listeners": [
+    {
+      "type": "PointerDown"
+    }
+  ],
+  "context_variables": []
+}
