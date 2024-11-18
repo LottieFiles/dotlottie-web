@@ -1,5 +1,47 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.2.24-beta.8
+
+### Patch Changes
+
+- Updated dependencies [c0927ea]
+  - @lottiefiles/dotlottie-web@0.37.0-beta.8
+
+## 0.2.24-beta.7
+
+### Patch Changes
+
+- Updated dependencies [989a447]
+  - @lottiefiles/dotlottie-web@0.37.0-beta.7
+
+## 0.2.24-beta.6
+
+### Patch Changes
+
+- Updated dependencies [6a6db41]
+  - @lottiefiles/dotlottie-web@0.37.0-beta.6
+
+## 0.2.24-beta.5
+
+### Patch Changes
+
+- Updated dependencies [5192b23]
+  - @lottiefiles/dotlottie-web@0.37.0-beta.5
+
+## 0.2.24-beta.4
+
+### Patch Changes
+
+- Updated dependencies [7ef3025]
+  - @lottiefiles/dotlottie-web@0.37.0-beta.4
+
+## 0.2.24-beta.3
+
+### Patch Changes
+
+- Updated dependencies [0dcc26c]
+  - @lottiefiles/dotlottie-web@0.37.0-beta.3
+
 ## 0.2.24
 
 ### Patch Changes

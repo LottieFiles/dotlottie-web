@@ -1,0 +1,32 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "@lottiefiles/dotlottie-react": "0.9.2",
+    "@lottiefiles/dotlottie-solid": "0.0.20",
+    "@lottiefiles/dotlottie-svelte": "0.3.22",
+    "@lottiefiles/dotlottie-vue": "0.4.17",
+    "@lottiefiles/dotlottie-wc": "0.2.23",
+    "@lottiefiles/dotlottie-web": "0.36.0",
+    "dotlottie-next-example": "0.0.0",
+    "dotlottie-react-example": "0.0.0",
+    "dotlottie-solid-example": "0.0.0",
+    "dotlottie-viewer": "0.0.1",
+    "dotlottie-vue-example": "0.0.0",
+    "dotlottie-wc-example": "0.0.0",
+    "dotlottie-web-example": "0.0.0",
+    "dotlottie-web-node-example": "0.0.0",
+    "with-parcel-example": "0.0.0"
+  },
+  "changesets": [
+    "famous-waves-attend",
+    "fast-maps-wave",
+    "kind-foxes-clean",
+    "nervous-jars-obey",
+    "nervous-suits-reply",
+    "smooth-buttons-battle",
+    "stale-sloths-fix",
+    "swift-pandas-argue",
+    "violet-shrimps-remain"
+  ]
+}
