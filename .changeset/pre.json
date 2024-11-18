@@ -19,6 +19,7 @@
     "with-parcel-example": "0.0.0"
   },
   "changesets": [
+    "brown-bananas-act",
     "famous-waves-attend",
     "fast-maps-wave",
     "kind-foxes-clean",
