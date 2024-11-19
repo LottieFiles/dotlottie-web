@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.37.0-beta.9
+
+### Patch Changes
+
+- 9ed1a99: fix: lottie default slots are not applied
+
 ## 0.37.0-beta.8
 
 ### Minor Changes
