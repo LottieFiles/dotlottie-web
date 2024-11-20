@@ -26,6 +26,8 @@ export class DotLottieWC extends LitElement {
 
   @property({ type: Boolean }) public useFrameInterpolation: Config['useFrameInterpolation'];
 
+  @property({ type: String }) public themeId: Config['themeId'];
+
   @state() public dotLottie: DotLottie | null = null;
 
   public static override styles = css`
@@ -96,6 +98,7 @@ export class DotLottieWC extends LitElement {
         mode: this.mode,
         renderConfig: this.renderConfig,
         useFrameInterpolation: this.useFrameInterpolation,
+        themeId: this.themeId,
       });
     }
   }

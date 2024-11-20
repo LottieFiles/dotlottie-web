@@ -468,10 +468,10 @@ export class DotLottieWorker {
     await this._updateDotLottieInstanceState();
   }
 
-  public async loadTheme(themeId: string): Promise<boolean> {
+  public async setTheme(themeId: string): Promise<boolean> {
     if (!this._created) return false;
 
-    const result = this._sendMessage('loadTheme', { instanceId: this._id, themeId });
+    const result = this._sendMessage('setTheme', { instanceId: this._id, themeId });
 
     await this._updateDotLottieInstanceState();
 
@@ -573,10 +573,10 @@ export class DotLottieWorker {
     await this._updateDotLottieInstanceState();
   }
 
-  public async loadThemeData(themeData: string): Promise<boolean> {
+  public async setThemeData(themeData: string): Promise<boolean> {
     if (!this._created) return false;
 
-    const loaded = await this._sendMessage('loadThemeData', { instanceId: this._id, themeData });
+    const loaded = await this._sendMessage('setThemeData', { instanceId: this._id, themeData });
 
     await this._updateDotLottieInstanceState();
 

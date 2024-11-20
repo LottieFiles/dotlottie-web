@@ -1,5 +1,53 @@
 # @lottiefiles/dotlottie-web
 
+## 0.37.0-beta.9
+
+### Patch Changes
+
+- 9ed1a99: fix: lottie default slots are not applied
+
+## 0.37.0-beta.8
+
+### Minor Changes
+
+- c0927ea: feat: add themeId to the DotLottie config
+
+## 0.37.0-beta.7
+
+### Minor Changes
+
+- 989a447: feat: update dotLottie config to accept initial themeId to load
+
+  Breaking change:
+
+  - The `DotLottie` constructor now accepts an initial `themeId`
+  - The `loadTheme` method has been renamed to `setTheme`
+  - `resetTheme` method has been added to reset the theme to the default one
+
+## 0.37.0-beta.6
+
+### Minor Changes
+
+- 6a6db41: fix(theming): gradient & expression
+
+## 0.37.0-beta.5
+
+### Patch Changes
+
+- 5192b23: fix: apply default slots in loaded lottie json/.lottie
+
+## 0.37.0-beta.4
+
+### Minor Changes
+
+- 7ef3025: feat: add name property to animations/themes/state machines assets in the manifest
+
+## 0.37.0-beta.3
+
+### Patch Changes
+
+- 0dcc26c: fix: setSlot with animated color property
+
 ## 0.36.1
 
 ### Patch Changes

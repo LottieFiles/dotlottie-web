@@ -52,14 +52,6 @@ export interface MethodParamsMap {
     instanceId: string;
     stateMachineData: string;
   };
-  loadTheme: {
-    instanceId: string;
-    themeId: string;
-  };
-  loadThemeData: {
-    instanceId: string;
-    themeData: string;
-  };
   pause: {
     instanceId: string;
   };
@@ -132,6 +124,14 @@ export interface MethodParamsMap {
     instanceId: string;
     speed: number;
   };
+  setTheme: {
+    instanceId: string;
+    themeId: string;
+  };
+  setThemeData: {
+    instanceId: string;
+    themeData: string;
+  };
   setUseFrameInterpolation: {
     instanceId: string;
     useFrameInterpolation: boolean;
@@ -180,8 +180,6 @@ export interface MethodResultMap {
   loadAnimation: void;
   loadStateMachine: boolean;
   loadStateMachineData: boolean;
-  loadTheme: boolean;
-  loadThemeData: boolean;
   onComplete: {
     event: CompleteEvent;
     instanceId: string;
@@ -251,6 +249,8 @@ export interface MethodResultMap {
   setRenderConfig: void;
   setSegment: void;
   setSpeed: void;
+  setTheme: boolean;
+  setThemeData: boolean;
   setUseFrameInterpolation: void;
   setViewport: boolean;
   setWasmUrl: void;

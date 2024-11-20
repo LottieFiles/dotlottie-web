@@ -16,7 +16,7 @@ export const Home = (): JSX.Element => {
 
   useEffect(() => {
     if (theme) {
-      newPlayerRef.current?.loadTheme(theme);
+      newPlayerRef.current?.setTheme(theme);
     }
   }, [theme, newPlayerRef]);
 
