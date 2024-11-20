@@ -240,7 +240,7 @@ export const useDotLottieWorker = (config?: DotLottieWorkerConfig): UseDotLottie
     if (!dotLottieRef.current) return;
 
     if (dotLottieRef.current.isLoaded && dotLottieRef.current.activeThemeId !== config?.themeId) {
-      dotLottieRef.current.loadTheme(config?.themeId || '');
+      dotLottieRef.current.setTheme(config?.themeId || '');
     }
   }, [config?.themeId]);
 
@@ -249,7 +249,7 @@ export const useDotLottieWorker = (config?: DotLottieWorkerConfig): UseDotLottie
     if (!dotLottieRef.current) return;
 
     if (dotLottieRef.current.isLoaded) {
-      dotLottieRef.current.loadThemeData(config?.themeData || '');
+      dotLottieRef.current.setThemeData(config?.themeData || '');
     }
   }, [config?.themeData]);
 

@@ -461,7 +461,7 @@ const commands: {
 
     instance.loadAnimation(animationId);
   },
-  loadTheme: (request) => {
+  setTheme: (request) => {
     const instanceId = request.params.instanceId;
     const themeId = request.params.themeId;
 
@@ -471,9 +471,9 @@ const commands: {
       throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    return instance.loadTheme(themeId);
+    return instance.setTheme(themeId);
   },
-  loadThemeData: (request) => {
+  setThemeData: (request) => {
     const instanceId = request.params.instanceId;
     const themeData = request.params.themeData;
 
@@ -483,7 +483,7 @@ const commands: {
       throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    return instance.loadThemeData(themeData);
+    return instance.setThemeData(themeData);
   },
   pause: (request) => {
     const instanceId = request.params.instanceId;

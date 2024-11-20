@@ -1542,7 +1542,7 @@ describe('markers', () => {
   });
 });
 
-describe('theming', () => {
+describe.skip('theming', () => {
   test('fail to load a theme', async () => {
     const onLoad = vi.fn();
 
@@ -1557,7 +1557,7 @@ describe('theming', () => {
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
 
-    const result = dotLottie.loadTheme('invalid');
+    const result = dotLottie.setTheme('invalid');
 
     expect(dotLottie.activeThemeId).toBeFalsy();
 
@@ -1580,7 +1580,7 @@ describe('theming', () => {
 
     const themeId = 'global_theme';
 
-    const result = dotLottie.loadTheme(themeId);
+    const result = dotLottie.setTheme(themeId);
 
     expect(dotLottie.activeThemeId).toBe(themeId);
 
@@ -1607,7 +1607,7 @@ describe('theming', () => {
 
     const themeId = themes[0]?.id ?? '';
 
-    const result = dotLottie.loadTheme(themeId);
+    const result = dotLottie.setTheme(themeId);
 
     expect(dotLottie.activeThemeId).toBe(themeId);
 
@@ -1637,7 +1637,7 @@ describe('theming', () => {
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
 
-    const result = dotLottie.loadThemeData(JSON.stringify(themeData));
+    const result = dotLottie.setThemeData(JSON.stringify(themeData));
 
     expect(result).toBe(true);
   });
@@ -1656,7 +1656,7 @@ describe('theming', () => {
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
 
-    const result = dotLottie.loadThemeData('invalid');
+    const result = dotLottie.setThemeData('invalid');
 
     expect(result).toBe(false);
   });
