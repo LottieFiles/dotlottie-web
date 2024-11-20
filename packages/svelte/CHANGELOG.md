@@ -1,5 +1,24 @@
 # @lottiefiles/dotlottie-svelte
 
+## 0.4.0
+
+### Minor Changes
+
+- 0d65643: feat: updated dotLottie-rs wasm bindings to v0.1.33 which includes the new v2 dotLottiespecs and theming support.
+  feat: Added `setSlots` methods to `DotLottie` class to set lottie slots in runtime.
+  feat: Added `themeId` prop to the `DotLottie` class config to initially load a .lottie with a specific theme.
+  feat: Added `resetTheme` method to the `DotLottie` class to reset the theme to the default one.
+
+  BREAKING CHANGE:
+
+  - DotLottie's `loadTheme` method is no longer supported, use `setTheme` instead.
+  - DotLottie's `setThemeData` method is no longer supported, use `setThemeData` instead.
+
+### Patch Changes
+
+- Updated dependencies [0d65643]
+  - @lottiefiles/dotlottie-web@0.37.0
+
 ## 0.3.23-beta.9
 
 ### Patch Changes
