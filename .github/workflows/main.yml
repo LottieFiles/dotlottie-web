@@ -210,7 +210,6 @@ jobs:
     permissions:
       contents: write
       pages: write
-      actions: write
 
     steps:
       - name: ⬇️ Checkout repo
