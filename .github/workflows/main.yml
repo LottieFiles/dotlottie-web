@@ -208,7 +208,7 @@ jobs:
       'refs/heads/main' }}
 
     permissions:
-      contents: read
+      contents: write
       pages: write
 
     steps:
