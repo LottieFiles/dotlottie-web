@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { DotLottiePlayer, DotLottieCommonPlayer } from '@dotlottie/react-player';
-import { DotLottieReact, setWasmUrl as setDotLottieWasmUrl, DotLottie } from '@lottiefiles/dotlottie-react';
+import {
+  DotLottieReact,
+  setWasmUrl as setDotLottieWasmUrl,
+  DotLottie,
+  RenderEvent,
+} from '@lottiefiles/dotlottie-react';
 import dotLottieWebPkg from '@lottiefiles/dotlottie-react/node_modules/@lottiefiles/dotlottie-web/package.json';
 import { Range, getTrackBackground } from 'react-range';
 import dotLottieWasmUrl from '../../../../packages/web/src/core/dotlottie-player.wasm?url';
