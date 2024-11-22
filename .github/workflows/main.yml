@@ -65,7 +65,11 @@ jobs:
     name: npm-release
     needs: validate
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+    outputs:
+      published: ${{ steps.release-to-npm.outputs.published }}
+    if:
+      ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' && github.ref ==
+      'refs/heads/main' }}
 
     permissions:
       # Allow creating a release in the repository
@@ -94,21 +98,18 @@ jobs:
         with:
           cache: pnpm
           node-version: 20
-          registry-url: https://registry.npmjs.org
 
       - name: 📥 Install dependencies
         run: pnpm install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
 
       - name: 🚀 Release to NPM
+        id: release-to-npm
         uses: changesets/action@v1
         with:
           commit: 'chore: 🤖 update versions'
           title: 'chore: 🤖 update versions'
           publish: pnpm release:publish
           version: pnpm release:version
-          createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
@@ -118,9 +119,11 @@ jobs:
 
   gpr-release:
     name: gpr-release
-    needs: validate
+    needs: [validate, npm-release]
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+    if:
+      ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' && github.ref ==
+      'refs/heads/main' && needs.npm-release.outputs.published == 'true' }}
 
     permissions:
       # Allow creating a release in the repository
@@ -159,18 +162,20 @@ jobs:
         with:
           commit: 'chore: update versions'
           title: 'chore: update versions'
-          publish: pnpm release:publish
+          publish: pnpm release:publish --no-git-tag
           version: pnpm release:version
-          createGithubReleases: true
+          createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   jsr-release:
     name: jsr-release
-    needs: validate
+    needs: [validate, npm-release]
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+    if:
+      ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' && github.ref ==
+      'refs/heads/main' && needs.npm-release.outputs.published == 'true' }}
 
     permissions:
       contents: read

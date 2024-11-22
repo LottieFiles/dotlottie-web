@@ -1,6 +1,8 @@
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import type { DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-react';
+import { DotLottieReact, DotLottieWorkerReact } from '@lottiefiles/dotlottie-react';
 import { Inter } from 'next/font/google';
 import Head from 'next/head';
+import React, { useState } from 'react';
 
 import styles from '@/styles/Home.module.css';
 
@@ -9,6 +11,9 @@ const inter = Inter({ subsets: ['latin'] });
 const src = 'https://lottie.host/e641272e-039b-4612-96de-138acfbede6e/bc0sW78EeR.lottie';
 
 export default function Home(): JSX.Element {
+  const [dotLottie, setDotLottie] = useState<DotLottie | DotLottieWorker | null>(null);
+  const [worker, setWorker] = useState(true);
+
   return (
     <>
       <Head>
@@ -18,17 +23,26 @@ export default function Home(): JSX.Element {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
-        <DotLottieReact
-          style={{
-            minWidth: '100px',
+        <button onClick={(): void => setWorker(!worker)}>Toggle worker</button>
+        <button
+          onClick={(): void => {
+            dotLottie?.play();
           }}
-          src={src}
-          loop
-          autoplay
-          renderConfig={{
-            autoResize: true,
+        >
+          Play
+        </button>
+        <button
+          onClick={(): void => {
+            dotLottie?.pause();
           }}
-        />
+        >
+          Pause
+        </button>
+        {worker ? (
+          <DotLottieWorkerReact src={src} loop autoplay dotLottieRefCallback={setDotLottie} />
+        ) : (
+          <DotLottieReact src={src} loop autoplay dotLottieRefCallback={setDotLottie} />
+        )}
       </main>
     </>
   );
