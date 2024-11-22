@@ -17,6 +17,18 @@ module.exports = [
     name: '@lottiefiles/dotlottie-react',
     path: 'packages/react/dist/index.js',
     import: '*',
+    modifyWebpackConfig: (config) => {
+      config.module = config.module || {};
+      config.module.rules = config.module.rules || [];
+      config.module.rules.push({
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+        },
+      });
+
+      return config;
+    },
   },
   {
     name: '@lottiefiles/dotlottie-vue',
