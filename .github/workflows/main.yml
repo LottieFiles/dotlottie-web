@@ -67,7 +67,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       published: ${{ steps.npm-release.outputs.published }}
-    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+    if:
+      ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' && github.ref ==
+      'refs/heads/main' }}
 
     permissions:
       # Allow creating a release in the repository
@@ -123,8 +125,8 @@ jobs:
     needs: [validate, npm-release]
     runs-on: ubuntu-latest
     if:
-      ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' &&
-      needs.npm-release.outputs.published == 'true' }}
+      ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' && github.ref ==
+      'refs/heads/main' && needs.npm-release.outputs.published == 'true' }}
 
     permissions:
       # Allow creating a release in the repository
@@ -175,8 +177,8 @@ jobs:
     needs: [validate, npm-release]
     runs-on: ubuntu-latest
     if:
-      ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' &&
-      needs.npm-release.outputs.published == 'true' }}
+      ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' && github.ref ==
+      'refs/heads/main' && needs.npm-release.outputs.published == 'true' }}
 
     permissions:
       contents: read
