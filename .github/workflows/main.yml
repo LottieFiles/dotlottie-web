@@ -61,6 +61,54 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+  # This job is triggered when we push a commit with the message "chore: release:snapshot"
+  # This will version the package and publish it to NPM with the "alpha" tag
+  # https://changesets-docs.vercel.app/snapshot-releases
+  npm-snapshot-release:
+    name: npm-snapshot-release
+    # needs: validate
+    runs-on: ubuntu-latest
+    if: >
+      ${{ github.repository == 'LottieFiles/dotlottie-web' &&
+          github.event_name == 'push' &&
+          contains(github.event.head_commit.message, 'chore: release:snapshot') &&
+          github.event.pull_request.state == 'open' }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup pnpm@v9
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node@v20
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 20
+
+      - name: 📥 Install dependencies
+        run: pnpm install
+
+      - name: 🏗 Build
+        run: pnpm build
+
+      - name: Verify changeset status
+        run: |
+          pnpm changeset status --output=./version.json --since=${{ github.event.pull_request.head.sha }}
+          cat ./version.json
+
+      # - name: 🔄 Version packages
+      #   id: version-packages
+      #   run: pnpm changeset version --snapshot alpha
+
+      # - name: 🚀 Snapshot Release to NPM
+      #   run: pnpm changeset publish --no-git-tag --tag alpha
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+
   npm-release:
     name: npm-release
     needs: validate
