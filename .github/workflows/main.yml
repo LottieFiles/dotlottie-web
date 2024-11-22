@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - alpha
   pull_request:
 
 concurrency:
@@ -67,9 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       published: ${{ steps.release-to-npm.outputs.published }}
-    if:
-      ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' && github.ref ==
-      'refs/heads/main' }}
+    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
 
     permissions:
       # Allow creating a release in the repository
@@ -108,7 +107,7 @@ jobs:
         with:
           commit: 'chore: 🤖 update versions'
           title: 'chore: 🤖 update versions'
-          publish: pnpm release:publish
+          publish: pnpm release:publish --no-git-tag
           version: pnpm release:version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
