@@ -201,11 +201,11 @@ jobs:
 
   publish-viewer:
     name: publish-viewer
-    # needs: validate
+    needs: validate
     runs-on: ubuntu-latest
-    # if:
-    #   ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' && github.ref ==
-    #   'refs/heads/main' }}
+    if:
+      ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' && github.ref ==
+      'refs/heads/main' }}
 
     permissions:
       contents: write
