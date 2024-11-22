@@ -1,66 +1,13 @@
-'use client';
+import type { Config } from '@lottiefiles/dotlottie-web';
+import { DotLottie } from '@lottiefiles/dotlottie-web';
 
-import type { DotLottie, Config } from '@lottiefiles/dotlottie-web';
-import type { ComponentProps, RefCallback } from 'react';
-import React from 'react';
+import type { BaseDotLottieProps } from './base-dotlottie-react';
+import { BaseDotLottieReact } from './base-dotlottie-react';
 
-import { useDotLottie } from './use-dotlottie';
-import useStableCallback from './use-stable-callback';
+export type DotLottieReactProps = Omit<BaseDotLottieProps<DotLottie>, 'createDotLottie'>;
 
-export type DotLottieReactProps = Omit<Config, 'canvas'> &
-  ComponentProps<'canvas'> & {
-    animationId?: string;
-    dotLottieRefCallback?: RefCallback<DotLottie>;
-    playOnHover?: boolean;
-    themeData?: string;
-    themeId?: string;
-  };
+const createDotLottie = (config: Config): DotLottie => new DotLottie(config);
 
-export const DotLottieReact = ({
-  animationId,
-  autoplay,
-  backgroundColor,
-  data,
-  dotLottieRefCallback,
-  loop,
-  marker,
-  mode,
-  playOnHover,
-  renderConfig,
-  segment,
-  speed,
-  src,
-  themeData,
-  themeId,
-  useFrameInterpolation,
-  ...props
-}: DotLottieReactProps): JSX.Element => {
-  const { DotLottieComponent, dotLottie } = useDotLottie({
-    data,
-    mode,
-    speed,
-    src,
-    autoplay,
-    loop,
-    segment,
-    renderConfig,
-    backgroundColor,
-    useFrameInterpolation,
-    playOnHover,
-    marker,
-    themeId,
-    animationId,
-    themeData,
-  });
-
-  const stableDotLottieRefCallback =
-    typeof dotLottieRefCallback === 'function' ? useStableCallback(dotLottieRefCallback) : undefined;
-
-  React.useEffect(() => {
-    if (typeof stableDotLottieRefCallback === 'function') {
-      stableDotLottieRefCallback(dotLottie);
-    }
-  }, [stableDotLottieRefCallback, dotLottie]);
-
-  return <DotLottieComponent {...props} />;
+export const DotLottieReact: React.FC<DotLottieReactProps> = (props) => {
+  return <BaseDotLottieReact {...props} createDotLottie={createDotLottie} />;
 };

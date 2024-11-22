@@ -8,13 +8,11 @@ module.exports = defineConfig({
   clean: true,
   dts: true,
   minify: false,
-  sourcemap: false,
+  sourcemap: true,
   entry: ['./src/index.ts'],
   format: ['esm'],
   platform: 'browser',
-  target: ['es2015', 'node18'],
+  target: ['esnext'],
   tsconfig: 'tsconfig.build.json',
-  // To provide an esm build without any external dependencies
-  noExternal: Object.keys(require('./package.json').dependencies),
-  external: ['react'],
+  external: ['react', 'react-dom'],
 });

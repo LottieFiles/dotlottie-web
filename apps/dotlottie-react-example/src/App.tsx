@@ -1,5 +1,5 @@
 // import { DotLottieReact, DotLottie, setWasmUrl } from '@lottiefiles/dotlottie-react';
-import { DotLottieWorkerReact, DotLottieWorker, setWasmUrl } from '@lottiefiles/dotlottie-react';
+import { setWasmUrl, DotLottieWorker, DotLottieWorkerReact } from '@lottiefiles/dotlottie-react';
 import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
 import React, { useState } from 'react';
 
@@ -64,29 +64,32 @@ function App() {
 
   return (
     <div>
-      <div
+      {/* <div
         style={{
           marginBottom: '2000px',
         }}
-      ></div>
-      <DotLottieWorkerReact
-        dotLottieRefCallback={setDotLottie}
-        useFrameInterpolation={useFrameInterpolation}
-        src={animations[srcIdx]}
-        autoplay
-        loop={loop}
-        speed={speed}
-        playOnHover={playOnHover}
-        renderConfig={{
-          autoResize: autoResizeCanvas,
-        }}
-        marker={marker}
-        style={{
-          margin: '2px',
-          border: '1px solid white',
-        }}
-        animationId={currentAnimationId}
-      />
+      ></div> */}
+      {loop && (
+        <DotLottieWorkerReact
+          dotLottieRefCallback={setDotLottie}
+          useFrameInterpolation={useFrameInterpolation}
+          src={animations[srcIdx]}
+          autoplay
+          loop={loop}
+          speed={speed}
+          playOnHover={playOnHover}
+          renderConfig={{
+            freezeOnOffscreen: false,
+            autoResize: autoResizeCanvas,
+          }}
+          marker={marker}
+          style={{
+            margin: '2px',
+            border: '1px solid white',
+          }}
+          animationId={currentAnimationId}
+        />
+      )}
       <input type="range" min="0" max="100" defaultValue="0" value={progress} />
       <label>
         Marker:
