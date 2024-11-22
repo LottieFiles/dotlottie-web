@@ -1,20 +1,17 @@
 const { defineConfig } = require('tsup');
 
 module.exports = defineConfig({
-  bundle: true,
+  bundle: false,
   metafile: false,
   splitting: false,
   treeshake: true,
   clean: true,
   dts: true,
-  minify: false,
-  sourcemap: false,
-  entry: ['./src/index.ts'],
+  sourcemap: true,
+  entry: ['./src/**/*.{ts,tsx}'],
   format: ['esm'],
   platform: 'browser',
-  target: ['es2015', 'node18'],
+  target: ['es2020'],
   tsconfig: 'tsconfig.build.json',
-  // To provide an esm build without any external dependencies
-  noExternal: Object.keys(require('./package.json').dependencies),
   external: ['react'],
 });
