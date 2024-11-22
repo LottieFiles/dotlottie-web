@@ -69,10 +69,8 @@ jobs:
     # needs: validate
     runs-on: ubuntu-latest
     if: >
-      ${{ github.repository == 'LottieFiles/dotlottie-web' &&
-          github.event_name == 'push' &&
-          contains(github.event.head_commit.message, 'chore: release:snapshot') &&
-          github.event.pull_request.state == 'open' }}
+      github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' &&
+      startsWith(github.event.head_commit.message, 'chore: release:snapshot')
     permissions:
       contents: read
       id-token: write
@@ -97,7 +95,7 @@ jobs:
 
       - name: Verify changeset status
         run: |
-          pnpm changeset status --output=./version.json --since=${{ github.event.pull_request.head.sha }}
+          pnpm changeset status --output=./version.json --since=${{ github.ref_name }}
           cat ./version.json
 
       # - name: 🔄 Version packages
