@@ -1,3 +1,5 @@
+'use client';
+
 import { DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-web';
 
 export * from './dotlottie';

@@ -1,3 +1,5 @@
+'use client';
+
 import type { Config } from '@lottiefiles/dotlottie-web';
 import { DotLottieWorker } from '@lottiefiles/dotlottie-web';
 

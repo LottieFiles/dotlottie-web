@@ -1,3 +1,5 @@
+'use client';
+
 import type { Config, DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-web';
 import { useState, useEffect, useCallback, useRef, type ComponentProps, type RefCallback, useMemo } from 'react';
 
@@ -42,11 +44,6 @@ export type BaseDotLottieProps<T extends DotLottie | DotLottieWorker> = Omit<Con
     workerId?: T extends DotLottieWorker ? string : undefined;
   };
 
-/**
- * A base component for rendering and playing animations using `DotLottie` or `DotLottieWorker`.
- * The component provides a `dotLottieRefCallback` to access the `DotLottie` instance and control playback.
- * The `createDotLottie` function is used to create the `DotLottie` or `DotLottieWorker` instance.
- */
 export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   createDotLottie,
   dotLottieRefCallback,
