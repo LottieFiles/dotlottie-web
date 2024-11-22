@@ -20,7 +20,7 @@
     "preinstall": "npx only-allow pnpm",
     "prepare": "husky install",
     "release": "pnpm release:version && pnpm release:publish",
-    "release:publish": "pnpm clean && pnpm build && changeset publish",
+    "release:publish": "pnpm clean && pnpm --filter @lottiefiles/dotlottie-* build && changeset publish",
     "release:version": "changeset version",
     "size": "size-limit",
     "stats:eslint": "cross-env TIMING=1 turbo run stats:eslint",
