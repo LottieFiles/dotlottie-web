@@ -64,13 +64,13 @@ jobs:
 
   npm-release:
     name: npm-release
-    needs: validate
+    # needs: validate
     runs-on: ubuntu-latest
     outputs:
       published: ${{ steps.release-to-npm.outputs.published }}
-    if:
-      ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' && github.ref ==
-      'refs/heads/main' }}
+    # if:
+    #   ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' && github.ref ==
+    #   'refs/heads/main' }}
 
     permissions:
       # Allow creating a release in the repository
@@ -114,6 +114,7 @@ jobs:
           title: 'chore: 🤖 update versions'
           publish: pnpm release:publish --snapshot --no-git-tag --tag alpha
           version: pnpm release:version --snapshot alpha
+          createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
