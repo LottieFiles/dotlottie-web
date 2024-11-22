@@ -18,5 +18,5 @@
     "@lottiefiles/dotlottie-wc": "0.3.0",
     "@lottiefiles/dotlottie-web": "0.37.0"
   },
-  "changesets": []
+  "changesets": ["spotty-buckets-cheer"]
 }

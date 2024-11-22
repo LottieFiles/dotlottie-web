@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.10.1-alpha.0
+
+### Patch Changes
+
+- 94884b5: fix: component lifecycle management in strict mode
+
 ## 0.10.0
 
 ### Minor Changes
