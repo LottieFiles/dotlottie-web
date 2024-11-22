@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.0.0-alpha-20241122093046
+
+### Patch Changes
+
+- 2e335b4: fix: cleanup and initialization in strict mode
+
 ## 0.10.0
 
 ### Minor Changes
