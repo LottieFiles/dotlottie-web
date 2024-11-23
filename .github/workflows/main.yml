@@ -41,10 +41,15 @@ jobs:
       - name: 💅 Verify format (`pnpm format` committed?)
         run: pnpm format
 
-      - name: 🛡️ Test
+      - name: 🛡️ Test (dotlottie-web)
         run: |
           npx playwright install --with-deps
           pnpm test:coverage
+        working-directory: packages/web
+
+      - name: 🛡️ Test (dotlottie-react)
+        run: pnpm test:coverage
+        working-directory: packages/react
 
       - name: 📏 Report dotlottie-web coverage
         if: always() && github.event_name == 'pull_request'
