@@ -97,9 +97,12 @@ jobs:
         with:
           cache: pnpm
           node-version: 20
+          registry-url: https://registry.npmjs.org
 
       - name: 📥 Install dependencies
         run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🚀 Release to NPM
         id: release-to-npm
