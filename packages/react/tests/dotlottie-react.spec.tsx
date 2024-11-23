@@ -10,9 +10,9 @@ import baseSrc from './__fixtures__/test.lottie?url';
 
 const dotLottieSrc = `http://localhost:5173/${baseSrc}`;
 
-const Wrapper = ({ children }: { children: React.ReactNode }): React.ReactNode => (
-  <React.StrictMode>{children}</React.StrictMode>
-);
+const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return <>{children}</>;
+};
 
 const render = (ui: React.ReactNode, options?: ComponentRenderOptions): RenderResult =>
   vitestRender(ui, { wrapper: Wrapper, ...options });
