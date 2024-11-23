@@ -45,15 +45,22 @@ jobs:
         run: |
           npx playwright install --with-deps
           pnpm test:coverage
-        working-directory: packages/web
 
-      - name: 📏 Report coverage
+      - name: 📏 Report dotlottie-web coverage
         if: always() && github.event_name == 'pull_request'
         uses: davelosert/vitest-coverage-report-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           working-directory: packages/web
           name: '@lottiefiles/dotlottie-web'
+
+      - name: 📏 Report dotlottie-react coverage
+        if: always() && github.event_name == 'pull_request'
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: packages/react
+          name: '@lottiefiles/dotlottie-react'
 
       - name: 📏 Report bundle size
         if: github.event_name == 'pull_request'

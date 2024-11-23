@@ -478,6 +478,16 @@ export class DotLottieWorker {
     return result;
   }
 
+  public async resetTheme(): Promise<boolean> {
+    if (!this._created) return false;
+
+    const result = await this._sendMessage('resetTheme', { instanceId: this._id });
+
+    await this._updateDotLottieInstanceState();
+
+    return result;
+  }
+
   public async load(config: Omit<Config, 'canvas'>): Promise<void> {
     if (!this._created) return;
 

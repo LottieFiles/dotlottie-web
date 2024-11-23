@@ -45,8 +45,22 @@ export type BaseDotLottieProps<T extends DotLottie | DotLottieWorker> = Omit<Con
   };
 
 export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
+  autoplay,
+  backgroundColor,
   createDotLottie,
+  data,
   dotLottieRefCallback,
+  loop,
+  mode,
+  playOnHover,
+  renderConfig,
+  segment,
+  speed,
+  src,
+  themeData,
+  themeId,
+  useFrameInterpolation,
+  workerId,
   ...props
 }: BaseDotLottieProps<T> & {
   createDotLottie: (config: T extends DotLottieWorker ? Config & { workerId?: string } : Config) => T;
@@ -55,14 +69,32 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dotLottieRef = useRef<T | null>(null);
   const dotLottieRefCallbackRef = useRef<RefCallback<T | null> | undefined>(dotLottieRefCallback);
-  const configRef = useRef<Omit<BaseDotLottieProps<T>, 'createDotLottie' | 'dotLottieRefCallback'> | undefined>(props);
+
+  const config: Omit<Config, 'canvas'> & {
+    workerId?: T extends DotLottieWorker ? string : undefined;
+  } = {
+    speed,
+    mode,
+    loop,
+    useFrameInterpolation,
+    segment,
+    backgroundColor,
+    autoplay,
+    themeId,
+    workerId,
+    src,
+    data,
+    renderConfig,
+  };
+
+  const configRef = useRef<Omit<BaseDotLottieProps<T>, 'createDotLottie' | 'dotLottieRefCallback'> | undefined>(config);
 
   dotLottieRefCallbackRef.current = dotLottieRefCallback;
   dotLottieRef.current = dotLottie;
-  configRef.current = props;
+  configRef.current = config;
 
   useEffect(() => {
-    if (typeof dotLottieRefCallbackRef.current === 'function') {
+    if (typeof dotLottieRefCallbackRef.current === 'function' && dotLottie) {
       dotLottieRefCallbackRef.current(dotLottie);
     }
   }, [dotLottie]);
@@ -113,100 +145,104 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   }, [dotLottie]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.speed !== 'number') return;
+    if (!dotLottieRef.current) return;
 
-    dotLottieRef.current.setSpeed(props.speed);
-  }, [props.speed]);
-
-  useEffect(() => {
-    if (!dotLottieRef.current || typeof props.mode !== 'string') return;
-
-    dotLottieRef.current.setMode(props.mode);
-  }, [props.mode]);
+    dotLottieRef.current.setSpeed(speed ?? 1);
+  }, [speed]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.loop !== 'boolean') return;
+    if (!dotLottieRef.current) return;
 
-    dotLottieRef.current.setLoop(props.loop);
-  }, [props.loop]);
-
-  useEffect(() => {
-    if (!dotLottieRef.current || typeof props.useFrameInterpolation !== 'boolean') return;
-
-    dotLottieRef.current.setUseFrameInterpolation(props.useFrameInterpolation);
-  }, [props.useFrameInterpolation]);
+    dotLottieRef.current.setMode(mode ?? 'forward');
+  }, [mode]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.segment !== 'object') return;
+    if (!dotLottieRef.current) return;
 
-    const startFrame = props.segment[0];
-    const endFrame = props.segment[1];
+    dotLottieRef.current.setLoop(loop ?? false);
+  }, [loop]);
+
+  useEffect(() => {
+    if (!dotLottieRef.current) return;
+
+    dotLottieRef.current.setUseFrameInterpolation(useFrameInterpolation ?? true);
+  }, [useFrameInterpolation]);
+
+  useEffect(() => {
+    if (!dotLottieRef.current || typeof segment !== 'object') return;
+
+    const startFrame = segment[0];
+    const endFrame = segment[1];
 
     dotLottieRef.current.setSegment(startFrame, endFrame);
-  }, [props.segment]);
+  }, [segment]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.backgroundColor !== 'string') return;
+    if (!dotLottieRef.current) return;
 
-    dotLottieRef.current.setBackgroundColor(props.backgroundColor);
-  }, [props.backgroundColor]);
+    dotLottieRef.current.setBackgroundColor(backgroundColor ?? '');
+  }, [backgroundColor]);
 
-  const renderConfig = useMemo(() => {
-    if (typeof props.renderConfig !== 'object') return undefined;
+  const memoizedRenderConfig = useMemo(() => {
+    if (typeof renderConfig !== 'object') return undefined;
 
-    return props.renderConfig;
-  }, [props.renderConfig?.autoResize, props.renderConfig?.devicePixelRatio, props.renderConfig?.freezeOnOffscreen]);
-
-  useEffect(() => {
-    if (!dotLottieRef.current || !renderConfig) return;
-
-    dotLottieRef.current.setRenderConfig(renderConfig);
-  }, [renderConfig]);
+    return renderConfig;
+  }, [renderConfig?.autoResize, renderConfig?.devicePixelRatio, renderConfig?.freezeOnOffscreen]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.data !== 'string' || typeof props.data !== 'object') return;
+    if (!dotLottieRef.current || !memoizedRenderConfig) return;
+
+    dotLottieRef.current.setRenderConfig(memoizedRenderConfig);
+  }, [memoizedRenderConfig]);
+
+  useEffect(() => {
+    if (!dotLottieRef.current || typeof data !== 'string' || typeof data !== 'object') return;
 
     dotLottieRef.current.load({
-      data: props.data,
+      data,
       ...(configRef.current || {}),
     });
-  }, [props.data]);
+  }, [data]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.src !== 'string') return;
+    if (!dotLottieRef.current || typeof src !== 'string') return;
 
     dotLottieRef.current.load({
-      src: props.src,
+      src,
       ...(configRef.current || {}),
     });
-  }, [props.src]);
+  }, [src]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.marker !== 'string') return;
+    if (!dotLottieRef.current) return;
 
-    dotLottieRef.current.setMarker(props.marker);
+    dotLottieRef.current.setMarker(props.marker ?? '');
   }, [props.marker]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.animationId !== 'string') return;
+    if (!dotLottieRef.current) return;
 
-    dotLottieRef.current.loadAnimation(props.animationId);
+    dotLottieRef.current.loadAnimation(props.animationId ?? '');
   }, [props.animationId]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.themeId !== 'string') return;
+    if (!dotLottieRef.current) return;
 
-    dotLottieRef.current.setTheme(props.themeId);
-  }, [props.themeId]);
+    if (typeof themeId === 'string') {
+      dotLottieRef.current.setTheme(themeId);
+    } else {
+      dotLottieRef.current.resetTheme();
+    }
+  }, [themeId]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.themeData !== 'string') return;
+    if (!dotLottieRef.current) return;
 
-    dotLottieRef.current.setThemeData(props.themeData);
-  }, [props.themeData]);
+    dotLottieRef.current.setThemeData(themeData ?? '');
+  }, [themeData]);
 
   return (
-    <div style={{ width: '100%', height: '100%', lineHeight: 0, ...props.style }}>
+    <div className={props.className} style={{ width: '100%', height: '100%', lineHeight: 0, ...props.style }}>
       <canvas ref={setCanvasRef} {...props} style={{ width: '100%', height: '100%' }} />
     </div>
   );
