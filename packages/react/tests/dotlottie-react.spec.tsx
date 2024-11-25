@@ -1,4 +1,5 @@
 import { DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-web';
+import { userEvent } from '@testing-library/user-event';
 import React from 'react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import type { ComponentRenderOptions, RenderResult } from 'vitest-browser-react';
@@ -6,9 +7,11 @@ import { cleanup, render as vitestRender } from 'vitest-browser-react';
 
 import { DotLottieReact, DotLottieWorkerReact } from '../src';
 
+import lottieBaseSrc from './__fixtures__/test.json?url';
 import baseSrc from './__fixtures__/test.lottie?url';
 
 const dotLottieSrc = `http://localhost:5173/${baseSrc}`;
+const lottieSrc = `http://localhost:5173/${lottieBaseSrc}`;
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
@@ -31,7 +34,11 @@ describe.each([
     const onComplete = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { unmount } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { container, unmount } = render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    expect(container).toMatchSnapshot();
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -297,5 +304,385 @@ describe.each([
     });
 
     expect(dotLottie?.backgroundColor).toBe('');
+  });
+
+  test('calls dotLottie.setMarker when marker prop changes', async () => {
+    const onLoad = vi.fn();
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    const setMarker = vi.spyOn(dotLottie, 'setMarker');
+
+    dotLottie?.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    expect(dotLottie?.marker).toBe('');
+
+    rerender(<Component src={dotLottieSrc} autoplay marker="Marker_1" dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(setMarker).toHaveBeenCalledTimes(1);
+    });
+
+    expect(setMarker).toHaveBeenCalledWith('Marker_1');
+
+    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(setMarker).toHaveBeenCalledTimes(2);
+    });
+
+    expect(dotLottie?.marker).toBe('');
+  });
+
+  test('calls dotLottie.setSegment & dotLottie.resetSegment when segment prop changes', async () => {
+    const onLoad = vi.fn();
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    const setSegment = vi.spyOn(dotLottie, 'setSegment');
+    const resetSegment = vi.spyOn(dotLottie, 'resetSegment');
+
+    dotLottie?.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    expect(dotLottie?.segment).toBeUndefined();
+
+    rerender(<Component src={dotLottieSrc} autoplay segment={[0, 10]} dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(setSegment).toHaveBeenCalledTimes(1);
+    });
+
+    expect(setSegment).toHaveBeenCalledWith(0, 10);
+
+    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(resetSegment).toHaveBeenCalledTimes(1);
+    });
+
+    expect(dotLottie?.segment).toBeUndefined();
+  });
+
+  test('calls dotLottie.setTheme & dotLottie.resetTheme when themeId prop changes', async () => {
+    const onLoad = vi.fn();
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    const setTheme = vi.spyOn(dotLottie, 'setTheme');
+    const resetTheme = vi.spyOn(dotLottie, 'resetTheme');
+
+    dotLottie?.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    expect(dotLottie?.themeId).toBeUndefined();
+
+    rerender(<Component src={dotLottieSrc} autoplay themeId="Theme_1" dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(setTheme).toHaveBeenCalledTimes(1);
+    });
+
+    expect(setTheme).toHaveBeenCalledWith('Theme_1');
+
+    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(resetTheme).toHaveBeenCalledTimes(1);
+    });
+
+    expect(dotLottie?.themeId).toBeUndefined();
+  });
+
+  test('playOnHover', async () => {
+    const user = userEvent.setup();
+
+    const onLoad = vi.fn();
+    const dotLottieRefCallback = vi.fn();
+
+    const screen = render(
+      <Component
+        data-testid="dotLottie-canvas"
+        src={dotLottieSrc}
+        autoplay
+        playOnHover
+        dotLottieRefCallback={dotLottieRefCallback}
+      />,
+    );
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    dotLottie?.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const play = vi.spyOn(dotLottie, 'play');
+    const pause = vi.spyOn(dotLottie, 'pause');
+
+    let canvasElement = screen.getByTestId('dotLottie-canvas').element();
+
+    await user.hover(canvasElement);
+
+    await vi.waitFor(() => {
+      expect(play).toHaveBeenCalledTimes(1);
+    });
+
+    await user.unhover(canvasElement);
+
+    await vi.waitFor(() => {
+      expect(pause).toHaveBeenCalledTimes(1);
+    });
+
+    play.mockClear();
+    pause.mockClear();
+
+    // shouldn't call play/pause again as the playOnHover prop is undefined
+    screen.rerender(
+      <Component
+        data-testid="dotLottie-canvas"
+        src={dotLottieSrc}
+        autoplay
+        dotLottieRefCallback={dotLottieRefCallback}
+      />,
+    );
+
+    canvasElement = screen.getByTestId('dotLottie-canvas').element();
+
+    let mouseEnterCount = 0;
+    let mouseLeaveCount = 0;
+
+    canvasElement.addEventListener('mouseenter', () => {
+      mouseEnterCount += 1;
+    });
+    canvasElement.addEventListener('mouseleave', () => {
+      mouseLeaveCount += 1;
+    });
+
+    await user.hover(canvasElement);
+
+    await vi.waitFor(() => {
+      expect(mouseEnterCount).toBe(1);
+      expect(mouseLeaveCount).toBe(0);
+    });
+
+    expect(play).not.toHaveBeenCalled();
+
+    await user.unhover(canvasElement);
+
+    await vi.waitFor(() => {
+      expect(mouseEnterCount).toBe(1);
+      expect(mouseLeaveCount).toBe(1);
+    });
+
+    expect(pause).not.toHaveBeenCalled();
+  });
+
+  test('calls dotLottie.loadAnimation when animationId prop changes', async () => {
+    const onLoad = vi.fn();
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    dotLottie?.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const loadAnimation = vi.spyOn(dotLottie, 'loadAnimation');
+
+    rerender(
+      <Component src={dotLottieSrc} autoplay animationId="Animation_1" dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(loadAnimation).toHaveBeenCalledTimes(1);
+    });
+
+    expect(loadAnimation).toHaveBeenCalledWith('Animation_1');
+
+    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(loadAnimation).toHaveBeenCalledTimes(2);
+    });
+
+    expect(loadAnimation).toHaveBeenCalledWith('');
+
+    await vi.waitFor(() => {
+      expect(dotLottie?.activeAnimationId).toBe('');
+    });
+  });
+
+  test('calls dotLottie.setRenderConfig when renderConfig prop changes', async () => {
+    const onLoad = vi.fn();
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    dotLottie?.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const defaultRenderConfig = dotLottie?.renderConfig;
+
+    const setRenderConfig = vi.spyOn(dotLottie, 'setRenderConfig');
+
+    rerender(
+      <Component
+        src={dotLottieSrc}
+        autoplay
+        renderConfig={{
+          devicePixelRatio: 0.5,
+          freezeOnOffscreen: false,
+        }}
+        dotLottieRefCallback={dotLottieRefCallback}
+      />,
+    );
+
+    await vi.waitFor(() => {
+      expect(setRenderConfig).toHaveBeenCalledTimes(1);
+    });
+
+    expect(setRenderConfig).toHaveBeenCalledWith({
+      devicePixelRatio: 0.5,
+      freezeOnOffscreen: false,
+    });
+
+    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(setRenderConfig).toHaveBeenCalledTimes(2);
+    });
+
+    expect(setRenderConfig).toHaveBeenCalledWith({});
+
+    // Falls back to the default values
+    expect(dotLottie?.renderConfig).toEqual(defaultRenderConfig);
+  });
+
+  test('calls dotLottie.load when data prop changes', async () => {
+    const onLoad = vi.fn();
+    const dotLottieRefCallback = vi.fn();
+
+    let response = await fetch(lottieSrc);
+    const animationData = await response.json();
+
+    const { rerender } = render(
+      <Component data={animationData} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    dotLottie?.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const load = vi.spyOn(dotLottie, 'load');
+
+    response = await fetch(dotLottieSrc);
+    const dotLottieAnimationData = await response.arrayBuffer();
+
+    rerender(
+      <Component data={dotLottieAnimationData} autoplay loop speed={2} dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(load).toHaveBeenCalledTimes(1);
+    });
+
+    expect(load).toHaveBeenCalledWith({
+      data: dotLottieAnimationData,
+      loop: true,
+      autoplay: true,
+      speed: 2,
+    });
+  });
+
+  test('calls dotLottie.load when src prop changes', async () => {
+    const onLoad = vi.fn();
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    dotLottie?.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const load = vi.spyOn(dotLottie, 'load');
+
+    rerender(<Component src={lottieSrc} autoplay loop speed={2} dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(load).toHaveBeenCalledTimes(1);
+    });
+
+    expect(load).toHaveBeenCalledWith({
+      src: lottieSrc,
+      loop: true,
+      autoplay: true,
+      speed: 2,
+    });
   });
 });

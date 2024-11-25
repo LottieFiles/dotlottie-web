@@ -598,6 +598,17 @@ const commands: {
 
     instance.setSegment(segment[0], segment[1]);
   },
+  resetSegment: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.resetSegment();
+  },
   setSpeed: (request) => {
     const instanceId = request.params.instanceId;
     const speed = request.params.speed;

@@ -423,6 +423,13 @@ export class DotLottieWorker {
     await this._updateDotLottieInstanceState();
   }
 
+  public async resetSegment(): Promise<void> {
+    if (!this._created) return;
+
+    await this._sendMessage('resetSegment', { instanceId: this._id });
+    await this._updateDotLottieInstanceState();
+  }
+
   public async setRenderConfig(renderConfig: RenderConfig): Promise<void> {
     if (!this._created) return;
 
