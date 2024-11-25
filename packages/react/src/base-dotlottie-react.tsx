@@ -1,7 +1,7 @@
 'use client';
 
 import type { Config, DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-web';
-import { useState, useEffect, useCallback, useRef, type ComponentProps, type RefCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, type ComponentProps, type RefCallback } from 'react';
 
 export type BaseDotLottieProps<T extends DotLottie | DotLottieWorker> = Omit<Config, 'canvas'> &
   ComponentProps<'canvas'> & {
@@ -45,8 +45,25 @@ export type BaseDotLottieProps<T extends DotLottie | DotLottieWorker> = Omit<Con
   };
 
 export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
+  animationId,
+  autoplay,
+  backgroundColor,
+  className,
   createDotLottie,
+  data,
   dotLottieRefCallback,
+  loop,
+  mode,
+  playOnHover,
+  renderConfig,
+  segment,
+  speed,
+  src,
+  style,
+  themeData,
+  themeId,
+  useFrameInterpolation,
+  workerId,
   ...props
 }: BaseDotLottieProps<T> & {
   createDotLottie: (config: T extends DotLottieWorker ? Config & { workerId?: string } : Config) => T;
@@ -55,14 +72,32 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dotLottieRef = useRef<T | null>(null);
   const dotLottieRefCallbackRef = useRef<RefCallback<T | null> | undefined>(dotLottieRefCallback);
-  const configRef = useRef<Omit<BaseDotLottieProps<T>, 'createDotLottie' | 'dotLottieRefCallback'> | undefined>(props);
+
+  const config: Omit<Config, 'canvas'> & {
+    workerId?: T extends DotLottieWorker ? string : undefined;
+  } = {
+    speed,
+    mode,
+    loop,
+    useFrameInterpolation,
+    segment,
+    backgroundColor,
+    autoplay,
+    themeId,
+    workerId,
+    src,
+    data,
+    renderConfig,
+  };
+
+  const configRef = useRef<Omit<BaseDotLottieProps<T>, 'createDotLottie' | 'dotLottieRefCallback'> | undefined>(config);
 
   dotLottieRefCallbackRef.current = dotLottieRefCallback;
   dotLottieRef.current = dotLottie;
-  configRef.current = props;
+  configRef.current = config;
 
   useEffect(() => {
-    if (typeof dotLottieRefCallbackRef.current === 'function') {
+    if (typeof dotLottieRefCallbackRef.current === 'function' && dotLottie) {
       dotLottieRefCallbackRef.current(dotLottie);
     }
   }, [dotLottie]);
@@ -85,12 +120,14 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
 
   useEffect(() => {
     const handlePlayOnHover = (event: MouseEvent): void => {
-      if (!configRef.current?.playOnHover || !dotLottieRef.current?.isLoaded) return;
+      if (!playOnHover) return;
 
       if (event.type === 'mouseenter') {
-        dotLottieRef.current.play();
-      } else if (event.type === 'mouseleave') {
-        dotLottieRef.current.pause();
+        dotLottieRef.current?.play();
+      }
+
+      if (event.type === 'mouseleave') {
+        dotLottieRef.current?.pause();
       }
     };
 
@@ -101,7 +138,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
       canvasRef.current?.removeEventListener('mouseenter', handlePlayOnHover);
       canvasRef.current?.removeEventListener('mouseleave', handlePlayOnHover);
     };
-  }, []);
+  }, [playOnHover]);
 
   useEffect(() => {
     return () => {
@@ -113,101 +150,95 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   }, [dotLottie]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.speed !== 'number') return;
-
-    dotLottieRef.current.setSpeed(props.speed);
-  }, [props.speed]);
+    dotLottieRef.current?.setSpeed(speed ?? 1);
+  }, [speed]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.mode !== 'string') return;
-
-    dotLottieRef.current.setMode(props.mode);
-  }, [props.mode]);
+    dotLottieRef.current?.setMode(mode ?? 'forward');
+  }, [mode]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.loop !== 'boolean') return;
-
-    dotLottieRef.current.setLoop(props.loop);
-  }, [props.loop]);
+    dotLottieRef.current?.setLoop(loop ?? false);
+  }, [loop]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.useFrameInterpolation !== 'boolean') return;
-
-    dotLottieRef.current.setUseFrameInterpolation(props.useFrameInterpolation);
-  }, [props.useFrameInterpolation]);
+    dotLottieRef.current?.setUseFrameInterpolation(useFrameInterpolation ?? true);
+  }, [useFrameInterpolation]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.segment !== 'object') return;
-
-    const startFrame = props.segment[0];
-    const endFrame = props.segment[1];
-
-    dotLottieRef.current.setSegment(startFrame, endFrame);
-  }, [props.segment]);
-
-  useEffect(() => {
-    if (!dotLottieRef.current || typeof props.backgroundColor !== 'string') return;
-
-    dotLottieRef.current.setBackgroundColor(props.backgroundColor);
-  }, [props.backgroundColor]);
-
-  const renderConfig = useMemo(() => {
-    if (typeof props.renderConfig !== 'object') return undefined;
-
-    return props.renderConfig;
-  }, [props.renderConfig?.autoResize, props.renderConfig?.devicePixelRatio, props.renderConfig?.freezeOnOffscreen]);
+    if (typeof segment?.[0] === 'number' && typeof segment[1] === 'number') {
+      dotLottieRef.current?.setSegment(segment[0], segment[1]);
+    } else {
+      dotLottieRef.current?.resetSegment();
+    }
+  }, [segment]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || !renderConfig) return;
-
-    dotLottieRef.current.setRenderConfig(renderConfig);
-  }, [renderConfig]);
+    dotLottieRef.current?.setBackgroundColor(backgroundColor ?? '');
+  }, [backgroundColor]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.data !== 'string' || typeof props.data !== 'object') return;
+    dotLottieRef.current?.setRenderConfig(renderConfig ?? {});
+  }, [JSON.stringify(renderConfig)]);
 
-    dotLottieRef.current.load({
-      data: props.data,
-      ...(configRef.current || {}),
+  useEffect(() => {
+    if (typeof data !== 'string' && typeof data !== 'object') return;
+
+    dotLottieRef.current?.load({
+      data,
+      ...configRef.current,
     });
-  }, [props.data]);
+  }, [data]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.src !== 'string') return;
+    if (typeof src !== 'string') return;
 
-    dotLottieRef.current.load({
-      src: props.src,
-      ...(configRef.current || {}),
+    dotLottieRef.current?.load({
+      src,
+      ...configRef.current,
     });
-  }, [props.src]);
+  }, [src]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.marker !== 'string') return;
-
-    dotLottieRef.current.setMarker(props.marker);
+    dotLottieRef.current?.setMarker(props.marker ?? '');
   }, [props.marker]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.animationId !== 'string') return;
-
-    dotLottieRef.current.loadAnimation(props.animationId);
-  }, [props.animationId]);
+    dotLottieRef.current?.loadAnimation(animationId ?? '');
+  }, [animationId]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.themeId !== 'string') return;
-
-    dotLottieRef.current.setTheme(props.themeId);
-  }, [props.themeId]);
+    if (typeof themeId === 'string') {
+      dotLottieRef.current?.setTheme(themeId);
+    } else {
+      dotLottieRef.current?.resetTheme();
+    }
+  }, [themeId]);
 
   useEffect(() => {
-    if (!dotLottieRef.current || typeof props.themeData !== 'string') return;
-
-    dotLottieRef.current.setThemeData(props.themeData);
-  }, [props.themeData]);
+    dotLottieRef.current?.setThemeData(themeData ?? '');
+  }, [themeData]);
 
   return (
-    <div style={{ width: '100%', height: '100%', lineHeight: 0, ...props.style }}>
-      <canvas ref={setCanvasRef} {...props} style={{ width: '100%', height: '100%' }} />
+    <div
+      className={className}
+      {...(!className && {
+        style: {
+          width: '100%',
+          height: '100%',
+          lineHeight: 0,
+          ...style,
+        },
+      })}
+    >
+      <canvas
+        ref={setCanvasRef}
+        style={{
+          width: '100%',
+          height: '100%',
+        }}
+        {...props}
+      />
     </div>
   );
 };

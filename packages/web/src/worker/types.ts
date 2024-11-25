@@ -83,6 +83,12 @@ export interface MethodParamsMap {
     x: number;
     y: number;
   };
+  resetSegment: {
+    instanceId: string;
+  };
+  resetTheme: {
+    instanceId: string;
+  };
   resize: {
     height: number;
     instanceId: string;
@@ -239,6 +245,8 @@ export interface MethodResultMap {
   postPointerExitEvent: number | undefined;
   postPointerMoveEvent: number | undefined;
   postPointerUpEvent: number | undefined;
+  resetSegment: void;
+  resetTheme: boolean;
   resize: void;
   setBackgroundColor: void;
   setFrame: void;

@@ -426,6 +426,13 @@ export class DotLottieWorker {
     await this._updateDotLottieInstanceState();
   }
 
+  public async resetSegment(): Promise<void> {
+    if (!this._created) return;
+
+    await this._sendMessage('resetSegment', { instanceId: this._id });
+    await this._updateDotLottieInstanceState();
+  }
+
   public async setRenderConfig(renderConfig: RenderConfig): Promise<void> {
     if (!this._created) return;
 
@@ -475,6 +482,16 @@ export class DotLottieWorker {
     if (!this._created) return false;
 
     const result = this._sendMessage('setTheme', { instanceId: this._id, themeId });
+
+    await this._updateDotLottieInstanceState();
+
+    return result;
+  }
+
+  public async resetTheme(): Promise<boolean> {
+    if (!this._created) return false;
+
+    const result = await this._sendMessage('resetTheme', { instanceId: this._id });
 
     await this._updateDotLottieInstanceState();
 
