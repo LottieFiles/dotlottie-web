@@ -738,7 +738,3 @@ self.onmessage = (event: { data: RpcRequest<keyof MethodParamsMap> }): void => {
     self.postMessage(errorResponse);
   }
 };
-
-const dummy = '';
-
-export default dummy;

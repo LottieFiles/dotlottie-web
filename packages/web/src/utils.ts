@@ -68,3 +68,19 @@ export function isElementInViewport(element: HTMLElement): boolean {
     rect.right <= (window.innerWidth || document.documentElement.clientWidth)
   );
 }
+
+export function raf(callback: () => void): number | NodeJS.Immediate {
+  if (typeof requestAnimationFrame === 'function') {
+    return requestAnimationFrame(callback);
+  } else {
+    return setImmediate(callback);
+  }
+}
+
+export function caf(id: number | NodeJS.Immediate): void {
+  if (typeof cancelAnimationFrame === 'function') {
+    cancelAnimationFrame(id as number);
+  } else {
+    clearImmediate(id as NodeJS.Immediate);
+  }
+}

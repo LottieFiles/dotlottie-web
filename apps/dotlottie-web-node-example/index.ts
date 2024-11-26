@@ -113,7 +113,7 @@ dotLottie.addEventListener('load', () => {
   );
 });
 
-dotLottie.addEventListener('frame', (event) => {
+dotLottie.addEventListener('render', (event) => {
   const frame = ctx.getImageData(0, 0, args.width, args.height).data;
 
   if (event.currentFrame >= dotLottie.totalFrames) {

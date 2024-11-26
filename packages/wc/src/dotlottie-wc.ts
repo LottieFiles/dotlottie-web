@@ -20,6 +20,8 @@ export class DotLottieWC extends LitElement {
 
   @property({ type: String }) public mode: Config['mode'];
 
+  @property({ type: String }) public marker: Config['marker'];
+
   @property({ type: String }) public backgroundColor: Config['backgroundColor'];
 
   @property({ type: Object }) public renderConfig: Config['renderConfig'];
@@ -44,16 +46,6 @@ export class DotLottieWC extends LitElement {
 
   public constructor() {
     super();
-
-    window.addEventListener('visibilitychange', () => {
-      if (this.dotLottie) {
-        if (document.visibilityState === 'visible') {
-          this.dotLottie.unfreeze();
-        } else {
-          this.dotLottie.freeze();
-        }
-      }
-    });
   }
 
   public override connectedCallback(): void {
@@ -95,6 +87,7 @@ export class DotLottieWC extends LitElement {
         autoplay: this.autoplay,
         speed: this.speed,
         segment: this.segment,
+        marker: this.marker,
         mode: this.mode,
         renderConfig: this.renderConfig,
         useFrameInterpolation: this.useFrameInterpolation,
