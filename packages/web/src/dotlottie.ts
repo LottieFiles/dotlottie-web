@@ -1,7 +1,7 @@
 import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER } from './constants';
 import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker, Fit as CoreFit } from './core';
-import { DotLottieWasmLoader } from './core';
+import { loadWasmModule, setWasmUrl } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
@@ -101,7 +101,7 @@ export class DotLottie {
       freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
     };
 
-    DotLottieWasmLoader.load()
+    loadWasmModule()
       .then((module) => {
         DotLottie._wasmModule = module;
 
@@ -854,7 +854,7 @@ export class DotLottie {
   }
 
   public static setWasmUrl(url: string): void {
-    DotLottieWasmLoader.setWasmUrl(url);
+    setWasmUrl(url);
   }
 
   public loadStateMachine(stateMachineId: string): boolean {

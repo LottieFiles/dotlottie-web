@@ -9,3 +9,6 @@ export const PACKAGE_VERSION = '__PACKAGE_VERSION__';
 export const PACKAGE_NAME = '__PACKAGE_NAME__';
 
 export const DEFAULT_DPR_FACTOR = 0.75;
+
+export const DEFAULT_WASM_URL = `https://cdn.jsdelivr.net/npm/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/dotlottie-player.wasm`;
+export const BACKUP_WASM_URL = `https://unpkg.com/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/dotlottie-player.wasm`;
