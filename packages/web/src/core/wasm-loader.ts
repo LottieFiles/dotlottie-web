@@ -11,6 +11,7 @@ let wasmURL = DEFAULT_WASM_URL;
  * @param url - The new URL for the WASM file.
  */
 export function setWasmUrl(url: string): void {
+  if (url === wasmURL) return;
   wasmURL = url;
   modulePromise = null;
 }
