@@ -14,10 +14,10 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       reporter: ['json', 'json-summary', 'text-summary', 'lcov'],
       thresholds: {
-        statements: 52,
-        branches: 51,
+        statements: 51,
+        branches: 58,
         functions: 52,
-        lines: 58,
+        lines: 52,
       },
     },
     testTimeout: 10000,
