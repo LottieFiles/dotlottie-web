@@ -62,6 +62,8 @@ export class DotLottieWasmLoader {
    * @param string -  The new URL for the WASM file.
    */
   public static setWasmUrl(url: string): void {
+    if (url === this._wasmURL) return;
+
     this._wasmURL = url;
     // Invalidate current module promise
     this._ModulePromise = null;
