@@ -1,5 +1,16 @@
 # @lottiefiles/dotlottie-web
 
+## 0.38.0
+
+### Minor Changes
+
+- 4be7253: chore: update dotlottie-rs WASM bindings to use ThorVG v0.15.5 and fix minor memory leaks.
+
+### Patch Changes
+
+- 4be7253: fix: incorrect default device pixel ratio for `DotLottieWorker`
+- 4be7253: fix: prevent unnecessary multiple WASM module fetches in `DotLottieWorker`
+
 ## 0.37.0
 
 ### Minor Changes
