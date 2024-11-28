@@ -431,6 +431,11 @@ export class DotLottie {
   public load(config: Omit<Config, 'canvas'>): void {
     if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 
+    if (this._animationFrameId !== null) {
+      this._frameManager.cancelAnimationFrame(this._animationFrameId);
+      this._animationFrameId = null;
+    }
+
     this._dotLottieCore.setConfig({
       themeId: config.themeId ?? '',
       autoplay: config.autoplay ?? false,
