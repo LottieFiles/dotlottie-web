@@ -1,8 +1,7 @@
 'use client';
 
 import type { DotLottie, Config } from '@lottiefiles/dotlottie-web';
-import type { ComponentProps, RefCallback } from 'react';
-import React from 'react';
+import { useEffect, type ComponentProps, type RefCallback } from 'react';
 
 import { useDotLottie } from './use-dotlottie';
 import useStableCallback from './use-stable-callback';
@@ -56,7 +55,7 @@ export const DotLottieReact = ({
   const stableDotLottieRefCallback =
     typeof dotLottieRefCallback === 'function' ? useStableCallback(dotLottieRefCallback) : undefined;
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (typeof stableDotLottieRefCallback === 'function') {
       stableDotLottieRefCallback(dotLottie);
     }

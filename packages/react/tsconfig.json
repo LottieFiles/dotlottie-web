@@ -4,7 +4,7 @@
 
   // Compiler options
   "compilerOptions": {
-    "jsx": "react",
+    "jsx": "react-jsx",
     "exactOptionalPropertyTypes": false
   }
 }
