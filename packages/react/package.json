@@ -41,18 +41,15 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
-    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0"
+    "react": "^17 || ^18"
   },
   "dependencies": {
     "@lottiefiles/dotlottie-web": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",
-    "@types/react-dom": "^18.2.15",
     "cross-env": "7.0.3",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "tsup": "8.0.1",
     "typescript": "5.0.4"
   },

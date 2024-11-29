@@ -10,7 +10,7 @@
     // Source root directory
     "rootDir": ".",
 
-    "jsx": "react",
+    "jsx": "react-jsx",
 
     "exactOptionalPropertyTypes": false
   },
