@@ -42,7 +42,7 @@ jobs:
 
       - name: 🛡️ Test
         run: |
-          npx playwright install --with-deps
+          npx playwright install --with-deps chromium
           pnpm test:coverage
         working-directory: packages/web
 
