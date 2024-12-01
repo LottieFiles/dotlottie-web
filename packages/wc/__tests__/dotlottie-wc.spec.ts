@@ -5,10 +5,10 @@ import { describe, test, expect, vi, afterEach } from 'vitest';
 import { setWasmUrl, type DotLottieWorkerWC } from '../src';
 import type { DotLottieWC } from '../src/dotlottie-wc';
 
-const src = new URL('./__fixtures__/test.lottie', import.meta.url).toString();
-const lottieSrc = new URL('./__fixtures__/test.json', import.meta.url).toString();
+const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
+const lottieSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 
-setWasmUrl(new URL('../../web/src/core/dotlottie-player.wasm', import.meta.url).toString());
+setWasmUrl(new URL('../../web/src/core/dotlottie-player.wasm', import.meta.url).href);
 
 const render = <T extends 'dotlottie-wc' | 'dotlottie-worker-wc'>(
   elementName: T,
@@ -462,6 +462,40 @@ describe.each([{ elementName: 'dotlottie-wc' as const }, { elementName: 'dotlott
       expect(loadAnimation).not.toHaveBeenCalled();
     });
 
-    test.todo('dotLottie instance is recreated when component is moved and reconnected in the DOM');
+    test('dotLottie instance is recreated when component is moved to a new DOM node', async () => {
+      const { element } = render(elementName, { src });
+
+      const dotLottie = element.dotLottie as DotLottie | DotLottieWorker;
+      const destroy = vi.spyOn(dotLottie, 'destroy');
+
+      expect(element.dotLottie).toBe(dotLottie);
+
+      const div = document.createElement('div');
+
+      // move the component to a new DOM node
+      div.appendChild(element);
+      document.body.appendChild(div);
+
+      expect(destroy).toHaveBeenCalledTimes(1);
+      expect(element.dotLottie).not.toBe(dotLottie);
+    });
+
+    test('dotLottie instance is recreated when component is adopted to a new document', async () => {
+      const { element } = render(elementName, { src });
+
+      const dotLottie = element.dotLottie as DotLottie | DotLottieWorker;
+      const destroy = vi.spyOn(dotLottie, 'destroy');
+
+      expect(element.dotLottie).toBe(dotLottie);
+
+      const iframe = document.createElement('iframe');
+
+      // move the component to a new document
+      document.body.appendChild(iframe);
+      iframe.contentDocument?.body.appendChild(element);
+
+      expect(destroy).toHaveBeenCalledTimes(1);
+      expect(element.dotLottie).not.toBe(dotLottie);
+    });
   },
 );

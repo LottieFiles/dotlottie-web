@@ -66,24 +66,51 @@ export abstract class AbstractDotLottieWC<T extends DotLottie | DotLottieWorker>
     super();
   }
 
+  private _init(): void {
+    const canvas = document.createElement('canvas');
+
+    this.shadowRoot?.appendChild(canvas);
+
+    this.dotLottie = this._createDotLottieInstance({
+      canvas,
+      src: this.src,
+      data: this.data,
+      loop: this.loop,
+      autoplay: this.autoplay,
+      speed: this.speed,
+      segment: this.segment,
+      mode: this.mode,
+      renderConfig: this.renderConfig,
+      useFrameInterpolation: this.useFrameInterpolation,
+      themeId: this.themeId,
+
+      workerId: this.workerId,
+    });
+  }
+
   public override connectedCallback(): void {
     super.connectedCallback();
-    this._initializeCanvas();
-    this._initializeDotLottie();
+    this._init();
+  }
+
+  /**
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements#custom_element_lifecycle_callbacks
+   */
+  public adoptedCallback(): void {
+    this._init();
   }
 
   public override disconnectedCallback(): void {
     super.disconnectedCallback();
-    if (this.dotLottie) {
-      this.dotLottie.destroy();
-      this.dotLottie = null;
-    }
+    this.dotLottie?.destroy();
+    this.dotLottie = null;
+    this.shadowRoot?.querySelector('canvas')?.remove();
   }
 
   public override attributeChangedCallback(name: string, old: string | null, value: string | null): void {
     super.attributeChangedCallback(name, old, value);
 
-    if (!this.dotLottie || !this.dotLottie.isReady || old === value) {
+    if (!this.dotLottie || old === value) {
       return;
     }
 
@@ -169,36 +196,6 @@ export abstract class AbstractDotLottieWC<T extends DotLottie | DotLottieWorker>
         themeId: this.themeId,
       });
     }
-  }
-
-  private _initializeCanvas(): void {
-    if (!this.shadowRoot) {
-      this.attachShadow({ mode: 'open' });
-    }
-
-    if (!this.shadowRoot?.querySelector('canvas')) {
-      const canvas = document.createElement('canvas');
-
-      this.shadowRoot?.appendChild(canvas);
-    }
-  }
-
-  private _initializeDotLottie(): void {
-    this.dotLottie = this._createDotLottieInstance({
-      canvas: this.shadowRoot?.querySelector('canvas') as HTMLCanvasElement,
-      src: this.src,
-      data: this.data,
-      loop: this.loop,
-      autoplay: this.autoplay,
-      speed: this.speed,
-      segment: this.segment,
-      mode: this.mode,
-      renderConfig: this.renderConfig,
-      useFrameInterpolation: this.useFrameInterpolation,
-      themeId: this.themeId,
-
-      workerId: this.workerId,
-    });
   }
 
   protected abstract _createDotLottieInstance(config: Config & { workerId?: string }): T;

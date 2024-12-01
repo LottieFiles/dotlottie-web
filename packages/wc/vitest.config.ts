@@ -12,10 +12,10 @@ export default defineConfig({
       provider: 'istanbul',
       reporter: ['json', 'json-summary', 'text-summary', 'lcov'],
       thresholds: {
-        statements: 97,
-        branches: 90,
+        statements: 98,
+        branches: 94,
         functions: 100,
-        lines: 97,
+        lines: 98,
       },
     },
     testTimeout: 10000,
