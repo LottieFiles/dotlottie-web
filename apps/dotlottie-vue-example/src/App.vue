@@ -5,6 +5,10 @@ import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
 
 setWasmUrl(wasmUrl);
 
+function dotLottieRefCallback(dotLottie: DotLottieVueInstance) {
+  console.log('dotLottieRefCallback', dotLottie);
+}
+
 const player: Ref<DotLottieVueInstance | null> = ref(null);
 
 function toggleLoop() {
@@ -52,6 +56,8 @@ onMounted(() => {
     loop
     ref="player"
     src="https://lottie.host/5525262b-4e57-4f0a-8103-cfdaa7c8969e/VCYIkooYX8.json"
+    :dot-lottie-ref-callback="dotLottieRefCallback"
+    play-on-hover
   />
   <div class="btn-group">
     <button @click="toggleLoop">Toggle Loop</button>
