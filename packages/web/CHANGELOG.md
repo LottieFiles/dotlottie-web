@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-web
 
+## 0.38.1
+
+### Patch Changes
+
+- 898084e: fix: animation with PNG sequence
+- de079cc: fix: runtime error when loading external image asset
+- 30ff412: fix: cancel animation frame before loading a new animation
+
 ## 0.38.0
 
 ### Minor Changes

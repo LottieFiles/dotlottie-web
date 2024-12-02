@@ -1,5 +1,18 @@
 # @lottiefiles/dotlottie-react
 
+## 0.11.0
+
+### Minor Changes
+
+- fb3ba0f: chore(react): update JSX transform to "react-jsx" and drop React 16 support
+
+### Patch Changes
+
+- Updated dependencies [898084e]
+- Updated dependencies [de079cc]
+- Updated dependencies [30ff412]
+  - @lottiefiles/dotlottie-web@0.38.1
+
 ## 0.10.1
 
 ### Patch Changes
