@@ -1,13 +1,13 @@
 import { solidPlugin } from 'esbuild-plugin-solid';
-import { defineConfig, type Options } from 'tsup';
+import { defineConfig } from 'tsup';
 
-export default defineConfig((options: Options) => ({
-  entry: ['./src/index.ts'],
+export default defineConfig({
+  entry: ['src/index.ts'],
   clean: true,
   dts: true,
+  sourcemap: true,
   format: ['esm'],
-  tsconfig: './tsconfig.build.json',
+  tsconfig: 'tsconfig.build.json',
   external: ['solid-js'],
   esbuildPlugins: [solidPlugin()],
-  ...options,
-}));
+});
