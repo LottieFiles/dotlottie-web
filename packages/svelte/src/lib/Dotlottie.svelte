@@ -6,45 +6,57 @@
 		DotLottie.setWasmUrl(url);
 	}
 
-	export let autoplay: Config['autoplay'] = false;
-	export let backgroundColor: Config['backgroundColor'] = undefined;
-	export let data: Config['data'] = undefined;
-	export let loop: Config['loop'] = false;
-	export let mode: Config['mode'] = 'forward';
-	export let renderConfig: Config['renderConfig'] = undefined;
-	export let segment: Config['segment'] = undefined;
-	export let speed: Config['speed'] = 1;
-	export let src: Config['src'] = undefined;
-	export let useFrameInterpolation: Config['useFrameInterpolation'] = true;
-	export let marker: Config['marker'] = undefined;
-	export let layout: Config['layout'] = undefined;
+	type Props = Partial<
+		Omit<Config, 'canvas'> & {
+			playOnHover: boolean;
+			animationId: string;
+			themeId: string;
+			themeData: string;
+			dotLottieRefCallback: (dotLottie: DotLottie) => void;
+		}
+	>;
 
-	export let playOnHover: boolean = false;
-	export let animationId: string = '';
-	export let themeId: string = '';
-	export let themeData: string = '';
-
-	export let dotLottieRefCallback: (dotLottie: DotLottie) => void = () => {};
+	let {
+		autoplay = false,
+		backgroundColor = '',
+		data,
+		loop = false,
+		mode = 'forward',
+		renderConfig,
+		segment,
+		speed = 1,
+		src,
+		useFrameInterpolation = true,
+		marker,
+		layout,
+		playOnHover = false,
+		animationId = '',
+		themeId = '',
+		themeData = '',
+		dotLottieRefCallback = () => {}
+	}: Props = $props();
 
 	const hoverHandler = (event: MouseEvent) => {
-		if (!playOnHover || !dotLottie.isLoaded) return;
+		if (!playOnHover || !dotLottie?.isLoaded) return;
 
 		if (event.type === 'mouseenter') {
-		dotLottie.play();
+			dotLottie.play();
 		} else if (event.type === 'mouseleave') {
-		dotLottie.pause();
+			dotLottie.pause();
 		}
 	};
 
-	let dotLottie: DotLottie;
-	let canvas: HTMLCanvasElement;
-	let prevSrc: string | undefined = undefined;
-	let prevData: Config['data'] = undefined;
+	let dotLottie: DotLottie | undefined = $state();
+	let canvas: Config['canvas'] | undefined = $state();
+	let prevSrc: string | undefined = $state();
+	let prevData: Config['data'] = $state();
 
 	onMount(() => {
+		if (!canvas) return;
+
 		const shouldAutoplay = autoplay && !playOnHover;
 		dotLottie = new DotLottie({
-			canvas,
+			canvas: canvas as HTMLCanvasElement,
 			src,
 			autoplay: shouldAutoplay,
 			loop,
@@ -60,114 +72,132 @@
 		if (dotLottieRefCallback) {
 			dotLottieRefCallback(dotLottie);
 		}
-		
+
 		canvas.addEventListener('mouseenter', hoverHandler);
 		canvas.addEventListener('mouseleave', hoverHandler);
 
 		return () => {
-			canvas.removeEventListener('mouseenter', hoverHandler);
-			canvas.removeEventListener('mouseleave', hoverHandler);
-			dotLottie.destroy();
+			if (canvas) {
+				canvas.removeEventListener('mouseenter', hoverHandler);
+				canvas.removeEventListener('mouseleave', hoverHandler);
+			}
+			if (dotLottie) dotLottie.destroy();
 		};
 	});
 
-	$: {
+	$effect(() => {
 		if (dotLottie && typeof layout === 'object') {
 			dotLottie.setLayout(layout);
 		}
-	}
+	});
 
-	$: {
+	$effect(() => {
 		if (dotLottie && typeof marker === 'string') {
 			dotLottie.setMarker(marker);
 		}
-	}
+	});
 
-	$: {
-		if (dotLottie &&  dotLottie.isLoaded && typeof speed == 'number') {
+	$effect(() => {
+		if (dotLottie && typeof speed == 'number' && dotLottie.isLoaded) {
 			dotLottie.setSpeed(speed);
 		}
-	}
+	});
 
-	$: {
-		if (dotLottie && dotLottie.isLoaded && typeof useFrameInterpolation == 'boolean') {
+	$effect(() => {
+		if (dotLottie && typeof useFrameInterpolation == 'boolean' && dotLottie.isLoaded) {
 			dotLottie.setUseFrameInterpolation(useFrameInterpolation);
 		}
-	}
+	});
 
-	$: {
-		if (dotLottie && dotLottie.isLoaded && Array.isArray(segment) && segment.length === 2 && typeof segment[0] === 'number' && typeof segment[1] === 'number') {
+	$effect(() => {
+		if (
+			dotLottie &&
+			dotLottie.isLoaded &&
+			Array.isArray(segment) &&
+			segment.length === 2 &&
+			typeof segment[0] === 'number' &&
+			typeof segment[1] === 'number'
+		) {
 			let [start, end] = segment;
 			dotLottie.setSegment(start, end);
 		}
-	}
+	});
 
-	$: {
-		if (dotLottie && dotLottie.isLoaded && typeof loop == 'boolean') {
+	$effect(() => {
+		if (dotLottie && typeof loop == 'boolean' && dotLottie.isLoaded) {
 			dotLottie.setLoop(loop);
 		}
-	}
+	});
 
-	$: {
-		if (dotLottie) {
-			dotLottie.setBackgroundColor(backgroundColor || "");
+	$effect(() => {
+		if (dotLottie && typeof backgroundColor == 'string' && dotLottie.isLoaded) {
+			dotLottie.setBackgroundColor(backgroundColor);
 		}
-	}
+	});
 
-	$: {
-		if (dotLottie && dotLottie.isLoaded && typeof mode == 'string') {
+	$effect(() => {
+		if (dotLottie && typeof mode == 'string' && dotLottie.isLoaded) {
 			dotLottie.setMode(mode);
 		}
-	}
+	});
 
+	$effect(() => {
+		if (dotLottie && src !== prevSrc) {
+			dotLottie.load({
+				src,
+				autoplay,
+				loop,
+				speed,
+				data,
+				renderConfig,
+				segment,
+				useFrameInterpolation,
+				backgroundColor,
+				mode,
+				marker,
+				layout
+			});
+			prevSrc = src;
+		}
+	});
 
-    $: if (dotLottie && src !== prevSrc) {
-        dotLottie.load({
-            src,
-            autoplay,
-            loop,
-            speed,
-            data,
-            renderConfig,
-            segment,
-            useFrameInterpolation,
-            backgroundColor,
-            mode,
-			marker,
-			layout
-        });
-        prevSrc = src; 
-    }
+	$effect(() => {
+		if (dotLottie && data !== prevData) {
+			dotLottie.load({
+				src,
+				autoplay,
+				loop,
+				speed,
+				data,
+				renderConfig,
+				segment,
+				useFrameInterpolation,
+				backgroundColor,
+				mode,
+				marker,
+				layout
+			});
+			prevData = data;
+		}
+	});
 
-	$: if (dotLottie && data !== prevData) {
-		dotLottie.load({
-			src,
-			autoplay,
-			loop,
-			speed,
-			data,
-			renderConfig,
-			segment,
-			useFrameInterpolation,
-			backgroundColor,
-			mode,
-			marker,
-			layout
-		});
-		prevData = data;
-	}
+	$effect(() => {
+		if (dotLottie && dotLottie.isLoaded && dotLottie.activeAnimationId !== animationId) {
+			dotLottie.loadAnimation(animationId);
+		}
+	});
 
-	$: if (dotLottie && dotLottie.isLoaded && dotLottie.activeAnimationId !== animationId) {
-		dotLottie.loadAnimation(animationId);
-	}
+	$effect(() => {
+		if (dotLottie && dotLottie.isLoaded && dotLottie.activeThemeId !== themeId) {
+			dotLottie.setTheme(themeId);
+		}
+	});
 
-	$: if (dotLottie && dotLottie.isLoaded && dotLottie.activeThemeId !== themeId) {
-		dotLottie.setTheme(themeId);
-	}
-
-	$: if (dotLottie && dotLottie.isLoaded) {
-		dotLottie.setThemeData(themeData);
-	}
+	$effect(() => {
+		if (dotLottie && dotLottie.isLoaded) {
+			dotLottie.setThemeData(themeData);
+		}
+	});
 </script>
 
 <div>

@@ -45,14 +45,10 @@ npm install @lottiefiles/dotlottie-svelte
 
 ```svelte
 <script lang="ts">
-import { DotLottieSvelte } from '@lottiefiles/dotlottie-svelte';
+	import { DotLottieSvelte } from '@lottiefiles/dotlottie-svelte';
 </script>
 
-<DotLottieSvelte
-  src="path/to/animation.lottie"
-  loop
-  autoplay
-/>
+<DotLottieSvelte src="path/to/animation.lottie" loop autoplay />
 ```
 
 ## Live Examples
@@ -92,29 +88,29 @@ Here is an example:
 
 ```svelte
 <script lang="ts">
-  import { DotLottieSvelte } from '@lottiefiles/dotlottie-svelte';
-  import type { DotLottie } from '@lottiefiles/dotlottie-svelte';
-  
-  let dotLottie: DotLottie | null = null;
+	import { DotLottieSvelte } from '@lottiefiles/dotlottie-svelte';
+	import type { DotLottie } from '@lottiefiles/dotlottie-svelte';
 
-  function play() {
-    dotLottie?.play();
-  }
+	let dotLottie: DotLottie | null = null;
 
-  function pause() {
-    dotLottie?.pause();
-  }
+	function play() {
+		dotLottie?.play();
+	}
 
-  function stop() {
-    dotLottie?.stop();
-  }
+	function pause() {
+		dotLottie?.pause();
+	}
+
+	function stop() {
+		dotLottie?.stop();
+	}
 </script>
 
 <DotLottieSvelte
-  src="path/to/your/animation.lottie"
-  loop={true}
-  autoplay={true}
-  dotLottieRefCallback={(ref) => dotLottie = ref}
+	src="path/to/your/animation.lottie"
+	loop={true}
+	autoplay={true}
+	dotLottieRefCallback={(ref) => (dotLottie = ref)}
 />
 
 <button on:click={play}>Play</button>
@@ -132,56 +128,56 @@ Here is an example:
 
 ```svelte
 <script lang="ts">
-    import { DotLottieSvelte } from '@lottiefiles/dotlottie-svelte';
-    import type { DotLottie } from '@lottiefiles/dotlottie-svelte';
+	import { DotLottieSvelte } from '@lottiefiles/dotlottie-svelte';
+	import type { DotLottie } from '@lottiefiles/dotlottie-svelte';
 
-    let dotLottie: DotLottie | null = null;
+	let dotLottie: DotLottie | null = null;
 
-    function onLoaded() {
-        console.log("Animation loaded");
-    }
+	function onLoaded() {
+		console.log('Animation loaded');
+	}
 
-    function onPlay() {
-        console.log("Animation started");
-    }
+	function onPlay() {
+		console.log('Animation started');
+	}
 
-    function onPause() {
-        console.log("Animation paused");
-    }
+	function onPause() {
+		console.log('Animation paused');
+	}
 
-    function onComplete() {
-        console.log("Animation completed");
-    }
-    
-    function setupListeners(dotLottieInstance) {
-        dotLottieInstance.addEventListener('load', onLoaded);
-        dotLottieInstance.addEventListener('play', onPlay);
-        dotLottieInstance.addEventListener('pause', onPause);
-        dotLottieInstance.addEventListener('complete', onComplete);
-    }
+	function onComplete() {
+		console.log('Animation completed');
+	}
 
-    function removeListeners(dotLottieInstance) {
-        dotLottieInstance.removeEventListener('load', onLoaded);
-        dotLottieInstance.removeEventListener('play', onPlay);
-        dotLottieInstance.removeEventListener('pause', onPause);
-        dotLottieInstance.removeEventListener('complete', onComplete);
-    }
+	function setupListeners(dotLottieInstance) {
+		dotLottieInstance.addEventListener('load', onLoaded);
+		dotLottieInstance.addEventListener('play', onPlay);
+		dotLottieInstance.addEventListener('pause', onPause);
+		dotLottieInstance.addEventListener('complete', onComplete);
+	}
 
-     onDestroy(() => {
-        if (dotLottie) {
-            removeListeners(dotLottie);
-        }
-    });
+	function removeListeners(dotLottieInstance) {
+		dotLottieInstance.removeEventListener('load', onLoaded);
+		dotLottieInstance.removeEventListener('play', onPlay);
+		dotLottieInstance.removeEventListener('pause', onPause);
+		dotLottieInstance.removeEventListener('complete', onComplete);
+	}
+
+	onDestroy(() => {
+		if (dotLottie) {
+			removeListeners(dotLottie);
+		}
+	});
 </script>
 
 <DotLottieSvelte
-    src="path/to/your/animation.lottie"
-    loop={true}
-    autoplay={true}
-    dotLottieRefCallback={(ref) => {
-        dotLottie = ref;
-        setupListeners(dotLottie);
-    }}
+	src="path/to/your/animation.lottie"
+	loop={true}
+	autoplay={true}
+	dotLottieRefCallback={(ref) => {
+		dotLottie = ref;
+		setupListeners(dotLottie);
+	}}
 />
 ```
 
