@@ -12,7 +12,7 @@
 	let isPaused = $state(false);
 	let isStopped = $state(false);
 	let isFrozen = $state(false);
-	let loop = true;
+	let loop = $state(true);
 	let backgroundColor = $state('#00000000');
 	let speed = $state(1);
 	let hasMultipleAnimations = $state(false);
@@ -49,6 +49,7 @@
 				isPlaying = true;
 				isPaused = false;
 				isStopped = false;
+        isFrozen = false;
 			});
 			dotLottie.addEventListener('pause', () => {
 				isPlaying = false;
@@ -96,6 +97,7 @@
 <button onclick={() => dotLottie?.stop()}>Stop</button>
 <button onclick={() => dotLottie?.freeze()}>Freeze</button>
 <button onclick={() => dotLottie?.unfreeze()}>Unfreeze</button>
+<button onclick={() => (loop = !loop)}>Toggle loop</button>
 <button onclick={() => (speed += 0.5)}>Increase speed</button>
 <button onclick={() => (speed -= 0.5)}>Decrease speed</button>
 <button onclick={next} disabled={!hasMultipleAnimations}>Next animation</button>
@@ -122,6 +124,7 @@
 <input type="color" bind:value={backgroundColor} />
 <ul>
 	<li>Speed: {speed}</li>
+	<li>Looped: {loop}</li>
 	<li>Loaded: {isLoaded}</li>
 	<li>Playing: {isPlaying}</li>
 	<li>Paused: {isPaused}</li>

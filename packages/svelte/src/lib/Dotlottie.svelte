@@ -18,7 +18,7 @@
 
 	let {
 		autoplay = false,
-		backgroundColor,
+		backgroundColor = '',
 		data,
 		loop = false,
 		mode = 'forward',
@@ -98,14 +98,13 @@
 	});
 
 	$effect(() => {
-		console.log(speed);
-		if (dotLottie && dotLottie.isLoaded && typeof speed == 'number') {
+		if (dotLottie && typeof speed == 'number' && dotLottie.isLoaded) {
 			dotLottie.setSpeed(speed);
 		}
 	});
 
 	$effect(() => {
-		if (dotLottie && dotLottie.isLoaded && typeof useFrameInterpolation == 'boolean') {
+		if (dotLottie && typeof useFrameInterpolation == 'boolean' && dotLottie.isLoaded) {
 			dotLottie.setUseFrameInterpolation(useFrameInterpolation);
 		}
 	});
@@ -125,19 +124,19 @@
 	});
 
 	$effect(() => {
-		if (dotLottie && dotLottie.isLoaded && typeof loop == 'boolean') {
+		if (dotLottie && typeof loop == 'boolean' && dotLottie.isLoaded) {
 			dotLottie.setLoop(loop);
 		}
 	});
 
 	$effect(() => {
-		if (dotLottie) {
-			dotLottie.setBackgroundColor(backgroundColor || '');
+		if (dotLottie && typeof backgroundColor == 'string' && dotLottie.isLoaded) {
+			dotLottie.setBackgroundColor(backgroundColor);
 		}
 	});
 
 	$effect(() => {
-		if (dotLottie && dotLottie.isLoaded && typeof mode == 'string') {
+		if (dotLottie && typeof mode == 'string' && dotLottie.isLoaded) {
 			dotLottie.setMode(mode);
 		}
 	});
