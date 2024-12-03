@@ -106,6 +106,7 @@ export class DotLottie {
         DotLottie._wasmModule = module;
 
         this._dotLottieCore = new module.DotLottiePlayer({
+          themeId: config.themeId ?? '',
           autoplay: config.autoplay ?? false,
           backgroundColor: 0,
           loopAnimation: config.loop ?? false,
@@ -430,7 +431,13 @@ export class DotLottie {
   public load(config: Omit<Config, 'canvas'>): void {
     if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 
+    if (this._animationFrameId !== null) {
+      this._frameManager.cancelAnimationFrame(this._animationFrameId);
+      this._animationFrameId = null;
+    }
+
     this._dotLottieCore.setConfig({
+      themeId: config.themeId ?? '',
       autoplay: config.autoplay ?? false,
       backgroundColor: 0,
       loopAnimation: config.loop ?? false,
@@ -792,24 +799,36 @@ export class DotLottie {
     return [];
   }
 
-  public loadTheme(themeId: string): boolean {
+  public setTheme(themeId: string): boolean {
     if (this._dotLottieCore === null) return false;
 
-    const loaded = this._dotLottieCore.loadTheme(themeId);
+    const loaded = this._dotLottieCore.setTheme(themeId);
 
     this._render();
 
     return loaded;
   }
 
-  public loadThemeData(themeData: string): boolean {
+  public resetTheme(): boolean {
     if (this._dotLottieCore === null) return false;
 
-    const loaded = this._dotLottieCore.loadThemeData(themeData);
+    return this._dotLottieCore.resetTheme();
+  }
+
+  public setThemeData(themeData: string): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    const loaded = this._dotLottieCore.setThemeData(themeData);
 
     this._render();
 
     return loaded;
+  }
+
+  public setSlots(slots: string): void {
+    if (this._dotLottieCore === null) return;
+
+    this._dotLottieCore.setSlots(slots);
   }
 
   public setLayout(layout: Layout): void {
@@ -1042,5 +1061,9 @@ export class DotLottie {
       width,
       height,
     };
+  }
+
+  public static transformThemeToLottieSlots(theme: string, slots: string): string {
+    return DotLottie._wasmModule?.transformThemeToLottieSlots(theme, slots) ?? '';
   }
 }

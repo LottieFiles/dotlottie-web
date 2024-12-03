@@ -10,14 +10,17 @@ import { getDefaultDPR, isElementInViewport } from '../utils';
 import type { MethodParamsMap, MethodResultMap, RpcRequest, RpcResponse } from './types';
 import { WorkerManager } from './worker-manager';
 
-function getCanvasSize(canvas: HTMLCanvasElement | OffscreenCanvas): { height: number; width: number } {
+function getCanvasSize(
+  canvas: HTMLCanvasElement | OffscreenCanvas,
+  devicePixelRatio: number,
+): { height: number; width: number } {
   if (canvas instanceof OffscreenCanvas) {
     return { width: canvas.width, height: canvas.height };
   }
 
   const { height, width } = canvas.getBoundingClientRect();
 
-  return { width: width * window.devicePixelRatio, height: height * window.devicePixelRatio };
+  return { width: width * devicePixelRatio, height: height * devicePixelRatio };
 }
 
 function generateUniqueId(): string {
@@ -250,7 +253,7 @@ export class DotLottieWorker {
           // @ts-ignore
           canvas: offscreen,
         },
-        ...getCanvasSize(this._canvas),
+        ...getCanvasSize(this._canvas, config.renderConfig?.devicePixelRatio || getDefaultDPR()),
       },
       [offscreen],
     );
@@ -468,10 +471,10 @@ export class DotLottieWorker {
     await this._updateDotLottieInstanceState();
   }
 
-  public async loadTheme(themeId: string): Promise<boolean> {
+  public async setTheme(themeId: string): Promise<boolean> {
     if (!this._created) return false;
 
-    const result = this._sendMessage('loadTheme', { instanceId: this._id, themeId });
+    const result = this._sendMessage('setTheme', { instanceId: this._id, themeId });
 
     await this._updateDotLottieInstanceState();
 
@@ -495,7 +498,10 @@ export class DotLottieWorker {
   public async resize(): Promise<void> {
     if (!this._created) return;
 
-    const { height, width } = getCanvasSize(this._canvas);
+    const { height, width } = getCanvasSize(
+      this._canvas,
+      this._dotLottieInstanceState.renderConfig.devicePixelRatio || getDefaultDPR(),
+    );
 
     await this._sendMessage('resize', { height, instanceId: this._id, width });
     await this._updateDotLottieInstanceState();
@@ -573,10 +579,10 @@ export class DotLottieWorker {
     await this._updateDotLottieInstanceState();
   }
 
-  public async loadThemeData(themeData: string): Promise<boolean> {
+  public async setThemeData(themeData: string): Promise<boolean> {
     if (!this._created) return false;
 
-    const loaded = await this._sendMessage('loadThemeData', { instanceId: this._id, themeData });
+    const loaded = await this._sendMessage('setThemeData', { instanceId: this._id, themeData });
 
     await this._updateDotLottieInstanceState();
 

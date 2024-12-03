@@ -190,13 +190,13 @@
 
 	$effect(() => {
 		if (dotLottie && dotLottie.isLoaded && dotLottie.activeThemeId !== themeId) {
-			dotLottie.loadTheme(themeId);
+			dotLottie.setTheme(themeId);
 		}
 	});
 
 	$effect(() => {
 		if (dotLottie && dotLottie.isLoaded) {
-			dotLottie.loadThemeData(themeData);
+			dotLottie.setThemeData(themeData);
 		}
 	});
 </script>

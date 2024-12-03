@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-namespace */
+/* eslint-disable @typescript-eslint/naming-convention */
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
   let HEAPF32: unknown;
@@ -81,8 +81,6 @@ export interface DotLottiePlayer {
   loadDotLottieData(_0: EmbindString, _1: number, _2: number): boolean;
   loadStateMachine(_0: EmbindString): boolean;
   loadStateMachineData(_0: EmbindString): boolean;
-  loadTheme(_0: EmbindString): boolean;
-  loadThemeData(_0: EmbindString): boolean;
   loopCount(): number;
   manifestString(): string;
   markers(): VectorMarker;
@@ -99,14 +97,18 @@ export interface DotLottiePlayer {
   postStringEvent(_0: EmbindString): number;
   render(): boolean;
   requestFrame(): number;
+  resetTheme(): boolean;
   resize(_0: number, _1: number): boolean;
   seek(_0: number): boolean;
   segmentDuration(): number;
   setConfig(_0: Config): void;
   setFrame(_0: number): boolean;
+  setSlots(_0: EmbindString): boolean;
   setStateMachineBooleanContext(_0: EmbindString, _1: boolean): boolean;
   setStateMachineNumericContext(_0: EmbindString, _1: number): boolean;
   setStateMachineStringContext(_0: EmbindString, _1: EmbindString): boolean;
+  setTheme(_0: EmbindString): boolean;
+  setThemeData(_0: EmbindString): boolean;
   setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
   startStateMachine(): boolean;
   stateMachineFrameworkSetup(): VectorString;
@@ -130,6 +132,7 @@ export interface Config {
   mode: Mode;
   segment: VectorFloat;
   speed: number;
+  themeId: EmbindString;
   useFrameInterpolation: boolean;
 }
 
@@ -157,6 +160,7 @@ interface EmbindModule {
   };
   createDefaultConfig(): Config;
   createDefaultLayout(): Layout;
+  transformThemeToLottieSlots(_0: EmbindString, _1: EmbindString): string;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;

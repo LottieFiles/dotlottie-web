@@ -128,7 +128,7 @@ export const DotLottieVue = defineComponent({
       () => props.themeData,
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
-          dotLottie.loadTheme(newVal);
+          dotLottie.setTheme(newVal);
         }
       },
     );
@@ -136,7 +136,7 @@ export const DotLottieVue = defineComponent({
       () => props.themeId,
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
-          dotLottie.loadThemeData(newVal);
+          dotLottie.setThemeData(newVal);
         }
       },
     );

@@ -1,5 +1,86 @@
 # @lottiefiles/dotlottie-web
 
+## 0.38.1
+
+### Patch Changes
+
+- 898084e: fix: animation with PNG sequence
+- de079cc: fix: runtime error when loading external image asset
+- 30ff412: fix: cancel animation frame before loading a new animation
+
+## 0.38.0
+
+### Minor Changes
+
+- 4be7253: chore: update dotlottie-rs WASM bindings to use ThorVG v0.15.5 and fix minor memory leaks.
+
+### Patch Changes
+
+- 4be7253: fix: incorrect default device pixel ratio for `DotLottieWorker`
+- 4be7253: fix: prevent unnecessary multiple WASM module fetches in `DotLottieWorker`
+
+## 0.37.0
+
+### Minor Changes
+
+- 0d65643: feat: updated dotLottie-rs wasm bindings to v0.1.33 which includes the new v2 dotLottiespecs and theming
+  support. feat: Added `setSlots` methods to `DotLottie` class to set lottie slots in runtime. feat: Added `themeId`
+  prop to the `DotLottie` class config to initially load a .lottie with a specific theme. feat: Added `resetTheme`
+  method to the `DotLottie` class to reset the theme to the default one.
+
+  BREAKING CHANGE:
+
+  - DotLottie's `loadTheme` method is no longer supported, use `setTheme` instead.
+  - DotLottie's `setThemeData` method is no longer supported, use `setThemeData` instead.
+
+## 0.37.0-beta.9
+
+### Patch Changes
+
+- 9ed1a99: fix: lottie default slots are not applied
+
+## 0.37.0-beta.8
+
+### Minor Changes
+
+- c0927ea: feat: add themeId to the DotLottie config
+
+## 0.37.0-beta.7
+
+### Minor Changes
+
+- 989a447: feat: update dotLottie config to accept initial themeId to load
+
+  Breaking change:
+
+  - The `DotLottie` constructor now accepts an initial `themeId`
+  - The `loadTheme` method has been renamed to `setTheme`
+  - `resetTheme` method has been added to reset the theme to the default one
+
+## 0.37.0-beta.6
+
+### Minor Changes
+
+- 6a6db41: fix(theming): gradient & expression
+
+## 0.37.0-beta.5
+
+### Patch Changes
+
+- 5192b23: fix: apply default slots in loaded lottie json/.lottie
+
+## 0.37.0-beta.4
+
+### Minor Changes
+
+- 7ef3025: feat: add name property to animations/themes/state machines assets in the manifest
+
+## 0.37.0-beta.3
+
+### Patch Changes
+
+- 0dcc26c: fix: setSlot with animated color property
+
 ## 0.36.1
 
 ### Patch Changes

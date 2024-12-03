@@ -1,5 +1,95 @@
 # @lottiefiles/dotlottie-react
 
+## 0.11.0
+
+### Minor Changes
+
+- fb3ba0f: chore(react): update JSX transform to "react-jsx" and drop React 16 support
+
+### Patch Changes
+
+- Updated dependencies [898084e]
+- Updated dependencies [de079cc]
+- Updated dependencies [30ff412]
+  - @lottiefiles/dotlottie-web@0.38.1
+
+## 0.10.1
+
+### Patch Changes
+
+- Updated dependencies [4be7253]
+- Updated dependencies [4be7253]
+- Updated dependencies [4be7253]
+  - @lottiefiles/dotlottie-web@0.38.0
+
+## 0.10.0
+
+### Minor Changes
+
+- 0d65643: feat: updated dotLottie-rs wasm bindings to v0.1.33 which includes the new v2 dotLottiespecs and theming
+  support. feat: Added `setSlots` methods to `DotLottie` class to set lottie slots in runtime. feat: Added `themeId`
+  prop to the `DotLottie` class config to initially load a .lottie with a specific theme. feat: Added `resetTheme`
+  method to the `DotLottie` class to reset the theme to the default one.
+
+  BREAKING CHANGE:
+
+  - DotLottie's `loadTheme` method is no longer supported, use `setTheme` instead.
+  - DotLottie's `setThemeData` method is no longer supported, use `setThemeData` instead.
+
+### Patch Changes
+
+- Updated dependencies [0d65643]
+  - @lottiefiles/dotlottie-web@0.37.0
+
+## 0.9.3-beta.9
+
+### Patch Changes
+
+- Updated dependencies [9ed1a99]
+  - @lottiefiles/dotlottie-web@0.37.0-beta.9
+
+## 0.9.3-beta.8
+
+### Patch Changes
+
+- Updated dependencies [c0927ea]
+  - @lottiefiles/dotlottie-web@0.37.0-beta.8
+
+## 0.9.3-beta.7
+
+### Patch Changes
+
+- Updated dependencies [989a447]
+  - @lottiefiles/dotlottie-web@0.37.0-beta.7
+
+## 0.9.3-beta.6
+
+### Patch Changes
+
+- Updated dependencies [6a6db41]
+  - @lottiefiles/dotlottie-web@0.37.0-beta.6
+
+## 0.9.3-beta.5
+
+### Patch Changes
+
+- Updated dependencies [5192b23]
+  - @lottiefiles/dotlottie-web@0.37.0-beta.5
+
+## 0.9.3-beta.4
+
+### Patch Changes
+
+- Updated dependencies [7ef3025]
+  - @lottiefiles/dotlottie-web@0.37.0-beta.4
+
+## 0.9.3-beta.3
+
+### Patch Changes
+
+- Updated dependencies [0dcc26c]
+  - @lottiefiles/dotlottie-web@0.37.0-beta.3
+
 ## 0.9.3
 
 ### Patch Changes

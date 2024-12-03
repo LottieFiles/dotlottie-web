@@ -266,7 +266,7 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
         if (!dotLottieInstance) return;
 
         if (dotLottieInstance.isLoaded && dotLottieInstance.activeThemeId !== config.themeId) {
-          dotLottieInstance.loadTheme(config.themeId || '');
+          dotLottieInstance.setTheme(config.themeId || '');
         }
       },
     ),
@@ -282,7 +282,7 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
         if (!dotLottieInstance) return;
 
         if (dotLottieInstance.isLoaded) {
-          dotLottieInstance.loadThemeData(config.themeData || '');
+          dotLottieInstance.setThemeData(config.themeData || '');
         }
       },
     ),

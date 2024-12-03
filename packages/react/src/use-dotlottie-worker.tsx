@@ -1,6 +1,6 @@
 import type { Config } from '@lottiefiles/dotlottie-web';
 import { DotLottieWorker } from '@lottiefiles/dotlottie-web';
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import type { ComponentProps, RefCallback } from 'react';
 
 interface DotLottieWorkerComponentProps {
@@ -240,7 +240,7 @@ export const useDotLottieWorker = (config?: DotLottieWorkerConfig): UseDotLottie
     if (!dotLottieRef.current) return;
 
     if (dotLottieRef.current.isLoaded && dotLottieRef.current.activeThemeId !== config?.themeId) {
-      dotLottieRef.current.loadTheme(config?.themeId || '');
+      dotLottieRef.current.setTheme(config?.themeId || '');
     }
   }, [config?.themeId]);
 
@@ -249,7 +249,7 @@ export const useDotLottieWorker = (config?: DotLottieWorkerConfig): UseDotLottie
     if (!dotLottieRef.current) return;
 
     if (dotLottieRef.current.isLoaded) {
-      dotLottieRef.current.loadThemeData(config?.themeData || '');
+      dotLottieRef.current.setThemeData(config?.themeData || '');
     }
   }, [config?.themeData]);
 
