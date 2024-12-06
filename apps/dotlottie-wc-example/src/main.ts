@@ -1,9 +1,10 @@
 import { setWasmUrl } from '@lottiefiles/dotlottie-wc';
 import type { DotLottieWC } from '@lottiefiles/dotlottie-wc';
 
-import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
+// eslint-disable-next-line node/no-unsupported-features/node-builtins
+setWasmUrl(new URL('../../../packages/web/src/core/dotlottie-player.wasm', import.meta.url).href);
 
-setWasmUrl(wasmUrl);
+const elementName = 'dotlottie-worker-wc';
 
 const app = document.querySelector<HTMLDivElement>('#app');
 
@@ -29,24 +30,24 @@ const container = document.querySelector('#container');
 
 if (playButton) {
   playButton.addEventListener('click', () => {
-    (document.querySelector('dotlottie-wc') as DotLottieWC).dotLottie?.play();
+    (document.querySelector(elementName) as DotLottieWC).dotLottie?.play();
   });
 }
 
 if (pauseButton) {
   pauseButton.addEventListener('click', () => {
-    (document.querySelector('dotlottie-wc') as DotLottieWC).dotLottie?.pause();
+    (document.querySelector(elementName) as DotLottieWC).dotLottie?.pause();
   });
 }
 
 if (stopButton) {
   stopButton.addEventListener('click', () => {
-    (document.querySelector('dotlottie-wc') as DotLottieWC).dotLottie?.stop();
+    (document.querySelector(elementName) as DotLottieWC).dotLottie?.stop();
   });
 }
 
 function create(): void {
-  const dotlottieComponent = document.createElement('dotlottie-wc') as DotLottieWC;
+  const dotlottieComponent = document.createElement(elementName) as DotLottieWC;
 
   // eslint-disable-next-line no-secrets/no-secrets
   dotlottieComponent.src = 'https://lottie.host/0e2d86ab-604d-4fc4-8512-d44a30eb81a8/YFj05ZHqHA.json';
@@ -56,13 +57,13 @@ function create(): void {
 }
 
 function destroy(): void {
-  const dotlottieComponent = document.querySelector('dotlottie-wc') as DotLottieWC;
+  const dotlottieComponent = document.querySelector(elementName) as DotLottieWC;
 
   dotlottieComponent.remove();
 }
 
 function move(): void {
-  const dotlottieComponent = document.querySelector('dotlottie-wc') as DotLottieWC;
+  const dotlottieComponent = document.querySelector(elementName) as DotLottieWC;
 
   dotlottieComponent.remove();
   setTimeout(() => {

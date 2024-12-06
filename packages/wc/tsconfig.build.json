@@ -12,7 +12,8 @@
 
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "exactOptionalPropertyTypes": false
+    "exactOptionalPropertyTypes": false,
+    "useDefineForClassFields": false
   },
 
   // Files included in compilation
