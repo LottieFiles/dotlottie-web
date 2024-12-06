@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.1.3
+
+### Patch Changes
+
+- 7c8dfe3: refactor(solid): remove preset and simplify tsup configuration
+
 ## 0.1.2
 
 ### Patch Changes
