@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.4.0
+
+### Minor Changes
+
+- 5df9a6e: feat: added dotLottie web worker component`dotlottie-worker-wc`
+- 5df9a6e: feat: added reactivity to attributes in both `dotlottie-wc` and `dotlottie-worker-wc`
+
 ## 0.3.2
 
 ### Patch Changes
