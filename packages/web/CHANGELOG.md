@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-web
 
+## 0.38.2
+
+### Patch Changes
+
+- fa72f98: updates the dotLottie-rs v0.1.34 WASM bindings, which include a fix for the “Memory Access Out of Bounds”
+  issue #376
+
 ## 0.38.1
 
 ### Patch Changes
