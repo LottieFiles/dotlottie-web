@@ -882,9 +882,8 @@ export class DotLottie {
     const scaleX = this._canvas.width / rect.width;
     const scaleY = this._canvas.height / rect.height;
 
-    const devicePixelRatio = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
-    const x = ((event.clientX - rect.left) * scaleX) / devicePixelRatio;
-    const y = ((event.clientY - rect.top) * scaleY) / devicePixelRatio;
+    const x = (event.clientX - rect.left) * scaleX;
+    const y = (event.clientY - rect.top) * scaleY;
 
     return {
       x,
