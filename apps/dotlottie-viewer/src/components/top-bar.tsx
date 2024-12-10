@@ -1,3 +1,4 @@
+import type { JSX } from 'react';
 import { useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { resetUserConfig, setSrc, setUserSrc } from '../store/viewer-slice';
@@ -49,6 +50,7 @@ const TopBar: React.FC<TopBarProps> = ({ className = '', ...props }) => {
         <>
           <span className="font-bold">Try it yourself!</span>
 
+          {/* @ts-ignore */}
           <Dropzone onDrop={onDrop} onDropRejected={onDropRejected}>
             {(state): JSX.Element => {
               return (

@@ -1,4 +1,5 @@
 import { DotLottie } from '@lottiefiles/dotlottie-react';
+import type { JSX } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setSrc, setUserSrc } from '../store/viewer-slice';
 import { useEffect, useRef } from 'react';
@@ -53,6 +54,7 @@ export const Home = (): JSX.Element => {
 
   return (
     <>
+      {/* @ts-ignore */}
       <Dropzone noClick onDrop={onDrop} onDropRejected={onDropRejected}>
         {(state): JSX.Element => {
           return (

@@ -31,6 +31,7 @@ const BaseSelect: React.FC<BaseSelectProps> = ({ className = '', items, placehol
   if (items.length === 0) {
     return (
       <span className={`min-h-9 text-gray-500 text-xs flex items-center gap-2 h-10`}>
+        {/* @ts-ignore */}
         <FaInfoCircle />
         {emptyMessage}
       </span>
