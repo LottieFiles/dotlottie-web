@@ -41,16 +41,16 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "react": "^17 || ^18"
+    "react": "^17 || ^18 || ^19"
   },
   "dependencies": {
     "@lottiefiles/dotlottie-web": "workspace:*"
   },
   "devDependencies": {
-    "@types/react": "^18.2.37",
+    "@types/react": "^19.0.1",
     "cross-env": "7.0.3",
-    "react": "^18.2.0",
-    "tsup": "8.0.1",
+    "react": "^19.0.0",
+    "tsup": "8.3.5",
     "typescript": "5.0.4"
   },
   "publishConfig": {

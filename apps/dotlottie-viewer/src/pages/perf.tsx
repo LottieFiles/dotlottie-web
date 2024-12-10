@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import type { JSX } from 'react';
 import { ChevronUpDownIcon } from '@heroicons/react/20/solid';
 import { DotLottieWorkerReact, DotLottieReact, setWasmUrl as setDotLottieWasmUrl } from '@lottiefiles/dotlottie-react';
 import { Player as LottieWeb } from '@lottiefiles/react-lottie-player';
@@ -289,6 +290,7 @@ export const Perf = (): JSX.Element => {
             <li key={`${anim.name}-${anim.lottieURL}-${index}`} className={`${anim.name}-${index}`}>
               {player.id === 0 && <DotLottieReact src={anim.lottieURL} style={size} loop autoplay />}
               {player.id === 1 && <DotLottieWorkerReact src={anim.lottieURL} style={size} loop autoplay />}
+              {/* @ts-ignore */}
               {player.id === 2 && <LottieWeb src={anim.lottieURL} style={size} loop autoplay />}
               {player.id === 3 && <SkottiePlayer lottieURL={anim.lottieURL} width={size.width} height={size.height} />}
               <h3 className="mt-6 text-lg font-semibold text-white">{anim.name}</h3>

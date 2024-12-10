@@ -1,7 +1,7 @@
 'use client';
 
 import type { DotLottieWorker, Config } from '@lottiefiles/dotlottie-web';
-import { useEffect, type ComponentProps, type RefCallback } from 'react';
+import { useEffect, type ComponentProps, type RefCallback, type JSX } from 'react';
 
 import { useDotLottieWorker } from './use-dotlottie-worker';
 import useStableCallback from './use-stable-callback';

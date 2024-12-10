@@ -178,6 +178,7 @@ export default function Players() {
                 }
               }}
             >
+              {/* @ts-ignore */}
               <GiPreviousButton />
             </button>
           ) : null}
@@ -188,6 +189,7 @@ export default function Players() {
                 lottieWebRef.current?.play();
               }}
             >
+              {/* @ts-ignore */}
               <FaPlay />
             </button>
           ) : (
@@ -197,6 +199,7 @@ export default function Players() {
                 lottieWebRef.current?.pause();
               }}
             >
+              {/* @ts-ignore */}
               <FaPause />
             </button>
           )}
@@ -209,6 +212,7 @@ export default function Players() {
                 }
               }}
             >
+              {/* @ts-ignore */}
               <GiNextButton />
             </button>
           ) : null}
@@ -278,6 +282,7 @@ export default function Players() {
             <span className="w-max pl-1 bg-transparent">{totalFrames}</span>
           </span>
           <button className="cursor-pointer" onClick={() => dispatch(setLoop(!loop))}>
+            {/* @ts-ignore */}
             <ImLoop className={`${!loop ? 'text-gray-500' : ''}`} />
           </button>
         </div>
