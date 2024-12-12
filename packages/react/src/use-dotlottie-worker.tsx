@@ -1,6 +1,6 @@
 import type { Config } from '@lottiefiles/dotlottie-web';
 import { DotLottieWorker } from '@lottiefiles/dotlottie-web';
-import { useCallback, useState, useEffect, useRef } from 'react';
+import { useCallback, useState, useEffect, useRef, type JSX } from 'react';
 import type { ComponentProps, RefCallback } from 'react';
 
 interface DotLottieWorkerComponentProps {
