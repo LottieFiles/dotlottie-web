@@ -394,17 +394,17 @@ importers:
         version: link:../web
     devDependencies:
       '@types/react':
-        specifier: ^18.2.37
-        version: 18.2.43
+        specifier: ^19.0.1
+        version: 19.0.1
       cross-env:
         specifier: 7.0.3
         version: 7.0.3
       react:
-        specifier: ^18.2.0
-        version: 18.2.0
+        specifier: ^19.0.0
+        version: 19.0.0
       tsup:
-        specifier: 8.0.1
-        version: 8.0.1(@swc/core@1.3.107(@swc/helpers@0.5.5))(postcss@8.4.39)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.5))(@types/node@22.7.6)(typescript@5.0.4))(typescript@5.0.4)
+        specifier: 8.3.5
+        version: 8.3.5(@swc/core@1.3.107(@swc/helpers@0.5.5))(jiti@1.21.0)(postcss@8.4.39)(typescript@5.0.4)(yaml@2.4.5)
       typescript:
         specifier: 5.0.4
         version: 5.0.4
@@ -3612,6 +3612,9 @@ packages:
 
   '@types/react@18.2.74':
     resolution: {integrity: sha512-9AEqNZZyBx8OdZpxzQlaFEVCSFUM2YXJH46yPOiOpm078k6ZLOCcuAzGum/zK8YBwY+dbahVNbHrbgrAwIRlqw==}
+
+  '@types/react@19.0.1':
+    resolution: {integrity: sha512-YW6614BDhqbpR5KtUYzTA+zlA7nayzJRA9ljz9CQoxthR0sDisYZLuvSMsil36t4EH/uAt8T52Xb4sVw17G+SQ==}
 
   '@types/scheduler@0.16.8':
     resolution: {integrity: sha512-WZLiwShhwLRmeV6zH+GkbOFT6Z6VklCItrDioxUnv+u4Ll+8vKeFySoFyK/0ctcRpOmwAicELfmys1sDc/Rw+A==}
@@ -8831,6 +8834,10 @@ packages:
     resolution: {integrity: sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==}
     engines: {node: '>=0.10.0'}
 
+  react@19.0.0:
+    resolution: {integrity: sha512-V8AVnmPIICiWpGfm6GLzCR/W5FXLchHop40W4nXBmdlEceh16rCN8O8LNWm5bh5XUX91fh7KpA+W0TgMKmgTpQ==}
+    engines: {node: '>=0.10.0'}
+
   read-cache@1.0.0:
     resolution: {integrity: sha512-Owdv/Ft7IjOgm/i0xvNDZ1LrRANRfew4b2prF3OWMQLxLfu3bS8FVhCsrSCMK4lR56Y9ya+AThoTpDCTxCmpRA==}
 
@@ -11364,21 +11371,21 @@ snapshots:
       '@babel/helper-validator-identifier': 7.25.7
       chalk: 2.4.2
       js-tokens: 4.0.0
-      picocolors: 1.0.1
+      picocolors: 1.1.1
 
   '@babel/highlight@7.24.7':
     dependencies:
       '@babel/helper-validator-identifier': 7.25.7
       chalk: 2.4.2
       js-tokens: 4.0.0
-      picocolors: 1.0.1
+      picocolors: 1.1.1
 
   '@babel/highlight@7.25.7':
     dependencies:
       '@babel/helper-validator-identifier': 7.25.7
       chalk: 2.4.2
       js-tokens: 4.0.0
-      picocolors: 1.0.1
+      picocolors: 1.1.1
 
   '@babel/parser@7.24.4':
     dependencies:
@@ -11520,7 +11527,7 @@ snapshots:
       '@babel/parser': 7.25.8
       '@babel/template': 7.25.7
       '@babel/types': 7.25.8
-      debug: 4.3.5
+      debug: 4.3.7
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
@@ -13036,13 +13043,15 @@ snapshots:
     transitivePeerDependencies:
       - '@parcel/core'
 
-  '@parcel/cache@2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))':
+  '@parcel/cache@2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)':
     dependencies:
       '@parcel/core': 2.12.0(@swc/helpers@0.5.5)
       '@parcel/fs': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
       '@parcel/logger': 2.12.0
       '@parcel/utils': 2.12.0
       lmdb: 2.8.5
+    transitivePeerDependencies:
+      - '@swc/helpers'
 
   '@parcel/codeframe@2.12.0':
     dependencies:
@@ -13102,7 +13111,7 @@ snapshots:
   '@parcel/core@2.12.0(@swc/helpers@0.5.5)':
     dependencies:
       '@mischnic/json-sourcemap': 0.1.1
-      '@parcel/cache': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))
+      '@parcel/cache': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
       '@parcel/diagnostic': 2.12.0
       '@parcel/events': 2.12.0
       '@parcel/fs': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
@@ -13115,7 +13124,7 @@ snapshots:
       '@parcel/source-map': 2.1.1
       '@parcel/types': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
       '@parcel/utils': 2.12.0
-      '@parcel/workers': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
+      '@parcel/workers': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))
       abortcontroller-polyfill: 1.7.5
       base-x: 3.0.10
       browserslist: 4.23.2
@@ -13143,7 +13152,7 @@ snapshots:
       '@parcel/types': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
       '@parcel/utils': 2.12.0
       '@parcel/watcher': 2.4.1
-      '@parcel/workers': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
+      '@parcel/workers': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))
     transitivePeerDependencies:
       - '@swc/helpers'
 
@@ -13217,7 +13226,7 @@ snapshots:
       '@parcel/plugin': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))
       '@parcel/rust': 2.12.0
       '@parcel/utils': 2.12.0
-      '@parcel/workers': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
+      '@parcel/workers': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))
 
   '@parcel/optimizer-svgo@2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))':
     dependencies:
@@ -13249,7 +13258,7 @@ snapshots:
       '@parcel/node-resolver-core': 3.3.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))
       '@parcel/types': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
       '@parcel/utils': 2.12.0
-      '@parcel/workers': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
+      '@parcel/workers': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))
       '@swc/core': 1.3.107(@swc/helpers@0.5.5)
       semver: 7.6.3
     transitivePeerDependencies:
@@ -13438,7 +13447,7 @@ snapshots:
       '@parcel/core': 2.12.0(@swc/helpers@0.5.5)
       '@parcel/plugin': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))
       '@parcel/utils': 2.12.0
-      '@parcel/workers': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
+      '@parcel/workers': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))
       nullthrows: 1.1.1
 
   '@parcel/transformer-js@2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))':
@@ -13449,7 +13458,7 @@ snapshots:
       '@parcel/rust': 2.12.0
       '@parcel/source-map': 2.1.1
       '@parcel/utils': 2.12.0
-      '@parcel/workers': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
+      '@parcel/workers': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))
       '@swc/helpers': 0.5.5
       browserslist: 4.23.2
       nullthrows: 1.1.1
@@ -13517,12 +13526,12 @@ snapshots:
 
   '@parcel/types@2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)':
     dependencies:
-      '@parcel/cache': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))
+      '@parcel/cache': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
       '@parcel/diagnostic': 2.12.0
       '@parcel/fs': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
       '@parcel/package-manager': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
       '@parcel/source-map': 2.1.1
-      '@parcel/workers': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
+      '@parcel/workers': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))
       utility-types: 3.11.0
     transitivePeerDependencies:
       - '@parcel/core'
@@ -13595,7 +13604,7 @@ snapshots:
       '@parcel/watcher-win32-ia32': 2.4.1
       '@parcel/watcher-win32-x64': 2.4.1
 
-  '@parcel/workers@2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)':
+  '@parcel/workers@2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))':
     dependencies:
       '@parcel/core': 2.12.0(@swc/helpers@0.5.5)
       '@parcel/diagnostic': 2.12.0
@@ -13604,8 +13613,6 @@ snapshots:
       '@parcel/types': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.5))(@swc/helpers@0.5.5)
       '@parcel/utils': 2.12.0
       nullthrows: 1.1.1
-    transitivePeerDependencies:
-      - '@swc/helpers'
 
   '@peculiar/asn1-schema@2.3.8':
     dependencies:
@@ -13978,7 +13985,7 @@ snapshots:
 
   '@sitespeed.io/tracium@0.3.3':
     dependencies:
-      debug: 4.3.5
+      debug: 4.3.7
     transitivePeerDependencies:
       - supports-color
 
@@ -14300,7 +14307,7 @@ snapshots:
 
   '@types/acorn@4.0.6':
     dependencies:
-      '@types/estree': 1.0.5
+      '@types/estree': 1.0.6
 
   '@types/aria-query@5.0.3': {}
 
@@ -14351,7 +14358,7 @@ snapshots:
 
   '@types/estree-jsx@1.0.2':
     dependencies:
-      '@types/estree': 1.0.5
+      '@types/estree': 1.0.6
 
   '@types/estree@1.0.5': {}
 
@@ -14454,6 +14461,10 @@ snapshots:
   '@types/react@18.2.74':
     dependencies:
       '@types/prop-types': 15.7.11
+      csstype: 3.1.3
+
+  '@types/react@19.0.1':
+    dependencies:
       csstype: 3.1.3
 
   '@types/scheduler@0.16.8': {}
@@ -14685,7 +14696,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 5.62.0
       '@typescript-eslint/visitor-keys': 5.62.0
-      debug: 4.3.5
+      debug: 4.3.7
       globby: 11.1.0
       is-glob: 4.0.3
       semver: 7.6.3
@@ -14829,7 +14840,7 @@ snapshots:
   '@vitest/browser@1.6.0(playwright@1.45.2)(vitest@1.2.2)(webdriverio@8.39.1(encoding@0.1.13)(typescript@5.2.2))':
     dependencies:
       '@vitest/utils': 1.6.0
-      magic-string: 0.30.10
+      magic-string: 0.30.14
       sirv: 2.0.4
       vitest: 1.2.2(@types/node@22.7.6)(@vitest/browser@1.6.0)(lightningcss@1.26.0)(terser@5.31.1)
     optionalDependencies:
@@ -15288,19 +15299,19 @@ snapshots:
 
   agent-base@6.0.2:
     dependencies:
-      debug: 4.3.5
+      debug: 4.3.7
     transitivePeerDependencies:
       - supports-color
 
   agent-base@7.1.0:
     dependencies:
-      debug: 4.3.5
+      debug: 4.3.7
     transitivePeerDependencies:
       - supports-color
 
   agent-base@7.1.1:
     dependencies:
-      debug: 4.3.5
+      debug: 4.3.7
     transitivePeerDependencies:
       - supports-color
 
@@ -17654,7 +17665,7 @@ snapshots:
 
   extract-zip@2.0.1:
     dependencies:
-      debug: 4.3.5
+      debug: 4.3.7
       get-stream: 5.2.0
       yauzl: 2.10.0
     optionalDependencies:
@@ -17937,7 +17948,7 @@ snapshots:
     dependencies:
       basic-ftp: 5.0.3
       data-uri-to-buffer: 6.0.1
-      debug: 4.3.5
+      debug: 4.3.7
       fs-extra: 8.1.0
     transitivePeerDependencies:
       - supports-color
@@ -17946,7 +17957,7 @@ snapshots:
     dependencies:
       basic-ftp: 5.0.5
       data-uri-to-buffer: 6.0.2
-      debug: 4.3.5
+      debug: 4.3.7
       fs-extra: 11.2.0
     transitivePeerDependencies:
       - supports-color
@@ -18244,14 +18255,14 @@ snapshots:
     dependencies:
       '@tootallnate/once': 2.0.0
       agent-base: 6.0.2
-      debug: 4.3.5
+      debug: 4.3.7
     transitivePeerDependencies:
       - supports-color
 
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.5
+      debug: 4.3.7
     transitivePeerDependencies:
       - supports-color
 
@@ -18263,21 +18274,21 @@ snapshots:
   https-proxy-agent@5.0.1:
     dependencies:
       agent-base: 6.0.2
-      debug: 4.3.5
+      debug: 4.3.7
     transitivePeerDependencies:
       - supports-color
 
   https-proxy-agent@7.0.4:
     dependencies:
       agent-base: 7.1.0
-      debug: 4.3.5
+      debug: 4.3.7
     transitivePeerDependencies:
       - supports-color
 
   https-proxy-agent@7.0.5:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.5
+      debug: 4.3.7
     transitivePeerDependencies:
       - supports-color
 
@@ -19520,7 +19531,7 @@ snapshots:
 
   micromark-factory-mdx-expression@1.0.9:
     dependencies:
-      '@types/estree': 1.0.5
+      '@types/estree': 1.0.6
       micromark-util-character: 1.2.0
       micromark-util-events-to-acorn: 1.2.3
       micromark-util-symbol: 1.1.0
@@ -19636,7 +19647,7 @@ snapshots:
   micromark-util-events-to-acorn@1.2.3:
     dependencies:
       '@types/acorn': 4.0.6
-      '@types/estree': 1.0.5
+      '@types/estree': 1.0.6
       '@types/unist': 2.0.6
       estree-util-visit: 1.2.1
       micromark-util-symbol: 1.1.0
@@ -19701,7 +19712,7 @@ snapshots:
   micromark@3.2.0:
     dependencies:
       '@types/debug': 4.1.10
-      debug: 4.3.5
+      debug: 4.3.7
       decode-named-character-reference: 1.0.2
       micromark-core-commonmark: 1.1.0
       micromark-factory-space: 1.1.0
@@ -19723,7 +19734,7 @@ snapshots:
   micromark@4.0.0:
     dependencies:
       '@types/debug': 4.1.12
-      debug: 4.3.5
+      debug: 4.3.7
       decode-named-character-reference: 1.0.2
       devlop: 1.1.0
       micromark-core-commonmark: 2.0.1
@@ -20323,7 +20334,7 @@ snapshots:
     dependencies:
       '@tootallnate/quickjs-emscripten': 0.23.0
       agent-base: 7.1.0
-      debug: 4.3.5
+      debug: 4.3.7
       get-uri: 6.0.2
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.4
@@ -20336,7 +20347,7 @@ snapshots:
     dependencies:
       '@tootallnate/quickjs-emscripten': 0.23.0
       agent-base: 7.1.1
-      debug: 4.3.5
+      debug: 4.3.7
       get-uri: 6.0.3
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.5
@@ -20763,7 +20774,7 @@ snapshots:
   proxy-agent@6.3.0:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.5
+      debug: 4.3.7
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.5
       lru-cache: 7.18.3
@@ -20777,7 +20788,7 @@ snapshots:
   proxy-agent@6.3.1:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.5
+      debug: 4.3.7
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.5
       lru-cache: 7.18.3
@@ -20790,7 +20801,7 @@ snapshots:
   proxy-agent@6.4.0:
     dependencies:
       agent-base: 7.1.0
-      debug: 4.3.5
+      debug: 4.3.7
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.4
       lru-cache: 7.18.3
@@ -21029,6 +21040,8 @@ snapshots:
   react@18.2.0:
     dependencies:
       loose-envify: 1.4.0
+
+  react@19.0.0: {}
 
   read-cache@1.0.0:
     dependencies:
@@ -22036,7 +22049,7 @@ snapshots:
   socks-proxy-agent@7.0.0:
     dependencies:
       agent-base: 6.0.2
-      debug: 4.3.5
+      debug: 4.3.7
       socks: 2.7.1
     transitivePeerDependencies:
       - supports-color
@@ -22044,7 +22057,7 @@ snapshots:
   socks-proxy-agent@8.0.2:
     dependencies:
       agent-base: 7.1.0
-      debug: 4.3.5
+      debug: 4.3.7
       socks: 2.7.1
     transitivePeerDependencies:
       - supports-color
@@ -22052,7 +22065,7 @@ snapshots:
   socks-proxy-agent@8.0.4:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.5
+      debug: 4.3.7
       socks: 2.8.3
     transitivePeerDependencies:
       - supports-color
@@ -22922,7 +22935,7 @@ snapshots:
   tuf-js@1.1.7:
     dependencies:
       '@tufjs/models': 1.0.4
-      debug: 4.3.5
+      debug: 4.3.7
       make-fetch-happen: 11.1.1
     transitivePeerDependencies:
       - supports-color
@@ -23305,7 +23318,7 @@ snapshots:
     dependencies:
       browserslist: 4.23.2
       escalade: 3.1.2
-      picocolors: 1.0.1
+      picocolors: 1.1.1
 
   update-notifier@6.0.2:
     dependencies:
@@ -23734,7 +23747,7 @@ snapshots:
     dependencies:
       chalk: 4.1.2
       commander: 9.5.0
-      debug: 4.3.5
+      debug: 4.3.7
     transitivePeerDependencies:
       - supports-color
     optional: true
