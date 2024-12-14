@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-react",
-  "version": "0.10.1-alpha.0",
+  "version": "0.11.1",
   "type": "module",
   "description": "React wrapper around the dotlottie-web library",
   "repository": {
@@ -44,23 +44,15 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
-    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0"
+    "react": "^17 || ^18"
   },
   "dependencies": {
     "@lottiefiles/dotlottie-web": "workspace:*"
   },
   "devDependencies": {
-    "@testing-library/user-event": "^14.5.2",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "@vitejs/plugin-react": "^4.2.1",
-    "@vitest/browser": "2.1.0-beta.5",
-    "@vitest/coverage-istanbul": "2.1.0-beta.5",
+    "@types/react": "^18.2.37",
     "cross-env": "7.0.3",
-    "playwright": "^1.45.2",
-    "react": "^18",
-    "react-dom": "^18",
+    "react": "^18.2.0",
     "tsup": "8.0.1",
     "typescript": "5.0.4",
     "vitest": "2.1.0-beta.5",

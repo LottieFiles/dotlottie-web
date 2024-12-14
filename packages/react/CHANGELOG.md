@@ -1,10 +1,33 @@
 # @lottiefiles/dotlottie-react
 
-## 0.10.1-alpha.0
+## 0.11.1
 
 ### Patch Changes
 
-- 94884b5: fix: component lifecycle management in strict mode
+- Updated dependencies [fa72f98]
+  - @lottiefiles/dotlottie-web@0.38.2
+
+## 0.11.0
+
+### Minor Changes
+
+- fb3ba0f: chore(react): update JSX transform to "react-jsx" and drop React 16 support
+
+### Patch Changes
+
+- Updated dependencies [898084e]
+- Updated dependencies [de079cc]
+- Updated dependencies [30ff412]
+  - @lottiefiles/dotlottie-web@0.38.1
+
+## 0.10.1
+
+### Patch Changes
+
+- Updated dependencies [4be7253]
+- Updated dependencies [4be7253]
+- Updated dependencies [4be7253]
+  - @lottiefiles/dotlottie-web@0.38.0
 
 ## 0.10.0
 

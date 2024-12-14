@@ -1,6 +1,5 @@
 // import { DotLottieReact, DotLottie, setWasmUrl } from '@lottiefiles/dotlottie-react';
-import { setWasmUrl, DotLottieWorker, DotLottieWorkerReact } from '@lottiefiles/dotlottie-react';
-import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
+import { DotLottieWorkerReact, DotLottieWorker, setWasmUrl } from '@lottiefiles/dotlottie-react';
 import React, { useState } from 'react';
 
 const animations = [
@@ -11,7 +10,7 @@ const animations = [
   './dragon.json',
 ];
 
-setWasmUrl(wasmUrl);
+setWasmUrl(new URL('../../../packages/web/src/core/dotlottie-player.wasm', import.meta.url).href);
 
 function App() {
   const [dotLottie, setDotLottie] = useState<DotLottieWorker | null>(null);

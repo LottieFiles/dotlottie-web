@@ -1,5 +1,36 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies [fa72f98]
+  - @lottiefiles/dotlottie-web@0.38.2
+
+## 0.1.3
+
+### Patch Changes
+
+- 7c8dfe3: refactor(solid): remove preset and simplify tsup configuration
+
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies [898084e]
+- Updated dependencies [de079cc]
+- Updated dependencies [30ff412]
+  - @lottiefiles/dotlottie-web@0.38.1
+
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies [4be7253]
+- Updated dependencies [4be7253]
+- Updated dependencies [4be7253]
+  - @lottiefiles/dotlottie-web@0.38.0
+
 ## 0.1.0
 
 ### Minor Changes

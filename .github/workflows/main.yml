@@ -43,9 +43,8 @@ jobs:
 
       - name: 🛡️ Test (dotlottie-web)
         run: |
-          npx playwright install --with-deps
+          npx playwright install --with-deps chromium
           pnpm test:coverage
-        working-directory: packages/web
 
       - name: 🛡️ Test (dotlottie-react)
         run: pnpm test:coverage
@@ -66,6 +65,14 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           working-directory: packages/react
           name: '@lottiefiles/dotlottie-react'
+
+      - name: 📏 Report dotlottie-wc coverage
+        if: always() && github.event_name == 'pull_request'
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: packages/wc
+          name: '@lottiefiles/dotlottie-wc'
 
       - name: 📏 Report bundle size
         if: github.event_name == 'pull_request'

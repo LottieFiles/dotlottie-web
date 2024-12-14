@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-wc",
-  "version": "0.3.0",
+  "version": "0.4.1",
   "type": "module",
   "description": "Web component wrapper around the dotlottie-web library",
   "repository": {
@@ -40,16 +40,23 @@
     "lint": "eslint --fix .",
     "stats:eslint": "cross-env TIMING=1 eslint .",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
+    "test": "vitest run --browser.headless",
+    "test:coverage": "vitest run --browser.headless --coverage",
+    "test:watch": "vitest --watch",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@lottiefiles/dotlottie-web": "workspace:*",
-    "lit": "^3.1.0"
+    "lit": "^3.2.1"
   },
   "devDependencies": {
+    "@vitest/browser": "2.1.0-beta.5",
+    "@vitest/coverage-istanbul": "2.1.0-beta.5",
     "cross-env": "7.0.3",
-    "tsup": "8.0.1",
-    "typescript": "5.0.4"
+    "playwright": "1.45.2",
+    "tsup": "^8.3.5",
+    "typescript": "5.0.4",
+    "vitest": "2.1.0-beta.5"
   },
   "publishConfig": {
     "access": "public",

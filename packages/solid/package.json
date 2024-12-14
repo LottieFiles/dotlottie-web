@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-solid",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "type": "module",
   "description": "Solid wrapper around the dotlottie-web library",
   "repository": {
@@ -15,15 +15,7 @@
   "license": "MIT",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "exports": {
-    "import": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
-  },
-  "browser": {},
   "types": "./dist/index.d.ts",
-  "typesVersions": {},
   "files": [
     "dist"
   ],
@@ -53,10 +45,11 @@
     "@lottiefiles/dotlottie-web": "workspace:*"
   },
   "devDependencies": {
+    "@types/node": "^22.7.6",
     "cross-env": "7.0.3",
+    "esbuild-plugin-solid": "^0.6.0",
     "solid-js": "^1.8.17",
     "tsup": "^8.0.2",
-    "tsup-preset-solid": "^2.2.0",
     "typescript": "^5.4.5"
   },
   "publishConfig": {

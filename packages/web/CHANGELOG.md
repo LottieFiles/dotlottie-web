@@ -1,5 +1,31 @@
 # @lottiefiles/dotlottie-web
 
+## 0.38.2
+
+### Patch Changes
+
+- fa72f98: updates the dotLottie-rs v0.1.34 WASM bindings, which include a fix for the “Memory Access Out of Bounds”
+  issue #376
+
+## 0.38.1
+
+### Patch Changes
+
+- 898084e: fix: animation with PNG sequence
+- de079cc: fix: runtime error when loading external image asset
+- 30ff412: fix: cancel animation frame before loading a new animation
+
+## 0.38.0
+
+### Minor Changes
+
+- 4be7253: chore: update dotlottie-rs WASM bindings to use ThorVG v0.15.5 and fix minor memory leaks.
+
+### Patch Changes
+
+- 4be7253: fix: incorrect default device pixel ratio for `DotLottieWorker`
+- 4be7253: fix: prevent unnecessary multiple WASM module fetches in `DotLottieWorker`
+
 ## 0.37.0
 
 ### Minor Changes
