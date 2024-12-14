@@ -1,65 +1,16 @@
 'use client';
 
-import type { DotLottie, Config } from '@lottiefiles/dotlottie-web';
-import { useEffect, type ComponentProps, type RefCallback, type JSX } from 'react';
+import type { Config } from '@lottiefiles/dotlottie-web';
+import { DotLottie } from '@lottiefiles/dotlottie-web';
+import type { JSX } from 'react';
 
-import { useDotLottie } from './use-dotlottie';
-import useStableCallback from './use-stable-callback';
+import type { BaseDotLottieProps } from './base-dotlottie-react';
+import { BaseDotLottieReact } from './base-dotlottie-react';
 
-export type DotLottieReactProps = Omit<Config, 'canvas'> &
-  ComponentProps<'canvas'> & {
-    animationId?: string;
-    dotLottieRefCallback?: RefCallback<DotLottie>;
-    playOnHover?: boolean;
-    themeData?: string;
-    themeId?: string;
-  };
+export type DotLottieReactProps = Omit<BaseDotLottieProps<DotLottie>, 'createDotLottie'>;
 
-export const DotLottieReact = ({
-  animationId,
-  autoplay,
-  backgroundColor,
-  data,
-  dotLottieRefCallback,
-  loop,
-  marker,
-  mode,
-  playOnHover,
-  renderConfig,
-  segment,
-  speed,
-  src,
-  themeData,
-  themeId,
-  useFrameInterpolation,
-  ...props
-}: DotLottieReactProps): JSX.Element => {
-  const { DotLottieComponent, dotLottie } = useDotLottie({
-    data,
-    mode,
-    speed,
-    src,
-    autoplay,
-    loop,
-    segment,
-    renderConfig,
-    backgroundColor,
-    useFrameInterpolation,
-    playOnHover,
-    marker,
-    themeId,
-    animationId,
-    themeData,
-  });
+const createDotLottie = (config: Config): DotLottie => new DotLottie(config);
 
-  const stableDotLottieRefCallback =
-    typeof dotLottieRefCallback === 'function' ? useStableCallback(dotLottieRefCallback) : undefined;
-
-  useEffect(() => {
-    if (typeof stableDotLottieRefCallback === 'function') {
-      stableDotLottieRefCallback(dotLottie);
-    }
-  }, [stableDotLottieRefCallback, dotLottie]);
-
-  return <DotLottieComponent {...props} />;
+export const DotLottieReact = (props: DotLottieReactProps): JSX.Element => {
+  return <BaseDotLottieReact {...props} createDotLottie={createDotLottie} />;
 };
