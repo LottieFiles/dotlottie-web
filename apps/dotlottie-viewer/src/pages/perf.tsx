@@ -135,12 +135,16 @@ export const Perf = (): JSX.Element => {
   const [player, setPlayer] = useState(playerOptions[0]);
   const [animationList, setAnimationList] = useState<any[]>([]);
   const [text, setText] = useState('');
+  const [useFrameInterpolation, setUseFrameInterpolation] = useState(true);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const playerParam = params.get('player');
     const countParam = params.get('count');
     const seed = params.get('seed');
+    const frameInterpolation = params.get('frame-interpolation');
+
+    setUseFrameInterpolation(frameInterpolation === null || frameInterpolation === 'true');
 
     const selectedCount = countOptions.find((c) => c.name === countParam) || countOptions[1];
     const selectedPlayer = playerOptions.find((p) => p.name === playerParam) || playerOptions[0];
@@ -265,6 +269,21 @@ export const Perf = (): JSX.Element => {
             >
               Set
             </button>
+            <div className="mt-6 flex gap-x-4">
+              {(player.id === 0 || player.id === 1) && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={useFrameInterpolation}
+                    onChange={(e) => {
+                      setQueryStringParameter('frame-interpolation', e.target.checked.toString());
+                      window.location.reload();
+                    }}
+                  />
+                  <span className="text-sm text-white">Use Frame Interpolation</span>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="mt-6 flex gap-x-4">
@@ -287,8 +306,24 @@ export const Perf = (): JSX.Element => {
         <ul className="mt-20 grid gap-x-8 gap-y-14 sm:grid-cols-4 xl:grid-cols-5">
           {animationList.map((anim, index) => (
             <li key={`${anim.name}-${anim.lottieURL}-${index}`} className={`${anim.name}-${index}`}>
-              {player.id === 0 && <DotLottieReact src={anim.lottieURL} style={size} loop autoplay />}
-              {player.id === 1 && <DotLottieWorkerReact src={anim.lottieURL} style={size} loop autoplay />}
+              {player.id === 0 && (
+                <DotLottieReact
+                  src={anim.lottieURL}
+                  style={size}
+                  loop
+                  autoplay
+                  useFrameInterpolation={useFrameInterpolation}
+                />
+              )}
+              {player.id === 1 && (
+                <DotLottieWorkerReact
+                  src={anim.lottieURL}
+                  style={size}
+                  loop
+                  autoplay
+                  useFrameInterpolation={useFrameInterpolation}
+                />
+              )}
               {player.id === 2 && <LottieWeb src={anim.lottieURL} style={size} loop autoplay />}
               {player.id === 3 && <SkottiePlayer lottieURL={anim.lottieURL} width={size.width} height={size.height} />}
               <h3 className="mt-6 text-lg font-semibold text-white">{anim.name}</h3>
