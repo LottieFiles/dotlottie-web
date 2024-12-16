@@ -53,6 +53,14 @@ jobs:
           working-directory: packages/web
           name: '@lottiefiles/dotlottie-web'
 
+      - name: 📏 Report coverage (react)
+        if: always() && github.event_name == 'pull_request'
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: packages/react
+          name: '@lottiefiles/dotlottie-react'
+
       - name: 📏 Report coverage (wc)
         if: always() && github.event_name == 'pull_request'
         uses: davelosert/vitest-coverage-report-action@v2
