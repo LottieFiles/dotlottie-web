@@ -1,5 +1,18 @@
 # @lottiefiles/dotlottie-react
 
+## 0.12.0
+
+### Minor Changes
+
+- 2c48dbf: refactor: abstract common functionality between `DotLottieReact` and `DotLottieReactWorker` to reduce bundle
+  size
+- 003e7b1: feat: React v19 upgrade
+
+### Patch Changes
+
+- 2c48dbf: fix: dotLottie instance instantiation and cleanup in React `StrictMode` for both `DotLottieReact` and
+  `DotLottieReactWorker` components
+
 ## 0.11.1
 
 ### Patch Changes
