@@ -640,44 +640,44 @@ export class DotLottieWorker {
     DotLottieWorker._wasmUrl = url;
   }
 
-  public async loadStateMachine(stateMachineId: string): Promise<boolean> {
+  public async stateMachineLoad(stateMachineId: string): Promise<boolean> {
     if (!this._created) return false;
 
-    const result = await this._sendMessage('loadStateMachine', { instanceId: this._id, stateMachineId });
+    const result = await this._sendMessage('stateMachineLoad', { instanceId: this._id, stateMachineId });
 
     await this._updateDotLottieInstanceState();
 
     return result;
   }
 
-  public async loadStateMachineData(stateMachineData: string): Promise<boolean> {
+  public async stateMachineLoadData(stateMachineData: string): Promise<boolean> {
     if (!this._created) return false;
 
-    const result = await this._sendMessage('loadStateMachineData', { instanceId: this._id, stateMachineData });
+    const result = await this._sendMessage('stateMachineLoadData', { instanceId: this._id, stateMachineData });
 
     await this._updateDotLottieInstanceState();
 
     return result;
   }
 
-  public async startStateMachine(): Promise<boolean> {
+  public async stateMachineStart(): Promise<boolean> {
     if (!this._created) return false;
 
     this._setupStateMachineListeners();
 
-    const result = await this._sendMessage('startStateMachine', { instanceId: this._id });
+    const result = await this._sendMessage('stateMachineStart', { instanceId: this._id });
 
     await this._updateDotLottieInstanceState();
 
     return result;
   }
 
-  public async stopStateMachine(): Promise<boolean> {
+  public async stateMachineStop(): Promise<boolean> {
     if (!this._created) return false;
 
     this._cleanupStateMachineListeners();
 
-    return this._sendMessage('stopStateMachine', { instanceId: this._id });
+    return this._sendMessage('stateMachineStop', { instanceId: this._id });
   }
 
   public async getStateMachineListeners(): Promise<string[]> {
@@ -686,14 +686,61 @@ export class DotLottieWorker {
     return this._sendMessage('getStateMachineListeners', { instanceId: this._id });
   }
 
+  public async stateMachineCurrentState(): Promise<string | undefined> {
+    if (!this._created) return '';
+
+    return this._sendMessage('stateMachineCurrentState', { instanceId: this._id });
+  }
+
+  public async stateMachineFire(eventName: string): Promise<void> {
+    if (!this._created) return;
+
+    this._sendMessage('stateMachineFire', { instanceId: this._id, eventName });
+  }
+
+  public async stateMachineGetBooleanTrigger(triggerId: string): Promise<boolean | undefined> {
+    if (!this._created) return false;
+
+    return this._sendMessage('stateMachineGetBooleanTrigger', { instanceId: this._id, triggerId });
+  }
+
+  public async stateMachineGetNumericTrigger(triggerId: string): Promise<number | undefined> {
+    if (!this._created) return 0;
+
+    return this._sendMessage('stateMachineGetNumericTrigger', { instanceId: this._id, triggerId });
+  }
+
+  public async stateMachineGetStringTrigger(triggerId: string): Promise<string | undefined> {
+    if (!this._created) return '';
+
+    return this._sendMessage('stateMachineGetStringTrigger', { instanceId: this._id, triggerId });
+  }
+
+  public async stateMachineSetBooleanTrigger(triggerId: string, value: boolean): Promise<void> {
+    if (!this._created) return;
+
+    this._sendMessage('stateMachineSetBooleanTrigger', { instanceId: this._id, triggerId, value });
+  }
+
+  public async stateMachineSetNumericTrigger(triggerId: string, value: number): Promise<void> {
+    if (!this._created) return;
+
+    this._sendMessage('stateMachineSetNumericTrigger', { instanceId: this._id, triggerId, value });
+  }
+
+  public async stateMachineSetStringTrigger(triggerId: string, value: string): Promise<void> {
+    if (!this._created) return;
+
+    this._sendMessage('stateMachineSetStringTrigger', { instanceId: this._id, triggerId, value });
+  }
+
   private _getPointerPosition(event: PointerEvent): { x: number; y: number } {
     const rect = (this._canvas as HTMLCanvasElement).getBoundingClientRect();
     const scaleX = this._canvas.width / rect.width;
     const scaleY = this._canvas.height / rect.height;
 
-    const devicePixelRatio = this._dotLottieInstanceState.renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
-    const x = ((event.clientX - rect.left) * scaleX) / devicePixelRatio;
-    const y = ((event.clientY - rect.top) * scaleY) / devicePixelRatio;
+    const x = (event.clientX - rect.left) * scaleX;
+    const y = (event.clientY - rect.top) * scaleY;
 
     return {
       x,
@@ -704,31 +751,31 @@ export class DotLottieWorker {
   private _onPointerUp(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this._sendMessage('postPointerUpEvent', { instanceId: this._id, x, y });
+    this._sendMessage('stateMachinePostPointerUpEvent', { instanceId: this._id, x, y });
   }
 
   private _onPointerDown(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this._sendMessage('postPointerDownEvent', { instanceId: this._id, x, y });
+    this._sendMessage('stateMachinePostPointerDownEvent', { instanceId: this._id, x, y });
   }
 
   private _onPointerMove(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this._sendMessage('postPointerMoveEvent', { instanceId: this._id, x, y });
+    this._sendMessage('stateMachinePostPointerMoveEvent', { instanceId: this._id, x, y });
   }
 
   private _onPointerEnter(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this._sendMessage('postPointerEnterEvent', { instanceId: this._id, x, y });
+    this._sendMessage('stateMachinePostPointerEnterEvent', { instanceId: this._id, x, y });
   }
 
   private _onPointerLeave(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
-    this._sendMessage('postPointerExitEvent', { instanceId: this._id, x, y });
+    this._sendMessage('stateMachinePostPointerExitEvent', { instanceId: this._id, x, y });
   }
 
   private async _setupStateMachineListeners(): Promise<void> {

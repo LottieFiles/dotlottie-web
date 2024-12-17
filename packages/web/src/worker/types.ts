@@ -44,44 +44,11 @@ export interface MethodParamsMap {
     animationId: string;
     instanceId: string;
   };
-  loadStateMachine: {
-    instanceId: string;
-    stateMachineId: string;
-  };
-  loadStateMachineData: {
-    instanceId: string;
-    stateMachineData: string;
-  };
   pause: {
     instanceId: string;
   };
   play: {
     instanceId: string;
-  };
-  postPointerDownEvent: {
-    instanceId: string;
-    x: number;
-    y: number;
-  };
-  postPointerEnterEvent: {
-    instanceId: string;
-    x: number;
-    y: number;
-  };
-  postPointerExitEvent: {
-    instanceId: string;
-    x: number;
-    y: number;
-  };
-  postPointerMoveEvent: {
-    instanceId: string;
-    x: number;
-    y: number;
-  };
-  postPointerUpEvent: {
-    instanceId: string;
-    x: number;
-    y: number;
   };
   resize: {
     height: number;
@@ -146,13 +113,80 @@ export interface MethodParamsMap {
   setWasmUrl: {
     url: string;
   };
-  startStateMachine: {
+  stateMachineCurrentState: {
+    instanceId: string;
+  };
+  stateMachineFire: {
+    eventName: string;
+    instanceId: string;
+  };
+  stateMachineGetBooleanTrigger: {
+    instanceId: string;
+    triggerId: string;
+  };
+  stateMachineGetNumericTrigger: {
+    instanceId: string;
+    triggerId: string;
+  };
+  stateMachineGetStringTrigger: {
+    instanceId: string;
+    triggerId: string;
+  };
+  stateMachineLoad: {
+    instanceId: string;
+    stateMachineId: string;
+  };
+  stateMachineLoadData: {
+    instanceId: string;
+    stateMachineData: string;
+  };
+  stateMachinePostPointerDownEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachinePostPointerEnterEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachinePostPointerExitEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachinePostPointerMoveEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachinePostPointerUpEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachineSetBooleanTrigger: {
+    instanceId: string;
+    triggerId: string;
+    value: boolean;
+  };
+  stateMachineSetNumericTrigger: {
+    instanceId: string;
+    triggerId: string;
+    value: number;
+  };
+  stateMachineSetStringTrigger: {
+    instanceId: string;
+    triggerId: string;
+    value: string;
+  };
+  stateMachineStart: {
+    instanceId: string;
+  };
+  stateMachineStop: {
     instanceId: string;
   };
   stop: {
-    instanceId: string;
-  };
-  stopStateMachine: {
     instanceId: string;
   };
   unfreeze: {
@@ -178,8 +212,6 @@ export interface MethodResultMap {
   getStateMachineListeners: string[];
   load: void;
   loadAnimation: void;
-  loadStateMachine: boolean;
-  loadStateMachineData: boolean;
   onComplete: {
     event: CompleteEvent;
     instanceId: string;
@@ -234,11 +266,6 @@ export interface MethodResultMap {
   };
   pause: void;
   play: void;
-  postPointerDownEvent: number | undefined;
-  postPointerEnterEvent: number | undefined;
-  postPointerExitEvent: number | undefined;
-  postPointerMoveEvent: number | undefined;
-  postPointerUpEvent: number | undefined;
   resize: void;
   setBackgroundColor: void;
   setFrame: void;
@@ -254,9 +281,24 @@ export interface MethodResultMap {
   setUseFrameInterpolation: void;
   setViewport: boolean;
   setWasmUrl: void;
-  startStateMachine: boolean;
+  stateMachineCurrentState: string | undefined;
+  stateMachineFire: void;
+  stateMachineGetBooleanTrigger: boolean | undefined;
+  stateMachineGetNumericTrigger: number | undefined;
+  stateMachineGetStringTrigger: string | undefined;
+  stateMachineLoad: boolean;
+  stateMachineLoadData: boolean;
+  stateMachinePostPointerDownEvent: number | undefined;
+  stateMachinePostPointerEnterEvent: number | undefined;
+  stateMachinePostPointerExitEvent: number | undefined;
+  stateMachinePostPointerMoveEvent: number | undefined;
+  stateMachinePostPointerUpEvent: number | undefined;
+  stateMachineSetBooleanTrigger: boolean | undefined;
+  stateMachineSetNumericTrigger: boolean | undefined;
+  stateMachineSetStringTrigger: boolean | undefined;
+  stateMachineStart: boolean;
+  stateMachineStop: boolean;
   stop: void;
-  stopStateMachine: boolean;
   unfreeze: void;
 }
 
