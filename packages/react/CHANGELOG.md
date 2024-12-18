@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.12.1
+
+### Patch Changes
+
+- c388ed6: fix: add missing layout prop
+
 ## 0.12.0
 
 ### Minor Changes
