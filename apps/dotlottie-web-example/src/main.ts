@@ -220,7 +220,7 @@ fetch(
 
     canvas.addEventListener('mousedown', () => {
       // dotLottie.postStateMachineEvent('OnPointerDown: 0.0 0.0');
-      dotLottie.postPointerDownEvent(0, 0);
+      dotLottie.stateMachinePostPointerDownEvent(0, 0);
     });
 
     dotLottie.addEventListener('loadError', console.error);
@@ -335,7 +335,7 @@ fetch(
     stateMachinesSelect.addEventListener('change', () => {
       const stateMachineId = stateMachinesSelect.value;
 
-      dotLottie.loadStateMachine(stateMachineId);
+      dotLottie.stateMachineLoad(stateMachineId);
     });
 
     markerSelect.addEventListener('change', () => {
@@ -374,11 +374,11 @@ fetch(
     });
 
     startStateMachineButton.addEventListener('click', () => {
-      dotLottie.startStateMachine();
+      dotLottie.stateMachineStart();
     });
 
     endStateMachineButton.addEventListener('click', () => {
-      dotLottie.stopStateMachine();
+      dotLottie.stateMachineStop();
     });
 
     playPauseButton.addEventListener('click', () => {
