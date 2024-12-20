@@ -263,117 +263,6 @@ const commands: {
 
     return instance.getStateMachineListeners();
   },
-  postPointerDownEvent(request) {
-    const instanceId = request.params.instanceId;
-    const x = request.params.x;
-    const y = request.params.y;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.postPointerDownEvent(x, y);
-  },
-  postPointerEnterEvent(request) {
-    const instanceId = request.params.instanceId;
-    const x = request.params.x;
-    const y = request.params.y;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.postPointerEnterEvent(x, y);
-  },
-  postPointerExitEvent(request) {
-    const instanceId = request.params.instanceId;
-    const x = request.params.x;
-    const y = request.params.y;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.postPointerExitEvent(x, y);
-  },
-  postPointerMoveEvent(request) {
-    const instanceId = request.params.instanceId;
-    const x = request.params.x;
-    const y = request.params.y;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.postPointerMoveEvent(x, y);
-  },
-  postPointerUpEvent(request) {
-    const instanceId = request.params.instanceId;
-    const x = request.params.x;
-    const y = request.params.y;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.postPointerUpEvent(x, y);
-  },
-  startStateMachine(request) {
-    const instanceId = request.params.instanceId;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.startStateMachine();
-  },
-  stopStateMachine(request) {
-    const instanceId = request.params.instanceId;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.stopStateMachine();
-  },
-  loadStateMachine(request) {
-    const instanceId = request.params.instanceId;
-    const stateMachineId = request.params.stateMachineId;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.loadStateMachine(stateMachineId);
-  },
-  loadStateMachineData(request) {
-    const instanceId = request.params.instanceId;
-    const stateMachineData = request.params.stateMachineData;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.loadStateMachineData(stateMachineData);
-  },
   create: (request) => {
     const instanceId = request.params.instanceId;
     const config = request.params.config;
@@ -682,6 +571,215 @@ const commands: {
     return {
       success: true,
     };
+  },
+  stateMachineCurrentState(request) {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineCurrentState();
+  },
+  stateMachineFire(request) {
+    const instanceId = request.params.instanceId;
+    const eventName = request.params.eventName;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineFire(eventName);
+  },
+  stateMachineGetBooleanTrigger(request) {
+    const instanceId = request.params.instanceId;
+    const triggerId = request.params.triggerId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineGetBooleanTrigger(triggerId);
+  },
+  stateMachineGetNumericTrigger(request) {
+    const instanceId = request.params.instanceId;
+    const triggerId = request.params.triggerId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineGetNumericTrigger(triggerId);
+  },
+  stateMachineGetStringTrigger(request) {
+    const instanceId = request.params.instanceId;
+    const triggerId = request.params.triggerId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineGetStringTrigger(triggerId);
+  },
+  stateMachineLoad(request) {
+    const instanceId = request.params.instanceId;
+    const stateMachineId = request.params.stateMachineId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineLoad(stateMachineId);
+  },
+  stateMachineLoadData(request) {
+    const instanceId = request.params.instanceId;
+    const stateMachineData = request.params.stateMachineData;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineLoadData(stateMachineData);
+  },
+  stateMachinePostPointerDownEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachinePostPointerDownEvent(x, y);
+  },
+  stateMachinePostPointerEnterEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachinePostPointerEnterEvent(x, y);
+  },
+  stateMachinePostPointerExitEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachinePostPointerExitEvent(x, y);
+  },
+  stateMachinePostPointerMoveEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachinePostPointerMoveEvent(x, y);
+  },
+  stateMachinePostPointerUpEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachinePostPointerUpEvent(x, y);
+  },
+  stateMachineSetBooleanTrigger(request) {
+    const instanceId = request.params.instanceId;
+    const triggerId = request.params.triggerId;
+    const value = request.params.value;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineSetBooleanTrigger(triggerId, value);
+  },
+  stateMachineSetNumericTrigger(request) {
+    const instanceId = request.params.instanceId;
+    const triggerId = request.params.triggerId;
+    const value = request.params.value;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineSetNumericTrigger(triggerId, value);
+  },
+  stateMachineSetStringTrigger(request) {
+    const instanceId = request.params.instanceId;
+    const triggerId = request.params.triggerId;
+    const value = request.params.value;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineSetStringTrigger(triggerId, value);
+  },
+  stateMachineStart(request) {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineStart();
+  },
+  stateMachineStop(request) {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineStop();
   },
 };
 
