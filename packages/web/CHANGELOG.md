@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-web
 
+## 0.39.0
+
+### Minor Changes
+
+- 8ef9888: perf(web): update currentFrame precision for perf
+- 1ee4ce9: chore: update dotlottie-rs v0.1.36 wasm bindings
+
 ## 0.38.2
 
 ### Patch Changes
