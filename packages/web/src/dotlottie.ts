@@ -231,7 +231,7 @@ export class DotLottie {
 
       this._eventManager.dispatch({
         type: 'frame',
-        currentFrame: this._dotLottieCore.currentFrame(),
+        currentFrame: this.currentFrame,
       });
 
       this._render();
@@ -405,7 +405,9 @@ export class DotLottie {
   }
 
   public get currentFrame(): number {
-    return this._dotLottieCore?.currentFrame() ?? 0;
+    if (!this._dotLottieCore) return 0;
+
+    return Math.round(this._dotLottieCore.currentFrame() * 100) / 100;
   }
 
   public get loopCount(): number {
@@ -489,7 +491,7 @@ export class DotLottie {
 
       this._eventManager.dispatch({
         type: 'render',
-        currentFrame: this._dotLottieCore.currentFrame(),
+        currentFrame: this.currentFrame,
       });
 
       return true;
@@ -501,14 +503,14 @@ export class DotLottie {
   private _draw(): void {
     if (this._dotLottieCore === null || this._context === null || !this._dotLottieCore.isPlaying()) return;
 
-    const nextFrame = this._dotLottieCore.requestFrame();
+    const nextFrame = Math.round(this._dotLottieCore.requestFrame() * 100) / 100;
 
     const updated = this._dotLottieCore.setFrame(nextFrame);
 
     if (updated) {
       this._eventManager.dispatch({
         type: 'frame',
-        currentFrame: this._dotLottieCore.currentFrame(),
+        currentFrame: this.currentFrame,
       });
 
       const rendered = this._render();
@@ -573,7 +575,7 @@ export class DotLottie {
     const ok = this._dotLottieCore.stop();
 
     if (ok) {
-      this._eventManager.dispatch({ type: 'frame', currentFrame: this._dotLottieCore.currentFrame() });
+      this._eventManager.dispatch({ type: 'frame', currentFrame: this.currentFrame });
 
       this._render();
 
@@ -589,7 +591,7 @@ export class DotLottie {
     const ok = this._dotLottieCore.seek(frame);
 
     if (ok) {
-      this._eventManager.dispatch({ type: 'frame', currentFrame: this._dotLottieCore.currentFrame() });
+      this._eventManager.dispatch({ type: 'frame', currentFrame: this.currentFrame });
 
       this._render();
     }
