@@ -13,7 +13,7 @@ interface StateMachineFlowProps {
 }
 
 export default function StateMachineFlow({ data }: StateMachineFlowProps) {
-  const [activeState, setActiveState] = useState<string>(data.descriptor.initial);
+  const [activeState, setActiveState] = useState<string>(data.initial);
 
   const createNodesAndEdges = useCallback(
     (stateMachine: StateMachine) => {

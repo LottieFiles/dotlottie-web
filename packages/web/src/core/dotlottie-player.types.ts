@@ -1,7 +1,9 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 /* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/no-namespace */
+/* eslint-disable typescript-sort-keys/interface */
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
+  let HEAPF32: unknown;
   let HEAPF64: unknown;
   let HEAP_DATA_VIEW: unknown;
   let HEAP8: unknown;
@@ -15,31 +17,36 @@ declare namespace RuntimeExports {
 }
 interface WasmModule {}
 
-export interface VectorFloat {
+type EmbindString = ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string;
+export interface ClassHandle {
+  clone(): this;
   delete(): void;
+  deleteLater(): this;
+  isAliasOf(other: ClassHandle): boolean;
+  isDeleted(): boolean;
+}
+export interface VectorFloat extends ClassHandle {
   get(_0: number): number | undefined;
   push_back(_0: number): void;
   resize(_0: number, _1: number): void;
-  set(_0: number, _1: number): boolean;
   size(): number;
+  set(_0: number, _1: number): boolean;
 }
 
-export interface VectorMarker {
-  delete(): void;
+export interface VectorMarker extends ClassHandle {
   get(_0: number): Marker | undefined;
   push_back(_0: Marker): void;
   resize(_0: number, _1: Marker): void;
-  set(_0: number, _1: Marker): boolean;
   size(): number;
+  set(_0: number, _1: Marker): boolean;
 }
 
-export interface VectorString {
-  delete(): void;
-  get(_0: number): ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string | undefined;
-  push_back(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): void;
-  resize(_0: number, _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): void;
-  set(_0: number, _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
+export interface VectorString extends ClassHandle {
+  get(_0: number): EmbindString | undefined;
+  push_back(_0: EmbindString): void;
+  resize(_0: number, _1: EmbindString): void;
   size(): number;
+  set(_0: number, _1: EmbindString): boolean;
 }
 
 export interface ModeValue<T extends number> {
@@ -57,89 +64,67 @@ export interface Layout {
   fit: Fit;
 }
 
-export interface DotLottiePlayer {
+export interface DotLottiePlayer extends ClassHandle {
   activeAnimationId(): string;
   activeThemeId(): string;
   animationSize(): VectorFloat;
-  buffer(): unknown;
   clear(): void;
-  config(): Config;
-  currentFrame(): number;
-  delete(): void;
-  duration(): number;
-  getLayerBounds(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): VectorFloat;
-  isComplete(): boolean;
   isLoaded(): boolean;
   isPaused(): boolean;
   isPlaying(): boolean;
   isStopped(): boolean;
-  loadAnimation(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string, _1: number, _2: number): boolean;
-  loadAnimationData(
-    _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
-    _1: number,
-    _2: number,
-  ): boolean;
-  loadAnimationPath(
-    _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
-    _1: number,
-    _2: number,
-  ): boolean;
-  loadDotLottieData(
-    _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
-    _1: number,
-    _2: number,
-  ): boolean;
-  loopCount(): number;
-  manifestString(): string;
-  markers(): VectorMarker;
   pause(): boolean;
   play(): boolean;
   render(): boolean;
-  requestFrame(): number;
+  stop(): boolean;
+  isComplete(): boolean;
   resetTheme(): boolean;
-  resize(_0: number, _1: number): boolean;
-  seek(_0: number): boolean;
-  segmentDuration(): number;
-  setConfig(_0: Config): void;
-  setFrame(_0: number): boolean;
-  setSlots(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
-  setTheme(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
-  setThemeData(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
-  setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
-  stateMachineCurrentState(): string;
-  stateMachineFireEvent(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): void;
-  stateMachineFrameworkSetup(): VectorString;
-  stateMachineGetBooleanTrigger(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
-  stateMachineGetNumericTrigger(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): number;
-  stateMachineGetStringTrigger(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): string;
-  stateMachineLoad(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
-  stateMachineLoadData(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): boolean;
-  stateMachinePostPointerDownEvent(_0: number, _1: number): number;
-  stateMachinePostPointerEnterEvent(_0: number, _1: number): number;
-  stateMachinePostPointerExitEvent(_0: number, _1: number): number;
-  stateMachinePostPointerMoveEvent(_0: number, _1: number): number;
-  stateMachinePostPointerUpEvent(_0: number, _1: number): number;
-  stateMachineSetBooleanTrigger(
-    _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
-    _1: boolean,
-  ): boolean;
-  stateMachineSetNumericTrigger(
-    _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
-    _1: number,
-  ): boolean;
-  stateMachineSetStringTrigger(
-    _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
-    _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
-  ): boolean;
   stateMachineStart(): boolean;
   stateMachineStop(): boolean;
-  stop(): boolean;
+  setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
+  loopCount(): number;
+  resize(_0: number, _1: number): boolean;
+  currentFrame(): number;
+  duration(): number;
+  requestFrame(): number;
+  setFrame(_0: number): boolean;
+  seek(_0: number): boolean;
   totalFrames(): number;
+  segmentDuration(): number;
+  stateMachinePostPointerDownEvent(_0: number, _1: number): number;
+  stateMachinePostPointerUpEvent(_0: number, _1: number): number;
+  stateMachinePostPointerMoveEvent(_0: number, _1: number): number;
+  stateMachinePostPointerEnterEvent(_0: number, _1: number): number;
+  stateMachinePostPointerExitEvent(_0: number, _1: number): number;
+  config(): Config;
+  setConfig(_0: Config): void;
+  loadAnimationData(_0: EmbindString, _1: number, _2: number): boolean;
+  loadAnimationPath(_0: EmbindString, _1: number, _2: number): boolean;
+  loadDotLottieData(_0: EmbindString, _1: number, _2: number): boolean;
+  loadAnimation(_0: EmbindString, _1: number, _2: number): boolean;
+  manifestString(): string;
+  setTheme(_0: EmbindString): boolean;
+  setThemeData(_0: EmbindString): boolean;
+  setSlots(_0: EmbindString): boolean;
+  markers(): VectorMarker;
+  stateMachineFrameworkSetup(): VectorString;
+  stateMachineLoad(_0: EmbindString): boolean;
+  stateMachineLoadData(_0: EmbindString): boolean;
+  stateMachineFireEvent(_0: EmbindString): void;
+  stateMachineSetNumericTrigger(_0: EmbindString, _1: number): boolean;
+  stateMachineSetStringTrigger(_0: EmbindString, _1: EmbindString): boolean;
+  stateMachineSetBooleanTrigger(_0: EmbindString, _1: boolean): boolean;
+  stateMachineGetNumericTrigger(_0: EmbindString): number;
+  stateMachineGetStringTrigger(_0: EmbindString): string;
+  stateMachineGetBooleanTrigger(_0: EmbindString): boolean;
+  getLayerBounds(_0: EmbindString): VectorFloat;
+  stateMachineCurrentState(): string;
+  buffer(): unknown;
 }
 
 export interface Marker {
   duration: number;
-  name: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string;
+  name: EmbindString;
   time: number;
 }
 
@@ -148,16 +133,18 @@ export interface Config {
   backgroundColor: number;
   layout: Layout;
   loopAnimation: boolean;
-  marker: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string;
-  mode: Mode;
+  useFrameInterpolation: boolean;
   segment: VectorFloat;
   speed: number;
-  themeId: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string;
-  useFrameInterpolation: boolean;
+  mode: Mode;
+  marker: EmbindString;
+  themeId: EmbindString;
 }
 
 interface EmbindModule {
-  DotLottiePlayer: { new (_0: Config): DotLottiePlayer };
+  DotLottiePlayer: {
+    new (_0: Config): DotLottiePlayer;
+  };
   Fit: {
     Contain: FitValue<1>;
     Cover: FitValue<3>;
@@ -166,15 +153,19 @@ interface EmbindModule {
     FitWidth: FitValue<4>;
     None: FitValue<6>;
   };
-  Mode: { Bounce: ModeValue<3>; Forward: ModeValue<1>; Reverse: ModeValue<2>; ReverseBounce: ModeValue<4> };
-  VectorFloat: { new (): VectorFloat };
-  VectorMarker: { new (): VectorMarker };
-  VectorString: { new (): VectorString };
-  createDefaultConfig(): Config;
+  Mode: { Forward: ModeValue<1>; Reverse: ModeValue<2>; Bounce: ModeValue<3>; ReverseBounce: ModeValue<4> };
+  VectorString: {
+    new (): VectorString;
+  };
+  VectorMarker: {
+    new (): VectorMarker;
+  };
   createDefaultLayout(): Layout;
-  transformThemeToLottieSlots(
-    _0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
-    _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
-  ): string;
+  VectorFloat: {
+    new (): VectorFloat;
+  };
+  createDefaultConfig(): Config;
+  transformThemeToLottieSlots(_0: EmbindString, _1: EmbindString): string;
 }
+
 export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;

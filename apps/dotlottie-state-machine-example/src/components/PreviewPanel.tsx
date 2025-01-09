@@ -103,7 +103,7 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ type }) => {
                 'Start state machine: ': startSm,
               });
 
-              if (parsedTheme.descriptor.id === 'Sync-to-cursor') {
+              if (parsedTheme.initial === 'Start') {
                 // eslint-disable-next-line react-hooks/exhaustive-deps
                 syncToCursorCb = (event: MouseEvent) => {
                   const pos = Math.min((event.clientX / document.body.clientWidth) * 100, 100);

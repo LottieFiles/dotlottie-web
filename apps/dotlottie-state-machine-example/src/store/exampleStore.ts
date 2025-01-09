@@ -23,15 +23,12 @@ const examples: InteractivityExample[] = [
     animationUrl: 'https://lottie.host/90e7f6e9-462a-4560-b1d7-4cedf81b5421/bWWD1bAgE4.json',
     interactivityJson: JSON.stringify(
       {
-        descriptor: {
-          id: 'star-rating',
-          initial: 'global',
-        },
+        initial: 'global',
         states: [
           {
             name: 'global',
             type: 'GlobalState',
-            animationId: '',
+            animation: '',
             transitions: [
               {
                 type: 'Transition',
@@ -98,7 +95,7 @@ const examples: InteractivityExample[] = [
           {
             type: 'PlaybackState',
             name: 'star_1',
-            animationId: '',
+            animation: '',
             autoplay: true,
             segment: 'star_1',
             transitions: [],
@@ -107,7 +104,7 @@ const examples: InteractivityExample[] = [
           {
             type: 'PlaybackState',
             name: 'star_2',
-            animationId: '',
+            animation: '',
             autoplay: true,
             segment: 'star_2',
             transitions: [],
@@ -116,7 +113,7 @@ const examples: InteractivityExample[] = [
           {
             type: 'PlaybackState',
             name: 'star_3',
-            animationId: '',
+            animation: '',
             autoplay: true,
             segment: 'star_3',
             transitions: [],
@@ -124,7 +121,7 @@ const examples: InteractivityExample[] = [
           {
             type: 'PlaybackState',
             name: 'star_4',
-            animationId: '',
+            animation: '',
             autoplay: true,
             segment: 'star_4',
             transitions: [],
@@ -132,7 +129,7 @@ const examples: InteractivityExample[] = [
           {
             type: 'PlaybackState',
             name: 'star_5',
-            animationId: '',
+            animation: '',
             autoplay: true,
             segment: 'star_5',
             transitions: [],
@@ -215,13 +212,10 @@ const examples: InteractivityExample[] = [
     animationUrl: 'https://lottie.host/899f8fbb-55db-4a51-8a64-96f1bc4e45d7/9BiY1S0tDm.json',
     interactivityJson: JSON.stringify(
       {
-        descriptor: {
-          id: 'Exploding pigeon',
-          initial: 'Pigeon Running',
-        },
+        initial: 'Pigeon Running',
         states: [
           {
-            animationId: 'pigeon',
+            animation: 'pigeon',
             type: 'PlaybackState',
             name: 'Pigeon Running',
             loop: true,
@@ -241,7 +235,7 @@ const examples: InteractivityExample[] = [
             ],
           },
           {
-            animationId: 'pigeon',
+            animation: 'pigeon',
             type: 'PlaybackState',
             name: 'Explosion',
             loop: false,
@@ -262,7 +256,7 @@ const examples: InteractivityExample[] = [
             ],
           },
           {
-            animationId: 'pigeon',
+            animation: 'pigeon',
             type: 'PlaybackState',
             name: 'Feathers falling',
             loop: false,
@@ -340,13 +334,10 @@ const examples: InteractivityExample[] = [
     animationUrl: 'https://lottie.host/e8593e62-09fd-48c4-9d7a-2fc35317d62f/6zVMp3lZf5.lottie',
     interactivityJson: JSON.stringify(
       {
-        descriptor: {
-          id: 'Sync-to-cursor',
-          initial: 'Start',
-        },
+        initial: 'Start',
         states: [
           {
-            animationId: 'scroll',
+            animation: 'scroll',
             type: 'PlaybackState',
             name: 'Start',
             transitions: [
@@ -404,13 +395,10 @@ const examples: InteractivityExample[] = [
     animationUrl: 'https://lottie.host/fba88936-b753-4751-a6ca-94db246157cf/5pGajCeC0B.json',
     interactivityJson: JSON.stringify(
       {
-        descriptor: {
-          id: 'interactive-stats',
-          initial: 'Start',
-        },
+        initial: 'Start',
         states: [
           {
-            animationId: 'stats',
+            animation: 'stats',
             type: 'PlaybackState',
             name: 'Start',
             transitions: [
@@ -468,13 +456,10 @@ const examples: InteractivityExample[] = [
     animationUrl: 'https://lottie.host/8bec049d-6b29-48f2-9592-df21853df42e/5AqIkEhG0r.json',
     interactivityJson: JSON.stringify(
       {
-        descriptor: {
-          id: 'loader',
-          initial: 'Start',
-        },
+        initial: 'Start',
         states: [
           {
-            animationId: 'stats',
+            animation: 'stats',
             type: 'PlaybackState',
             name: 'Start',
             transitions: [
@@ -532,13 +517,10 @@ const examples: InteractivityExample[] = [
     animationUrl: 'https://lottie.host/9be40797-ef92-451f-add9-d6f66a78635a/lqnums50Xh.json',
     interactivityJson: JSON.stringify(
       {
-        descriptor: {
-          id: 'hover-btn',
-          initial: 'Start',
-        },
+        initial: 'Start',
         states: [
           {
-            animationId: '',
+            animation: '',
             type: 'GlobalState',
             name: 'Start',
             transitions: [
@@ -565,7 +547,7 @@ const examples: InteractivityExample[] = [
             ],
           },
           {
-            animationId: '',
+            animation: '',
             type: 'PlaybackState',
             name: 'Forward',
             mode: 'Forward',
@@ -573,7 +555,7 @@ const examples: InteractivityExample[] = [
             transitions: [],
           },
           {
-            animationId: '',
+            animation: '',
             type: 'PlaybackState',
             name: 'Reverse',
             mode: 'Reverse',
@@ -624,13 +606,10 @@ const examples: InteractivityExample[] = [
     animationUrl: 'https://lottie.host/9be40797-ef92-451f-add9-d6f66a78635a/lqnums50Xh.json',
     interactivityJson: JSON.stringify(
       {
-        descriptor: {
-          id: 'hold-btn',
-          initial: 'Start',
-        },
+        initial: 'Start',
         states: [
           {
-            animationId: '',
+            animation: '',
             type: 'GlobalState',
             name: 'Start',
             transitions: [
@@ -657,7 +636,7 @@ const examples: InteractivityExample[] = [
             ],
           },
           {
-            animationId: '',
+            animation: '',
             type: 'PlaybackState',
             name: 'Forward',
             mode: 'Forward',
@@ -665,7 +644,7 @@ const examples: InteractivityExample[] = [
             transitions: [],
           },
           {
-            animationId: '',
+            animation: '',
             type: 'PlaybackState',
             name: 'Reverse',
             mode: 'Reverse',
@@ -716,13 +695,10 @@ const examples: InteractivityExample[] = [
     animationUrl: 'https://lottie.host/9be40797-ef92-451f-add9-d6f66a78635a/lqnums50Xh.json',
     interactivityJson: JSON.stringify(
       {
-        descriptor: {
-          id: 'hold-btn',
-          initial: 'Start',
-        },
+        initial: 'Start',
         states: [
           {
-            animationId: '',
+            animation: '',
             type: 'GlobalState',
             name: 'Start',
             transitions: [
@@ -739,7 +715,7 @@ const examples: InteractivityExample[] = [
             ],
           },
           {
-            animationId: '',
+            animation: '',
             type: 'PlaybackState',
             name: 'Forward',
             mode: 'Forward',
@@ -777,15 +753,12 @@ const examples: InteractivityExample[] = [
     animationUrl: 'https://lottie.host/8c2590c3-3aaa-4d47-b6cd-1ef979e284f4/2ykhbXYDAc.json',
     interactivityJson: JSON.stringify(
       {
-        descriptor: {
-          id: 'toggle',
-          initial: 'initial-wait',
-        },
+        initial: 'initial-wait',
         states: [
           {
             name: 'initial-wait',
             type: 'PlaybackState',
-            animationId: '',
+            animation: '',
             transitions: [
               {
                 type: 'Transition',
@@ -804,7 +777,7 @@ const examples: InteractivityExample[] = [
           {
             name: 'a',
             type: 'PlaybackState',
-            animationId: '',
+            animation: '',
             autoplay: true,
             speed: 2.0,
             transitions: [
@@ -825,7 +798,7 @@ const examples: InteractivityExample[] = [
           {
             name: 'b',
             type: 'PlaybackState',
-            animationId: '',
+            animation: '',
             autoplay: true,
             speed: 2.0,
             mode: 'Reverse',
@@ -876,15 +849,12 @@ const examples: InteractivityExample[] = [
     animationUrl: 'https://lottie.host/9a5a6605-fc90-4935-8d10-9df4c83902ff/PFUKH53LJk.lottie',
     interactivityJson: JSON.stringify(
       {
-        descriptor: {
-          id: 'toggle',
-          initial: 'initial-wait',
-        },
+        initial: 'initial-wait',
         states: [
           {
             name: 'initial-wait',
             type: 'PlaybackState',
-            animationId: '',
+            animation: '',
             transitions: [
               {
                 type: 'Transition',
@@ -909,7 +879,7 @@ const examples: InteractivityExample[] = [
           {
             name: 'a',
             type: 'PlaybackState',
-            animationId: '',
+            animation: '',
             autoplay: true,
             speed: 2.0,
             transitions: [
@@ -936,7 +906,7 @@ const examples: InteractivityExample[] = [
           {
             name: 'b',
             type: 'PlaybackState',
-            animationId: '',
+            animation: '',
             autoplay: true,
             speed: 2.0,
             mode: 'Reverse',
