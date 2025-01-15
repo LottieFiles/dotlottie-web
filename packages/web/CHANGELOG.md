@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.39.0-beta.0
+
+### Minor Changes
+
+- 9e8c07f: interactivity support
+
 ## 0.38.2
 
 ### Patch Changes
