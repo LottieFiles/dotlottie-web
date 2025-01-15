@@ -261,7 +261,7 @@ const examples: InteractivityExample[] = [
             name: 'Feathers falling',
             loop: false,
             autoplay: true,
-            segment: 'feathers',
+            segment: 'feather',
             transitions: [
               {
                 type: 'Transition',
