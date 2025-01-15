@@ -2,7 +2,7 @@ name: main
 on:
   push:
     branches:
-      - main
+      - main, feat/interactivity-stable
   pull_request:
 
 concurrency:
