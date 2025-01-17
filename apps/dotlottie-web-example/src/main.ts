@@ -455,9 +455,9 @@ fetch(
       for (const marker of markers) {
         const option = document.createElement('option');
 
-        option.value = marker.name;
+        option.value = String(marker.name);
 
-        option.textContent = marker.name;
+        option.textContent = String(marker.name);
 
         markerSelect.appendChild(option);
       }
