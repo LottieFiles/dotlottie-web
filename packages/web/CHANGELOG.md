@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.39.0-beta.1
+
+### Minor Changes
+
+- 2e4e248: bumping for a release
+
 ## 0.39.0-beta.0
 
 ### Minor Changes
