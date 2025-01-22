@@ -19,5 +19,5 @@
     "@lottiefiles/dotlottie-wc": "0.4.1",
     "@lottiefiles/dotlottie-web": "0.38.2"
   },
-  "changesets": ["smart-dryers-divide"]
+  "changesets": ["orange-pears-build", "smart-dryers-divide"]
 }
