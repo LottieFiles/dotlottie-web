@@ -66,8 +66,8 @@ export interface Layout {
 
 export interface DotLottiePlayer extends ClassHandle {
   activeAnimationId(): string;
+  activeStateMachineId(): string;
   activeThemeId(): string;
-  animationSize(): VectorFloat;
   clear(): void;
   isLoaded(): boolean;
   isPaused(): boolean;
@@ -113,11 +113,13 @@ export interface DotLottiePlayer extends ClassHandle {
   stateMachineFireEvent(_0: EmbindString): void;
   stateMachineSetNumericTrigger(_0: EmbindString, _1: number): boolean;
   stateMachineSetStringTrigger(_0: EmbindString, _1: EmbindString): boolean;
-  stateMachineSetBooleanTrigger(_0: EmbindString, _1: boolean): boolean;
-  stateMachineGetNumericTrigger(_0: EmbindString): number;
   stateMachineGetStringTrigger(_0: EmbindString): string;
+  stateMachineGetNumericTrigger(_0: EmbindString): number;
+  stateMachineSetBooleanTrigger(_0: EmbindString, _1: boolean): boolean;
   stateMachineGetBooleanTrigger(_0: EmbindString): boolean;
   getLayerBounds(_0: EmbindString): VectorFloat;
+  getStateMachine(_0: EmbindString): string;
+  animationSize(): VectorFloat;
   stateMachineCurrentState(): string;
   buffer(): unknown;
 }
@@ -137,8 +139,9 @@ export interface Config {
   segment: VectorFloat;
   speed: number;
   mode: Mode;
-  marker: EmbindString;
+  stateMachineId: EmbindString;
   themeId: EmbindString;
+  marker: EmbindString;
 }
 
 interface EmbindModule {

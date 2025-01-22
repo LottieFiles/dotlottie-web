@@ -9,7 +9,6 @@ const StateMachineInfo: React.FC = () => {
   const easedValue = useEasing(targetValue, 3000, 'easeInOut');
 
   useEffect(() => {
-    console.log(parsedTheme);
     if (parsedTheme) {
       // setStateMachine(parsedTheme);
     }
@@ -162,8 +161,7 @@ const StateMachineInfo: React.FC = () => {
                           <label className="block text-gray-700 text-sm font-bold mb-2">{item.name}</label>
                           <input
                             onChange={(e) => {
-                              let s = dotLottieObject?.stateMachineSetStringTrigger(item.name, e.target.value);
-                              console.log(s);
+                              dotLottieObject?.stateMachineSetStringTrigger(item.name, e.target.value);
                             }}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             id="username"

@@ -111,6 +111,7 @@ export class DotLottie {
 
         this._dotLottieCore = new module.DotLottiePlayer({
           themeId: config.themeId ?? '',
+          stateMachineId: config.stateMachineId ?? '',
           autoplay: config.autoplay ?? false,
           backgroundColor: 0,
           loopAnimation: config.loop ?? false,
@@ -441,6 +442,7 @@ export class DotLottie {
 
     this._dotLottieCore.setConfig({
       themeId: config.themeId ?? '',
+      stateMachineId: config.stateMachineId ?? '',
       autoplay: config.autoplay ?? false,
       backgroundColor: 0,
       loopAnimation: config.loop ?? false,
@@ -1012,6 +1014,14 @@ export class DotLottie {
 
   public stateMachineLoadData(stateMachineData: string): boolean {
     return this._dotLottieCore?.stateMachineLoadData(stateMachineData) ?? false;
+  }
+
+  public getStateMachine(stateMachineId: string): string {
+    return this._dotLottieCore?.getStateMachine(stateMachineId) ?? '';
+  }
+
+  public activeStateMachine(): string {
+    return this._dotLottieCore?.activeStateMachineId() ?? '';
   }
 
   public animationSize(): { height: number; width: number } {

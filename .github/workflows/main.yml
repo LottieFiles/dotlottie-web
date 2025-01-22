@@ -77,143 +77,143 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-  npm-release:
-    name: npm-release
-    needs: validate
-    runs-on: ubuntu-latest
-    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+  # npm-release:
+  #   name: npm-release
+  #   needs: validate
+  #   runs-on: ubuntu-latest
+  #   if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
 
-    permissions:
-      # Allow creating a release in the repository
-      contents: write
+  #   permissions:
+  #     # Allow creating a release in the repository
+  #     contents: write
 
-      # Required for provenance
-      id-token: write
-      packages: write
+  #     # Required for provenance
+  #     id-token: write
+  #     packages: write
 
-      # Required for creating a release PR
-      pull-requests: write
+  #     # Required for creating a release PR
+  #     pull-requests: write
 
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
-        with:
-          # https://github.com/changesets/action/issues/201#issuecomment-1206088289
-          # check out all commits and tags so changeset can skip duplicate tags
-          fetch-depth: 0
+  #   steps:
+  #     - name: ⬇️ Checkout repo
+  #       uses: actions/checkout@v4
+  #       with:
+  #         # https://github.com/changesets/action/issues/201#issuecomment-1206088289
+  #         # check out all commits and tags so changeset can skip duplicate tags
+  #         fetch-depth: 0
 
-      - name: ⎔ Setup pnpm@v9
-        uses: pnpm/action-setup@v4
+  #     - name: ⎔ Setup pnpm@v9
+  #       uses: pnpm/action-setup@v4
 
-      - name: ⎔ Setup Node@v20
-        uses: actions/setup-node@v4
-        with:
-          cache: pnpm
-          node-version: 20
-          registry-url: https://registry.npmjs.org
+  #     - name: ⎔ Setup Node@v20
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         cache: pnpm
+  #         node-version: 20
+  #         registry-url: https://registry.npmjs.org
 
-      - name: 📥 Install dependencies
-        run: pnpm install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+  #     - name: 📥 Install dependencies
+  #       run: pnpm install
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
 
-      - name: 🚀 Release to NPM
-        uses: changesets/action@v1
-        with:
-          commit: 'chore: 🤖 update versions'
-          title: 'chore: 🤖 update versions'
-          publish: pnpm release:publish
-          version: pnpm release:version
-          createGithubReleases: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+  #     - name: 🚀 Release to NPM
+  #       uses: changesets/action@v1
+  #       with:
+  #         commit: 'chore: 🤖 update versions'
+  #         title: 'chore: 🤖 update versions'
+  #         publish: pnpm release:publish
+  #         version: pnpm release:version
+  #         createGithubReleases: false
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
 
-      - name: Remove existing NPM .npmrc
-        run: rm -f "$HOME/.npmrc"
+  #     - name: Remove existing NPM .npmrc
+  #       run: rm -f "$HOME/.npmrc"
 
-  gpr-release:
-    name: gpr-release
-    needs: validate
-    runs-on: ubuntu-latest
-    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+  # gpr-release:
+  #   name: gpr-release
+  #   needs: validate
+  #   runs-on: ubuntu-latest
+  #   if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
 
-    permissions:
-      # Allow creating a release in the repository
-      contents: write
+  #   permissions:
+  #     # Allow creating a release in the repository
+  #     contents: write
 
-      # Required for provenance
-      id-token: write
-      packages: write
+  #     # Required for provenance
+  #     id-token: write
+  #     packages: write
 
-      # Required for creating a release PR
-      pull-requests: write
+  #     # Required for creating a release PR
+  #     pull-requests: write
 
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  #   steps:
+  #     - name: ⬇️ Checkout repo
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
 
-      - name: ⎔ Setup pnpm@v9
-        uses: pnpm/action-setup@v4
+  #     - name: ⎔ Setup pnpm@v9
+  #       uses: pnpm/action-setup@v4
 
-      - name: ⎔ Setup Node@v20
-        uses: actions/setup-node@v4
-        with:
-          cache: pnpm
-          node-version: 20
-          registry-url: https://npm.pkg.github.com/
+  #     - name: ⎔ Setup Node@v20
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         cache: pnpm
+  #         node-version: 20
+  #         registry-url: https://npm.pkg.github.com/
 
-      - name: 📥 Install dependencies
-        run: pnpm install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: 📥 Install dependencies
+  #       run: pnpm install
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🚀 Release to Github Packages
-        uses: changesets/action@v1
-        with:
-          commit: 'chore: update versions'
-          title: 'chore: update versions'
-          publish: pnpm release:publish
-          version: pnpm release:version
-          createGithubReleases: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: 🚀 Release to Github Packages
+  #       uses: changesets/action@v1
+  #       with:
+  #         commit: 'chore: update versions'
+  #         title: 'chore: update versions'
+  #         publish: pnpm release:publish
+  #         version: pnpm release:version
+  #         createGithubReleases: true
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  jsr-release:
-    name: jsr-release
-    needs: validate
-    runs-on: ubuntu-latest
-    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+  # jsr-release:
+  #   name: jsr-release
+  #   needs: validate
+  #   runs-on: ubuntu-latest
+  #   if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
 
-    permissions:
-      contents: read
-      id-token: write
+  #   permissions:
+  #     contents: read
+  #     id-token: write
 
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  #   steps:
+  #     - name: ⬇️ Checkout repo
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
 
-      # related issue https://github.com/denoland/deno/issues/26152
-      - name: ⎔ Setup .npmrc (NPM) in web package
-        run: |
-          echo "@lottiefiles:registry=https://registry.npmjs.org/" >> ./packages/web/.npmrc
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPMJS_TOKEN }}" >> ./packages/web/.npmrc
+  #     # related issue https://github.com/denoland/deno/issues/26152
+  #     - name: ⎔ Setup .npmrc (NPM) in web package
+  #       run: |
+  #         echo "@lottiefiles:registry=https://registry.npmjs.org/" >> ./packages/web/.npmrc
+  #         echo "//registry.npmjs.org/:_authToken=${{ secrets.NPMJS_TOKEN }}" >> ./packages/web/.npmrc
 
-      - name: 🔄 Sync version to jsr.json
-        run: |
-          VERSION=$(jq -r '.version' ./packages/web/package.json)
-          jq '.version = $newVersion' --arg newVersion "$VERSION" ./packages/web/jsr.json > temp.json
-          mv temp.json ./packages/web/jsr.json
-          cat ./packages/web/jsr.json
+  #     - name: 🔄 Sync version to jsr.json
+  #       run: |
+  #         VERSION=$(jq -r '.version' ./packages/web/package.json)
+  #         jq '.version = $newVersion' --arg newVersion "$VERSION" ./packages/web/jsr.json > temp.json
+  #         mv temp.json ./packages/web/jsr.json
+  #         cat ./packages/web/jsr.json
 
-      - name: 🚀 Release to JSR
-        run: npx jsr publish --allow-dirty
-        working-directory: packages/web
+  #     - name: 🚀 Release to JSR
+  #       run: npx jsr publish --allow-dirty
+  #       working-directory: packages/web
 
   publish-viewer:
     name: publish-viewer

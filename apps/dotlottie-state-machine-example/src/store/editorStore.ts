@@ -26,6 +26,5 @@ export const useEditorStore = create<EditorState>((set) => ({
   previewType: 'dotlottie-web',
   parsedTheme: null,
   updateParsedData: (theme) => set({ parsedTheme: theme }),
-  // dotLottieObject: DotLottie,
   setDotLottieObject: (dotLottie) => set({ dotLottieObject: dotLottie }),
 }));
