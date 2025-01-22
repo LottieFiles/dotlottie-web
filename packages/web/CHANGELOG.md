@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.39.0-beta.2
+
+### Minor Changes
+
+- 349b1cd: added state machine getters
+
 ## 0.39.0-beta.1
 
 ### Minor Changes
