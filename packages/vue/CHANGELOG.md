@@ -1,5 +1,16 @@
 # @lottiefiles/dotlottie-vue
 
+## 0.6.0-beta.4
+
+### Minor Changes
+
+- db492e7: added statemachineid prop, updated worker support
+
+### Patch Changes
+
+- Updated dependencies [db492e7]
+  - @lottiefiles/dotlottie-web@0.39.0-beta.4
+
 ## 0.6.0-beta.3
 
 ### Minor Changes
