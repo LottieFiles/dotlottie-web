@@ -19,5 +19,11 @@
     "@lottiefiles/dotlottie-wc": "0.4.1",
     "@lottiefiles/dotlottie-web": "0.38.2"
   },
-  "changesets": ["curly-seahorses-teach", "orange-pears-build", "poor-poets-kneel", "smart-dryers-divide"]
+  "changesets": [
+    "curly-seahorses-teach",
+    "new-students-bow",
+    "orange-pears-build",
+    "poor-poets-kneel",
+    "smart-dryers-divide"
+  ]
 }
