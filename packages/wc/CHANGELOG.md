@@ -1,5 +1,16 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.5.0-beta.3
+
+### Minor Changes
+
+- 1c838fc: added state machine getters
+
+### Patch Changes
+
+- Updated dependencies [1c838fc]
+  - @lottiefiles/dotlottie-web@0.39.0-beta.3
+
 ## 0.4.2-beta.2
 
 ### Patch Changes
