@@ -41,6 +41,7 @@ export type DotLottieConfig = Omit<Config, 'canvas'> &
   Partial<{
     animationId?: string;
     playOnHover: boolean;
+    stateMachineId?: string;
     themeData?: string;
     themeId?: string;
   }>;
@@ -267,6 +268,23 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
 
         if (dotLottieInstance.isLoaded && dotLottieInstance.activeThemeId !== config.themeId) {
           dotLottieInstance.setTheme(config.themeId || '');
+        }
+      },
+    ),
+  );
+
+  // stateMachineId reactivity
+  createEffect(
+    on(
+      () => config.stateMachineId,
+      () => {
+        const dotLottieInstance = dotLottie();
+
+        if (!dotLottieInstance) return;
+
+        if (dotLottieInstance.isLoaded && dotLottieInstance.activeStateMachineId() !== config.stateMachineId) {
+          dotLottieInstance.stateMachineLoad(config.stateMachineId || '');
+          dotLottieInstance.stateMachineStart();
         }
       },
     ),

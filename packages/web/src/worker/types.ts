@@ -18,6 +18,9 @@ import type { Config, Layout, Mode, RenderConfig } from '../types';
 import type { DotLottieInstanceState } from './dotlottie';
 
 export interface MethodParamsMap {
+  activeStateMachineId: {
+    instanceId: string;
+  };
   create: {
     config: Config;
     height: number;
@@ -32,6 +35,10 @@ export interface MethodParamsMap {
   };
   getDotLottieInstanceState: {
     instanceId: string;
+  };
+  getStateMachine: {
+    instanceId: string;
+    stateMachineId: string;
   };
   getStateMachineListeners: {
     instanceId: string;
@@ -201,6 +208,7 @@ export interface RpcRequest<T extends keyof MethodParamsMap> {
 }
 
 export interface MethodResultMap {
+  activeStateMachineId: string;
   create: {
     instanceId: string;
   };
@@ -209,6 +217,7 @@ export interface MethodResultMap {
   getDotLottieInstanceState: {
     state: DotLottieInstanceState;
   };
+  getStateMachine: string;
   getStateMachineListeners: string[];
   load: void;
   loadAnimation: void;

@@ -572,6 +572,28 @@ const commands: {
       success: true,
     };
   },
+  getStateMachine(request) {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.getStateMachine(request.params.stateMachineId);
+  },
+  activeStateMachineId(request) {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.activeStateMachineId();
+  },
   stateMachineCurrentState(request) {
     const instanceId = request.params.instanceId;
 

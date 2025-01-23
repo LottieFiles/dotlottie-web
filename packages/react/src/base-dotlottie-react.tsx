@@ -61,6 +61,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   segment,
   speed,
   src,
+  stateMachineId,
   style,
   themeData,
   themeId,
@@ -86,6 +87,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     backgroundColor,
     autoplay,
     themeId,
+    stateMachineId,
     workerId,
     src,
     data,
@@ -219,6 +221,15 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     }
   }, [themeId]);
 
+  useEffect(() => {
+    if (typeof stateMachineId === 'string') {
+      dotLottieRef.current?.stateMachineLoad(stateMachineId);
+      dotLottieRef.current?.stateMachineStart();
+    } else {
+      // dotLottieRef.current?.stateMachineLoad(stateMachineId);
+      // dotLottieRef.current?.stateMachineStart();
+    }
+  }, [stateMachineId]);
   useEffect(() => {
     dotLottieRef.current?.setThemeData(themeData ?? '');
   }, [themeData]);

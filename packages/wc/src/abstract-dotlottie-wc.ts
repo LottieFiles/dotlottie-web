@@ -45,6 +45,9 @@ export abstract class AbstractDotLottieWC<T extends DotLottie | DotLottieWorker>
   public themeId: Config['themeId'];
 
   @property({ type: String })
+  public stateMachineId: Config['stateMachineId'];
+
+  @property({ type: String })
   public workerId?: string;
 
   @state()
@@ -83,6 +86,7 @@ export abstract class AbstractDotLottieWC<T extends DotLottie | DotLottieWorker>
       renderConfig: this.renderConfig,
       useFrameInterpolation: this.useFrameInterpolation,
       themeId: this.themeId,
+      stateMachineId: this.stateMachineId,
 
       workerId: this.workerId,
     });
@@ -151,6 +155,11 @@ export abstract class AbstractDotLottieWC<T extends DotLottie | DotLottieWorker>
       this.dotLottie.setTheme(value ?? '');
     }
 
+    if (name === 'statemachineid') {
+      this.dotLottie.stateMachineLoad(value ?? '');
+      this.dotLottie.stateMachineStart();
+    }
+
     if (name === 'backgroundcolor') {
       this.dotLottie.setBackgroundColor(value ?? '');
     }
@@ -194,6 +203,7 @@ export abstract class AbstractDotLottieWC<T extends DotLottie | DotLottieWorker>
         renderConfig: this.renderConfig,
         useFrameInterpolation: this.useFrameInterpolation,
         themeId: this.themeId,
+        stateMachineId: this.stateMachineId,
       });
     }
   }

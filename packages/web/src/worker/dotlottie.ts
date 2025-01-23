@@ -650,6 +650,29 @@ export class DotLottieWorker {
     return result;
   }
 
+  public async getStateMachine(stateMachineId: string): Promise<string> {
+    if (!this._created) return '';
+
+    const result = await this._sendMessage('getStateMachine', {
+      instanceId: this._id,
+      stateMachineId,
+    });
+
+    await this._updateDotLottieInstanceState();
+
+    return result;
+  }
+
+  public async activeStateMachineId(): Promise<string> {
+    if (!this._created) return '';
+
+    const result = await this._sendMessage('activeStateMachineId', { instanceId: this._id });
+
+    await this._updateDotLottieInstanceState();
+
+    return result;
+  }
+
   public async stateMachineLoadData(stateMachineData: string): Promise<boolean> {
     if (!this._created) return false;
 

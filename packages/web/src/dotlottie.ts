@@ -1020,7 +1020,7 @@ export class DotLottie {
     return this._dotLottieCore?.getStateMachine(stateMachineId) ?? '';
   }
 
-  public activeStateMachine(): string {
+  public activeStateMachineId(): string {
     return this._dotLottieCore?.activeStateMachineId() ?? '';
   }
 
