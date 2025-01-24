@@ -57,6 +57,8 @@ const createCoreSegment = (segment: number[], module: MainModule): VectorFloat =
   return coresegment;
 };
 
+let canvasInstanceId = 0;
+
 export class DotLottie {
   private readonly _canvas: HTMLCanvasElement | OffscreenCanvas;
 
@@ -90,7 +92,6 @@ export class DotLottie {
 
   public constructor(config: Config) {
     this._canvas = config.canvas;
-    this._context = this._canvas.getContext('2d');
 
     this._eventManager = new EventManager();
     this._frameManager = new AnimationFrameManager();
@@ -99,29 +100,57 @@ export class DotLottie {
       devicePixelRatio: config.renderConfig?.devicePixelRatio || getDefaultDPR(),
       // freezeOnOffscreen is true by default to prevent unnecessary rendering when the canvas is offscreen
       freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
+      renderer: config.renderConfig?.renderer ?? 'sw',
     };
+
+    console.log(this._renderConfig.renderer);
+
+    let canvasSelector = '';
+
+    if (this._renderConfig.renderer !== 'sw' && this._canvas instanceof HTMLCanvasElement) {
+      this._canvas.setAttribute('data-dl-id', `${canvasInstanceId}-${this._renderConfig.renderer}`);
+
+      canvasSelector = `[data-dl-id="${this._canvas.getAttribute('data-dl-id')}"]`;
+
+      canvasInstanceId += 1;
+    }
 
     DotLottieWasmLoader.load()
       .then((module) => {
         DotLottie._wasmModule = module;
 
-        this._dotLottieCore = new module.DotLottiePlayer({
-          themeId: config.themeId ?? '',
-          autoplay: config.autoplay ?? false,
-          backgroundColor: 0,
-          loopAnimation: config.loop ?? false,
-          mode: createCoreMode(config.mode ?? 'forward', module),
-          segment: createCoreSegment(config.segment ?? [], module),
-          speed: config.speed ?? 1,
-          useFrameInterpolation: config.useFrameInterpolation ?? true,
-          marker: config.marker ?? '',
-          layout: config.layout
-            ? {
-                align: createCoreAlign(config.layout.align, module),
-                fit: createCoreFit(config.layout.fit, module),
-              }
-            : module.createDefaultLayout(),
-        });
+        let engine = null;
+
+        if (this._renderConfig.renderer === 'wg') {
+          engine = module.TvgEngine.TvgEngineWg;
+        } else if (this._renderConfig.renderer === 'gl') {
+          engine = module.TvgEngine.TvgEngineGl;
+        } else {
+          engine = module.TvgEngine.TvgEngineSw;
+        }
+
+        this._dotLottieCore = new module.DotLottiePlayer(
+          {
+            ...module.createDefaultConfig(),
+            themeId: config.themeId ?? '',
+            autoplay: config.autoplay ?? false,
+            loopAnimation: config.loop ?? false,
+            mode: createCoreMode(config.mode ?? 'forward', module),
+            segment: createCoreSegment(config.segment ?? [], module),
+            speed: config.speed ?? 1,
+            useFrameInterpolation: config.useFrameInterpolation ?? true,
+            marker: config.marker ?? '',
+            layout: config.layout
+              ? {
+                  align: createCoreAlign(config.layout.align, module),
+                  fit: createCoreFit(config.layout.fit, module),
+                }
+              : module.createDefaultLayout(),
+          },
+          engine,
+          0,
+          canvasSelector,
+        );
 
         this._eventManager.dispatch({ type: 'ready' });
 
@@ -439,6 +468,7 @@ export class DotLottie {
     }
 
     this._dotLottieCore.setConfig({
+      ...DotLottie._wasmModule.createDefaultConfig(),
       themeId: config.themeId ?? '',
       autoplay: config.autoplay ?? false,
       backgroundColor: 0,
@@ -466,15 +496,30 @@ export class DotLottie {
   }
 
   private _render(): boolean {
-    if (this._dotLottieCore === null || this._context === null) return false;
+    if (this._dotLottieCore === null) return false;
 
     const rendered = this._dotLottieCore.render();
 
-    if (rendered) {
+    if (this._renderConfig.renderer === 'wg' || this._renderConfig.renderer === 'gl') {
+      if (rendered) {
+        this._eventManager.dispatch({
+          type: 'render',
+          currentFrame: this.currentFrame,
+        });
+      }
+
+      return rendered;
+    }
+
+    if (!this._context) {
+      this._context = this._canvas.getContext('2d');
+    }
+
+    if (rendered && this._context) {
       const buffer = this._dotLottieCore.buffer() as Uint8Array;
       const clampedBuffer = new Uint8ClampedArray(buffer, 0, this._canvas.width * this._canvas.height * 4);
 
-      let imageData = null;
+      let imageData: ImageData | null = null;
 
       /* 
         In Node.js, the ImageData constructor is not available. 
@@ -501,7 +546,7 @@ export class DotLottie {
   }
 
   private _draw(): void {
-    if (this._dotLottieCore === null || this._context === null || !this._dotLottieCore.isPlaying()) return;
+    if (this._dotLottieCore === null || !this._dotLottieCore.isPlaying()) return;
 
     const nextFrame = Math.round(this._dotLottieCore.requestFrame() * 100) / 100;
 
