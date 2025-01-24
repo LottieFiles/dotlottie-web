@@ -7,7 +7,7 @@ var createDotLottiePlayerModule = (() => {
     var k = moduleArg,
       aa,
       ba,
-      ca = new Promise((a, b) => {
+      ea = new Promise((a, b) => {
         aa = a;
         ba = b;
       }),
@@ -22,114 +22,114 @@ var createDotLottiePlayerModule = (() => {
       fetch(a, { credentials: 'same-origin' }).then((b) =>
         b.ok ? b.arrayBuffer() : Promise.reject(Error(b.status + ' : ' + b.url)),
       );
-    var ja = k.print || console.log.bind(console),
-      t = k.printErr || console.error.bind(console);
+    var t = k.printErr || console.error.bind(console);
     Object.assign(k, fa);
     fa = null;
     k.thisProgram && (ha = k.thisProgram);
-    var ka = k.wasmBinary,
-      la,
-      ma = !1,
-      na,
+    var ja = k.wasmBinary,
+      ka,
+      la = !1,
+      ma,
       w,
       x,
       y,
       z,
       C,
       D,
-      oa,
-      pa;
-    function qa() {
-      var a = la.buffer;
+      na,
+      oa;
+    function pa() {
+      var a = ka.buffer;
       k.HEAP8 = w = new Int8Array(a);
       k.HEAP16 = y = new Int16Array(a);
       k.HEAPU8 = x = new Uint8Array(a);
       k.HEAPU16 = z = new Uint16Array(a);
       k.HEAP32 = C = new Int32Array(a);
       k.HEAPU32 = D = new Uint32Array(a);
-      k.HEAPF32 = oa = new Float32Array(a);
-      k.HEAPF64 = pa = new Float64Array(a);
+      k.HEAPF32 = na = new Float32Array(a);
+      k.HEAPF64 = oa = new Float64Array(a);
     }
-    var ra = [],
-      sa = [],
-      ta = [];
-    function ua() {
+    var qa = [],
+      ra = [],
+      sa = [];
+    function ta() {
       var a = k.preRun.shift();
-      ra.unshift(a);
+      qa.unshift(a);
     }
     var F = 0,
-      va = null,
+      ua = null,
       G = null;
-    function wa(a) {
+    function va(a) {
       k.onAbort?.(a);
       a = 'Aborted(' + a + ')';
       t(a);
-      ma = !0;
+      la = !0;
       a = new WebAssembly.RuntimeError(a + '. Build with -sASSERTIONS for more info.');
       ba(a);
       throw a;
     }
-    var xa = (a) => a.startsWith('data:application/octet-stream;base64,'),
-      ya;
-    function za(a) {
-      if (a == ya && ka) return new Uint8Array(ka);
+    var wa = (a) => a.startsWith('data:application/octet-stream;base64,'),
+      xa;
+    function ya(a) {
+      if (a == xa && ja) return new Uint8Array(ja);
       throw 'both async and sync fetching of the wasm failed';
     }
-    function Aa(a) {
-      return ka
-        ? Promise.resolve().then(() => za(a))
+    function za(a) {
+      return ja
+        ? Promise.resolve().then(() => ya(a))
         : ia(a).then(
             (b) => new Uint8Array(b),
-            () => za(a),
+            () => ya(a),
           );
     }
-    function Ba(a, b, c) {
-      return Aa(a)
+    function Aa(a, b, c) {
+      return za(a)
         .then((d) => WebAssembly.instantiate(d, b))
         .then(c, (d) => {
           t(`failed to asynchronously prepare wasm: ${d}`);
-          wa(d);
+          va(d);
         });
     }
-    function Ca(a, b) {
-      var c = ya;
-      return ka || 'function' != typeof WebAssembly.instantiateStreaming || xa(c) || 'function' != typeof fetch
-        ? Ba(c, a, b)
+    function Ba(a, b) {
+      var c = xa;
+      return ja || 'function' != typeof WebAssembly.instantiateStreaming || wa(c) || 'function' != typeof fetch
+        ? Aa(c, a, b)
         : fetch(c, { credentials: 'same-origin' }).then((d) =>
             WebAssembly.instantiateStreaming(d, a).then(b, function (e) {
               t(`wasm streaming compile failed: ${e}`);
               t('falling back to ArrayBuffer instantiation');
-              return Ba(c, a, b);
+              return Aa(c, a, b);
             }),
           );
     }
-    class Da {
+    class Ca {
       name = 'ExitStatus';
       constructor(a) {
         this.message = `Program terminated with exit(${a})`;
         this.status = a;
       }
     }
-    var Ea = (a) => {
+    var Da = (a) => {
         for (; 0 < a.length; ) a.shift()(k);
       },
-      Fa = k.noExitRuntime || !0,
-      Ga = 'undefined' != typeof TextDecoder ? new TextDecoder() : void 0,
-      H = (a, b = 0, c = NaN) => {
-        var d = b + c;
-        for (c = b; a[c] && !(c >= d); ) ++c;
-        if (16 < c - b && a.buffer && Ga) return Ga.decode(a.subarray(b, c));
-        for (d = ''; b < c; ) {
-          var e = a[b++];
+      Ea = k.noExitRuntime || !0,
+      Fa = 'undefined' != typeof TextDecoder ? new TextDecoder() : void 0,
+      Ga = (a = 0, b = NaN) => {
+        var c = x,
+          d = a + b;
+        for (b = a; c[b] && !(b >= d); ) ++b;
+        if (16 < b - a && c.buffer && Fa) return Fa.decode(c.subarray(a, b));
+        for (d = ''; a < b; ) {
+          var e = c[a++];
           if (e & 128) {
-            var f = a[b++] & 63;
+            var f = c[a++] & 63;
             if (192 == (e & 224)) d += String.fromCharCode(((e & 31) << 6) | f);
             else {
-              var h = a[b++] & 63;
+              var h = c[a++] & 63;
               e =
                 224 == (e & 240)
                   ? ((e & 15) << 12) | (f << 6) | h
-                  : ((e & 7) << 18) | (f << 12) | (h << 6) | (a[b++] & 63);
+                  : ((e & 7) << 18) | (f << 12) | (h << 6) | (c[a++] & 63);
               65536 > e
                 ? (d += String.fromCharCode(e))
                 : ((e -= 65536), (d += String.fromCharCode(55296 | (e >> 10), 56320 | (e & 1023))));
@@ -140,12 +140,12 @@ var createDotLottiePlayerModule = (() => {
       };
     class Ha {
       constructor(a) {
-        this.wa = a - 24;
+        this.va = a - 24;
       }
     }
     var Ia = 0,
       Ja = 0,
-      I = (a, b, c) => {
+      H = (a, b, c) => {
         var d = x;
         if (0 < c) {
           c = b + c - 1;
@@ -186,30 +186,30 @@ var createDotLottiePlayerModule = (() => {
           a.pop()(b);
         }
       };
-    function J(a) {
+    function I(a) {
       return this.fromWireType(D[a >> 2]);
     }
-    var K = {},
-      L = {},
+    var J = {},
+      K = {},
       Ma = {},
-      M,
-      O = (a, b, c) => {
+      L,
+      N = (a, b, c) => {
         function d(g) {
           g = c(g);
-          if (g.length !== a.length) throw new M('Mismatched type converter count');
-          for (var l = 0; l < a.length; ++l) N(a[l], g[l]);
+          if (g.length !== a.length) throw new L('Mismatched type converter count');
+          for (var l = 0; l < a.length; ++l) M(a[l], g[l]);
         }
         a.forEach((g) => (Ma[g] = b));
         var e = Array(b.length),
           f = [],
           h = 0;
         b.forEach((g, l) => {
-          L.hasOwnProperty(g)
-            ? (e[l] = L[g])
+          K.hasOwnProperty(g)
+            ? (e[l] = K[g])
             : (f.push(g),
-              K.hasOwnProperty(g) || (K[g] = []),
-              K[g].push(() => {
-                e[l] = L[g];
+              J.hasOwnProperty(g) || (J[g] = []),
+              J[g].push(() => {
+                e[l] = K[g];
                 ++h;
                 h === f.length && d(e);
               }));
@@ -217,253 +217,253 @@ var createDotLottiePlayerModule = (() => {
         0 === f.length && d(e);
       },
       Na,
-      P = (a) => {
+      O = (a) => {
         for (var b = ''; x[a]; ) b += Na[x[a++]];
         return b;
       },
-      Q;
+      P;
     function Pa(a, b, c = {}) {
       var d = b.name;
-      if (!a) throw new Q(`type "${d}" must have a positive integer typeid pointer`);
-      if (L.hasOwnProperty(a)) {
-        if (c.ab) return;
-        throw new Q(`Cannot register type '${d}' twice`);
+      if (!a) throw new P(`type "${d}" must have a positive integer typeid pointer`);
+      if (K.hasOwnProperty(a)) {
+        if (c.$a) return;
+        throw new P(`Cannot register type '${d}' twice`);
       }
-      L[a] = b;
+      K[a] = b;
       delete Ma[a];
-      K.hasOwnProperty(a) && ((b = K[a]), delete K[a], b.forEach((e) => e()));
+      J.hasOwnProperty(a) && ((b = J[a]), delete J[a], b.forEach((e) => e()));
     }
-    function N(a, b, c = {}) {
+    function M(a, b, c = {}) {
       return Pa(a, b, c);
     }
     var Qa = (a) => {
-        throw new Q(a.ua.xa.va.name + ' instance already deleted');
+        throw new P(a.ta.wa.ua.name + ' instance already deleted');
       },
       Ra = !1,
       Sa = () => {},
       Ta = (a, b, c) => {
         if (b === c) return a;
-        if (void 0 === c.Aa) return null;
-        a = Ta(a, b, c.Aa);
-        return null === a ? null : c.Ua(a);
+        if (void 0 === c.za) return null;
+        a = Ta(a, b, c.za);
+        return null === a ? null : c.Ta(a);
       },
       Ua = {},
       Va = {},
       Wa = (a, b) => {
-        if (void 0 === b) throw new Q('ptr should not be undefined');
-        for (; a.Aa; ) (b = a.Ka(b)), (a = a.Aa);
+        if (void 0 === b) throw new P('ptr should not be undefined');
+        for (; a.za; ) (b = a.Ja(b)), (a = a.za);
         return Va[b];
       },
       Xa = (a, b) => {
-        if (!b.xa || !b.wa) throw new M('makeClassHandle requires ptr and ptrType');
-        if (!!b.Ba !== !!b.za) throw new M('Both smartPtrType and smartPtr must be specified');
+        if (!b.wa || !b.va) throw new L('makeClassHandle requires ptr and ptrType');
+        if (!!b.Aa !== !!b.ya) throw new L('Both smartPtrType and smartPtr must be specified');
         b.count = { value: 1 };
-        return R(Object.create(a, { ua: { value: b, writable: !0 } }));
+        return Q(Object.create(a, { ta: { value: b, writable: !0 } }));
       },
-      R = (a) => {
-        if ('undefined' === typeof FinalizationRegistry) return (R = (b) => b), a;
+      Q = (a) => {
+        if ('undefined' === typeof FinalizationRegistry) return (Q = (b) => b), a;
         Ra = new FinalizationRegistry((b) => {
-          b = b.ua;
+          b = b.ta;
           --b.count.value;
-          0 === b.count.value && (b.za ? b.Ba.Ea(b.za) : b.xa.va.Ea(b.wa));
+          0 === b.count.value && (b.ya ? b.Aa.Da(b.ya) : b.wa.ua.Da(b.va));
         });
-        R = (b) => {
-          var c = b.ua;
-          c.za && Ra.register(b, { ua: c }, b);
+        Q = (b) => {
+          var c = b.ta;
+          c.ya && Ra.register(b, { ta: c }, b);
           return b;
         };
         Sa = (b) => {
           Ra.unregister(b);
         };
-        return R(a);
+        return Q(a);
       },
       Ya = [];
     function Za() {}
-    var $a = (a, b) => Object.defineProperty(b, 'name', { value: a }),
-      ab = (a, b, c) => {
-        if (void 0 === a[b].ya) {
+    var R = (a, b) => Object.defineProperty(b, 'name', { value: a }),
+      $a = (a, b, c) => {
+        if (void 0 === a[b].xa) {
           var d = a[b];
           a[b] = function (...e) {
-            if (!a[b].ya.hasOwnProperty(e.length))
-              throw new Q(
-                `Function '${c}' called with an invalid number of arguments (${e.length}) - expects one of (${a[b].ya})!`,
+            if (!a[b].xa.hasOwnProperty(e.length))
+              throw new P(
+                `Function '${c}' called with an invalid number of arguments (${e.length}) - expects one of (${a[b].xa})!`,
               );
-            return a[b].ya[e.length].apply(this, e);
+            return a[b].xa[e.length].apply(this, e);
           };
-          a[b].ya = [];
-          a[b].ya[d.Ha] = d;
+          a[b].xa = [];
+          a[b].xa[d.Ga] = d;
         }
       },
-      bb = (a, b, c) => {
+      ab = (a, b, c) => {
         if (k.hasOwnProperty(a)) {
-          if (void 0 === c || (void 0 !== k[a].ya && void 0 !== k[a].ya[c]))
-            throw new Q(`Cannot register public name '${a}' twice`);
-          ab(k, a, a);
-          if (k[a].ya.hasOwnProperty(c))
-            throw new Q(`Cannot register multiple overloads of a function with the same number of arguments (${c})!`);
-          k[a].ya[c] = b;
-        } else (k[a] = b), (k[a].Ha = c);
+          if (void 0 === c || (void 0 !== k[a].xa && void 0 !== k[a].xa[c]))
+            throw new P(`Cannot register public name '${a}' twice`);
+          $a(k, a, a);
+          if (k[a].xa.hasOwnProperty(c))
+            throw new P(`Cannot register multiple overloads of a function with the same number of arguments (${c})!`);
+          k[a].xa[c] = b;
+        } else (k[a] = b), (k[a].Ga = c);
       },
-      cb = (a) => {
+      bb = (a) => {
         a = a.replace(/[^a-zA-Z0-9_]/g, '$');
         var b = a.charCodeAt(0);
         return 48 <= b && 57 >= b ? `_${a}` : a;
       };
-    function db(a, b, c, d, e, f, h, g) {
+    function cb(a, b, c, d, e, f, h, g) {
       this.name = a;
       this.constructor = b;
-      this.Ga = c;
-      this.Ea = d;
-      this.Aa = e;
-      this.Wa = f;
-      this.Ka = h;
-      this.Ua = g;
-      this.cb = [];
+      this.Fa = c;
+      this.Da = d;
+      this.za = e;
+      this.Va = f;
+      this.Ja = h;
+      this.Ta = g;
+      this.bb = [];
     }
-    var eb = (a, b, c) => {
+    var db = (a, b, c) => {
       for (; b !== c; ) {
-        if (!b.Ka) throw new Q(`Expected null or instance of ${c.name}, got an instance of ${b.name}`);
-        a = b.Ka(a);
-        b = b.Aa;
+        if (!b.Ja) throw new P(`Expected null or instance of ${c.name}, got an instance of ${b.name}`);
+        a = b.Ja(a);
+        b = b.za;
       }
       return a;
     };
-    function fb(a, b) {
+    function eb(a, b) {
       if (null === b) {
-        if (this.Na) throw new Q(`null is not a valid ${this.name}`);
+        if (this.Ma) throw new P(`null is not a valid ${this.name}`);
         return 0;
       }
-      if (!b.ua) throw new Q(`Cannot pass "${gb(b)}" as a ${this.name}`);
-      if (!b.ua.wa) throw new Q(`Cannot pass deleted object as a pointer of type ${this.name}`);
-      return eb(b.ua.wa, b.ua.xa.va, this.va);
+      if (!b.ta) throw new P(`Cannot pass "${fb(b)}" as a ${this.name}`);
+      if (!b.ta.va) throw new P(`Cannot pass deleted object as a pointer of type ${this.name}`);
+      return db(b.ta.va, b.ta.wa.ua, this.ua);
     }
-    function hb(a, b) {
+    function gb(a, b) {
       if (null === b) {
-        if (this.Na) throw new Q(`null is not a valid ${this.name}`);
-        if (this.Ma) {
-          var c = this.Oa();
-          null !== a && a.push(this.Ea, c);
+        if (this.Ma) throw new P(`null is not a valid ${this.name}`);
+        if (this.La) {
+          var c = this.Na();
+          null !== a && a.push(this.Da, c);
           return c;
         }
         return 0;
       }
-      if (!b || !b.ua) throw new Q(`Cannot pass "${gb(b)}" as a ${this.name}`);
-      if (!b.ua.wa) throw new Q(`Cannot pass deleted object as a pointer of type ${this.name}`);
-      if (!this.La && b.ua.xa.La)
-        throw new Q(
-          `Cannot convert argument of type ${b.ua.Ba ? b.ua.Ba.name : b.ua.xa.name} to parameter type ${this.name}`,
+      if (!b || !b.ta) throw new P(`Cannot pass "${fb(b)}" as a ${this.name}`);
+      if (!b.ta.va) throw new P(`Cannot pass deleted object as a pointer of type ${this.name}`);
+      if (!this.Ka && b.ta.wa.Ka)
+        throw new P(
+          `Cannot convert argument of type ${b.ta.Aa ? b.ta.Aa.name : b.ta.wa.name} to parameter type ${this.name}`,
         );
-      c = eb(b.ua.wa, b.ua.xa.va, this.va);
-      if (this.Ma) {
-        if (void 0 === b.ua.za) throw new Q('Passing raw pointer to smart pointer is illegal');
-        switch (this.ib) {
+      c = db(b.ta.va, b.ta.wa.ua, this.ua);
+      if (this.La) {
+        if (void 0 === b.ta.ya) throw new P('Passing raw pointer to smart pointer is illegal');
+        switch (this.hb) {
           case 0:
-            if (b.ua.Ba === this) c = b.ua.za;
+            if (b.ta.Aa === this) c = b.ta.ya;
             else
-              throw new Q(
-                `Cannot convert argument of type ${b.ua.Ba ? b.ua.Ba.name : b.ua.xa.name} to parameter type ${
+              throw new P(
+                `Cannot convert argument of type ${b.ta.Aa ? b.ta.Aa.name : b.ta.wa.name} to parameter type ${
                   this.name
                 }`,
               );
             break;
           case 1:
-            c = b.ua.za;
+            c = b.ta.ya;
             break;
           case 2:
-            if (b.ua.Ba === this) c = b.ua.za;
+            if (b.ta.Aa === this) c = b.ta.ya;
             else {
               var d = b.clone();
-              c = this.eb(
+              c = this.cb(
                 c,
-                ib(() => d['delete']()),
+                hb(() => d['delete']()),
               );
-              null !== a && a.push(this.Ea, c);
+              null !== a && a.push(this.Da, c);
             }
             break;
           default:
-            throw new Q('Unsupporting sharing policy');
+            throw new P('Unsupporting sharing policy');
         }
       }
       return c;
     }
-    function jb(a, b) {
+    function ib(a, b) {
       if (null === b) {
-        if (this.Na) throw new Q(`null is not a valid ${this.name}`);
+        if (this.Ma) throw new P(`null is not a valid ${this.name}`);
         return 0;
       }
-      if (!b.ua) throw new Q(`Cannot pass "${gb(b)}" as a ${this.name}`);
-      if (!b.ua.wa) throw new Q(`Cannot pass deleted object as a pointer of type ${this.name}`);
-      if (b.ua.xa.La) throw new Q(`Cannot convert argument of type ${b.ua.xa.name} to parameter type ${this.name}`);
-      return eb(b.ua.wa, b.ua.xa.va, this.va);
+      if (!b.ta) throw new P(`Cannot pass "${fb(b)}" as a ${this.name}`);
+      if (!b.ta.va) throw new P(`Cannot pass deleted object as a pointer of type ${this.name}`);
+      if (b.ta.wa.Ka) throw new P(`Cannot convert argument of type ${b.ta.wa.name} to parameter type ${this.name}`);
+      return db(b.ta.va, b.ta.wa.ua, this.ua);
     }
-    function kb(a, b, c, d, e, f, h, g, l, m, n) {
+    function jb(a, b, c, d, e, f, h, g, l, m, n) {
       this.name = a;
-      this.va = b;
-      this.Na = c;
-      this.La = d;
-      this.Ma = e;
-      this.bb = f;
-      this.ib = h;
-      this.Sa = g;
-      this.Oa = l;
-      this.eb = m;
-      this.Ea = n;
-      e || void 0 !== b.Aa ? (this.toWireType = hb) : ((this.toWireType = d ? fb : jb), (this.Da = null));
+      this.ua = b;
+      this.Ma = c;
+      this.Ka = d;
+      this.La = e;
+      this.ab = f;
+      this.hb = h;
+      this.Ra = g;
+      this.Na = l;
+      this.cb = m;
+      this.Da = n;
+      e || void 0 !== b.za ? (this.toWireType = gb) : ((this.toWireType = d ? eb : ib), (this.Ca = null));
     }
-    var lb = (a, b, c) => {
-        if (!k.hasOwnProperty(a)) throw new M('Replacing nonexistent public symbol');
-        void 0 !== k[a].ya && void 0 !== c ? (k[a].ya[c] = b) : ((k[a] = b), (k[a].Ha = c));
+    var kb = (a, b, c) => {
+        if (!k.hasOwnProperty(a)) throw new L('Replacing nonexistent public symbol');
+        void 0 !== k[a].xa && void 0 !== c ? (k[a].xa[c] = b) : ((k[a] = b), (k[a].Ga = c));
       },
       S,
-      mb = (a, b, c = []) => {
+      lb = (a, b, c = []) => {
         a.includes('j') ? ((a = a.replace(/p/g, 'i')), (b = (0, k['dynCall_' + a])(b, ...c))) : (b = S.get(b)(...c));
         return b;
       },
-      nb =
+      mb =
         (a, b) =>
         (...c) =>
-          mb(a, b, c),
+          lb(a, b, c),
       T = (a, b) => {
-        a = P(a);
-        var c = a.includes('j') ? nb(a, b) : S.get(b);
-        if ('function' != typeof c) throw new Q(`unknown function pointer with signature ${a}: ${b}`);
+        a = O(a);
+        var c = a.includes('j') ? mb(a, b) : S.get(b);
+        if ('function' != typeof c) throw new P(`unknown function pointer with signature ${a}: ${b}`);
         return c;
       },
-      ob,
-      qb = (a) => {
-        a = pb(a);
-        var b = P(a);
+      nb,
+      pb = (a) => {
+        a = ob(a);
+        var b = O(a);
         U(a);
         return b;
       },
-      rb = (a, b) => {
+      qb = (a, b) => {
         function c(f) {
-          e[f] || L[f] || (Ma[f] ? Ma[f].forEach(c) : (d.push(f), (e[f] = !0)));
+          e[f] || K[f] || (Ma[f] ? Ma[f].forEach(c) : (d.push(f), (e[f] = !0)));
         }
         var d = [],
           e = {};
         b.forEach(c);
-        throw new ob(`${a}: ` + d.map(qb).join([', ']));
+        throw new nb(`${a}: ` + d.map(pb).join([', ']));
       },
-      sb = (a, b) => {
+      rb = (a, b) => {
         for (var c = [], d = 0; d < a; d++) c.push(D[(b + 4 * d) >> 2]);
         return c;
       };
-    function tb(a) {
-      for (var b = 1; b < a.length; ++b) if (null !== a[b] && void 0 === a[b].Da) return !0;
+    function sb(a) {
+      for (var b = 1; b < a.length; ++b) if (null !== a[b] && void 0 === a[b].Ca) return !0;
       return !1;
     }
-    function ub(a, b, c, d, e) {
+    function tb(a, b, c, d, e) {
       var f = b.length;
-      if (2 > f) throw new Q("argTypes array size mismatch! Must at least get return value and 'this' types!");
+      if (2 > f) throw new P("argTypes array size mismatch! Must at least get return value and 'this' types!");
       var h = null !== b[1] && null !== c,
-        g = tb(b),
+        g = sb(b),
         l = 'void' !== b[0].name,
         m = f - 2,
         n = Array(m),
         q = [],
         r = [];
-      return $a(a, function (...A) {
+      return R(a, function (...A) {
         r.length = 0;
         q.length = h ? 2 : 1;
         q[0] = e;
@@ -477,27 +477,27 @@ var createDotLottiePlayerModule = (() => {
         else
           for (v = h ? 1 : 2; v < b.length; v++) {
             var E = 1 === v ? u : n[v - 2];
-            null !== b[v].Da && b[v].Da(E);
+            null !== b[v].Ca && b[v].Ca(E);
           }
         u = l ? b[0].fromWireType(A) : void 0;
         return u;
       });
     }
-    var vb = (a) => {
+    var ub = (a) => {
         a = a.trim();
         const b = a.indexOf('(');
         return -1 !== b ? a.substr(0, b) : a;
       },
-      xb = [],
+      vb = [],
       V = [],
-      yb = (a) => {
-        9 < a && 0 === --V[a + 1] && ((V[a] = void 0), xb.push(a));
+      xb = (a) => {
+        9 < a && 0 === --V[a + 1] && ((V[a] = void 0), vb.push(a));
       },
-      zb = (a) => {
-        if (!a) throw new Q('Cannot use deleted val. handle = ' + a);
+      yb = (a) => {
+        if (!a) throw new P('Cannot use deleted val. handle = ' + a);
         return V[a];
       },
-      ib = (a) => {
+      hb = (a) => {
         switch (a) {
           case void 0:
             return 2;
@@ -508,25 +508,25 @@ var createDotLottiePlayerModule = (() => {
           case !1:
             return 8;
           default:
-            const b = xb.pop() || V.length;
+            const b = vb.pop() || V.length;
             V[b] = a;
             V[b + 1] = 1;
             return b;
         }
       },
-      Ab = {
+      zb = {
         name: 'emscripten::val',
         fromWireType: (a) => {
-          var b = zb(a);
-          yb(a);
+          var b = yb(a);
+          xb(a);
           return b;
         },
-        toWireType: (a, b) => ib(b),
-        Ca: 8,
-        readValueFromPointer: J,
-        Da: null,
+        toWireType: (a, b) => hb(b),
+        Ba: 8,
+        readValueFromPointer: I,
+        Ca: null,
       },
-      Bb = (a, b, c) => {
+      Ab = (a, b, c) => {
         switch (b) {
           case 1:
             return c
@@ -556,31 +556,31 @@ var createDotLottiePlayerModule = (() => {
             throw new TypeError(`invalid integer width (${b}): ${a}`);
         }
       },
-      Cb = (a, b) => {
-        var c = L[a];
-        if (void 0 === c) throw ((a = `${b} has unknown type ${qb(a)}`), new Q(a));
+      Bb = (a, b) => {
+        var c = K[a];
+        if (void 0 === c) throw ((a = `${b} has unknown type ${pb(a)}`), new P(a));
         return c;
       },
-      gb = (a) => {
+      fb = (a) => {
         if (null === a) return 'null';
         var b = typeof a;
         return 'object' === b || 'array' === b || 'function' === b ? a.toString() : '' + a;
       },
-      Db = (a, b) => {
+      Cb = (a, b) => {
         switch (b) {
           case 4:
             return function (c) {
-              return this.fromWireType(oa[c >> 2]);
+              return this.fromWireType(na[c >> 2]);
             };
           case 8:
             return function (c) {
-              return this.fromWireType(pa[c >> 3]);
+              return this.fromWireType(oa[c >> 3]);
             };
           default:
             throw new TypeError(`invalid float width (${b}): ${a}`);
         }
       },
-      Eb = (a, b, c) => {
+      Db = (a, b, c) => {
         switch (b) {
           case 1:
             return c ? (d) => w[d] : (d) => x[d];
@@ -592,13 +592,13 @@ var createDotLottiePlayerModule = (() => {
             throw new TypeError(`invalid integer width (${b}): ${a}`);
         }
       },
-      Fb = Object.assign({ optional: !0 }, Ab),
-      Gb = 'undefined' != typeof TextDecoder ? new TextDecoder('utf-16le') : void 0,
-      Hb = (a, b) => {
+      Eb = Object.assign({ optional: !0 }, zb),
+      Fb = 'undefined' != typeof TextDecoder ? new TextDecoder('utf-16le') : void 0,
+      Gb = (a, b) => {
         var c = a >> 1;
         for (var d = c + b / 2; !(c >= d) && z[c]; ) ++c;
         c <<= 1;
-        if (32 < c - a && Gb) return Gb.decode(x.subarray(a, c));
+        if (32 < c - a && Fb) return Fb.decode(x.subarray(a, c));
         c = '';
         for (d = 0; !(d >= b / 2); ++d) {
           var e = y[(a + 2 * d) >> 1];
@@ -607,7 +607,7 @@ var createDotLottiePlayerModule = (() => {
         }
         return c;
       },
-      Ib = (a, b, c) => {
+      Hb = (a, b, c) => {
         c ??= 2147483647;
         if (2 > c) return 0;
         c -= 2;
@@ -617,8 +617,8 @@ var createDotLottiePlayerModule = (() => {
         y[b >> 1] = 0;
         return b - d;
       },
-      Jb = (a) => 2 * a.length,
-      Kb = (a, b) => {
+      Ib = (a) => 2 * a.length,
+      Jb = (a, b) => {
         for (var c = 0, d = ''; !(c >= b / 4); ) {
           var e = C[(a + 4 * c) >> 2];
           if (0 == e) break;
@@ -629,7 +629,7 @@ var createDotLottiePlayerModule = (() => {
         }
         return d;
       },
-      Lb = (a, b, c) => {
+      Kb = (a, b, c) => {
         c ??= 2147483647;
         if (4 > c) return 0;
         var d = b;
@@ -647,7 +647,7 @@ var createDotLottiePlayerModule = (() => {
         C[b >> 2] = 0;
         return b - d;
       },
-      Mb = (a) => {
+      Lb = (a) => {
         for (var b = 0, c = 0; c < a.length; ++c) {
           var d = a.charCodeAt(c);
           55296 <= d && 57343 >= d && ++c;
@@ -655,43 +655,43 @@ var createDotLottiePlayerModule = (() => {
         }
         return b;
       },
-      Nb = 0,
-      Ob = [],
-      Pb = (a) => {
-        var b = Ob.length;
-        Ob.push(a);
+      Mb = 0,
+      Nb = [],
+      Ob = (a) => {
+        var b = Nb.length;
+        Nb.push(a);
         return b;
       },
-      Qb = (a, b) => {
-        for (var c = Array(a), d = 0; d < a; ++d) c[d] = Cb(D[(b + 4 * d) >> 2], 'parameter ' + d);
+      Pb = (a, b) => {
+        for (var c = Array(a), d = 0; d < a; ++d) c[d] = Bb(D[(b + 4 * d) >> 2], 'parameter ' + d);
         return c;
       },
-      Rb = Reflect.construct,
-      Sb = {},
+      Qb = Reflect.construct,
+      Rb = {},
+      Sb = (a) => {
+        if (!(a instanceof Ca || 'unwind' == a)) throw a;
+      },
       Tb = (a) => {
-        if (!(a instanceof Da || 'unwind' == a)) throw a;
+        ma = a;
+        Ea || 0 < Mb || (k.onExit?.(a), (la = !0));
+        throw new Ca(a);
       },
       Ub = (a) => {
-        na = a;
-        Fa || 0 < Nb || (k.onExit?.(a), (ma = !0));
-        throw new Da(a);
-      },
-      Vb = (a) => {
-        if (!ma)
+        if (!la)
           try {
-            if ((a(), !(Fa || 0 < Nb)))
+            if ((a(), !(Ea || 0 < Mb)))
               try {
-                (na = a = na), Ub(a);
+                (ma = a = ma), Tb(a);
               } catch (b) {
-                Tb(b);
+                Sb(b);
               }
           } catch (b) {
-            Tb(b);
+            Sb(b);
           }
       },
-      Wb = {},
-      Yb = () => {
-        if (!Xb) {
+      Vb = {},
+      Xb = () => {
+        if (!Wb) {
           var a = {
               USER: 'web_user',
               LOGNAME: 'web_user',
@@ -706,30 +706,29 @@ var createDotLottiePlayerModule = (() => {
               _: ha || './this.program',
             },
             b;
-          for (b in Wb) void 0 === Wb[b] ? delete a[b] : (a[b] = Wb[b]);
+          for (b in Vb) void 0 === Vb[b] ? delete a[b] : (a[b] = Vb[b]);
           var c = [];
           for (b in a) c.push(`${b}=${a[b]}`);
-          Xb = c;
+          Wb = c;
         }
-        return Xb;
+        return Wb;
       },
-      Xb,
-      Zb = [null, [], []],
-      $b = () => {
+      Wb,
+      Yb = () => {
         if ('object' == typeof crypto && 'function' == typeof crypto.getRandomValues)
           return (a) => crypto.getRandomValues(a);
-        wa('initRandomDevice');
+        va('initRandomDevice');
       },
-      ac = (a) => (ac = $b())(a);
-    M = k.InternalError = class extends Error {
+      Zb = (a) => (Zb = Yb())(a);
+    L = k.InternalError = class extends Error {
       constructor(a) {
         super(a);
         this.name = 'InternalError';
       }
     };
-    for (var bc = Array(256), cc = 0; 256 > cc; ++cc) bc[cc] = String.fromCharCode(cc);
-    Na = bc;
-    Q = k.BindingError = class extends Error {
+    for (var $b = Array(256), ac = 0; 256 > ac; ++ac) $b[ac] = String.fromCharCode(ac);
+    Na = $b;
+    P = k.BindingError = class extends Error {
       constructor(a) {
         super(a);
         this.name = 'BindingError';
@@ -738,90 +737,90 @@ var createDotLottiePlayerModule = (() => {
     Object.assign(Za.prototype, {
       isAliasOf: function (a) {
         if (!(this instanceof Za && a instanceof Za)) return !1;
-        var b = this.ua.xa.va,
-          c = this.ua.wa;
-        a.ua = a.ua;
-        var d = a.ua.xa.va;
-        for (a = a.ua.wa; b.Aa; ) (c = b.Ka(c)), (b = b.Aa);
-        for (; d.Aa; ) (a = d.Ka(a)), (d = d.Aa);
+        var b = this.ta.wa.ua,
+          c = this.ta.va;
+        a.ta = a.ta;
+        var d = a.ta.wa.ua;
+        for (a = a.ta.va; b.za; ) (c = b.Ja(c)), (b = b.za);
+        for (; d.za; ) (a = d.Ja(a)), (d = d.za);
         return b === d && c === a;
       },
       clone: function () {
-        this.ua.wa || Qa(this);
-        if (this.ua.Ja) return (this.ua.count.value += 1), this;
-        var a = R,
+        this.ta.va || Qa(this);
+        if (this.ta.Ia) return (this.ta.count.value += 1), this;
+        var a = Q,
           b = Object,
           c = b.create,
           d = Object.getPrototypeOf(this),
-          e = this.ua;
+          e = this.ta;
         a = a(
           c.call(b, d, {
-            ua: { value: { count: e.count, Ia: e.Ia, Ja: e.Ja, wa: e.wa, xa: e.xa, za: e.za, Ba: e.Ba } },
+            ta: { value: { count: e.count, Ha: e.Ha, Ia: e.Ia, va: e.va, wa: e.wa, ya: e.ya, Aa: e.Aa } },
           }),
         );
-        a.ua.count.value += 1;
-        a.ua.Ia = !1;
+        a.ta.count.value += 1;
+        a.ta.Ha = !1;
         return a;
       },
       ['delete']() {
-        this.ua.wa || Qa(this);
-        if (this.ua.Ia && !this.ua.Ja) throw new Q('Object already scheduled for deletion');
+        this.ta.va || Qa(this);
+        if (this.ta.Ha && !this.ta.Ia) throw new P('Object already scheduled for deletion');
         Sa(this);
-        var a = this.ua;
+        var a = this.ta;
         --a.count.value;
-        0 === a.count.value && (a.za ? a.Ba.Ea(a.za) : a.xa.va.Ea(a.wa));
-        this.ua.Ja || ((this.ua.za = void 0), (this.ua.wa = void 0));
+        0 === a.count.value && (a.ya ? a.Aa.Da(a.ya) : a.wa.ua.Da(a.va));
+        this.ta.Ia || ((this.ta.ya = void 0), (this.ta.va = void 0));
       },
       isDeleted: function () {
-        return !this.ua.wa;
+        return !this.ta.va;
       },
       deleteLater: function () {
-        this.ua.wa || Qa(this);
-        if (this.ua.Ia && !this.ua.Ja) throw new Q('Object already scheduled for deletion');
+        this.ta.va || Qa(this);
+        if (this.ta.Ha && !this.ta.Ia) throw new P('Object already scheduled for deletion');
         Ya.push(this);
-        this.ua.Ia = !0;
+        this.ta.Ha = !0;
         return this;
       },
     });
-    Object.assign(kb.prototype, {
-      Xa(a) {
-        this.Sa && (a = this.Sa(a));
+    Object.assign(jb.prototype, {
+      Wa(a) {
+        this.Ra && (a = this.Ra(a));
         return a;
       },
-      Qa(a) {
-        this.Ea?.(a);
+      Pa(a) {
+        this.Da?.(a);
       },
-      Ca: 8,
-      readValueFromPointer: J,
+      Ba: 8,
+      readValueFromPointer: I,
       fromWireType: function (a) {
         function b() {
-          return this.Ma
-            ? Xa(this.va.Ga, { xa: this.bb, wa: c, Ba: this, za: a })
-            : Xa(this.va.Ga, { xa: this, wa: a });
+          return this.La
+            ? Xa(this.ua.Fa, { wa: this.ab, va: c, Aa: this, ya: a })
+            : Xa(this.ua.Fa, { wa: this, va: a });
         }
-        var c = this.Xa(a);
-        if (!c) return this.Qa(a), null;
-        var d = Wa(this.va, c);
+        var c = this.Wa(a);
+        if (!c) return this.Pa(a), null;
+        var d = Wa(this.ua, c);
         if (void 0 !== d) {
-          if (0 === d.ua.count.value) return (d.ua.wa = c), (d.ua.za = a), d.clone();
+          if (0 === d.ta.count.value) return (d.ta.va = c), (d.ta.ya = a), d.clone();
           d = d.clone();
-          this.Qa(a);
+          this.Pa(a);
           return d;
         }
-        d = this.va.Wa(c);
+        d = this.ua.Va(c);
         d = Ua[d];
         if (!d) return b.call(this);
-        d = this.La ? d.Ta : d.pointerType;
-        var e = Ta(c, this.va, d.va);
+        d = this.Ka ? d.Sa : d.pointerType;
+        var e = Ta(c, this.ua, d.ua);
         return null === e
           ? b.call(this)
-          : this.Ma
-          ? Xa(d.va.Ga, { xa: d, wa: e, Ba: this, za: a })
-          : Xa(d.va.Ga, { xa: d, wa: e });
+          : this.La
+          ? Xa(d.ua.Fa, { wa: d, va: e, Aa: this, ya: a })
+          : Xa(d.ua.Fa, { wa: d, va: e });
       },
     });
-    ob = k.UnboundTypeError = ((a, b) => {
-      var c = $a(b, function (d) {
+    nb = k.UnboundTypeError = ((a, b) => {
+      var c = R(b, function (d) {
         this.name = b;
         this.message = d;
         d = Error(d).stack;
@@ -835,18 +834,18 @@ var createDotLottiePlayerModule = (() => {
       return c;
     })(Error, 'UnboundTypeError');
     V.push(0, 1, void 0, 1, null, 1, !0, 1, !1, 1);
-    k.count_emval_handles = () => V.length / 2 - 5 - xb.length;
-    var oc = {
+    k.count_emval_handles = () => V.length / 2 - 5 - vb.length;
+    var mc = {
         c: (a, b, c, d) =>
-          wa(
-            `Assertion failed: ${a ? H(x, a) : ''}, at: ` +
-              [b ? (b ? H(x, b) : '') : 'unknown filename', c, d ? (d ? H(x, d) : '') : 'unknown function'],
+          va(
+            `Assertion failed: ${a ? Ga(a) : ''}, at: ` +
+              [b ? (b ? Ga(b) : '') : 'unknown filename', c, d ? (d ? Ga(d) : '') : 'unknown function'],
           ),
         m: (a, b, c) => {
           var d = new Ha(a);
-          D[(d.wa + 16) >> 2] = 0;
-          D[(d.wa + 4) >> 2] = b;
-          D[(d.wa + 8) >> 2] = c;
+          D[(d.va + 16) >> 2] = 0;
+          D[(d.va + 4) >> 2] = b;
+          D[(d.va + 8) >> 2] = c;
           Ia = a;
           Ja++;
           throw Ia;
@@ -854,30 +853,30 @@ var createDotLottiePlayerModule = (() => {
         M: () => {},
         J: () => {},
         K: () => {},
-        P: function () {},
+        O: function () {},
         L: () => {},
-        R: () => wa(''),
+        Q: () => va(''),
         v: (a) => {
           var b = Ka[a];
           delete Ka[a];
-          var c = b.Oa,
-            d = b.Ea,
-            e = b.Ra,
-            f = e.map((h) => h.$a).concat(e.map((h) => h.gb));
-          O([a], f, (h) => {
+          var c = b.Na,
+            d = b.Da,
+            e = b.Qa,
+            f = e.map((h) => h.Za).concat(e.map((h) => h.fb));
+          N([a], f, (h) => {
             var g = {};
             e.forEach((l, m) => {
               var n = h[m],
-                q = l.Ya,
-                r = l.Za,
+                q = l.Xa,
+                r = l.Ya,
                 A = h[m + e.length],
-                u = l.fb,
-                v = l.hb;
-              g[l.Va] = {
+                u = l.eb,
+                v = l.gb;
+              g[l.Ua] = {
                 read: (E) => n.fromWireType(q(r, E)),
-                write: (E, da) => {
+                write: (E, ca) => {
                   var B = [];
-                  u(v, E, A.toWireType(B, da));
+                  u(v, E, A.toWireType(B, ca));
                   La(B);
                 },
               };
@@ -899,17 +898,17 @@ var createDotLottiePlayerModule = (() => {
                   null !== l && l.push(d, q);
                   return q;
                 },
-                Ca: 8,
-                readValueFromPointer: J,
-                Da: d,
+                Ba: 8,
+                readValueFromPointer: I,
+                Ca: d,
               },
             ];
           });
         },
         C: () => {},
-        W: (a, b, c, d) => {
-          b = P(b);
-          N(a, {
+        V: (a, b, c, d) => {
+          b = O(b);
+          M(a, {
             name: b,
             fromWireType: function (e) {
               return !!e;
@@ -917,166 +916,166 @@ var createDotLottiePlayerModule = (() => {
             toWireType: function (e, f) {
               return f ? c : d;
             },
-            Ca: 8,
+            Ba: 8,
             readValueFromPointer: function (e) {
               return this.fromWireType(x[e]);
             },
-            Da: null,
+            Ca: null,
           });
         },
         r: (a, b, c, d, e, f, h, g, l, m, n, q, r) => {
-          n = P(n);
+          n = O(n);
           f = T(e, f);
           g &&= T(h, g);
           m &&= T(l, m);
           r = T(q, r);
-          var A = cb(n);
-          bb(A, function () {
-            rb(`Cannot construct ${n} due to unbound types`, [d]);
+          var A = bb(n);
+          ab(A, function () {
+            qb(`Cannot construct ${n} due to unbound types`, [d]);
           });
-          O([a, b, c], d ? [d] : [], (u) => {
+          N([a, b, c], d ? [d] : [], (u) => {
             u = u[0];
             if (d) {
-              var v = u.va;
-              var E = v.Ga;
+              var v = u.ua;
+              var E = v.Fa;
             } else E = Za.prototype;
-            u = $a(n, function (...Oa) {
-              if (Object.getPrototypeOf(this) !== da) throw new Q("Use 'new' to construct " + n);
-              if (void 0 === B.Fa) throw new Q(n + ' has no accessible constructor');
-              var wb = B.Fa[Oa.length];
+            u = R(n, function (...Oa) {
+              if (Object.getPrototypeOf(this) !== ca) throw new P("Use 'new' to construct " + n);
+              if (void 0 === B.Ea) throw new P(n + ' has no accessible constructor');
+              var wb = B.Ea[Oa.length];
               if (void 0 === wb)
-                throw new Q(
+                throw new P(
                   `Tried to invoke ctor of ${n} with invalid number of parameters (${
                     Oa.length
-                  }) - expected (${Object.keys(B.Fa).toString()}) parameters instead!`,
+                  }) - expected (${Object.keys(B.Ea).toString()}) parameters instead!`,
                 );
               return wb.apply(this, Oa);
             });
-            var da = Object.create(E, { constructor: { value: u } });
-            u.prototype = da;
-            var B = new db(n, u, da, r, v, f, g, m);
-            if (B.Aa) {
-              var ea;
-              (ea = B.Aa).Pa ?? (ea.Pa = []);
-              B.Aa.Pa.push(B);
+            var ca = Object.create(E, { constructor: { value: u } });
+            u.prototype = ca;
+            var B = new cb(n, u, ca, r, v, f, g, m);
+            if (B.za) {
+              var da;
+              (da = B.za).Oa ?? (da.Oa = []);
+              B.za.Oa.push(B);
             }
-            v = new kb(n, B, !0, !1, !1);
-            ea = new kb(n + '*', B, !1, !1, !1);
-            E = new kb(n + ' const*', B, !1, !0, !1);
-            Ua[a] = { pointerType: ea, Ta: E };
-            lb(A, u);
-            return [v, ea, E];
+            v = new jb(n, B, !0, !1, !1);
+            da = new jb(n + '*', B, !1, !1, !1);
+            E = new jb(n + ' const*', B, !1, !0, !1);
+            Ua[a] = { pointerType: da, Sa: E };
+            kb(A, u);
+            return [v, da, E];
           });
         },
         q: (a, b, c, d, e, f) => {
-          var h = sb(b, c);
+          var h = rb(b, c);
           e = T(d, e);
-          O([], [a], (g) => {
+          N([], [a], (g) => {
             g = g[0];
             var l = `constructor ${g.name}`;
-            void 0 === g.va.Fa && (g.va.Fa = []);
-            if (void 0 !== g.va.Fa[b - 1])
-              throw new Q(
+            void 0 === g.ua.Ea && (g.ua.Ea = []);
+            if (void 0 !== g.ua.Ea[b - 1])
+              throw new P(
                 `Cannot register multiple constructors with identical number of parameters (${b - 1}) for class '${
                   g.name
                 }'! Overload resolution is currently only performed using the parameter count, not actual type info!`,
               );
-            g.va.Fa[b - 1] = () => {
-              rb(`Cannot construct ${g.name} due to unbound types`, h);
+            g.ua.Ea[b - 1] = () => {
+              qb(`Cannot construct ${g.name} due to unbound types`, h);
             };
-            O([], h, (m) => {
+            N([], h, (m) => {
               m.splice(1, 0, null);
-              g.va.Fa[b - 1] = ub(l, m, null, e, f);
+              g.ua.Ea[b - 1] = tb(l, m, null, e, f);
               return [];
             });
             return [];
           });
         },
         f: (a, b, c, d, e, f, h, g) => {
-          var l = sb(c, d);
-          b = P(b);
-          b = vb(b);
+          var l = rb(c, d);
+          b = O(b);
+          b = ub(b);
           f = T(e, f);
-          O([], [a], (m) => {
+          N([], [a], (m) => {
             function n() {
-              rb(`Cannot call ${q} due to unbound types`, l);
+              qb(`Cannot call ${q} due to unbound types`, l);
             }
             m = m[0];
             var q = `${m.name}.${b}`;
             b.startsWith('@@') && (b = Symbol[b.substring(2)]);
-            g && m.va.cb.push(b);
-            var r = m.va.Ga,
+            g && m.ua.bb.push(b);
+            var r = m.ua.Fa,
               A = r[b];
-            void 0 === A || (void 0 === A.ya && A.className !== m.name && A.Ha === c - 2)
-              ? ((n.Ha = c - 2), (n.className = m.name), (r[b] = n))
-              : (ab(r, b, q), (r[b].ya[c - 2] = n));
-            O([], l, (u) => {
-              u = ub(q, u, m, f, h);
-              void 0 === r[b].ya ? ((u.Ha = c - 2), (r[b] = u)) : (r[b].ya[c - 2] = u);
+            void 0 === A || (void 0 === A.xa && A.className !== m.name && A.Ga === c - 2)
+              ? ((n.Ga = c - 2), (n.className = m.name), (r[b] = n))
+              : ($a(r, b, q), (r[b].xa[c - 2] = n));
+            N([], l, (u) => {
+              u = tb(q, u, m, f, h);
+              void 0 === r[b].xa ? ((u.Ga = c - 2), (r[b] = u)) : (r[b].xa[c - 2] = u);
               return [];
             });
             return [];
           });
         },
-        V: (a) => N(a, Ab),
+        U: (a) => M(a, zb),
         x: (a, b, c, d) => {
           function e() {}
-          b = P(b);
+          b = O(b);
           e.values = {};
-          N(a, {
+          M(a, {
             name: b,
             constructor: e,
             fromWireType: function (f) {
               return this.constructor.values[f];
             },
             toWireType: (f, h) => h.value,
-            Ca: 8,
-            readValueFromPointer: Bb(b, c, d),
-            Da: null,
+            Ba: 8,
+            readValueFromPointer: Ab(b, c, d),
+            Ca: null,
           });
-          bb(b, e);
+          ab(b, e);
         },
         k: (a, b, c) => {
-          var d = Cb(a, 'enum');
-          b = P(b);
+          var d = Bb(a, 'enum');
+          b = O(b);
           a = d.constructor;
           d = Object.create(d.constructor.prototype, {
             value: { value: c },
-            constructor: { value: $a(`${d.name}_${b}`, function () {}) },
+            constructor: { value: R(`${d.name}_${b}`, function () {}) },
           });
           a.values[c] = d;
           a[b] = d;
         },
         z: (a, b, c) => {
-          b = P(b);
-          N(a, {
+          b = O(b);
+          M(a, {
             name: b,
             fromWireType: (d) => d,
             toWireType: (d, e) => e,
-            Ca: 8,
-            readValueFromPointer: Db(b, c),
-            Da: null,
+            Ba: 8,
+            readValueFromPointer: Cb(b, c),
+            Ca: null,
           });
         },
         u: (a, b, c, d, e, f) => {
-          var h = sb(b, c);
-          a = P(a);
-          a = vb(a);
+          var h = rb(b, c);
+          a = O(a);
+          a = ub(a);
           e = T(d, e);
-          bb(
+          ab(
             a,
             function () {
-              rb(`Cannot call ${a} due to unbound types`, h);
+              qb(`Cannot call ${a} due to unbound types`, h);
             },
             b - 1,
           );
-          O([], h, (g) => {
-            lb(a, ub(a, [g[0], null].concat(g.slice(1)), null, e, f), b - 1);
+          N([], h, (g) => {
+            kb(a, tb(a, [g[0], null].concat(g.slice(1)), null, e, f), b - 1);
             return [];
           });
         },
         l: (a, b, c, d, e) => {
-          b = P(b);
+          b = O(b);
           -1 === e && (e = 4294967295);
           e = (g) => g;
           if (0 === d) {
@@ -1090,7 +1089,7 @@ var createDotLottiePlayerModule = (() => {
             : function (g, l) {
                 return l;
               };
-          N(a, { name: b, fromWireType: e, toWireType: h, Ca: 8, readValueFromPointer: Eb(b, c, 0 !== d), Da: null });
+          M(a, { name: b, fromWireType: e, toWireType: h, Ba: 8, readValueFromPointer: Db(b, c, 0 !== d), Ca: null });
         },
         h: (a, b, c) => {
           function d(f) {
@@ -1099,27 +1098,27 @@ var createDotLottiePlayerModule = (() => {
           var e = [Int8Array, Uint8Array, Int16Array, Uint16Array, Int32Array, Uint32Array, Float32Array, Float64Array][
             b
           ];
-          c = P(c);
-          N(a, { name: c, fromWireType: d, Ca: 8, readValueFromPointer: d }, { ab: !0 });
+          c = O(c);
+          M(a, { name: c, fromWireType: d, Ba: 8, readValueFromPointer: d }, { $a: !0 });
         },
         t: (a) => {
-          N(a, Fb);
+          M(a, Eb);
         },
-        aa: (a, b, c, d, e, f, h, g, l, m, n, q) => {
-          c = P(c);
+        $: (a, b, c, d, e, f, h, g, l, m, n, q) => {
+          c = O(c);
           f = T(e, f);
           g = T(h, g);
           m = T(l, m);
           q = T(n, q);
-          O([a], [b], (r) => {
+          N([a], [b], (r) => {
             r = r[0];
-            return [new kb(c, r.va, !1, !1, !0, r, d, f, g, m, q)];
+            return [new jb(c, r.ua, !1, !1, !0, r, d, f, g, m, q)];
           });
         },
         A: (a, b) => {
-          b = P(b);
+          b = O(b);
           var c = 'std::string' === b;
-          N(a, {
+          M(a, {
             name: b,
             fromWireType: function (d) {
               var e = D[d >> 2],
@@ -1128,7 +1127,7 @@ var createDotLottiePlayerModule = (() => {
                 for (var h = f, g = 0; g <= e; ++g) {
                   var l = f + g;
                   if (g == e || 0 == x[l]) {
-                    h = h ? H(x, h, l - h) : '';
+                    h = h ? Ga(h, l - h) : '';
                     if (void 0 === m) var m = h;
                     else (m += String.fromCharCode(0)), (m += h);
                     h = l + 1;
@@ -1147,43 +1146,43 @@ var createDotLottiePlayerModule = (() => {
               var f,
                 h = 'string' == typeof e;
               if (!(h || e instanceof Uint8Array || e instanceof Uint8ClampedArray || e instanceof Int8Array))
-                throw new Q('Cannot pass non-string to std::string');
+                throw new P('Cannot pass non-string to std::string');
               if (c && h)
                 for (var g = (f = 0); g < e.length; ++g) {
                   var l = e.charCodeAt(g);
                   127 >= l ? f++ : 2047 >= l ? (f += 2) : 55296 <= l && 57343 >= l ? ((f += 4), ++g) : (f += 3);
                 }
               else f = e.length;
-              g = dc(4 + f + 1);
+              g = bc(4 + f + 1);
               l = g + 4;
               D[g >> 2] = f;
-              if (c && h) I(e, l, f + 1);
+              if (c && h) H(e, l, f + 1);
               else if (h)
                 for (h = 0; h < f; ++h) {
                   var m = e.charCodeAt(h);
-                  if (255 < m) throw (U(l), new Q('String has UTF-16 code units that do not fit in 8 bits'));
+                  if (255 < m) throw (U(l), new P('String has UTF-16 code units that do not fit in 8 bits'));
                   x[l + h] = m;
                 }
               else for (h = 0; h < f; ++h) x[l + h] = e[h];
               null !== d && d.push(U, g);
               return g;
             },
-            Ca: 8,
-            readValueFromPointer: J,
-            Da(d) {
+            Ba: 8,
+            readValueFromPointer: I,
+            Ca(d) {
               U(d);
             },
           });
         },
         s: (a, b, c) => {
-          c = P(c);
+          c = O(c);
           if (2 === b) {
-            var d = Hb;
-            var e = Ib;
-            var f = Jb;
+            var d = Gb;
+            var e = Hb;
+            var f = Ib;
             var h = (g) => z[g >> 1];
-          } else 4 === b && ((d = Kb), (e = Lb), (f = Mb), (h = (g) => D[g >> 2]));
-          N(a, {
+          } else 4 === b && ((d = Jb), (e = Kb), (f = Lb), (h = (g) => D[g >> 2]));
+          M(a, {
             name: c,
             fromWireType: (g) => {
               for (var l = D[g >> 2], m, n = g + 4, q = 0; q <= l; ++q) {
@@ -1195,82 +1194,82 @@ var createDotLottiePlayerModule = (() => {
               return m;
             },
             toWireType: (g, l) => {
-              if ('string' != typeof l) throw new Q(`Cannot pass non-string to C++ string type ${c}`);
+              if ('string' != typeof l) throw new P(`Cannot pass non-string to C++ string type ${c}`);
               var m = f(l),
-                n = dc(4 + m + b);
+                n = bc(4 + m + b);
               D[n >> 2] = m / b;
               e(l, n + 4, m + b);
               null !== g && g.push(U, n);
               return n;
             },
-            Ca: 8,
-            readValueFromPointer: J,
-            Da(g) {
+            Ba: 8,
+            readValueFromPointer: I,
+            Ca(g) {
               U(g);
             },
           });
         },
         w: (a, b, c, d, e, f) => {
-          Ka[a] = { name: P(b), Oa: T(c, d), Ea: T(e, f), Ra: [] };
+          Ka[a] = { name: O(b), Na: T(c, d), Da: T(e, f), Qa: [] };
         },
         j: (a, b, c, d, e, f, h, g, l, m) => {
-          Ka[a].Ra.push({ Va: P(b), $a: c, Ya: T(d, e), Za: f, gb: h, fb: T(g, l), hb: m });
+          Ka[a].Qa.push({ Ua: O(b), Za: c, Xa: T(d, e), Ya: f, fb: h, eb: T(g, l), gb: m });
         },
-        X: (a, b) => {
-          b = P(b);
-          N(a, { jb: !0, name: b, Ca: 0, fromWireType: () => {}, toWireType: () => {} });
+        W: (a, b) => {
+          b = O(b);
+          M(a, { ib: !0, name: b, Ba: 0, fromWireType: () => {}, toWireType: () => {} });
         },
         H: () => {
-          Fa = !1;
-          Nb = 0;
+          Ea = !1;
+          Mb = 0;
         },
         D: () => {
           throw Infinity;
         },
-        _: (a, b, c, d) => {
-          a = Ob[a];
-          b = zb(b);
+        Z: (a, b, c, d) => {
+          a = Nb[a];
+          b = yb(b);
           return a(null, b, c, d);
         },
-        B: yb,
-        Z: (a, b, c) => {
-          var d = Qb(a, b),
+        B: xb,
+        Y: (a, b, c) => {
+          var d = Pb(a, b),
             e = d.shift();
           a--;
           var f = Array(a);
           b = `methodCaller<(${d.map((h) => h.name).join(', ')}) => ${e.name}>`;
-          return Pb(
-            $a(b, (h, g, l, m) => {
-              for (var n = 0, q = 0; q < a; ++q) (f[q] = d[q].readValueFromPointer(m + n)), (n += d[q].Ca);
-              g = 1 === c ? Rb(g, f) : g.apply(h, f);
+          return Ob(
+            R(b, (h, g, l, m) => {
+              for (var n = 0, q = 0; q < a; ++q) (f[q] = d[q].readValueFromPointer(m + n)), (n += d[q].Ba);
+              g = 1 === c ? Qb(g, f) : g.apply(h, f);
               h = [];
               g = e.toWireType(h, g);
-              h.length && (D[l >> 2] = ib(h));
+              h.length && (D[l >> 2] = hb(h));
               return g;
             }),
           );
         },
-        $: (a) => {
+        _: (a) => {
           9 < a && (V[a + 1] += 1);
         },
-        Y: (a) => {
-          var b = zb(a);
+        X: (a) => {
+          var b = yb(a);
           La(b);
-          yb(a);
+          xb(a);
         },
         o: (a, b) => {
-          a = Cb(a, '_emval_take_value');
+          a = Bb(a, '_emval_take_value');
           a = a.readValueFromPointer(b);
-          return ib(a);
+          return hb(a);
         },
         E: (a, b) => {
-          Sb[a] && (clearTimeout(Sb[a].id), delete Sb[a]);
+          Rb[a] && (clearTimeout(Rb[a].id), delete Rb[a]);
           if (!b) return 0;
           var c = setTimeout(() => {
-            delete Sb[a];
-            Vb(() => ec(a, performance.now()));
+            delete Rb[a];
+            Ub(() => cc(a, performance.now()));
           }, b);
-          Sb[a] = { id: c, kb: b };
+          Rb[a] = { id: c, jb: b };
           return 0;
         },
         F: (a, b, c, d) => {
@@ -1288,9 +1287,9 @@ var createDotLottiePlayerModule = (() => {
           };
           a = b(f);
           b = b(e);
-          e < f ? (I(a, c, 17), I(b, d, 17)) : (I(a, d, 17), I(b, c, 17));
+          e < f ? (H(a, c, 17), H(b, d, 17)) : (H(a, d, 17), H(b, c, 17));
         },
-        ba: () => performance.now(),
+        aa: () => performance.now(),
         G: (a) => {
           var b = x.length;
           a >>>= 0;
@@ -1300,12 +1299,12 @@ var createDotLottiePlayerModule = (() => {
             d = Math.min(d, a + 100663296);
             a: {
               d =
-                ((Math.min(2147483648, 65536 * Math.ceil(Math.max(a, d) / 65536)) - la.buffer.byteLength + 65535) /
+                ((Math.min(2147483648, 65536 * Math.ceil(Math.max(a, d) / 65536)) - ka.buffer.byteLength + 65535) /
                   65536) |
                 0;
               try {
-                la.grow(d);
-                qa();
+                ka.grow(d);
+                pa();
                 var e = 1;
                 break a;
               } catch (f) {}
@@ -1315,9 +1314,9 @@ var createDotLottiePlayerModule = (() => {
           }
           return !1;
         },
-        T: (a, b) => {
+        S: (a, b) => {
           var c = 0;
-          Yb().forEach((d, e) => {
+          Xb().forEach((d, e) => {
             var f = b + c;
             e = D[(a + 4 * e) >> 2] = f;
             for (f = 0; f < d.length; ++f) w[e++] = d.charCodeAt(f);
@@ -1326,94 +1325,78 @@ var createDotLottiePlayerModule = (() => {
           });
           return 0;
         },
-        U: (a, b) => {
-          var c = Yb();
+        T: (a, b) => {
+          var c = Xb();
           D[a >> 2] = c.length;
           var d = 0;
           c.forEach((e) => (d += e.length + 1));
           D[b >> 2] = d;
           return 0;
         },
-        Q: () => 52,
-        O: () => 52,
-        N: (a, b, c, d) => {
-          for (var e = 0, f = 0; f < c; f++) {
-            var h = D[b >> 2],
-              g = D[(b + 4) >> 2];
-            b += 8;
-            for (var l = 0; l < g; l++) {
-              var m = a,
-                n = x[h + l],
-                q = Zb[m];
-              0 === n || 10 === n ? ((1 === m ? ja : t)(H(q)), (q.length = 0)) : q.push(n);
-            }
-            e += g;
-          }
-          D[d >> 2] = e;
-          return 0;
-        },
-        i: fc,
-        d: gc,
-        e: hc,
-        p: ic,
-        y: jc,
-        b: kc,
-        a: lc,
-        g: mc,
-        n: nc,
-        S: Ub,
+        P: () => 52,
+        N: () => 52,
+        i: dc,
+        d: ec,
+        e: fc,
+        p: gc,
+        y: hc,
+        b: ic,
+        a: jc,
+        g: kc,
+        n: lc,
+        R: Tb,
         I: (a, b) => {
-          ac(x.subarray(a, a + b));
+          Zb(x.subarray(a, a + b));
           return 0;
         },
       },
       W = (function () {
         function a(c) {
           W = c.exports;
-          la = W.ca;
-          qa();
-          S = W.ga;
-          sa.unshift(W.da);
+          ka = W.ba;
+          pa();
+          S = W.fa;
+          ra.unshift(W.ca);
           F--;
           k.monitorRunDependencies?.(F);
-          0 == F && (null !== va && (clearInterval(va), (va = null)), G && ((c = G), (G = null), c()));
+          0 == F && (null !== ua && (clearInterval(ua), (ua = null)), G && ((c = G), (G = null), c()));
           return W;
         }
         F++;
         k.monitorRunDependencies?.(F);
-        var b = { a: oc };
+        var b = { a: mc };
         if (k.instantiateWasm)
           try {
             return k.instantiateWasm(b, a);
           } catch (c) {
             t(`Module.instantiateWasm callback failed with error: ${c}`), ba(c);
           }
-        ya ??= xa('DotLottiePlayer.wasm')
+        xa ??= wa('DotLottiePlayer.wasm')
           ? 'DotLottiePlayer.wasm'
           : k.locateFile
           ? k.locateFile('DotLottiePlayer.wasm', p)
           : p + 'DotLottiePlayer.wasm';
-        Ca(b, function (c) {
+        Ba(b, function (c) {
           a(c.instance);
         }).catch(ba);
         return {};
       })(),
-      dc = (a) => (dc = W.ea)(a),
-      pb = (a) => (pb = W.fa)(a),
-      U = (a) => (U = W.ha)(a),
-      ec = (a, b) => (ec = W.ia)(a, b),
-      X = (a, b) => (X = W.ja)(a, b),
-      Y = (a) => (Y = W.ka)(a),
-      Z = () => (Z = W.la)();
-    k.dynCall_iijj = (a, b, c, d, e, f) => (k.dynCall_iijj = W.ma)(a, b, c, d, e, f);
-    k.dynCall_vijj = (a, b, c, d, e, f) => (k.dynCall_vijj = W.na)(a, b, c, d, e, f);
-    k.dynCall_jiii = (a, b, c, d) => (k.dynCall_jiii = W.oa)(a, b, c, d);
-    k.dynCall_jii = (a, b, c) => (k.dynCall_jii = W.pa)(a, b, c);
-    k.dynCall_viijii = (a, b, c, d, e, f, h) => (k.dynCall_viijii = W.qa)(a, b, c, d, e, f, h);
-    k.dynCall_iiiiij = (a, b, c, d, e, f, h) => (k.dynCall_iiiiij = W.ra)(a, b, c, d, e, f, h);
-    k.dynCall_iiiiijj = (a, b, c, d, e, f, h, g, l) => (k.dynCall_iiiiijj = W.sa)(a, b, c, d, e, f, h, g, l);
-    k.dynCall_iiiiiijj = (a, b, c, d, e, f, h, g, l, m) => (k.dynCall_iiiiiijj = W.ta)(a, b, c, d, e, f, h, g, l, m);
-    function lc(a, b, c) {
+      bc = (a) => (bc = W.da)(a),
+      ob = (a) => (ob = W.ea)(a),
+      U = (a) => (U = W.ga)(a),
+      cc = (a, b) => (cc = W.ha)(a, b),
+      X = (a, b) => (X = W.ia)(a, b),
+      Y = (a) => (Y = W.ja)(a),
+      Z = () => (Z = W.ka)();
+    k.dynCall_iijj = (a, b, c, d, e, f) => (k.dynCall_iijj = W.la)(a, b, c, d, e, f);
+    k.dynCall_vijj = (a, b, c, d, e, f) => (k.dynCall_vijj = W.ma)(a, b, c, d, e, f);
+    k.dynCall_jiii = (a, b, c, d) => (k.dynCall_jiii = W.na)(a, b, c, d);
+    k.dynCall_jii = (a, b, c) => (k.dynCall_jii = W.oa)(a, b, c);
+    k.dynCall_viijii = (a, b, c, d, e, f, h) => (k.dynCall_viijii = W.pa)(a, b, c, d, e, f, h);
+    k.dynCall_iiiiij = (a, b, c, d, e, f, h) => (k.dynCall_iiiiij = W.qa)(a, b, c, d, e, f, h);
+    k.dynCall_iiiiijj = (a, b, c, d, e, f, h, g, l) => (k.dynCall_iiiiijj = W.ra)(a, b, c, d, e, f, h, g, l);
+    k.dynCall_iiiiiijj = (a, b, c, d, e, f, h, g, l, m) => (k.dynCall_iiiiiijj = W.sa)(a, b, c, d, e, f, h, g, l, m);
+    function jc(a, b, c) {
       var d = Z();
       try {
         S.get(a)(b, c);
@@ -1423,7 +1406,7 @@ var createDotLottiePlayerModule = (() => {
         X(1, 0);
       }
     }
-    function kc(a, b) {
+    function ic(a, b) {
       var c = Z();
       try {
         S.get(a)(b);
@@ -1433,7 +1416,7 @@ var createDotLottiePlayerModule = (() => {
         X(1, 0);
       }
     }
-    function hc(a, b, c, d) {
+    function fc(a, b, c, d) {
       var e = Z();
       try {
         return S.get(a)(b, c, d);
@@ -1443,7 +1426,7 @@ var createDotLottiePlayerModule = (() => {
         X(1, 0);
       }
     }
-    function gc(a, b, c) {
+    function ec(a, b, c) {
       var d = Z();
       try {
         return S.get(a)(b, c);
@@ -1453,7 +1436,7 @@ var createDotLottiePlayerModule = (() => {
         X(1, 0);
       }
     }
-    function fc(a, b) {
+    function dc(a, b) {
       var c = Z();
       try {
         return S.get(a)(b);
@@ -1463,7 +1446,7 @@ var createDotLottiePlayerModule = (() => {
         X(1, 0);
       }
     }
-    function ic(a, b, c, d, e, f) {
+    function gc(a, b, c, d, e, f) {
       var h = Z();
       try {
         return S.get(a)(b, c, d, e, f);
@@ -1473,7 +1456,7 @@ var createDotLottiePlayerModule = (() => {
         X(1, 0);
       }
     }
-    function nc(a, b, c, d, e) {
+    function lc(a, b, c, d, e) {
       var f = Z();
       try {
         S.get(a)(b, c, d, e);
@@ -1483,7 +1466,7 @@ var createDotLottiePlayerModule = (() => {
         X(1, 0);
       }
     }
-    function mc(a, b, c, d) {
+    function kc(a, b, c, d) {
       var e = Z();
       try {
         S.get(a)(b, c, d);
@@ -1493,7 +1476,7 @@ var createDotLottiePlayerModule = (() => {
         X(1, 0);
       }
     }
-    function jc(a) {
+    function hc(a) {
       var b = Z();
       try {
         S.get(a)();
@@ -1503,28 +1486,28 @@ var createDotLottiePlayerModule = (() => {
         X(1, 0);
       }
     }
-    var pc;
-    G = function qc() {
-      pc || rc();
-      pc || (G = qc);
+    var nc;
+    G = function oc() {
+      nc || pc();
+      nc || (G = oc);
     };
-    function rc() {
+    function pc() {
       function a() {
-        if (!pc && ((pc = !0), (k.calledRun = !0), !ma)) {
-          Ea(sa);
+        if (!nc && ((nc = !0), (k.calledRun = !0), !la)) {
+          Da(ra);
           aa(k);
           k.onRuntimeInitialized?.();
           if (k.postRun)
             for ('function' == typeof k.postRun && (k.postRun = [k.postRun]); k.postRun.length; ) {
               var b = k.postRun.shift();
-              ta.unshift(b);
+              sa.unshift(b);
             }
-          Ea(ta);
+          Da(sa);
         }
       }
       if (!(0 < F)) {
-        if (k.preRun) for ('function' == typeof k.preRun && (k.preRun = [k.preRun]); k.preRun.length; ) ua();
-        Ea(ra);
+        if (k.preRun) for ('function' == typeof k.preRun && (k.preRun = [k.preRun]); k.preRun.length; ) ta();
+        Da(qa);
         0 < F ||
           (k.setStatus
             ? (k.setStatus('Running...'),
@@ -1537,8 +1520,8 @@ var createDotLottiePlayerModule = (() => {
     }
     if (k.preInit)
       for ('function' == typeof k.preInit && (k.preInit = [k.preInit]); 0 < k.preInit.length; ) k.preInit.pop()();
-    rc();
-    moduleRtn = ca;
+    pc();
+    moduleRtn = ea;
 
     return moduleRtn;
   };
