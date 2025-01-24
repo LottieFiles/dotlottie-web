@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - feat/web-gpu-gl
   pull_request:
 
 concurrency:
