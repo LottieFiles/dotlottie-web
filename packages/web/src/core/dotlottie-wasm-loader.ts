@@ -16,7 +16,15 @@ export class DotLottieWasmLoader {
   }
 
   private static async _tryLoad(url: string): Promise<MainModule> {
-    const module = await createDotLottiePlayerModule({ locateFile: () => url });
+    let preinitializedWebGPUDevice = null;
+
+    if (typeof navigator.gpu !== 'undefined') {
+      const adapter = await navigator.gpu.requestAdapter();
+
+      preinitializedWebGPUDevice = await adapter?.requestDevice();
+    }
+
+    const module = await createDotLottiePlayerModule({ locateFile: () => url, preinitializedWebGPUDevice });
 
     return module;
   }

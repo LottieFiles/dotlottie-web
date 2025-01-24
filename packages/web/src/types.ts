@@ -2,6 +2,7 @@ export interface RenderConfig {
   autoResize?: boolean;
   devicePixelRatio?: number;
   freezeOnOffscreen?: boolean;
+  renderer?: 'wg' | 'gl' | 'sw';
 }
 
 export type Mode = 'forward' | 'reverse' | 'bounce' | 'reverse-bounce';

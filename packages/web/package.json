@@ -46,6 +46,7 @@
     "@types/node": "^20.14.11",
     "@vitest/browser": "2.1.0-beta.5",
     "@vitest/coverage-istanbul": "2.1.0-beta.5",
+    "@webgpu/types": "^0.1.53",
     "cross-env": "7.0.3",
     "esbuild": "^0.23.0",
     "esbuild-plugin-replace": "^1.4.0",
