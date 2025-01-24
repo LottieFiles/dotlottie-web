@@ -18,5 +18,5 @@
     "@lottiefiles/dotlottie-wc": "0.4.2",
     "@lottiefiles/dotlottie-web": "0.39.0"
   },
-  "changesets": []
+  "changesets": ["moody-otters-sniff", "thirty-cobras-perform"]
 }
