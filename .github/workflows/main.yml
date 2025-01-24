@@ -4,7 +4,7 @@ on:
     branches:
       - main
       - feat/web-gpu-gl
-  pull_request:
+  # pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
