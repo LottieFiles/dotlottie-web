@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-web
 
+## 0.40.0-pre.0
+
+### Minor Changes
+
+- 9d67d22: chore: update dotlottie-rs\@v0.1.37 wasm bindings
+- 1870455: feat: 🎸 WebGPU & WebGL renderers
+
 ## 0.39.0
 
 ### Minor Changes
