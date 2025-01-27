@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.40.1
+
+### Patch Changes
+
+- 5b6ec2f: fix(web): 🐛 fail to resize when canvas element is hidden
+
 ## 0.40.0
 
 ### Minor Changes
