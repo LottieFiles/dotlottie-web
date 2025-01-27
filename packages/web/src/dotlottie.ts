@@ -694,8 +694,10 @@ export class DotLottie {
 
       const { height: clientHeight, width: clientWidth } = this._canvas.getBoundingClientRect();
 
-      this._canvas.width = clientWidth * dpr;
-      this._canvas.height = clientHeight * dpr;
+      if (clientHeight !== 0 && clientWidth !== 0) {
+        this._canvas.width = clientWidth * dpr;
+        this._canvas.height = clientHeight * dpr;
+      }
     }
 
     const ok = this._dotLottieCore.resize(this._canvas.width, this._canvas.height);
