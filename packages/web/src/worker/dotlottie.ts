@@ -14,13 +14,15 @@ function getCanvasSize(
   canvas: HTMLCanvasElement | OffscreenCanvas,
   devicePixelRatio: number,
 ): { height: number; width: number } {
-  if (canvas instanceof OffscreenCanvas) {
-    return { width: canvas.width, height: canvas.height };
+  if (canvas instanceof HTMLCanvasElement) {
+    const { height: clientHeight, width: clientWidth } = canvas.getBoundingClientRect();
+
+    if (clientHeight !== 0 && clientWidth !== 0) {
+      return { width: clientWidth * devicePixelRatio, height: clientHeight * devicePixelRatio };
+    }
   }
 
-  const { height, width } = canvas.getBoundingClientRect();
-
-  return { width: width * devicePixelRatio, height: height * devicePixelRatio };
+  return { width: canvas.width, height: canvas.height };
 }
 
 function generateUniqueId(): string {

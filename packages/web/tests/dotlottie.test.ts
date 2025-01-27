@@ -2160,4 +2160,29 @@ describe.each([
       });
     });
   });
+
+  test('doesn"t throw an error when resize is called and the canvas is not visible', async () => {
+    canvas.style.display = 'none';
+
+    const onLoad = vi.fn();
+    const onPlay = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+      autoplay: true,
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+    dotLottie.addEventListener('play', onPlay);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+      expect(onPlay).toHaveBeenCalledTimes(1);
+    });
+
+    expect(() => dotLottie.resize()).not.toThrow();
+
+    canvas.style.display = 'block';
+  });
 });
