@@ -68,6 +68,7 @@ export class DotLottieWasmLoader {
 
   /**
    * Sets the callback bridge for the DotLottie player
+   * Utilizes a primary and backup URL for robustness.
    * @param bridge - The bridge object containing all callback implementations
    */
   public static setBridge(bridge: DotLottieBridge): void {

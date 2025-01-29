@@ -125,11 +125,11 @@ export class DotLottie {
       },
       // eslint-disable-next-line @typescript-eslint/naming-convention
       observer_on_frame(_dotlottie_instance_id: number, _frame_no: number): void {
-        // console.log('Frame', _dotlottie_instance_id, _frame_no);
+        console.log('Frame', _dotlottie_instance_id, _frame_no);
       },
       // eslint-disable-next-line @typescript-eslint/naming-convention
       observer_on_loop(_dotlottie_instance_id: number, _loop_count: number): void {
-        // console.log('Loop', _dotlottie_instance_id, _loop_count);
+        console.log('Loop', _dotlottie_instance_id, _loop_count);
       },
       // eslint-disable-next-line @typescript-eslint/naming-convention
       observer_on_pause(_dotlottie_instance_id: number): void {
@@ -141,7 +141,7 @@ export class DotLottie {
       },
       // eslint-disable-next-line @typescript-eslint/naming-convention
       observer_on_render(_dotlottie_instance_id: number, _frame_no: number): void {
-        // console.log('Render', _dotlottie_instance_id, _frame_no);
+        console.log('Render', _dotlottie_instance_id, _frame_no);
       },
       // eslint-disable-next-line @typescript-eslint/naming-convention
       observer_on_stop(_dotlottie_instance_id: number): void {
