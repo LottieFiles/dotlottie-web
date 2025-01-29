@@ -1,22 +1,41 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { PACKAGE_NAME, PACKAGE_VERSION } from '../constants';
 
 import createDotLottiePlayerModule from './dotlottie-player';
 import type { MainModule } from './dotlottie-player.types';
 
+// Define the bridge interface
+export interface DotLottieBridge {
+  observer_on_complete: (dotlottie_instance_id: number) => void;
+  observer_on_frame: (dotlottie_instance_id: number, frame_no: number) => void;
+  observer_on_load: (dotlottie_instance_id: number) => void;
+  observer_on_load_error: (dotlottie_instance_id: number) => void;
+  observer_on_loop: (dotlottie_instance_id: number, loop_count: number) => void;
+  observer_on_pause: (dotlottie_instance_id: number) => void;
+  observer_on_play: (dotlottie_instance_id: number) => void;
+  observer_on_render: (dotlottie_instance_id: number, frame_no: number) => void;
+  observer_on_stop: (dotlottie_instance_id: number) => void;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class DotLottieWasmLoader {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   private static _ModulePromise: Promise<MainModule> | null = null;
 
   // URL for the WASM file, constructed using package information
   private static _wasmURL = `https://cdn.jsdelivr.net/npm/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/dotlottie-player.wasm`;
+
+  private static _bridge: DotLottieBridge | null = null;
 
   private constructor() {
     throw new Error('RendererLoader is a static class and cannot be instantiated.');
   }
 
   private static async _tryLoad(url: string): Promise<MainModule> {
-    const module = await createDotLottiePlayerModule({ locateFile: () => url });
+    const module = await createDotLottiePlayerModule({
+      locateFile: () => url,
+      // Pass the bridge to the module if it exists
+      dotlottieBridge: this._bridge || undefined,
+    });
 
     return module;
   }
@@ -48,11 +67,25 @@ export class DotLottieWasmLoader {
   }
 
   /**
+   * Sets the callback bridge for the DotLottie player
+   * @param bridge - The bridge object containing all callback implementations
+   */
+  public static setBridge(bridge: DotLottieBridge): void {
+    this._bridge = bridge;
+    // Invalidate current module promise to ensure next load uses new bridge
+    this._ModulePromise = null;
+  }
+
+  /**
    * Public method to load the WebAssembly module.
-   * Utilizes a primary and backup URL for robustness.
+   * @param bridge - Optional bridge object to set before loading
    * @returns Promise<Module> - A promise that resolves to the loaded module.
    */
-  public static async load(): Promise<MainModule> {
+  public static async load(bridge?: DotLottieBridge): Promise<MainModule> {
+    if (bridge) {
+      this.setBridge(bridge);
+    }
+
     return this._loadWithBackup();
   }
 

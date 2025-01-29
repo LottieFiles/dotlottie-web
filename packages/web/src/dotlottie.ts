@@ -1,6 +1,14 @@
 import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER } from './constants';
-import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker, Fit as CoreFit } from './core';
+import type {
+  DotLottiePlayer,
+  DotLottieBridge,
+  MainModule,
+  Mode as CoreMode,
+  VectorFloat,
+  Marker,
+  Fit as CoreFit,
+} from './core';
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
@@ -101,7 +109,47 @@ export class DotLottie {
       freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
     };
 
-    DotLottieWasmLoader.load()
+    // Create your bridge implementation
+    const bridge: DotLottieBridge = {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      observer_on_load: (dotlottie_instance_id) => {
+        console.log('Loaded', dotlottie_instance_id);
+      },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      observer_on_load_error: (dotlottie_instance_id) => {
+        console.log('Error', dotlottie_instance_id);
+      },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      observer_on_complete: (_dotlottie_instance_id: number) => {
+        console.log('Complete', _dotlottie_instance_id);
+      },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      observer_on_frame(_dotlottie_instance_id: number, _frame_no: number): void {
+        // console.log('Frame', _dotlottie_instance_id, _frame_no);
+      },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      observer_on_loop(_dotlottie_instance_id: number, _loop_count: number): void {
+        // console.log('Loop', _dotlottie_instance_id, _loop_count);
+      },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      observer_on_pause(_dotlottie_instance_id: number): void {
+        console.log('Pause', _dotlottie_instance_id);
+      },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      observer_on_play(_dotlottie_instance_id: number): void {
+        console.log('Play', _dotlottie_instance_id);
+      },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      observer_on_render(_dotlottie_instance_id: number, _frame_no: number): void {
+        // console.log('Render', _dotlottie_instance_id, _frame_no);
+      },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      observer_on_stop(_dotlottie_instance_id: number): void {
+        console.log('Stop', _dotlottie_instance_id);
+      },
+    };
+
+    DotLottieWasmLoader.load(bridge)
       .then((module) => {
         DotLottie._wasmModule = module;
 
