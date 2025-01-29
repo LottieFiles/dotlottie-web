@@ -1,6 +1,15 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER } from './constants';
-import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker, Fit as CoreFit } from './core';
+import type {
+  DotLottiePlayer,
+  DotLottieBridge,
+  MainModule,
+  Mode as CoreMode,
+  VectorFloat,
+  Marker,
+  Fit as CoreFit,
+} from './core';
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
@@ -105,7 +114,54 @@ export class DotLottie {
       freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
     };
 
-    DotLottieWasmLoader.load()
+    // Create your bridge implementation
+    const bridge: DotLottieBridge = {
+      observer_on_load: (dotlottie_instance_id) => {
+        console.log('Loaded', dotlottie_instance_id);
+      },
+      observer_on_load_error: (dotlottie_instance_id) => {
+        console.log('Error', dotlottie_instance_id);
+      },
+      observer_on_complete: (_dotlottie_instance_id: number) => {
+        console.log('Complete', _dotlottie_instance_id);
+      },
+      observer_on_frame(_dotlottie_instance_id: number, _frame_no: number): void {
+        // console.log('Frame', _dotlottie_instance_id, _frame_no);
+      },
+      observer_on_loop(_dotlottie_instance_id: number, _loop_count: number): void {
+        // console.log('Loop', _dotlottie_instance_id, _loop_count);
+      },
+      observer_on_pause(_dotlottie_instance_id: number): void {
+        console.log('Pause', _dotlottie_instance_id);
+      },
+      observer_on_play(_dotlottie_instance_id: number): void {
+        console.log('Play', _dotlottie_instance_id);
+      },
+      observer_on_render(_dotlottie_instance_id: number, _frame_no: number): void {
+        // console.log('Render', _dotlottie_instance_id, _frame_no);
+      },
+      observer_on_stop(_dotlottie_instance_id: number): void {
+        console.log('Stop', _dotlottie_instance_id);
+      },
+      state_machine_observer_on_custom_event(dotlottie_instance_id: number, message: string): void {
+        console.log('Custom Event', dotlottie_instance_id, message);
+      },
+      state_machine_observer_on_state_entered(dotlottie_instance_id: number, entering_state: string): void {
+        console.log('State Entered', dotlottie_instance_id, entering_state);
+      },
+      state_machine_observer_on_state_exit(dotlottie_instance_id: number, exiting_state: string): void {
+        console.log('State Exit', dotlottie_instance_id, exiting_state);
+      },
+      state_machine_observer_on_transition(
+        dotlottie_instance_id: number,
+        previous_state: string,
+        new_state: string,
+      ): void {
+        console.log('Transition', dotlottie_instance_id, previous_state, new_state);
+      },
+    };
+
+    DotLottieWasmLoader.load(bridge)
       .then((module) => {
         DotLottie._wasmModule = module;
 
