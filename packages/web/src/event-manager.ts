@@ -14,7 +14,12 @@ export type EventType =
   | 'freeze'
   | 'unfreeze'
   | 'render'
-  | 'ready';
+  | 'ready'
+  | 'stateMachineOnCustomEvent'
+  | 'stateMachineOnError'
+  | 'stateMachineOnStateEntered'
+  | 'stateMachineOnStateExit'
+  | 'stateMachineOnTransition';
 
 /**
  * Maps an event type string to its respective event interface.
@@ -45,6 +50,16 @@ type EventByType<T> = T extends 'complete'
   ? RenderEvent
   : T extends 'ready'
   ? ReadyEvent
+  : T extends 'stateMachineOnCustomEvent'
+  ? StateMachineOnCustomEvent
+  : T extends 'stateMachineOnError'
+  ? StateMachineOnErrorEvent
+  : T extends 'stateMachineOnStateEntered'
+  ? StateMachineOnStateEnteredEvent
+  : T extends 'stateMachineOnStateExit'
+  ? StateMachineOnStateExitEvent
+  : T extends 'stateMachineOnTransition'
+  ? StateMachineOnTransitionEvent
   : never;
 
 /**
@@ -139,6 +154,30 @@ export interface StopEvent extends BaseEvent {
 export interface ReadyEvent extends BaseEvent {
   type: 'ready';
 }
+export interface StateMachineOnCustomEvent extends BaseEvent {
+  message: string;
+  type: 'stateMachineOnCustomEvent';
+}
+export interface StateMachineOnErrorEvent extends BaseEvent {
+  message: string;
+  type: 'stateMachineOnError';
+}
+
+export interface StateMachineOnStateEnteredEvent extends BaseEvent {
+  enteringState: string;
+  type: 'stateMachineOnStateEntered';
+}
+
+export interface StateMachineOnStateExitEvent extends BaseEvent {
+  exitingState: string;
+  type: 'stateMachineOnStateExit';
+}
+
+export interface StateMachineOnTransitionEvent extends BaseEvent {
+  newState: string;
+  previousState: string;
+  type: 'stateMachineOnTransition';
+}
 
 /**
  * Type representing all possible event types.
@@ -155,8 +194,8 @@ export type Event =
   | DestroyEvent
   | FreezeEvent
   | UnfreezeEvent
-  | RenderEvent
-  | ReadyEvent;
+  | ReadyEvent
+  | StateMachineOnCustomEvent;
 
 export interface EventListener<T extends EventType> {
   (event: EventByType<T>): void;

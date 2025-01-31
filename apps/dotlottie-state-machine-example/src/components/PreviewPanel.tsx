@@ -119,6 +119,10 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ type }) => {
               }
             }
           });
+
+          themed.addEventListener('stateMachineOnError', (event) => {
+            console.log('State machine error: ', event.message);
+          });
         }
 
         if (mounted) {

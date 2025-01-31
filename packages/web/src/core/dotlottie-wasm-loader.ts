@@ -16,6 +16,7 @@ export interface DotLottieBridge {
   observer_on_render: (dotlottie_instance_id: number, frame_no: number) => void;
   observer_on_stop: (dotlottie_instance_id: number) => void;
   state_machine_observer_on_custom_event: (dotlottie_instance_id: number, message: string) => void;
+  state_machine_observer_on_error: (dotlottie_instance_id: number, message: string) => void;
   state_machine_observer_on_state_entered: (dotlottie_instance_id: number, entering_state: string) => void;
   state_machine_observer_on_state_exit: (dotlottie_instance_id: number, exiting_state: string) => void;
   state_machine_observer_on_transition: (
