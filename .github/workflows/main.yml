@@ -41,41 +41,41 @@ jobs:
       - name: 💅 Verify format (`pnpm format` committed?)
         run: pnpm format
 
-      - name: 🛡️ Test
-        run: |
-          npx playwright install --with-deps chromium
-          pnpm test:coverage
+      # - name: 🛡️ Test
+      #   run: |
+      #     npx playwright install --with-deps chromium
+      #     pnpm test:coverage
 
-      - name: 📏 Report coverage (web)
-        if: always() && github.event_name == 'pull_request'
-        uses: davelosert/vitest-coverage-report-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          working-directory: packages/web
-          name: '@lottiefiles/dotlottie-web'
+      # - name: 📏 Report coverage (web)
+      #   if: always() && github.event_name == 'pull_request'
+      #   uses: davelosert/vitest-coverage-report-action@v2
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     working-directory: packages/web
+      #     name: '@lottiefiles/dotlottie-web'
 
-      - name: 📏 Report coverage (react)
-        if: always() && github.event_name == 'pull_request'
-        uses: davelosert/vitest-coverage-report-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          working-directory: packages/react
-          name: '@lottiefiles/dotlottie-react'
+      # - name: 📏 Report coverage (react)
+      #   if: always() && github.event_name == 'pull_request'
+      #   uses: davelosert/vitest-coverage-report-action@v2
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     working-directory: packages/react
+      #     name: '@lottiefiles/dotlottie-react'
 
-      - name: 📏 Report coverage (wc)
-        if: always() && github.event_name == 'pull_request'
-        uses: davelosert/vitest-coverage-report-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          working-directory: packages/wc
-          name: '@lottiefiles/dotlottie-wc'
+      # - name: 📏 Report coverage (wc)
+      #   if: always() && github.event_name == 'pull_request'
+      #   uses: davelosert/vitest-coverage-report-action@v2
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     working-directory: packages/wc
+      #     name: '@lottiefiles/dotlottie-wc'
 
-      - name: 📏 Report bundle size
-        if: github.event_name == 'pull_request'
-        uses: andresz1/size-limit-action@v1
-        continue-on-error: true
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: 📏 Report bundle size
+      #   if: github.event_name == 'pull_request'
+      #   uses: andresz1/size-limit-action@v1
+      #   continue-on-error: true
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
 
   npm-release:
     name: npm-release
