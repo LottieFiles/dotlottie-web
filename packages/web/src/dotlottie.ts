@@ -93,6 +93,8 @@ export class DotLottie {
 
   private readonly _pointerUpMethod: (event: PointerEvent) => void;
 
+  private readonly _clickMethod: (event: MouseEvent) => void;
+
   private readonly _pointerDownMethod: (event: PointerEvent) => void;
 
   private readonly _pointerMoveMethod: (event: PointerEvent) => void;
@@ -116,48 +118,56 @@ export class DotLottie {
 
     // Create your bridge implementation
     const bridge: DotLottieBridge = {
-      observer_on_load: (dotlottie_instance_id) => {
-        console.log('Loaded', dotlottie_instance_id);
+      observer_on_load: (_dotlottie_instance_id) => {
+        // this load is cause inifite loops
+        // this._eventManager.dispatch({ type: 'load' });
       },
-      observer_on_load_error: (dotlottie_instance_id) => {
-        console.log('Error', dotlottie_instance_id);
+      observer_on_load_error: (_dotlottie_instance_id) => {
+        this._eventManager.dispatch({ type: 'loadError', error: new Error('Error occured during load.') });
       },
       observer_on_complete: (_dotlottie_instance_id: number) => {
-        console.log('Complete', _dotlottie_instance_id);
+        this._eventManager.dispatch({ type: 'complete' });
       },
-      observer_on_frame(_dotlottie_instance_id: number, _frame_no: number): void {
-        // console.log('Frame', _dotlottie_instance_id, _frame_no);
+      observer_on_frame: (_dotlottie_instance_id: number, _frame_no: number) => {
+        this._eventManager.dispatch({ type: 'frame', currentFrame: _frame_no });
       },
-      observer_on_loop(_dotlottie_instance_id: number, _loop_count: number): void {
-        // console.log('Loop', _dotlottie_instance_id, _loop_count);
+      observer_on_loop: (_dotlottie_instance_id: number, _loop_count: number) => {
+        this._eventManager.dispatch({ type: 'loop', loopCount: _loop_count });
       },
-      observer_on_pause(_dotlottie_instance_id: number): void {
-        console.log('Pause', _dotlottie_instance_id);
+      observer_on_pause: (_dotlottie_instance_id: number) => {
+        this._eventManager.dispatch({ type: 'pause' });
       },
-      observer_on_play(_dotlottie_instance_id: number): void {
-        console.log('Play', _dotlottie_instance_id);
+      observer_on_play: (_dotlottie_instance_id: number) => {
+        this._eventManager.dispatch({ type: 'play' });
       },
-      observer_on_render(_dotlottie_instance_id: number, _frame_no: number): void {
-        // console.log('Render', _dotlottie_instance_id, _frame_no);
+      observer_on_render: (_dotlottie_instance_id: number, _frame_no: number) => {
+        this._eventManager.dispatch({ type: 'render', currentFrame: _frame_no });
       },
-      observer_on_stop(_dotlottie_instance_id: number): void {
-        console.log('Stop', _dotlottie_instance_id);
+      observer_on_stop: (_dotlottie_instance_id: number) => {
+        this._eventManager.dispatch({ type: 'stop' });
       },
-      state_machine_observer_on_custom_event(dotlottie_instance_id: number, message: string): void {
-        console.log('Custom Event', dotlottie_instance_id, message);
+      state_machine_observer_on_custom_event: (_dotlottie_instance_id: number, message: string) => {
+        this._eventManager.dispatch({ type: 'stateMachineOnCustomEvent', message });
       },
-      state_machine_observer_on_state_entered(dotlottie_instance_id: number, entering_state: string): void {
-        console.log('State Entered', dotlottie_instance_id, entering_state);
+      state_machine_observer_on_error: (_dotlottie_instance_id: number, message: string) => {
+        this._eventManager.dispatch({ type: 'stateMachineOnError', message });
       },
-      state_machine_observer_on_state_exit(dotlottie_instance_id: number, exiting_state: string): void {
-        console.log('State Exit', dotlottie_instance_id, exiting_state);
+      state_machine_observer_on_state_entered: (_dotlottie_instance_id: number, entering_state: string) => {
+        this._eventManager.dispatch({ type: 'stateMachineOnStateEntered', enteringState: entering_state });
       },
-      state_machine_observer_on_transition(
-        dotlottie_instance_id: number,
+      state_machine_observer_on_state_exit: (_dotlottie_instance_id: number, exiting_state: string) => {
+        this._eventManager.dispatch({ type: 'stateMachineOnStateExit', exitingState: exiting_state });
+      },
+      state_machine_observer_on_transition: (
+        _dotlottie_instance_id: number,
         previous_state: string,
         new_state: string,
-      ): void {
-        console.log('Transition', dotlottie_instance_id, previous_state, new_state);
+      ) => {
+        this._eventManager.dispatch({
+          type: 'stateMachineOnTransition',
+          previousState: previous_state,
+          newState: new_state,
+        });
       },
     };
 
@@ -204,6 +214,8 @@ export class DotLottie {
       });
 
     this._pointerUpMethod = this._onPointerUp.bind(this);
+
+    this._clickMethod = this._onClick.bind(this);
 
     this._pointerDownMethod = this._onPointerDown.bind(this);
 
@@ -290,17 +302,11 @@ export class DotLottie {
         this.resize();
       }
 
-      this._eventManager.dispatch({
-        type: 'frame',
-        currentFrame: this._dotLottieCore.currentFrame(),
-      });
-
       this._render();
 
       if (this._dotLottieCore.config().autoplay) {
         this._dotLottieCore.play();
         if (this._dotLottieCore.isPlaying()) {
-          this._eventManager.dispatch({ type: 'play' });
           this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
         } else {
           console.error('something went wrong, the animation was suppose to autoplay');
@@ -548,11 +554,6 @@ export class DotLottie {
 
       this._context.putImageData(imageData, 0, 0);
 
-      this._eventManager.dispatch({
-        type: 'render',
-        currentFrame: this._dotLottieCore.currentFrame(),
-      });
-
       return true;
     }
 
@@ -579,26 +580,26 @@ export class DotLottie {
        */
       this._previousFrameNb = nextFrame;
 
-      this._eventManager.dispatch({
-        type: 'frame',
-        currentFrame: this._dotLottieCore.currentFrame(),
-      });
+      // this._eventManager.dispatch({
+      //   type: 'frame',
+      //   currentFrame: this._dotLottieCore.currentFrame(),
+      // });
 
-      const rendered = this._render();
+      this._render();
 
-      if (rendered) {
-        // handle loop or complete
-        if (this._dotLottieCore.isComplete()) {
-          if (this._dotLottieCore.config().loopAnimation) {
-            this._eventManager.dispatch({
-              type: 'loop',
-              loopCount: this._dotLottieCore.loopCount(),
-            });
-          } else {
-            this._eventManager.dispatch({ type: 'complete' });
-          }
-        }
-      }
+      // if (rendered) {
+      //   // handle loop or complete
+      //   if (this._dotLottieCore.isComplete()) {
+      //     if (this._dotLottieCore.config().loopAnimation) {
+      //       this._eventManager.dispatch({
+      //         type: 'loop',
+      //         loopCount: this._dotLottieCore.loopCount(),
+      //       });
+      //     } else {
+      //       this._eventManager.dispatch({ type: 'complete' });
+      //     }
+      //   }
+      // }
     }
 
     this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
@@ -611,7 +612,7 @@ export class DotLottie {
 
     if (ok || this._dotLottieCore.isPlaying()) {
       this._isFrozen = false;
-      this._eventManager.dispatch({ type: 'play' });
+      // this._eventManager.dispatch({ type: 'play' });
       this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
     }
 
@@ -636,7 +637,7 @@ export class DotLottie {
     const ok = this._dotLottieCore.pause();
 
     if (ok || this._dotLottieCore.isPaused()) {
-      this._eventManager.dispatch({ type: 'pause' });
+      // this._eventManager.dispatch({ type: 'pause' });
     }
   }
 
@@ -646,11 +647,11 @@ export class DotLottie {
     const ok = this._dotLottieCore.stop();
 
     if (ok) {
-      this._eventManager.dispatch({ type: 'frame', currentFrame: this._dotLottieCore.currentFrame() });
+      // this._eventManager.dispatch({ type: 'frame', currentFrame: this._dotLottieCore.currentFrame() });
 
       this._render();
 
-      this._eventManager.dispatch({ type: 'stop' });
+      // this._eventManager.dispatch({ type: 'stop' });
     }
   }
 
@@ -662,7 +663,7 @@ export class DotLottie {
     const ok = this._dotLottieCore.seek(frame);
 
     if (ok) {
-      this._eventManager.dispatch({ type: 'frame', currentFrame: this._dotLottieCore.currentFrame() });
+      // this._eventManager.dispatch({ type: 'frame', currentFrame: this._dotLottieCore.currentFrame() });
 
       this._render();
     }
@@ -954,7 +955,7 @@ export class DotLottie {
     return stopped;
   }
 
-  private _getPointerPosition(event: PointerEvent): { x: number; y: number } {
+  private _getPointerPosition(event: MouseEvent | PointerEvent): { x: number; y: number } {
     const rect = (this._canvas as HTMLCanvasElement).getBoundingClientRect();
     const scaleX = this._canvas.width / rect.width;
     const scaleY = this._canvas.height / rect.height;
@@ -962,10 +963,13 @@ export class DotLottie {
     const x = (event.clientX - rect.left) * scaleX;
     const y = (event.clientY - rect.top) * scaleY;
 
-    return {
-      x,
-      y,
-    };
+    return { x, y };
+  }
+
+  private _onClick(event: MouseEvent): void {
+    const { x, y } = this._getPointerPosition(event);
+
+    this.stateMachinePostClickEvent(x, y);
   }
 
   private _onPointerUp(event: PointerEvent): void {
@@ -996,6 +1000,10 @@ export class DotLottie {
     const { x, y } = this._getPointerPosition(event);
 
     this.stateMachinePostPointerExitEvent(x, y);
+  }
+
+  public stateMachinePostClickEvent(x: number, y: number): number | undefined {
+    return this._dotLottieCore?.stateMachinePostClickEvent(x, y);
   }
 
   public stateMachinePostPointerDownEvent(x: number, y: number): number | undefined {
@@ -1035,6 +1043,10 @@ export class DotLottie {
   private _setupStateMachineListeners(): void {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this._dotLottieCore !== null && this.isLoaded) {
       const listeners = this.getStateMachineListeners();
+
+      if (listeners.includes('Click')) {
+        this._canvas.addEventListener('click', this._clickMethod);
+      }
 
       if (listeners.includes('PointerUp')) {
         this._canvas.addEventListener('pointerup', this._pointerUpMethod);
@@ -1088,6 +1100,10 @@ export class DotLottie {
       width,
       height,
     };
+  }
+
+  public stateMachineOverrideCurrentState(state: string, do_tick: boolean): boolean {
+    return this._dotLottieCore?.stateMachineOverrideCurrentState(state, do_tick) ?? false;
   }
 
   public stateMachineSetBooleanTrigger(name: string, value: boolean): boolean {

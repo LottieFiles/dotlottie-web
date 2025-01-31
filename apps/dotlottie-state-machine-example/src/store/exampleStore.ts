@@ -137,7 +137,7 @@ const examples: InteractivityExample[] = [
         ],
         listeners: [
           {
-            type: 'PointerDown',
+            type: 'Click',
             layerName: 'star1',
             actions: [
               {
@@ -148,7 +148,7 @@ const examples: InteractivityExample[] = [
             ],
           },
           {
-            type: 'PointerDown',
+            type: 'Click',
             layerName: 'star2',
             actions: [
               {
@@ -159,7 +159,7 @@ const examples: InteractivityExample[] = [
             ],
           },
           {
-            type: 'PointerDown',
+            type: 'Click',
             layerName: 'star3',
             actions: [
               {
@@ -170,7 +170,7 @@ const examples: InteractivityExample[] = [
             ],
           },
           {
-            type: 'PointerDown',
+            type: 'Click',
             layerName: 'star4',
             actions: [
               {
@@ -181,7 +181,7 @@ const examples: InteractivityExample[] = [
             ],
           },
           {
-            type: 'PointerDown',
+            type: 'Click',
             layerName: 'star5',
             actions: [
               {
