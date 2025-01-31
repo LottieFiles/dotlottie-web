@@ -16,6 +16,11 @@ import type {
   RenderEvent,
   StopEvent,
   UnfreezeEvent,
+  StateMachineOnCustomEvent,
+  StateMachineOnStateEnteredEvent,
+  StateMachineOnErrorEvent,
+  StateMachineOnStateExitEvent,
+  StateMachineOnTransitionEvent,
 } from '../event-manager';
 
 import type { DotLottieInstanceState } from './dotlottie';
@@ -191,6 +196,71 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
 
     self.postMessage(response);
   },
+  stateMachineOnCustomEvent: (instanceId: string) => (event: Event) => {
+    const stateMachineOnCustomEvent = event as StateMachineOnCustomEvent;
+    const response: RpcResponse<'onStateMachineCustomEvent'> = {
+      id: '',
+      method: 'onStateMachineCustomEvent',
+      result: {
+        instanceId,
+        event: stateMachineOnCustomEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineOnError: (instanceId: string) => (event: Event) => {
+    const stateMachineOnErrorEvent = event as StateMachineOnErrorEvent;
+    const response: RpcResponse<'onStateMachineErrorEvent'> = {
+      id: '',
+      method: 'onStateMachineErrorEvent',
+      result: {
+        instanceId,
+        event: stateMachineOnErrorEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineOnStateEntered: (instanceId: string) => (event: Event) => {
+    const stateMachineOnStateEntered = event as StateMachineOnStateEnteredEvent;
+    const response: RpcResponse<'onStateMachineStateEnteredEvent'> = {
+      id: '',
+      method: 'onStateMachineStateEnteredEvent',
+      result: {
+        instanceId,
+        event: stateMachineOnStateEntered,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineOnStateExit: (instanceId: string) => (event: Event) => {
+    const stateMachineOnStateExitEvent = event as StateMachineOnStateExitEvent;
+    const response: RpcResponse<'onStateMachineStateExitEvent'> = {
+      id: '',
+      method: 'onStateMachineStateExitEvent',
+      result: {
+        instanceId,
+        event: stateMachineOnStateExitEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineOnTransition: (instanceId: string) => (event: Event) => {
+    const stateMachineOnTransitionEvent = event as StateMachineOnTransitionEvent;
+    const response: RpcResponse<'onStateMachineTransitionEvent'> = {
+      id: '',
+      method: 'onStateMachineTransitionEvent',
+      result: {
+        instanceId,
+        event: stateMachineOnTransitionEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
 };
 
 const commands: {
@@ -294,6 +364,11 @@ const commands: {
       'unfreeze',
       'render',
       'ready',
+      'stateMachineOnCustomEvent',
+      'stateMachineOnError',
+      'stateMachineOnStateEntered',
+      'stateMachineOnStateExit',
+      'stateMachineOnTransition',
     ];
 
     events.forEach((event) => {

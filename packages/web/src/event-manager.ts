@@ -195,7 +195,12 @@ export type Event =
   | FreezeEvent
   | UnfreezeEvent
   | ReadyEvent
-  | StateMachineOnCustomEvent;
+  | RenderEvent
+  | StateMachineOnCustomEvent
+  | StateMachineOnErrorEvent
+  | StateMachineOnStateEnteredEvent
+  | StateMachineOnStateExitEvent
+  | StateMachineOnTransitionEvent;
 
 export interface EventListener<T extends EventType> {
   (event: EventByType<T>): void;

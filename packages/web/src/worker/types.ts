@@ -10,6 +10,11 @@ import type {
   PlayEvent,
   ReadyEvent,
   RenderEvent,
+  StateMachineOnCustomEvent,
+  StateMachineOnErrorEvent,
+  StateMachineOnStateEnteredEvent,
+  StateMachineOnStateExitEvent,
+  StateMachineOnTransitionEvent,
   StopEvent,
   UnfreezeEvent,
 } from '../event-manager';
@@ -263,6 +268,26 @@ export interface MethodResultMap {
   };
   onRender: {
     event: RenderEvent;
+    instanceId: string;
+  };
+  onStateMachineCustomEvent: {
+    event: StateMachineOnCustomEvent;
+    instanceId: string;
+  };
+  onStateMachineErrorEvent: {
+    event: StateMachineOnErrorEvent;
+    instanceId: string;
+  };
+  onStateMachineStateEnteredEvent: {
+    event: StateMachineOnStateEnteredEvent;
+    instanceId: string;
+  };
+  onStateMachineStateExitEvent: {
+    event: StateMachineOnStateExitEvent;
+    instanceId: string;
+  };
+  onStateMachineTransitionEvent: {
+    event: StateMachineOnTransitionEvent;
     instanceId: string;
   };
   onStop: {
