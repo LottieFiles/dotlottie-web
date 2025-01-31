@@ -1,5 +1,18 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.2.0-beta.5
+
+### Minor Changes
+
+- 0f66cee: added dotlottie-worker fixes
+- 7bf1e4f: adds click listener type, state machine observers and override state method
+
+### Patch Changes
+
+- Updated dependencies [0f66cee]
+- Updated dependencies [7bf1e4f]
+  - @lottiefiles/dotlottie-web@0.39.0-beta.5
+
 ## 0.2.0-beta.4
 
 ### Minor Changes
