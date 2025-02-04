@@ -4,7 +4,7 @@ import type { DotLottieWC } from '@lottiefiles/dotlottie-wc';
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
 setWasmUrl(new URL('../../../packages/web/src/core/dotlottie-player.wasm', import.meta.url).href);
 
-const elementName = 'dotlottie-worker-wc';
+const elementName = 'dotlottie-wc';
 
 const app = document.querySelector<HTMLDivElement>('#app');
 
@@ -15,6 +15,7 @@ if (app) {
     <button id="stop">Stop</button>
     <button id="create">Create</button>
     <button id="destroy">Destroy</button>
+    <button id="sm">Load SM</button>
     <button id="move">Move</button>
     <div id="container"></div>
   `;
@@ -25,6 +26,7 @@ const pauseButton = document.querySelector('#pause');
 const stopButton = document.querySelector('#stop');
 const createButton = document.querySelector('#create');
 const destroyButton = document.querySelector('#destroy');
+const loadSmButton = document.querySelector('#sm');
 const moveButton = document.querySelector('#move');
 const container = document.querySelector('#container');
 
@@ -49,11 +51,17 @@ if (stopButton) {
 function create(): void {
   const dotlottieComponent = document.createElement(elementName) as DotLottieWC;
 
-  // eslint-disable-next-line no-secrets/no-secrets
-  dotlottieComponent.src = 'https://lottie.host/0e2d86ab-604d-4fc4-8512-d44a30eb81a8/YFj05ZHqHA.json';
-  dotlottieComponent.autoplay = true;
+  dotlottieComponent.src = '/sm_star_rating.lottie';
   dotlottieComponent.loop = true;
+  dotlottieComponent.autoplay = true;
   container?.appendChild(dotlottieComponent);
+}
+
+function loadSM(): void {
+  const dotlottieComponent = document.querySelector(elementName) as DotLottieWC;
+
+  dotlottieComponent.dotLottie?.pause();
+  dotlottieComponent.setAttribute('stateMachineId', 'starRating');
 }
 
 function destroy(): void {
@@ -82,6 +90,12 @@ if (createButton) {
 if (destroyButton) {
   destroyButton.addEventListener('click', () => {
     destroy();
+  });
+}
+
+if (loadSmButton) {
+  loadSmButton.addEventListener('click', () => {
+    loadSM();
   });
 }
 
