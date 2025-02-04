@@ -20,6 +20,7 @@
     "@lottiefiles/dotlottie-web": "0.38.2"
   },
   "changesets": [
+    "brave-yaks-pay",
     "curly-seahorses-teach",
     "new-students-bow",
     "orange-pears-build",

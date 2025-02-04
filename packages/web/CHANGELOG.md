@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.39.0-beta.6
+
+### Patch Changes
+
+- 4ddd970: statemachineid prop can start the sm automatically
+
 ## 0.39.0-beta.5
 
 ### Minor Changes
