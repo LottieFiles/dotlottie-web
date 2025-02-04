@@ -304,7 +304,12 @@ export class DotLottie {
 
       this._render();
 
-      if (this._dotLottieCore.config().autoplay) {
+      if (this._dotLottieCore.config().stateMachineId) {
+        this.stateMachineLoad(this._dotLottieCore.config().stateMachineId.toString());
+        this.stateMachineStart();
+      }
+
+      if (this._dotLottieCore.config().autoplay && !this._dotLottieCore.config().stateMachineId) {
         this._dotLottieCore.play();
         if (this._dotLottieCore.isPlaying()) {
           this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
