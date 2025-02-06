@@ -89,7 +89,9 @@ export class DotLottie {
 
   private _stateMachineIsActive: boolean = false;
 
-  private _previousFrameNb: number = 0;
+  private _previousFrameNb: number = -1;
+
+  private _stateMachineId: string = '';
 
   private readonly _pointerUpMethod: (event: PointerEvent) => void;
 
@@ -177,7 +179,7 @@ export class DotLottie {
 
         this._dotLottieCore = new module.DotLottiePlayer({
           themeId: config.themeId ?? '',
-          stateMachineId: config.stateMachineId ?? '',
+          stateMachineId: '',
           autoplay: config.autoplay ?? false,
           backgroundColor: 0,
           loopAnimation: config.loop ?? false,
@@ -195,6 +197,11 @@ export class DotLottie {
         });
 
         this._eventManager.dispatch({ type: 'ready' });
+
+        // The state machine is active if a state machine id is provided
+        if (config.stateMachineId) {
+          this._stateMachineId = config.stateMachineId;
+        }
 
         if (config.data) {
           this._loadFromData(config.data);
@@ -304,18 +311,24 @@ export class DotLottie {
 
       this._render();
 
-      if (this._dotLottieCore.config().stateMachineId) {
-        this.stateMachineLoad(this._dotLottieCore.config().stateMachineId.toString());
-        this.stateMachineStart();
-      }
-
-      if (this._dotLottieCore.config().autoplay && !this._dotLottieCore.config().stateMachineId) {
+      if (this._dotLottieCore.config().autoplay) {
         this._dotLottieCore.play();
         if (this._dotLottieCore.isPlaying()) {
           this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
         } else {
           console.error('something went wrong, the animation was suppose to autoplay');
         }
+      }
+
+      /**
+       * DotLottie was created with state machine id.
+       *
+       * Load and start the state machine. We manually perform this rather than pass it to the DotLottieCore to
+       * prevent rendering discrepancies.
+       */
+      if (this._stateMachineId) {
+        this.stateMachineLoad(this._stateMachineId);
+        this.stateMachineStart();
       }
 
       if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
@@ -526,10 +539,11 @@ export class DotLottie {
         : DotLottie._wasmModule.createDefaultLayout(),
     });
 
-    if (config.data) {
-      this._loadFromData(config.data);
-    } else if (config.src) {
-      this._loadFromSrc(config.src);
+    // SetConfig does not manage loading and starting state machines, so we do it here.
+    if (config.stateMachineId) {
+      this._stateMachineId = config.stateMachineId;
+      this.stateMachineLoad(config.stateMachineId);
+      this.stateMachineStart();
     }
 
     this.setBackgroundColor(config.backgroundColor ?? '');
@@ -1139,8 +1153,8 @@ export class DotLottie {
     this._dotLottieCore?.stateMachineFireEvent(eventName);
   }
 
-  public stateMachineCurrentState(): string | undefined {
-    return this._dotLottieCore?.stateMachineCurrentState();
+  public stateMachineCurrentState(): string {
+    return this._dotLottieCore?.stateMachineCurrentState() ?? '';
   }
 
   /**
