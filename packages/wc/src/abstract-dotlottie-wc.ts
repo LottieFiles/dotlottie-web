@@ -188,6 +188,7 @@ export abstract class AbstractDotLottieWC<T extends DotLottie | DotLottieWorker>
         renderConfig: this.renderConfig,
         useFrameInterpolation: this.useFrameInterpolation,
         themeId: this.themeId,
+        stateMachineId: this.stateMachineId,
       });
     }
 

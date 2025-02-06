@@ -4,7 +4,7 @@ import type { DotLottieWC } from '@lottiefiles/dotlottie-wc';
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
 setWasmUrl(new URL('../../../packages/web/src/core/dotlottie-player.wasm', import.meta.url).href);
 
-const elementName = 'dotlottie-wc';
+const elementName = 'dotlottie-worker-wc';
 
 const app = document.querySelector<HTMLDivElement>('#app');
 
@@ -51,17 +51,15 @@ if (stopButton) {
 function create(): void {
   const dotlottieComponent = document.createElement(elementName) as DotLottieWC;
 
-  dotlottieComponent.src = '/sm_star_rating.lottie';
-  dotlottieComponent.loop = true;
-  dotlottieComponent.autoplay = true;
+  // eslint-disable-next-line no-secrets/no-secrets
+  dotlottieComponent.src = 'https://asset-cdn.lottiefiles.dev/1452b1e1-1d27-4394-a39a-a3c838e2b477/aUwJ8LNLZd.lottie';
   container?.appendChild(dotlottieComponent);
 }
 
 function loadSM(): void {
   const dotlottieComponent = document.querySelector(elementName) as DotLottieWC;
 
-  dotlottieComponent.dotLottie?.pause();
-  dotlottieComponent.setAttribute('stateMachineId', 'starRating');
+  dotlottieComponent.setAttribute('statemachineid', 'StateMachine1');
 }
 
 function destroy(): void {
