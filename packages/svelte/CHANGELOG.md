@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-svelte
 
+## 0.5.0-beta.7
+
+### Patch Changes
+
+- f6f39be: fix for using state machine prop at creation.
+- Updated dependencies [f6f39be]
+  - @lottiefiles/dotlottie-web@0.39.0-beta.7
+
 ## 0.5.0-beta.6
 
 ### Patch Changes
