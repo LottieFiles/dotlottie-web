@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.39.0-beta.7
+
+### Patch Changes
+
+- f6f39be: fix for using state machine prop at creation.
+
 ## 0.39.0-beta.6
 
 ### Patch Changes
