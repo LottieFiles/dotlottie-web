@@ -1,0 +1,22 @@
+{
+  "mode": "pre",
+  "tag": "dev",
+  "initialVersions": {
+    "dotlottie-next-example": "0.0.0",
+    "dotlottie-react-example": "0.0.0",
+    "dotlottie-solid-example": "0.0.0",
+    "dotlottie-viewer": "0.0.1",
+    "dotlottie-vue-example": "0.0.0",
+    "dotlottie-wc-example": "0.0.0",
+    "dotlottie-web-example": "0.0.0",
+    "dotlottie-web-node-example": "0.0.0",
+    "with-parcel-example": "0.0.0",
+    "@lottiefiles/dotlottie-react": "0.12.3",
+    "@lottiefiles/dotlottie-solid": "0.1.7",
+    "@lottiefiles/dotlottie-svelte": "0.4.6",
+    "@lottiefiles/dotlottie-vue": "0.5.6",
+    "@lottiefiles/dotlottie-wc": "0.4.4",
+    "@lottiefiles/dotlottie-web": "0.40.1"
+  },
+  "changesets": []
+}
