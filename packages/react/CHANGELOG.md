@@ -1,5 +1,16 @@
 # @lottiefiles/dotlottie-react
 
+## 0.13.0-beta.8
+
+### Minor Changes
+
+- 1683077: added additional trigger change listeners
+
+### Patch Changes
+
+- Updated dependencies [1683077]
+  - @lottiefiles/dotlottie-web@0.39.0-beta.8
+
 ## 0.13.0-beta.7
 
 ### Patch Changes
