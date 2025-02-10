@@ -205,6 +205,12 @@ export class DotLottie {
           newValue: new_value,
         });
       },
+      state_machine_observer_on_trigger_fired: (_dotlottie_instance_id: number, trigger_name: string) => {
+        this._eventManager.dispatch({
+          type: 'stateMachineTriggerFired',
+          triggerName: trigger_name,
+        });
+      },
       state_machine_observer_on_string_trigger_value_change: (
         _dotlottie_instance_id: number,
         trigger_name: string,

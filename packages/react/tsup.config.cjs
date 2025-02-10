@@ -1,6 +1,6 @@
 const { defineConfig } = require('tsup');
 
-module.exports = defineConfig({
+const config = {
   bundle: true,
   metafile: false,
   splitting: false,
@@ -15,4 +15,16 @@ module.exports = defineConfig({
   target: ['es2020'],
   tsconfig: 'tsconfig.build.json',
   external: ['react'],
-});
+};
+
+module.exports = defineConfig([
+  config,
+  // CDN build: Self-contained
+  {
+    ...config,
+    dts: false,
+    format: ['esm'],
+    noExternal: Object.keys(require('./package.json').dependencies),
+    outDir: 'dist/browser',
+  },
+]);
