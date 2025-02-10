@@ -10,11 +10,16 @@ import type {
   PlayEvent,
   ReadyEvent,
   RenderEvent,
-  StateMachineOnCustomEvent,
-  StateMachineOnErrorEvent,
-  StateMachineOnStateEnteredEvent,
-  StateMachineOnStateExitEvent,
-  StateMachineOnTransitionEvent,
+  StateMachineBooleanTriggerValueChangeEvent,
+  StateMachineCustomEvent,
+  StateMachineErrorEvent,
+  StateMachineNumericTriggerValueChangeEvent,
+  StateMachineStartEvent,
+  StateMachineStateEnteredEvent,
+  StateMachineStateExitEvent,
+  StateMachineStopEvent,
+  StateMachineStringTriggerValueChangeEvent,
+  StateMachineTransitionEvent,
   StopEvent,
   UnfreezeEvent,
 } from '../event-manager';
@@ -270,25 +275,60 @@ export interface MethodResultMap {
     event: RenderEvent;
     instanceId: string;
   };
+  onStateMachineBooleanTriggerValueChange: {
+    event: StateMachineBooleanTriggerValueChangeEvent;
+    instanceId: string;
+    newValue: boolean;
+    oldValue: boolean;
+    triggerName: string;
+  };
   onStateMachineCustomEvent: {
-    event: StateMachineOnCustomEvent;
+    event: StateMachineCustomEvent;
     instanceId: string;
   };
-  onStateMachineErrorEvent: {
-    event: StateMachineOnErrorEvent;
+  onStateMachineError: {
+    event: StateMachineErrorEvent;
+    instanceId: string;
+    message: string;
+  };
+  onStateMachineNumericTriggerValueChange: {
+    event: StateMachineNumericTriggerValueChangeEvent;
+    instanceId: string;
+    newValue: number;
+    oldValue: number;
+    triggerName: string;
+  };
+
+  onStateMachineStart: {
+    event: StateMachineStartEvent;
     instanceId: string;
   };
-  onStateMachineStateEnteredEvent: {
-    event: StateMachineOnStateEnteredEvent;
+  onStateMachineStateEntered: {
+    enteringState: string;
+    event: StateMachineStateEnteredEvent;
     instanceId: string;
   };
-  onStateMachineStateExitEvent: {
-    event: StateMachineOnStateExitEvent;
+  onStateMachineStateExit: {
+    event: StateMachineStateExitEvent;
+    exitingState: string;
     instanceId: string;
   };
-  onStateMachineTransitionEvent: {
-    event: StateMachineOnTransitionEvent;
+  onStateMachineStop: {
+    event: StateMachineStopEvent;
     instanceId: string;
+  };
+  onStateMachineStringTriggerValueChange: {
+    event: StateMachineStringTriggerValueChangeEvent;
+    instanceId: string;
+    newValue: string;
+    oldValue: string;
+    triggerName: string;
+  };
+  onStateMachineTransition: {
+    event: StateMachineTransitionEvent;
+    instanceId: string;
+    newState: string;
+    previousState: string;
   };
   onStop: {
     event: StopEvent;
@@ -330,6 +370,7 @@ export interface MethodResultMap {
   stateMachineSetBooleanTrigger: boolean | undefined;
   stateMachineSetNumericTrigger: boolean | undefined;
   stateMachineSetStringTrigger: boolean | undefined;
+  stateMachineSetupListeners: void;
   stateMachineStart: boolean;
   stateMachineStop: boolean;
   stop: void;

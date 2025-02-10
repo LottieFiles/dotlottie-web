@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-namespace */
-/* eslint-disable typescript-sort-keys/interface */
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
   let HEAPF32: unknown;
@@ -29,24 +28,24 @@ export interface VectorFloat extends ClassHandle {
   get(_0: number): number | undefined;
   push_back(_0: number): void;
   resize(_0: number, _1: number): void;
-  size(): number;
   set(_0: number, _1: number): boolean;
+  size(): number;
 }
 
 export interface VectorMarker extends ClassHandle {
   get(_0: number): Marker | undefined;
   push_back(_0: Marker): void;
   resize(_0: number, _1: Marker): void;
-  size(): number;
   set(_0: number, _1: Marker): boolean;
+  size(): number;
 }
 
 export interface VectorString extends ClassHandle {
   get(_0: number): EmbindString | undefined;
   push_back(_0: EmbindString): void;
   resize(_0: number, _1: EmbindString): void;
-  size(): number;
   set(_0: number, _1: EmbindString): boolean;
+  size(): number;
 }
 
 export interface ModeValue<T extends number> {
@@ -68,64 +67,64 @@ export interface DotLottiePlayer extends ClassHandle {
   activeAnimationId(): string;
   activeStateMachineId(): string;
   activeThemeId(): string;
+  animationSize(): VectorFloat;
+  buffer(): unknown;
   clear(): void;
+  config(): Config;
+  currentFrame(): number;
+  duration(): number;
+  getLayerBounds(_0: EmbindString): VectorFloat;
+  getStateMachine(_0: EmbindString): string;
+  instanceId(): number;
+  isComplete(): boolean;
   isLoaded(): boolean;
   isPaused(): boolean;
   isPlaying(): boolean;
   isStopped(): boolean;
-  pause(): boolean;
-  play(): boolean;
-  render(): boolean;
-  stop(): boolean;
-  isComplete(): boolean;
-  resetTheme(): boolean;
-  stateMachineStart(): boolean;
-  stateMachineStop(): boolean;
-  setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
-  loopCount(): number;
-  resize(_0: number, _1: number): boolean;
-  instanceId(): number;
-  currentFrame(): number;
-  duration(): number;
-  requestFrame(): number;
-  setFrame(_0: number): boolean;
-  seek(_0: number): boolean;
-  totalFrames(): number;
-  segmentDuration(): number;
-  stateMachinePostClickEvent(_0: number, _1: number): number;
-  stateMachinePostPointerDownEvent(_0: number, _1: number): number;
-  stateMachinePostPointerUpEvent(_0: number, _1: number): number;
-  stateMachinePostPointerMoveEvent(_0: number, _1: number): number;
-  stateMachinePostPointerEnterEvent(_0: number, _1: number): number;
-  stateMachinePostPointerExitEvent(_0: number, _1: number): number;
-  config(): Config;
-  setConfig(_0: Config): void;
+  loadAnimation(_0: EmbindString, _1: number, _2: number): boolean;
   loadAnimationData(_0: EmbindString, _1: number, _2: number): boolean;
   loadAnimationPath(_0: EmbindString, _1: number, _2: number): boolean;
   loadDotLottieData(_0: EmbindString, _1: number, _2: number): boolean;
-  loadAnimation(_0: EmbindString, _1: number, _2: number): boolean;
+  loopCount(): number;
   manifestString(): string;
+  markers(): VectorMarker;
+  pause(): boolean;
+  play(): boolean;
+  render(): boolean;
+  requestFrame(): number;
+  resetTheme(): boolean;
+  resize(_0: number, _1: number): boolean;
+  seek(_0: number): boolean;
+  segmentDuration(): number;
+  setConfig(_0: Config): void;
+  setFrame(_0: number): boolean;
+  setSlots(_0: EmbindString): boolean;
   setTheme(_0: EmbindString): boolean;
   setThemeData(_0: EmbindString): boolean;
-  setSlots(_0: EmbindString): boolean;
-  markers(): VectorMarker;
-  stateMachineFrameworkSetup(): VectorString;
-  stateMachineLoad(_0: EmbindString): boolean;
-  stateMachineLoadData(_0: EmbindString): boolean;
+  setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
+  stateMachineCurrentState(): string;
   stateMachineFireEvent(_0: EmbindString): void;
-  stateMachineSetNumericTrigger(_0: EmbindString, _1: number): boolean;
-  stateMachineSetStringTrigger(_0: EmbindString, _1: EmbindString): boolean;
+  stateMachineFrameworkSetup(): VectorString;
   stateMachineGetBooleanTrigger(_0: EmbindString): boolean;
   stateMachineGetNumericTrigger(_0: EmbindString): number;
   stateMachineGetStringTrigger(_0: EmbindString): string;
-  stateMachineSetBooleanTrigger(_0: EmbindString, _1: boolean): boolean;
-  getLayerBounds(_0: EmbindString): VectorFloat;
-  getStateMachine(_0: EmbindString): string;
-  animationSize(): VectorFloat;
-  stateMachineCurrentState(): string;
+  stateMachineLoad(_0: EmbindString): boolean;
+  stateMachineLoadData(_0: EmbindString): boolean;
   stateMachineOverrideCurrentState(_0: EmbindString, _1: boolean): boolean;
+  stateMachinePostClickEvent(_0: number, _1: number): number;
+  stateMachinePostPointerDownEvent(_0: number, _1: number): number;
+  stateMachinePostPointerEnterEvent(_0: number, _1: number): number;
+  stateMachinePostPointerExitEvent(_0: number, _1: number): number;
+  stateMachinePostPointerMoveEvent(_0: number, _1: number): number;
+  stateMachinePostPointerUpEvent(_0: number, _1: number): number;
+  stateMachineSetBooleanTrigger(_0: EmbindString, _1: boolean): boolean;
+  stateMachineSetNumericTrigger(_0: EmbindString, _1: number): boolean;
+  stateMachineSetStringTrigger(_0: EmbindString, _1: EmbindString): boolean;
+  stateMachineStart(): boolean;
   stateMachineStatus(): string;
-  buffer(): unknown;
+  stateMachineStop(): boolean;
+  stop(): boolean;
+  totalFrames(): number;
 }
 
 export interface Marker {
@@ -139,13 +138,13 @@ export interface Config {
   backgroundColor: number;
   layout: Layout;
   loopAnimation: boolean;
-  useFrameInterpolation: boolean;
+  marker: EmbindString;
+  mode: Mode;
   segment: VectorFloat;
   speed: number;
-  mode: Mode;
   stateMachineId: EmbindString;
   themeId: EmbindString;
-  marker: EmbindString;
+  useFrameInterpolation: boolean;
 }
 
 interface EmbindModule {
@@ -160,18 +159,18 @@ interface EmbindModule {
     FitWidth: FitValue<4>;
     None: FitValue<6>;
   };
-  Mode: { Forward: ModeValue<1>; Reverse: ModeValue<2>; Bounce: ModeValue<3>; ReverseBounce: ModeValue<4> };
-  VectorString: {
-    new (): VectorString;
+  Mode: { Bounce: ModeValue<3>; Forward: ModeValue<1>; Reverse: ModeValue<2>; ReverseBounce: ModeValue<4> };
+  VectorFloat: {
+    new (): VectorFloat;
   };
   VectorMarker: {
     new (): VectorMarker;
   };
-  createDefaultLayout(): Layout;
-  VectorFloat: {
-    new (): VectorFloat;
+  VectorString: {
+    new (): VectorString;
   };
   createDefaultConfig(): Config;
+  createDefaultLayout(): Layout;
   transformThemeToLottieSlots(_0: EmbindString, _1: EmbindString): string;
 }
 

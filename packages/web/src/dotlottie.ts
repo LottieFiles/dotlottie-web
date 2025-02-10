@@ -149,16 +149,16 @@ export class DotLottie {
         this._eventManager.dispatch({ type: 'stop' });
       },
       state_machine_observer_on_custom_event: (_dotlottie_instance_id: number, message: string) => {
-        this._eventManager.dispatch({ type: 'stateMachineOnCustomEvent', message });
+        this._eventManager.dispatch({ type: 'stateMachineCustomEvent', message });
       },
       state_machine_observer_on_error: (_dotlottie_instance_id: number, message: string) => {
-        this._eventManager.dispatch({ type: 'stateMachineOnError', message });
+        this._eventManager.dispatch({ type: 'stateMachineError', message });
       },
       state_machine_observer_on_state_entered: (_dotlottie_instance_id: number, entering_state: string) => {
-        this._eventManager.dispatch({ type: 'stateMachineOnStateEntered', enteringState: entering_state });
+        this._eventManager.dispatch({ type: 'stateMachineStateEntered', enteringState: entering_state });
       },
       state_machine_observer_on_state_exit: (_dotlottie_instance_id: number, exiting_state: string) => {
-        this._eventManager.dispatch({ type: 'stateMachineOnStateExit', exitingState: exiting_state });
+        this._eventManager.dispatch({ type: 'stateMachineStateExit', exitingState: exiting_state });
       },
       state_machine_observer_on_transition: (
         _dotlottie_instance_id: number,
@@ -166,9 +166,56 @@ export class DotLottie {
         new_state: string,
       ) => {
         this._eventManager.dispatch({
-          type: 'stateMachineOnTransition',
+          type: 'stateMachineTransition',
           previousState: previous_state,
           newState: new_state,
+        });
+      },
+      state_machine_observer_on_start: (_dotlottie_instance_id: number) => {
+        this._stateMachineIsActive = true;
+        this._eventManager.dispatch({ type: 'stateMachineStart' });
+      },
+      state_machine_observer_on_stop: (_dotlottie_instance_id: number) => {
+        this._stateMachineIsActive = false;
+        this._eventManager.dispatch({ type: 'stateMachineStop' });
+      },
+      state_machine_observer_on_boolean_trigger_value_change: (
+        _dotlottie_instance_id: number,
+        trigger_name: string,
+        old_value: boolean,
+        new_value: boolean,
+      ) => {
+        this._eventManager.dispatch({
+          type: 'stateMachineBooleanTriggerValueChange',
+          triggerName: trigger_name,
+          oldValue: old_value,
+          newValue: new_value,
+        });
+      },
+      state_machine_observer_on_numeric_trigger_value_change: (
+        _dotlottie_instance_id: number,
+        trigger_name: string,
+        old_value: number,
+        new_value: number,
+      ) => {
+        this._eventManager.dispatch({
+          type: 'stateMachineNumericTriggerValueChange',
+          triggerName: trigger_name,
+          oldValue: old_value,
+          newValue: new_value,
+        });
+      },
+      state_machine_observer_on_string_trigger_value_change: (
+        _dotlottie_instance_id: number,
+        trigger_name: string,
+        old_value: string,
+        new_value: string,
+      ) => {
+        this._eventManager.dispatch({
+          type: 'stateMachineStringTriggerValueChange',
+          triggerName: trigger_name,
+          oldValue: old_value,
+          newValue: new_value,
         });
       },
     };
@@ -522,7 +569,7 @@ export class DotLottie {
 
     this._dotLottieCore.setConfig({
       themeId: config.themeId ?? '',
-      stateMachineId: config.stateMachineId ?? '',
+      stateMachineId: '',
       autoplay: config.autoplay ?? false,
       backgroundColor: 0,
       loopAnimation: config.loop ?? false,
@@ -544,6 +591,10 @@ export class DotLottie {
       this._stateMachineId = config.stateMachineId;
       this.stateMachineLoad(config.stateMachineId);
       this.stateMachineStart();
+    }
+
+    if (this._dotLottieCore.config().autoplay) {
+      this._dotLottieCore.play();
     }
 
     this.setBackgroundColor(config.backgroundColor ?? '');
@@ -955,9 +1006,11 @@ export class DotLottie {
 
     if (started) {
       this._stateMachineIsActive = true;
-      this._setupStateMachineListeners();
+      this.setupStateMachineListeners();
 
       this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
+    } else {
+      console.error('Failed to start the state machine: ', this._stateMachineId);
     }
 
     return started;
@@ -1059,7 +1112,7 @@ export class DotLottie {
     return listeners;
   }
 
-  private _setupStateMachineListeners(): void {
+  public setupStateMachineListeners(): void {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this._dotLottieCore !== null && this.isLoaded) {
       const listeners = this.getStateMachineListeners();
 
@@ -1086,6 +1139,8 @@ export class DotLottie {
       if (listeners.includes('PointerExit')) {
         this._canvas.addEventListener('pointerleave', this._pointerExitMethod);
       }
+    } else {
+      console.error("Error setting up state machine listeners: The canvas element doesn't exist.");
     }
   }
 
