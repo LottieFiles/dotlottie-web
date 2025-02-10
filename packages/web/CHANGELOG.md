@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.39.0-beta.8
+
+### Minor Changes
+
+- 1683077: added additional trigger change listeners
+
 ## 0.39.0-beta.7
 
 ### Patch Changes
