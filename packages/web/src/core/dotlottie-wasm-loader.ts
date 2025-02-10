@@ -15,15 +15,36 @@ export interface DotLottieBridge {
   observer_on_play: (dotlottie_instance_id: number) => void;
   observer_on_render: (dotlottie_instance_id: number, frame_no: number) => void;
   observer_on_stop: (dotlottie_instance_id: number) => void;
+  state_machine_observer_on_boolean_trigger_value_change: (
+    dotlottie_instance_id: number,
+    trigger_name: string,
+    old_value: boolean,
+    new_value: boolean,
+  ) => void;
   state_machine_observer_on_custom_event: (dotlottie_instance_id: number, message: string) => void;
   state_machine_observer_on_error: (dotlottie_instance_id: number, message: string) => void;
+  state_machine_observer_on_numeric_trigger_value_change: (
+    dotlottie_instance_id: number,
+    trigger_name: string,
+    old_value: number,
+    new_value: number,
+  ) => void;
+  state_machine_observer_on_start: (dotlottie_instance_id: number) => void;
   state_machine_observer_on_state_entered: (dotlottie_instance_id: number, entering_state: string) => void;
   state_machine_observer_on_state_exit: (dotlottie_instance_id: number, exiting_state: string) => void;
+  state_machine_observer_on_stop: (dotlottie_instance_id: number) => void;
+  state_machine_observer_on_string_trigger_value_change: (
+    dotlottie_instance_id: number,
+    trigger_name: string,
+    old_value: string,
+    new_value: string,
+  ) => void;
   state_machine_observer_on_transition: (
     dotlottie_instance_id: number,
     previous_state: string,
     new_state: string,
   ) => void;
+  state_machine_observer_on_trigger_fired: (dotlottie_instance_id: number, trigger_name: string) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class

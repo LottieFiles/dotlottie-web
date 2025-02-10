@@ -161,6 +161,17 @@ export class DotLottieWorker {
       | 'onStop'
       | 'onLoadError'
       | 'onReady'
+      | 'onStateMachineCustomEvent'
+      | 'onStateMachineError'
+      | 'onStateMachineStateEntered'
+      | 'onStateMachineStateExit'
+      | 'onStateMachineTransition'
+      | 'onStateMachineStart'
+      | 'onStateMachineStop'
+      | 'onStateMachineBooleanTriggerValueChange'
+      | 'onStateMachineNumericTriggerValueChange'
+      | 'onStateMachineStringTriggerValueChange'
+      | 'onStateMachineTriggerFired'
     > = event.data;
 
     if (!rpcResponse.id) {
@@ -229,6 +240,70 @@ export class DotLottieWorker {
       }
 
       if (rpcResponse.method === 'onReady' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineCustomEvent' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineError' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineStateEntered' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineStateExit' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineTransition' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineStart' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineStop' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (
+        rpcResponse.method === 'onStateMachineStringTriggerValueChange' &&
+        rpcResponse.result.instanceId === this._id
+      ) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (
+        rpcResponse.method === 'onStateMachineNumericTriggerValueChange' &&
+        rpcResponse.result.instanceId === this._id
+      ) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (
+        rpcResponse.method === 'onStateMachineBooleanTriggerValueChange' &&
+        rpcResponse.result.instanceId === this._id
+      ) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineTriggerFired' && rpcResponse.result.instanceId === this._id) {
         await this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
