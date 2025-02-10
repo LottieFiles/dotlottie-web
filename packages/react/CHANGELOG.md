@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.13.0
+
+### Minor Changes
+
+- 1c925ce: chore(build): create bundler-free ESM distribution
+
 ## 0.12.3
 
 ### Patch Changes
