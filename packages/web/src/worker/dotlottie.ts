@@ -171,6 +171,7 @@ export class DotLottieWorker {
       | 'onStateMachineBooleanTriggerValueChange'
       | 'onStateMachineNumericTriggerValueChange'
       | 'onStateMachineStringTriggerValueChange'
+      | 'onStateMachineTriggerFired'
     > = event.data;
 
     if (!rpcResponse.id) {
@@ -298,6 +299,11 @@ export class DotLottieWorker {
         rpcResponse.method === 'onStateMachineBooleanTriggerValueChange' &&
         rpcResponse.result.instanceId === this._id
       ) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineTriggerFired' && rpcResponse.result.instanceId === this._id) {
         await this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
       }

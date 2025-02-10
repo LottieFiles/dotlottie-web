@@ -44,6 +44,7 @@ export interface DotLottieBridge {
     previous_state: string,
     new_state: string,
   ) => void;
+  state_machine_observer_on_trigger_fired: (dotlottie_instance_id: number, trigger_name: string) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class

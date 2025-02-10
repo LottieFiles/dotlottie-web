@@ -20,6 +20,7 @@ import type {
   StateMachineStopEvent,
   StateMachineStringTriggerValueChangeEvent,
   StateMachineTransitionEvent,
+  StateMachineTriggerFiredEvent,
   StopEvent,
   UnfreezeEvent,
 } from '../event-manager';
@@ -298,7 +299,6 @@ export interface MethodResultMap {
     oldValue: number;
     triggerName: string;
   };
-
   onStateMachineStart: {
     event: StateMachineStartEvent;
     instanceId: string;
@@ -329,6 +329,11 @@ export interface MethodResultMap {
     instanceId: string;
     newState: string;
     previousState: string;
+  };
+  onStateMachineTriggerFired: {
+    event: StateMachineTriggerFiredEvent;
+    instanceId: string;
+    triggerName: string;
   };
   onStop: {
     event: StopEvent;

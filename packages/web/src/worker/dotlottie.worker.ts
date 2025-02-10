@@ -26,6 +26,7 @@ import type {
   StateMachineStringTriggerValueChangeEvent,
   StateMachineNumericTriggerValueChangeEvent,
   StateMachineBooleanTriggerValueChangeEvent,
+  StateMachineTriggerFiredEvent,
 } from '../event-manager';
 
 import type { DotLottieInstanceState } from './dotlottie';
@@ -355,6 +356,21 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
 
     self.postMessage(response);
   },
+  stateMachineTriggerFired: (instanceId: string) => (event: Event) => {
+    const stateMachineTriggerFireEvent = event as StateMachineTriggerFiredEvent;
+
+    const response: RpcResponse<'onStateMachineTriggerFired'> = {
+      id: '',
+      method: 'onStateMachineTriggerFired',
+      result: {
+        instanceId,
+        event: stateMachineTriggerFireEvent,
+        triggerName: stateMachineTriggerFireEvent.triggerName,
+      },
+    };
+
+    self.postMessage(response);
+  },
 };
 
 const commands: {
@@ -468,6 +484,7 @@ const commands: {
       'stateMachineStateEntered',
       'stateMachineStateExit',
       'stateMachineTransition',
+      'stateMachineTriggerFired',
     ];
 
     events.forEach((event) => {

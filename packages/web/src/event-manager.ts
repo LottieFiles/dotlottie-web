@@ -24,7 +24,8 @@ export type EventType =
   | 'stateMachineStop'
   | 'stateMachineBooleanTriggerValueChange'
   | 'stateMachineNumericTriggerValueChange'
-  | 'stateMachineStringTriggerValueChange';
+  | 'stateMachineStringTriggerValueChange'
+  | 'stateMachineTriggerFired';
 
 /**
  * Maps an event type string to its respective event interface.
@@ -75,6 +76,8 @@ type EventByType<T> = T extends 'complete'
   ? StateMachineNumericTriggerValueChangeEvent
   : T extends 'stateMachineStringTriggerValueChange'
   ? StateMachineStringTriggerValueChangeEvent
+  : T extends 'stateMachineTriggerFired'
+  ? StateMachineTriggerFiredEvent
   : never;
 
 /**
@@ -229,6 +232,11 @@ export interface StateMachineStringTriggerValueChangeEvent extends BaseEvent {
   type: 'stateMachineStringTriggerValueChange';
 }
 
+export interface StateMachineTriggerFiredEvent extends BaseEvent {
+  triggerName: string;
+  type: 'stateMachineTriggerFired';
+}
+
 /**
  * Type representing all possible event types.
  */
@@ -255,7 +263,8 @@ export type Event =
   | StateMachineStopEvent
   | StateMachineBooleanTriggerValueChangeEvent
   | StateMachineNumericTriggerValueChangeEvent
-  | StateMachineStringTriggerValueChangeEvent;
+  | StateMachineStringTriggerValueChangeEvent
+  | StateMachineTriggerFiredEvent;
 
 export interface EventListener<T extends EventType> {
   (event: EventByType<T>): void;
