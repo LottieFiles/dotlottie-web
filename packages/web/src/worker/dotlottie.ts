@@ -863,6 +863,12 @@ export class DotLottieWorker {
     this._sendMessage('stateMachinePostPointerUpEvent', { instanceId: this._id, x, y });
   }
 
+  private _onClick(event: MouseEvent): void {
+    const { x, y } = this._getPointerPosition(event);
+
+    this._sendMessage('stateMachinePostClickEvent', { instanceId: this._id, x, y });
+  }
+
   private _onPointerDown(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
