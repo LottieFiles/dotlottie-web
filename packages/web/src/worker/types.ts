@@ -152,6 +152,11 @@ export interface MethodParamsMap {
     instanceId: string;
     stateMachineData: string;
   };
+  stateMachinePostClickEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
   stateMachinePostPointerDownEvent: {
     instanceId: string;
     x: number;
@@ -322,6 +327,7 @@ export interface MethodResultMap {
   stateMachineGetStringTrigger: string | undefined;
   stateMachineLoad: boolean;
   stateMachineLoadData: boolean;
+  stateMachinePostClickEvent: number | undefined;
   stateMachinePostPointerDownEvent: number | undefined;
   stateMachinePostPointerEnterEvent: number | undefined;
   stateMachinePostPointerExitEvent: number | undefined;

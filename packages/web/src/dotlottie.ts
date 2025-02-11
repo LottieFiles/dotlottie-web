@@ -30,6 +30,11 @@ const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
   }
 };
 
+interface DebouncedFunction<T extends (...args: any[]) => unknown> {
+  (...args: Parameters<T>): void;
+  cancel: () => void;
+}
+
 const createCoreFit = (fit: Fit, module: MainModule): CoreFit => {
   if (fit === 'contain') {
     return module.Fit.Contain;
@@ -226,7 +231,7 @@ export class DotLottie {
 
     this._pointerDownMethod = this._onPointerDown.bind(this);
 
-    this._pointerMoveMethod = this._onPointerMove.bind(this);
+    this._pointerMoveMethod = this._createCountedDebounce(this._onPointerMove.bind(this), 50, 10);
 
     this._pointerEnterMethod = this._onPointerEnter.bind(this);
 
@@ -585,6 +590,12 @@ export class DotLottie {
       this._context === null ||
       (!this._dotLottieCore.isPlaying() && !this._stateMachineIsActive)
     ) {
+      // If the animation is not playing, we don't need to draw the frame.
+      if (this._animationFrameId !== null) {
+        this._frameManager.cancelAnimationFrame(this._animationFrameId);
+        this._animationFrameId = null;
+      }
+
       return;
     }
 
@@ -947,6 +958,10 @@ export class DotLottie {
   }
 
   public stateMachineLoad(stateMachineId: string): boolean {
+    if (this._stateMachineIsActive) {
+      this.stateMachineStop();
+    }
+
     return this._dotLottieCore?.stateMachineLoad(stateMachineId) ?? false;
   }
 
@@ -957,7 +972,9 @@ export class DotLottie {
       this._stateMachineIsActive = true;
       this._setupStateMachineListeners();
 
-      this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
+      if (this._animationFrameId === null) {
+        this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
+      }
     }
 
     return started;
@@ -1001,6 +1018,53 @@ export class DotLottie {
     const { x, y } = this._getPointerPosition(event);
 
     this.stateMachinePostPointerDownEvent(x, y);
+  }
+
+  private _createCountedDebounce<T extends (...args: any[]) => unknown>(
+    callback: T,
+    delay: number = 100,
+    maxSkipped: number = 50,
+  ): DebouncedFunction<T> {
+    let timeoutId: NodeJS.Timeout | undefined;
+    let skipCounter = 0;
+
+    const debouncedFn = (...args: Parameters<T>): void => {
+      skipCounter += 1;
+
+      // If we've skipped too many events, force the callback to fire
+      if (skipCounter >= maxSkipped) {
+        skipCounter = 0;
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = undefined;
+        }
+        callback.apply(this, args);
+
+        return;
+      }
+
+      // Normal debounce behavior
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      timeoutId = setTimeout(() => {
+        skipCounter = 0;
+        callback.apply(this, args);
+        timeoutId = undefined;
+      }, delay);
+    };
+
+    // Add cancel method to allow manual cleanup
+    debouncedFn.cancel = (): void => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = undefined;
+      }
+      skipCounter = 0;
+    };
+
+    return debouncedFn;
   }
 
   private _onPointerMove(event: PointerEvent): void {
@@ -1091,6 +1155,7 @@ export class DotLottie {
 
   private _cleanupStateMachineListeners(): void {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      this._canvas.removeEventListener('click', this._clickMethod);
       this._canvas.removeEventListener('pointerup', this._pointerUpMethod);
       this._canvas.removeEventListener('pointerdown', this._pointerDownMethod);
       this._canvas.removeEventListener('pointermove', this._pointerMoveMethod);
