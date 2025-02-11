@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-vue
 
+## 0.6.0-beta.9
+
+### Patch Changes
+
+- 2e74ad0: optimizations to the drawing cycle
+- Updated dependencies [2e74ad0]
+  - @lottiefiles/dotlottie-web@0.39.0-beta.9
+
 ## 0.6.0-beta.8
 
 ### Minor Changes
