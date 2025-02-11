@@ -16,11 +16,17 @@ import type {
   RenderEvent,
   StopEvent,
   UnfreezeEvent,
-  StateMachineOnCustomEvent,
-  StateMachineOnStateEnteredEvent,
-  StateMachineOnErrorEvent,
-  StateMachineOnStateExitEvent,
-  StateMachineOnTransitionEvent,
+  StateMachineCustomEvent,
+  StateMachineStateEnteredEvent,
+  StateMachineErrorEvent,
+  StateMachineStateExitEvent,
+  StateMachineTransitionEvent,
+  StateMachineStartEvent,
+  StateMachineStopEvent,
+  StateMachineStringTriggerValueChangeEvent,
+  StateMachineNumericTriggerValueChangeEvent,
+  StateMachineBooleanTriggerValueChangeEvent,
+  StateMachineTriggerFiredEvent,
 } from '../event-manager';
 
 import type { DotLottieInstanceState } from './dotlottie';
@@ -196,8 +202,9 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
 
     self.postMessage(response);
   },
-  stateMachineOnCustomEvent: (instanceId: string) => (event: Event) => {
-    const stateMachineOnCustomEvent = event as StateMachineOnCustomEvent;
+  stateMachineCustomEvent: (instanceId: string) => (event: Event) => {
+    const stateMachineOnCustomEvent = event as StateMachineCustomEvent;
+
     const response: RpcResponse<'onStateMachineCustomEvent'> = {
       id: '',
       method: 'onStateMachineCustomEvent',
@@ -209,53 +216,156 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
 
     self.postMessage(response);
   },
-  stateMachineOnError: (instanceId: string) => (event: Event) => {
-    const stateMachineOnErrorEvent = event as StateMachineOnErrorEvent;
-    const response: RpcResponse<'onStateMachineErrorEvent'> = {
+  stateMachineError: (instanceId: string) => (event: Event) => {
+    const stateMachineOnErrorEvent = event as StateMachineErrorEvent;
+
+    const response: RpcResponse<'onStateMachineError'> = {
       id: '',
-      method: 'onStateMachineErrorEvent',
+      method: 'onStateMachineError',
       result: {
         instanceId,
         event: stateMachineOnErrorEvent,
+        message: stateMachineOnErrorEvent.message,
       },
     };
 
     self.postMessage(response);
   },
-  stateMachineOnStateEntered: (instanceId: string) => (event: Event) => {
-    const stateMachineOnStateEntered = event as StateMachineOnStateEnteredEvent;
-    const response: RpcResponse<'onStateMachineStateEnteredEvent'> = {
+  stateMachineStateEntered: (instanceId: string) => (event: Event) => {
+    const stateMachineOnStateEntered = event as StateMachineStateEnteredEvent;
+
+    const response: RpcResponse<'onStateMachineStateEntered'> = {
       id: '',
-      method: 'onStateMachineStateEnteredEvent',
+      method: 'onStateMachineStateEntered',
       result: {
         instanceId,
         event: stateMachineOnStateEntered,
+        enteringState: stateMachineOnStateEntered.enteringState,
       },
     };
 
     self.postMessage(response);
   },
-  stateMachineOnStateExit: (instanceId: string) => (event: Event) => {
-    const stateMachineOnStateExitEvent = event as StateMachineOnStateExitEvent;
-    const response: RpcResponse<'onStateMachineStateExitEvent'> = {
+  stateMachineStateExit: (instanceId: string) => (event: Event) => {
+    const stateMachineOnStateExitEvent = event as StateMachineStateExitEvent;
+
+    const response: RpcResponse<'onStateMachineStateExit'> = {
       id: '',
-      method: 'onStateMachineStateExitEvent',
+      method: 'onStateMachineStateExit',
       result: {
         instanceId,
         event: stateMachineOnStateExitEvent,
+        exitingState: stateMachineOnStateExitEvent.exitingState,
       },
     };
 
     self.postMessage(response);
   },
-  stateMachineOnTransition: (instanceId: string) => (event: Event) => {
-    const stateMachineOnTransitionEvent = event as StateMachineOnTransitionEvent;
-    const response: RpcResponse<'onStateMachineTransitionEvent'> = {
+  stateMachineTransition: (instanceId: string) => (event: Event) => {
+    const stateMachineOnTransitionEvent = event as StateMachineTransitionEvent;
+
+    const response: RpcResponse<'onStateMachineTransition'> = {
       id: '',
-      method: 'onStateMachineTransitionEvent',
+      method: 'onStateMachineTransition',
       result: {
         instanceId,
         event: stateMachineOnTransitionEvent,
+        newState: stateMachineOnTransitionEvent.newState,
+        previousState: stateMachineOnTransitionEvent.previousState,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineStart: (instanceId: string) => (event: Event) => {
+    const stateMachineOnStartEvent = event as StateMachineStartEvent;
+
+    const response: RpcResponse<'onStateMachineStart'> = {
+      id: '',
+      method: 'onStateMachineStart',
+      result: {
+        instanceId,
+        event: stateMachineOnStartEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineStop: (instanceId: string) => (event: Event) => {
+    const stateMachineOnStopEvent = event as StateMachineStopEvent;
+
+    const response: RpcResponse<'onStateMachineStop'> = {
+      id: '',
+      method: 'onStateMachineStop',
+      result: {
+        instanceId,
+        event: stateMachineOnStopEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineStringTriggerValueChange: (instanceId: string) => (event: Event) => {
+    const stateMachineOnStringTriggerValueChangeEvent = event as StateMachineStringTriggerValueChangeEvent;
+
+    const response: RpcResponse<'onStateMachineStringTriggerValueChange'> = {
+      id: '',
+      method: 'onStateMachineStringTriggerValueChange',
+      result: {
+        instanceId,
+        event: stateMachineOnStringTriggerValueChangeEvent,
+        newValue: stateMachineOnStringTriggerValueChangeEvent.newValue,
+        oldValue: stateMachineOnStringTriggerValueChangeEvent.oldValue,
+        triggerName: stateMachineOnStringTriggerValueChangeEvent.triggerName,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineNumericTriggerValueChange: (instanceId: string) => (event: Event) => {
+    const stateMachineOnNumericTriggerValueChangeEvent = event as StateMachineNumericTriggerValueChangeEvent;
+
+    const response: RpcResponse<'onStateMachineNumericTriggerValueChange'> = {
+      id: '',
+      method: 'onStateMachineNumericTriggerValueChange',
+      result: {
+        instanceId,
+        event: stateMachineOnNumericTriggerValueChangeEvent,
+        newValue: stateMachineOnNumericTriggerValueChangeEvent.newValue,
+        oldValue: stateMachineOnNumericTriggerValueChangeEvent.oldValue,
+        triggerName: stateMachineOnNumericTriggerValueChangeEvent.triggerName,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineBooleanTriggerValueChange: (instanceId: string) => (event: Event) => {
+    const stateMachineOnBooleanValueChangeEvent = event as StateMachineBooleanTriggerValueChangeEvent;
+
+    const response: RpcResponse<'onStateMachineBooleanTriggerValueChange'> = {
+      id: '',
+      method: 'onStateMachineBooleanTriggerValueChange',
+      result: {
+        instanceId,
+        event: stateMachineOnBooleanValueChangeEvent,
+        newValue: stateMachineOnBooleanValueChangeEvent.newValue,
+        oldValue: stateMachineOnBooleanValueChangeEvent.oldValue,
+        triggerName: stateMachineOnBooleanValueChangeEvent.triggerName,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineTriggerFired: (instanceId: string) => (event: Event) => {
+    const stateMachineTriggerFireEvent = event as StateMachineTriggerFiredEvent;
+
+    const response: RpcResponse<'onStateMachineTriggerFired'> = {
+      id: '',
+      method: 'onStateMachineTriggerFired',
+      result: {
+        instanceId,
+        event: stateMachineTriggerFireEvent,
+        triggerName: stateMachineTriggerFireEvent.triggerName,
       },
     };
 
@@ -364,11 +474,17 @@ const commands: {
       'unfreeze',
       'render',
       'ready',
-      'stateMachineOnCustomEvent',
-      'stateMachineOnError',
-      'stateMachineOnStateEntered',
-      'stateMachineOnStateExit',
-      'stateMachineOnTransition',
+      'stateMachineStart',
+      'stateMachineStop',
+      'stateMachineNumericTriggerValueChange',
+      'stateMachineBooleanTriggerValueChange',
+      'stateMachineStringTriggerValueChange',
+      'stateMachineCustomEvent',
+      'stateMachineError',
+      'stateMachineStateEntered',
+      'stateMachineStateExit',
+      'stateMachineTransition',
+      'stateMachineTriggerFired',
     ];
 
     events.forEach((event) => {

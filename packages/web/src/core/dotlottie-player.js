@@ -200,10 +200,10 @@ var createDotLottiePlayerModule = (() => {
     function createWasm() {
       function receiveInstance(instance, module) {
         wasmExports = instance.exports;
-        wasmMemory = wasmExports['pa'];
+        wasmMemory = wasmExports['wa'];
         updateMemoryViews();
-        wasmTable = wasmExports['ta'];
-        addOnInit(wasmExports['qa']);
+        wasmTable = wasmExports['Aa'];
+        addOnInit(wasmExports['xa']);
         removeRunDependency('wasm-instantiate');
         return wasmExports;
       }
@@ -2257,6 +2257,23 @@ var createDotLottiePlayerModule = (() => {
       randomFill(HEAPU8.subarray(buffer, buffer + size));
       return 0;
     };
+    function _state_machine_observer_on_boolean_trigger_value_change(
+      dotlottie_instance_id,
+      trigger_name,
+      trigger_name_len,
+      old_value,
+      new_value,
+    ) {
+      const trigger_name_converted = UTF8ToString(trigger_name, trigger_name_len);
+      if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_boolean_trigger_value_change) {
+        Module.dotlottieBridge.state_machine_observer_on_boolean_trigger_value_change(
+          dotlottie_instance_id,
+          trigger_name_converted,
+          old_value,
+          new_value,
+        );
+      }
+    }
     function _state_machine_observer_on_custom_event(dotlottie_instance_id, message_ptr, message_len) {
       const message = UTF8ToString(message_ptr, message_len);
       if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_state_entered) {
@@ -2269,10 +2286,64 @@ var createDotLottiePlayerModule = (() => {
         Module.dotlottieBridge.state_machine_observer_on_error(dotlottie_instance_id, message);
       }
     }
+    function _state_machine_observer_on_numeric_trigger_value_change(
+      dotlottie_instance_id,
+      trigger_name,
+      trigger_name_len,
+      old_value,
+      new_value,
+    ) {
+      const trigger_name_converted = UTF8ToString(trigger_name, trigger_name_len);
+      if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_numeric_trigger_value_change) {
+        Module.dotlottieBridge.state_machine_observer_on_numeric_trigger_value_change(
+          dotlottie_instance_id,
+          trigger_name_converted,
+          old_value,
+          new_value,
+        );
+      }
+    }
+    function _state_machine_observer_on_start(dotlottie_instance_id) {
+      if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_start) {
+        Module.dotlottieBridge.state_machine_observer_on_start(dotlottie_instance_id);
+      }
+    }
     function _state_machine_observer_on_state_entered(dotlottie_instance_id, state_ptr, state_len) {
       const state = UTF8ToString(state_ptr, state_len);
       if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_state_entered) {
         Module.dotlottieBridge.state_machine_observer_on_state_entered(dotlottie_instance_id, state);
+      }
+    }
+    function _state_machine_observer_on_state_exit(dotlottie_instance_id, state_ptr, state_len) {
+      const state = UTF8ToString(state_ptr, state_len);
+      if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_state_entered) {
+        Module.dotlottieBridge.state_machine_observer_on_state_exit(dotlottie_instance_id, state);
+      }
+    }
+    function _state_machine_observer_on_stop(dotlottie_instance_id) {
+      if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_stop) {
+        Module.dotlottieBridge.state_machine_observer_on_stop(dotlottie_instance_id);
+      }
+    }
+    function _state_machine_observer_on_string_trigger_value_change(
+      dotlottie_instance_id,
+      trigger_name,
+      trigger_name_len,
+      old_value,
+      old_value_len,
+      new_value,
+      new_value_len,
+    ) {
+      const trigger_name_converted = UTF8ToString(trigger_name, trigger_name_len);
+      const old_value_converted = UTF8ToString(old_value, old_value_len);
+      const new_value_converted = UTF8ToString(new_value, new_value_len);
+      if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_string_trigger_value_change) {
+        Module.dotlottieBridge.state_machine_observer_on_string_trigger_value_change(
+          dotlottie_instance_id,
+          trigger_name_converted,
+          old_value_converted,
+          new_value_converted,
+        );
       }
     }
     function _state_machine_observer_on_transition(
@@ -2286,6 +2357,12 @@ var createDotLottiePlayerModule = (() => {
       const newState = UTF8ToString(new_state_ptr, new_state_len);
       if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_transition) {
         Module.dotlottieBridge.state_machine_observer_on_transition(dotlottie_instance_id, previousState, newState);
+      }
+    }
+    function _state_machine_observer_on_trigger_fired(dotlottie_instance_id, trigger_name, trigger_name_len) {
+      const trigger_name_converted = UTF8ToString(trigger_name, trigger_name_len);
+      if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_string_trigger_value_change) {
+        Module.dotlottieBridge.state_machine_observer_on_trigger_fired(dotlottie_instance_id, trigger_name_converted);
       }
     }
     InternalError = Module['InternalError'] = class InternalError extends Error {
@@ -2316,36 +2393,36 @@ var createDotLottiePlayerModule = (() => {
       R: __abort_js,
       v: __embind_finalize_value_object,
       B: __embind_register_bigint,
-      ia: __embind_register_bool,
+      pa: __embind_register_bool,
       r: __embind_register_class,
       q: __embind_register_class_constructor,
       f: __embind_register_class_function,
-      ha: __embind_register_emval,
-      x: __embind_register_enum,
+      oa: __embind_register_emval,
+      y: __embind_register_enum,
       k: __embind_register_enum_value,
       z: __embind_register_float,
       u: __embind_register_function,
       l: __embind_register_integer,
       h: __embind_register_memory_view,
       w: __embind_register_optional,
-      oa: __embind_register_smart_ptr,
+      va: __embind_register_smart_ptr,
       A: __embind_register_std_string,
       t: __embind_register_std_wstring,
       s: __embind_register_value_object,
       j: __embind_register_value_object_field,
-      ja: __embind_register_void,
+      qa: __embind_register_void,
       V: __emscripten_get_now,
-      H: __emscripten_runtime_keepalive_clear,
-      D: __emscripten_throw_longjmp,
-      ma: __emval_call,
-      C: __emval_decref,
-      la: __emval_get_method_caller,
-      na: __emval_incref,
-      ka: __emval_run_destructors,
+      G: __emscripten_runtime_keepalive_clear,
+      C: __emscripten_throw_longjmp,
+      ta: __emval_call,
+      I: __emval_decref,
+      sa: __emval_get_method_caller,
+      ua: __emval_incref,
+      ra: __emval_run_destructors,
       o: __emval_take_value,
-      E: __setitimer_js,
-      F: __tzset_js,
-      G: _emscripten_resize_heap,
+      D: __setitimer_js,
+      E: __tzset_js,
+      F: _emscripten_resize_heap,
       T: _environ_get,
       U: _environ_sizes_get,
       Q: _fd_close,
@@ -2355,52 +2432,59 @@ var createDotLottiePlayerModule = (() => {
       d: invoke_iii,
       e: invoke_iiii,
       p: invoke_iiiiii,
-      y: invoke_v,
+      x: invoke_v,
       b: invoke_vi,
       a: invoke_vii,
       g: invoke_viii,
       n: invoke_viiii,
-      _: _observer_on_complete,
-      ba: _observer_on_frame,
-      ga: _observer_on_load,
-      fa: _observer_on_load_error,
-      $: _observer_on_loop,
-      da: _observer_on_pause,
-      ea: _observer_on_play,
-      aa: _observer_on_render,
-      ca: _observer_on_stop,
+      fa: _observer_on_complete,
+      ia: _observer_on_frame,
+      na: _observer_on_load,
+      ma: _observer_on_load_error,
+      ga: _observer_on_loop,
+      ka: _observer_on_pause,
+      la: _observer_on_play,
+      ha: _observer_on_render,
+      ja: _observer_on_stop,
       S: _proc_exit,
-      I: _random_get,
-      X: _state_machine_observer_on_custom_event,
-      W: _state_machine_observer_on_error,
-      Y: _state_machine_observer_on_state_entered,
-      Z: _state_machine_observer_on_transition,
+      H: _random_get,
+      X: _state_machine_observer_on_boolean_trigger_value_change,
+      ba: _state_machine_observer_on_custom_event,
+      aa: _state_machine_observer_on_error,
+      Y: _state_machine_observer_on_numeric_trigger_value_change,
+      $: _state_machine_observer_on_start,
+      da: _state_machine_observer_on_state_entered,
+      ca: _state_machine_observer_on_state_exit,
+      _: _state_machine_observer_on_stop,
+      Z: _state_machine_observer_on_string_trigger_value_change,
+      ea: _state_machine_observer_on_transition,
+      W: _state_machine_observer_on_trigger_fired,
     };
     var wasmExports = createWasm();
-    var ___wasm_call_ctors = () => (___wasm_call_ctors = wasmExports['qa'])();
-    var _malloc = (a0) => (_malloc = wasmExports['ra'])(a0);
-    var ___getTypeName = (a0) => (___getTypeName = wasmExports['sa'])(a0);
-    var _free = (a0) => (_free = wasmExports['ua'])(a0);
-    var __emscripten_timeout = (a0, a1) => (__emscripten_timeout = wasmExports['va'])(a0, a1);
-    var _setThrew = (a0, a1) => (_setThrew = wasmExports['wa'])(a0, a1);
-    var __emscripten_stack_restore = (a0) => (__emscripten_stack_restore = wasmExports['xa'])(a0);
-    var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmExports['ya'])();
+    var ___wasm_call_ctors = () => (___wasm_call_ctors = wasmExports['xa'])();
+    var _malloc = (a0) => (_malloc = wasmExports['ya'])(a0);
+    var ___getTypeName = (a0) => (___getTypeName = wasmExports['za'])(a0);
+    var _free = (a0) => (_free = wasmExports['Ba'])(a0);
+    var __emscripten_timeout = (a0, a1) => (__emscripten_timeout = wasmExports['Ca'])(a0, a1);
+    var _setThrew = (a0, a1) => (_setThrew = wasmExports['Da'])(a0, a1);
+    var __emscripten_stack_restore = (a0) => (__emscripten_stack_restore = wasmExports['Ea'])(a0);
+    var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmExports['Fa'])();
     var dynCall_iijj = (Module['dynCall_iijj'] = (a0, a1, a2, a3, a4, a5) =>
-      (dynCall_iijj = Module['dynCall_iijj'] = wasmExports['za'])(a0, a1, a2, a3, a4, a5));
+      (dynCall_iijj = Module['dynCall_iijj'] = wasmExports['Ga'])(a0, a1, a2, a3, a4, a5));
     var dynCall_vijj = (Module['dynCall_vijj'] = (a0, a1, a2, a3, a4, a5) =>
-      (dynCall_vijj = Module['dynCall_vijj'] = wasmExports['Aa'])(a0, a1, a2, a3, a4, a5));
+      (dynCall_vijj = Module['dynCall_vijj'] = wasmExports['Ha'])(a0, a1, a2, a3, a4, a5));
     var dynCall_jiii = (Module['dynCall_jiii'] = (a0, a1, a2, a3) =>
-      (dynCall_jiii = Module['dynCall_jiii'] = wasmExports['Ba'])(a0, a1, a2, a3));
+      (dynCall_jiii = Module['dynCall_jiii'] = wasmExports['Ia'])(a0, a1, a2, a3));
     var dynCall_jii = (Module['dynCall_jii'] = (a0, a1, a2) =>
-      (dynCall_jii = Module['dynCall_jii'] = wasmExports['Ca'])(a0, a1, a2));
+      (dynCall_jii = Module['dynCall_jii'] = wasmExports['Ja'])(a0, a1, a2));
     var dynCall_viijii = (Module['dynCall_viijii'] = (a0, a1, a2, a3, a4, a5, a6) =>
-      (dynCall_viijii = Module['dynCall_viijii'] = wasmExports['Da'])(a0, a1, a2, a3, a4, a5, a6));
+      (dynCall_viijii = Module['dynCall_viijii'] = wasmExports['Ka'])(a0, a1, a2, a3, a4, a5, a6));
     var dynCall_iiiiij = (Module['dynCall_iiiiij'] = (a0, a1, a2, a3, a4, a5, a6) =>
-      (dynCall_iiiiij = Module['dynCall_iiiiij'] = wasmExports['Ea'])(a0, a1, a2, a3, a4, a5, a6));
+      (dynCall_iiiiij = Module['dynCall_iiiiij'] = wasmExports['La'])(a0, a1, a2, a3, a4, a5, a6));
     var dynCall_iiiiijj = (Module['dynCall_iiiiijj'] = (a0, a1, a2, a3, a4, a5, a6, a7, a8) =>
-      (dynCall_iiiiijj = Module['dynCall_iiiiijj'] = wasmExports['Fa'])(a0, a1, a2, a3, a4, a5, a6, a7, a8));
+      (dynCall_iiiiijj = Module['dynCall_iiiiijj'] = wasmExports['Ma'])(a0, a1, a2, a3, a4, a5, a6, a7, a8));
     var dynCall_iiiiiijj = (Module['dynCall_iiiiiijj'] = (a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) =>
-      (dynCall_iiiiiijj = Module['dynCall_iiiiiijj'] = wasmExports['Ga'])(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9));
+      (dynCall_iiiiiijj = Module['dynCall_iiiiiijj'] = wasmExports['Na'])(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9));
     function invoke_vii(index, a1, a2) {
       var sp = stackSave();
       try {
