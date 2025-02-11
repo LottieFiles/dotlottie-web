@@ -868,6 +868,19 @@ const commands: {
 
     return instance.stateMachineLoadData(stateMachineData);
   },
+  stateMachinePostClickEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachinePostClickEvent(x, y);
+  },
   stateMachinePostPointerDownEvent(request) {
     const instanceId = request.params.instanceId;
     const x = request.params.x;

@@ -27,6 +27,11 @@ function generateUniqueId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 }
 
+interface DebouncedFunction<T extends (...args: any[]) => unknown> {
+  (...args: Parameters<T>): void;
+  cancel: () => void;
+}
+
 export interface DotLottieInstanceState {
   activeAnimationId: string | undefined;
   activeThemeId: string | undefined;
@@ -98,6 +103,8 @@ export class DotLottieWorker {
 
   private _created: boolean = false;
 
+  private readonly _clickMethod: (event: MouseEvent) => void;
+
   private readonly _pointerUpMethod: (event: PointerEvent) => void;
 
   private readonly _pointerDownMethod: (event: PointerEvent) => void;
@@ -138,9 +145,11 @@ export class DotLottieWorker {
 
     this._pointerUpMethod = this._onPointerUp.bind(this);
 
+    this._clickMethod = this._onClick.bind(this);
+
     this._pointerDownMethod = this._onPointerDown.bind(this);
 
-    this._pointerMoveMethod = this._onPointerMove.bind(this);
+    this._pointerMoveMethod = this._createCountedDebounce(this._onPointerMove.bind(this), 50, 10);
 
     this._pointerEnterMethod = this._onPointerEnter.bind(this);
 
@@ -718,6 +727,8 @@ export class DotLottieWorker {
   public async stateMachineLoad(stateMachineId: string): Promise<boolean> {
     if (!this._created) return false;
 
+    this.stateMachineStop();
+
     const result = await this._sendMessage('stateMachineLoad', { instanceId: this._id, stateMachineId });
 
     await this._updateDotLottieInstanceState();
@@ -832,7 +843,7 @@ export class DotLottieWorker {
     this._sendMessage('stateMachineSetStringTrigger', { instanceId: this._id, triggerId, value });
   }
 
-  private _getPointerPosition(event: PointerEvent): { x: number; y: number } {
+  private _getPointerPosition(event: MouseEvent | PointerEvent): { x: number; y: number } {
     const rect = (this._canvas as HTMLCanvasElement).getBoundingClientRect();
     const scaleX = this._canvas.width / rect.width;
     const scaleY = this._canvas.height / rect.height;
@@ -858,6 +869,53 @@ export class DotLottieWorker {
     this._sendMessage('stateMachinePostPointerDownEvent', { instanceId: this._id, x, y });
   }
 
+  private _createCountedDebounce<T extends (...args: any[]) => unknown>(
+    callback: T,
+    delay: number = 100,
+    maxSkipped: number = 50,
+  ): DebouncedFunction<T> {
+    let timeoutId: NodeJS.Timeout | undefined;
+    let skipCounter = 0;
+
+    const debouncedFn = (...args: Parameters<T>): void => {
+      skipCounter += 1;
+
+      // If we've skipped too many events, force the callback to fire
+      if (skipCounter >= maxSkipped) {
+        skipCounter = 0;
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = undefined;
+        }
+        callback.apply(this, args);
+
+        return;
+      }
+
+      // Normal debounce behavior
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      timeoutId = setTimeout(() => {
+        skipCounter = 0;
+        callback.apply(this, args);
+        timeoutId = undefined;
+      }, delay);
+    };
+
+    // Add cancel method to allow manual cleanup
+    debouncedFn.cancel = (): void => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = undefined;
+      }
+      skipCounter = 0;
+    };
+
+    return debouncedFn;
+  }
+
   private _onPointerMove(event: PointerEvent): void {
     const { x, y } = this._getPointerPosition(event);
 
@@ -879,6 +937,10 @@ export class DotLottieWorker {
   private async _setupStateMachineListeners(): Promise<void> {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this.isLoaded) {
       const listeners = await this._sendMessage('getStateMachineListeners', { instanceId: this._id });
+
+      if (listeners.includes('Click')) {
+        this._canvas.addEventListener('click', this._clickMethod);
+      }
 
       if (listeners.includes('PointerUp')) {
         this._canvas.addEventListener('pointerup', this._pointerUpMethod);
@@ -904,6 +966,7 @@ export class DotLottieWorker {
 
   private _cleanupStateMachineListeners(): void {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      this._canvas.removeEventListener('click', this._clickMethod);
       this._canvas.removeEventListener('pointerup', this._pointerUpMethod);
       this._canvas.removeEventListener('pointerdown', this._pointerDownMethod);
       this._canvas.removeEventListener('pointermove', this._pointerMoveMethod);
