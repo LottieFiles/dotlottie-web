@@ -130,28 +130,28 @@ export class DotLottie {
         // this._eventManager.dispatch({ type: 'load' });
       },
       observer_on_load_error: (_dotlottie_instance_id) => {
-        this._eventManager.dispatch({ type: 'loadError', error: new Error('Error occured during load.') });
+        // this._eventManager.dispatch({ type: 'loadError', error: new Error('Error occured during load.') });
       },
       observer_on_complete: (_dotlottie_instance_id: number) => {
-        this._eventManager.dispatch({ type: 'complete' });
+        // this._eventManager.dispatch({ type: 'complete' });
       },
       observer_on_frame: (_dotlottie_instance_id: number, _frame_no: number) => {
-        this._eventManager.dispatch({ type: 'frame', currentFrame: _frame_no });
+        // this._eventManager.dispatch({ type: 'frame', currentFrame: _frame_no });
       },
       observer_on_loop: (_dotlottie_instance_id: number, _loop_count: number) => {
-        this._eventManager.dispatch({ type: 'loop', loopCount: _loop_count });
+        // this._eventManager.dispatch({ type: 'loop', loopCount: _loop_count });
       },
       observer_on_pause: (_dotlottie_instance_id: number) => {
-        this._eventManager.dispatch({ type: 'pause' });
+        // this._eventManager.dispatch({ type: 'pause' });
       },
       observer_on_play: (_dotlottie_instance_id: number) => {
-        this._eventManager.dispatch({ type: 'play' });
+        // this._eventManager.dispatch({ type: 'play' });
       },
       observer_on_render: (_dotlottie_instance_id: number, _frame_no: number) => {
-        this._eventManager.dispatch({ type: 'render', currentFrame: _frame_no });
+        // this._eventManager.dispatch({ type: 'render', currentFrame: _frame_no });
       },
       observer_on_stop: (_dotlottie_instance_id: number) => {
-        this._eventManager.dispatch({ type: 'stop' });
+        // this._eventManager.dispatch({ type: 'stop' });
       },
       state_machine_observer_on_custom_event: (_dotlottie_instance_id: number, message: string) => {
         this._eventManager.dispatch({ type: 'stateMachineCustomEvent', message });
@@ -367,11 +367,17 @@ export class DotLottie {
         this.resize();
       }
 
+      this._eventManager.dispatch({
+        type: 'frame',
+        currentFrame: this._dotLottieCore.currentFrame(),
+      });
+
       this._render();
 
       if (this._dotLottieCore.config().autoplay) {
         this._dotLottieCore.play();
         if (this._dotLottieCore.isPlaying()) {
+          this._eventManager.dispatch({ type: 'play' });
           this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
         } else {
           console.error('something went wrong, the animation was suppose to autoplay');
@@ -578,6 +584,11 @@ export class DotLottie {
   public load(config: Omit<Config, 'canvas'>): void {
     if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 
+    if (this._animationFrameId !== null) {
+      this._frameManager.cancelAnimationFrame(this._animationFrameId);
+      this._animationFrameId = null;
+    }
+
     this._dotLottieCore.setConfig({
       themeId: config.themeId ?? '',
       stateMachineId: '',
@@ -597,15 +608,17 @@ export class DotLottie {
         : DotLottie._wasmModule.createDefaultLayout(),
     });
 
+    if (config.data) {
+      this._loadFromData(config.data);
+    } else if (config.src) {
+      this._loadFromSrc(config.src);
+    }
+
     // SetConfig does not manage loading and starting state machines, so we do it here.
     if (config.stateMachineId) {
       this._stateMachineId = config.stateMachineId;
       this.stateMachineLoad(config.stateMachineId);
       this.stateMachineStart();
-    }
-
-    if (this._dotLottieCore.config().autoplay) {
-      this._dotLottieCore.play();
     }
 
     this.setBackgroundColor(config.backgroundColor ?? '');
@@ -634,6 +647,11 @@ export class DotLottie {
       }
 
       this._context.putImageData(imageData, 0, 0);
+
+      this._eventManager.dispatch({
+        type: 'render',
+        currentFrame: this._dotLottieCore.currentFrame(),
+      });
 
       return true;
     }
@@ -667,26 +685,26 @@ export class DotLottie {
        */
       this._previousFrameNb = nextFrame;
 
-      // this._eventManager.dispatch({
-      //   type: 'frame',
-      //   currentFrame: this._dotLottieCore.currentFrame(),
-      // });
+      this._eventManager.dispatch({
+        type: 'frame',
+        currentFrame: this._dotLottieCore.currentFrame(),
+      });
 
-      this._render();
+      const rendered = this._render();
 
-      // if (rendered) {
-      //   // handle loop or complete
-      //   if (this._dotLottieCore.isComplete()) {
-      //     if (this._dotLottieCore.config().loopAnimation) {
-      //       this._eventManager.dispatch({
-      //         type: 'loop',
-      //         loopCount: this._dotLottieCore.loopCount(),
-      //       });
-      //     } else {
-      //       this._eventManager.dispatch({ type: 'complete' });
-      //     }
-      //   }
-      // }
+      if (rendered) {
+        // handle loop or complete
+        if (this._dotLottieCore.isComplete()) {
+          if (this._dotLottieCore.config().loopAnimation) {
+            this._eventManager.dispatch({
+              type: 'loop',
+              loopCount: this._dotLottieCore.loopCount(),
+            });
+          } else {
+            this._eventManager.dispatch({ type: 'complete' });
+          }
+        }
+      }
     }
 
     this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
@@ -724,7 +742,7 @@ export class DotLottie {
     const ok = this._dotLottieCore.pause();
 
     if (ok || this._dotLottieCore.isPaused()) {
-      // this._eventManager.dispatch({ type: 'pause' });
+      this._eventManager.dispatch({ type: 'pause' });
     }
   }
 
@@ -734,11 +752,11 @@ export class DotLottie {
     const ok = this._dotLottieCore.stop();
 
     if (ok) {
-      // this._eventManager.dispatch({ type: 'frame', currentFrame: this._dotLottieCore.currentFrame() });
+      this._eventManager.dispatch({ type: 'frame', currentFrame: this._dotLottieCore.currentFrame() });
 
       this._render();
 
-      // this._eventManager.dispatch({ type: 'stop' });
+      this._eventManager.dispatch({ type: 'stop' });
     }
   }
 
@@ -750,7 +768,7 @@ export class DotLottie {
     const ok = this._dotLottieCore.seek(frame);
 
     if (ok) {
-      // this._eventManager.dispatch({ type: 'frame', currentFrame: this._dotLottieCore.currentFrame() });
+      this._eventManager.dispatch({ type: 'frame', currentFrame: this._dotLottieCore.currentFrame() });
 
       this._render();
     }
