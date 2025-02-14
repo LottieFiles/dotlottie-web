@@ -3,7 +3,8 @@ on:
   push:
     branches:
       - main
-  pull_request:
+      - feat/web-gpu-gl
+  # pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -218,9 +219,7 @@ jobs:
     name: publish-viewer
     needs: validate
     runs-on: ubuntu-latest
-    if:
-      ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' && github.ref ==
-      'refs/heads/main' }}
+    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
 
     permissions:
       contents: write

@@ -8,7 +8,9 @@
     "outDir": "./dist",
 
     // Source root directory
-    "rootDir": "."
+    "rootDir": ".",
+
+    "types": ["@webgpu/types"]
   },
 
   // Files included in compilation
