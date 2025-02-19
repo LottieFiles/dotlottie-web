@@ -1,5 +1,12 @@
 # vite-react-typescript-starter
 
+## 0.0.1-beta.10
+
+### Patch Changes
+
+- Updated dependencies [783f3e0]
+  - @lottiefiles/dotlottie-web@0.39.0-beta.10
+
 ## 0.0.1-beta.9
 
 ### Patch Changes

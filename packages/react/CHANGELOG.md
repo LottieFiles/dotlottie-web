@@ -1,5 +1,16 @@
 # @lottiefiles/dotlottie-react
 
+## 0.13.0-beta.10
+
+### Minor Changes
+
+- 783f3e0: onLoopComplete listener, openurl action added!
+
+### Patch Changes
+
+- Updated dependencies [783f3e0]
+  - @lottiefiles/dotlottie-web@0.39.0-beta.10
+
 ## 0.13.0-beta.9
 
 ### Patch Changes
