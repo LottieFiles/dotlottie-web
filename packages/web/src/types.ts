@@ -15,6 +15,13 @@ export interface Layout {
   fit: Fit;
 }
 
+export type OpenUrlMode = 'allow' | 'deny' | 'interaction';
+
+export interface OpenUrl {
+  mode: OpenUrlMode;
+  whitelist: string[];
+}
+
 export interface Config {
   autoplay?: boolean;
   backgroundColor?: string;

@@ -200,10 +200,10 @@ var createDotLottiePlayerModule = (() => {
     function createWasm() {
       function receiveInstance(instance, module) {
         wasmExports = instance.exports;
-        wasmMemory = wasmExports['wa'];
+        wasmMemory = wasmExports['xa'];
         updateMemoryViews();
-        wasmTable = wasmExports['Aa'];
-        addOnInit(wasmExports['xa']);
+        wasmTable = wasmExports['Ba'];
+        addOnInit(wasmExports['ya']);
         removeRunDependency('wasm-instantiate');
         return wasmExports;
       }
@@ -1228,6 +1228,62 @@ var createDotLottiePlayerModule = (() => {
       }
       return false;
     }
+    function newFunc(constructor, argumentList) {
+      if (!(constructor instanceof Function)) {
+        throw new TypeError(`new_ called with constructor type ${typeof constructor} which is not a function`);
+      }
+      var dummy = createNamedFunction(constructor.name || 'unknownFunctionName', function () {});
+      dummy.prototype = constructor.prototype;
+      var obj = new dummy();
+      var r = constructor.apply(obj, argumentList);
+      return r instanceof Object ? r : obj;
+    }
+    function createJsInvoker(argTypes, isClassMethodFunc, returns, isAsync) {
+      var needsDestructorStack = usesDestructorStack(argTypes);
+      var argCount = argTypes.length - 2;
+      var argsList = [];
+      var argsListWired = ['fn'];
+      if (isClassMethodFunc) {
+        argsListWired.push('thisWired');
+      }
+      for (var i = 0; i < argCount; ++i) {
+        argsList.push(`arg${i}`);
+        argsListWired.push(`arg${i}Wired`);
+      }
+      argsList = argsList.join(',');
+      argsListWired = argsListWired.join(',');
+      var invokerFnBody = `return function (${argsList}) {\n`;
+      if (needsDestructorStack) {
+        invokerFnBody += 'var destructors = [];\n';
+      }
+      var dtorStack = needsDestructorStack ? 'destructors' : 'null';
+      var args1 = ['humanName', 'throwBindingError', 'invoker', 'fn', 'runDestructors', 'retType', 'classParam'];
+      if (isClassMethodFunc) {
+        invokerFnBody += `var thisWired = classParam['toWireType'](${dtorStack}, this);\n`;
+      }
+      for (var i = 0; i < argCount; ++i) {
+        invokerFnBody += `var arg${i}Wired = argType${i}['toWireType'](${dtorStack}, arg${i});\n`;
+        args1.push(`argType${i}`);
+      }
+      invokerFnBody += (returns || isAsync ? 'var rv = ' : '') + `invoker(${argsListWired});\n`;
+      if (needsDestructorStack) {
+        invokerFnBody += 'runDestructors(destructors);\n';
+      } else {
+        for (var i = isClassMethodFunc ? 1 : 2; i < argTypes.length; ++i) {
+          var paramName = i === 1 ? 'thisWired' : 'arg' + (i - 2) + 'Wired';
+          if (argTypes[i].destructorFunction !== null) {
+            invokerFnBody += `${paramName}_dtor(${paramName});\n`;
+            args1.push(`${paramName}_dtor`);
+          }
+        }
+      }
+      if (returns) {
+        invokerFnBody += "var ret = retType['fromWireType'](rv);\n" + 'return ret;\n';
+      } else {
+      }
+      invokerFnBody += '}\n';
+      return [args1, invokerFnBody];
+    }
     function craftInvokerFunction(humanName, argTypes, classType, cppInvokerFunc, cppTargetFunc, isAsync) {
       var argCount = argTypes.length;
       if (argCount < 2) {
@@ -1236,41 +1292,28 @@ var createDotLottiePlayerModule = (() => {
       var isClassMethodFunc = argTypes[1] !== null && classType !== null;
       var needsDestructorStack = usesDestructorStack(argTypes);
       var returns = argTypes[0].name !== 'void';
-      var expectedArgCount = argCount - 2;
-      var argsWired = new Array(expectedArgCount);
-      var invokerFuncArgs = [];
-      var destructors = [];
-      var invokerFn = function (...args) {
-        destructors.length = 0;
-        var thisWired;
-        invokerFuncArgs.length = isClassMethodFunc ? 2 : 1;
-        invokerFuncArgs[0] = cppTargetFunc;
-        if (isClassMethodFunc) {
-          thisWired = argTypes[1]['toWireType'](destructors, this);
-          invokerFuncArgs[1] = thisWired;
-        }
-        for (var i = 0; i < expectedArgCount; ++i) {
-          argsWired[i] = argTypes[i + 2]['toWireType'](destructors, args[i]);
-          invokerFuncArgs.push(argsWired[i]);
-        }
-        var rv = cppInvokerFunc(...invokerFuncArgs);
-        function onDone(rv) {
-          if (needsDestructorStack) {
-            runDestructors(destructors);
-          } else {
-            for (var i = isClassMethodFunc ? 1 : 2; i < argTypes.length; i++) {
-              var param = i === 1 ? thisWired : argsWired[i - 2];
-              if (argTypes[i].destructorFunction !== null) {
-                argTypes[i].destructorFunction(param);
-              }
-            }
-          }
-          if (returns) {
-            return argTypes[0]['fromWireType'](rv);
+      var closureArgs = [
+        humanName,
+        throwBindingError,
+        cppInvokerFunc,
+        cppTargetFunc,
+        runDestructors,
+        argTypes[0],
+        argTypes[1],
+      ];
+      for (var i = 0; i < argCount - 2; ++i) {
+        closureArgs.push(argTypes[i + 2]);
+      }
+      if (!needsDestructorStack) {
+        for (var i = isClassMethodFunc ? 1 : 2; i < argTypes.length; ++i) {
+          if (argTypes[i].destructorFunction !== null) {
+            closureArgs.push(argTypes[i].destructorFunction);
           }
         }
-        return onDone(rv);
-      };
+      }
+      let [args, invokerFnBody] = createJsInvoker(argTypes, isClassMethodFunc, returns, isAsync);
+      args.push(invokerFnBody);
+      var invokerFn = newFunc(Function, args)(...closureArgs);
       return createNamedFunction(humanName, invokerFn);
     }
     var __embind_register_class_constructor = (
@@ -1986,16 +2029,31 @@ var createDotLottiePlayerModule = (() => {
       var types = emval_lookupTypes(argCount, argTypes);
       var retType = types.shift();
       argCount--;
-      var argN = new Array(argCount);
-      var invokerFunction = (obj, func, destructorsRef, args) => {
-        var offset = 0;
-        for (var i = 0; i < argCount; ++i) {
-          argN[i] = types[i]['readValueFromPointer'](args + offset);
-          offset += types[i].argPackAdvance;
-        }
-        var rv = kind === 1 ? reflectConstruct(func, argN) : func.apply(obj, argN);
-        return emval_returnValue(retType, destructorsRef, rv);
-      };
+      var functionBody = `return function (obj, func, destructorsRef, args) {\n`;
+      var offset = 0;
+      var argsList = [];
+      if (kind === 0) {
+        argsList.push('obj');
+      }
+      var params = ['retType'];
+      var args = [retType];
+      for (var i = 0; i < argCount; ++i) {
+        argsList.push('arg' + i);
+        params.push('argType' + i);
+        args.push(types[i]);
+        functionBody += `  var arg${i} = argType${i}.readValueFromPointer(args${offset ? '+' + offset : ''});\n`;
+        offset += types[i].argPackAdvance;
+      }
+      var invoker = kind === 1 ? 'new func' : 'func.call';
+      functionBody += `  var rv = ${invoker}(${argsList.join(', ')});\n`;
+      if (!retType.isVoid) {
+        params.push('emval_returnValue');
+        args.push(emval_returnValue);
+        functionBody += '  return emval_returnValue(retType, destructorsRef, rv);\n';
+      }
+      functionBody += '};\n';
+      params.push(functionBody);
+      var invokerFunction = newFunc(Function, params)(...args);
       var functionName = `methodCaller<(${types.map((t) => t.name).join(', ')}) => ${retType.name}>`;
       return emval_addMethodCaller(createNamedFunction(functionName, invokerFunction));
     };
@@ -2123,6 +2181,9 @@ var createDotLottiePlayerModule = (() => {
         }
       }
       return false;
+    };
+    var _emscripten_run_script = (ptr) => {
+      eval(UTF8ToString(ptr));
     };
     var ENV = {};
     var getExecutableName = () => thisProgram || './this.program';
@@ -2384,45 +2445,46 @@ var createDotLottiePlayerModule = (() => {
     init_emval();
     var wasmImports = {
       c: ___assert_fail,
-      m: ___cxa_throw,
+      l: ___cxa_throw,
       M: ___syscall_fstat64,
-      J: ___syscall_getcwd,
+      I: ___syscall_getcwd,
       K: ___syscall_newfstatat,
       P: ___syscall_openat,
       L: ___syscall_stat64,
       R: __abort_js,
-      v: __embind_finalize_value_object,
+      u: __embind_finalize_value_object,
       B: __embind_register_bigint,
-      pa: __embind_register_bool,
-      r: __embind_register_class,
-      q: __embind_register_class_constructor,
+      qa: __embind_register_bool,
+      s: __embind_register_class,
+      r: __embind_register_class_constructor,
       f: __embind_register_class_function,
-      oa: __embind_register_emval,
-      y: __embind_register_enum,
-      k: __embind_register_enum_value,
+      pa: __embind_register_emval,
+      v: __embind_register_enum,
+      j: __embind_register_enum_value,
       z: __embind_register_float,
-      u: __embind_register_function,
-      l: __embind_register_integer,
+      t: __embind_register_function,
+      m: __embind_register_integer,
       h: __embind_register_memory_view,
-      w: __embind_register_optional,
-      va: __embind_register_smart_ptr,
+      x: __embind_register_optional,
+      wa: __embind_register_smart_ptr,
       A: __embind_register_std_string,
-      t: __embind_register_std_wstring,
-      s: __embind_register_value_object,
-      j: __embind_register_value_object_field,
-      qa: __embind_register_void,
+      w: __embind_register_std_wstring,
+      p: __embind_register_value_object,
+      k: __embind_register_value_object_field,
+      ra: __embind_register_void,
       V: __emscripten_get_now,
       G: __emscripten_runtime_keepalive_clear,
       C: __emscripten_throw_longjmp,
-      ta: __emval_call,
-      I: __emval_decref,
-      sa: __emval_get_method_caller,
-      ua: __emval_incref,
-      ra: __emval_run_destructors,
+      ua: __emval_call,
+      J: __emval_decref,
+      ta: __emval_get_method_caller,
+      va: __emval_incref,
+      sa: __emval_run_destructors,
       o: __emval_take_value,
       D: __setitimer_js,
       E: __tzset_js,
       F: _emscripten_resize_heap,
+      W: _emscripten_run_script,
       T: _environ_get,
       U: _environ_sizes_get,
       Q: _fd_close,
@@ -2431,60 +2493,60 @@ var createDotLottiePlayerModule = (() => {
       i: invoke_ii,
       d: invoke_iii,
       e: invoke_iiii,
-      p: invoke_iiiiii,
-      x: invoke_v,
+      q: invoke_iiiiii,
+      y: invoke_v,
       b: invoke_vi,
       a: invoke_vii,
       g: invoke_viii,
       n: invoke_viiii,
-      fa: _observer_on_complete,
-      ia: _observer_on_frame,
-      na: _observer_on_load,
-      ma: _observer_on_load_error,
-      ga: _observer_on_loop,
-      ka: _observer_on_pause,
-      la: _observer_on_play,
-      ha: _observer_on_render,
-      ja: _observer_on_stop,
+      ga: _observer_on_complete,
+      ja: _observer_on_frame,
+      oa: _observer_on_load,
+      na: _observer_on_load_error,
+      ha: _observer_on_loop,
+      la: _observer_on_pause,
+      ma: _observer_on_play,
+      ia: _observer_on_render,
+      ka: _observer_on_stop,
       S: _proc_exit,
       H: _random_get,
-      X: _state_machine_observer_on_boolean_trigger_value_change,
-      ba: _state_machine_observer_on_custom_event,
-      aa: _state_machine_observer_on_error,
-      Y: _state_machine_observer_on_numeric_trigger_value_change,
-      $: _state_machine_observer_on_start,
-      da: _state_machine_observer_on_state_entered,
-      ca: _state_machine_observer_on_state_exit,
-      _: _state_machine_observer_on_stop,
-      Z: _state_machine_observer_on_string_trigger_value_change,
-      ea: _state_machine_observer_on_transition,
-      W: _state_machine_observer_on_trigger_fired,
+      Y: _state_machine_observer_on_boolean_trigger_value_change,
+      ca: _state_machine_observer_on_custom_event,
+      ba: _state_machine_observer_on_error,
+      Z: _state_machine_observer_on_numeric_trigger_value_change,
+      aa: _state_machine_observer_on_start,
+      ea: _state_machine_observer_on_state_entered,
+      da: _state_machine_observer_on_state_exit,
+      $: _state_machine_observer_on_stop,
+      _: _state_machine_observer_on_string_trigger_value_change,
+      fa: _state_machine_observer_on_transition,
+      X: _state_machine_observer_on_trigger_fired,
     };
     var wasmExports = createWasm();
-    var ___wasm_call_ctors = () => (___wasm_call_ctors = wasmExports['xa'])();
-    var _malloc = (a0) => (_malloc = wasmExports['ya'])(a0);
-    var ___getTypeName = (a0) => (___getTypeName = wasmExports['za'])(a0);
-    var _free = (a0) => (_free = wasmExports['Ba'])(a0);
-    var __emscripten_timeout = (a0, a1) => (__emscripten_timeout = wasmExports['Ca'])(a0, a1);
-    var _setThrew = (a0, a1) => (_setThrew = wasmExports['Da'])(a0, a1);
-    var __emscripten_stack_restore = (a0) => (__emscripten_stack_restore = wasmExports['Ea'])(a0);
-    var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmExports['Fa'])();
+    var ___wasm_call_ctors = () => (___wasm_call_ctors = wasmExports['ya'])();
+    var _malloc = (a0) => (_malloc = wasmExports['za'])(a0);
+    var ___getTypeName = (a0) => (___getTypeName = wasmExports['Aa'])(a0);
+    var _free = (a0) => (_free = wasmExports['Ca'])(a0);
+    var __emscripten_timeout = (a0, a1) => (__emscripten_timeout = wasmExports['Da'])(a0, a1);
+    var _setThrew = (a0, a1) => (_setThrew = wasmExports['Ea'])(a0, a1);
+    var __emscripten_stack_restore = (a0) => (__emscripten_stack_restore = wasmExports['Fa'])(a0);
+    var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmExports['Ga'])();
     var dynCall_iijj = (Module['dynCall_iijj'] = (a0, a1, a2, a3, a4, a5) =>
-      (dynCall_iijj = Module['dynCall_iijj'] = wasmExports['Ga'])(a0, a1, a2, a3, a4, a5));
+      (dynCall_iijj = Module['dynCall_iijj'] = wasmExports['Ha'])(a0, a1, a2, a3, a4, a5));
     var dynCall_vijj = (Module['dynCall_vijj'] = (a0, a1, a2, a3, a4, a5) =>
-      (dynCall_vijj = Module['dynCall_vijj'] = wasmExports['Ha'])(a0, a1, a2, a3, a4, a5));
+      (dynCall_vijj = Module['dynCall_vijj'] = wasmExports['Ia'])(a0, a1, a2, a3, a4, a5));
     var dynCall_jiii = (Module['dynCall_jiii'] = (a0, a1, a2, a3) =>
-      (dynCall_jiii = Module['dynCall_jiii'] = wasmExports['Ia'])(a0, a1, a2, a3));
+      (dynCall_jiii = Module['dynCall_jiii'] = wasmExports['Ja'])(a0, a1, a2, a3));
     var dynCall_jii = (Module['dynCall_jii'] = (a0, a1, a2) =>
-      (dynCall_jii = Module['dynCall_jii'] = wasmExports['Ja'])(a0, a1, a2));
+      (dynCall_jii = Module['dynCall_jii'] = wasmExports['Ka'])(a0, a1, a2));
     var dynCall_viijii = (Module['dynCall_viijii'] = (a0, a1, a2, a3, a4, a5, a6) =>
-      (dynCall_viijii = Module['dynCall_viijii'] = wasmExports['Ka'])(a0, a1, a2, a3, a4, a5, a6));
+      (dynCall_viijii = Module['dynCall_viijii'] = wasmExports['La'])(a0, a1, a2, a3, a4, a5, a6));
     var dynCall_iiiiij = (Module['dynCall_iiiiij'] = (a0, a1, a2, a3, a4, a5, a6) =>
-      (dynCall_iiiiij = Module['dynCall_iiiiij'] = wasmExports['La'])(a0, a1, a2, a3, a4, a5, a6));
+      (dynCall_iiiiij = Module['dynCall_iiiiij'] = wasmExports['Ma'])(a0, a1, a2, a3, a4, a5, a6));
     var dynCall_iiiiijj = (Module['dynCall_iiiiijj'] = (a0, a1, a2, a3, a4, a5, a6, a7, a8) =>
-      (dynCall_iiiiijj = Module['dynCall_iiiiijj'] = wasmExports['Ma'])(a0, a1, a2, a3, a4, a5, a6, a7, a8));
+      (dynCall_iiiiijj = Module['dynCall_iiiiijj'] = wasmExports['Na'])(a0, a1, a2, a3, a4, a5, a6, a7, a8));
     var dynCall_iiiiiijj = (Module['dynCall_iiiiiijj'] = (a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) =>
-      (dynCall_iiiiiijj = Module['dynCall_iiiiiijj'] = wasmExports['Na'])(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9));
+      (dynCall_iiiiiijj = Module['dynCall_iiiiiijj'] = wasmExports['Oa'])(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9));
     function invoke_vii(index, a1, a2) {
       var sp = stackSave();
       try {
