@@ -608,17 +608,14 @@ export class DotLottie {
         : DotLottie._wasmModule.createDefaultLayout(),
     });
 
+    if (config.stateMachineId) {
+      this._stateMachineId = config.stateMachineId;
+    }
+
     if (config.data) {
       this._loadFromData(config.data);
     } else if (config.src) {
       this._loadFromSrc(config.src);
-    }
-
-    // SetConfig does not manage loading and starting state machines, so we do it here.
-    if (config.stateMachineId) {
-      this._stateMachineId = config.stateMachineId;
-      this.stateMachineLoad(config.stateMachineId);
-      this.stateMachineStart();
     }
 
     this.setBackgroundColor(config.backgroundColor ?? '');
