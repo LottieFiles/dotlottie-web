@@ -64,6 +64,16 @@ export interface Layout {
   fit: Fit;
 }
 
+export interface OpenUrlModeValue<T extends number> {
+  value: T;
+}
+export type OpenUrlMode = OpenUrlModeValue<1> | OpenUrlModeValue<2> | OpenUrlModeValue<3>;
+
+export interface OpenUrl {
+  mode: OpenUrlMode;
+  whitelist: VectorString;
+}
+
 export interface DotLottiePlayer extends ClassHandle {
   activeAnimationId(): string;
   activeStateMachineId(): string;
@@ -121,7 +131,7 @@ export interface DotLottiePlayer extends ClassHandle {
   stateMachineSetBooleanTrigger(_0: EmbindString, _1: boolean): boolean;
   totalFrames(): number;
   stateMachineSetStringTrigger(_0: EmbindString, _1: EmbindString): boolean;
-  stateMachineStart(): boolean;
+  stateMachineStart(_0: OpenUrl): boolean;
   stateMachinePostPointerMoveEvent(_0: number, _1: number): number;
   stateMachineLoad(_0: EmbindString): boolean;
   stateMachineStatus(): string;
@@ -161,6 +171,7 @@ interface EmbindModule {
     None: FitValue<6>;
   };
   Mode: { Bounce: ModeValue<3>; Forward: ModeValue<1>; Reverse: ModeValue<2>; ReverseBounce: ModeValue<4> };
+  OpenUrlMode: { Allow: OpenUrlModeValue<3>; Deny: OpenUrlModeValue<1>; Interaction: OpenUrlModeValue<2> };
   VectorFloat: {
     new (): VectorFloat;
   };
@@ -172,6 +183,7 @@ interface EmbindModule {
   };
   createDefaultConfig(): Config;
   createDefaultLayout(): Layout;
+  createDefaultOpenURL(): OpenUrl;
   transformThemeToLottieSlots(_0: EmbindString, _1: EmbindString): string;
 }
 

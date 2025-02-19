@@ -9,13 +9,14 @@ import type {
   VectorFloat,
   Marker,
   Fit as CoreFit,
+  OpenUrl as CoreOpenUrl,
 } from './core';
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
 import { CanvasResizeObserver } from './resize-observer';
-import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data } from './types';
+import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data, OpenUrl } from './types';
 import { getDefaultDPR, hexStringToRGBAInt, isDotLottie, isElementInViewport, isLottie } from './utils';
 
 const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
@@ -1037,8 +1038,31 @@ export class DotLottie {
     return this._dotLottieCore?.stateMachineLoad(stateMachineId) ?? false;
   }
 
-  public stateMachineStart(): boolean {
-    const started = this._dotLottieCore?.stateMachineStart() ?? false;
+  public stateMachineStart(openUrl?: OpenUrl): boolean {
+    if (DotLottie._wasmModule === null) return false;
+
+    const cf: CoreOpenUrl = {
+      mode: DotLottie._wasmModule.OpenUrlMode.Interaction,
+      whitelist: new DotLottie._wasmModule.VectorString(),
+    };
+
+    if (openUrl) {
+      if (openUrl.mode === 'allow') {
+        cf.mode = DotLottie._wasmModule.OpenUrlMode.Allow;
+      } else if (openUrl.mode === 'deny') {
+        cf.mode = DotLottie._wasmModule.OpenUrlMode.Deny;
+      } else {
+        cf.mode = DotLottie._wasmModule.OpenUrlMode.Interaction;
+      }
+
+      if (openUrl.whitelist.length > 0) {
+        for (const entry of openUrl.whitelist) {
+          cf.whitelist.push_back(entry);
+        }
+      }
+    }
+
+    const started = this._dotLottieCore?.stateMachineStart(cf) ?? false;
 
     if (started) {
       this._stateMachineIsActive = true;
