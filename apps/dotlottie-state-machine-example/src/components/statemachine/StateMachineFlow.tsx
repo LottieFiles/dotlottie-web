@@ -48,7 +48,7 @@ export default function StateMachineFlow({ data }: StateMachineFlowProps) {
             source: state.name,
             target: transition.toState,
             animated: true,
-            label: transition.guards.map((g) => `${g.triggerName} ${g.conditionType} ${g.compareTo}`).join(' AND '),
+            label: transition.guards.map((g) => `${g.inputName} ${g.conditionType} ${g.compareTo}`).join(' AND '),
             style: { stroke: '#2563eb' },
           });
         });

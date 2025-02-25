@@ -37,7 +37,7 @@ const examples: InteractivityExample[] = [
                   {
                     type: 'Numeric',
                     conditionType: 'Equal',
-                    triggerName: 'rating',
+                    inputName: 'rating',
                     compareTo: 1,
                   },
                 ],
@@ -49,7 +49,7 @@ const examples: InteractivityExample[] = [
                   {
                     type: 'Numeric',
                     conditionType: 'Equal',
-                    triggerName: 'rating',
+                    inputName: 'rating',
                     compareTo: 2,
                   },
                 ],
@@ -61,7 +61,7 @@ const examples: InteractivityExample[] = [
                   {
                     type: 'Numeric',
                     conditionType: 'Equal',
-                    triggerName: 'rating',
+                    inputName: 'rating',
                     compareTo: 3,
                   },
                 ],
@@ -73,7 +73,7 @@ const examples: InteractivityExample[] = [
                   {
                     type: 'Numeric',
                     conditionType: 'Equal',
-                    triggerName: 'rating',
+                    inputName: 'rating',
                     compareTo: 4,
                   },
                 ],
@@ -85,7 +85,7 @@ const examples: InteractivityExample[] = [
                   {
                     type: 'Numeric',
                     conditionType: 'Equal',
-                    triggerName: 'rating',
+                    inputName: 'rating',
                     compareTo: 5,
                   },
                 ],
@@ -135,14 +135,14 @@ const examples: InteractivityExample[] = [
             transitions: [],
           },
         ],
-        listeners: [
+        interactions: [
           {
             type: 'Click',
             layerName: 'star1',
             actions: [
               {
                 type: 'SetNumeric',
-                triggerName: 'rating',
+                inputName: 'rating',
                 value: 1,
               },
             ],
@@ -153,7 +153,7 @@ const examples: InteractivityExample[] = [
             actions: [
               {
                 type: 'SetNumeric',
-                triggerName: 'rating',
+                inputName: 'rating',
                 value: 2,
               },
             ],
@@ -164,7 +164,7 @@ const examples: InteractivityExample[] = [
             actions: [
               {
                 type: 'SetNumeric',
-                triggerName: 'rating',
+                inputName: 'rating',
                 value: 3,
               },
             ],
@@ -175,7 +175,7 @@ const examples: InteractivityExample[] = [
             actions: [
               {
                 type: 'SetNumeric',
-                triggerName: 'rating',
+                inputName: 'rating',
                 value: 4,
               },
             ],
@@ -186,13 +186,13 @@ const examples: InteractivityExample[] = [
             actions: [
               {
                 type: 'SetNumeric',
-                triggerName: 'rating',
+                inputName: 'rating',
                 value: 5,
               },
             ],
           },
         ],
-        triggers: [
+        inputs: [
           {
             type: 'Numeric',
             name: 'rating',
@@ -228,7 +228,7 @@ const examples: InteractivityExample[] = [
                 guards: [
                   {
                     type: 'Event',
-                    triggerName: 'Explode',
+                    inputName: 'Explode',
                   },
                 ],
               },
@@ -249,7 +249,7 @@ const examples: InteractivityExample[] = [
                 guards: [
                   {
                     type: 'Event',
-                    triggerName: 'Rain feathers',
+                    inputName: 'Rain feathers',
                   },
                 ],
               },
@@ -269,20 +269,20 @@ const examples: InteractivityExample[] = [
                 guards: [
                   {
                     type: 'Event',
-                    triggerName: 'Restart',
+                    inputName: 'Restart',
                   },
                 ],
               },
             ],
           },
         ],
-        listeners: [
+        interactions: [
           {
             type: 'PointerDown',
             actions: [
               {
                 type: 'Fire',
-                triggerName: 'Explode',
+                inputName: 'Explode',
               },
             ],
           },
@@ -292,7 +292,7 @@ const examples: InteractivityExample[] = [
             actions: [
               {
                 type: 'Fire',
-                triggerName: 'Rain feathers',
+                inputName: 'Rain feathers',
               },
             ],
           },
@@ -302,12 +302,12 @@ const examples: InteractivityExample[] = [
             actions: [
               {
                 type: 'Fire',
-                triggerName: 'Restart',
+                inputName: 'Restart',
               },
             ],
           },
         ],
-        triggers: [
+        inputs: [
           {
             type: 'Event',
             name: 'Explode',
@@ -347,7 +347,7 @@ const examples: InteractivityExample[] = [
                 guards: [
                   {
                     type: 'Event',
-                    triggerName: 'Step',
+                    inputName: 'Step',
                   },
                 ],
               },
@@ -360,18 +360,18 @@ const examples: InteractivityExample[] = [
             ],
           },
         ],
-        listeners: [
+        interactions: [
           {
             type: 'PointerDown',
             actions: [
               {
                 type: 'Increment',
-                triggerName: 'Progress',
+                inputName: 'Progress',
               },
             ],
           },
         ],
-        triggers: [
+        inputs: [
           {
             type: 'Numeric',
             name: 'Progress',
@@ -408,7 +408,7 @@ const examples: InteractivityExample[] = [
                 guards: [
                   {
                     type: 'Event',
-                    triggerName: 'Step',
+                    inputName: 'Step',
                   },
                 ],
               },
@@ -421,18 +421,18 @@ const examples: InteractivityExample[] = [
             ],
           },
         ],
-        listeners: [
+        interactions: [
           {
             type: 'PointerDown',
             actions: [
               {
                 type: 'Increment',
-                triggerName: 'Progress',
+                inputName: 'Progress',
               },
             ],
           },
         ],
-        triggers: [
+        inputs: [
           {
             type: 'Numeric',
             name: 'Progress',
@@ -469,7 +469,7 @@ const examples: InteractivityExample[] = [
                 guards: [
                   {
                     type: 'Event',
-                    triggerName: 'Step',
+                    inputName: 'Step',
                   },
                 ],
               },
@@ -482,18 +482,18 @@ const examples: InteractivityExample[] = [
             ],
           },
         ],
-        listeners: [
+        interactions: [
           {
             type: 'PointerDown',
             actions: [
               {
                 type: 'Increment',
-                triggerName: 'Progress',
+                inputName: 'Progress',
               },
             ],
           },
         ],
-        triggers: [
+        inputs: [
           {
             type: 'Numeric',
             name: 'Progress',
@@ -530,7 +530,7 @@ const examples: InteractivityExample[] = [
                 guards: [
                   {
                     type: 'Event',
-                    triggerName: 'Forward',
+                    inputName: 'Forward',
                   },
                 ],
               },
@@ -540,7 +540,7 @@ const examples: InteractivityExample[] = [
                 guards: [
                   {
                     type: 'Event',
-                    triggerName: 'Reverse',
+                    inputName: 'Reverse',
                   },
                 ],
               },
@@ -563,13 +563,13 @@ const examples: InteractivityExample[] = [
             transitions: [],
           },
         ],
-        listeners: [
+        interactions: [
           {
             type: 'PointerEnter',
             actions: [
               {
                 type: 'Fire',
-                triggerName: 'Forward',
+                inputName: 'Forward',
               },
             ],
           },
@@ -578,12 +578,12 @@ const examples: InteractivityExample[] = [
             actions: [
               {
                 type: 'Fire',
-                triggerName: 'Reverse',
+                inputName: 'Reverse',
               },
             ],
           },
         ],
-        triggers: [
+        inputs: [
           {
             type: 'Event',
             name: 'Forward',
@@ -619,7 +619,7 @@ const examples: InteractivityExample[] = [
                 guards: [
                   {
                     type: 'Event',
-                    triggerName: 'Forward',
+                    inputName: 'Forward',
                   },
                 ],
               },
@@ -629,7 +629,7 @@ const examples: InteractivityExample[] = [
                 guards: [
                   {
                     type: 'Event',
-                    triggerName: 'Reverse',
+                    inputName: 'Reverse',
                   },
                 ],
               },
@@ -652,13 +652,13 @@ const examples: InteractivityExample[] = [
             transitions: [],
           },
         ],
-        listeners: [
+        interactions: [
           {
             type: 'PointerDown',
             actions: [
               {
                 type: 'Fire',
-                triggerName: 'Forward',
+                inputName: 'Forward',
               },
             ],
           },
@@ -667,12 +667,12 @@ const examples: InteractivityExample[] = [
             actions: [
               {
                 type: 'Fire',
-                triggerName: 'Reverse',
+                inputName: 'Reverse',
               },
             ],
           },
         ],
-        triggers: [
+        inputs: [
           {
             type: 'Event',
             name: 'Forward',
@@ -708,7 +708,7 @@ const examples: InteractivityExample[] = [
                 guards: [
                   {
                     type: 'Event',
-                    triggerName: 'Forward',
+                    inputName: 'Forward',
                   },
                 ],
               },
@@ -723,18 +723,18 @@ const examples: InteractivityExample[] = [
             transitions: [],
           },
         ],
-        listeners: [
+        interactions: [
           {
             type: 'PointerDown',
             actions: [
               {
                 type: 'Fire',
-                triggerName: 'Forward',
+                inputName: 'Forward',
               },
             ],
           },
         ],
-        triggers: [
+        inputs: [
           {
             type: 'Event',
             name: 'Forward',
@@ -767,7 +767,7 @@ const examples: InteractivityExample[] = [
                   {
                     type: 'Boolean',
                     conditionType: 'Equal',
-                    triggerName: 'OnOffSwitch',
+                    inputName: 'OnOffSwitch',
                     compareTo: true,
                   },
                 ],
@@ -788,7 +788,7 @@ const examples: InteractivityExample[] = [
                   {
                     type: 'Boolean',
                     conditionType: 'Equal',
-                    triggerName: 'OnOffSwitch',
+                    inputName: 'OnOffSwitch',
                     compareTo: false,
                   },
                 ],
@@ -810,7 +810,7 @@ const examples: InteractivityExample[] = [
                   {
                     type: 'Boolean',
                     conditionType: 'Equal',
-                    triggerName: 'OnOffSwitch',
+                    inputName: 'OnOffSwitch',
                     compareTo: true,
                   },
                 ],
@@ -818,18 +818,18 @@ const examples: InteractivityExample[] = [
             ],
           },
         ],
-        listeners: [
+        interactions: [
           {
             type: 'PointerDown',
             actions: [
               {
                 type: 'Toggle',
-                triggerName: 'OnOffSwitch',
+                inputName: 'OnOffSwitch',
               },
             ],
           },
         ],
-        triggers: [
+        inputs: [
           {
             type: 'Boolean',
             name: 'OnOffSwitch',
@@ -863,7 +863,7 @@ const examples: InteractivityExample[] = [
                   {
                     type: 'Boolean',
                     conditionType: 'Equal',
-                    triggerName: 'OnOffSwitch',
+                    inputName: 'OnOffSwitch',
                     compareTo: true,
                   },
                 ],
@@ -890,7 +890,7 @@ const examples: InteractivityExample[] = [
                   {
                     type: 'Boolean',
                     conditionType: 'Equal',
-                    triggerName: 'OnOffSwitch',
+                    inputName: 'OnOffSwitch',
                     compareTo: false,
                   },
                 ],
@@ -918,7 +918,7 @@ const examples: InteractivityExample[] = [
                   {
                     type: 'Boolean',
                     conditionType: 'Equal',
-                    triggerName: 'OnOffSwitch',
+                    inputName: 'OnOffSwitch',
                     compareTo: true,
                   },
                 ],
@@ -932,18 +932,18 @@ const examples: InteractivityExample[] = [
             ],
           },
         ],
-        listeners: [
+        interactions: [
           {
             type: 'PointerDown',
             actions: [
               {
                 type: 'Toggle',
-                triggerName: 'OnOffSwitch',
+                inputName: 'OnOffSwitch',
               },
             ],
           },
         ],
-        triggers: [
+        inputs: [
           {
             type: 'Boolean',
             name: 'OnOffSwitch',

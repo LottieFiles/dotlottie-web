@@ -22,10 +22,10 @@ export type EventType =
   | 'stateMachineTransition'
   | 'stateMachineStart'
   | 'stateMachineStop'
-  | 'stateMachineBooleanTriggerValueChange'
-  | 'stateMachineNumericTriggerValueChange'
-  | 'stateMachineStringTriggerValueChange'
-  | 'stateMachineTriggerFired';
+  | 'stateMachineBooleanInputValueChange'
+  | 'stateMachineNumericInputValueChange'
+  | 'stateMachineStringInputValueChange'
+  | 'stateMachineInputFired';
 
 /**
  * Maps an event type string to its respective event interface.
@@ -70,14 +70,14 @@ type EventByType<T> = T extends 'complete'
   ? StateMachineStartEvent
   : T extends 'stateMachineStop'
   ? StateMachineStopEvent
-  : T extends 'stateMachineBooleanTriggerValueChange'
-  ? StateMachineBooleanTriggerValueChangeEvent
-  : T extends 'stateMachineNumericTriggerValueChange'
-  ? StateMachineNumericTriggerValueChangeEvent
-  : T extends 'stateMachineStringTriggerValueChange'
-  ? StateMachineStringTriggerValueChangeEvent
-  : T extends 'stateMachineTriggerFired'
-  ? StateMachineTriggerFiredEvent
+  : T extends 'stateMachineBooleanInputValueChange'
+  ? StateMachineBooleanInputValueChangeEvent
+  : T extends 'stateMachineNumericInputValueChange'
+  ? StateMachineNumericInputValueChangeEvent
+  : T extends 'stateMachineStringInputValueChange'
+  ? StateMachineStringInputValueChangeEvent
+  : T extends 'stateMachineInputFired'
+  ? StateMachineInputFiredEvent
   : never;
 
 /**
@@ -205,36 +205,30 @@ export interface StateMachineStopEvent extends BaseEvent {
   type: 'stateMachineStop';
 }
 
-export interface StateMachineBooleanTriggerValueChangeEvent extends BaseEvent {
-  triggerName: string;
-  // eslint-disable-next-line typescript-sort-keys/interface
-  oldValue: boolean;
-  // eslint-disable-next-line typescript-sort-keys/interface
+export interface StateMachineBooleanInputValueChangeEvent extends BaseEvent {
+  inputName: string;
   newValue: boolean;
-  type: 'stateMachineBooleanTriggerValueChange';
+  oldValue: boolean;
+  type: 'stateMachineBooleanInputValueChange';
 }
 
-export interface StateMachineNumericTriggerValueChangeEvent extends BaseEvent {
-  triggerName: string;
-  // eslint-disable-next-line typescript-sort-keys/interface
-  oldValue: number;
-  // eslint-disable-next-line typescript-sort-keys/interface
+export interface StateMachineNumericInputValueChangeEvent extends BaseEvent {
+  inputName: string;
   newValue: number;
-  type: 'stateMachineNumericTriggerValueChange';
+  oldValue: number;
+  type: 'stateMachineNumericInputValueChange';
 }
 
-export interface StateMachineStringTriggerValueChangeEvent extends BaseEvent {
-  triggerName: string;
-  // eslint-disable-next-line typescript-sort-keys/interface
-  oldValue: string;
-  // eslint-disable-next-line typescript-sort-keys/interface
+export interface StateMachineStringInputValueChangeEvent extends BaseEvent {
+  inputName: string;
   newValue: string;
-  type: 'stateMachineStringTriggerValueChange';
+  oldValue: string;
+  type: 'stateMachineStringInputValueChange';
 }
 
-export interface StateMachineTriggerFiredEvent extends BaseEvent {
-  triggerName: string;
-  type: 'stateMachineTriggerFired';
+export interface StateMachineInputFiredEvent extends BaseEvent {
+  inputName: string;
+  type: 'stateMachineInputFired';
 }
 
 /**
@@ -261,10 +255,10 @@ export type Event =
   | StateMachineTransitionEvent
   | StateMachineStartEvent
   | StateMachineStopEvent
-  | StateMachineBooleanTriggerValueChangeEvent
-  | StateMachineNumericTriggerValueChangeEvent
-  | StateMachineStringTriggerValueChangeEvent
-  | StateMachineTriggerFiredEvent;
+  | StateMachineBooleanInputValueChangeEvent
+  | StateMachineNumericInputValueChangeEvent
+  | StateMachineStringInputValueChangeEvent
+  | StateMachineInputFiredEvent;
 
 export interface EventListener<T extends EventType> {
   (event: EventByType<T>): void;

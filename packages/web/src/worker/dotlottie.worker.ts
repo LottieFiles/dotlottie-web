@@ -23,10 +23,10 @@ import type {
   StateMachineTransitionEvent,
   StateMachineStartEvent,
   StateMachineStopEvent,
-  StateMachineStringTriggerValueChangeEvent,
-  StateMachineNumericTriggerValueChangeEvent,
-  StateMachineBooleanTriggerValueChangeEvent,
-  StateMachineTriggerFiredEvent,
+  StateMachineStringInputValueChangeEvent,
+  StateMachineNumericInputValueChangeEvent,
+  StateMachineBooleanInputValueChangeEvent,
+  StateMachineInputFiredEvent,
 } from '../event-manager';
 
 import type { DotLottieInstanceState } from './dotlottie';
@@ -305,67 +305,69 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
 
     self.postMessage(response);
   },
-  stateMachineStringTriggerValueChange: (instanceId: string) => (event: Event) => {
-    const stateMachineOnStringTriggerValueChangeEvent = event as StateMachineStringTriggerValueChangeEvent;
+  stateMachineStringInputValueChange: (instanceId: string) => (event: Event) => {
+    const stateMachineOnStringInputValueChangeEvent = event as StateMachineStringInputValueChangeEvent;
 
-    const response: RpcResponse<'onStateMachineStringTriggerValueChange'> = {
+    const response: RpcResponse<'onStateMachineStringInputValueChange'> = {
       id: '',
-      method: 'onStateMachineStringTriggerValueChange',
+      method: 'onStateMachineStringInputValueChange',
       result: {
         instanceId,
-        event: stateMachineOnStringTriggerValueChangeEvent,
-        newValue: stateMachineOnStringTriggerValueChangeEvent.newValue,
-        oldValue: stateMachineOnStringTriggerValueChangeEvent.oldValue,
-        triggerName: stateMachineOnStringTriggerValueChangeEvent.triggerName,
+        event: stateMachineOnStringInputValueChangeEvent,
+        newValue: stateMachineOnStringInputValueChangeEvent.newValue,
+        oldValue: stateMachineOnStringInputValueChangeEvent.oldValue,
+        inputName: stateMachineOnStringInputValueChangeEvent.inputName,
       },
     };
 
     self.postMessage(response);
   },
-  stateMachineNumericTriggerValueChange: (instanceId: string) => (event: Event) => {
-    const stateMachineOnNumericTriggerValueChangeEvent = event as StateMachineNumericTriggerValueChangeEvent;
+  stateMachineNumericInputValueChange: (instanceId: string) => (event: Event) => {
+    const stateMachineOnNumericInputValueChangeEvent = event as StateMachineNumericInputValueChangeEvent;
 
-    const response: RpcResponse<'onStateMachineNumericTriggerValueChange'> = {
+    // eslint-disable-next-line no-secrets/no-secrets
+    const response: RpcResponse<'onStateMachineNumericInputValueChange'> = {
       id: '',
-      method: 'onStateMachineNumericTriggerValueChange',
+      // eslint-disable-next-line no-secrets/no-secrets
+      method: 'onStateMachineNumericInputValueChange',
       result: {
         instanceId,
-        event: stateMachineOnNumericTriggerValueChangeEvent,
-        newValue: stateMachineOnNumericTriggerValueChangeEvent.newValue,
-        oldValue: stateMachineOnNumericTriggerValueChangeEvent.oldValue,
-        triggerName: stateMachineOnNumericTriggerValueChangeEvent.triggerName,
+        event: stateMachineOnNumericInputValueChangeEvent,
+        newValue: stateMachineOnNumericInputValueChangeEvent.newValue,
+        oldValue: stateMachineOnNumericInputValueChangeEvent.oldValue,
+        inputName: stateMachineOnNumericInputValueChangeEvent.inputName,
       },
     };
 
     self.postMessage(response);
   },
-  stateMachineBooleanTriggerValueChange: (instanceId: string) => (event: Event) => {
-    const stateMachineOnBooleanValueChangeEvent = event as StateMachineBooleanTriggerValueChangeEvent;
+  stateMachineBooleanInputValueChange: (instanceId: string) => (event: Event) => {
+    const stateMachineOnBooleanValueChangeEvent = event as StateMachineBooleanInputValueChangeEvent;
 
-    const response: RpcResponse<'onStateMachineBooleanTriggerValueChange'> = {
+    const response: RpcResponse<'onStateMachineBooleanInputValueChange'> = {
       id: '',
-      method: 'onStateMachineBooleanTriggerValueChange',
+      method: 'onStateMachineBooleanInputValueChange',
       result: {
         instanceId,
         event: stateMachineOnBooleanValueChangeEvent,
         newValue: stateMachineOnBooleanValueChangeEvent.newValue,
         oldValue: stateMachineOnBooleanValueChangeEvent.oldValue,
-        triggerName: stateMachineOnBooleanValueChangeEvent.triggerName,
+        inputName: stateMachineOnBooleanValueChangeEvent.inputName,
       },
     };
 
     self.postMessage(response);
   },
-  stateMachineTriggerFired: (instanceId: string) => (event: Event) => {
-    const stateMachineTriggerFireEvent = event as StateMachineTriggerFiredEvent;
+  stateMachineInputFired: (instanceId: string) => (event: Event) => {
+    const stateMachineInputFireEvent = event as StateMachineInputFiredEvent;
 
-    const response: RpcResponse<'onStateMachineTriggerFired'> = {
+    const response: RpcResponse<'onStateMachineInputFired'> = {
       id: '',
-      method: 'onStateMachineTriggerFired',
+      method: 'onStateMachineInputFired',
       result: {
         instanceId,
-        event: stateMachineTriggerFireEvent,
-        triggerName: stateMachineTriggerFireEvent.triggerName,
+        event: stateMachineInputFireEvent,
+        inputName: stateMachineInputFireEvent.inputName,
       },
     };
 
@@ -476,15 +478,15 @@ const commands: {
       'ready',
       'stateMachineStart',
       'stateMachineStop',
-      'stateMachineNumericTriggerValueChange',
-      'stateMachineBooleanTriggerValueChange',
-      'stateMachineStringTriggerValueChange',
+      'stateMachineNumericInputValueChange',
+      'stateMachineBooleanInputValueChange',
+      'stateMachineStringInputValueChange',
       'stateMachineCustomEvent',
       'stateMachineError',
       'stateMachineStateEntered',
       'stateMachineStateExit',
       'stateMachineTransition',
-      'stateMachineTriggerFired',
+      'stateMachineInputFired',
     ];
 
     events.forEach((event) => {
@@ -808,7 +810,7 @@ const commands: {
 
     return instance.stateMachineFire(eventName);
   },
-  stateMachineGetBooleanTrigger(request) {
+  stateMachineGetBooleanInput(request) {
     const instanceId = request.params.instanceId;
     const triggerId = request.params.triggerId;
 
@@ -818,9 +820,9 @@ const commands: {
       throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    return instance.stateMachineGetBooleanTrigger(triggerId);
+    return instance.stateMachineGetBooleanInput(triggerId);
   },
-  stateMachineGetNumericTrigger(request) {
+  stateMachineGetNumericInput(request) {
     const instanceId = request.params.instanceId;
     const triggerId = request.params.triggerId;
 
@@ -830,9 +832,9 @@ const commands: {
       throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    return instance.stateMachineGetNumericTrigger(triggerId);
+    return instance.stateMachineGetNumericInput(triggerId);
   },
-  stateMachineGetStringTrigger(request) {
+  stateMachineGetStringInput(request) {
     const instanceId = request.params.instanceId;
     const triggerId = request.params.triggerId;
 
@@ -842,7 +844,7 @@ const commands: {
       throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    return instance.stateMachineGetStringTrigger(triggerId);
+    return instance.stateMachineGetStringInput(triggerId);
   },
   stateMachineLoad(request) {
     const instanceId = request.params.instanceId;
@@ -946,7 +948,7 @@ const commands: {
 
     return instance.stateMachinePostPointerUpEvent(x, y);
   },
-  stateMachineSetBooleanTrigger(request) {
+  stateMachineSetBooleanInput(request) {
     const instanceId = request.params.instanceId;
     const triggerId = request.params.triggerId;
     const value = request.params.value;
@@ -957,9 +959,9 @@ const commands: {
       throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    return instance.stateMachineSetBooleanTrigger(triggerId, value);
+    return instance.stateMachineSetBooleanInput(triggerId, value);
   },
-  stateMachineSetNumericTrigger(request) {
+  stateMachineSetNumericInput(request) {
     const instanceId = request.params.instanceId;
     const triggerId = request.params.triggerId;
     const value = request.params.value;
@@ -970,9 +972,9 @@ const commands: {
       throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    return instance.stateMachineSetNumericTrigger(triggerId, value);
+    return instance.stateMachineSetNumericInput(triggerId, value);
   },
-  stateMachineSetStringTrigger(request) {
+  stateMachineSetStringInput(request) {
     const instanceId = request.params.instanceId;
     const triggerId = request.params.triggerId;
     const value = request.params.value;
@@ -983,7 +985,7 @@ const commands: {
       throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    return instance.stateMachineSetStringTrigger(triggerId, value);
+    return instance.stateMachineSetStringInput(triggerId, value);
   },
   stateMachineStart(request) {
     const instanceId = request.params.instanceId;

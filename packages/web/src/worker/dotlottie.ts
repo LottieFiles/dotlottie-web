@@ -177,10 +177,11 @@ export class DotLottieWorker {
       | 'onStateMachineTransition'
       | 'onStateMachineStart'
       | 'onStateMachineStop'
-      | 'onStateMachineBooleanTriggerValueChange'
-      | 'onStateMachineNumericTriggerValueChange'
-      | 'onStateMachineStringTriggerValueChange'
-      | 'onStateMachineTriggerFired'
+      | 'onStateMachineBooleanInputValueChange'
+      // eslint-disable-next-line no-secrets/no-secrets
+      | 'onStateMachineNumericInputValueChange'
+      | 'onStateMachineStringInputValueChange'
+      | 'onStateMachineInputFired'
     > = event.data;
 
     if (!rpcResponse.id) {
@@ -288,8 +289,14 @@ export class DotLottieWorker {
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
+      if (rpcResponse.method === 'onStateMachineStringInputValueChange' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
       if (
-        rpcResponse.method === 'onStateMachineStringTriggerValueChange' &&
+        // eslint-disable-next-line no-secrets/no-secrets
+        rpcResponse.method === 'onStateMachineNumericInputValueChange' &&
         rpcResponse.result.instanceId === this._id
       ) {
         await this._updateDotLottieInstanceState();
@@ -297,22 +304,14 @@ export class DotLottieWorker {
       }
 
       if (
-        rpcResponse.method === 'onStateMachineNumericTriggerValueChange' &&
+        rpcResponse.method === 'onStateMachineBooleanInputValueChange' &&
         rpcResponse.result.instanceId === this._id
       ) {
         await this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
-      if (
-        rpcResponse.method === 'onStateMachineBooleanTriggerValueChange' &&
-        rpcResponse.result.instanceId === this._id
-      ) {
-        await this._updateDotLottieInstanceState();
-        this._eventManager.dispatch(rpcResponse.result.event);
-      }
-
-      if (rpcResponse.method === 'onStateMachineTriggerFired' && rpcResponse.result.instanceId === this._id) {
+      if (rpcResponse.method === 'onStateMachineInputFired' && rpcResponse.result.instanceId === this._id) {
         await this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
@@ -807,40 +806,40 @@ export class DotLottieWorker {
     this._sendMessage('stateMachineFire', { instanceId: this._id, eventName });
   }
 
-  public async stateMachineGetBooleanTrigger(triggerId: string): Promise<boolean | undefined> {
+  public async stateMachineGetBooleanInput(triggerId: string): Promise<boolean | undefined> {
     if (!this._created) return false;
 
-    return this._sendMessage('stateMachineGetBooleanTrigger', { instanceId: this._id, triggerId });
+    return this._sendMessage('stateMachineGetBooleanInput', { instanceId: this._id, triggerId });
   }
 
-  public async stateMachineGetNumericTrigger(triggerId: string): Promise<number | undefined> {
+  public async stateMachineGetNumericInput(triggerId: string): Promise<number | undefined> {
     if (!this._created) return 0;
 
-    return this._sendMessage('stateMachineGetNumericTrigger', { instanceId: this._id, triggerId });
+    return this._sendMessage('stateMachineGetNumericInput', { instanceId: this._id, triggerId });
   }
 
-  public async stateMachineGetStringTrigger(triggerId: string): Promise<string | undefined> {
+  public async stateMachineGetStringInput(triggerId: string): Promise<string | undefined> {
     if (!this._created) return '';
 
-    return this._sendMessage('stateMachineGetStringTrigger', { instanceId: this._id, triggerId });
+    return this._sendMessage('stateMachineGetStringInput', { instanceId: this._id, triggerId });
   }
 
-  public async stateMachineSetBooleanTrigger(triggerId: string, value: boolean): Promise<void> {
+  public async stateMachineSetBooleanInput(triggerId: string, value: boolean): Promise<void> {
     if (!this._created) return;
 
-    this._sendMessage('stateMachineSetBooleanTrigger', { instanceId: this._id, triggerId, value });
+    this._sendMessage('stateMachineSetBooleanInput', { instanceId: this._id, triggerId, value });
   }
 
-  public async stateMachineSetNumericTrigger(triggerId: string, value: number): Promise<void> {
+  public async stateMachineSetNumericInput(triggerId: string, value: number): Promise<void> {
     if (!this._created) return;
 
-    this._sendMessage('stateMachineSetNumericTrigger', { instanceId: this._id, triggerId, value });
+    this._sendMessage('stateMachineSetNumericInput', { instanceId: this._id, triggerId, value });
   }
 
-  public async stateMachineSetStringTrigger(triggerId: string, value: string): Promise<void> {
+  public async stateMachineSetStringInput(triggerId: string, value: string): Promise<void> {
     if (!this._created) return;
 
-    this._sendMessage('stateMachineSetStringTrigger', { instanceId: this._id, triggerId, value });
+    this._sendMessage('stateMachineSetStringInput', { instanceId: this._id, triggerId, value });
   }
 
   private _getPointerPosition(event: MouseEvent | PointerEvent): { x: number; y: number } {

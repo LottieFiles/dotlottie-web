@@ -109,7 +109,7 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ type }) => {
                   const pos = Math.min((event.clientX / document.body.clientWidth) * 100, 100);
                   const frame = (themed.totalFrames * pos) / 100;
 
-                  themed.stateMachineSetNumericTrigger('Progress', frame);
+                  themed.stateMachineSetNumericInput('Progress', frame);
                   themed.stateMachineFire('Step');
                 };
 

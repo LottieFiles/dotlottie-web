@@ -2386,15 +2386,15 @@ var M = class M3 {
   }
   setStateMachineBooleanContext(n, i) {
     var d, s;
-    return (s = (d = this._dotLottieCore) == null ? void 0 : d.stateMachineSetBooleanTrigger(n, i)) != null ? s : false;
+    return (s = (d = this._dotLottieCore) == null ? void 0 : d.stateMachineSetBooleanInput(n, i)) != null ? s : false;
   }
   setStateMachineNumericContext(n, i) {
     var d, s;
-    return (s = (d = this._dotLottieCore) == null ? void 0 : d.stateMachineSetNumericTrigger(n, i)) != null ? s : false;
+    return (s = (d = this._dotLottieCore) == null ? void 0 : d.stateMachineSetNumericInput(n, i)) != null ? s : false;
   }
   setStateMachineStringContext(n, i) {
     var d, s;
-    return (s = (d = this._dotLottieCore) == null ? void 0 : d.stateMachineSetStringTrigger(n, i)) != null ? s : false;
+    return (s = (d = this._dotLottieCore) == null ? void 0 : d.stateMachineSetStringInput(n, i)) != null ? s : false;
   }
   getLayerBoundingBox(n) {
     var C;

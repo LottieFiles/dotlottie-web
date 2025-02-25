@@ -10,17 +10,17 @@ import type {
   PlayEvent,
   ReadyEvent,
   RenderEvent,
-  StateMachineBooleanTriggerValueChangeEvent,
+  StateMachineBooleanInputValueChangeEvent,
   StateMachineCustomEvent,
   StateMachineErrorEvent,
-  StateMachineNumericTriggerValueChangeEvent,
+  StateMachineNumericInputValueChangeEvent,
   StateMachineStartEvent,
   StateMachineStateEnteredEvent,
   StateMachineStateExitEvent,
   StateMachineStopEvent,
-  StateMachineStringTriggerValueChangeEvent,
+  StateMachineStringInputValueChangeEvent,
   StateMachineTransitionEvent,
-  StateMachineTriggerFiredEvent,
+  StateMachineInputFiredEvent,
   StopEvent,
   UnfreezeEvent,
 } from '../event-manager';
@@ -138,15 +138,15 @@ export interface MethodParamsMap {
     eventName: string;
     instanceId: string;
   };
-  stateMachineGetBooleanTrigger: {
+  stateMachineGetBooleanInput: {
     instanceId: string;
     triggerId: string;
   };
-  stateMachineGetNumericTrigger: {
+  stateMachineGetNumericInput: {
     instanceId: string;
     triggerId: string;
   };
-  stateMachineGetStringTrigger: {
+  stateMachineGetStringInput: {
     instanceId: string;
     triggerId: string;
   };
@@ -188,17 +188,17 @@ export interface MethodParamsMap {
     x: number;
     y: number;
   };
-  stateMachineSetBooleanTrigger: {
+  stateMachineSetBooleanInput: {
     instanceId: string;
     triggerId: string;
     value: boolean;
   };
-  stateMachineSetNumericTrigger: {
+  stateMachineSetNumericInput: {
     instanceId: string;
     triggerId: string;
     value: number;
   };
-  stateMachineSetStringTrigger: {
+  stateMachineSetStringInput: {
     instanceId: string;
     triggerId: string;
     value: string;
@@ -281,12 +281,12 @@ export interface MethodResultMap {
     event: RenderEvent;
     instanceId: string;
   };
-  onStateMachineBooleanTriggerValueChange: {
-    event: StateMachineBooleanTriggerValueChangeEvent;
+  onStateMachineBooleanInputValueChange: {
+    event: StateMachineBooleanInputValueChangeEvent;
+    inputName: string;
     instanceId: string;
     newValue: boolean;
     oldValue: boolean;
-    triggerName: string;
   };
   onStateMachineCustomEvent: {
     event: StateMachineCustomEvent;
@@ -297,12 +297,17 @@ export interface MethodResultMap {
     instanceId: string;
     message: string;
   };
-  onStateMachineNumericTriggerValueChange: {
-    event: StateMachineNumericTriggerValueChangeEvent;
+  onStateMachineInputFired: {
+    event: StateMachineInputFiredEvent;
+    inputName: string;
+    instanceId: string;
+  };
+  onStateMachineNumericInputValueChange: {
+    event: StateMachineNumericInputValueChangeEvent;
+    inputName: string;
     instanceId: string;
     newValue: number;
     oldValue: number;
-    triggerName: string;
   };
   onStateMachineStart: {
     event: StateMachineStartEvent;
@@ -322,23 +327,18 @@ export interface MethodResultMap {
     event: StateMachineStopEvent;
     instanceId: string;
   };
-  onStateMachineStringTriggerValueChange: {
-    event: StateMachineStringTriggerValueChangeEvent;
+  onStateMachineStringInputValueChange: {
+    event: StateMachineStringInputValueChangeEvent;
+    inputName: string;
     instanceId: string;
     newValue: string;
     oldValue: string;
-    triggerName: string;
   };
   onStateMachineTransition: {
     event: StateMachineTransitionEvent;
     instanceId: string;
     newState: string;
     previousState: string;
-  };
-  onStateMachineTriggerFired: {
-    event: StateMachineTriggerFiredEvent;
-    instanceId: string;
-    triggerName: string;
   };
   onStop: {
     event: StopEvent;
@@ -367,9 +367,9 @@ export interface MethodResultMap {
   setWasmUrl: void;
   stateMachineCurrentState: string | undefined;
   stateMachineFire: void;
-  stateMachineGetBooleanTrigger: boolean | undefined;
-  stateMachineGetNumericTrigger: number | undefined;
-  stateMachineGetStringTrigger: string | undefined;
+  stateMachineGetBooleanInput: boolean | undefined;
+  stateMachineGetNumericInput: number | undefined;
+  stateMachineGetStringInput: string | undefined;
   stateMachineLoad: boolean;
   stateMachineLoadData: boolean;
   stateMachinePostClickEvent: number | undefined;
@@ -378,9 +378,9 @@ export interface MethodResultMap {
   stateMachinePostPointerExitEvent: number | undefined;
   stateMachinePostPointerMoveEvent: number | undefined;
   stateMachinePostPointerUpEvent: number | undefined;
-  stateMachineSetBooleanTrigger: boolean | undefined;
-  stateMachineSetNumericTrigger: boolean | undefined;
-  stateMachineSetStringTrigger: boolean | undefined;
+  stateMachineSetBooleanInput: boolean | undefined;
+  stateMachineSetNumericInput: boolean | undefined;
+  stateMachineSetStringInput: boolean | undefined;
   stateMachineSetupListeners: void;
   stateMachineStart: boolean;
   stateMachineStop: boolean;

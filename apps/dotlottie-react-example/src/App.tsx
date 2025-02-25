@@ -1,13 +1,22 @@
-// import { DotLottieReact, DotLottie, setWasmUrl } from '@lottiefiles/dotlottie-react';
+// import { DotLottieReact, DotLottie, setWasmUrl, OpenUrl, OpenUrlMode } from '@lottiefiles/dotlottie-react';
 import { DotLottieWorkerReact, DotLottieWorker, setWasmUrl } from '@lottiefiles/dotlottie-react';
 import React, { useState } from 'react';
 
+// import smData from './open_url_rating.json';
+// import pigeonData from './loop_complete.json'
+import starAnimation from './star-rating.json';
+import starSM from './starRating.json';
+// import pigeonAnimation from './exploding-pigeon.json';
+// import pigeonSM from './exploding-pigeon-sm.json';
+
 const animations = [
-  'https://lottie.host/e641272e-039b-4612-96de-138acfbede6e/bc0sW78EeR.lottie',
-  './markers_example.json',
-  'https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie',
-  'https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json',
-  './dragon.json',
+  // pigeon
+  // 'https://assets.codepen.io/11716235/sm_exploding_pigeon.lottie'
+  // 'https://assets.codepen.io/11716235/sm_star_rating.lottie',
+  //minecraft
+  // 'https://asset-cdn.lottiefiles.dev/1452b1e1-1d27-4394-a39a-a3c838e2b477/aUwJ8LNLZd.lottie',
+  //pig
+  // 'https://asset-cdn.lottiefiles.dev/dc0615d8-a1fb-4c25-866b-2152d3cdc0c9/L9pOD3RJen.lottie'
 ];
 
 setWasmUrl(new URL('../../../packages/web/src/core/dotlottie-player.wasm', import.meta.url).href);
@@ -28,11 +37,11 @@ function App() {
 
   React.useEffect(() => {
     function updateCurrentFrame(event: { currentFrame: number }) {
-      // console.log('currentFrame', event.currentFrame);
       setCurrentFrame(event.currentFrame);
     }
 
     function onLoad() {
+      console.log('onLoad');
       if (dotLottie) {
         setAllMarkers(dotLottie.markers().map((marker) => marker.name));
         setAnimationsIds(dotLottie.manifest?.animations.map((animation) => animation.id) || []);
@@ -41,12 +50,15 @@ function App() {
     }
 
     dotLottie?.addEventListener('play', console.log);
+    dotLottie?.addEventListener('complete', console.log);
     dotLottie?.addEventListener('freeze', console.log);
     dotLottie?.addEventListener('unfreeze', console.log);
     dotLottie?.addEventListener('pause', console.log);
     dotLottie?.addEventListener('stop', console.log);
     dotLottie?.addEventListener('load', onLoad);
     dotLottie?.addEventListener('frame', updateCurrentFrame);
+
+    // ------------------------------------------------------------------------------------
 
     return () => {
       dotLottie?.removeEventListener('play', console.log);
@@ -63,17 +75,11 @@ function App() {
 
   return (
     <div>
-      <div
-        style={{
-          marginBottom: '2000px',
-        }}
-      ></div>
       <DotLottieWorkerReact
         dotLottieRefCallback={setDotLottie}
         useFrameInterpolation={useFrameInterpolation}
-        src={animations[srcIdx]}
-        autoplay
-        loop={loop}
+        // src={animations[srcIdx]}
+        data={starAnimation}
         speed={speed}
         playOnHover={playOnHover}
         renderConfig={{
@@ -103,8 +109,56 @@ function App() {
         </select>
       </label>
       <button
-        onClick={() => {
-          dotLottie?.play();
+        onClick={async () => {
+          dotLottie?.addEventListener('stateMachineStart', () => {
+            console.log('🚨 stateMachineStart');
+          });
+          dotLottie?.addEventListener('stateMachineTransition', (event) => {
+            console.log('🚨 stateMachineTransition ', event.previousState, event.newState);
+          });
+          dotLottie?.addEventListener('stateMachineStateEntered', (event) => {
+            console.log('🚨 enteringState ', event.enteringState);
+          });
+          dotLottie?.addEventListener('stateMachineStateExit', (event) => {
+            console.log('🚨 state machine exit', event.exitingState);
+          });
+          dotLottie?.addEventListener('stateMachineStop', () => {
+            console.log('🚨 state machine stop');
+          });
+          dotLottie?.addEventListener('stateMachineNumericInputValueChange', (event) => {
+            console.log('🚨 state machine trigger value change', event.inputName, event.oldValue, event.newValue);
+          });
+          dotLottie?.addEventListener('stateMachineStringInputValueChange', (event) => {
+            console.log('🚨 state machine trigger value change', event.inputName, event.oldValue, event.newValue);
+          });
+          dotLottie?.addEventListener('stateMachineBooleanInputValueChange', (event) => {
+            console.log('🚨 state machine trigger value change', event.inputName, event.oldValue, event.newValue);
+          });
+
+          dotLottie?.addEventListener('stateMachineCustomEvent', (message) => {
+            console.log('🚨 stateMachineOnCustomEvent', message);
+          });
+
+          dotLottie?.addEventListener('stateMachineInputFired', (message) => {
+            console.log('APP:: 🚨 stateMachineInputFired', message);
+          });
+
+          // const jsonSmData = JSON.stringify(smData);
+          // const l = dotLottie?.stateMachineLoadData(jsonSmData);
+
+          // const l = dotLottie?.stateMachineLoadData(JSON.stringify(pigeonSM));
+          const l = dotLottie?.stateMachineLoadData(JSON.stringify(starSM));
+
+          // let config = OpenUrl();
+
+          // const config = OpenUrl({
+          //   url: 'https://www.lottiefiles.com',
+          //   target: '_blank',
+          // })
+
+          const s = dotLottie?.stateMachineStart();
+
+          console.log(l, s);
         }}
       >
         Play
@@ -119,6 +173,7 @@ function App() {
       <button
         onClick={() => {
           dotLottie?.stop();
+          // dotLottie?.stateMachineStop();
         }}
       >
         Stop
@@ -149,6 +204,8 @@ function App() {
           const totalAnimations = animations.length;
 
           const nextSrcIdx = (srcIdx + 1) % totalAnimations;
+
+          console.log(nextSrcIdx);
 
           setSrcIdx(nextSrcIdx);
         }}
