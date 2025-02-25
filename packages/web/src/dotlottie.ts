@@ -185,47 +185,47 @@ export class DotLottie {
         this._stateMachineIsActive = false;
         this._eventManager.dispatch({ type: 'stateMachineStop' });
       },
-      state_machine_observer_on_boolean_trigger_value_change: (
+      state_machine_observer_on_boolean_input_value_change: (
         _dotlottie_instance_id: number,
-        trigger_name: string,
+        input_name: string,
         old_value: boolean,
         new_value: boolean,
       ) => {
         this._eventManager.dispatch({
-          type: 'stateMachineBooleanTriggerValueChange',
-          triggerName: trigger_name,
+          type: 'stateMachineBooleanInputValueChange',
+          inputName: input_name,
           oldValue: old_value,
           newValue: new_value,
         });
       },
-      state_machine_observer_on_numeric_trigger_value_change: (
+      state_machine_observer_on_numeric_input_value_change: (
         _dotlottie_instance_id: number,
-        trigger_name: string,
+        input_name: string,
         old_value: number,
         new_value: number,
       ) => {
         this._eventManager.dispatch({
-          type: 'stateMachineNumericTriggerValueChange',
-          triggerName: trigger_name,
+          type: 'stateMachineNumericInputValueChange',
+          inputName: input_name,
           oldValue: old_value,
           newValue: new_value,
         });
       },
-      state_machine_observer_on_trigger_fired: (_dotlottie_instance_id: number, trigger_name: string) => {
+      state_machine_observer_on_input_fired: (_dotlottie_instance_id: number, input_name: string) => {
         this._eventManager.dispatch({
-          type: 'stateMachineTriggerFired',
-          triggerName: trigger_name,
+          type: 'stateMachineInputFired',
+          inputName: input_name,
         });
       },
-      state_machine_observer_on_string_trigger_value_change: (
+      state_machine_observer_on_string_input_value_change: (
         _dotlottie_instance_id: number,
-        trigger_name: string,
+        input_name: string,
         old_value: string,
         new_value: string,
       ) => {
         this._eventManager.dispatch({
-          type: 'stateMachineStringTriggerValueChange',
-          triggerName: trigger_name,
+          type: 'stateMachineStringInputValueChange',
+          inputName: input_name,
           oldValue: old_value,
           newValue: new_value,
         });
@@ -1290,28 +1290,28 @@ export class DotLottie {
     return this._dotLottieCore?.stateMachineOverrideCurrentState(state, do_tick) ?? false;
   }
 
-  public stateMachineSetBooleanTrigger(name: string, value: boolean): boolean {
-    return this._dotLottieCore?.stateMachineSetBooleanTrigger(name, value) ?? false;
+  public stateMachineSetBooleanInput(name: string, value: boolean): boolean {
+    return this._dotLottieCore?.stateMachineSetBooleanInput(name, value) ?? false;
   }
 
-  public stateMachineSetNumericTrigger(name: string, value: number): boolean {
-    return this._dotLottieCore?.stateMachineSetNumericTrigger(name, value) ?? false;
+  public stateMachineSetNumericInput(name: string, value: number): boolean {
+    return this._dotLottieCore?.stateMachineSetNumericInput(name, value) ?? false;
   }
 
-  public stateMachineSetStringTrigger(name: string, value: string): boolean {
-    return this._dotLottieCore?.stateMachineSetStringTrigger(name, value) ?? false;
+  public stateMachineSetStringInput(name: string, value: string): boolean {
+    return this._dotLottieCore?.stateMachineSetStringInput(name, value) ?? false;
   }
 
-  public stateMachineGetStringTrigger(name: string): string | undefined {
-    return this._dotLottieCore?.stateMachineGetStringTrigger(name);
+  public stateMachineGetStringInput(name: string): string | undefined {
+    return this._dotLottieCore?.stateMachineGetStringInput(name);
   }
 
-  public stateMachineGetNumericTrigger(name: string): number | undefined {
-    return this._dotLottieCore?.stateMachineGetNumericTrigger(name);
+  public stateMachineGetNumericInput(name: string): number | undefined {
+    return this._dotLottieCore?.stateMachineGetNumericInput(name);
   }
 
-  public stateMachineGetBooleanTrigger(name: string): boolean | undefined {
-    return this._dotLottieCore?.stateMachineGetBooleanTrigger(name);
+  public stateMachineGetBooleanInput(name: string): boolean | undefined {
+    return this._dotLottieCore?.stateMachineGetBooleanInput(name);
   }
 
   public stateMachineFire(eventName: string): void {

@@ -1,7 +1,7 @@
 export interface Guard {
   type: 'Numeric' | 'String' | 'Boolean' | 'Event';
   conditionType?: string;
-  triggerName: string;
+  inputName: string;
   compareTo?: string | number | boolean;
 }
 
@@ -13,7 +13,7 @@ export interface Transition {
 
 export interface Action {
   type: string;
-  triggerName?: string;
+  inputName?: string;
   value?: string | number | boolean;
 }
 
@@ -35,7 +35,7 @@ export interface StateMachine {
   };
   states: State[];
   listeners?: any[];
-  triggers?: {
+  inputs?: {
     type: string;
     name: string;
     value: string | number | boolean;

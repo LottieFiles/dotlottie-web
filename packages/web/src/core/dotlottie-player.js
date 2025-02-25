@@ -2318,18 +2318,18 @@ var createDotLottiePlayerModule = (() => {
       randomFill(HEAPU8.subarray(buffer, buffer + size));
       return 0;
     };
-    function _state_machine_observer_on_boolean_trigger_value_change(
+    function _state_machine_observer_on_boolean_input_value_change(
       dotlottie_instance_id,
-      trigger_name,
-      trigger_name_len,
+      input_name,
+      input_name_len,
       old_value,
       new_value,
     ) {
-      const trigger_name_converted = UTF8ToString(trigger_name, trigger_name_len);
-      if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_boolean_trigger_value_change) {
-        Module.dotlottieBridge.state_machine_observer_on_boolean_trigger_value_change(
+      const input_name_converted = UTF8ToString(input_name, input_name_len);
+      if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_boolean_input_value_change) {
+        Module.dotlottieBridge.state_machine_observer_on_boolean_input_value_change(
           dotlottie_instance_id,
-          trigger_name_converted,
+          input_name_converted,
           old_value,
           new_value,
         );
@@ -2347,18 +2347,24 @@ var createDotLottiePlayerModule = (() => {
         Module.dotlottieBridge.state_machine_observer_on_error(dotlottie_instance_id, message);
       }
     }
-    function _state_machine_observer_on_numeric_trigger_value_change(
+    function _state_machine_observer_on_input_fired(dotlottie_instance_id, input_name, input_name_len) {
+      const input_name_converted = UTF8ToString(input_name, input_name_len);
+      if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_string_input_value_change) {
+        Module.dotlottieBridge.state_machine_observer_on_input_fired(dotlottie_instance_id, input_name_converted);
+      }
+    }
+    function _state_machine_observer_on_numeric_input_value_change(
       dotlottie_instance_id,
-      trigger_name,
-      trigger_name_len,
+      input_name,
+      input_name_len,
       old_value,
       new_value,
     ) {
-      const trigger_name_converted = UTF8ToString(trigger_name, trigger_name_len);
-      if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_numeric_trigger_value_change) {
-        Module.dotlottieBridge.state_machine_observer_on_numeric_trigger_value_change(
+      const input_name_converted = UTF8ToString(input_name, input_name_len);
+      if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_numeric_input_value_change) {
+        Module.dotlottieBridge.state_machine_observer_on_numeric_input_value_change(
           dotlottie_instance_id,
-          trigger_name_converted,
+          input_name_converted,
           old_value,
           new_value,
         );
@@ -2386,22 +2392,22 @@ var createDotLottiePlayerModule = (() => {
         Module.dotlottieBridge.state_machine_observer_on_stop(dotlottie_instance_id);
       }
     }
-    function _state_machine_observer_on_string_trigger_value_change(
+    function _state_machine_observer_on_string_input_value_change(
       dotlottie_instance_id,
-      trigger_name,
-      trigger_name_len,
+      input_name,
+      input_name_len,
       old_value,
       old_value_len,
       new_value,
       new_value_len,
     ) {
-      const trigger_name_converted = UTF8ToString(trigger_name, trigger_name_len);
+      const input_name_converted = UTF8ToString(input_name, input_name_len);
       const old_value_converted = UTF8ToString(old_value, old_value_len);
       const new_value_converted = UTF8ToString(new_value, new_value_len);
-      if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_string_trigger_value_change) {
-        Module.dotlottieBridge.state_machine_observer_on_string_trigger_value_change(
+      if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_string_input_value_change) {
+        Module.dotlottieBridge.state_machine_observer_on_string_input_value_change(
           dotlottie_instance_id,
-          trigger_name_converted,
+          input_name_converted,
           old_value_converted,
           new_value_converted,
         );
@@ -2418,12 +2424,6 @@ var createDotLottiePlayerModule = (() => {
       const newState = UTF8ToString(new_state_ptr, new_state_len);
       if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_transition) {
         Module.dotlottieBridge.state_machine_observer_on_transition(dotlottie_instance_id, previousState, newState);
-      }
-    }
-    function _state_machine_observer_on_trigger_fired(dotlottie_instance_id, trigger_name, trigger_name_len) {
-      const trigger_name_converted = UTF8ToString(trigger_name, trigger_name_len);
-      if (Module.dotlottieBridge && Module.dotlottieBridge.state_machine_observer_on_string_trigger_value_change) {
-        Module.dotlottieBridge.state_machine_observer_on_trigger_fired(dotlottie_instance_id, trigger_name_converted);
       }
     }
     InternalError = Module['InternalError'] = class InternalError extends Error {
@@ -2510,17 +2510,17 @@ var createDotLottiePlayerModule = (() => {
       ka: _observer_on_stop,
       S: _proc_exit,
       H: _random_get,
-      Y: _state_machine_observer_on_boolean_trigger_value_change,
+      Y: _state_machine_observer_on_boolean_input_value_change,
       ca: _state_machine_observer_on_custom_event,
       ba: _state_machine_observer_on_error,
-      Z: _state_machine_observer_on_numeric_trigger_value_change,
+      X: _state_machine_observer_on_input_fired,
+      Z: _state_machine_observer_on_numeric_input_value_change,
       aa: _state_machine_observer_on_start,
       ea: _state_machine_observer_on_state_entered,
       da: _state_machine_observer_on_state_exit,
       $: _state_machine_observer_on_stop,
-      _: _state_machine_observer_on_string_trigger_value_change,
+      _: _state_machine_observer_on_string_input_value_change,
       fa: _state_machine_observer_on_transition,
-      X: _state_machine_observer_on_trigger_fired,
     };
     var wasmExports = createWasm();
     var ___wasm_call_ctors = () => (___wasm_call_ctors = wasmExports['ya'])();

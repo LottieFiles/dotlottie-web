@@ -58,7 +58,7 @@ const StateMachineInfo: React.FC = () => {
 
         setCurrentValue(newValue);
 
-        dotLottieObject?.stateMachineSetNumericTrigger(target, newValue);
+        dotLottieObject?.stateMachineSetNumericInput(target, newValue);
         dotLottieObject?.stateMachineFire('Step');
 
         if (progress < 1) {
@@ -67,7 +67,7 @@ const StateMachineInfo: React.FC = () => {
           // Ensure we end exactly on the target value
           setCurrentValue(targetValue);
 
-          dotLottieObject?.stateMachineSetNumericTrigger(target, targetValue);
+          dotLottieObject?.stateMachineSetNumericInput(target, targetValue);
           dotLottieObject?.stateMachineFire('Step');
         }
       };
@@ -88,7 +88,7 @@ const StateMachineInfo: React.FC = () => {
   useEffect(() => {
     if (target) {
       console.log('wooo: ', target, targetValue);
-      dotLottieObject?.stateMachineSetNumericTrigger(target, targetValue);
+      dotLottieObject?.stateMachineSetNumericInput(target, targetValue);
       dotLottieObject?.stateMachineFire('Step');
     }
   }, [targetValue, target, dotLottieObject]);
@@ -106,12 +106,12 @@ const StateMachineInfo: React.FC = () => {
   return (
     <div className={`h-full flex flex-col bg-white rounded-lg border border-gray-200`}>
       <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Triggers</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Inputs</h2>
       </div>
       <nav className="flex-1 overflow-y-auto p-4">
         <ul className="space-y-2">
-          {parsedTheme?.triggers &&
-            parsedTheme.triggers.map((item, index) => {
+          {parsedTheme?.inputs &&
+            parsedTheme.inputs.map((item, index) => {
               if (item.type === 'Numeric') {
                 return (
                   <div key={index}>
@@ -122,7 +122,7 @@ const StateMachineInfo: React.FC = () => {
                           {/* {easedValue.toFixed(2)} */}
                           <input
                             onChange={(e) => {
-                              // dotLottieObject?.stateMachineSetNumericTrigger(item.name, parseInt(e.target.value));
+                              // dotLottieObject?.stateMachineSetNumericInput(item.name, parseInt(e.target.value));
                               debouncedTest(item.name, parseInt(e.target.value));
                             }}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -142,9 +142,9 @@ const StateMachineInfo: React.FC = () => {
                       <button
                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                         onClick={() => {
-                          const triggerValue = dotLottieObject?.stateMachineGetBooleanTrigger(item.name);
+                          const triggerValue = dotLottieObject?.stateMachineGetBooleanInput(item.name);
 
-                          dotLottieObject?.stateMachineSetBooleanTrigger(item.name, !triggerValue);
+                          dotLottieObject?.stateMachineSetBooleanInput(item.name, !triggerValue);
                         }}
                       >
                         {item.name}
@@ -161,7 +161,7 @@ const StateMachineInfo: React.FC = () => {
                           <label className="block text-gray-700 text-sm font-bold mb-2">{item.name}</label>
                           <input
                             onChange={(e) => {
-                              dotLottieObject?.stateMachineSetStringTrigger(item.name, e.target.value);
+                              dotLottieObject?.stateMachineSetStringInput(item.name, e.target.value);
                             }}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             id="username"

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-namespace */
-/* eslint-disable typescript-sort-keys/interface */
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
   let HEAPF32: unknown;
@@ -116,26 +115,26 @@ export interface DotLottiePlayer extends ClassHandle {
   stateMachineCurrentState(): string;
   stateMachineFireEvent(_0: EmbindString): void;
   stateMachineFrameworkSetup(): VectorString;
-  stateMachineGetBooleanTrigger(_0: EmbindString): boolean;
-  stateMachineGetNumericTrigger(_0: EmbindString): number;
-  stateMachineGetStringTrigger(_0: EmbindString): string;
-  stateMachinePostPointerUpEvent(_0: number, _1: number): number;
+  stateMachineGetBooleanInput(_0: EmbindString): boolean;
+  stateMachineGetNumericInput(_0: EmbindString): number;
+  stateMachineGetStringInput(_0: EmbindString): string;
+  stateMachineLoad(_0: EmbindString): boolean;
   stateMachineLoadData(_0: EmbindString): boolean;
   stateMachineOverrideCurrentState(_0: EmbindString, _1: boolean): boolean;
   stateMachinePostClickEvent(_0: number, _1: number): number;
-  stateMachineSetNumericTrigger(_0: EmbindString, _1: number): boolean;
-  stateMachinePostPointerEnterEvent(_0: number, _1: number): number;
-  stop(): boolean;
-  stateMachinePostPointerExitEvent(_0: number, _1: number): number;
-  stateMachineStop(): boolean;
-  stateMachineSetBooleanTrigger(_0: EmbindString, _1: boolean): boolean;
-  totalFrames(): number;
-  stateMachineSetStringTrigger(_0: EmbindString, _1: EmbindString): boolean;
-  stateMachineStart(_0: OpenUrl): boolean;
-  stateMachinePostPointerMoveEvent(_0: number, _1: number): number;
-  stateMachineLoad(_0: EmbindString): boolean;
-  stateMachineStatus(): string;
   stateMachinePostPointerDownEvent(_0: number, _1: number): number;
+  stateMachinePostPointerEnterEvent(_0: number, _1: number): number;
+  stateMachinePostPointerExitEvent(_0: number, _1: number): number;
+  stateMachinePostPointerMoveEvent(_0: number, _1: number): number;
+  stateMachinePostPointerUpEvent(_0: number, _1: number): number;
+  stateMachineSetBooleanInput(_0: EmbindString, _1: boolean): boolean;
+  stateMachineSetNumericInput(_0: EmbindString, _1: number): boolean;
+  stateMachineSetStringInput(_0: EmbindString, _1: EmbindString): boolean;
+  stateMachineStart(_0: OpenUrl): boolean;
+  stateMachineStatus(): string;
+  stateMachineStop(): boolean;
+  stop(): boolean;
+  totalFrames(): number;
 }
 
 export interface Marker {
