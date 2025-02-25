@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.39.0-beta.11
+
+### Minor Changes
+
+- a163991: refactored triggers and listeners naming.
+
 ## 0.39.0-beta.10
 
 ### Minor Changes

@@ -1,5 +1,16 @@
 # @lottiefiles/dotlottie-svelte
 
+## 0.5.0-beta.11
+
+### Minor Changes
+
+- a163991: refactored triggers and listeners naming.
+
+### Patch Changes
+
+- Updated dependencies [a163991]
+  - @lottiefiles/dotlottie-web@0.39.0-beta.11
+
 ## 0.5.0-beta.10
 
 ### Minor Changes
