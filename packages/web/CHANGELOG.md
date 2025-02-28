@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.41.0-pre.0
+
+### Minor Changes
+
+- fd3ffbf: feat: split WebGL and WebGPU under separate paths
+
 ## 0.40.1
 
 ### Patch Changes
