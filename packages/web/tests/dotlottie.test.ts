@@ -5,15 +5,22 @@ import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 import type { Config, Layout, Mode } from '../src';
 import { DotLottie as DotLottieClass, DotLottieWorker as DotLottieWorkerClass } from '../src';
 import { getDefaultDPR } from '../src/common/utils';
+import { DotLottie as DotLottieWebGLClass } from '../src/webgl';
+import { DotLottie as DotLottieWebGPUClass } from '../src/webgpu';
 
 import { createCanvas, sleep } from './test-utils';
 
 const wasmUrl = new URL('../src/software/wasm/dotlottie-player.wasm', import.meta.url).href;
+const wasmUrlWebGL = new URL('../src/webgl/wasm/dotlottie-player.wasm', import.meta.url).href;
+const wasmUrlWebGPU = new URL('../src/webgpu/wasm/dotlottie-player.wasm', import.meta.url).href;
+
 const jsonSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
 
 DotLottieClass.setWasmUrl(wasmUrl);
 DotLottieWorkerClass.setWasmUrl(wasmUrl);
+DotLottieWebGLClass.setWasmUrl(wasmUrlWebGL);
+DotLottieWebGPUClass.setWasmUrl(wasmUrlWebGPU);
 
 describe.each([
   {
@@ -22,9 +29,15 @@ describe.each([
   {
     DotLottie: DotLottieWorkerClass,
   },
+  // {
+  //   DotLottie: DotLottieWebGLClass,
+  // },
+  // {
+  //   DotLottie: DotLottieWebGPUClass,
+  // },
 ])('$DotLottie.name', ({ DotLottie }) => {
   let canvas: HTMLCanvasElement;
-  let dotLottie: DotLottieClass | DotLottieWorkerClass;
+  let dotLottie: DotLottieClass | DotLottieWorkerClass | DotLottieWebGLClass | DotLottieWebGPUClass;
   const isWorker = DotLottie === DotLottieWorkerClass;
 
   type Option = Omit<Omit<Config, 'canvas'>, 'src'>;
