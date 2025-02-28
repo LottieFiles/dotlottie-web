@@ -9,7 +9,7 @@ import {
 } from '@lottiefiles/dotlottie-react';
 import dotLottieWebPkg from '@lottiefiles/dotlottie-react/node_modules/@lottiefiles/dotlottie-web/package.json';
 import { Range, getTrackBackground } from 'react-range';
-import dotLottieWasmUrl from '../../../../packages/web/src/core/dotlottie-player.wasm?url';
+import dotLottieWasmUrl from '../../../../packages/web/src/software/wasm/dotlottie-player.wasm?url';
 import {
   setActiveAnimationId,
   setAnimations,

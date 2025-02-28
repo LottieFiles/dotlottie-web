@@ -6,7 +6,7 @@ import { isMobile } from 'react-device-detect';
 import { setCanvasKit, Skottie as SkottiePlayer } from '../components/skottie';
 import skottieWasmUrl from '../../node_modules/canvaskit-wasm/bin/full/canvaskit.wasm?url';
 import InitCanvasKit from 'canvaskit-wasm/bin/full/canvaskit';
-import dotLottieWasmUrl from '../../../../packages/web/src/core/dotlottie-player.wasm?url';
+import dotLottieWasmUrl from '../../../../packages/web/src/software/wasm/dotlottie-player.wasm?url';
 
 setDotLottieWasmUrl(window.location.origin + dotLottieWasmUrl);
 
@@ -325,9 +325,6 @@ export const Perf = (): JSX.Element => {
                   loop
                   autoplay
                   useFrameInterpolation={useFrameInterpolation}
-                  renderConfig={{
-                    renderer: 'wg',
-                  }}
                 />
               )}
               {player.id === 2 && (
@@ -337,9 +334,6 @@ export const Perf = (): JSX.Element => {
                   loop
                   autoplay
                   useFrameInterpolation={useFrameInterpolation}
-                  renderConfig={{
-                    renderer: 'gl',
-                  }}
                 />
               )}
               {player.id === 3 && (

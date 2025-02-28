@@ -10,7 +10,7 @@ const animations = [
   './dragon.json',
 ];
 
-setWasmUrl(new URL('../../../packages/web/src/core/dotlottie-player.wasm', import.meta.url).href);
+setWasmUrl(new URL('../../../packages/web/src/software/wasm/dotlottie-player.wasm', import.meta.url).href);
 
 function App() {
   const [dotLottie, setDotLottie] = useState<DotLottieWorker | null>(null);

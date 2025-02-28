@@ -71,6 +71,13 @@ const createCoreSegment = (segment: number[], module: MainModule): VectorFloat =
   return coresegment;
 };
 
+// Helper function to safely check if an object is an HTMLCanvasElement
+const isHTMLCanvasElement = (obj: unknown): obj is HTMLCanvasElement => {
+  return typeof HTMLCanvasElement !== 'undefined' && obj instanceof HTMLCanvasElement;
+};
+
+let canvasId = 0;
+
 export class DotLottieCommon {
   private readonly _canvas: HTMLCanvasElement | OffscreenCanvas;
 
@@ -135,9 +142,19 @@ export class DotLottieCommon {
           engine = module.TvgEngine.TvgEngineSw;
         }
 
-        // Get canvas selector for the specific rendering engine
-        // This converts the canvas to a format that the WASM module can accept
-        const canvasSelector = this._canvas instanceof HTMLCanvasElement ? this._canvas.id || '#canvas' : '#canvas';
+        let selector = '';
+
+        if (isHTMLCanvasElement(this._canvas)) {
+          if (this._canvas.id) {
+            selector = `#${this._canvas.id}`;
+          } else if (this._renderer !== 'sw') {
+            if (!this._canvas.getAttribute('data-dl-id')) {
+              this._canvas.setAttribute('data-dl-id', `${canvasId}`);
+              canvasId += 1;
+            }
+            selector = `[data-dl-id="${this._canvas.getAttribute('data-dl-id')}"]`;
+          }
+        }
 
         this._dotLottieCore = new module.DotLottiePlayer(
           {
@@ -159,7 +176,7 @@ export class DotLottieCommon {
           },
           engine,
           0,
-          canvasSelector,
+          selector,
         );
 
         this._eventManager.dispatch({ type: 'ready' });
@@ -175,6 +192,7 @@ export class DotLottieCommon {
         }
       })
       .catch((error: Error) => {
+        console.error('error', error);
         this._eventManager.dispatch({
           type: 'loadError',
           error: new Error(`Failed to load wasm module: ${error}`),
@@ -666,7 +684,7 @@ export class DotLottieCommon {
   public setBackgroundColor(color: string): void {
     if (this._dotLottieCore === null) return;
 
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+    if (IS_BROWSER && isHTMLCanvasElement(this._canvas)) {
       this._canvas.style.backgroundColor = color;
     } else {
       this._dotLottieCore.setConfig({
@@ -746,7 +764,7 @@ export class DotLottieCommon {
   public resize(): void {
     if (!this._dotLottieCore || !this.isLoaded) return;
 
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+    if (IS_BROWSER && isHTMLCanvasElement(this._canvas)) {
       const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
 
       const { height: clientHeight, width: clientWidth } = this._canvas.getBoundingClientRect();
@@ -944,7 +962,11 @@ export class DotLottieCommon {
   }
 
   private _getPointerPosition(event: PointerEvent): { x: number; y: number } {
-    const rect = (this._canvas as HTMLCanvasElement).getBoundingClientRect();
+    if (!isHTMLCanvasElement(this._canvas)) {
+      return { x: 0, y: 0 };
+    }
+
+    const rect = this._canvas.getBoundingClientRect();
     const scaleX = this._canvas.width / rect.width;
     const scaleY = this._canvas.height / rect.height;
 
@@ -1023,7 +1045,7 @@ export class DotLottieCommon {
   }
 
   private _setupStateMachineListeners(): void {
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this._dotLottieCore !== null && this.isLoaded) {
+    if (IS_BROWSER && isHTMLCanvasElement(this._canvas) && this._dotLottieCore !== null && this.isLoaded) {
       const listeners = this.getStateMachineListeners();
 
       if (listeners.includes('PointerUp')) {
@@ -1049,7 +1071,7 @@ export class DotLottieCommon {
   }
 
   private _cleanupStateMachineListeners(): void {
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+    if (IS_BROWSER && isHTMLCanvasElement(this._canvas)) {
       this._canvas.removeEventListener('pointerup', this._pointerUpMethod);
       this._canvas.removeEventListener('pointerdown', this._pointerDownMethod);
       this._canvas.removeEventListener('pointermove', this._pointerMoveMethod);

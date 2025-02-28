@@ -127,7 +127,7 @@ export interface DotLottiePlayer extends ClassHandle {
 
 export interface Marker {
   duration: number;
-  name: EmbindString;
+  name: string;
   time: number;
 }
 

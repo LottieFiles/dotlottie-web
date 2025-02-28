@@ -16,7 +16,22 @@ export class WasmLoader {
   }
 
   private static async _tryLoad(url: string): Promise<MainModule> {
-    const module = await createDotLottiePlayerModule({ locateFile: () => url });
+    if (typeof navigator === 'undefined' || typeof navigator.gpu === 'undefined') {
+      throw new Error('WebGPU not supported');
+    }
+
+    const adapter = await navigator.gpu.requestAdapter();
+
+    if (!adapter) {
+      throw new Error('WebGPU adapter not found');
+    }
+
+    const device = await adapter.requestDevice();
+
+    const module = await createDotLottiePlayerModule({
+      locateFile: () => url,
+      preinitializedWebGPUDevice: device,
+    });
 
     return module;
   }

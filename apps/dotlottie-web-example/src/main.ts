@@ -164,7 +164,6 @@ allCanvas.forEach((canvas) => {
     backgroundColor,
     renderConfig: {
       autoResize: true,
-      renderer: 'gl',
     },
     useFrameInterpolation: false,
   });
@@ -206,9 +205,6 @@ fetch(
       speed: 1,
       backgroundColor: '#800080ff',
       themeId: 'animated_light',
-      renderConfig: {
-        renderer: 'wg',
-      },
       // useFrameInterpolation: false,
     });
 

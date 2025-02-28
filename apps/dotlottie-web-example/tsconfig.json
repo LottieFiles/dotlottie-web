@@ -3,7 +3,9 @@
   "extends": "../../tsconfig.dev.json",
 
   // Compiler options
-  "compilerOptions": {},
+  "compilerOptions": {
+    "moduleResolution": "bundler"
+  },
 
   "include": ["src"]
 }
