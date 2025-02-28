@@ -4,11 +4,11 @@ import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
 import type { Config, Layout, Mode } from '../src';
 import { DotLottie as DotLottieClass, DotLottieWorker as DotLottieWorkerClass } from '../src';
-import { getDefaultDPR } from '../src/utils';
+import { getDefaultDPR } from '../src/common/utils';
 
 import { createCanvas, sleep } from './test-utils';
 
-const wasmUrl = new URL('../src/core/dotlottie-player.wasm', import.meta.url).href;
+const wasmUrl = new URL('../src/software/wasm/dotlottie-player.wasm', import.meta.url).href;
 const jsonSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
 

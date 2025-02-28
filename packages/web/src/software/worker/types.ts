@@ -12,8 +12,8 @@ import type {
   RenderEvent,
   StopEvent,
   UnfreezeEvent,
-} from '../event-manager';
-import type { Config, Layout, Mode, RenderConfig } from '../types';
+} from '../../common/event-manager';
+import type { Config, Layout, Mode, RenderConfig } from '../../common/types';
 
 import type { DotLottieInstanceState } from './dotlottie';
 

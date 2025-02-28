@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from 'vitest';
 
-import { EventManager } from '../src/event-manager';
+import { EventManager } from '../src/common/event-manager';
 
 describe('EventManager', () => {
   test('initializes with an empty event listeners map', () => {

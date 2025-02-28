@@ -1,4 +1,4 @@
-import { DotLottie } from '../src';
-import wasmUrl from '../src/core/dotlottie-player.wasm?url';
+import { DotLottie } from '../src/software';
+import wasmUrl from '../src/software/wasm/dotlottie-player.wasm?url';
 
 DotLottie.setWasmUrl(wasmUrl);
