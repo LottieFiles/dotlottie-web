@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.41.0-pre.2
+
+### Patch Changes
+
+- de5ca14: fix: correct WASM file URLs in WebGPU loader
+
 ## 0.41.0-pre.1
 
 ### Patch Changes
