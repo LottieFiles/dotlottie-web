@@ -9,7 +9,7 @@ const config = {
   dts: true,
   minify: true,
   sourcemap: true,
-  entry: ['./src/index.ts'],
+  entry: ['./src/index.ts', './src/webgl/index.ts', './src/webgpu/index.ts'],
   format: ['esm'],
   platform: 'browser',
   target: ['es2020'],
