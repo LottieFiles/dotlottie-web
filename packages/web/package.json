@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-web",
-  "version": "0.40.1",
+  "version": "0.41.0-pre.2",
   "type": "module",
   "description": "Lottie and DotLottie player for the web",
   "repository": {
@@ -17,6 +17,23 @@
   "license": "MIT",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./webgl": {
+      "types": "./dist/webgl/index.d.ts",
+      "import": "./dist/webgl/index.js",
+      "require": "./dist/webgl/index.cjs"
+    },
+    "./webgpu": {
+      "types": "./dist/webgpu/index.d.ts",
+      "import": "./dist/webgpu/index.js",
+      "require": "./dist/webgpu/index.cjs"
+    }
+  },
   "types": "dist/index.d.ts",
   "files": [
     "dist"
@@ -46,11 +63,12 @@
     "@types/node": "^20.14.11",
     "@vitest/browser": "2.1.0-beta.5",
     "@vitest/coverage-istanbul": "2.1.0-beta.5",
+    "@webgpu/types": "^0.1.53",
     "cross-env": "7.0.3",
     "esbuild": "^0.23.0",
     "esbuild-plugin-replace": "^1.4.0",
     "playwright": "^1.45.2",
-    "tsup": "8.2.0",
+    "tsup": "8.4.0",
     "typescript": "5.0.4",
     "vitest": "2.1.0-beta.5"
   },

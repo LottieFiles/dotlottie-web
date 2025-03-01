@@ -28,7 +28,7 @@ module.exports = defineConfig({
   dts: true,
   minify: true,
   sourcemap: true,
-  entry: ['./src/index.ts'],
+  entry: ['./src/index.ts', 'src/webgl/index.ts', 'src/webgpu/index.ts'],
   outDir: './dist',
   format: ['esm', 'cjs'],
   platform: 'neutral',
@@ -44,8 +44,16 @@ module.exports = defineConfig({
   ],
   onSuccess: async () => {
     await copyFileSync(
-      path.resolve(__dirname, 'src/core/dotlottie-player.wasm'),
+      path.resolve(__dirname, 'src/software/wasm/dotlottie-player.wasm'),
       path.resolve(__dirname, 'dist/dotlottie-player.wasm'),
+    );
+    await copyFileSync(
+      path.resolve(__dirname, 'src/webgpu/wasm/dotlottie-player.wasm'),
+      path.resolve(__dirname, 'dist/webgpu/dotlottie-player.wasm'),
+    );
+    await copyFileSync(
+      path.resolve(__dirname, 'src/webgl/wasm/dotlottie-player.wasm'),
+      path.resolve(__dirname, 'dist/webgl/dotlottie-player.wasm'),
     );
   },
 });

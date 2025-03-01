@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 /* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/no-namespace */
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
   let HEAPF32: unknown;
@@ -17,8 +17,14 @@ declare namespace RuntimeExports {
 interface WasmModule {}
 
 type EmbindString = ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string;
-export interface VectorFloat {
+export interface ClassHandle {
+  clone(): this;
   delete(): void;
+  deleteLater(): this;
+  isAliasOf(other: ClassHandle): boolean;
+  isDeleted(): boolean;
+}
+export interface VectorFloat extends ClassHandle {
   get(_0: number): number | undefined;
   push_back(_0: number): void;
   resize(_0: number, _1: number): void;
@@ -26,8 +32,7 @@ export interface VectorFloat {
   size(): number;
 }
 
-export interface VectorMarker {
-  delete(): void;
+export interface VectorMarker extends ClassHandle {
   get(_0: number): Marker | undefined;
   push_back(_0: Marker): void;
   resize(_0: number, _1: Marker): void;
@@ -35,14 +40,18 @@ export interface VectorMarker {
   size(): number;
 }
 
-export interface VectorString {
-  delete(): void;
+export interface VectorString extends ClassHandle {
   get(_0: number): EmbindString | undefined;
   push_back(_0: EmbindString): void;
   resize(_0: number, _1: EmbindString): void;
   set(_0: number, _1: EmbindString): boolean;
   size(): number;
 }
+
+export interface TvgEngineValue<T extends number> {
+  value: T;
+}
+export type TvgEngine = TvgEngineValue<1> | TvgEngineValue<2> | TvgEngineValue<3>;
 
 export interface ModeValue<T extends number> {
   value: T;
@@ -59,7 +68,7 @@ export interface Layout {
   fit: Fit;
 }
 
-export interface DotLottiePlayer {
+export interface DotLottiePlayer extends ClassHandle {
   activeAnimationId(): string;
   activeThemeId(): string;
   animationSize(): VectorFloat;
@@ -67,7 +76,6 @@ export interface DotLottiePlayer {
   clear(): void;
   config(): Config;
   currentFrame(): number;
-  delete(): void;
   duration(): number;
   getLayerBounds(_0: EmbindString): VectorFloat;
   isComplete(): boolean;
@@ -138,7 +146,7 @@ export interface Config {
 
 interface EmbindModule {
   DotLottiePlayer: {
-    new (_0: Config): DotLottiePlayer;
+    new (_0: Config, _1: TvgEngine, _2: number, _3: EmbindString): DotLottiePlayer;
   };
   Fit: {
     Contain: FitValue<1>;
@@ -149,6 +157,7 @@ interface EmbindModule {
     None: FitValue<6>;
   };
   Mode: { Bounce: ModeValue<3>; Forward: ModeValue<1>; Reverse: ModeValue<2>; ReverseBounce: ModeValue<4> };
+  TvgEngine: { TvgEngineGl: TvgEngineValue<2>; TvgEngineSw: TvgEngineValue<1>; TvgEngineWg: TvgEngineValue<3> };
   VectorFloat: {
     new (): VectorFloat;
   };

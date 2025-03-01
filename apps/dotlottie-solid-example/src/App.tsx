@@ -2,7 +2,7 @@ import { type DotLottie, DotLottieSolid, setWasmUrl } from '@lottiefiles/dotlott
 import type { Component } from 'solid-js';
 import { createEffect, createSignal, onCleanup } from 'solid-js';
 
-import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
+import wasmUrl from '../../../packages/web/src/software/wasm/dotlottie-player.wasm?url';
 
 const animations = [
   'https://lottie.host/b06d1336-2c08-4156-aa6f-96f08ff511e0/4itF1pXb1i.lottie',

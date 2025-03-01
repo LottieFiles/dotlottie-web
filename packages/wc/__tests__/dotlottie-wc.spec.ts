@@ -8,7 +8,7 @@ import type { DotLottieWC } from '../src/dotlottie-wc';
 const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
 const lottieSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 
-setWasmUrl(new URL('../../web/src/core/dotlottie-player.wasm', import.meta.url).href);
+setWasmUrl(new URL('../../web/src/software/wasm/dotlottie-player.wasm', import.meta.url).href);
 
 const render = <T extends 'dotlottie-wc' | 'dotlottie-worker-wc'>(
   elementName: T,

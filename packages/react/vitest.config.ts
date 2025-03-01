@@ -24,6 +24,5 @@ export default defineConfig({
     },
     testTimeout: 10000,
     cache: false,
-    setupFiles: ['./setup-file.ts'],
   },
 });

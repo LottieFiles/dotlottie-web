@@ -1,11 +1,11 @@
-import { IS_BROWSER } from '../constants';
-import type { Marker } from '../core';
-import type { EventType, EventListener, FrameEvent } from '../event-manager';
-import { EventManager } from '../event-manager';
-import { OffscreenObserver } from '../offscreen-observer';
-import { CanvasResizeObserver } from '../resize-observer';
-import type { Config, Layout, Manifest, Mode, RenderConfig } from '../types';
-import { getDefaultDPR, isElementInViewport } from '../utils';
+import { IS_BROWSER } from '../../common/constants';
+import type { EventType, EventListener, FrameEvent } from '../../common/event-manager';
+import { EventManager } from '../../common/event-manager';
+import { OffscreenObserver } from '../../common/offscreen-observer';
+import { CanvasResizeObserver } from '../../common/resize-observer';
+import type { Config, Layout, Manifest, Mode, RenderConfig } from '../../common/types';
+import { getDefaultDPR, isElementInViewport } from '../../common/utils';
+import type { Marker } from '../wasm/dotlottie-player.types';
 
 import type { MethodParamsMap, MethodResultMap, RpcRequest, RpcResponse } from './types';
 import { WorkerManager } from './worker-manager';
