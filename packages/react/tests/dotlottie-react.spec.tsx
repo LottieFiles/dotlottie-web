@@ -1,4 +1,6 @@
 import { DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-web';
+import { DotLottie as DotLottieWebGL } from '@lottiefiles/dotlottie-web/webgl';
+import { DotLottie as DotLottieWebGPU } from '@lottiefiles/dotlottie-web/webgpu';
 import { userEvent } from '@testing-library/user-event';
 import React from 'react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
@@ -6,6 +8,8 @@ import type { ComponentRenderOptions, RenderResult } from 'vitest-browser-react'
 import { cleanup, render as vitestRender } from 'vitest-browser-react';
 
 import { DotLottieReact, DotLottieWorkerReact } from '../src';
+import { DotLottieReact as DotLottieWebGLReact } from '../src/webgl';
+import { DotLottieReact as DotLottieWebGPUReact } from '../src/webgpu';
 
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
 const dotLottieSrc = new URL('./__fixtures__/test.lottie', import.meta.url).href;
@@ -20,9 +24,11 @@ const render = (ui: React.ReactNode, options?: ComponentRenderOptions): RenderRe
   vitestRender(ui, { wrapper: Wrapper, ...options });
 
 describe.each([
-  { component: DotLottieReact, instanceType: DotLottie },
-  { component: DotLottieWorkerReact, instanceType: DotLottieWorker },
-])('$component.name', ({ component: Component, instanceType }) => {
+  { name: 'DotLottieReact', component: DotLottieReact, instanceType: DotLottie },
+  { name: 'DotLottieWorkerReact', component: DotLottieWorkerReact, instanceType: DotLottieWorker },
+  { name: 'DotLottieWebGPUReact', component: DotLottieWebGPUReact, instanceType: DotLottieWebGPU },
+  { name: 'DotLottieWebGLReact', component: DotLottieWebGLReact, instanceType: DotLottieWebGL },
+])('$name', ({ component: Component, instanceType }) => {
   afterEach(() => {
     cleanup();
   });
