@@ -1,10 +1,10 @@
-import { PACKAGE_NAME, PACKAGE_VERSION } from '../constants';
+import { PACKAGE_NAME, PACKAGE_VERSION } from '../common/constants';
 
-import createDotLottiePlayerModule from './dotlottie-player';
-import type { MainModule } from './dotlottie-player.types';
+import createDotLottiePlayerModule from './wasm/dotlottie-player';
+import type { MainModule } from './wasm/dotlottie-player.types';
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
-export class DotLottieWasmLoader {
+export class WasmLoader {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   private static _ModulePromise: Promise<MainModule> | null = null;
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { DotLottieSvelte, setWasmUrl } from '../lib/index.js';
 	import type { DotLottie } from '../lib/index.js';
-	import wasmUrl from "../../../web/src/core/dotlottie-player.wasm?url";
+	import wasmUrl from "../../../web/src/software/wasm/dotlottie-player.wasm?url";
 
 	setWasmUrl(wasmUrl);
 

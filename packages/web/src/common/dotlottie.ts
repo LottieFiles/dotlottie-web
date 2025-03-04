@@ -1,7 +1,14 @@
+import type {
+  DotLottiePlayer,
+  MainModule,
+  Mode as CoreMode,
+  VectorFloat,
+  Marker,
+  Fit as CoreFit,
+} from '../software/wasm/dotlottie-player.types';
+
 import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER } from './constants';
-import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker, Fit as CoreFit } from './core';
-import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
@@ -9,6 +16,13 @@ import { CanvasResizeObserver } from './resize-observer';
 import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data } from './types';
 import { getDefaultDPR, hexStringToRGBAInt, isDotLottie, isElementInViewport, isLottie } from './utils';
 
+// Type definition for WasmLoader
+export interface WasmLoaderType {
+  load(): Promise<MainModule>;
+  setWasmUrl(url: string): void;
+}
+
+// Helper functions for conversion
 const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
   if (mode === 'reverse') {
     return module.Mode.Reverse;
@@ -57,7 +71,14 @@ const createCoreSegment = (segment: number[], module: MainModule): VectorFloat =
   return coresegment;
 };
 
-export class DotLottie {
+// Helper function to safely check if an object is an HTMLCanvasElement
+const isHTMLCanvasElement = (obj: unknown): obj is HTMLCanvasElement => {
+  return typeof HTMLCanvasElement !== 'undefined' && obj instanceof HTMLCanvasElement;
+};
+
+let canvasId = 0;
+
+export class DotLottieCommon {
   private readonly _canvas: HTMLCanvasElement | OffscreenCanvas;
 
   private _context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
@@ -70,7 +91,7 @@ export class DotLottie {
 
   private _dotLottieCore: DotLottiePlayer | null = null;
 
-  private static _wasmModule: MainModule | null = null;
+  private _wasmModule: MainModule | null = null;
 
   private _renderConfig: RenderConfig = {};
 
@@ -88,9 +109,14 @@ export class DotLottie {
 
   private readonly _pointerExitMethod: (event: PointerEvent) => void;
 
-  public constructor(config: Config) {
+  private readonly _wasmLoader: WasmLoaderType;
+
+  private readonly _renderer: string;
+
+  public constructor(config: Config, wasmLoader: WasmLoaderType, renderer: string = 'sw') {
     this._canvas = config.canvas;
-    this._context = this._canvas.getContext('2d');
+    this._wasmLoader = wasmLoader;
+    this._renderer = renderer;
 
     this._eventManager = new EventManager();
     this._frameManager = new AnimationFrameManager();
@@ -101,27 +127,57 @@ export class DotLottie {
       freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
     };
 
-    DotLottieWasmLoader.load()
+    this._wasmLoader
+      .load()
       .then((module) => {
-        DotLottie._wasmModule = module;
+        this._wasmModule = module;
 
-        this._dotLottieCore = new module.DotLottiePlayer({
-          themeId: config.themeId ?? '',
-          autoplay: config.autoplay ?? false,
-          backgroundColor: 0,
-          loopAnimation: config.loop ?? false,
-          mode: createCoreMode(config.mode ?? 'forward', module),
-          segment: createCoreSegment(config.segment ?? [], module),
-          speed: config.speed ?? 1,
-          useFrameInterpolation: config.useFrameInterpolation ?? true,
-          marker: config.marker ?? '',
-          layout: config.layout
-            ? {
-                align: createCoreAlign(config.layout.align, module),
-                fit: createCoreFit(config.layout.fit, module),
-              }
-            : module.createDefaultLayout(),
-        });
+        let engine = null;
+
+        if (this._renderer === 'wg') {
+          engine = module.TvgEngine.TvgEngineWg;
+        } else if (this._renderer === 'gl') {
+          engine = module.TvgEngine.TvgEngineGl;
+        } else {
+          engine = module.TvgEngine.TvgEngineSw;
+        }
+
+        let selector = '';
+
+        if (isHTMLCanvasElement(this._canvas)) {
+          if (this._canvas.id) {
+            selector = `#${this._canvas.id}`;
+          } else if (this._renderer !== 'sw') {
+            if (!this._canvas.getAttribute('data-dl-id')) {
+              this._canvas.setAttribute('data-dl-id', `${canvasId}`);
+              canvasId += 1;
+            }
+            selector = `[data-dl-id="${this._canvas.getAttribute('data-dl-id')}"]`;
+          }
+        }
+
+        this._dotLottieCore = new module.DotLottiePlayer(
+          {
+            ...module.createDefaultConfig(),
+            themeId: config.themeId ?? '',
+            autoplay: config.autoplay ?? false,
+            loopAnimation: config.loop ?? false,
+            mode: createCoreMode(config.mode ?? 'forward', module),
+            segment: createCoreSegment(config.segment ?? [], module),
+            speed: config.speed ?? 1,
+            useFrameInterpolation: config.useFrameInterpolation ?? true,
+            marker: config.marker ?? '',
+            layout: config.layout
+              ? {
+                  align: createCoreAlign(config.layout.align, module),
+                  fit: createCoreFit(config.layout.fit, module),
+                }
+              : module.createDefaultLayout(),
+          },
+          engine,
+          0,
+          selector,
+        );
 
         this._eventManager.dispatch({ type: 'ready' });
 
@@ -135,7 +191,8 @@ export class DotLottie {
           this.setBackgroundColor(config.backgroundColor);
         }
       })
-      .catch((error) => {
+      .catch((error: Error) => {
+        console.error('error', error);
         this._eventManager.dispatch({
           type: 'loadError',
           error: new Error(`Failed to load wasm module: ${error}`),
@@ -282,22 +339,22 @@ export class DotLottie {
         align: [layout.align.get(0) as number, layout.align.get(1) as number],
         fit: ((): Fit => {
           switch (layout.fit) {
-            case DotLottie._wasmModule?.Fit.Contain:
+            case this._wasmModule?.Fit.Contain:
               return 'contain';
 
-            case DotLottie._wasmModule?.Fit.Cover:
+            case this._wasmModule?.Fit.Cover:
               return 'cover';
 
-            case DotLottie._wasmModule?.Fit.Fill:
+            case this._wasmModule?.Fit.Fill:
               return 'fill';
 
-            case DotLottie._wasmModule?.Fit.FitHeight:
+            case this._wasmModule?.Fit.FitHeight:
               return 'fit-height';
 
-            case DotLottie._wasmModule?.Fit.FitWidth:
+            case this._wasmModule?.Fit.FitWidth:
               return 'fit-width';
 
-            case DotLottie._wasmModule?.Fit.None:
+            case this._wasmModule?.Fit.None:
               return 'none';
 
             default:
@@ -353,11 +410,11 @@ export class DotLottie {
   public get mode(): Mode {
     const mode = this._dotLottieCore?.config().mode;
 
-    if (mode === DotLottie._wasmModule?.Mode.Reverse) {
+    if (mode === this._wasmModule?.Mode.Reverse) {
       return 'reverse';
-    } else if (mode === DotLottie._wasmModule?.Mode.Bounce) {
+    } else if (mode === this._wasmModule?.Mode.Bounce) {
       return 'bounce';
-    } else if (mode === DotLottie._wasmModule?.Mode.ReverseBounce) {
+    } else if (mode === this._wasmModule?.Mode.ReverseBounce) {
       return 'reverse-bounce';
     } else {
       return 'forward';
@@ -431,7 +488,7 @@ export class DotLottie {
   }
 
   public load(config: Omit<Config, 'canvas'>): void {
-    if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
+    if (this._dotLottieCore === null || this._wasmModule === null) return;
 
     if (this._animationFrameId !== null) {
       this._frameManager.cancelAnimationFrame(this._animationFrameId);
@@ -439,21 +496,22 @@ export class DotLottie {
     }
 
     this._dotLottieCore.setConfig({
+      ...this._wasmModule.createDefaultConfig(),
       themeId: config.themeId ?? '',
       autoplay: config.autoplay ?? false,
       backgroundColor: 0,
       loopAnimation: config.loop ?? false,
-      mode: createCoreMode(config.mode ?? 'forward', DotLottie._wasmModule),
-      segment: createCoreSegment(config.segment ?? [], DotLottie._wasmModule),
+      mode: createCoreMode(config.mode ?? 'forward', this._wasmModule),
+      segment: createCoreSegment(config.segment ?? [], this._wasmModule),
       speed: config.speed ?? 1,
       useFrameInterpolation: config.useFrameInterpolation ?? true,
       marker: config.marker ?? '',
       layout: config.layout
         ? {
-            align: createCoreAlign(config.layout.align, DotLottie._wasmModule),
-            fit: createCoreFit(config.layout.fit, DotLottie._wasmModule),
+            align: createCoreAlign(config.layout.align, this._wasmModule),
+            fit: createCoreFit(config.layout.fit, this._wasmModule),
           }
-        : DotLottie._wasmModule.createDefaultLayout(),
+        : this._wasmModule.createDefaultLayout(),
     });
 
     if (config.data) {
@@ -466,15 +524,32 @@ export class DotLottie {
   }
 
   private _render(): boolean {
-    if (this._dotLottieCore === null || this._context === null) return false;
+    if (this._dotLottieCore === null) return false;
 
     const rendered = this._dotLottieCore.render();
 
-    if (rendered) {
-      const buffer = this._dotLottieCore.buffer() as Uint8Array;
-      const clampedBuffer = new Uint8ClampedArray(buffer, 0, this._canvas.width * this._canvas.height * 4);
+    if (this._renderer === 'wg' || this._renderer === 'gl') {
+      if (rendered) {
+        this._eventManager.dispatch({
+          type: 'render',
+          currentFrame: this.currentFrame,
+        });
+      }
 
-      let imageData = null;
+      return rendered;
+    }
+    if (!this._context) {
+      this._context = this._canvas.getContext('2d') as
+        | CanvasRenderingContext2D
+        | OffscreenCanvasRenderingContext2D
+        | null;
+    }
+
+    if (rendered && this._context) {
+      const buffer = this._dotLottieCore.buffer() as Uint8Array;
+      const clampedBuffer = new Uint8ClampedArray(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+
+      let imageData: ImageData | null = null;
 
       /* 
         In Node.js, the ImageData constructor is not available. 
@@ -501,7 +576,7 @@ export class DotLottie {
   }
 
   private _draw(): void {
-    if (this._dotLottieCore === null || this._context === null || !this._dotLottieCore.isPlaying()) return;
+    if (this._dotLottieCore === null || !this._dotLottieCore.isPlaying()) return;
 
     const nextFrame = Math.round(this._dotLottieCore.requestFrame() * 100) / 100;
 
@@ -609,7 +684,7 @@ export class DotLottie {
   public setBackgroundColor(color: string): void {
     if (this._dotLottieCore === null) return;
 
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+    if (IS_BROWSER && isHTMLCanvasElement(this._canvas)) {
       this._canvas.style.backgroundColor = color;
     } else {
       this._dotLottieCore.setConfig({
@@ -689,7 +764,7 @@ export class DotLottie {
   public resize(): void {
     if (!this._dotLottieCore || !this.isLoaded) return;
 
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+    if (IS_BROWSER && isHTMLCanvasElement(this._canvas)) {
       const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
 
       const { height: clientHeight, width: clientWidth } = this._canvas.getBoundingClientRect();
@@ -708,20 +783,20 @@ export class DotLottie {
   }
 
   public setSegment(startFrame: number, endFrame: number): void {
-    if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
+    if (this._dotLottieCore === null || this._wasmModule === null) return;
 
     this._dotLottieCore.setConfig({
       ...this._dotLottieCore.config(),
-      segment: createCoreSegment([startFrame, endFrame], DotLottie._wasmModule),
+      segment: createCoreSegment([startFrame, endFrame], this._wasmModule),
     });
   }
 
   public setMode(mode: Mode): void {
-    if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
+    if (this._dotLottieCore === null || this._wasmModule === null) return;
 
     this._dotLottieCore.setConfig({
       ...this._dotLottieCore.config(),
-      mode: createCoreMode(mode, DotLottie._wasmModule),
+      mode: createCoreMode(mode, this._wasmModule),
     });
   }
 
@@ -836,13 +911,13 @@ export class DotLottie {
   }
 
   public setLayout(layout: Layout): void {
-    if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
+    if (this._dotLottieCore === null || this._wasmModule === null) return;
 
     this._dotLottieCore.setConfig({
       ...this._dotLottieCore.config(),
       layout: {
-        align: createCoreAlign(layout.align, DotLottie._wasmModule),
-        fit: createCoreFit(layout.fit, DotLottie._wasmModule),
+        align: createCoreAlign(layout.align, this._wasmModule),
+        fit: createCoreFit(layout.fit, this._wasmModule),
       },
     });
   }
@@ -853,8 +928,13 @@ export class DotLottie {
     return this._dotLottieCore.setViewport(x, y, width, height);
   }
 
-  public static setWasmUrl(url: string): void {
-    DotLottieWasmLoader.setWasmUrl(url);
+  /**
+   * Static method to set WASM URL - this should be implemented by subclasses
+   * @param _url - The URL to set
+   */
+  public static setWasmUrl(_url: string): void {
+    // This method should be implemented by subclasses that have access to their specific WasmLoader
+    console.warn('setWasmUrl must be implemented by a subclass with access to its specific WasmLoader');
   }
 
   public loadStateMachine(stateMachineId: string): boolean {
@@ -882,7 +962,11 @@ export class DotLottie {
   }
 
   private _getPointerPosition(event: PointerEvent): { x: number; y: number } {
-    const rect = (this._canvas as HTMLCanvasElement).getBoundingClientRect();
+    if (!isHTMLCanvasElement(this._canvas)) {
+      return { x: 0, y: 0 };
+    }
+
+    const rect = this._canvas.getBoundingClientRect();
     const scaleX = this._canvas.width / rect.width;
     const scaleY = this._canvas.height / rect.height;
 
@@ -961,7 +1045,7 @@ export class DotLottie {
   }
 
   private _setupStateMachineListeners(): void {
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this._dotLottieCore !== null && this.isLoaded) {
+    if (IS_BROWSER && isHTMLCanvasElement(this._canvas) && this._dotLottieCore !== null && this.isLoaded) {
       const listeners = this.getStateMachineListeners();
 
       if (listeners.includes('PointerUp')) {
@@ -987,7 +1071,7 @@ export class DotLottie {
   }
 
   private _cleanupStateMachineListeners(): void {
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+    if (IS_BROWSER && isHTMLCanvasElement(this._canvas)) {
       this._canvas.removeEventListener('pointerup', this._pointerUpMethod);
       this._canvas.removeEventListener('pointerdown', this._pointerDownMethod);
       this._canvas.removeEventListener('pointermove', this._pointerMoveMethod);
@@ -1067,7 +1151,13 @@ export class DotLottie {
     };
   }
 
-  public static transformThemeToLottieSlots(theme: string, slots: string): string {
-    return DotLottie._wasmModule?.transformThemeToLottieSlots(theme, slots) ?? '';
+  /**
+   * Transform theme to lottie slots
+   * @param theme - The theme data
+   * @param slots - The slots data
+   * @returns The transformed data
+   */
+  public transformThemeToLottieSlots(theme: string, slots: string): string {
+    return this._wasmModule?.transformThemeToLottieSlots(theme, slots) ?? '';
   }
 }

@@ -1,5 +1,32 @@
 # @lottiefiles/dotlottie-react
 
+## 0.14.0-pre.3
+
+### Minor Changes
+
+- 89d7c41: feat(react): add WebGL and WebGPU support
+
+## 0.13.1-pre.2
+
+### Patch Changes
+
+- Updated dependencies [de5ca14]
+  - @lottiefiles/dotlottie-web@0.41.0-pre.2
+
+## 0.13.1-pre.1
+
+### Patch Changes
+
+- Updated dependencies [6e6fc38]
+  - @lottiefiles/dotlottie-web@0.41.0-pre.1
+
+## 0.13.1-pre.0
+
+### Patch Changes
+
+- Updated dependencies [fd3ffbf]
+  - @lottiefiles/dotlottie-web@0.41.0-pre.0
+
 ## 0.13.0
 
 ### Minor Changes

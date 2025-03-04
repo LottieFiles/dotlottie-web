@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 
-import { hexStringToRGBAInt, isHexColor, isLottie, isDotLottie, getDefaultDPR } from '../src/utils';
+import { hexStringToRGBAInt, isHexColor, isLottie, isDotLottie, getDefaultDPR } from '../src/common/utils';
 
 import lottieUrl from './__fixtures__/test.json?url';
 import dotLottieUrl from './__fixtures__/test.lottie?url';

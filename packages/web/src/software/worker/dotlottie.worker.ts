@@ -1,5 +1,4 @@
 /* eslint-disable no-restricted-globals */
-import { DotLottie } from '../dotlottie';
 import type {
   CompleteEvent,
   DestroyEvent,
@@ -16,7 +15,8 @@ import type {
   RenderEvent,
   StopEvent,
   UnfreezeEvent,
-} from '../event-manager';
+} from '../../common/event-manager';
+import { DotLottie } from '../dotlottie';
 
 import type { DotLottieInstanceState } from './dotlottie';
 import type { MethodParamsMap, RpcRequest, MethodResultMap, RpcResponse } from './types';

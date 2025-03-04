@@ -4,7 +4,6 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "parcel build index.html --no-cache",
     "dev": "parcel index.html --no-cache --open"
   },
   "dependencies": {

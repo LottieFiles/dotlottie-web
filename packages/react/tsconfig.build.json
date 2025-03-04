@@ -4,6 +4,7 @@
 
   // Compiler options
   "compilerOptions": {
+    "moduleResolution": "bundler",
     // Compiled output JS and source maps output directory
     "outDir": "./dist",
 

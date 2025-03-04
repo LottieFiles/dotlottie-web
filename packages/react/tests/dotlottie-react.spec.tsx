@@ -1,15 +1,22 @@
+/* eslint-disable node/no-unsupported-features/node-builtins */
 import { DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-web';
+// import { DotLottie as DotLottieWebGL } from '@lottiefiles/dotlottie-web/webgl';
+// import { DotLottie as DotLottieWebGPU } from '@lottiefiles/dotlottie-web/webgpu';
 import { userEvent } from '@testing-library/user-event';
 import React from 'react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import type { ComponentRenderOptions, RenderResult } from 'vitest-browser-react';
 import { cleanup, render as vitestRender } from 'vitest-browser-react';
 
-import { DotLottieReact, DotLottieWorkerReact } from '../src';
+import { DotLottieReact, DotLottieWorkerReact, setWasmUrl } from '../src';
+// import { DotLottieReact as DotLottieWebGLReact, setWasmUrl as setWebGLWasmUrl } from '../src/webgl';
+// import { DotLottieReact as DotLottieWebGPUReact, setWasmUrl as setWebGPUWasmUrl } from '../src/webgpu';
 
-// eslint-disable-next-line node/no-unsupported-features/node-builtins
+setWasmUrl(new URL('../../web/src/software/wasm/dotlottie-player.wasm?url', import.meta.url).href);
+// setWebGLWasmUrl(new URL('../../web/src/webgl/wasm/dotlottie-player.wasm?url', import.meta.url).href);
+// setWebGPUWasmUrl(new URL('../../web/src/webgpu/wasm/dotlottie-player.wasm?url', import.meta.url).href);
+
 const dotLottieSrc = new URL('./__fixtures__/test.lottie', import.meta.url).href;
-// eslint-disable-next-line node/no-unsupported-features/node-builtins
 const lottieSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -20,9 +27,11 @@ const render = (ui: React.ReactNode, options?: ComponentRenderOptions): RenderRe
   vitestRender(ui, { wrapper: Wrapper, ...options });
 
 describe.each([
-  { component: DotLottieReact, instanceType: DotLottie },
-  { component: DotLottieWorkerReact, instanceType: DotLottieWorker },
-])('$component.name', ({ component: Component, instanceType }) => {
+  { name: 'DotLottieReact', component: DotLottieReact, instanceType: DotLottie },
+  { name: 'DotLottieWorkerReact', component: DotLottieWorkerReact, instanceType: DotLottieWorker },
+  // { name: 'DotLottieWebGPUReact', component: DotLottieWebGPUReact, instanceType: DotLottieWebGPU },
+  // { name: 'DotLottieWebGLReact', component: DotLottieWebGLReact, instanceType: DotLottieWebGL },
+])('$name', ({ component: Component, instanceType }) => {
   afterEach(() => {
     cleanup();
   });

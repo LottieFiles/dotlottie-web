@@ -2,7 +2,7 @@ import { setWasmUrl } from '@lottiefiles/dotlottie-wc';
 import type { DotLottieWC } from '@lottiefiles/dotlottie-wc';
 
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
-setWasmUrl(new URL('../../../packages/web/src/core/dotlottie-player.wasm', import.meta.url).href);
+setWasmUrl(new URL('../../../packages/web/src/software/wasm/dotlottie-player.wasm', import.meta.url).href);
 
 const elementName = 'dotlottie-worker-wc';
 

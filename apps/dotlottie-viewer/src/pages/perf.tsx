@@ -6,7 +6,7 @@ import { isMobile } from 'react-device-detect';
 import { setCanvasKit, Skottie as SkottiePlayer } from '../components/skottie';
 import skottieWasmUrl from '../../node_modules/canvaskit-wasm/bin/full/canvaskit.wasm?url';
 import InitCanvasKit from 'canvaskit-wasm/bin/full/canvaskit';
-import dotLottieWasmUrl from '../../../../packages/web/src/core/dotlottie-player.wasm?url';
+import dotLottieWasmUrl from '../../../../packages/web/src/software/wasm/dotlottie-player.wasm?url';
 
 setDotLottieWasmUrl(window.location.origin + dotLottieWasmUrl);
 
@@ -124,9 +124,11 @@ const countOptions = [
 
 const playerOptions = [
   { id: 0, name: 'dotlottie-web' },
-  { id: 1, name: 'dotlottie-web/worker' },
-  { id: 2, name: 'lottie-web' },
-  { id: 3, name: 'skia/skottie' },
+  { id: 1, name: 'dotlottie-web/wg' },
+  { id: 2, name: 'dotlottie-web/gl' },
+  { id: 3, name: 'dotlottie-web/worker' },
+  { id: 4, name: 'lottie-web' },
+  { id: 5, name: 'skia/skottie' },
 ];
 
 export const Perf = (): JSX.Element => {
@@ -315,7 +317,26 @@ export const Perf = (): JSX.Element => {
                   useFrameInterpolation={useFrameInterpolation}
                 />
               )}
+
               {player.id === 1 && (
+                <DotLottieReact
+                  src={anim.lottieURL}
+                  style={size}
+                  loop
+                  autoplay
+                  useFrameInterpolation={useFrameInterpolation}
+                />
+              )}
+              {player.id === 2 && (
+                <DotLottieReact
+                  src={anim.lottieURL}
+                  style={size}
+                  loop
+                  autoplay
+                  useFrameInterpolation={useFrameInterpolation}
+                />
+              )}
+              {player.id === 3 && (
                 <DotLottieWorkerReact
                   src={anim.lottieURL}
                   style={size}
@@ -324,8 +345,8 @@ export const Perf = (): JSX.Element => {
                   useFrameInterpolation={useFrameInterpolation}
                 />
               )}
-              {player.id === 2 && <LottieWeb src={anim.lottieURL} style={size} loop autoplay />}
-              {player.id === 3 && <SkottiePlayer lottieURL={anim.lottieURL} width={size.width} height={size.height} />}
+              {player.id === 4 && <LottieWeb src={anim.lottieURL} style={size} loop autoplay />}
+              {player.id === 5 && <SkottiePlayer lottieURL={anim.lottieURL} width={size.width} height={size.height} />}
               <h3 className="mt-6 text-lg font-semibold text-white">{anim.name}</h3>
               <p className="text-sm text-gray-500">{anim.location}</p>
             </li>

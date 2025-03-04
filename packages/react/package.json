@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-react",
-  "version": "0.13.0",
+  "version": "0.14.0-pre.3",
   "type": "module",
   "description": "React wrapper around the dotlottie-web library",
   "repository": {
@@ -17,6 +17,23 @@
   "license": "MIT",
   "main": "dist/index.js",
   "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/browser/index.js",
+      "default": "./dist/browser/index.js"
+    },
+    "./webgl": {
+      "types": "./dist/webgl/index.d.ts",
+      "import": "./dist/webgl/index.js",
+      "default": "./dist/browser/webgl/index.js"
+    },
+    "./webgpu": {
+      "types": "./dist/webgpu/index.d.ts",
+      "import": "./dist/webgpu/index.js",
+      "default": "./dist/browser/webgpu/index.js"
+    }
+  },
   "browser": "dist/browser/index.js",
   "types": "dist/index.d.ts",
   "files": [

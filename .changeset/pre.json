@@ -1,0 +1,28 @@
+{
+  "mode": "pre",
+  "tag": "pre",
+  "initialVersions": {
+    "dotlottie-next-example": "0.0.0",
+    "dotlottie-react-example": "0.0.0",
+    "dotlottie-solid-example": "0.0.0",
+    "dotlottie-viewer": "0.0.1",
+    "dotlottie-vue-example": "0.0.0",
+    "dotlottie-wc-example": "0.0.0",
+    "dotlottie-web-example": "0.0.0",
+    "dotlottie-web-node-example": "0.0.0",
+    "with-parcel-example": "0.0.0",
+    "@lottiefiles/dotlottie-react": "0.12.1",
+    "@lottiefiles/dotlottie-solid": "0.1.5",
+    "@lottiefiles/dotlottie-svelte": "0.4.4",
+    "@lottiefiles/dotlottie-vue": "0.5.4",
+    "@lottiefiles/dotlottie-wc": "0.4.2",
+    "@lottiefiles/dotlottie-web": "0.39.0"
+  },
+  "changesets": [
+    "good-news-reflect",
+    "moody-sheep-cheer",
+    "shaggy-zoos-hang",
+    "thirty-cobras-perform",
+    "wise-glasses-lie"
+  ]
+}
