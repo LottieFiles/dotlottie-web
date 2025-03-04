@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.14.0-pre.3
+
+### Minor Changes
+
+- 89d7c41: feat(react): add WebGL and WebGPU support
+
 ## 0.13.1-pre.2
 
 ### Patch Changes
