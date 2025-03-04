@@ -12,6 +12,18 @@ exports[`'DotLottieReact' > basic 1`] = `
 </div>
 `;
 
+exports[`'DotLottieReact' > basic 2`] = `
+<div>
+  <div
+    style="width: 100%; height: 100%; line-height: 0;"
+  >
+    <canvas
+      style="width: 100%; height: 100%;"
+    />
+  </div>
+</div>
+`;
+
 exports[`'DotLottieWebGLReact' > basic 1`] = `
 <div>
   <div
@@ -24,7 +36,31 @@ exports[`'DotLottieWebGLReact' > basic 1`] = `
 </div>
 `;
 
+exports[`'DotLottieWebGLReact' > basic 2`] = `
+<div>
+  <div
+    style="width: 100%; height: 100%; line-height: 0;"
+  >
+    <canvas
+      style="width: 100%; height: 100%;"
+    />
+  </div>
+</div>
+`;
+
 exports[`'DotLottieWebGPUReact' > basic 1`] = `
+<div>
+  <div
+    style="width: 100%; height: 100%; line-height: 0;"
+  >
+    <canvas
+      style="width: 100%; height: 100%;"
+    />
+  </div>
+</div>
+`;
+
+exports[`'DotLottieWebGPUReact' > basic 2`] = `
 <div>
   <div
     style="width: 100%; height: 100%; line-height: 0;"
