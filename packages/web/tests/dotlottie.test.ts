@@ -18,9 +18,11 @@ DotLottieWorkerClass.setWasmUrl(wasmUrl);
 describe.each([
   {
     DotLottie: DotLottieClass,
+    name: 'DotLottie',
   },
   {
     DotLottie: DotLottieWorkerClass,
+    name: 'DotLottieWorker',
   },
 ])('$DotLottie.name', ({ DotLottie }) => {
   let canvas: HTMLCanvasElement;
@@ -39,6 +41,42 @@ describe.each([
   });
 
   describe('play', () => {
+    test('triggers loop event correctly', async () => {
+      const onLoad = vi.fn();
+      const onLoop = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+        loop: true,
+        autoplay: true,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+      dotLottie.addEventListener('loop', onLoop);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+
+      const loopCount = 4;
+
+      await vi.waitFor(
+        () => {
+          expect(onLoop).toHaveBeenCalledTimes(loopCount);
+        },
+        { timeout: (dotLottie.duration * 1000 + 500) * loopCount },
+      );
+
+      expect(dotLottie.loopCount).toBe(loopCount);
+
+      for (let i = 1; i <= loopCount; i += 1) {
+        expect(onLoop).toHaveBeenNthCalledWith(i, {
+          type: 'loop',
+          loopCount: i,
+        });
+      }
+    });
     test('unfreeze the animation on play()', async () => {
       const onLoad = vi.fn();
       const onPlay = vi.fn();

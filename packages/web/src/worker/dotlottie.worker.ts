@@ -206,6 +206,7 @@ const commands: {
     }
 
     const state: DotLottieInstanceState = {
+      loopCount: instance.loopCount,
       isLoaded: instance.isLoaded,
       isPaused: instance.isPaused,
       isPlaying: instance.isPlaying,
