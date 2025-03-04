@@ -12,9 +12,9 @@ import { DotLottieReact, DotLottieWorkerReact, setWasmUrl } from '../src';
 import { DotLottieReact as DotLottieWebGLReact, setWasmUrl as setWebGLWasmUrl } from '../src/webgl';
 import { DotLottieReact as DotLottieWebGPUReact, setWasmUrl as setWebGPUWasmUrl } from '../src/webgpu';
 
-setWasmUrl(new URL('../web/src/software/wasm/dotlottie-player.wasm?url', import.meta.url).href);
-setWebGLWasmUrl(new URL('../web/src/software/webgl/dotlottie-player.wasm?url', import.meta.url).href);
-setWebGPUWasmUrl(new URL('../web/src/software/webgpu/dotlottie-player.wasm?url', import.meta.url).href);
+setWasmUrl(new URL('../../web/src/software/wasm/dotlottie-player.wasm?url', import.meta.url).href);
+setWebGLWasmUrl(new URL('../../web/src/webgl/wasm/dotlottie-player.wasm?url', import.meta.url).href);
+setWebGPUWasmUrl(new URL('../../web/src/webgpu/wasm/dotlottie-player.wasm?url', import.meta.url).href);
 
 const dotLottieSrc = new URL('./__fixtures__/test.lottie', import.meta.url).href;
 const lottieSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
