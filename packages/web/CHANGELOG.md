@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-web
 
+## 0.40.2
+
+### Patch Changes
+
+- 7e6b460: fix: 🐛 on loop event regression on `DotLottie`
+- 7e6b460: fix: 🐛 ensure loop event is triggered on DotLottieWorker
+
 ## 0.40.1
 
 ### Patch Changes
