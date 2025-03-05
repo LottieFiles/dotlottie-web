@@ -503,7 +503,7 @@ export class DotLottie {
   private _draw(): void {
     if (this._dotLottieCore === null || this._context === null || !this._dotLottieCore.isPlaying()) return;
 
-    const nextFrame = Math.round(this._dotLottieCore.requestFrame() * 100) / 100;
+    const nextFrame = Math.round(this._dotLottieCore.requestFrame() * 1000) / 1000;
 
     const updated = this._dotLottieCore.setFrame(nextFrame);
 

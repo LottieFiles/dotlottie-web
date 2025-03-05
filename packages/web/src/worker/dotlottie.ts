@@ -44,6 +44,7 @@ export interface DotLottieInstanceState {
   isStopped: boolean;
   layout: Layout | undefined;
   loop: boolean;
+  loopCount: number;
   manifest: Manifest | null;
   marker: string | undefined;
   markers: Marker[];
@@ -68,6 +69,7 @@ export class DotLottieWorker {
   private readonly _canvas: HTMLCanvasElement;
 
   private _dotLottieInstanceState: DotLottieInstanceState = {
+    loopCount: 0,
     markers: [],
     autoplay: false,
     backgroundColor: '',
@@ -163,6 +165,7 @@ export class DotLottieWorker {
       | 'onStop'
       | 'onLoadError'
       | 'onReady'
+      | 'onLoop'
     > = event.data;
 
     if (!rpcResponse.id) {
@@ -234,6 +237,11 @@ export class DotLottieWorker {
         await this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
+
+      if (rpcResponse.method === 'onLoop' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
     }
   }
 
@@ -267,6 +275,10 @@ export class DotLottieWorker {
     this._created = true;
 
     await this._updateDotLottieInstanceState();
+  }
+
+  public get loopCount(): number {
+    return this._dotLottieInstanceState.loopCount;
   }
 
   public get isLoaded(): boolean {
