@@ -57,6 +57,17 @@ const createCoreSegment = (segment: number[], module: MainModule): VectorFloat =
   return coresegment;
 };
 
+const createCoreLayout = (layout: Layout | undefined, module: MainModule): { align: VectorFloat; fit: CoreFit } => {
+  if (!layout) {
+    return module.createDefaultLayout();
+  }
+
+  return {
+    align: createCoreAlign(layout.align ?? [0.5, 0.5], module),
+    fit: createCoreFit(layout.fit ?? 'contain', module),
+  };
+};
+
 export class DotLottie {
   private readonly _canvas: HTMLCanvasElement | OffscreenCanvas;
 
@@ -115,12 +126,7 @@ export class DotLottie {
           speed: config.speed ?? 1,
           useFrameInterpolation: config.useFrameInterpolation ?? true,
           marker: config.marker ?? '',
-          layout: config.layout
-            ? {
-                align: createCoreAlign(config.layout.align, module),
-                fit: createCoreFit(config.layout.fit, module),
-              }
-            : module.createDefaultLayout(),
+          layout: createCoreLayout(config.layout, module),
         });
 
         this._eventManager.dispatch({ type: 'ready' });
@@ -448,12 +454,7 @@ export class DotLottie {
       speed: config.speed ?? 1,
       useFrameInterpolation: config.useFrameInterpolation ?? true,
       marker: config.marker ?? '',
-      layout: config.layout
-        ? {
-            align: createCoreAlign(config.layout.align, DotLottie._wasmModule),
-            fit: createCoreFit(config.layout.fit, DotLottie._wasmModule),
-          }
-        : DotLottie._wasmModule.createDefaultLayout(),
+      layout: createCoreLayout(config.layout, DotLottie._wasmModule),
     });
 
     if (config.data) {
@@ -471,7 +472,7 @@ export class DotLottie {
     const rendered = this._dotLottieCore.render();
 
     if (rendered) {
-      const buffer = this._dotLottieCore.buffer() as Uint8Array;
+      const buffer = this._dotLottieCore.buffer() as ArrayBuffer;
       const clampedBuffer = new Uint8ClampedArray(buffer, 0, this._canvas.width * this._canvas.height * 4);
 
       let imageData = null;
@@ -840,10 +841,7 @@ export class DotLottie {
 
     this._dotLottieCore.setConfig({
       ...this._dotLottieCore.config(),
-      layout: {
-        align: createCoreAlign(layout.align, DotLottie._wasmModule),
-        fit: createCoreFit(layout.fit, DotLottie._wasmModule),
-      },
+      layout: createCoreLayout(layout, DotLottie._wasmModule),
     });
   }
 

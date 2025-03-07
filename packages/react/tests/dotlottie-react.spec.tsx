@@ -728,4 +728,43 @@ describe.each([
 
     expect(setLayout).toHaveBeenCalledWith({ align: [0.5, 0.5], fit: 'contain' });
   });
+
+  test('calls dotLottie.setLayout properly when layout prop changes with fit only', async () => {
+    const onLoad = vi.fn();
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    dotLottie?.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const setLayout = vi.spyOn(dotLottie, 'setLayout');
+
+    rerender(
+      <Component src={dotLottieSrc} autoplay layout={{ fit: 'cover' }} dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(setLayout).toHaveBeenCalledTimes(1);
+    });
+
+    expect(setLayout).toHaveBeenCalledWith({ fit: 'cover' });
+
+    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(setLayout).toHaveBeenCalledTimes(2);
+    });
+
+    expect(setLayout).toHaveBeenCalledWith({ fit: 'cover' });
+  });
 });

@@ -226,11 +226,8 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   }, [themeData]);
 
   useEffect(() => {
-    dotLottieRef.current?.setLayout({
-      align: layout?.align ?? [0.5, 0.5],
-      fit: layout?.fit ?? 'contain',
-    });
-  }, [layout?.align[0], layout?.align[1], layout?.fit]);
+    dotLottieRef.current?.setLayout(layout ?? {});
+  }, [layout?.fit, layout?.align && layout.align[0], layout?.align && layout.align[1]]);
 
   return (
     <div

@@ -11,8 +11,8 @@ export type Data = string | ArrayBuffer | Record<string, unknown>;
 export type Fit = 'contain' | 'cover' | 'fill' | 'none' | 'fit-width' | 'fit-height';
 
 export interface Layout {
-  align: [number, number];
-  fit: Fit;
+  align?: [number, number];
+  fit?: Fit;
 }
 
 export interface Config {
