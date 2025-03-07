@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-react
 
+## 0.13.2
+
+### Patch Changes
+
+- 956eedb: fix: TypeError caused by passing empty or incomplete `layout` props to `DotLottieReact` component
+- Updated dependencies [956eedb]
+  - @lottiefiles/dotlottie-web@0.41.0
+
 ## 0.13.1
 
 ### Patch Changes
