@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable typescript-sort-keys/interface */
 /* eslint-disable @typescript-eslint/no-namespace */
+/* eslint-disable typescript-sort-keys/interface */
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
   let HEAPF32: unknown;
@@ -29,24 +29,24 @@ export interface VectorFloat extends ClassHandle {
   get(_0: number): number | undefined;
   push_back(_0: number): void;
   resize(_0: number, _1: number): void;
-  set(_0: number, _1: number): boolean;
   size(): number;
+  set(_0: number, _1: number): boolean;
 }
 
 export interface VectorMarker extends ClassHandle {
   get(_0: number): Marker | undefined;
   push_back(_0: Marker): void;
   resize(_0: number, _1: Marker): void;
-  set(_0: number, _1: Marker): boolean;
   size(): number;
+  set(_0: number, _1: Marker): boolean;
 }
 
 export interface VectorString extends ClassHandle {
   get(_0: number): EmbindString | undefined;
   push_back(_0: EmbindString): void;
   resize(_0: number, _1: EmbindString): void;
-  set(_0: number, _1: EmbindString): boolean;
   size(): number;
+  set(_0: number, _1: EmbindString): boolean;
 }
 
 export interface ModeValue<T extends number> {
@@ -78,7 +78,7 @@ export interface DotLottiePlayer extends ClassHandle {
   activeAnimationId(): string;
   activeStateMachineId(): string;
   activeThemeId(): string;
-  animationSize(): VectorFloat;
+  clear(): void;
   isLoaded(): boolean;
   isPaused(): boolean;
   isPlaying(): boolean;
@@ -137,7 +137,7 @@ export interface DotLottiePlayer extends ClassHandle {
   getLayerBounds(_0: EmbindString): VectorFloat;
   tweenToMarker(_0: EmbindString, _1?: number, _2?: VectorFloat): boolean;
   getStateMachine(_0: EmbindString): string;
-  clear(): void;
+  animationSize(): VectorFloat;
   stateMachineCurrentState(): string;
   stateMachineOverrideCurrentState(_0: EmbindString, _1: boolean): boolean;
   stateMachineStatus(): string;
@@ -155,13 +155,13 @@ export interface Config {
   backgroundColor: number;
   layout: Layout;
   loopAnimation: boolean;
-  marker: EmbindString;
+  useFrameInterpolation: boolean;
   segment: VectorFloat;
   speed: number;
   mode: Mode;
   stateMachineId: EmbindString;
   themeId: EmbindString;
-  useFrameInterpolation: boolean;
+  marker: EmbindString;
 }
 
 interface EmbindModule {
@@ -176,7 +176,7 @@ interface EmbindModule {
     FitWidth: FitValue<4>;
     None: FitValue<6>;
   };
-  Mode: { Bounce: ModeValue<3>; Reverse: ModeValue<2>; Forward: ModeValue<1>; ReverseBounce: ModeValue<4> };
+  Mode: { Forward: ModeValue<1>; Reverse: ModeValue<2>; Bounce: ModeValue<3>; ReverseBounce: ModeValue<4> };
   OpenUrlMode: { Allow: OpenUrlModeValue<3>; Interaction: OpenUrlModeValue<2>; Deny: OpenUrlModeValue<1> };
   VectorFloat: {
     new (): VectorFloat;
