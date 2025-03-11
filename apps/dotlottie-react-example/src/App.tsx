@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 
 // import smData from './open_url_rating.json';
 // import pigeonData from './loop_complete.json'
-import starAnimation from './star-rating.json';
-import starSM from './starRating.json';
+// import starAnimation from './star-rating.json';
+// import starSM from './starRating.json';
 // import pigeonAnimation from './exploding-pigeon.json';
 // import pigeonSM from './exploding-pigeon-sm.json';
 
@@ -79,8 +79,9 @@ function App() {
         dotLottieRefCallback={setDotLottie}
         useFrameInterpolation={useFrameInterpolation}
         // src={animations[srcIdx]}
-        data={starAnimation}
+        src={'https://assets.codepen.io/11716235/sm_smiley_slider.lottie'}
         speed={speed}
+        stateMachineId="smiley_slider"
         playOnHover={playOnHover}
         renderConfig={{
           autoResize: autoResizeCanvas,
@@ -90,7 +91,6 @@ function App() {
           margin: '2px',
           border: '1px solid white',
         }}
-        animationId={currentAnimationId}
       />
       <input type="range" min="0" max="100" defaultValue="0" value={progress} />
       <label>
@@ -147,7 +147,7 @@ function App() {
           // const l = dotLottie?.stateMachineLoadData(jsonSmData);
 
           // const l = dotLottie?.stateMachineLoadData(JSON.stringify(pigeonSM));
-          const l = dotLottie?.stateMachineLoadData(JSON.stringify(starSM));
+          const l = dotLottie?.stateMachineLoad('smiley_slider');
 
           // let config = OpenUrl();
 
