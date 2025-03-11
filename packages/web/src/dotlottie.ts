@@ -672,16 +672,14 @@ export class DotLottie {
       return;
     }
 
-    const nextFrame = this._dotLottieCore.requestFrame();
+    const updated = this._dotLottieCore.tick();
 
-    const updated = this._dotLottieCore.setFrame(nextFrame);
-
-    if (updated || (this._previousFrameNb !== nextFrame && this._stateMachineIsActive)) {
-      /**
-       * When a state machine has "setFrame" or "setProgress" it will set a frame, causing updated to be false, thus not drawing.
-       * We can keep track of the previous frame, if it doesn't match the next frame dotlottie-web is out of date and we render the frame.
-       */
-      this._previousFrameNb = nextFrame;
+    /**
+     * When a state machine has "setFrame" or "setProgress" it will set a frame, causing updated to be false, thus not drawing.
+     * We can keep track of the previous frame, if it doesn't match the next frame dotlottie-web is out of date and we render the frame.
+     */
+    if (updated || (this.currentFrame !== this._previousFrameNb && this._stateMachineIsActive)) {
+      this._previousFrameNb = this.currentFrame;
 
       this._eventManager.dispatch({
         type: 'frame',
@@ -1249,6 +1247,7 @@ export class DotLottie {
         this._canvas.addEventListener('pointerleave', this._pointerExitMethod);
       }
     } else {
+      // eslint-disable-next-line no-console
       console.error("Error setting up state machine listeners: The canvas element doesn't exist.");
     }
   }

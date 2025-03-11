@@ -224,11 +224,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   useEffect(() => {
     if (typeof stateMachineId === 'string') {
       dotLottieRef.current?.stateMachineLoad(stateMachineId);
-      // let config = new OpenUrl();
       dotLottieRef.current?.stateMachineStart();
-    } else {
-      // dotLottieRef.current?.stateMachineLoad(stateMachineId);
-      // dotLottieRef.current?.stateMachineStart();
     }
   }, [stateMachineId]);
   useEffect(() => {
