@@ -1,5 +1,16 @@
 # @lottiefiles/dotlottie-react
 
+## 0.13.0-beta.12
+
+### Minor Changes
+
+- 8907a33: added tweened transition support
+
+### Patch Changes
+
+- Updated dependencies [8907a33]
+  - @lottiefiles/dotlottie-web@0.39.0-beta.12
+
 ## 0.13.0-beta.11
 
 ### Minor Changes

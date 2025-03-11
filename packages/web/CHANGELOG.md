@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.39.0-beta.12
+
+### Minor Changes
+
+- 8907a33: added tweened transition support
+
 ## 0.39.0-beta.11
 
 ### Minor Changes
