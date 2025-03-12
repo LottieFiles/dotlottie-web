@@ -2487,14 +2487,14 @@ var createDotLottiePlayerModule = (() => {
       c: ___cxa_find_matching_catch_2,
       o: ___cxa_throw,
       e: ___resumeException,
-      S: ___syscall_fstat64,
-      P: ___syscall_getcwd,
-      Q: ___syscall_newfstatat,
+      R: ___syscall_fstat64,
+      O: ___syscall_getcwd,
+      P: ___syscall_newfstatat,
       U: ___syscall_openat,
-      R: ___syscall_stat64,
+      Q: ___syscall_stat64,
       W: __abort_js,
       y: __embind_finalize_value_object,
-      I: __embind_register_bigint,
+      H: __embind_register_bigint,
       xa: __embind_register_bool,
       w: __embind_register_class,
       v: __embind_register_class_constructor,
@@ -2502,49 +2502,49 @@ var createDotLottiePlayerModule = (() => {
       wa: __embind_register_emval,
       A: __embind_register_enum,
       m: __embind_register_enum_value,
-      E: __embind_register_float,
+      D: __embind_register_float,
       x: __embind_register_function,
       p: __embind_register_integer,
-      k: __embind_register_memory_view,
+      l: __embind_register_memory_view,
       z: __embind_register_optional,
       Da: __embind_register_smart_ptr,
-      F: __embind_register_std_string,
+      E: __embind_register_std_string,
       B: __embind_register_std_wstring,
       t: __embind_register_value_object,
       n: __embind_register_value_object_field,
       ya: __embind_register_void,
       aa: __emscripten_get_now,
-      N: __emscripten_runtime_keepalive_clear,
-      J: __emscripten_throw_longjmp,
-      G: __emval_as,
+      M: __emscripten_runtime_keepalive_clear,
+      I: __emscripten_throw_longjmp,
+      F: __emval_as,
       Ba: __emval_call,
       _: __emval_decref,
       Aa: __emval_get_method_caller,
       Ca: __emval_incref,
       za: __emval_run_destructors,
       s: __emval_take_value,
-      K: __setitimer_js,
-      L: __tzset_js,
-      M: _emscripten_resize_heap,
+      J: __setitimer_js,
+      K: __tzset_js,
+      L: _emscripten_resize_heap,
       ba: _emscripten_run_script,
       Y: _environ_get,
       Z: _environ_sizes_get,
       V: _fd_close,
       T: _fd_read,
-      C: _fd_write,
+      S: _fd_write,
       j: invoke_ii,
-      h: invoke_iii,
+      g: invoke_iii,
       f: invoke_iiii,
       $: invoke_iiiii,
       r: invoke_iiiiii,
-      D: invoke_iiiiiiii,
+      C: invoke_iiiiiiii,
       u: invoke_v,
       b: invoke_vi,
       a: invoke_vii,
-      g: invoke_viii,
-      l: invoke_viiii,
+      h: invoke_viii,
+      k: invoke_viiii,
       q: invoke_viiiii,
-      H: invoke_vijjjj,
+      G: invoke_vijjjj,
       na: _observer_on_complete,
       qa: _observer_on_frame,
       va: _observer_on_load,
@@ -2555,7 +2555,7 @@ var createDotLottiePlayerModule = (() => {
       pa: _observer_on_render,
       ra: _observer_on_stop,
       X: _proc_exit,
-      O: _random_get,
+      N: _random_get,
       da: _state_machine_observer_on_boolean_input_value_change,
       ja: _state_machine_observer_on_custom_event,
       ia: _state_machine_observer_on_error,
@@ -2637,6 +2637,16 @@ var createDotLottiePlayerModule = (() => {
         _setThrew(1, 0);
       }
     }
+    function invoke_v(index) {
+      var sp = stackSave();
+      try {
+        getWasmTableEntry(index)();
+      } catch (e) {
+        stackRestore(sp);
+        if (e !== e + 0) throw e;
+        _setThrew(1, 0);
+      }
+    }
     function invoke_ii(index, a1) {
       var sp = stackSave();
       try {
@@ -2651,16 +2661,6 @@ var createDotLottiePlayerModule = (() => {
       var sp = stackSave();
       try {
         getWasmTableEntry(index)(a1, a2, a3, a4, a5);
-      } catch (e) {
-        stackRestore(sp);
-        if (e !== e + 0) throw e;
-        _setThrew(1, 0);
-      }
-    }
-    function invoke_v(index) {
-      var sp = stackSave();
-      try {
-        getWasmTableEntry(index)();
       } catch (e) {
         stackRestore(sp);
         if (e !== e + 0) throw e;

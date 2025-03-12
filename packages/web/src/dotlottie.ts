@@ -1339,32 +1339,32 @@ export class DotLottie {
    * });
    * ```
    */
-  public getLayerBoundingBox(layerName: string):
-    | {
-        height: number;
-        width: number;
-        x: number;
-        y: number;
-      }
-    | undefined {
-    const bounds = this._dotLottieCore?.getLayerBounds(layerName);
+  // public getLayerBoundingBox(layerName: string):
+  //   | {
+  //       height: number;
+  //       width: number;
+  //       x: number;
+  //       y: number;
+  //     }
+  //   | undefined {
+  //   const bounds = this._dotLottieCore?.getLayerBounds(layerName);
 
-    if (!bounds) return undefined;
+  //   if (!bounds) return undefined;
 
-    if (bounds.size() !== 4) return undefined;
+  //   if (bounds.size() !== 4) return undefined;
 
-    const x = bounds.get(0) as number;
-    const y = bounds.get(1) as number;
-    const width = bounds.get(2) as number;
-    const height = bounds.get(3) as number;
+  //   const x = bounds.get(0) as number;
+  //   const y = bounds.get(1) as number;
+  //   const width = bounds.get(2) as number;
+  //   const height = bounds.get(3) as number;
 
-    return {
-      x,
-      y,
-      width,
-      height,
-    };
-  }
+  //   return {
+  //     x,
+  //     y,
+  //     width,
+  //     height,
+  //   };
+  // }
 
   public static transformThemeToLottieSlots(theme: string, slots: string): string {
     return DotLottie._wasmModule?.transformThemeToLottieSlots(theme, slots) ?? '';
