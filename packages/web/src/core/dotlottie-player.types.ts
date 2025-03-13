@@ -19,33 +19,33 @@ interface WasmModule {}
 
 type EmbindString = ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string;
 export interface ClassHandle {
-  clone(): this;
+  isAliasOf(other: ClassHandle): boolean;
   delete(): void;
   deleteLater(): this;
-  isAliasOf(other: ClassHandle): boolean;
   isDeleted(): boolean;
+  clone(): this;
 }
 export interface VectorFloat extends ClassHandle {
+  size(): number;
   get(_0: number): number | undefined;
   push_back(_0: number): void;
   resize(_0: number, _1: number): void;
-  size(): number;
   set(_0: number, _1: number): boolean;
 }
 
 export interface VectorMarker extends ClassHandle {
+  size(): number;
   get(_0: number): Marker | undefined;
   push_back(_0: Marker): void;
   resize(_0: number, _1: Marker): void;
-  size(): number;
   set(_0: number, _1: Marker): boolean;
 }
 
 export interface VectorString extends ClassHandle {
+  size(): number;
   get(_0: number): EmbindString | undefined;
   push_back(_0: EmbindString): void;
   resize(_0: number, _1: EmbindString): void;
-  size(): number;
   set(_0: number, _1: EmbindString): boolean;
 }
 
@@ -60,8 +60,8 @@ export interface FitValue<T extends number> {
 export type Fit = FitValue<1> | FitValue<3> | FitValue<2> | FitValue<4> | FitValue<5> | FitValue<6>;
 
 export interface Layout {
-  align: VectorFloat;
   fit: Fit;
+  align: VectorFloat;
 }
 
 export interface OpenUrlModeValue<T extends number> {
@@ -75,9 +75,9 @@ export interface OpenUrl {
 }
 
 export interface DotLottiePlayer extends ClassHandle {
-  activeAnimationId(): string;
-  activeStateMachineId(): string;
-  activeThemeId(): string;
+  markers(): VectorMarker;
+  animationSize(): VectorFloat;
+  stateMachineFrameworkSetup(): VectorString;
   clear(): void;
   isLoaded(): boolean;
   isPaused(): boolean;
@@ -123,21 +123,21 @@ export interface DotLottiePlayer extends ClassHandle {
   setTheme(_0: EmbindString): boolean;
   setThemeData(_0: EmbindString): boolean;
   setSlots(_0: EmbindString): boolean;
-  markers(): VectorMarker;
-  stateMachineFrameworkSetup(): VectorString;
+  activeAnimationId(): string;
+  activeThemeId(): string;
   stateMachineLoad(_0: EmbindString): boolean;
   stateMachineLoadData(_0: EmbindString): boolean;
   stateMachineFireEvent(_0: EmbindString): void;
   stateMachineSetNumericInput(_0: EmbindString, _1: number): boolean;
-  stateMachineSetBooleanInput(_0: EmbindString, _1: boolean): boolean;
   stateMachineSetStringInput(_0: EmbindString, _1: EmbindString): boolean;
+  stateMachineSetBooleanInput(_0: EmbindString, _1: boolean): boolean;
   stateMachineGetNumericInput(_0: EmbindString): number;
   stateMachineGetStringInput(_0: EmbindString): string;
   stateMachineGetBooleanInput(_0: EmbindString): boolean;
   getLayerBounds(_0: EmbindString): VectorFloat;
   tweenToMarker(_0: EmbindString, _1?: number, _2?: VectorFloat): boolean;
   getStateMachine(_0: EmbindString): string;
-  animationSize(): VectorFloat;
+  activeStateMachineId(): string;
   stateMachineCurrentState(): string;
   stateMachineOverrideCurrentState(_0: EmbindString, _1: boolean): boolean;
   stateMachineStatus(): string;
@@ -145,49 +145,49 @@ export interface DotLottiePlayer extends ClassHandle {
 }
 
 export interface Marker {
-  duration: number;
   name: EmbindString;
   time: number;
+  duration: number;
 }
 
 export interface Config {
   autoplay: boolean;
-  backgroundColor: number;
-  layout: Layout;
   loopAnimation: boolean;
+  mode: Mode;
+  speed: number;
   useFrameInterpolation: boolean;
   segment: VectorFloat;
-  speed: number;
-  mode: Mode;
-  stateMachineId: EmbindString;
-  themeId: EmbindString;
+  backgroundColor: number;
+  layout: Layout;
   marker: EmbindString;
+  themeId: EmbindString;
+  stateMachineId: EmbindString;
 }
 
 interface EmbindModule {
-  DotLottiePlayer: {
-    new (_0: Config): DotLottiePlayer;
+  VectorFloat: {
+    new (): VectorFloat;
   };
+  VectorMarker: {
+    new (): VectorMarker;
+  };
+  VectorString: {
+    new (): VectorString;
+  };
+  Mode: { Forward: ModeValue<1>; Reverse: ModeValue<2>; Bounce: ModeValue<3>; ReverseBounce: ModeValue<4> };
   Fit: {
     Contain: FitValue<1>;
     Cover: FitValue<3>;
     Fill: FitValue<2>;
-    FitHeight: FitValue<5>;
     FitWidth: FitValue<4>;
+    FitHeight: FitValue<5>;
     None: FitValue<6>;
   };
-  Mode: { Forward: ModeValue<1>; Reverse: ModeValue<2>; Bounce: ModeValue<3>; ReverseBounce: ModeValue<4> };
-  OpenUrlMode: { Allow: OpenUrlModeValue<3>; Interaction: OpenUrlModeValue<2>; Deny: OpenUrlModeValue<1> };
-  VectorFloat: {
-    new (): VectorFloat;
-  };
   createDefaultLayout(): Layout;
-  VectorString: {
-    new (): VectorString;
-  };
+  OpenUrlMode: { Deny: OpenUrlModeValue<1>; Interaction: OpenUrlModeValue<2>; Allow: OpenUrlModeValue<3> };
   createDefaultOpenURL(): OpenUrl;
-  VectorMarker: {
-    new (): VectorMarker;
+  DotLottiePlayer: {
+    new (_0: Config): DotLottiePlayer;
   };
   createDefaultConfig(): Config;
   transformThemeToLottieSlots(_0: EmbindString, _1: EmbindString): string;
