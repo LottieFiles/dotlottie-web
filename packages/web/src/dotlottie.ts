@@ -155,7 +155,22 @@ export class DotLottie {
         // this._eventManager.dispatch({ type: 'stop' });
       },
       state_machine_observer_on_custom_event: (_dotlottie_instance_id: number, message: string) => {
-        this._eventManager.dispatch({ type: 'stateMachineCustomEvent', message });
+        if (message.startsWith('OpenUrl:')) {
+          const [urlPart = '', targetPart] = message.split(' | ');
+          const url = urlPart.replace('OpenUrl: ', '');
+
+          if (typeof window === 'undefined') return;
+
+          if (targetPart) {
+            const target = targetPart.replace('Target: ', '');
+
+            window.open(url, target);
+          } else {
+            window.open(url, '_self');
+          }
+        } else {
+          this._eventManager.dispatch({ type: 'stateMachineCustomEvent', message });
+        }
       },
       state_machine_observer_on_error: (_dotlottie_instance_id: number, message: string) => {
         this._eventManager.dispatch({ type: 'stateMachineError', message });
