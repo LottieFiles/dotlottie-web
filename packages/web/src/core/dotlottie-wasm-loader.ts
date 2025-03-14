@@ -102,8 +102,9 @@ export class DotLottieWasmLoader {
    */
   public static setBridge(bridge: DotLottieBridge): void {
     this._bridge = bridge;
+
     // Invalidate current module promise to ensure next load uses new bridge
-    this._ModulePromise = null;
+    // this._ModulePromise = null;
   }
 
   /**
