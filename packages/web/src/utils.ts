@@ -1,7 +1,7 @@
 import { DEFAULT_DPR_FACTOR, IS_BROWSER, LOTTIE_JSON_MANDATORY_FIELDS, ZIP_SIGNATURE } from './constants';
 
 export function isHexColor(color: string): boolean {
-  return /^#([\da-f]{6}|[\da-f]{8})$/iu.test(color);
+  return /^#([\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/iu.test(color);
 }
 
 export function hexStringToRGBAInt(colorHex: string): number {
@@ -10,6 +10,15 @@ export function hexStringToRGBAInt(colorHex: string): number {
   }
 
   let hex = colorHex.replace('#', '');
+
+  if (hex.length === 3 || hex.length === 4) {
+    const expandedHex = hex
+      .split('')
+      .map((char) => char + char)
+      .join('');
+
+    hex = expandedHex;
+  }
 
   // Add alpha if it's not included
   hex = hex.length === 6 ? `${hex}ff` : hex;
