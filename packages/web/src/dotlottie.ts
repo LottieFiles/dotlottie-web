@@ -444,6 +444,8 @@ export class DotLottie {
       this._animationFrameId = null;
     }
 
+    this._isFrozen = false;
+
     this._dotLottieCore.setConfig({
       themeId: config.themeId ?? '',
       autoplay: config.autoplay ?? false,
@@ -504,38 +506,52 @@ export class DotLottie {
   private _draw(): void {
     if (this._dotLottieCore === null || this._context === null || !this._dotLottieCore.isPlaying()) return;
 
-    const nextFrame = Math.round(this._dotLottieCore.requestFrame() * 1000) / 1000;
+    try {
+      const nextFrame = Math.round(this._dotLottieCore.requestFrame() * 1000) / 1000;
+      const updated = this._dotLottieCore.setFrame(nextFrame);
 
-    const updated = this._dotLottieCore.setFrame(nextFrame);
+      if (updated) {
+        this._eventManager.dispatch({
+          type: 'frame',
+          currentFrame: this.currentFrame,
+        });
 
-    if (updated) {
-      this._eventManager.dispatch({
-        type: 'frame',
-        currentFrame: this.currentFrame,
-      });
+        const rendered = this._render();
 
-      const rendered = this._render();
+        if (rendered) {
+          if (this._dotLottieCore.isComplete()) {
+            if (this._dotLottieCore.config().loopAnimation) {
+              this._eventManager.dispatch({
+                type: 'loop',
+                loopCount: this._dotLottieCore.loopCount(),
+              });
+            } else {
+              this._eventManager.dispatch({ type: 'complete' });
 
-      if (rendered) {
-        // handle loop or complete
-        if (this._dotLottieCore.isComplete()) {
-          if (this._dotLottieCore.config().loopAnimation) {
-            this._eventManager.dispatch({
-              type: 'loop',
-              loopCount: this._dotLottieCore.loopCount(),
-            });
-          } else {
-            this._eventManager.dispatch({ type: 'complete' });
+              return;
+            }
           }
         }
       }
-    }
 
-    this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
+      this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
+    } catch (error) {
+      console.error('Error in animation frame:', error);
+
+      if (this._animationFrameId !== null) {
+        this._frameManager.cancelAnimationFrame(this._animationFrameId);
+        this._animationFrameId = null;
+      }
+    }
   }
 
   public play(): void {
     if (this._dotLottieCore === null) return;
+
+    if (this._animationFrameId !== null) {
+      this._frameManager.cancelAnimationFrame(this._animationFrameId);
+      this._animationFrameId = null;
+    }
 
     const ok = this._dotLottieCore.play();
 
@@ -649,6 +665,11 @@ export class DotLottie {
   }
 
   public destroy(): void {
+    if (this._animationFrameId !== null) {
+      this._frameManager.cancelAnimationFrame(this._animationFrameId);
+      this._animationFrameId = null;
+    }
+
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       OffscreenObserver.unobserve(this._canvas);
       CanvasResizeObserver.unobserve(this._canvas);
