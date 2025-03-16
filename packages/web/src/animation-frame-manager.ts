@@ -16,27 +16,34 @@ class WebAnimationFrameStrategy implements AnimationFrameStrategy {
 }
 
 class NodeAnimationFrameStrategy implements AnimationFrameStrategy {
-  private _lastHandleId: number = 0;
+  private _handleIdCounter: number = 0;
 
-  private _lastImmediate: NodeJS.Immediate | null = null;
+  private readonly _activeImmediates: Map<number, NodeJS.Immediate> = new Map();
 
   public requestAnimationFrame(callback: (time: number) => void): number {
-    if (this._lastHandleId >= Number.MAX_SAFE_INTEGER) {
-      this._lastHandleId = 0;
+    if (this._handleIdCounter >= Number.MAX_SAFE_INTEGER) {
+      this._handleIdCounter = 0;
     }
 
-    this._lastHandleId += 1;
+    this._handleIdCounter += 1;
+    const id = this._handleIdCounter;
 
-    this._lastImmediate = setImmediate(() => {
+    const immediate = setImmediate(() => {
+      this._activeImmediates.delete(id);
       callback(Date.now());
     });
 
-    return this._lastHandleId;
+    this._activeImmediates.set(id, immediate);
+
+    return id;
   }
 
-  public cancelAnimationFrame(_id: number): void {
-    if (this._lastImmediate) {
-      clearImmediate(this._lastImmediate);
+  public cancelAnimationFrame(id: number): void {
+    const immediate = this._activeImmediates.get(id);
+
+    if (immediate) {
+      clearImmediate(immediate);
+      this._activeImmediates.delete(id);
     }
   }
 }
