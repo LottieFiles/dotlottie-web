@@ -43,11 +43,19 @@ export class CanvasResizeObserver {
   }
 
   public static unobserve(canvas: HTMLCanvasElement): void {
+    const element = this._observedCanvases.get(canvas);
+
+    if (element) {
+      const timeoutId = element[1];
+
+      if (timeoutId) clearTimeout(timeoutId);
+    }
+
     this._observer?.unobserve(canvas);
     this._observedCanvases.delete(canvas);
 
-    if (this._observedCanvases.size === 0) {
-      this._observer?.disconnect();
+    if (!this._observedCanvases.size && this._observer) {
+      this._observer.disconnect();
       this._observer = null;
     }
   }
