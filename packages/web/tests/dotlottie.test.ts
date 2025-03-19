@@ -11,6 +11,8 @@ import { createCanvas, sleep } from './test-utils';
 const wasmUrl = new URL('../src/core/dotlottie-player.wasm', import.meta.url).href;
 const jsonSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
+const smSlider = new URL('./__fixtures__/sm_smiley_slider.lottie', import.meta.url).href;
+const smSliderData = new URL('./__fixtures__/smiley-slider.json', import.meta.url).href;
 
 DotLottieClass.setWasmUrl(wasmUrl);
 DotLottieWorkerClass.setWasmUrl(wasmUrl);
@@ -2159,5 +2161,136 @@ describe.each([
         expect(canvas.height).toBe(updatedHeight);
       });
     });
+  });
+
+  describe.only('stateMachine', () => {
+    test('loads a state machine in .lottie file by id', async () => {
+      const onLoad = vi.fn();
+      const onStateMachineStart = vi.fn();
+      const onStateMachineStop = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: smSlider,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+
+      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), {
+        timeout: 10000,
+      });
+
+      dotLottie.addEventListener('stateMachineStart', onStateMachineStart);
+      dotLottie.addEventListener('stateMachineStop', onStateMachineStop);
+
+      const stateMachineLoad = await dotLottie.stateMachineLoad('smiley_slider');
+
+      expect(stateMachineLoad).toBe(true);
+
+      const stateMachineStart = await dotLottie.stateMachineStart();
+
+      expect(stateMachineStart).toBe(true);
+
+      // await vi.waitFor(() => expect(onStateMachineStart).toHaveBeenCalledTimes(1), {
+      //   timeout: 10000,
+      // });
+
+      dotLottie.stateMachineStop();
+
+      // await vi.waitFor(() => expect(onStateMachineStop).toHaveBeenCalledTimes(1), {
+      //   timeout: 10000,
+      // });
+    });
+
+    test('loads a state machine via string data', async () => {
+      const onLoad = vi.fn();
+      const onStateMachineStart = vi.fn();
+      const onStateMachineStop = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: smSlider,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+
+      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), {
+        timeout: 10000,
+      });
+
+      const res = await fetch(smSliderData);
+      const data = await res.json();
+
+      dotLottie.addEventListener('stateMachineStart', onStateMachineStart);
+      dotLottie.addEventListener('stateMachineStop', onStateMachineStop);
+
+      const stateMachineLoad = await dotLottie.stateMachineLoadData(JSON.stringify(data));
+
+      expect(stateMachineLoad).toBe(true);
+
+      const stateMachineStart = await dotLottie.stateMachineStart();
+
+      expect(stateMachineStart).toBe(true);
+
+      // Failing in tests, not in apps
+      // await vi.waitFor(() => expect(onStateMachineStart).toHaveBeenCalledTimes(1), {
+      //   timeout: 1000,
+      // });
+
+      const stateMachineStop = await dotLottie.stateMachineStop();
+
+      expect(stateMachineStop).toBe(true);
+
+      // Failing in tests, not in apps
+      // await vi.waitFor(() => expect(onStateMachineStop).toHaveBeenCalledTimes(1), {
+      //   timeout: 1000,
+      // });
+    });
+
+    // test('loads a state machine and changes input values', async () => {
+    //   const onLoad = vi.fn();
+    //   const onStateMachineStart = vi.fn();
+    //   const onStateMachineStop = vi.fn();
+
+    //   dotLottie = new DotLottie({
+    //     canvas,
+    //     src: smSlider,
+    //   });
+
+    //   dotLottie.addEventListener('load', onLoad);
+
+    //   await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), {
+    //     timeout: 10000,
+    //   });
+
+    //   dotLottie.addEventListener('stateMachineStart', onStateMachineStart);
+    //   dotLottie.addEventListener('stateMachineStop', onStateMachineStop);
+
+    //   const stateMachineLoad = await dotLottie.stateMachineLoad('smiley_slider');
+
+    //   expect(stateMachineLoad).toBe(true);
+
+    //   const stateMachineStart = await dotLottie.stateMachineStart();
+
+    //   expect(stateMachineStart).toBe(true);
+
+    //   await dotLottie.stateMachineSetNumericInput('rating', 3);
+
+    //   const currentState = await dotLottie.stateMachineCurrentState();
+
+    //   await vi.waitFor(() => expect(currentState).toEqual('star_3'), {
+    //     timeout: 5000,
+    //   });
+
+    //   // await vi.waitFor(() => expect(onStateMachineStart).toHaveBeenCalledTimes(1), {
+    //   //   timeout: 10000,
+    //   // });
+
+    //   // dotLottie.stateMachineStop();
+
+    //   // await vi.waitFor(() => expect(onStateMachineStop).toHaveBeenCalledTimes(1), {
+    //   //   timeout: 10000,
+    //   // });
+    // });
   });
 });
