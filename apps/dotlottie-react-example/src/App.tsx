@@ -1,5 +1,5 @@
-// import { DotLottieReact, DotLottie, setWasmUrl, OpenUrl, OpenUrlMode } from '@lottiefiles/dotlottie-react';
-import { DotLottieWorkerReact, DotLottieWorker, setWasmUrl } from '@lottiefiles/dotlottie-react';
+import { DotLottieReact, DotLottie, setWasmUrl } from '@lottiefiles/dotlottie-react';
+// import { DotLottieWorkerReact, DotLottieWorker, setWasmUrl } from '@lottiefiles/dotlottie-react';
 import React, { useState } from 'react';
 
 // import smData from './open_url_rating.json';
@@ -22,7 +22,7 @@ const animations = [
 setWasmUrl(new URL('../../../packages/web/src/core/dotlottie-player.wasm', import.meta.url).href);
 
 function App() {
-  const [dotLottie, setDotLottie] = useState<DotLottieWorker | null>(null);
+  const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
   const [loop, setLoop] = useState(true);
   const [speed, setSpeed] = useState(1);
   const [currentFrame, setCurrentFrame] = useState(0);
@@ -75,7 +75,7 @@ function App() {
 
   return (
     <div>
-      <DotLottieWorkerReact
+      <DotLottieReact
         dotLottieRefCallback={setDotLottie}
         useFrameInterpolation={useFrameInterpolation}
         // src={animations[srcIdx]}

@@ -13,22 +13,6 @@ const baseUrl = window.location.origin + import.meta.env.BASE_URL;
 
 app.innerHTML = `
 <div class="grid" style="margin-top: 1000px">
-  <canvas data-src="https://lottie.host/b2d44b82-fd7e-401f-a4fa-77999147c0be/vqNwJryGBp.lottie"></canvas>
-  <canvas data-bg-color="green" data-src="https://lottie.host/1cf72a35-6d88-4d9a-9961-f1bb88087f2c/miJIHiyH4Q.lottie"></canvas>
-  <canvas data-src="https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json"></canvas>
-  <canvas data-src="https://lottie.host/a7421582-4733-49e5-9f77-e8d4cd792239/WZQjpo4uZR.lottie"></canvas>
-  <canvas data-src="https://lottie.host/e2a24b6f-df7f-4fc5-94ea-30f0846f85dc/1RLOR2g0m3.lottie"></canvas>
-  <canvas data-src="https://lottie.host/35326116-a8ca-4219-81ca-df9ce56a3f22/zCGFevEA23.lottie"></canvas>
-  <canvas data-src="https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie"></canvas>
-  <canvas data-src="${baseUrl}/down.json"></canvas>
-  <canvas data-src="${baseUrl}/editor.json"></canvas>
-  <canvas data-src="${baseUrl}/growup.json"></canvas>
-  <canvas data-src="${baseUrl}/hamster.lottie"></canvas>
-  <canvas data-src="${baseUrl}/like.json"></canvas>
-  <canvas data-src="${baseUrl}/lolo.json"></canvas>
-  <canvas data-src="${baseUrl}/walker.json"></canvas>
-  <canvas data-src="${baseUrl}/waves.json"></canvas>
-  <canvas data-src="${baseUrl}/woman.json"></canvas>
 </div>
 
 <div class="container">
@@ -185,7 +169,8 @@ fetch(
   // './toggle.lottie',
   // './exploding_pigeon.lottie',
   // './lolo.json',
-  './multi_themes.lottie',
+  // './multi_themes.lottie',
+  'https://assets.codepen.io/11716235/sm_smiley_slider.lottie',
 )
   .then(async (res) => res.arrayBuffer())
   .then((data): void => {
@@ -224,6 +209,28 @@ fetch(
     });
 
     dotLottie.addEventListener('loadError', console.error);
+
+    dotLottie.addEventListener('render', () => {
+      const ctx = canvas.getContext('2d');
+
+      const points = dotLottie.getLayerBoundingBox('wink');
+
+      if (!points) return;
+      if (!ctx) return;
+
+      const ax = points.x1;
+      const ay = points.y1;
+      const cx = points.x3;
+      const cy = points.y3;
+      const dx = points.x4;
+      const dy = points.y4;
+
+      const width = Math.sqrt((dx - cx) ** 2 + (dy - cy) ** 2);
+      const height = Math.sqrt((ax - dx) ** 2 + (ay - dy) ** 2);
+
+      ctx.strokeStyle = 'red';
+      ctx.strokeRect(ax, ay, width, height);
+    });
 
     const playPauseButton = document.getElementById('playPause') as HTMLButtonElement;
     const stopButton = document.getElementById('stop') as HTMLButtonElement;
@@ -333,9 +340,7 @@ fetch(
     });
 
     stateMachinesSelect.addEventListener('change', () => {
-      const stateMachineId = stateMachinesSelect.value;
-
-      dotLottie.stateMachineLoad(stateMachineId);
+      dotLottie.stateMachineLoad('smiley_slider');
     });
 
     markerSelect.addEventListener('change', () => {
