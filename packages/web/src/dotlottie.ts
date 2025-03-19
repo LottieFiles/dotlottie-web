@@ -1343,41 +1343,65 @@ export class DotLottie {
    *
    * @example
    * ```typescript
-   * // Draw a rectangle around the layer 'Layer 1'
-   * dotLottie.addEventListener('render', () => {
-   *   const boundingBox = dotLottie.getLayerBoundingBox('Layer 1');
-   *
-   *   if (boundingBox) {
-   *     const { x, y, width, height } = boundingBox;
-   *     context.strokeRect(x, y, width, height);
-   *   }
-   * });
+   * // Draw a red rectangle around the layer 'Layer 1'
+    dotLottie.addEventListener('render', () => {
+      const ctx = canvas.getContext('2d');
+      const points = dotLottie.getLayerBoundingBox('Layer ');
+
+      if (!points) return;
+      if (!ctx) return;
+
+      const ax = points.x1;
+      const ay = points.y1;
+      const cx = points.x3;
+      const cy = points.y3;
+      const dx = points.x4;
+      const dy = points.y4;
+
+      const width = Math.sqrt((dx - cx) ** 2 + (dy - cy) ** 2);
+      const height = Math.sqrt((ax - dx) ** 2 + (ay - dy) ** 2);
+
+      ctx.strokeStyle = 'red';
+      ctx.strokeRect(ax, ay, width, height);
+    });
    * ```
    */
   public getLayerBoundingBox(layerName: string):
     | {
-        height: number;
-        width: number;
-        x: number;
-        y: number;
+        x1: number;
+        x2: number;
+        x3: number;
+        x4: number;
+        y1: number;
+        y2: number;
+        y3: number;
+        y4: number;
       }
     | undefined {
     const bounds = this._dotLottieCore?.getLayerBounds(layerName);
 
     if (!bounds) return undefined;
 
-    if (bounds.size() !== 4) return undefined;
+    if (bounds.size() !== 8) return undefined;
 
-    const x = bounds.get(0) as number;
-    const y = bounds.get(1) as number;
-    const width = bounds.get(2) as number;
-    const height = bounds.get(3) as number;
+    const x1 = bounds.get(0) as number;
+    const y1 = bounds.get(1) as number;
+    const x2 = bounds.get(2) as number;
+    const y2 = bounds.get(3) as number;
+    const x3 = bounds.get(4) as number;
+    const y3 = bounds.get(5) as number;
+    const x4 = bounds.get(6) as number;
+    const y4 = bounds.get(7) as number;
 
     return {
-      x,
-      y,
-      width,
-      height,
+      x1,
+      x2,
+      x3,
+      x4,
+      y1,
+      y2,
+      y3,
+      y4,
     };
   }
 
