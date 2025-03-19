@@ -1,5 +1,16 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.5.0-beta.13
+
+### Minor Changes
+
+- fe6b657: updated thorvg hit detection
+
+### Patch Changes
+
+- Updated dependencies [fe6b657]
+  - @lottiefiles/dotlottie-web@0.39.0-beta.13
+
 ## 0.5.0-beta.12
 
 ### Minor Changes
