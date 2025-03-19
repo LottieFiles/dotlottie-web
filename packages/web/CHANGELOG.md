@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.39.0-beta.13
+
+### Minor Changes
+
+- fe6b657: updated thorvg hit detection
+
 ## 0.39.0-beta.12
 
 ### Minor Changes
