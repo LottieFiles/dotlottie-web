@@ -9,6 +9,10 @@ import { DotLottieReact, DotLottieWorkerReact } from '../src';
 
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
 const dotLottieSrc = new URL('./__fixtures__/test.lottie', import.meta.url).href;
+
+// eslint-disable-next-line node/no-unsupported-features/node-builtins
+const smileySliderSrc = new URL('./__fixtures__/sm-smiley-slider.lottie', import.meta.url).href;
+
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
 const lottieSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 
@@ -549,6 +553,42 @@ describe.each([
 
     await vi.waitFor(() => {
       expect(dotLottie?.activeAnimationId).toBe('');
+    });
+  });
+
+  test('calls dotLottie.stateMachineLoad when a stateMachineId prop changes', async () => {
+    const onLoad = vi.fn();
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = render(
+      <Component src={smileySliderSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    dotLottie?.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const loadStateMachine = vi.spyOn(dotLottie, 'stateMachineLoad');
+
+    rerender(
+      <Component
+        src={dotLottieSrc}
+        autoplay
+        stateMachineId="smiley_slider"
+        dotLottieRefCallback={dotLottieRefCallback}
+      />,
+    );
+
+    await vi.waitFor(() => {
+      expect(loadStateMachine).toHaveBeenCalledTimes(1);
     });
   });
 

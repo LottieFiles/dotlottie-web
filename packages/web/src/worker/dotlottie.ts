@@ -723,6 +723,23 @@ export class DotLottieWorker {
     DotLottieWorker._wasmUrl = url;
   }
 
+  public async getLayerBoundingBox(
+    layerName: string,
+  ): Promise<
+    { x1: number; x2: number; x3: number; x4: number; y1: number; y2: number; y3: number; y4: number } | undefined
+  > {
+    if (!this._created) return undefined;
+
+    const result = await this._sendMessage('getLayerBoundingBox', {
+      instanceId: this._id,
+      layerName,
+    });
+
+    await this._updateDotLottieInstanceState();
+
+    return result;
+  }
+
   public async stateMachineLoad(stateMachineId: string): Promise<boolean> {
     if (!this._created) return false;
 
@@ -872,6 +889,30 @@ export class DotLottieWorker {
     const { x, y } = this._getPointerPosition(event);
 
     this._sendMessage('stateMachinePostPointerDownEvent', { instanceId: this._id, x, y });
+  }
+
+  public async stateMachinePostPointerDownEvent(x: number, y: number): Promise<void> {
+    this._sendMessage('stateMachinePostPointerDownEvent', { instanceId: this._id, x, y });
+  }
+
+  public async stateMachinePostPointerUpEvent(x: number, y: number): Promise<void> {
+    this._sendMessage('stateMachinePostPointerUpEvent', { instanceId: this._id, x, y });
+  }
+
+  public async stateMachinePostClickEvent(x: number, y: number): Promise<void> {
+    this._sendMessage('stateMachinePostClickEvent', { instanceId: this._id, x, y });
+  }
+
+  public async stateMachinePostPointerMoveEvent(x: number, y: number): Promise<void> {
+    this._sendMessage('stateMachinePostPointerMoveEvent', { instanceId: this._id, x, y });
+  }
+
+  public async stateMachinePostPointerEnterEvent(x: number, y: number): Promise<void> {
+    this._sendMessage('stateMachinePostPointerEnterEvent', { instanceId: this._id, x, y });
+  }
+
+  public async stateMachinePostPointerExitEvent(x: number, y: number): Promise<void> {
+    this._sendMessage('stateMachinePostPointerExitEvent', { instanceId: this._id, x, y });
   }
 
   private _createCountedDebounce<T extends (...args: any[]) => unknown>(

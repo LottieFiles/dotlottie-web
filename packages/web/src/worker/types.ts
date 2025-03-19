@@ -47,6 +47,10 @@ export interface MethodParamsMap {
   getDotLottieInstanceState: {
     instanceId: string;
   };
+  getLayerBoundingBox: {
+    instanceId: string;
+    layerName: string;
+  };
   getStateMachine: {
     instanceId: string;
     stateMachineId: string;
@@ -233,6 +237,18 @@ export interface MethodResultMap {
   getDotLottieInstanceState: {
     state: DotLottieInstanceState;
   };
+  getLayerBoundingBox:
+    | {
+        x1: number;
+        x2: number;
+        x3: number;
+        x4: number;
+        y1: number;
+        y2: number;
+        y3: number;
+        y4: number;
+      }
+    | undefined;
   getStateMachine: string;
   getStateMachineListeners: string[];
   load: void;

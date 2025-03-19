@@ -749,6 +749,18 @@ const commands: {
       success: true,
     };
   },
+  getLayerBoundingBox(request) {
+    const instanceId = request.params.instanceId;
+    const layerName = request.params.layerName;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.getLayerBoundingBox(layerName);
+  },
   setLoop(request) {
     const instanceId = request.params.instanceId;
     const loop = request.params.loop;

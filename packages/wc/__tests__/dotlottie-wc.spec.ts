@@ -7,6 +7,7 @@ import type { DotLottieWC } from '../src/dotlottie-wc';
 
 const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
 const lottieSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
+const smileySliderSrc = new URL('./__fixtures__/sm-smiley-slider.lottie', import.meta.url).href;
 
 setWasmUrl(new URL('../../web/src/core/dotlottie-player.wasm', import.meta.url).href);
 
@@ -347,6 +348,32 @@ describe.each([{ elementName: 'dotlottie-wc' as const }, { elementName: 'dotlott
       rerender({});
 
       expect(load).not.toHaveBeenCalled();
+    });
+
+    test('calls dotLottie.stateMachineLoad when statemachineid attribute changes', async () => {
+      const { element, rerender } = render(elementName, { src });
+
+      const dotLottie = element.dotLottie as DotLottie | DotLottieWorker;
+
+      await vi.waitFor(() => {
+        expect(dotLottie.isLoaded).toBe(true);
+      });
+
+      const loadStateMachine = vi.spyOn(dotLottie, 'stateMachineLoad');
+
+      rerender({
+        src: smileySliderSrc,
+        stateMachineId: 'smiley_slider',
+      });
+
+      expect(loadStateMachine).toHaveBeenCalledTimes(1);
+
+      // eslint-disable-next-line @typescript-eslint/promise-function-async
+      const lottieAnimationData = await fetch(lottieSrc).then((res) => res.text());
+
+      rerender({ data: lottieAnimationData });
+
+      expect(loadStateMachine).toHaveBeenCalledTimes(2);
     });
 
     test('calls dotLottie.setBackgroundColor when background-color attribute changes', async () => {
