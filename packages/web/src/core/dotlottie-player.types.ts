@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable @typescript-eslint/no-namespace */
 /* eslint-disable typescript-sort-keys/interface */
+/* eslint-disable @typescript-eslint/no-namespace */
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
   let HEAPF32: unknown;

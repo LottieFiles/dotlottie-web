@@ -705,7 +705,7 @@ export class DotLottie {
 
       if (rendered) {
         // handle loop or complete
-        if (this._dotLottieCore.isComplete()) {
+        if (this._dotLottieCore.isComplete() && !this._dotLottieCore.isTweening()) {
           if (this._dotLottieCore.config().loopAnimation) {
             this._eventManager.dispatch({
               type: 'loop',
@@ -728,7 +728,7 @@ export class DotLottie {
 
     if (ok || this._dotLottieCore.isPlaying()) {
       this._isFrozen = false;
-      // this._eventManager.dispatch({ type: 'play' });
+      this._eventManager.dispatch({ type: 'play' });
       this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
     }
 
