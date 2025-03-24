@@ -1,5 +1,41 @@
 # @lottiefiles/dotlottie-react
 
+## 0.13.0
+
+### Minor Changes
+
+- 8907a33: added tweened transition support
+- 783f3e0: onLoopComplete listener, openurl action added!
+- fe6b657: updated thorvg hit detection
+- 1683077: added additional trigger change listeners
+- a163991: refactored triggers and listeners naming.
+- db492e7: added statemachineid prop, updated worker support
+- 1c838fc: added state machine getters
+- 0f66cee: added dotlottie-worker fixes
+- 7bf1e4f: adds click listener type, state machine observers and override state method
+
+### Patch Changes
+
+- 2e74ad0: optimizations to the drawing cycle
+- 4ddd970: statemachineid prop can start the sm automatically
+- f6f39be: fix for using state machine prop at creation.
+- Updated dependencies [2e74ad0]
+- Updated dependencies [4ddd970]
+- Updated dependencies [8907a33]
+- Updated dependencies [783f3e0]
+- Updated dependencies [349b1cd]
+- Updated dependencies [f6f39be]
+- Updated dependencies [fe6b657]
+- Updated dependencies [1683077]
+- Updated dependencies [a163991]
+- Updated dependencies [db492e7]
+- Updated dependencies [2e4e248]
+- Updated dependencies [1c838fc]
+- Updated dependencies [9e8c07f]
+- Updated dependencies [0f66cee]
+- Updated dependencies [7bf1e4f]
+  - @lottiefiles/dotlottie-web@0.39.0
+
 ## 0.13.0-beta.12
 
 ### Minor Changes

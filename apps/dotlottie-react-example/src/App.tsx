@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 
 // import smData from './open_url_rating.json';
 // import pigeonData from './loop_complete.json'
-// import starAnimation from './star-rating.json';
-// import starSM from './starRating.json';
+import starAnimation from './star-rating.json';
+import starSM from './starRating.json';
 // import pigeonAnimation from './exploding-pigeon.json';
 // import pigeonSM from './exploding-pigeon-sm.json';
 
@@ -79,9 +79,9 @@ function App() {
         dotLottieRefCallback={setDotLottie}
         useFrameInterpolation={useFrameInterpolation}
         // src={animations[srcIdx]}
-        src={'https://assets.codepen.io/11716235/sm_smiley_slider.lottie'}
+        // src={'https://assets.codepen.io/11716235/sm_smiley_slider.lottie'}
+        data={starAnimation}
         speed={speed}
-        stateMachineId="smiley_slider"
         playOnHover={playOnHover}
         renderConfig={{
           autoResize: autoResizeCanvas,
@@ -111,43 +111,58 @@ function App() {
       <button
         onClick={async () => {
           dotLottie?.addEventListener('stateMachineStart', () => {
-            console.log('🚨 stateMachineStart');
+            console.log('[state machine event] > stateMachineStart');
           });
           dotLottie?.addEventListener('stateMachineTransition', (event) => {
-            console.log('🚨 stateMachineTransition ', event.previousState, event.newState);
+            console.log('[state machine event] > stateMachineTransition ', event.previousState, event.newState);
           });
           dotLottie?.addEventListener('stateMachineStateEntered', (event) => {
-            console.log('🚨 enteringState ', event.enteringState);
+            console.log('[state machine event] > enteringState ', event.enteringState);
           });
           dotLottie?.addEventListener('stateMachineStateExit', (event) => {
-            console.log('🚨 state machine exit', event.exitingState);
+            console.log('[state machine event] > state machine exit', event.exitingState);
           });
           dotLottie?.addEventListener('stateMachineStop', () => {
             console.log('🚨 state machine stop');
           });
           dotLottie?.addEventListener('stateMachineNumericInputValueChange', (event) => {
-            console.log('🚨 state machine trigger value change', event.inputName, event.oldValue, event.newValue);
+            console.log(
+              '[state machine event] > state machine trigger value change',
+              event.inputName,
+              event.oldValue,
+              event.newValue,
+            );
           });
           dotLottie?.addEventListener('stateMachineStringInputValueChange', (event) => {
-            console.log('🚨 state machine trigger value change', event.inputName, event.oldValue, event.newValue);
+            console.log(
+              '[state machine event] > state machine trigger value change',
+              event.inputName,
+              event.oldValue,
+              event.newValue,
+            );
           });
           dotLottie?.addEventListener('stateMachineBooleanInputValueChange', (event) => {
-            console.log('🚨 state machine trigger value change', event.inputName, event.oldValue, event.newValue);
+            console.log(
+              '[state machine event] > state machine trigger value change',
+              event.inputName,
+              event.oldValue,
+              event.newValue,
+            );
           });
 
           dotLottie?.addEventListener('stateMachineCustomEvent', (message) => {
-            console.log('🚨 stateMachineOnCustomEvent', message);
+            console.log('[state machine event] > stateMachineOnCustomEvent', message);
           });
 
           dotLottie?.addEventListener('stateMachineInputFired', (message) => {
-            console.log('APP:: 🚨 stateMachineInputFired', message);
+            console.log('APP:: [state machine event] > stateMachineInputFired', message);
           });
 
           // const jsonSmData = JSON.stringify(smData);
           // const l = dotLottie?.stateMachineLoadData(jsonSmData);
 
-          // const l = dotLottie?.stateMachineLoadData(JSON.stringify(pigeonSM));
-          const l = dotLottie?.stateMachineLoad('smiley_slider');
+          const l = dotLottie?.stateMachineLoadData(JSON.stringify(starSM));
+          // const l = dotLottie?.stateMachineLoad('smiley_slider');
 
           // let config = OpenUrl();
 
@@ -172,8 +187,11 @@ function App() {
       </button>
       <button
         onClick={() => {
-          dotLottie?.stop();
+          // dotLottie?.stop();
           // dotLottie?.stateMachineStop();
+          dotLottie?.stateMachineStop();
+          dotLottie?.load({ autoplay: true, loop: true, speed: 1 });
+          dotLottie?.play();
         }}
       >
         Stop
