@@ -17,6 +17,7 @@ export { type DotLottie };
 export interface DotLottieVueProps extends Omit<Config, 'canvas'> {
   animationId?: string;
   playOnHover?: boolean;
+  stateMachineId?: string;
   themeData?: string;
   themeId?: string;
 }
@@ -42,6 +43,7 @@ export const DotLottieVue = defineComponent({
     playOnHover: { type: Boolean, required: false },
     themeData: { type: String, required: false },
     themeId: { type: String, required: false },
+    stateMachineId: { type: String, required: false },
   },
 
   setup(props: DotLottieVueProps, { attrs, expose }: SetupContext): () => VNode {
@@ -137,6 +139,15 @@ export const DotLottieVue = defineComponent({
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
           dotLottie.setThemeData(newVal);
+        }
+      },
+    );
+    watch(
+      () => props.stateMachineId,
+      (newVal) => {
+        if (dotLottie && typeof newVal !== 'undefined') {
+          dotLottie.stateMachineLoad(newVal);
+          dotLottie.stateMachineStart();
         }
       },
     );

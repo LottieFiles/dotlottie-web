@@ -14,7 +14,18 @@ export type EventType =
   | 'freeze'
   | 'unfreeze'
   | 'render'
-  | 'ready';
+  | 'ready'
+  | 'stateMachineCustomEvent'
+  | 'stateMachineError'
+  | 'stateMachineStateEntered'
+  | 'stateMachineStateExit'
+  | 'stateMachineTransition'
+  | 'stateMachineStart'
+  | 'stateMachineStop'
+  | 'stateMachineBooleanInputValueChange'
+  | 'stateMachineNumericInputValueChange'
+  | 'stateMachineStringInputValueChange'
+  | 'stateMachineInputFired';
 
 /**
  * Maps an event type string to its respective event interface.
@@ -45,6 +56,28 @@ type EventByType<T> = T extends 'complete'
   ? RenderEvent
   : T extends 'ready'
   ? ReadyEvent
+  : T extends 'stateMachineCustomEvent'
+  ? StateMachineCustomEvent
+  : T extends 'stateMachineError'
+  ? StateMachineErrorEvent
+  : T extends 'stateMachineStateEntered'
+  ? StateMachineStateEnteredEvent
+  : T extends 'stateMachineStateExit'
+  ? StateMachineStateExitEvent
+  : T extends 'stateMachineTransition'
+  ? StateMachineTransitionEvent
+  : T extends 'stateMachineStart'
+  ? StateMachineStartEvent
+  : T extends 'stateMachineStop'
+  ? StateMachineStopEvent
+  : T extends 'stateMachineBooleanInputValueChange'
+  ? StateMachineBooleanInputValueChangeEvent
+  : T extends 'stateMachineNumericInputValueChange'
+  ? StateMachineNumericInputValueChangeEvent
+  : T extends 'stateMachineStringInputValueChange'
+  ? StateMachineStringInputValueChangeEvent
+  : T extends 'stateMachineInputFired'
+  ? StateMachineInputFiredEvent
   : never;
 
 /**
@@ -139,6 +172,64 @@ export interface StopEvent extends BaseEvent {
 export interface ReadyEvent extends BaseEvent {
   type: 'ready';
 }
+export interface StateMachineCustomEvent extends BaseEvent {
+  message: string;
+  type: 'stateMachineCustomEvent';
+}
+export interface StateMachineErrorEvent extends BaseEvent {
+  message: string;
+  type: 'stateMachineError';
+}
+
+export interface StateMachineStateEnteredEvent extends BaseEvent {
+  enteringState: string;
+  type: 'stateMachineStateEntered';
+}
+
+export interface StateMachineStateExitEvent extends BaseEvent {
+  exitingState: string;
+  type: 'stateMachineStateExit';
+}
+
+export interface StateMachineTransitionEvent extends BaseEvent {
+  newState: string;
+  previousState: string;
+  type: 'stateMachineTransition';
+}
+
+export interface StateMachineStartEvent extends BaseEvent {
+  type: 'stateMachineStart';
+}
+
+export interface StateMachineStopEvent extends BaseEvent {
+  type: 'stateMachineStop';
+}
+
+export interface StateMachineBooleanInputValueChangeEvent extends BaseEvent {
+  inputName: string;
+  newValue: boolean;
+  oldValue: boolean;
+  type: 'stateMachineBooleanInputValueChange';
+}
+
+export interface StateMachineNumericInputValueChangeEvent extends BaseEvent {
+  inputName: string;
+  newValue: number;
+  oldValue: number;
+  type: 'stateMachineNumericInputValueChange';
+}
+
+export interface StateMachineStringInputValueChangeEvent extends BaseEvent {
+  inputName: string;
+  newValue: string;
+  oldValue: string;
+  type: 'stateMachineStringInputValueChange';
+}
+
+export interface StateMachineInputFiredEvent extends BaseEvent {
+  inputName: string;
+  type: 'stateMachineInputFired';
+}
 
 /**
  * Type representing all possible event types.
@@ -155,8 +246,19 @@ export type Event =
   | DestroyEvent
   | FreezeEvent
   | UnfreezeEvent
+  | ReadyEvent
   | RenderEvent
-  | ReadyEvent;
+  | StateMachineCustomEvent
+  | StateMachineErrorEvent
+  | StateMachineStateEnteredEvent
+  | StateMachineStateExitEvent
+  | StateMachineTransitionEvent
+  | StateMachineStartEvent
+  | StateMachineStopEvent
+  | StateMachineBooleanInputValueChangeEvent
+  | StateMachineNumericInputValueChangeEvent
+  | StateMachineStringInputValueChangeEvent
+  | StateMachineInputFiredEvent;
 
 export interface EventListener<T extends EventType> {
   (event: EventByType<T>): void;

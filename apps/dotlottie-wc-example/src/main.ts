@@ -15,6 +15,7 @@ if (app) {
     <button id="stop">Stop</button>
     <button id="create">Create</button>
     <button id="destroy">Destroy</button>
+    <button id="sm">Load SM</button>
     <button id="move">Move</button>
     <div id="container"></div>
   `;
@@ -25,6 +26,7 @@ const pauseButton = document.querySelector('#pause');
 const stopButton = document.querySelector('#stop');
 const createButton = document.querySelector('#create');
 const destroyButton = document.querySelector('#destroy');
+const loadSmButton = document.querySelector('#sm');
 const moveButton = document.querySelector('#move');
 const container = document.querySelector('#container');
 
@@ -50,10 +52,15 @@ function create(): void {
   const dotlottieComponent = document.createElement(elementName) as DotLottieWC;
 
   // eslint-disable-next-line no-secrets/no-secrets
-  dotlottieComponent.src = 'https://lottie.host/0e2d86ab-604d-4fc4-8512-d44a30eb81a8/YFj05ZHqHA.json';
-  dotlottieComponent.autoplay = true;
-  dotlottieComponent.loop = true;
+  // dotlottieComponent.src = 'https://asset-cdn.lottiefiles.dev/1452b1e1-1d27-4394-a39a-a3c838e2b477/aUwJ8LNLZd.lottie';
+  dotlottieComponent.src = 'https://assets.codepen.io/11716235/sm_smiley_slider.lottie';
   container?.appendChild(dotlottieComponent);
+}
+
+function loadSM(): void {
+  const dotlottieComponent = document.querySelector(elementName) as DotLottieWC;
+
+  dotlottieComponent.setAttribute('statemachineid', 'smiley_slider');
 }
 
 function destroy(): void {
@@ -82,6 +89,12 @@ if (createButton) {
 if (destroyButton) {
   destroyButton.addEventListener('click', () => {
     destroy();
+  });
+}
+
+if (loadSmButton) {
+  loadSmButton.addEventListener('click', () => {
+    loadSM();
   });
 }
 

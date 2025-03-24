@@ -1,0 +1,105 @@
+{
+  "initial": "global",
+  "states": [
+    {
+      "name": "global",
+      "type": "GlobalState",
+      "animation": "",
+      "transitions": [
+        {
+          "type": "Transition",
+          "toState": "star_1",
+          "guards": [{ "type": "Numeric", "conditionType": "Equal", "inputName": "rating", "compareTo": 1 }]
+        },
+        {
+          "type": "Transition",
+          "toState": "star_2",
+          "guards": [{ "type": "Numeric", "conditionType": "Equal", "inputName": "rating", "compareTo": 2 }]
+        },
+        {
+          "type": "Transition",
+          "toState": "star_3",
+          "guards": [{ "type": "Numeric", "conditionType": "Equal", "inputName": "rating", "compareTo": 3 }]
+        },
+        {
+          "type": "Transition",
+          "toState": "star_4",
+          "guards": [{ "type": "Numeric", "conditionType": "Equal", "inputName": "rating", "compareTo": 4 }]
+        },
+        {
+          "type": "Transition",
+          "toState": "star_5",
+          "guards": [{ "type": "Numeric", "conditionType": "Equal", "inputName": "rating", "compareTo": 5 }]
+        }
+      ]
+    },
+    {
+      "type": "PlaybackState",
+      "name": "star_1",
+      "animation": "",
+      "autoplay": true,
+      "segment": "star_1",
+      "transitions": []
+    },
+    {
+      "type": "PlaybackState",
+      "name": "star_2",
+      "animation": "",
+      "autoplay": true,
+      "segment": "star_2",
+      "transitions": []
+    },
+    {
+      "type": "PlaybackState",
+      "name": "star_3",
+      "animation": "",
+      "autoplay": true,
+      "segment": "star_3",
+      "transitions": []
+    },
+    {
+      "type": "PlaybackState",
+      "name": "star_4",
+      "animation": "",
+      "autoplay": true,
+      "segment": "star_4",
+      "transitions": []
+    },
+    {
+      "type": "PlaybackState",
+      "name": "star_5",
+      "animation": "",
+      "autoplay": true,
+      "segment": "star_5",
+      "transitions": []
+    }
+  ],
+  "inputs": [{ "type": "Numeric", "name": "rating", "value": 0 }],
+  "interactions": [
+    {
+      "type": "PointerDown",
+      "layerName": "star1",
+      "actions": [{ "type": "SetNumeric", "inputName": "rating", "value": 1 }]
+    },
+    {
+      "type": "PointerDown",
+      "layerName": "star2",
+      "actions": [{ "type": "SetNumeric", "inputName": "rating", "value": 2 }]
+    },
+    {
+      "type": "PointerDown",
+      "layerName": "star3",
+      "actions": [{ "type": "SetNumeric", "inputName": "rating", "value": 3 }]
+    },
+    {
+      "type": "PointerDown",
+      "layerName": "star4",
+      "actions": [{ "type": "SetNumeric", "inputName": "rating", "value": 4 }]
+    },
+    {
+      "type": "PointerDown",
+      "layerName": "star5",
+      "actions": [{ "type": "SetNumeric", "inputName": "rating", "value": 5 }]
+    }
+  ]
+}

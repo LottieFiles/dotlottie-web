@@ -1,0 +1,68 @@
+{
+  "initial": "pigeonRunning",
+  "states": [
+    {
+      "type": "PlaybackState",
+      "name": "pigeonRunning",
+      "animation": "",
+      "loop": true,
+      "autoplay": true,
+      "segment": "bird",
+      "transitions": [
+        {
+          "type": "Transition",
+          "toState": "explosion",
+          "guards": [
+            {
+              "type": "Numeric",
+              "inputName": "loopCount",
+              "conditionType": "GreaterThanOrEqual",
+              "compareTo": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "PlaybackState",
+      "name": "explosion",
+      "animation": "",
+      "final": true,
+      "loop": false,
+      "autoplay": true,
+      "segment": "explosion",
+      "transitions": []
+    }
+  ],
+  "inputs": [
+    {
+      "type": "Event",
+      "name": "explode"
+    },
+    {
+      "type": "Event",
+      "name": "rainFeathers"
+    },
+    {
+      "type": "Event",
+      "name": "restart"
+    },
+    {
+      "type": "Numeric",
+      "name": "loopCount",
+      "value": 0
+    }
+  ],
+  "listeners": [
+    {
+      "type": "OnLoopComplete",
+      "stateName": "pigeonRunning",
+      "actions": [
+        {
+          "type": "Increment",
+          "inputName": "loopCount"
+        }
+      ]
+    }
+  ]
+}

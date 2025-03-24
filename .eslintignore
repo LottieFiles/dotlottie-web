@@ -46,3 +46,4 @@ dotlottie-player.js
 dotlottie.worker.js
 
 apps/dotlottie-viewer
+apps/dotlottie-state-machine-example
