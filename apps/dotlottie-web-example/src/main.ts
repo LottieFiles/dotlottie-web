@@ -218,11 +218,6 @@ fetch(
     // });
     // });
 
-    canvas.addEventListener('mousedown', () => {
-      // dotLottie.postStateMachineEvent('OnPointerDown: 0.0 0.0');
-      dotLottie.postPointerDownEvent(0, 0);
-    });
-
     dotLottie.addEventListener('loadError', console.error);
 
     const playPauseButton = document.getElementById('playPause') as HTMLButtonElement;
@@ -335,7 +330,7 @@ fetch(
     stateMachinesSelect.addEventListener('change', () => {
       const stateMachineId = stateMachinesSelect.value;
 
-      dotLottie.loadStateMachine(stateMachineId);
+      dotLottie.stateMachineLoad(stateMachineId);
     });
 
     markerSelect.addEventListener('change', () => {
@@ -374,11 +369,11 @@ fetch(
     });
 
     startStateMachineButton.addEventListener('click', () => {
-      dotLottie.startStateMachine();
+      dotLottie.stateMachineStart();
     });
 
     endStateMachineButton.addEventListener('click', () => {
-      dotLottie.stopStateMachine();
+      dotLottie.stateMachineStop();
     });
 
     playPauseButton.addEventListener('click', () => {
@@ -450,17 +445,17 @@ fetch(
         themeSelect.appendChild(option);
       }
 
-      const markers = dotLottie.markers();
+      // const markers = dotLottie.markers();
 
-      for (const marker of markers) {
-        const option = document.createElement('option');
+      // for (const marker of markers) {
+      //   const option = document.createElement('option');
 
-        option.value = marker.name;
+      //   option.value = marker.name;
 
-        option.textContent = marker.name;
+      //   option.textContent = marker.name;
 
-        markerSelect.appendChild(option);
-      }
+      //   markerSelect.appendChild(option);
+      // }
 
       activeAnimationSpan.textContent = dotLottie.activeAnimationId ?? 'None';
 
