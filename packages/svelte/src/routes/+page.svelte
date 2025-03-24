@@ -21,6 +21,7 @@
 	let themes: string[] = [];
 	let activeAnimationId = "";
 	let activeThemeId = "";
+	let activeStateMachineId = "";
 
 	function dotLottieRefCallback(ref: DotLottie) {
 		dotLottie = ref;
@@ -79,6 +80,7 @@
 	backgroundColor={backgroundColor}
 	animationId={activeAnimationId}
 	themeId={activeThemeId}
+	stateMachineId={activeStateMachineId}
 	src={src}
 	loop={loop}
 	speed={speed}

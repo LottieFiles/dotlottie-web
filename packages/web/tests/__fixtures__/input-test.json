@@ -1,0 +1,194 @@
+{
+  "initial": "star_1",
+  "states": [
+    {
+      "name": "global",
+      "type": "GlobalState",
+      "animation": "",
+      "transitions": [
+        {
+          "type": "Transition",
+          "toState": "star_2",
+          "guards": [
+            {
+              "type": "Event",
+              "inputName": "testEvent"
+            }
+          ]
+        },
+        {
+          "type": "Tweened",
+          "toState": "star_3",
+          "duration": 0.1,
+          "easing": [
+            0.76,
+            0,
+            0.24,
+            1
+          ],
+          "guards": [
+            {
+              "type": "Numeric",
+              "conditionType": "Equal",
+              "inputName": "rating",
+              "compareTo": 3
+            }
+          ]
+        },
+        {
+          "type": "Transition",
+          "toState": "star_4",
+          "guards": [
+            {
+              "type": "Numeric",
+              "conditionType": "Equal",
+              "inputName": "rating",
+              "compareTo": 4
+            }
+          ]
+        },
+        {
+          "type": "Transition",
+          "toState": "star_5",
+          "guards": [
+            {
+              "type": "Numeric",
+              "conditionType": "Equal",
+              "inputName": "rating",
+              "compareTo": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "PlaybackState",
+      "name": "star_1",
+      "animation": "",
+      "autoplay": false,
+      "loop": false,
+      "segment": "angry",
+      "transitions": []
+    },
+    {
+      "type": "PlaybackState",
+      "name": "star_2",
+      "animation": "",
+      "autoplay": false,
+      "loop": false,
+      "segment": "sad",
+      "transitions": []
+    },
+    {
+      "type": "PlaybackState",
+      "name": "star_3",
+      "animation": "",
+      "autoplay": false,
+      "loop": false,
+      "segment": "mourn",
+      "transitions": []
+    },
+    {
+      "type": "PlaybackState",
+      "name": "star_4",
+      "animation": "",
+      "autoplay": false,
+      "loop": false,
+      "segment": "wink",
+      "transitions": []
+    },
+    {
+      "type": "PlaybackState",
+      "name": "star_5",
+      "animation": "",
+      "autoplay": false,
+      "loop": false,
+      "segment": "laughing",
+      "transitions": []
+    }
+  ],
+  "inputs": [
+    {
+      "type": "Numeric",
+      "name": "rating",
+      "value": 0
+    },
+    {
+      "type": "Numeric",
+      "name": "testNumeric",
+      "value": 0
+    },
+    {
+      "type": "String",
+      "name": "testString",
+      "value": "testString"
+    },
+    {
+      "type": "Boolean",
+      "name": "testBoolean",
+      "value": false
+    },
+    {
+      "type": "Event",
+      "name": "testEvent",
+      "value": "testEvent"
+    }
+  ],
+  "interactions": [
+    {
+      "type": "PointerDown",
+      "layerName": "angry",
+      "actions": [
+        {
+          "type": "SetNumeric",
+          "inputName": "rating",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "type": "PointerDown",
+      "layerName": "sad",
+      "actions": [
+        {
+          "type": "SetNumeric",
+          "inputName": "rating",
+          "value": 2
+        }
+      ]
+    },
+    {
+      "type": "PointerDown",
+      "layerName": "mourn",
+      "actions": [
+        {
+          "type": "SetNumeric",
+          "inputName": "rating",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "type": "PointerDown",
+      "layerName": "wink",
+      "actions": [
+        {
+          "type": "SetNumeric",
+          "inputName": "rating",
+          "value": 4
+        }
+      ]
+    },
+    {
+      "type": "PointerDown",
+      "layerName": "laughing",
+      "actions": [
+        {
+          "type": "SetNumeric",
+          "inputName": "rating",
+          "value": 5
+        }
+      ]
+    }
+  ]
+}

@@ -23,6 +23,7 @@ export const DotLottieSolid = (props: DotLottieSolidProps): JSX.Element => {
     'marker',
     'segment',
     'themeId',
+    'stateMachineId',
     'autoplay',
     'themeData',
     'playOnHover',

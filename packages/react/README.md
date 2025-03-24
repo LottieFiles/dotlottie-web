@@ -89,10 +89,10 @@ The `DotLottieReactProps` extends the `HTMLCanvasElement` Props and accepts all 
 
 The `renderConfig` object accepts the following properties:
 
-| Property name      | Type   | Required | Default                       | Description             |
-| ------------------ | ------ | :------: | ----------------------------- | ----------------------- |
-| `devicePixelRatio` | number |          | window\.devicePixelRatio \| 1 | The device pixel ratio. |
-| `renderConfig.autoResize`       | boolean|          | true                          | Determines if the canvas should resize automatically to its container |
+| Property name             | Type    | Required | Default                       | Description                                                           |
+| ------------------------- | ------- | :------: | ----------------------------- | --------------------------------------------------------------------- |
+| `devicePixelRatio`        | number  |          | window\.devicePixelRatio \| 1 | The device pixel ratio.                                               |
+| `renderConfig.autoResize` | boolean |          | true                          | Determines if the canvas should resize automatically to its container |
 
 ## Custom Playback Controls
 

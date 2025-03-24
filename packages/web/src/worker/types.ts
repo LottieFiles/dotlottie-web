@@ -10,6 +10,17 @@ import type {
   PlayEvent,
   ReadyEvent,
   RenderEvent,
+  StateMachineBooleanInputValueChangeEvent,
+  StateMachineCustomEvent,
+  StateMachineErrorEvent,
+  StateMachineNumericInputValueChangeEvent,
+  StateMachineStartEvent,
+  StateMachineStateEnteredEvent,
+  StateMachineStateExitEvent,
+  StateMachineStopEvent,
+  StateMachineStringInputValueChangeEvent,
+  StateMachineTransitionEvent,
+  StateMachineInputFiredEvent,
   StopEvent,
   UnfreezeEvent,
 } from '../event-manager';
@@ -18,6 +29,9 @@ import type { Config, Layout, Mode, RenderConfig } from '../types';
 import type { DotLottieInstanceState } from './dotlottie';
 
 export interface MethodParamsMap {
+  activeStateMachineId: {
+    instanceId: string;
+  };
   create: {
     config: Config;
     height: number;
@@ -33,6 +47,14 @@ export interface MethodParamsMap {
   getDotLottieInstanceState: {
     instanceId: string;
   };
+  getLayerBoundingBox: {
+    instanceId: string;
+    layerName: string;
+  };
+  getStateMachine: {
+    instanceId: string;
+    stateMachineId: string;
+  };
   getStateMachineListeners: {
     instanceId: string;
   };
@@ -44,44 +66,11 @@ export interface MethodParamsMap {
     animationId: string;
     instanceId: string;
   };
-  loadStateMachine: {
-    instanceId: string;
-    stateMachineId: string;
-  };
-  loadStateMachineData: {
-    instanceId: string;
-    stateMachineData: string;
-  };
   pause: {
     instanceId: string;
   };
   play: {
     instanceId: string;
-  };
-  postPointerDownEvent: {
-    instanceId: string;
-    x: number;
-    y: number;
-  };
-  postPointerEnterEvent: {
-    instanceId: string;
-    x: number;
-    y: number;
-  };
-  postPointerExitEvent: {
-    instanceId: string;
-    x: number;
-    y: number;
-  };
-  postPointerMoveEvent: {
-    instanceId: string;
-    x: number;
-    y: number;
-  };
-  postPointerUpEvent: {
-    instanceId: string;
-    x: number;
-    y: number;
   };
   resize: {
     height: number;
@@ -146,13 +135,85 @@ export interface MethodParamsMap {
   setWasmUrl: {
     url: string;
   };
-  startStateMachine: {
+  stateMachineCurrentState: {
+    instanceId: string;
+  };
+  stateMachineFire: {
+    eventName: string;
+    instanceId: string;
+  };
+  stateMachineGetBooleanInput: {
+    instanceId: string;
+    triggerId: string;
+  };
+  stateMachineGetNumericInput: {
+    instanceId: string;
+    triggerId: string;
+  };
+  stateMachineGetStringInput: {
+    instanceId: string;
+    triggerId: string;
+  };
+  stateMachineLoad: {
+    instanceId: string;
+    stateMachineId: string;
+  };
+  stateMachineLoadData: {
+    instanceId: string;
+    stateMachineData: string;
+  };
+  stateMachinePostClickEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachinePostPointerDownEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachinePostPointerEnterEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachinePostPointerExitEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachinePostPointerMoveEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachinePostPointerUpEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachineSetBooleanInput: {
+    instanceId: string;
+    triggerId: string;
+    value: boolean;
+  };
+  stateMachineSetNumericInput: {
+    instanceId: string;
+    triggerId: string;
+    value: number;
+  };
+  stateMachineSetStringInput: {
+    instanceId: string;
+    triggerId: string;
+    value: string;
+  };
+  stateMachineStart: {
+    instanceId: string;
+  };
+  stateMachineStop: {
     instanceId: string;
   };
   stop: {
-    instanceId: string;
-  };
-  stopStateMachine: {
     instanceId: string;
   };
   unfreeze: {
@@ -167,6 +228,7 @@ export interface RpcRequest<T extends keyof MethodParamsMap> {
 }
 
 export interface MethodResultMap {
+  activeStateMachineId: string;
   create: {
     instanceId: string;
   };
@@ -175,11 +237,22 @@ export interface MethodResultMap {
   getDotLottieInstanceState: {
     state: DotLottieInstanceState;
   };
+  getLayerBoundingBox:
+    | {
+        x1: number;
+        x2: number;
+        x3: number;
+        x4: number;
+        y1: number;
+        y2: number;
+        y3: number;
+        y4: number;
+      }
+    | undefined;
+  getStateMachine: string;
   getStateMachineListeners: string[];
   load: void;
   loadAnimation: void;
-  loadStateMachine: boolean;
-  loadStateMachineData: boolean;
   onComplete: {
     event: CompleteEvent;
     instanceId: string;
@@ -224,6 +297,65 @@ export interface MethodResultMap {
     event: RenderEvent;
     instanceId: string;
   };
+  onStateMachineBooleanInputValueChange: {
+    event: StateMachineBooleanInputValueChangeEvent;
+    inputName: string;
+    instanceId: string;
+    newValue: boolean;
+    oldValue: boolean;
+  };
+  onStateMachineCustomEvent: {
+    event: StateMachineCustomEvent;
+    instanceId: string;
+  };
+  onStateMachineError: {
+    event: StateMachineErrorEvent;
+    instanceId: string;
+    message: string;
+  };
+  onStateMachineInputFired: {
+    event: StateMachineInputFiredEvent;
+    inputName: string;
+    instanceId: string;
+  };
+  onStateMachineNumericInputValueChange: {
+    event: StateMachineNumericInputValueChangeEvent;
+    inputName: string;
+    instanceId: string;
+    newValue: number;
+    oldValue: number;
+  };
+  onStateMachineStart: {
+    event: StateMachineStartEvent;
+    instanceId: string;
+  };
+  onStateMachineStateEntered: {
+    enteringState: string;
+    event: StateMachineStateEnteredEvent;
+    instanceId: string;
+  };
+  onStateMachineStateExit: {
+    event: StateMachineStateExitEvent;
+    exitingState: string;
+    instanceId: string;
+  };
+  onStateMachineStop: {
+    event: StateMachineStopEvent;
+    instanceId: string;
+  };
+  onStateMachineStringInputValueChange: {
+    event: StateMachineStringInputValueChangeEvent;
+    inputName: string;
+    instanceId: string;
+    newValue: string;
+    oldValue: string;
+  };
+  onStateMachineTransition: {
+    event: StateMachineTransitionEvent;
+    instanceId: string;
+    newState: string;
+    previousState: string;
+  };
   onStop: {
     event: StopEvent;
     instanceId: string;
@@ -234,11 +366,6 @@ export interface MethodResultMap {
   };
   pause: void;
   play: void;
-  postPointerDownEvent: number | undefined;
-  postPointerEnterEvent: number | undefined;
-  postPointerExitEvent: number | undefined;
-  postPointerMoveEvent: number | undefined;
-  postPointerUpEvent: number | undefined;
   resize: void;
   setBackgroundColor: void;
   setFrame: void;
@@ -254,9 +381,26 @@ export interface MethodResultMap {
   setUseFrameInterpolation: void;
   setViewport: boolean;
   setWasmUrl: void;
-  startStateMachine: boolean;
+  stateMachineCurrentState: string | undefined;
+  stateMachineFire: void;
+  stateMachineGetBooleanInput: boolean | undefined;
+  stateMachineGetNumericInput: number | undefined;
+  stateMachineGetStringInput: string | undefined;
+  stateMachineLoad: boolean;
+  stateMachineLoadData: boolean;
+  stateMachinePostClickEvent: number | undefined;
+  stateMachinePostPointerDownEvent: number | undefined;
+  stateMachinePostPointerEnterEvent: number | undefined;
+  stateMachinePostPointerExitEvent: number | undefined;
+  stateMachinePostPointerMoveEvent: number | undefined;
+  stateMachinePostPointerUpEvent: number | undefined;
+  stateMachineSetBooleanInput: boolean | undefined;
+  stateMachineSetNumericInput: boolean | undefined;
+  stateMachineSetStringInput: boolean | undefined;
+  stateMachineSetupListeners: void;
+  stateMachineStart: boolean;
+  stateMachineStop: boolean;
   stop: void;
-  stopStateMachine: boolean;
   unfreeze: void;
 }
 

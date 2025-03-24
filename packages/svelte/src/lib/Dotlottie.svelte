@@ -22,6 +22,7 @@
 	export let playOnHover: boolean = false;
 	export let animationId: string = '';
 	export let themeId: string = '';
+	export let stateMachineId: string = '';
 	export let themeData: string = '';
 
 	export let dotLottieRefCallback: (dotLottie: DotLottie) => void = () => {};
@@ -163,6 +164,11 @@
 
 	$: if (dotLottie && dotLottie.isLoaded && dotLottie.activeThemeId !== themeId) {
 		dotLottie.setTheme(themeId);
+	}
+
+	$: if (dotLottie && dotLottie.isLoaded && dotLottie.activeStateMachineId() !== stateMachineId) {
+		dotLottie.stateMachineLoad(stateMachineId);
+		dotLottie.stateMachineStart();
 	}
 
 	$: if (dotLottie && dotLottie.isLoaded) {
