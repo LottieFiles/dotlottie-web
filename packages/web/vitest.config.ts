@@ -14,11 +14,15 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       reporter: ['json', 'json-summary', 'text-summary', 'lcov'],
       thresholds: {
-        statements: 51,
-        branches: 58,
-        functions: 52,
-        lines: 52,
+        statements: 70,
+        branches: 66,
+        functions: 70,
+        lines: 74,
       },
+      // Exclude worker script from code coverage as it runs in a separate context
+      // and cannot be properly instrumented by the coverage provider
+      // See: https://github.com/vitest-dev/vitest/issues/4899
+      exclude: ['src/worker/dotlottie.worker.ts'],
     },
     testTimeout: 10000,
     cache: false,
