@@ -736,20 +736,30 @@ function executeCommand<T extends keyof MethodParamsMap>(rpcRequest: RpcRequest<
     throw new Error(`Cannot execute method ${method} on instance ${instanceId} because it is being destroyed`);
   }
 
-  if (allowedMethods.has(method) && typeof commands[method] === 'function') {
-    if (instanceId) {
-      trackOperation(instanceId, rpcRequest.id, true);
-    }
+  if (!allowedMethods.has(method)) {
+    throw new Error(`Method ${method} is not allowed.`);
+  }
 
-    try {
-      return commands[method](rpcRequest as RpcRequest<typeof method>);
-    } finally {
-      if (instanceId) {
-        trackOperation(instanceId, rpcRequest.id, false);
-      }
-    }
-  } else {
+  if (!Object.prototype.hasOwnProperty.call(commands, method)) {
     throw new Error(`Method ${method} is not implemented in commands.`);
+  }
+
+  const command = commands[method];
+
+  if (typeof command !== 'function') {
+    throw new Error(`Command ${method} is not a function.`);
+  }
+
+  if (instanceId) {
+    trackOperation(instanceId, rpcRequest.id, true);
+  }
+
+  try {
+    return command(rpcRequest as RpcRequest<typeof method>);
+  } finally {
+    if (instanceId) {
+      trackOperation(instanceId, rpcRequest.id, false);
+    }
   }
 }
 
