@@ -4,9 +4,13 @@ export default defineConfig({
   test: {
     browser: {
       enabled: true,
-      name: 'chromium',
       provider: 'playwright',
       screenshotFailures: false,
+      instances: [
+        {
+          browser: 'chromium',
+        },
+      ],
     },
     retry: 1,
     coverage: {
