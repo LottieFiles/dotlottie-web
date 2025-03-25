@@ -22,6 +22,8 @@ import type { DotLottieInstanceState } from './dotlottie';
 import type { MethodParamsMap, RpcRequest, MethodResultMap, RpcResponse } from './types';
 
 const instancesMap = new Map<string, DotLottie>();
+const destroyingInstances = new Set<string>();
+const inflightOperations = new Map<string, Set<string>>();
 
 const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) => void> = {
   ready: (instanceId: string) => (event) => {
@@ -192,6 +194,37 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
     self.postMessage(response);
   },
 };
+
+function trackOperation(instanceId: string, operationId: string, isStart: boolean): void {
+  if (isStart) {
+    if (!inflightOperations.has(instanceId)) {
+      inflightOperations.set(instanceId, new Set());
+    }
+
+    const operations = inflightOperations.get(instanceId);
+
+    if (operations) {
+      operations.add(operationId);
+    }
+  } else {
+    const operations = inflightOperations.get(instanceId);
+
+    if (operations) {
+      operations.delete(operationId);
+
+      if (destroyingInstances.has(instanceId) && operations.size === 0) {
+        const instance = instancesMap.get(instanceId);
+
+        if (instance) {
+          instance.destroy();
+          instancesMap.delete(instanceId);
+          destroyingInstances.delete(instanceId);
+          inflightOperations.delete(instanceId);
+        }
+      }
+    }
+  }
+}
 
 const commands: {
   [K in keyof MethodParamsMap]: (request: RpcRequest<K>) => MethodResultMap[K];
@@ -419,13 +452,20 @@ const commands: {
   destroy: (request) => {
     const instanceId = request.params.instanceId;
 
-    const instance = instancesMap.get(instanceId);
+    destroyingInstances.add(instanceId);
 
-    if (!instance) return;
+    const operations = inflightOperations.get(instanceId);
 
-    instance.destroy();
+    if (!operations || operations.size === 0) {
+      const instance = instancesMap.get(instanceId);
 
-    instancesMap.delete(instanceId);
+      if (instance) {
+        instance.destroy();
+        instancesMap.delete(instanceId);
+        destroyingInstances.delete(instanceId);
+        inflightOperations.delete(instanceId);
+      }
+    }
   },
   freeze: (request) => {
     const instanceId = request.params.instanceId;
@@ -686,11 +726,28 @@ const commands: {
   },
 };
 
+const allowedMethods = new Set(Object.keys(commands));
+
 function executeCommand<T extends keyof MethodParamsMap>(rpcRequest: RpcRequest<T>): MethodResultMap[T] {
   const method = rpcRequest.method;
+  const instanceId = 'instanceId' in rpcRequest.params ? (rpcRequest.params.instanceId as string) : undefined;
 
-  if (typeof commands[method] === 'function') {
-    return commands[method](rpcRequest as RpcRequest<typeof method>);
+  if (instanceId && destroyingInstances.has(instanceId) && method !== 'destroy') {
+    throw new Error(`Cannot execute method ${method} on instance ${instanceId} because it is being destroyed`);
+  }
+
+  if (allowedMethods.has(method) && typeof commands[method] === 'function') {
+    if (instanceId) {
+      trackOperation(instanceId, rpcRequest.id, true);
+    }
+
+    try {
+      return commands[method](rpcRequest as RpcRequest<typeof method>);
+    } finally {
+      if (instanceId) {
+        trackOperation(instanceId, rpcRequest.id, false);
+      }
+    }
   } else {
     throw new Error(`Method ${method} is not implemented in commands.`);
   }
