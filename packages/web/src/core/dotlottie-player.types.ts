@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-namespace */
-/* eslint-disable typescript-sort-keys/interface */
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
   let HEAPF32: unknown;
@@ -80,69 +79,69 @@ export interface DotLottiePlayer extends ClassHandle {
   activeThemeId(): string;
   animationSize(): VectorFloat;
   buffer(): unknown;
+  clear(): void;
+  config(): Config;
+  currentFrame(): number;
+  duration(): number;
+  getLayerBounds(_0: EmbindString): VectorFloat;
+  getStateMachine(_0: EmbindString): string;
+  instanceId(): number;
+  intersect(_0: number, _1: number, _2: EmbindString): boolean;
+  isComplete(): boolean;
+  isLoaded(): boolean;
   isPaused(): boolean;
   isPlaying(): boolean;
   isStopped(): boolean;
-  pause(): boolean;
-  play(): boolean;
-  render(): boolean;
-  stop(): boolean;
-  isComplete(): boolean;
-  resetTheme(): boolean;
-  stateMachineStart(_0: OpenUrl): boolean;
-  stateMachineStop(): boolean;
-  tick(): boolean;
-  tweenStop(): boolean;
   isTweening(): boolean;
-  setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
-  loopCount(): number;
-  resize(_0: number, _1: number): boolean;
-  instanceId(): number;
-  tweenUpdate(_0?: number): boolean;
-  currentFrame(): number;
-  duration(): number;
-  requestFrame(): number;
-  setFrame(_0: number): boolean;
-  seek(_0: number): boolean;
-  totalFrames(): number;
-  segmentDuration(): number;
-  tween(_0: number, _1?: number, _2?: VectorFloat): boolean;
-  stateMachinePostClickEvent(_0: number, _1: number): number;
-  stateMachinePostPointerDownEvent(_0: number, _1: number): number;
-  stateMachinePostPointerUpEvent(_0: number, _1: number): number;
-  stateMachinePostPointerMoveEvent(_0: number, _1: number): number;
-  stateMachinePostPointerEnterEvent(_0: number, _1: number): number;
-  stateMachinePostPointerExitEvent(_0: number, _1: number): number;
-  config(): Config;
-  setConfig(_0: Config): void;
+  loadAnimation(_0: EmbindString, _1: number, _2: number): boolean;
   loadAnimationData(_0: EmbindString, _1: number, _2: number): boolean;
   loadAnimationPath(_0: EmbindString, _1: number, _2: number): boolean;
   loadDotLottieData(_0: EmbindString, _1: number, _2: number): boolean;
-  loadAnimation(_0: EmbindString, _1: number, _2: number): boolean;
+  loopCount(): number;
   manifestString(): string;
+  markers(): VectorMarker;
+  pause(): boolean;
+  play(): boolean;
+  render(): boolean;
+  requestFrame(): number;
+  resetTheme(): boolean;
+  resize(_0: number, _1: number): boolean;
+  seek(_0: number): boolean;
+  segmentDuration(): number;
+  setConfig(_0: Config): void;
+  setFrame(_0: number): boolean;
+  setSlots(_0: EmbindString): boolean;
   setTheme(_0: EmbindString): boolean;
   setThemeData(_0: EmbindString): boolean;
-  setSlots(_0: EmbindString): boolean;
-  markers(): VectorMarker;
-  stateMachineFrameworkSetup(): VectorString;
-  stateMachineLoad(_0: EmbindString): boolean;
-  stateMachineLoadData(_0: EmbindString): boolean;
+  setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
+  stateMachineCurrentState(): string;
   stateMachineFireEvent(_0: EmbindString): void;
-  stateMachineSetNumericInput(_0: EmbindString, _1: number): boolean;
-  stateMachineSetStringInput(_0: EmbindString, _1: EmbindString): boolean;
-  stateMachineSetBooleanInput(_0: EmbindString, _1: boolean): boolean;
+  stateMachineFrameworkSetup(): VectorString;
+  stateMachineGetBooleanInput(_0: EmbindString): boolean;
   stateMachineGetNumericInput(_0: EmbindString): number;
   stateMachineGetStringInput(_0: EmbindString): string;
-  stateMachineGetBooleanInput(_0: EmbindString): boolean;
-  intersect(_0: number, _1: number, _2: EmbindString): boolean;
-  getLayerBounds(_0: EmbindString): VectorFloat;
-  tweenToMarker(_0: EmbindString, _1?: number, _2?: VectorFloat): boolean;
-  getStateMachine(_0: EmbindString): string;
-  clear(): void;
-  stateMachineCurrentState(): string;
+  stateMachineLoad(_0: EmbindString): boolean;
+  stateMachineLoadData(_0: EmbindString): boolean;
   stateMachineOverrideCurrentState(_0: EmbindString, _1: boolean): boolean;
+  stateMachinePostClickEvent(_0: number, _1: number): number;
+  stateMachinePostPointerDownEvent(_0: number, _1: number): number;
+  stateMachinePostPointerEnterEvent(_0: number, _1: number): number;
+  stateMachinePostPointerExitEvent(_0: number, _1: number): number;
+  stateMachinePostPointerMoveEvent(_0: number, _1: number): number;
+  stateMachinePostPointerUpEvent(_0: number, _1: number): number;
+  stateMachineSetBooleanInput(_0: EmbindString, _1: boolean): boolean;
+  stateMachineSetNumericInput(_0: EmbindString, _1: number): boolean;
+  stateMachineSetStringInput(_0: EmbindString, _1: EmbindString): boolean;
+  stateMachineStart(_0: OpenUrl): boolean;
   stateMachineStatus(): string;
-  isLoaded(): boolean;
+  stateMachineStop(): boolean;
+  stop(): boolean;
+  tick(): boolean;
+  totalFrames(): number;
+  tween(_0: number, _1?: number, _2?: VectorFloat): boolean;
+  tweenStop(): boolean;
+  tweenToMarker(_0: EmbindString, _1?: number, _2?: VectorFloat): boolean;
+  tweenUpdate(_0?: number): boolean;
 }
 
 export interface Marker {
@@ -158,8 +157,8 @@ export interface Config {
   loopAnimation: boolean;
   marker: EmbindString;
   mode: Mode;
-  speed: number;
   segment: VectorFloat;
+  speed: number;
   stateMachineId: EmbindString;
   themeId: EmbindString;
   useFrameInterpolation: boolean;
@@ -188,9 +187,9 @@ interface EmbindModule {
   VectorString: {
     new (): VectorString;
   };
-  createDefaultOpenURL(): OpenUrl;
-  createDefaultLayout(): Layout;
   createDefaultConfig(): Config;
+  createDefaultLayout(): Layout;
+  createDefaultOpenURL(): OpenUrl;
   transformThemeToLottieSlots(_0: EmbindString, _1: EmbindString): string;
 }
 

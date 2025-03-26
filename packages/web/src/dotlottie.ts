@@ -9,7 +9,6 @@ import type {
   VectorFloat,
   Marker,
   Fit as CoreFit,
-  OpenUrl as CoreOpenUrl,
 } from './core';
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
@@ -1056,10 +1055,7 @@ export class DotLottie {
   public stateMachineStart(openUrl?: OpenUrl): boolean {
     if (DotLottie._wasmModule === null) return false;
 
-    const cf: CoreOpenUrl = {
-      mode: DotLottie._wasmModule.OpenUrlMode.Interaction,
-      whitelist: new DotLottie._wasmModule.VectorString(),
-    };
+    const cf = DotLottie._wasmModule.createDefaultOpenURL();
 
     if (openUrl) {
       if (openUrl.mode === 'allow') {
@@ -1069,6 +1065,10 @@ export class DotLottie {
       } else {
         cf.mode = DotLottie._wasmModule.OpenUrlMode.Interaction;
       }
+
+      // Push back an empty string so that it at least has a single element.
+      // This helps resolve emscripten issues where the vector is empty.
+      cf.whitelist.push_back('');
 
       if (openUrl.whitelist.length > 0) {
         for (const entry of openUrl.whitelist) {
