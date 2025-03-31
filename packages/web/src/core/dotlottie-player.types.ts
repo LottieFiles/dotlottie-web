@@ -17,8 +17,14 @@ declare namespace RuntimeExports {
 interface WasmModule {}
 
 type EmbindString = ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string;
-export interface VectorFloat {
+export interface ClassHandle {
+  clone(): this;
   delete(): void;
+  deleteLater(): this;
+  isAliasOf(other: ClassHandle): boolean;
+  isDeleted(): boolean;
+}
+export interface VectorFloat extends ClassHandle {
   get(_0: number): number | undefined;
   push_back(_0: number): void;
   resize(_0: number, _1: number): void;
@@ -26,8 +32,7 @@ export interface VectorFloat {
   size(): number;
 }
 
-export interface VectorMarker {
-  delete(): void;
+export interface VectorMarker extends ClassHandle {
   get(_0: number): Marker | undefined;
   push_back(_0: Marker): void;
   resize(_0: number, _1: Marker): void;
@@ -35,8 +40,7 @@ export interface VectorMarker {
   size(): number;
 }
 
-export interface VectorString {
-  delete(): void;
+export interface VectorString extends ClassHandle {
   get(_0: number): EmbindString | undefined;
   push_back(_0: EmbindString): void;
   resize(_0: number, _1: EmbindString): void;
@@ -59,7 +63,7 @@ export interface Layout {
   fit: Fit;
 }
 
-export interface DotLottiePlayer {
+export interface DotLottiePlayer extends ClassHandle {
   activeAnimationId(): string;
   activeThemeId(): string;
   animationSize(): VectorFloat;
@@ -67,7 +71,6 @@ export interface DotLottiePlayer {
   clear(): void;
   config(): Config;
   currentFrame(): number;
-  delete(): void;
   duration(): number;
   getLayerBounds(_0: EmbindString): VectorFloat;
   isComplete(): boolean;
@@ -75,6 +78,7 @@ export interface DotLottiePlayer {
   isPaused(): boolean;
   isPlaying(): boolean;
   isStopped(): boolean;
+  isTweening(): boolean;
   loadAnimation(_0: EmbindString, _1: number, _2: number): boolean;
   loadAnimationData(_0: EmbindString, _1: number, _2: number): boolean;
   loadAnimationPath(_0: EmbindString, _1: number, _2: number): boolean;
@@ -114,7 +118,12 @@ export interface DotLottiePlayer {
   stateMachineFrameworkSetup(): VectorString;
   stop(): boolean;
   stopStateMachine(): boolean;
+  tick(): boolean;
   totalFrames(): number;
+  tween(_0: number, _1: number, _2: number): boolean;
+  tweenTo(_0: number, _1: number, _2: VectorFloat): boolean;
+  tweenToMarker(_0: EmbindString, _1: number, _2: VectorFloat): boolean;
+  tweenUpdate(): boolean;
 }
 
 export interface Marker {
