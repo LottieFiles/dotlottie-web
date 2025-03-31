@@ -1012,7 +1012,7 @@ var createDotLottiePlayerModule = (() => {
             return [];
           });
         },
-        i: (a, b, c, d, e, f, h, g) => {
+        h: (a, b, c, d, e, f, h, g) => {
           var l = vb(c, d);
           b = Q(b);
           b = yb(b);
@@ -1378,12 +1378,12 @@ var createDotLottiePlayerModule = (() => {
         _: lc,
         s: mc,
         C: nc,
-        q: oc,
+        u: oc,
         b: pc,
         a: qc,
-        h: rc,
+        i: rc,
         l: sc,
-        u: tc,
+        q: tc,
         G: uc,
         X: Xb,
         N: (a, b) => {
