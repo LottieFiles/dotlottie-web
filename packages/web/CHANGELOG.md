@@ -1,5 +1,16 @@
 # @lottiefiles/dotlottie-web
 
+## 0.42.0
+
+### Minor Changes
+
+- faaf25e: feat: upgrade dotlottie-rs v0.1.39 WASM bindings
+- faaf25e: refactor: update the getLayerBoundingBox method to return OBB points
+
+### Patch Changes
+
+- 4ffcae2: fix: ensure proper cancellation of animation frames in \_draw method
+
 ## 0.41.0
 
 ### Minor Changes

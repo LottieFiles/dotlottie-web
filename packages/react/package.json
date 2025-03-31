@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-react",
-  "version": "0.13.2",
+  "version": "0.13.3",
   "type": "module",
   "description": "React wrapper around the dotlottie-web library",
   "repository": {
