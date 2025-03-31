@@ -1,6 +1,6 @@
 # @lottiefiles/dotlottie-vue
 
-## 0.5.9
+## 0.6.1
 
 ### Patch Changes
 

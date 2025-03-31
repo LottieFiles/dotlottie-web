@@ -1,6 +1,6 @@
 # @lottiefiles/dotlottie-svelte
 
-## 0.4.9
+## 0.5.1
 
 ### Patch Changes
 

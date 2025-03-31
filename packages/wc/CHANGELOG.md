@@ -1,6 +1,6 @@
 # @lottiefiles/dotlottie-wc
 
-## 0.4.7
+## 0.5.1
 
 ### Patch Changes
 
