@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.42.1
+
+### Patch Changes
+
+- ce0d9a2: fix: clear timeouts in CanvasResizeObserver when unobserving to prevent memory leaks
+
 ## 0.42.0
 
 ### Minor Changes
