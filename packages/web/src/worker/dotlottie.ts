@@ -102,6 +102,10 @@ export class DotLottieWorker {
 
   private _created: boolean = false;
 
+  private readonly _pendingRequests: Set<string> = new Set();
+
+  private _isDestroying: boolean = false;
+
   private readonly _pointerUpMethod: (event: PointerEvent) => void;
 
   private readonly _pointerDownMethod: (event: PointerEvent) => void;
@@ -524,7 +528,30 @@ export class DotLottieWorker {
   public async destroy(): Promise<void> {
     if (!this._created) return;
 
+    this._isDestroying = true;
+
     this._created = false;
+
+    this._dotLottieInstanceState = {
+      ...this._dotLottieInstanceState,
+      isPlaying: false,
+      isPaused: false,
+      isStopped: true,
+    };
+
+    if (this._pendingRequests.size > 0) {
+      await new Promise<void>((resolve) => {
+        const checkPendingRequests = (): void => {
+          if (this._pendingRequests.size === 0) {
+            resolve();
+          } else {
+            setTimeout(checkPendingRequests, 10);
+          }
+        };
+
+        checkPendingRequests();
+      });
+    }
 
     await this._sendMessage('destroy', { instanceId: this._id });
 
@@ -614,11 +641,21 @@ export class DotLottieWorker {
     params: MethodParamsMap[T],
     transfer?: Transferable[],
   ): Promise<MethodResultMap[T]> {
+    if (this._isDestroying && method !== 'destroy') {
+      const error = new Error(`Cannot execute method ${method} because the instance is being destroyed`);
+
+      console.error(error);
+
+      throw error;
+    }
+
     const rpcRequest: RpcRequest<T> = {
       id: `dotlottie-request-${generateUniqueId()}`,
       method,
       params,
     };
+
+    this._pendingRequests.add(rpcRequest.id);
 
     this._worker.postMessage(rpcRequest, transfer || []);
 
@@ -629,6 +666,8 @@ export class DotLottieWorker {
         // Check if the response corresponds to the request
         if (rpcResponse.id === rpcRequest.id) {
           this._worker.removeEventListener('message', onMessage);
+
+          this._pendingRequests.delete(rpcRequest.id);
 
           if (rpcResponse.error) {
             reject(new Error(`Failed to execute method ${method}: ${rpcResponse.error}`));

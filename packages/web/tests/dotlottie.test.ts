@@ -548,6 +548,120 @@ describe.each([
       expect(onPlay).toHaveBeenCalledTimes(1);
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
+
+    test('handles destroy while operations are in-flight without errors', async () => {
+      if (DotLottie !== DotLottieWorkerClass) {
+        return;
+      }
+
+      const onLoad = vi.fn();
+      const onDestroy = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+        autoplay: true,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+      dotLottie.addEventListener('destroy', onDestroy);
+
+      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
+
+      dotLottie.setFrame(10);
+      dotLottie.setSpeed(2);
+      dotLottie.setBackgroundColor('#ff0000');
+      dotLottie.setMode('bounce');
+      dotLottie.resize();
+
+      const destroyPromise = dotLottie.destroy();
+
+      await destroyPromise;
+
+      expect(onDestroy).toHaveBeenCalledTimes(1);
+
+      expect(dotLottie.isPlaying).toBe(false);
+
+      await dotLottie.play();
+      expect(dotLottie.isPlaying).toBe(false);
+      expect(dotLottie.isStopped).toBe(true);
+    });
+
+    test('handles multiple concurrent worker operations with destroy', async () => {
+      if (DotLottie !== DotLottieWorkerClass) {
+        return;
+      }
+
+      const canvas2 = createCanvas();
+      const onLoadInstance1 = vi.fn();
+      const onLoadInstance2 = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+        autoplay: true,
+        workerId: 'instance1Worker',
+      });
+
+      const dotLottie2 = new DotLottie({
+        canvas: canvas2,
+        src,
+        autoplay: true,
+        workerId: 'instance2Worker',
+      });
+
+      dotLottie.addEventListener('load', onLoadInstance1);
+      dotLottie2.addEventListener('load', onLoadInstance2);
+
+      await vi.waitFor(() => {
+        expect(onLoadInstance1).toHaveBeenCalledTimes(1);
+        expect(onLoadInstance2).toHaveBeenCalledTimes(1);
+      });
+
+      dotLottie.setFrame(20);
+      dotLottie2.setFrame(30);
+
+      dotLottie.setSpeed(3);
+      dotLottie.setBackgroundColor('#00ff00');
+      dotLottie.setMode('reverse-bounce');
+
+      await dotLottie.destroy();
+
+      await dotLottie2.setFrame(40);
+      expect(dotLottie2.currentFrame).toBe(40);
+
+      await dotLottie2.destroy();
+      canvas2.remove();
+    });
+
+    test('rejects operations that are initiated after instance is marked for destroy', async () => {
+      if (DotLottie !== DotLottieWorkerClass) {
+        return;
+      }
+
+      const onLoad = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+        autoplay: true,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+
+      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
+
+      dotLottie.destroy();
+
+      expect(dotLottie.isPlaying).toBe(false);
+      expect(dotLottie.isStopped).toBe(true);
+
+      await dotLottie.play();
+      await dotLottie.setFrame(50);
+
+      expect(dotLottie.isPlaying).toBe(false);
+      expect(dotLottie.isStopped).toBe(true);
+    });
   });
 
   describe('resize', () => {
