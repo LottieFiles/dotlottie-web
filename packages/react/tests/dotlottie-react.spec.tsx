@@ -13,7 +13,7 @@ const dotLottieSrc = new URL('./__fixtures__/test.lottie', import.meta.url).href
 const lottieSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return <>{children}</>;
+  return <React.StrictMode>{children}</React.StrictMode>;
 };
 
 const render = (ui: React.ReactNode, options?: ComponentRenderOptions): RenderResult =>
@@ -766,5 +766,34 @@ describe.each([
     });
 
     expect(setLayout).toHaveBeenCalledWith({ fit: 'cover' });
+  });
+
+  test('dotLottieRefCallback is called once when component is mounted and only once when component is unmounted', async () => {
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender, unmount } = render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    expect(dotLottieRefCallback.mock.calls[0]?.[0]).toBeInstanceOf(instanceType);
+
+    // a rerender shouldn't call dotLottieRefCallback again
+    rerender(<Component src={dotLottieSrc} autoplay={false} dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(<Component src={dotLottieSrc} autoplay={false} speed={2} dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component
+        src={dotLottieSrc}
+        autoplay={false}
+        speed={2}
+        loop={true}
+        dotLottieRefCallback={dotLottieRefCallback}
+      />,
+    );
+
+    unmount();
+
+    expect(dotLottieRefCallback).toHaveBeenCalledTimes(2);
+    expect(dotLottieRefCallback.mock.calls[1]?.[0]).toBeNull();
   });
 });
