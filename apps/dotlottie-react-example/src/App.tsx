@@ -1,19 +1,20 @@
+import { DotLottieReact, DotLottie, setWasmUrl } from '@lottiefiles/dotlottie-react';
 // import { DotLottieReact, DotLottie, setWasmUrl } from '@lottiefiles/dotlottie-react';
-import { DotLottieWorkerReact, DotLottieWorker, setWasmUrl } from '@lottiefiles/dotlottie-react';
 import React, { useState } from 'react';
 
 const animations = [
-  'https://lottie.host/e641272e-039b-4612-96de-138acfbede6e/bc0sW78EeR.lottie',
-  './markers_example.json',
-  'https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie',
-  'https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json',
-  './dragon.json',
+  'https://assets.codepen.io/11716235/sm_star_rating_1.lottie',
+  // 'https://assets.codepen.io/11716235/sm_exploding_pigeon.lottie',
+  // 'https://assets.codepen.io/11716235/sm_toggle_button.lottie',
+  // 'https://assets.codepen.io/11716235/sm_theme_action.lottie',
+  // 'https://assets.codepen.io/11716235/sm_smiley_slider.lottie'
 ];
 
 setWasmUrl(new URL('../../../packages/web/src/core/dotlottie-player.wasm', import.meta.url).href);
 
 function App() {
-  const [dotLottie, setDotLottie] = useState<DotLottieWorker | null>(null);
+  const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
+  const [dotSecond] = useState<DotLottie | null>(null);
   const [loop, setLoop] = useState(true);
   const [speed, setSpeed] = useState(1);
   const [currentFrame, setCurrentFrame] = useState(0);
@@ -37,16 +38,36 @@ function App() {
         setAllMarkers(dotLottie.markers().map((marker) => marker.name));
         setAnimationsIds(dotLottie.manifest?.animations.map((animation) => animation.id) || []);
         setCurrentAnimationId(dotLottie.activeAnimationId || '');
+
+        console.log('Adding event listeners');
+
+        dotLottie?.addEventListener('stateMachineError', (message) => {
+          console.error('StateMachineError: ', message);
+        });
+        dotLottie?.addEventListener('play', console.log);
+        dotLottie?.addEventListener('loop', console.log);
+        dotLottie?.addEventListener('complete', console.log);
+        dotLottie?.addEventListener('freeze', console.log);
+        dotLottie?.addEventListener('unfreeze', console.log);
+        dotLottie?.addEventListener('pause', console.log);
+        dotLottie?.addEventListener('stop', console.log);
+        dotLottie?.addEventListener('frame', updateCurrentFrame);
+
+        dotLottie?.addEventListener('stateMachineStart', console.log);
+        dotLottie?.addEventListener('stateMachineStop', console.log);
+        dotLottie?.addEventListener('stateMachineTransition', console.log);
+        dotLottie?.addEventListener('stateMachineStateEntered', console.log);
+        dotLottie?.addEventListener('stateMachineStateExit', console.log);
+        dotLottie?.addEventListener('stateMachineCustomEvent', console.log);
+        dotLottie?.addEventListener('stateMachineError', console.log);
+        dotLottie?.addEventListener('stateMachineStringInputValueChange', console.log);
+        dotLottie?.addEventListener('stateMachineNumericInputValueChange', console.log);
+        dotLottie?.addEventListener('stateMachineBooleanInputValueChange', console.log);
+        dotLottie?.addEventListener('stateMachineInputFired', console.log);
       }
     }
 
-    dotLottie?.addEventListener('play', console.log);
-    dotLottie?.addEventListener('freeze', console.log);
-    dotLottie?.addEventListener('unfreeze', console.log);
-    dotLottie?.addEventListener('pause', console.log);
-    dotLottie?.addEventListener('stop', console.log);
     dotLottie?.addEventListener('load', onLoad);
-    dotLottie?.addEventListener('frame', updateCurrentFrame);
 
     return () => {
       dotLottie?.removeEventListener('play', console.log);
@@ -68,13 +89,30 @@ function App() {
           marginBottom: '2000px',
         }}
       ></div>
-      <DotLottieWorkerReact
+      <DotLottieReact
         dotLottieRefCallback={setDotLottie}
         useFrameInterpolation={useFrameInterpolation}
         src={animations[srcIdx]}
-        autoplay
-        loop={loop}
         speed={speed}
+        playOnHover={playOnHover}
+        renderConfig={{
+          autoResize: autoResizeCanvas,
+        }}
+        marker={marker}
+        autoplay={true}
+        loop={false}
+        style={{
+          margin: '2px',
+          border: '1px solid white',
+        }}
+        animationId={currentAnimationId}
+      />
+      {/* <DotLottieReact
+        dotLottieRefCallback={setDotSecond}
+        useFrameInterpolation={useFrameInterpolation}
+        src={animations[srcIdx]}
+        speed={speed}
+        autoplay
         playOnHover={playOnHover}
         renderConfig={{
           autoResize: autoResizeCanvas,
@@ -85,7 +123,7 @@ function App() {
           border: '1px solid white',
         }}
         animationId={currentAnimationId}
-      />
+      /> */}
       <input type="range" min="0" max="100" defaultValue="0" value={progress} />
       <label>
         Marker:
@@ -122,6 +160,37 @@ function App() {
         }}
       >
         Stop
+      </button>
+      <button
+        onClick={() => {
+          const error = dotLottie?.stateMachineLoad(dotLottie?.manifest?.stateMachines[0].id);
+
+          console.log(error);
+
+          const start = dotLottie?.stateMachineStart();
+
+          console.log(error, start);
+
+          ////
+
+          const error2 = dotSecond?.stateMachineLoad(dotSecond?.manifest?.stateMachines[0].id);
+
+          console.log(error2);
+
+          const start2 = dotSecond?.stateMachineStart();
+
+          console.log(error2, start2);
+        }}
+      >
+        Load State Machine
+      </button>
+      <button
+        onClick={() => {
+          dotLottie?.stateMachineStop();
+          dotSecond?.stateMachineStop();
+        }}
+      >
+        Stop State Machine
       </button>
       <button
         onClick={() => {

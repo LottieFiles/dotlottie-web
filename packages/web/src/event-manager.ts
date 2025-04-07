@@ -298,9 +298,15 @@ export class EventManager {
   }
 
   public dispatch<T extends EventType>(event: EventByType<T>): void {
+    console.log('DISPATCHING : ', event.type);
     const listeners = this._eventListeners.get(event.type);
 
-    listeners?.forEach((listener) => listener(event));
+    listeners?.forEach((listener) => {
+      console.log('listener: ', listener);
+      listener(event);
+    });
+
+    console.log('DONE');
   }
 
   public removeAllEventListeners(): void {

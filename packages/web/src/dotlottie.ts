@@ -1,16 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER } from './constants';
-import type {
-  DotLottiePlayer,
-  DotLottieBridge,
-  MainModule,
-  Mode as CoreMode,
-  VectorFloat,
-  Marker,
-  Fit as CoreFit,
-} from './core';
+import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker, Fit as CoreFit } from './core';
 import { DotLottieWasmLoader } from './core';
+import { DotLottieObserver } from './dotlottie-observer';
+import { DotLottieStateMachineObserver } from './dotlottie-state-machine-observer';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
@@ -71,6 +65,17 @@ const createCoreSegment = (segment: number[], module: MainModule): VectorFloat =
   return coresegment;
 };
 
+const createCoreObserver = (module: MainModule, eventManager: EventManager): DotLottieObserver | undefined => {
+  return new DotLottieObserver(module, eventManager);
+};
+
+const createStateMachineObserver = (
+  module: MainModule,
+  eventManager: EventManager,
+): DotLottieStateMachineObserver | undefined => {
+  return new DotLottieStateMachineObserver(module, eventManager);
+};
+
 const createCoreLayout = (layout: Layout | undefined, module: MainModule): { align: VectorFloat; fit: CoreFit } => {
   if (!layout) {
     return module.createDefaultLayout();
@@ -121,6 +126,12 @@ export class DotLottie {
 
   private readonly _pointerExitMethod: (event: PointerEvent) => void;
 
+  private _observer: DotLottieObserver | undefined;
+
+  private _isSubscribed: boolean = false;
+
+  private _stateMachineObserver: DotLottieStateMachineObserver | undefined;
+
   public constructor(config: Config) {
     this._canvas = config.canvas;
     this._context = this._canvas.getContext('2d');
@@ -134,130 +145,7 @@ export class DotLottie {
       freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
     };
 
-    // Create your bridge implementation
-    const bridge: DotLottieBridge = {
-      observer_on_load: (_dotlottie_instance_id) => {
-        // this load is cause inifite loops
-        // this._eventManager.dispatch({ type: 'load' });
-      },
-      observer_on_load_error: (_dotlottie_instance_id) => {
-        // this._eventManager.dispatch({ type: 'loadError', error: new Error('Error occured during load.') });
-      },
-      observer_on_complete: (_dotlottie_instance_id: number) => {
-        // this._eventManager.dispatch({ type: 'complete' });
-      },
-      observer_on_frame: (_dotlottie_instance_id: number, _frame_no: number) => {
-        // this._eventManager.dispatch({ type: 'frame', currentFrame: _frame_no });
-      },
-      observer_on_loop: (_dotlottie_instance_id: number, _loop_count: number) => {
-        // this._eventManager.dispatch({ type: 'loop', loopCount: _loop_count });
-      },
-      observer_on_pause: (_dotlottie_instance_id: number) => {
-        // this._eventManager.dispatch({ type: 'pause' });
-      },
-      observer_on_play: (_dotlottie_instance_id: number) => {
-        // this._eventManager.dispatch({ type: 'play' });
-      },
-      observer_on_render: (_dotlottie_instance_id: number, _frame_no: number) => {
-        // this._eventManager.dispatch({ type: 'render', currentFrame: _frame_no });
-      },
-      observer_on_stop: (_dotlottie_instance_id: number) => {
-        // this._eventManager.dispatch({ type: 'stop' });
-      },
-      state_machine_observer_on_custom_event: (_dotlottie_instance_id: number, message: string) => {
-        if (message.startsWith('OpenUrl:')) {
-          const [urlPart = '', targetPart] = message.split(' | ');
-          const url = urlPart.replace('OpenUrl: ', '');
-
-          if (typeof window === 'undefined') return;
-
-          if (targetPart) {
-            const target = targetPart.replace('Target: ', '');
-
-            window.open(url, target);
-          } else {
-            window.open(url, '_self');
-          }
-        } else {
-          this._eventManager.dispatch({ type: 'stateMachineCustomEvent', message });
-        }
-      },
-      state_machine_observer_on_error: (_dotlottie_instance_id: number, message: string) => {
-        this._eventManager.dispatch({ type: 'stateMachineError', message });
-      },
-      state_machine_observer_on_state_entered: (_dotlottie_instance_id: number, entering_state: string) => {
-        this._eventManager.dispatch({ type: 'stateMachineStateEntered', enteringState: entering_state });
-      },
-      state_machine_observer_on_state_exit: (_dotlottie_instance_id: number, exiting_state: string) => {
-        this._eventManager.dispatch({ type: 'stateMachineStateExit', exitingState: exiting_state });
-      },
-      state_machine_observer_on_transition: (
-        _dotlottie_instance_id: number,
-        previous_state: string,
-        new_state: string,
-      ) => {
-        this._eventManager.dispatch({
-          type: 'stateMachineTransition',
-          previousState: previous_state,
-          newState: new_state,
-        });
-      },
-      state_machine_observer_on_start: (_dotlottie_instance_id: number) => {
-        this._stateMachineIsActive = true;
-        this._eventManager.dispatch({ type: 'stateMachineStart' });
-      },
-      state_machine_observer_on_stop: (_dotlottie_instance_id: number) => {
-        this._stateMachineIsActive = false;
-        this._eventManager.dispatch({ type: 'stateMachineStop' });
-      },
-      state_machine_observer_on_boolean_input_value_change: (
-        _dotlottie_instance_id: number,
-        input_name: string,
-        old_value: boolean,
-        new_value: boolean,
-      ) => {
-        this._eventManager.dispatch({
-          type: 'stateMachineBooleanInputValueChange',
-          inputName: input_name,
-          oldValue: old_value,
-          newValue: new_value,
-        });
-      },
-      state_machine_observer_on_numeric_input_value_change: (
-        _dotlottie_instance_id: number,
-        input_name: string,
-        old_value: number,
-        new_value: number,
-      ) => {
-        this._eventManager.dispatch({
-          type: 'stateMachineNumericInputValueChange',
-          inputName: input_name,
-          oldValue: old_value,
-          newValue: new_value,
-        });
-      },
-      state_machine_observer_on_input_fired: (_dotlottie_instance_id: number, input_name: string) => {
-        this._eventManager.dispatch({
-          type: 'stateMachineInputFired',
-          inputName: input_name,
-        });
-      },
-      state_machine_observer_on_string_input_value_change: (
-        _dotlottie_instance_id: number,
-        input_name: string,
-        old_value: string,
-        new_value: string,
-      ) => {
-        this._eventManager.dispatch({
-          type: 'stateMachineStringInputValueChange',
-          inputName: input_name,
-          oldValue: old_value,
-          newValue: new_value,
-        });
-      },
-    };
-
-    DotLottieWasmLoader.load(bridge)
+    DotLottieWasmLoader.load()
       .then((module) => {
         DotLottie._wasmModule = module;
 
@@ -275,7 +163,13 @@ export class DotLottie {
           layout: createCoreLayout(config.layout, module),
         });
 
+        // Event Management
         this._eventManager.dispatch({ type: 'ready' });
+
+        console.log('Creating core observer...');
+        this._observer = createCoreObserver(module, this._eventManager);
+
+        this._stateMachineObserver = createStateMachineObserver(module, this._eventManager);
 
         // The state machine is active if a state machine id is provided
         if (config.stateMachineId) {
@@ -383,22 +277,36 @@ export class DotLottie {
 
     if (loaded) {
       this._eventManager.dispatch({ type: 'load' });
+      console.log('🚨 LOADED ANIMATION FROM DATA');
+
+      if (this._observer && !this._isSubscribed) {
+        console.log('Load from data calling subscribe');
+
+        // Subscribe returns the shared pointer
+        const tmp = this._dotLottieCore.subscribe(this._observer.observer);
+
+        this._isSubscribed = true;
+
+        if (tmp !== null) {
+          this._observer.observer = tmp;
+        }
+      }
 
       if (IS_BROWSER) {
         this.resize();
       }
 
-      this._eventManager.dispatch({
-        type: 'frame',
-        currentFrame: this.currentFrame,
-      });
+      // this._eventManager.dispatch({
+      //   type: 'frame',
+      //   currentFrame: this.currentFrame,
+      // });
 
       this._render();
 
       if (this._dotLottieCore.config().autoplay) {
         this._dotLottieCore.play();
         if (this._dotLottieCore.isPlaying()) {
-          this._eventManager.dispatch({ type: 'play' });
+          // this._eventManager.dispatch({ type: 'play' });
           this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
         } else {
           console.error('something went wrong, the animation was suppose to autoplay');
@@ -663,10 +571,10 @@ export class DotLottie {
 
       this._context.putImageData(imageData, 0, 0);
 
-      this._eventManager.dispatch({
-        type: 'render',
-        currentFrame: this.currentFrame,
-      });
+      // this._eventManager.dispatch({
+      //   type: 'render',
+      //   currentFrame: this.currentFrame,
+      // });
 
       return true;
     }
@@ -698,10 +606,10 @@ export class DotLottie {
     if (updated || (this.currentFrame !== this._previousFrameNb && this._stateMachineIsActive)) {
       this._previousFrameNb = this.currentFrame;
 
-      this._eventManager.dispatch({
-        type: 'frame',
-        currentFrame: this.currentFrame,
-      });
+      // this._eventManager.dispatch({
+      //   type: 'frame',
+      //   currentFrame: this.currentFrame,
+      // });
 
       const rendered = this._render();
 
@@ -709,12 +617,12 @@ export class DotLottie {
         // handle loop or complete
         if (this._dotLottieCore.isComplete() && !this._dotLottieCore.isTweening()) {
           if (this._dotLottieCore.config().loopAnimation) {
-            this._eventManager.dispatch({
-              type: 'loop',
-              loopCount: this._dotLottieCore.loopCount(),
-            });
+            // this._eventManager.dispatch({
+            //   type: 'loop',
+            //   loopCount: this._dotLottieCore.loopCount(),
+            // });
           } else {
-            this._eventManager.dispatch({ type: 'complete' });
+            // this._eventManager.dispatch({ type: 'complete' });
           }
         }
       }
@@ -730,7 +638,7 @@ export class DotLottie {
 
     if (ok || this._dotLottieCore.isPlaying()) {
       this._isFrozen = false;
-      this._eventManager.dispatch({ type: 'play' });
+      // this._eventManager.dispatch({ type: 'play' });
       this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
     }
 
@@ -755,7 +663,7 @@ export class DotLottie {
     const ok = this._dotLottieCore.pause();
 
     if (ok || this._dotLottieCore.isPaused()) {
-      this._eventManager.dispatch({ type: 'pause' });
+      // this._eventManager.dispatch({ type: 'pause' });
     }
   }
 
@@ -765,11 +673,11 @@ export class DotLottie {
     const ok = this._dotLottieCore.stop();
 
     if (ok) {
-      this._eventManager.dispatch({ type: 'frame', currentFrame: this.currentFrame });
+      // this._eventManager.dispatch({ type: 'frame', currentFrame: this.currentFrame });
 
       this._render();
 
-      this._eventManager.dispatch({ type: 'stop' });
+      // this._eventManager.dispatch({ type: 'stop' });
     }
   }
 
@@ -781,7 +689,7 @@ export class DotLottie {
     const ok = this._dotLottieCore.seek(frame);
 
     if (ok) {
-      this._eventManager.dispatch({ type: 'frame', currentFrame: this.currentFrame });
+      // this._eventManager.dispatch({ type: 'frame', currentFrame: this.currentFrame });
 
       this._render();
     }
@@ -830,6 +738,7 @@ export class DotLottie {
   }
 
   public addEventListener<T extends EventType>(type: T, listener: EventListener<T>): void {
+    console.log('🐸 Adding listener 🐸 ');
     this._eventManager.addEventListener(type, listener);
   }
 
@@ -843,6 +752,9 @@ export class DotLottie {
       CanvasResizeObserver.unobserve(this._canvas);
     }
 
+    if (this._observer?.observer) {
+      this._dotLottieCore?.unsubscribe(this._observer.observer);
+    }
     this._dotLottieCore?.delete();
     this._dotLottieCore = null;
     this._context = null;
@@ -947,12 +859,25 @@ export class DotLottie {
   }
 
   public loadAnimation(animationId: string): void {
+    console.log('🚨 LOAD ANIMATION');
     if (this._dotLottieCore === null || this._dotLottieCore.activeAnimationId() === animationId) return;
 
     const loaded = this._dotLottieCore.loadAnimation(animationId, this._canvas.width, this._canvas.height);
 
     if (loaded) {
       this._eventManager.dispatch({ type: 'load' });
+
+      if (this._observer && !this._isSubscribed) {
+        // Subscribe returns the shared pointer
+        console.log('Load animation calling subscribe');
+        const tmp = this._dotLottieCore.subscribe(this._observer.observer);
+
+        this._isSubscribed = true;
+
+        if (tmp !== null) {
+          this._observer.observer = tmp;
+        }
+      }
       this.resize();
     } else {
       this._eventManager.dispatch({
@@ -1049,6 +974,18 @@ export class DotLottie {
       this.stateMachineStop();
     }
 
+    if (DotLottie._wasmModule) {
+      this._stateMachineObserver = createStateMachineObserver(DotLottie._wasmModule, this._eventManager);
+
+      if (this._stateMachineObserver) {
+        const tmp = this._dotLottieCore?.stateMachineSubscribe(this._stateMachineObserver.observer);
+
+        if (tmp) {
+          this._stateMachineObserver.observer = tmp;
+        }
+      }
+    }
+
     return this._dotLottieCore?.stateMachineLoad(stateMachineId) ?? false;
   }
 
@@ -1097,6 +1034,12 @@ export class DotLottie {
     const stopped = this._dotLottieCore?.stateMachineStop() ?? false;
 
     if (stopped) {
+      if (this._stateMachineObserver) {
+        console.log('Unsubscribing...');
+        this._dotLottieCore?.stateMachineUnsubscribe(this._stateMachineObserver.observer);
+
+        console.log(this._stateMachineObserver.observer);
+      }
       this._stateMachineIsActive = false;
       this._cleanupStateMachineListeners();
     }
