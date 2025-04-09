@@ -490,7 +490,15 @@ export class DotLottie {
 
     if (rendered) {
       const buffer = this._dotLottieCore.buffer() as ArrayBuffer;
-      const clampedBuffer = new Uint8ClampedArray(buffer, 0, this._canvas.width * this._canvas.height * 4);
+      const expectedLength = this._canvas.width * this._canvas.height * 4;
+
+      if (buffer.byteLength !== expectedLength) {
+        console.warn(`Buffer size mismatch: got ${buffer.byteLength}, expected ${expectedLength}`);
+
+        return false;
+      }
+
+      const clampedBuffer = new Uint8ClampedArray(buffer, 0, expectedLength);
 
       let imageData = null;
 
