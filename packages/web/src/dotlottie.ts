@@ -81,6 +81,8 @@ export class DotLottie {
 
   private _dotLottieCore: DotLottiePlayer | null = null;
 
+  private _isDestroyed: boolean = false;
+
   private static _wasmModule: MainModule | null = null;
 
   private _renderConfig: RenderConfig = {};
@@ -101,7 +103,6 @@ export class DotLottie {
 
   public constructor(config: Config) {
     this._canvas = config.canvas;
-    this._context = this._canvas.getContext('2d');
 
     this._eventManager = new EventManager();
     this._frameManager = new AnimationFrameManager();
@@ -114,6 +115,10 @@ export class DotLottie {
 
     DotLottieWasmLoader.load()
       .then((module) => {
+        if (this._isDestroyed) {
+          return;
+        }
+
         DotLottie._wasmModule = module;
 
         this._dotLottieCore = new module.DotLottiePlayer({
@@ -398,6 +403,10 @@ export class DotLottie {
     return this._dotLottieCore?.isLoaded() ?? false;
   }
 
+  public get isDestroyed(): boolean {
+    return this._isDestroyed;
+  }
+
   public get isPlaying(): boolean {
     return this._dotLottieCore?.isPlaying() ?? false;
   }
@@ -469,7 +478,13 @@ export class DotLottie {
   }
 
   private _render(): boolean {
-    if (this._dotLottieCore === null || this._context === null) return false;
+    if (this._dotLottieCore === null) return false;
+
+    if (!this._context) {
+      this._context = this._canvas.getContext('2d');
+    }
+
+    if (!this._context) return false;
 
     const rendered = this._dotLottieCore.render();
 
@@ -504,7 +519,7 @@ export class DotLottie {
   }
 
   private _draw(): void {
-    if (this._dotLottieCore === null || this._context === null || !this._dotLottieCore.isPlaying()) return;
+    if (this._dotLottieCore === null || !this._dotLottieCore.isPlaying()) return;
 
     try {
       const nextFrame = Math.round(this._dotLottieCore.requestFrame() * 1000) / 1000;
@@ -665,6 +680,10 @@ export class DotLottie {
   }
 
   public destroy(): void {
+    if (this._isDestroyed) return;
+
+    this._isDestroyed = true;
+
     if (this._animationFrameId !== null) {
       this._frameManager.cancelAnimationFrame(this._animationFrameId);
       this._animationFrameId = null;
