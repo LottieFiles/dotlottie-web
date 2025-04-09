@@ -1,5 +1,14 @@
 # @lottiefiles/dotlottie-web
 
+## 0.42.1-pre.0
+
+### Patch Changes
+
+- d2f5447: fix: prevent `IndexSizeError` when buffer size doesn't match canvas dimensions
+- 5a788c6: fix: 🐛 prevent race condition when destroying `DotLottie` instance before WASM is initialized
+- ce0d9a2: fix: clear timeouts in CanvasResizeObserver when unobserving to prevent memory leaks
+- 5a788c6: fix: resolve race condition in DotLottieWorker destroy method
+
 ## 0.42.0
 
 ### Minor Changes
