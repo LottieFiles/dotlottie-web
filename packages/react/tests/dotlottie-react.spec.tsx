@@ -2,8 +2,7 @@ import { DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-web';
 import { userEvent } from '@testing-library/user-event';
 import React from 'react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import type { ComponentRenderOptions, RenderResult } from 'vitest-browser-react';
-import { cleanup, render as vitestRender } from 'vitest-browser-react';
+import { cleanup, render, configure } from 'vitest-browser-react/pure';
 
 import { DotLottieReact, DotLottieWorkerReact } from '../src';
 
@@ -12,12 +11,9 @@ const dotLottieSrc = new URL('./__fixtures__/test.lottie', import.meta.url).href
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
 const lottieSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 
-const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return <React.StrictMode>{children}</React.StrictMode>;
-};
-
-const render = (ui: React.ReactNode, options?: ComponentRenderOptions): RenderResult =>
-  vitestRender(ui, { wrapper: Wrapper, ...options });
+configure({
+  reactStrictMode: true,
+});
 
 describe.each([
   { component: DotLottieReact, instanceType: DotLottie },

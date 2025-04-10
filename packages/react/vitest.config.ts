@@ -10,7 +10,6 @@ export default defineConfig({
       provider: 'playwright',
       screenshotFailures: false,
     },
-    retry: 1,
     coverage: {
       provider: 'istanbul',
       include: ['src/**/*.{ts,tsx}'],
