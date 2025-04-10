@@ -255,15 +255,11 @@ describe.each([
 
         await dotLottie.play();
 
-        await vi.waitFor(() => {
-          expect(onPlay).toHaveBeenCalledTimes(1);
-        });
+        expect(onPlay).toHaveBeenCalledTimes(1);
 
-        await vi.waitFor(() => {
-          expect(onFrame).toHaveBeenNthCalledWith(1, {
-            type: 'frame',
-            currentFrame: expectedStartFrame,
-          });
+        expect(onFrame).toHaveBeenNthCalledWith(1, {
+          type: 'frame',
+          currentFrame: expectedStartFrame,
         });
 
         await vi.waitFor(
@@ -275,11 +271,9 @@ describe.each([
           },
         );
 
-        await vi.waitFor(() => {
-          expect(onFrame).toHaveBeenLastCalledWith({
-            type: 'frame',
-            currentFrame: config.mode?.includes('bounce') ? expectedStartFrame : expectedEndFrame,
-          });
+        expect(onFrame).toHaveBeenLastCalledWith({
+          type: 'frame',
+          currentFrame: config.mode?.includes('bounce') ? expectedStartFrame : expectedEndFrame,
         });
 
         const actualDuration = completeTime - playTime;
@@ -354,11 +348,9 @@ describe.each([
 
         expect(onComplete).not.toHaveBeenCalled();
 
-        await vi.waitFor(() => {
-          expect(onFrame).toHaveBeenNthCalledWith(1, {
-            type: 'frame',
-            currentFrame: expectedStartFrame,
-          });
+        expect(onFrame).toHaveBeenNthCalledWith(1, {
+          type: 'frame',
+          currentFrame: expectedStartFrame,
         });
 
         await vi.waitFor(
@@ -370,11 +362,9 @@ describe.each([
           },
         );
 
-        await vi.waitFor(() => {
-          expect(onFrame).toHaveBeenLastCalledWith({
-            type: 'frame',
-            currentFrame: config.mode?.includes('bounce') ? expectedStartFrame : expectedEndFrame,
-          });
+        expect(onFrame).toHaveBeenLastCalledWith({
+          type: 'frame',
+          currentFrame: config.mode?.includes('bounce') ? expectedStartFrame : expectedEndFrame,
         });
 
         const actualDuration = completeTime - playTime;
@@ -1246,8 +1236,6 @@ describe.each([
 
       await dotLottie.setFrame(10);
 
-      expect(dotLottie.currentFrame).toBe(10);
-
       await vi.waitFor(
         () =>
           expect(onFrame).toHaveBeenNthCalledWith(1, {
@@ -1258,6 +1246,8 @@ describe.each([
           timeout: 1000,
         },
       );
+
+      expect(dotLottie.currentFrame).toBe(10);
 
       expect(dotLottie.isPlaying).toBe(true);
     });
