@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { Observer, MainModule } from './core';
 import type { EventManager } from './event-manager';
@@ -16,49 +15,67 @@ export class DotLottieObserver {
 
     const implementer = {
       on_load: (): void => {
-        console.log('[Observer] on_load');
-        eventManager.dispatch({ type: 'load' });
+        if (eventManager.hasEvent('load')) {
+          setTimeout(() => {
+            eventManager.dispatch({ type: 'load' });
+          }, 0);
+        }
       },
       on_load_error: (): void => {
-        console.log('[Observer] on_load_error');
-        eventManager.dispatch({ type: 'loadError', error: new Error('An error ocurred.') });
+        if (eventManager.hasEvent('loadError')) {
+          setTimeout(() => {
+            eventManager.dispatch({ type: 'loadError', error: new Error('An error ocurred.') });
+          }, 0);
+        }
       },
       on_play: (): void => {
-        console.log('[Observer] on_play');
-
-        this._eventManager.dispatch({ type: 'play' });
-
-        console.log('[Observer] DISPATCHED on_play');
+        if (eventManager.hasEvent('play')) {
+          setTimeout(() => {
+            this._eventManager.dispatch({ type: 'play' });
+          }, 0);
+        }
       },
       on_pause: (): void => {
-        console.log('[Observer] on_pause');
-
-        eventManager.dispatch({ type: 'pause' });
+        if (eventManager.hasEvent('pause')) {
+          setTimeout(() => {
+            eventManager.dispatch({ type: 'pause' });
+          }, 0);
+        }
       },
       on_stop: (): void => {
-        console.log('[Observer] on_stop');
-
-        eventManager.dispatch({ type: 'stop' });
+        if (eventManager.hasEvent('stop')) {
+          setTimeout(() => {
+            eventManager.dispatch({ type: 'stop' });
+          }, 0);
+        }
       },
       on_complete: (): void => {
-        console.log('[Observer] on_complete');
-
-        eventManager.dispatch({ type: 'complete' });
+        if (eventManager.hasEvent('complete')) {
+          setTimeout(() => {
+            eventManager.dispatch({ type: 'complete' });
+          }, 0);
+        }
       },
       on_loop: (loopCount: number): void => {
-        console.log('[Observer] on_loop');
-
-        eventManager.dispatch({ type: 'loop', loopCount });
+        if (eventManager.hasEvent('loop')) {
+          setTimeout(() => {
+            eventManager.dispatch({ type: 'loop', loopCount });
+          }, 0);
+        }
       },
       on_frame: (currentFrame: number): void => {
-        console.log('[Observer] on_frame');
+        if (eventManager.hasEvent('frame')) {
+          const roundedFrame = Math.round(currentFrame * 100) / 100;
 
-        eventManager.dispatch({ type: 'frame', currentFrame });
+          eventManager.dispatch({ type: 'frame', currentFrame: roundedFrame });
+        }
       },
       on_render: (currentFrame: number): void => {
-        console.log('[Observer] on_render');
-
-        eventManager.dispatch({ type: 'render', currentFrame });
+        if (eventManager.hasEvent('render')) {
+          setTimeout(() => {
+            eventManager.dispatch({ type: 'render', currentFrame });
+          }, 0);
+        }
       },
     };
 

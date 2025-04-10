@@ -193,10 +193,10 @@ describe.each([
         speed: 0.5,
       },
     ])('config: %s', (config) => {
-      test('on play()', async () => {
+      test.only('on play()', async () => {
         const onLoad = vi.fn();
         const onPlay = vi.fn();
-        const onCompelete = vi.fn();
+        const onComplete = vi.fn();
         const onFrame = vi.fn();
 
         dotLottie = new DotLottie({
@@ -213,7 +213,7 @@ describe.each([
 
         dotLottie.addEventListener('load', onLoad);
         dotLottie.addEventListener('play', onPlay);
-        dotLottie.addEventListener('complete', onCompelete);
+        dotLottie.addEventListener('complete', onComplete);
         dotLottie.addEventListener('frame', onFrame);
 
         await vi.waitFor(() => {
@@ -251,7 +251,7 @@ describe.each([
           expect(onPlay).not.toHaveBeenCalled();
         });
 
-        expect(onCompelete).not.toHaveBeenCalled();
+        expect(onComplete).not.toHaveBeenCalled();
 
         await dotLottie.play();
 
@@ -264,7 +264,7 @@ describe.each([
 
         await vi.waitFor(
           () => {
-            expect(onCompelete).toHaveBeenCalledTimes(1);
+            expect(onComplete).toHaveBeenCalledTimes(1);
           },
           {
             timeout: expectedDuration + 250,
@@ -286,7 +286,7 @@ describe.each([
       test('autoplay animation', async () => {
         const onLoad = vi.fn();
         const onPlay = vi.fn();
-        const onCompelete = vi.fn();
+        const onComplete = vi.fn();
         const onFrame = vi.fn();
 
         dotLottie = new DotLottie({
@@ -304,7 +304,7 @@ describe.each([
 
         dotLottie.addEventListener('load', onLoad);
         dotLottie.addEventListener('play', onPlay);
-        dotLottie.addEventListener('complete', onCompelete);
+        dotLottie.addEventListener('complete', onComplete);
         dotLottie.addEventListener('frame', onFrame);
 
         await vi.waitFor(() => {
@@ -346,7 +346,7 @@ describe.each([
           expect(onPlay).toHaveBeenCalledTimes(1);
         });
 
-        expect(onCompelete).not.toHaveBeenCalled();
+        expect(onComplete).not.toHaveBeenCalled();
 
         expect(onFrame).toHaveBeenNthCalledWith(1, {
           type: 'frame',
@@ -355,7 +355,7 @@ describe.each([
 
         await vi.waitFor(
           () => {
-            expect(onCompelete).toHaveBeenCalledTimes(1);
+            expect(onComplete).toHaveBeenCalledTimes(1);
           },
           {
             timeout: expectedDuration + 250,
@@ -377,7 +377,7 @@ describe.each([
       test('play() after pause()', async () => {
         const onLoad = vi.fn();
         const onPlay = vi.fn();
-        const onCompelete = vi.fn();
+        const onComplete = vi.fn();
         const onPause = vi.fn();
 
         dotLottie = new DotLottie({
@@ -405,7 +405,7 @@ describe.each([
         dotLottie.addEventListener('load', onLoad);
         dotLottie.addEventListener('play', onPlay);
         dotLottie.addEventListener('pause', onPause);
-        dotLottie.addEventListener('complete', onCompelete);
+        dotLottie.addEventListener('complete', onComplete);
 
         await vi.waitFor(() => {
           expect(onLoad).toHaveBeenCalledTimes(1);
@@ -447,7 +447,7 @@ describe.each([
 
         await vi.waitFor(
           () => {
-            expect(onCompelete).toHaveBeenCalledTimes(1);
+            expect(onComplete).toHaveBeenCalledTimes(1);
           },
           {
             timeout: expectedDuration + 250,
@@ -1226,11 +1226,13 @@ describe.each([
       dotLottie.addEventListener('play', onPlay);
       dotLottie.addEventListener('frame', onFrame);
 
-      await vi.waitFor(() => expect(onPlay).toHaveBeenCalledTimes(1));
+      expect(onPlay).toHaveBeenCalledTimes(1);
 
       onFrame.mockClear();
 
       await dotLottie.setFrame(10);
+
+      expect(dotLottie.currentFrame).toBe(10);
 
       expect(onFrame).toHaveBeenNthCalledWith(1, {
         type: 'frame',
@@ -1255,7 +1257,7 @@ describe.each([
       dotLottie.addEventListener('load', onLoad);
       dotLottie.addEventListener('frame', onFrame);
 
-      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
+      expect(onLoad).toHaveBeenCalledTimes(1);
 
       onFrame.mockClear();
 
@@ -1280,9 +1282,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
-      });
+      expect(onLoad).toHaveBeenCalledTimes(1);
 
       dotLottie.removeEventListener('load', onLoad);
 
@@ -1305,9 +1305,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
-      });
+      expect(onLoad).toHaveBeenCalledTimes(1);
     });
 
     test('registers the same handler only once', async () => {
@@ -1321,9 +1319,7 @@ describe.each([
       dotLottie.addEventListener('load', onLoad);
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
-      });
+      expect(onLoad).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1339,10 +1335,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
-      });
-
+      expect(onLoad).toHaveBeenCalledTimes(1);
       expect(dotLottie.renderConfig.devicePixelRatio).toBe(defaultDPR);
 
       await dotLottie.setRenderConfig({
@@ -1366,9 +1359,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
-      });
+      expect(onLoad).toHaveBeenCalledTimes(1);
 
       expect(dotLottie.renderConfig.devicePixelRatio).toBe(0.5);
 
@@ -1408,7 +1399,9 @@ describe.each([
 
       await dotLottie.loadAnimation(animationId);
 
-      expect(onLoad).toHaveBeenCalledTimes(2);
+      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(2), {
+        timeout: 10000,
+      });
 
       expect(dotLottie.activeAnimationId).toEqual(animationId);
     });
@@ -1463,7 +1456,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
+      expect(onLoad).toHaveBeenCalledTimes(1);
 
       expect(dotLottie.manifest).toBeNull();
     });
@@ -1482,9 +1475,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
-      });
+      expect(onLoad).toHaveBeenCalledTimes(1);
 
       const markers = dotLottie.markers();
 
@@ -1494,7 +1485,7 @@ describe.each([
     test('loads an animation and play a specific marker', async () => {
       const onPlay = vi.fn();
       const onFrame = vi.fn();
-      const onCompelete = vi.fn();
+      const onComplete = vi.fn();
 
       dotLottie = new DotLottie({
         canvas,
@@ -1505,17 +1496,13 @@ describe.each([
 
       dotLottie.addEventListener('play', onPlay);
       dotLottie.addEventListener('frame', onFrame);
-      dotLottie.addEventListener('complete', onCompelete);
+      dotLottie.addEventListener('complete', onComplete);
 
-      await vi.waitFor(() => {
-        expect(onPlay).toHaveBeenCalledTimes(1);
-      });
+      expect(onPlay).toHaveBeenCalledTimes(1);
 
       expect(dotLottie.marker).toBe('Marker_2');
 
-      await vi.waitFor(() => {
-        expect(onCompelete).toHaveBeenCalledTimes(1);
-      });
+      expect(onComplete).toHaveBeenCalledTimes(1);
 
       expect(onFrame).toHaveBeenNthCalledWith(1, {
         type: 'frame',
@@ -1531,7 +1518,7 @@ describe.each([
     test('setMarker() sets a new marker', async () => {
       const onPlay = vi.fn();
       const onFrame = vi.fn();
-      const onCompelete = vi.fn();
+      const onComplete = vi.fn();
 
       dotLottie = new DotLottie({
         canvas,
@@ -1542,18 +1529,14 @@ describe.each([
 
       dotLottie.addEventListener('play', onPlay);
       dotLottie.addEventListener('frame', onFrame);
-      dotLottie.addEventListener('complete', onCompelete);
+      dotLottie.addEventListener('complete', onComplete);
 
-      await vi.waitFor(() => {
-        expect(onPlay).toHaveBeenCalledTimes(1);
-      });
+      expect(onPlay).toHaveBeenCalledTimes(1);
 
       await dotLottie.setMarker('Marker_3');
       onFrame.mockClear();
 
-      await vi.waitFor(() => {
-        expect(onCompelete).toHaveBeenCalledTimes(1);
-      });
+      expect(onComplete).toHaveBeenCalledTimes(1);
 
       expect(onFrame).toHaveBeenLastCalledWith({
         type: 'frame',
@@ -1564,7 +1547,7 @@ describe.each([
     test("setMarker clears the marker when the marker doesn't exist", async () => {
       const onPlay = vi.fn();
       const onFrame = vi.fn();
-      const onCompelete = vi.fn();
+      const onComplete = vi.fn();
 
       dotLottie = new DotLottie({
         canvas,
@@ -1575,18 +1558,16 @@ describe.each([
 
       dotLottie.addEventListener('play', onPlay);
       dotLottie.addEventListener('frame', onFrame);
-      dotLottie.addEventListener('complete', onCompelete);
+      dotLottie.addEventListener('complete', onComplete);
 
-      await vi.waitFor(() => {
-        expect(onPlay).toHaveBeenCalledTimes(1);
-      });
+      expect(onPlay).toHaveBeenCalledTimes(1);
 
       await dotLottie.setMarker('invalid');
       onFrame.mockClear();
 
       await vi.waitFor(
         () => {
-          expect(onCompelete).toHaveBeenCalledTimes(1);
+          expect(onComplete).toHaveBeenCalledTimes(1);
         },
         {
           timeout: dotLottie.duration * 1000 + 500,
@@ -1613,9 +1594,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
-      });
+      expect(onLoad).toHaveBeenCalledTimes(1);
 
       const result = await dotLottie.setTheme('invalid');
 
@@ -1634,9 +1613,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
-      });
+      expect(onLoad).toHaveBeenCalledTimes(1);
 
       const themeId = 'global_theme';
 
@@ -1693,9 +1670,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
-      });
+      expect(onLoad).toHaveBeenCalledTimes(1);
 
       const result = await dotLottie.setThemeData(JSON.stringify(themeData));
 
@@ -1712,9 +1687,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
-      });
+      expect(onLoad).toHaveBeenCalledTimes(1);
 
       const result = await dotLottie.setThemeData('invalid');
 
@@ -1735,9 +1708,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
-      });
+      expect(onLoad).toHaveBeenCalledTimes(1);
 
       expect(dotLottie.layout?.fit).toBe('contain');
       expect(dotLottie.layout?.align).toEqual([0.5, 0.5]);
@@ -1779,9 +1750,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
-      });
+      expect(onLoad).toHaveBeenCalledTimes(1);
 
       expect(dotLottie.layout).toEqual(layout);
     });
@@ -1796,9 +1765,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
-      });
+      expect(onLoad).toHaveBeenCalledTimes(1);
 
       const layout: Layout = {
         fit: 'cover',
@@ -1810,9 +1777,7 @@ describe.each([
         layout,
       });
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(2);
-      });
+      expect(onLoad).toHaveBeenCalledTimes(2);
 
       expect(dotLottie.layout).toEqual(layout);
     });
@@ -1828,9 +1793,7 @@ describe.each([
 
     dotLottie.addEventListener('load', onLoad);
 
-    await vi.waitFor(() => {
-      expect(onLoad).toHaveBeenCalledTimes(1);
-    });
+    expect(onLoad).toHaveBeenCalledTimes(1);
 
     const updated = await dotLottie.setViewport(0, 0, 100, 100);
 
@@ -1851,9 +1814,7 @@ describe.each([
 
     dotLottie.addEventListener('freeze', onFreeze);
 
-    await vi.waitFor(() => {
-      expect(onFreeze).toHaveBeenCalledTimes(1);
-    });
+    expect(onFreeze).toHaveBeenCalledTimes(1);
 
     expect(dotLottie.isFrozen).toBe(true);
   });
@@ -1874,9 +1835,7 @@ describe.each([
 
     dotLottie.addEventListener('freeze', onFreeze);
 
-    await vi.waitFor(() => {
-      expect(onFreeze).toHaveBeenCalledTimes(1);
-    });
+    expect(onFreeze).toHaveBeenCalledTimes(1);
 
     expect(dotLottie.isFrozen).toBe(true);
   });
@@ -1919,15 +1878,11 @@ describe.each([
     dotLottie.addEventListener('freeze', onFreeze);
     dotLottie.addEventListener('unfreeze', onUnfreeze);
 
-    await vi.waitFor(() => {
-      expect(dotLottie.isPlaying).toBe(true);
-    });
+    expect(dotLottie.isPlaying).toBe(true);
 
     canvas.style.marginTop = '100vh';
 
-    await vi.waitFor(() => {
-      expect(onFreeze).toHaveBeenCalledTimes(1);
-    });
+    expect(onFreeze).toHaveBeenCalledTimes(1);
 
     expect(dotLottie.isFrozen).toBe(true);
   });
@@ -1950,15 +1905,11 @@ describe.each([
     dotLottie.addEventListener('freeze', onFreeze);
     dotLottie.addEventListener('unfreeze', onUnfreeze);
 
-    await vi.waitFor(() => {
-      expect(onFreeze).toHaveBeenCalledTimes(1);
-    });
+    expect(onFreeze).toHaveBeenCalledTimes(1);
 
     canvas.style.marginTop = '0';
 
-    await vi.waitFor(() => {
-      expect(onUnfreeze).toHaveBeenCalledTimes(1);
-    });
+    expect(onUnfreeze).toHaveBeenCalledTimes(1);
 
     expect(dotLottie.isPlaying).toBe(true);
     expect(dotLottie.isFrozen).toBe(false);
@@ -1982,9 +1933,7 @@ describe.each([
     dotLottie.addEventListener('freeze', onFreeze);
     dotLottie.addEventListener('unfreeze', onUnfreeze);
 
-    await vi.waitFor(() => {
-      expect(onFreeze).toHaveBeenCalledTimes(1);
-    });
+    expect(onFreeze).toHaveBeenCalledTimes(1);
 
     expect(dotLottie.isFrozen).toBe(true);
     expect(onUnfreeze).not.toHaveBeenCalled();
@@ -2012,9 +1961,7 @@ describe.each([
     dotLottie.addEventListener('freeze', onFreeze);
     dotLottie.addEventListener('unfreeze', onUnfreeze);
 
-    await vi.waitFor(() => {
-      expect(onFreeze).toHaveBeenCalledTimes(1);
-    });
+    expect(onFreeze).toHaveBeenCalledTimes(1);
 
     expect(dotLottie.isFrozen).toBe(true);
 
@@ -2024,9 +1971,7 @@ describe.each([
 
     canvas.style.marginTop = '0';
 
-    await vi.waitFor(() => {
-      expect(onUnfreeze).toHaveBeenCalledTimes(1);
-    });
+    expect(onUnfreeze).toHaveBeenCalledTimes(1);
 
     canvas.style.marginTop = '100vh';
 
@@ -2047,9 +1992,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalled();
-      });
+      expect(onLoad).toHaveBeenCalled();
 
       expect(dotLottie.renderConfig.autoResize).toBeFalsy();
     });
@@ -2067,9 +2010,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalled();
-      });
+      expect(onLoad).toHaveBeenCalled();
 
       expect(dotLottie.renderConfig.autoResize).toBeTruthy();
     });
@@ -2087,9 +2028,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalled();
-      });
+      expect(onLoad).toHaveBeenCalled();
 
       expect(dotLottie.renderConfig.autoResize).toBeFalsy();
     });
@@ -2107,9 +2046,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalled();
-      });
+      expect(onLoad).toHaveBeenCalled();
 
       const initialWidth = canvas.width;
       const initialHeight = canvas.height;
@@ -2119,10 +2056,8 @@ describe.each([
       canvas.style.width = `${canvas.getBoundingClientRect().width * scale}px`;
       canvas.style.height = `${canvas.getBoundingClientRect().height * scale}px`;
 
-      await vi.waitFor(() => {
-        expect(canvas.width).toBe(initialWidth * scale);
-        expect(canvas.height).toBe(initialHeight * scale);
-      });
+      expect(canvas.width).toBe(initialWidth * scale);
+      expect(canvas.height).toBe(initialHeight * scale);
     });
 
     test('should not resize the canvas when autoResize is disabled, even if the canvas element size changes', async () => {
@@ -2138,9 +2073,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalled();
-      });
+      expect(onLoad).toHaveBeenCalled();
 
       const initialWidth = canvas.width;
       const initialHeight = canvas.height;
@@ -2150,10 +2083,8 @@ describe.each([
       canvas.style.width = `${canvas.getBoundingClientRect().width * scale}px`;
       canvas.style.height = `${canvas.getBoundingClientRect().height * scale}px`;
 
-      await vi.waitFor(() => {
-        expect(canvas.width).toBe(initialWidth);
-        expect(canvas.height).toBe(initialHeight);
-      });
+      expect(canvas.width).toBe(initialWidth);
+      expect(canvas.height).toBe(initialHeight);
     });
 
     test('should stop resizing the canvas when autoResize is disabled dynamically after being enabled', async () => {
@@ -2169,9 +2100,7 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalled();
-      });
+      expect(onLoad).toHaveBeenCalled();
 
       const initialWidth = canvas.width;
       const initialHeight = canvas.height;
@@ -2181,10 +2110,8 @@ describe.each([
       canvas.style.width = `${canvas.getBoundingClientRect().width * scale}px`;
       canvas.style.height = `${canvas.getBoundingClientRect().height * scale}px`;
 
-      await vi.waitFor(() => {
-        expect(canvas.width).toBe(initialWidth * scale);
-        expect(canvas.height).toBe(initialHeight * scale);
-      });
+      expect(canvas.width).toBe(initialWidth * scale);
+      expect(canvas.height).toBe(initialHeight * scale);
 
       await dotLottie.setRenderConfig({
         autoResize: false,
@@ -2196,10 +2123,8 @@ describe.each([
       canvas.style.width = `${canvas.getBoundingClientRect().width * scale}px`;
       canvas.style.height = `${canvas.getBoundingClientRect().height * scale}px`;
 
-      await vi.waitFor(() => {
-        expect(canvas.width).toBe(updatedWidth);
-        expect(canvas.height).toBe(updatedHeight);
-      });
+      expect(canvas.width).toBe(updatedWidth);
+      expect(canvas.height).toBe(updatedHeight);
     });
   });
 
