@@ -562,6 +562,9 @@ export class DotLottie {
     } catch (error) {
       console.error('Error in animation frame:', error);
 
+      // Allows users to catch rendering errors
+      this._dispatchError(`Error in animation frame: ${error}`);
+
       if (this._animationFrameId !== null) {
         this._frameManager.cancelAnimationFrame(this._animationFrameId);
         this._animationFrameId = null;
