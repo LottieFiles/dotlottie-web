@@ -11,6 +11,7 @@ import { createCanvas, sleep } from './test-utils';
 const wasmUrl = new URL('../src/core/dotlottie-player.wasm', import.meta.url).href;
 const jsonSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
+const failingAnimation = new URL('./__fixtures__/failingLottie.lottie', import.meta.url).href;
 
 DotLottieClass.setWasmUrl(wasmUrl);
 DotLottieWorkerClass.setWasmUrl(wasmUrl);
@@ -547,6 +548,22 @@ describe.each([
 
       expect(onPlay).toHaveBeenCalledTimes(1);
       expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('draw', () => {
+    (isWorker ? test.skip : test.only)('fires renderError if it fails to draw', async () => {
+      dotLottie = new DotLottie({
+        canvas,
+        src: failingAnimation,
+        autoplay: true,
+      });
+
+      const onRenderError = vi.fn();
+
+      dotLottie.addEventListener('renderError', onRenderError);
+
+      await vi.waitFor(() => expect(onRenderError).toHaveBeenCalledTimes(1), 1000);
     });
   });
 
