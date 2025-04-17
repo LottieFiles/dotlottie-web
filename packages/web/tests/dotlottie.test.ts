@@ -552,18 +552,26 @@ describe.each([
   });
 
   describe('draw', () => {
-    (isWorker ? test.skip : test.only)('fires renderError if it fails to draw', async () => {
+    (isWorker ? test.skip : test.only)('fires renderError if it fails to render', async () => {
+      const onReady = vi.fn();
+      const onRenderError = vi.fn();
+
       dotLottie = new DotLottie({
         canvas,
-        src: failingAnimation,
+        src: jsonSrc,
         autoplay: true,
       });
 
-      const onRenderError = vi.fn();
-
       dotLottie.addEventListener('renderError', onRenderError);
+      dotLottie.addEventListener('ready', onReady);
 
-      await vi.waitFor(() => expect(onRenderError).toHaveBeenCalledTimes(1), 1000);
+      await vi.waitFor(() => expect(onReady).toHaveBeenCalledTimes(1));
+
+      vi.spyOn(dotLottie['_dotLottieCore'], 'render').mockImplementationOnce(() => {
+        throw new Error('Failed to render');
+      });
+
+      await vi.waitFor(() => expect(onRenderError).toHaveBeenCalledTimes(1));
     });
   });
 
