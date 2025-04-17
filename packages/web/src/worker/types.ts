@@ -9,6 +9,7 @@ import type {
   PauseEvent,
   PlayEvent,
   ReadyEvent,
+  RenderErrorEvent,
   RenderEvent,
   StopEvent,
   UnfreezeEvent,
@@ -222,6 +223,10 @@ export interface MethodResultMap {
   };
   onRender: {
     event: RenderEvent;
+    instanceId: string;
+  };
+  onRenderError: {
+    event: RenderErrorEvent;
     instanceId: string;
   };
   onStop: {
