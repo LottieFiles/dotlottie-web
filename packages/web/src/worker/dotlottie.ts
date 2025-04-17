@@ -754,10 +754,18 @@ export class DotLottieWorker {
     return result;
   }
 
-  public async stateMachineLoad(stateMachineId: string): Promise<boolean> {
+  public async stateMachineLoadData(stateMachineData: string): Promise<boolean> {
     if (!this._created) return false;
 
-    this.stateMachineStop();
+    const result = await this._sendMessage('stateMachineLoadData', { instanceId: this._id, stateMachineData });
+
+    await this._updateDotLottieInstanceState();
+
+    return result;
+  }
+
+  public async stateMachineLoad(stateMachineId: string): Promise<boolean> {
+    if (!this._created) return false;
 
     const result = await this._sendMessage('stateMachineLoad', { instanceId: this._id, stateMachineId });
 
@@ -783,16 +791,6 @@ export class DotLottieWorker {
     if (!this._created) return '';
 
     const result = await this._sendMessage('activeStateMachineId', { instanceId: this._id });
-
-    await this._updateDotLottieInstanceState();
-
-    return result;
-  }
-
-  public async stateMachineLoadData(stateMachineData: string): Promise<boolean> {
-    if (!this._created) return false;
-
-    const result = await this._sendMessage('stateMachineLoadData', { instanceId: this._id, stateMachineData });
 
     await this._updateDotLottieInstanceState();
 

@@ -196,7 +196,7 @@ describe.each([
       test('on play()', async () => {
         const onLoad = vi.fn();
         const onPlay = vi.fn();
-        const onCompelete = vi.fn();
+        const onComplete = vi.fn();
         const onFrame = vi.fn();
 
         dotLottie = new DotLottie({
@@ -213,7 +213,7 @@ describe.each([
 
         dotLottie.addEventListener('load', onLoad);
         dotLottie.addEventListener('play', onPlay);
-        dotLottie.addEventListener('complete', onCompelete);
+        dotLottie.addEventListener('complete', onComplete);
         dotLottie.addEventListener('frame', onFrame);
 
         await vi.waitFor(() => {
@@ -251,7 +251,7 @@ describe.each([
           expect(onPlay).not.toHaveBeenCalled();
         });
 
-        expect(onCompelete).not.toHaveBeenCalled();
+        expect(onComplete).not.toHaveBeenCalled();
 
         await dotLottie.play();
 
@@ -264,7 +264,7 @@ describe.each([
 
         await vi.waitFor(
           () => {
-            expect(onCompelete).toHaveBeenCalledTimes(1);
+            expect(onComplete).toHaveBeenCalledTimes(1);
           },
           {
             timeout: expectedDuration + 250,
@@ -286,7 +286,7 @@ describe.each([
       test('autoplay animation', async () => {
         const onLoad = vi.fn();
         const onPlay = vi.fn();
-        const onCompelete = vi.fn();
+        const onComplete = vi.fn();
         const onFrame = vi.fn();
 
         dotLottie = new DotLottie({
@@ -304,7 +304,7 @@ describe.each([
 
         dotLottie.addEventListener('load', onLoad);
         dotLottie.addEventListener('play', onPlay);
-        dotLottie.addEventListener('complete', onCompelete);
+        dotLottie.addEventListener('complete', onComplete);
         dotLottie.addEventListener('frame', onFrame);
 
         await vi.waitFor(() => {
@@ -346,7 +346,7 @@ describe.each([
           expect(onPlay).toHaveBeenCalledTimes(1);
         });
 
-        expect(onCompelete).not.toHaveBeenCalled();
+        expect(onComplete).not.toHaveBeenCalled();
 
         expect(onFrame).toHaveBeenNthCalledWith(1, {
           type: 'frame',
@@ -355,7 +355,7 @@ describe.each([
 
         await vi.waitFor(
           () => {
-            expect(onCompelete).toHaveBeenCalledTimes(1);
+            expect(onComplete).toHaveBeenCalledTimes(1);
           },
           {
             timeout: expectedDuration + 250,
@@ -377,7 +377,7 @@ describe.each([
       test('play() after pause()', async () => {
         const onLoad = vi.fn();
         const onPlay = vi.fn();
-        const onCompelete = vi.fn();
+        const onComplete = vi.fn();
         const onPause = vi.fn();
 
         dotLottie = new DotLottie({
@@ -405,7 +405,7 @@ describe.each([
         dotLottie.addEventListener('load', onLoad);
         dotLottie.addEventListener('play', onPlay);
         dotLottie.addEventListener('pause', onPause);
-        dotLottie.addEventListener('complete', onCompelete);
+        dotLottie.addEventListener('complete', onComplete);
 
         await vi.waitFor(() => {
           expect(onLoad).toHaveBeenCalledTimes(1);
@@ -447,7 +447,7 @@ describe.each([
 
         await vi.waitFor(
           () => {
-            expect(onCompelete).toHaveBeenCalledTimes(1);
+            expect(onComplete).toHaveBeenCalledTimes(1);
           },
           {
             timeout: expectedDuration + 250,
@@ -936,7 +936,9 @@ describe.each([
 
       await dotLottie.stop();
 
-      expect(onStop).toHaveBeenCalledTimes(1);
+      await vi.waitFor(() => {
+        expect(onStop).toHaveBeenCalledTimes(1);
+      });
 
       expect(dotLottie.isPlaying).toBe(false);
       expect(dotLottie.isStopped).toBe(true);
@@ -1022,11 +1024,13 @@ describe.each([
 
         await dotLottie.stop();
 
-        expect(onStop).toHaveBeenCalledTimes(1);
-        expect(dotLottie.isStopped).toBe(true);
-        expect(dotLottie.isPlaying).toBe(false);
-        expect(dotLottie.isFrozen).toBe(false);
-        expect(dotLottie.isPaused).toBe(false);
+        await vi.waitFor(() => {
+          expect(onStop).toHaveBeenCalledTimes(1);
+          expect(dotLottie.isStopped).toBe(true);
+          expect(dotLottie.isPlaying).toBe(false);
+          expect(dotLottie.isFrozen).toBe(false);
+          expect(dotLottie.isPaused).toBe(false);
+        });
 
         await sleep(500);
 
@@ -1232,10 +1236,16 @@ describe.each([
 
       await dotLottie.setFrame(10);
 
-      expect(onFrame).toHaveBeenNthCalledWith(1, {
-        type: 'frame',
-        currentFrame: 10,
-      });
+      await vi.waitFor(
+        () =>
+          expect(onFrame).toHaveBeenNthCalledWith(1, {
+            type: 'frame',
+            currentFrame: 10,
+          }),
+        {
+          timeout: 1000,
+        },
+      );
 
       expect(dotLottie.currentFrame).toBe(10);
 
@@ -1408,7 +1418,9 @@ describe.each([
 
       await dotLottie.loadAnimation(animationId);
 
-      expect(onLoad).toHaveBeenCalledTimes(2);
+      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(2), {
+        timeout: 10000,
+      });
 
       expect(dotLottie.activeAnimationId).toEqual(animationId);
     });
@@ -1494,7 +1506,7 @@ describe.each([
     test('loads an animation and play a specific marker', async () => {
       const onPlay = vi.fn();
       const onFrame = vi.fn();
-      const onCompelete = vi.fn();
+      const onComplete = vi.fn();
 
       dotLottie = new DotLottie({
         canvas,
@@ -1505,7 +1517,7 @@ describe.each([
 
       dotLottie.addEventListener('play', onPlay);
       dotLottie.addEventListener('frame', onFrame);
-      dotLottie.addEventListener('complete', onCompelete);
+      dotLottie.addEventListener('complete', onComplete);
 
       await vi.waitFor(() => {
         expect(onPlay).toHaveBeenCalledTimes(1);
@@ -1514,7 +1526,7 @@ describe.each([
       expect(dotLottie.marker).toBe('Marker_2');
 
       await vi.waitFor(() => {
-        expect(onCompelete).toHaveBeenCalledTimes(1);
+        expect(onComplete).toHaveBeenCalledTimes(1);
       });
 
       expect(onFrame).toHaveBeenNthCalledWith(1, {
@@ -1531,7 +1543,7 @@ describe.each([
     test('setMarker() sets a new marker', async () => {
       const onPlay = vi.fn();
       const onFrame = vi.fn();
-      const onCompelete = vi.fn();
+      const onComplete = vi.fn();
 
       dotLottie = new DotLottie({
         canvas,
@@ -1542,7 +1554,7 @@ describe.each([
 
       dotLottie.addEventListener('play', onPlay);
       dotLottie.addEventListener('frame', onFrame);
-      dotLottie.addEventListener('complete', onCompelete);
+      dotLottie.addEventListener('complete', onComplete);
 
       await vi.waitFor(() => {
         expect(onPlay).toHaveBeenCalledTimes(1);
@@ -1552,7 +1564,7 @@ describe.each([
       onFrame.mockClear();
 
       await vi.waitFor(() => {
-        expect(onCompelete).toHaveBeenCalledTimes(1);
+        expect(onComplete).toHaveBeenCalledTimes(1);
       });
 
       expect(onFrame).toHaveBeenLastCalledWith({
@@ -1564,7 +1576,7 @@ describe.each([
     test("setMarker clears the marker when the marker doesn't exist", async () => {
       const onPlay = vi.fn();
       const onFrame = vi.fn();
-      const onCompelete = vi.fn();
+      const onComplete = vi.fn();
 
       dotLottie = new DotLottie({
         canvas,
@@ -1575,7 +1587,7 @@ describe.each([
 
       dotLottie.addEventListener('play', onPlay);
       dotLottie.addEventListener('frame', onFrame);
-      dotLottie.addEventListener('complete', onCompelete);
+      dotLottie.addEventListener('complete', onComplete);
 
       await vi.waitFor(() => {
         expect(onPlay).toHaveBeenCalledTimes(1);
@@ -1586,7 +1598,7 @@ describe.each([
 
       await vi.waitFor(
         () => {
-          expect(onCompelete).toHaveBeenCalledTimes(1);
+          expect(onComplete).toHaveBeenCalledTimes(1);
         },
         {
           timeout: dotLottie.duration * 1000 + 500,
