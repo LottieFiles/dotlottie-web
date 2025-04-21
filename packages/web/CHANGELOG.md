@@ -1,5 +1,16 @@
 # @lottiefiles/dotlottie-web
 
+## 0.43.0
+
+### Minor Changes
+
+- 59f4ce4: chore: update [dotLottie-rs v0.1.40](https://github.com/LottieFiles/dotlottie-rs/releases/tag/v0.1.40) WASM
+  bindings
+
+### Patch Changes
+
+- ce0d9a2: fix: clear timeouts in CanvasResizeObserver when unobserving to prevent memory leaks
+
 ## 0.42.0
 
 ### Minor Changes
