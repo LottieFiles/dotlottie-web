@@ -118,6 +118,7 @@ export class DotLottie {
 
         this._dotLottieCore = new module.DotLottiePlayer({
           themeId: config.themeId ?? '',
+          stateMachineId: '',
           autoplay: config.autoplay ?? false,
           backgroundColor: 0,
           loopAnimation: config.loop ?? false,
@@ -448,6 +449,7 @@ export class DotLottie {
 
     this._dotLottieCore.setConfig({
       themeId: config.themeId ?? '',
+      stateMachineId: '',
       autoplay: config.autoplay ?? false,
       backgroundColor: 0,
       loopAnimation: config.loop ?? false,
@@ -877,11 +879,15 @@ export class DotLottie {
   }
 
   public loadStateMachine(stateMachineId: string): boolean {
-    return this._dotLottieCore?.loadStateMachine(stateMachineId) ?? false;
+    return this._dotLottieCore?.stateMachineLoad(stateMachineId) ?? false;
   }
 
   public startStateMachine(): boolean {
-    const started = this._dotLottieCore?.startStateMachine() ?? false;
+    if (DotLottie._wasmModule === null || this._dotLottieCore === null) return false;
+
+    const openUrl = DotLottie._wasmModule.createDefaultOpenURL();
+
+    const started = this._dotLottieCore.stateMachineStart(openUrl);
 
     if (started) {
       this._setupStateMachineListeners();
@@ -891,7 +897,7 @@ export class DotLottie {
   }
 
   public stopStateMachine(): boolean {
-    const stopped = this._dotLottieCore?.stopStateMachine() ?? false;
+    const stopped = this._dotLottieCore?.stateMachineStop() ?? false;
 
     if (stopped) {
       this._cleanupStateMachineListeners();
@@ -946,23 +952,23 @@ export class DotLottie {
   }
 
   public postPointerUpEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.postPointerUpEvent(x, y);
+    return this._dotLottieCore?.stateMachinePostPointerUpEvent(x, y);
   }
 
   public postPointerDownEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.postPointerDownEvent(x, y);
+    return this._dotLottieCore?.stateMachinePostPointerDownEvent(x, y);
   }
 
   public postPointerMoveEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.postPointerMoveEvent(x, y);
+    return this._dotLottieCore?.stateMachinePostPointerMoveEvent(x, y);
   }
 
   public postPointerEnterEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.postPointerEnterEvent(x, y);
+    return this._dotLottieCore?.stateMachinePostPointerEnterEvent(x, y);
   }
 
   public postPointerExitEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.postPointerExitEvent(x, y);
+    return this._dotLottieCore?.stateMachinePostPointerExitEvent(x, y);
   }
 
   public getStateMachineListeners(): string[] {
@@ -1016,7 +1022,7 @@ export class DotLottie {
   }
 
   public loadStateMachineData(stateMachineData: string): boolean {
-    return this._dotLottieCore?.loadStateMachineData(stateMachineData) ?? false;
+    return this._dotLottieCore?.stateMachineLoadData(stateMachineData) ?? false;
   }
 
   public animationSize(): { height: number; width: number } {
@@ -1030,15 +1036,15 @@ export class DotLottie {
   }
 
   public setStateMachineBooleanContext(name: string, value: boolean): boolean {
-    return this._dotLottieCore?.setStateMachineBooleanContext(name, value) ?? false;
+    return this._dotLottieCore?.stateMachineSetBooleanInput(name, value) ?? false;
   }
 
   public setStateMachineNumericContext(name: string, value: number): boolean {
-    return this._dotLottieCore?.setStateMachineNumericContext(name, value) ?? false;
+    return this._dotLottieCore?.stateMachineSetNumericInput(name, value) ?? false;
   }
 
   public setStateMachineStringContext(name: string, value: string): boolean {
-    return this._dotLottieCore?.setStateMachineStringContext(name, value) ?? false;
+    return this._dotLottieCore?.stateMachineSetStringInput(name, value) ?? false;
   }
 
   /**

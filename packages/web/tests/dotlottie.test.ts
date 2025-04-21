@@ -1594,7 +1594,7 @@ describe.each([
         currentFrame: dotLottie.totalFrames,
       });
 
-      expect(dotLottie.marker).toBe('invalid');
+      expect(dotLottie.marker).toBe('');
     });
   });
 
