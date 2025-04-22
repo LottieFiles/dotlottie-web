@@ -13,3 +13,16 @@ export const createCanvas = (): HTMLCanvasElement => {
 
   return canvas;
 };
+
+export const addCSPPolicy = (content: string[]): (() => void) => {
+  const meta = document.createElement('meta');
+
+  meta.httpEquiv = 'Content-Security-Policy';
+  meta.content = content.join('; ');
+
+  document.head.appendChild(meta);
+
+  return (): void => {
+    document.head.removeChild(meta);
+  };
+};
