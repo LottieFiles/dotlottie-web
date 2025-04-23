@@ -16,6 +16,7 @@ export interface Layout {
 }
 
 export interface Config {
+  animationId?: string;
   autoplay?: boolean;
   backgroundColor?: string;
   canvas: HTMLCanvasElement;

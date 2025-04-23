@@ -128,6 +128,7 @@ export class DotLottie {
           useFrameInterpolation: config.useFrameInterpolation ?? true,
           marker: config.marker ?? '',
           layout: createCoreLayout(config.layout, module),
+          animationId: config.animationId ?? '',
         });
 
         this._eventManager.dispatch({ type: 'ready' });
@@ -459,6 +460,7 @@ export class DotLottie {
       useFrameInterpolation: config.useFrameInterpolation ?? true,
       marker: config.marker ?? '',
       layout: createCoreLayout(config.layout, DotLottie._wasmModule),
+      animationId: config.animationId ?? '',
     });
 
     if (config.data) {

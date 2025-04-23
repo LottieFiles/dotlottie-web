@@ -56,6 +56,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   dotLottieRefCallback,
   layout,
   loop,
+  marker,
   mode,
   playOnHover,
   renderConfig,
@@ -92,6 +93,8 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     data,
     layout,
     renderConfig,
+    animationId,
+    marker,
   };
 
   const configRef = useRef<Omit<BaseDotLottieProps<T>, 'createDotLottie' | 'dotLottieRefCallback'> | undefined>(config);
@@ -205,8 +208,8 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   }, [src]);
 
   useEffect(() => {
-    dotLottieRef.current?.setMarker(props.marker ?? '');
-  }, [props.marker]);
+    dotLottieRef.current?.setMarker(marker ?? '');
+  }, [marker]);
 
   useEffect(() => {
     dotLottieRef.current?.loadAnimation(animationId ?? '');
