@@ -1,4 +1,3 @@
-/* eslint-disable no-warning-comments */
 'use client';
 
 import type { Config, DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-web';
@@ -173,10 +172,9 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     if (typeof segment?.[0] === 'number' && typeof segment[1] === 'number') {
       dotLottieRef.current?.setSegment(segment[0], segment[1]);
     } else {
-      // TODO: implement it for worker
-      // dotLottieRef.current?.resetSegment();
+      dotLottieRef.current?.resetSegment();
     }
-  }, [segment]);
+  }, [segment?.[0], segment?.[1]]);
 
   useEffect(() => {
     dotLottieRef.current?.setBackgroundColor(backgroundColor ?? '');
@@ -216,8 +214,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     if (typeof themeId === 'string') {
       dotLottieRef.current?.setTheme(themeId);
     } else {
-      // TODO: implement it for worker
-      // dotLottieRef.current?.resetTheme();
+      dotLottieRef.current?.resetTheme();
     }
   }, [themeId]);
 
