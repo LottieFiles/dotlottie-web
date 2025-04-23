@@ -39,6 +39,7 @@
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
     "test": "vitest run --browser.headless",
     "test:coverage": "vitest run --browser.headless --coverage",
+    "test:node": "vitest run --config ./vitest.config.node.ts",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },

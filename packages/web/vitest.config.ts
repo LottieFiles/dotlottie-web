@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
+    include: ['tests/**/*.{test,spec}.ts', '!tests/**/*.node.{test,spec}.ts'],
     browser: {
       enabled: true,
       name: 'chromium',

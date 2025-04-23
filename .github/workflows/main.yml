@@ -40,7 +40,11 @@ jobs:
       - name: 💅 Verify format (`pnpm format` committed?)
         run: pnpm format
 
-      - name: 🛡️ Test
+      - name: 🛡️ Test (Node)
+        run: pnpm test:node
+        working-directory: packages/web
+
+      - name: 🛡️ Test (Browser)
         run: |
           npx playwright install --with-deps chromium
           pnpm test:coverage
