@@ -344,7 +344,7 @@ describe.each([
     expect(dotLottie?.marker).toBe('');
   });
 
-  test.todo('calls dotLottie.setSegment & dotLottie.resetSegment when segment prop changes', async () => {
+  test('calls dotLottie.setSegment & dotLottie.resetSegment when segment prop changes', async () => {
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
@@ -422,6 +422,63 @@ describe.each([
     });
 
     expect(dotLottie?.themeId).toBeUndefined();
+  });
+
+  test('calls dotLottie.resetSegment when invalid segment prop is provided', async () => {
+    const onLoad = vi.fn();
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    dotLottie?.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const setSegment = vi.spyOn(dotLottie, 'setSegment');
+
+    rerender(<Component src={dotLottieSrc} autoplay segment={[0, 10]} dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(setSegment).toHaveBeenCalledTimes(1);
+    });
+
+    const resetSegment = vi.spyOn(dotLottie, 'resetSegment');
+
+    rerender(
+      <Component src={dotLottieSrc} autoplay segment={'invalid' as unknown} dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(resetSegment).toHaveBeenCalledTimes(1);
+    });
+
+    resetSegment.mockClear();
+
+    rerender(
+      <Component src={dotLottieSrc} autoplay segment={[0] as unknown} dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(resetSegment).toHaveBeenCalledTimes(1);
+    });
+
+    resetSegment.mockClear();
+
+    rerender(
+      <Component src={dotLottieSrc} autoplay segment={['a', 'b'] as unknown} dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(resetSegment).toHaveBeenCalledTimes(1);
+    });
   });
 
   test('playOnHover', async () => {

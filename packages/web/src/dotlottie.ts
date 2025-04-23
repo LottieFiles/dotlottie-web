@@ -762,7 +762,7 @@ export class DotLottie {
 
     this._dotLottieCore.setConfig({
       ...this._dotLottieCore.config(),
-      segment: createCoreSegment([0, this._dotLottieCore.totalFrames()], DotLottie._wasmModule),
+      segment: createCoreSegment([], DotLottie._wasmModule),
     });
   }
 
