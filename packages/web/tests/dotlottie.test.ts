@@ -2290,7 +2290,6 @@ describe.each([
         expect(onLoad).toHaveBeenCalledTimes(1);
       });
 
-      const totalFrames = dotLottie.totalFrames;
       const segmentStart = 5;
       const segmentEnd = 15;
 
@@ -2299,7 +2298,7 @@ describe.each([
 
       await dotLottie.resetSegment();
 
-      expect(dotLottie.segment).toEqual([0, totalFrames]);
+      expect(dotLottie.segment).toBeUndefined();
 
       await dotLottie.play();
 
@@ -2332,13 +2331,11 @@ describe.each([
         expect(onLoad).toHaveBeenCalledTimes(1);
       });
 
-      const totalFrames = dotLottie.totalFrames;
-
       expect(dotLottie.segment).toEqual([5, 15]);
 
       await dotLottie.resetSegment();
 
-      expect(dotLottie.segment).toEqual([0, totalFrames]);
+      expect(dotLottie.segment).toBeUndefined();
 
       expect(dotLottie.isPlaying).toBe(true);
     });
@@ -2361,15 +2358,13 @@ describe.each([
         expect(onLoad).toHaveBeenCalledTimes(1);
       });
 
-      const totalFrames = dotLottie.totalFrames;
-
       expect(dotLottie.segment).toEqual([10, 20]);
       expect(dotLottie.mode).toBe('reverse');
       expect(dotLottie.speed).toBe(2);
 
       await dotLottie.resetSegment();
 
-      expect(dotLottie.segment).toEqual([0, totalFrames]);
+      expect(dotLottie.segment).toBeUndefined();
       expect(dotLottie.mode).toBe('reverse');
       expect(dotLottie.speed).toBe(2);
     });

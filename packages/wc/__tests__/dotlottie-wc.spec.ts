@@ -289,14 +289,38 @@ describe.each([{ elementName: 'dotlottie-wc' as const }, { elementName: 'dotlott
       await vi.waitFor(() => {
         expect(dotLottie.segment).toEqual([0, 20]);
       });
+    });
+
+    test('calls dotLottie.resetSegment when segment attribute is invalid or removed', async () => {
+      const { element, rerender } = render(elementName, { src });
+
+      const dotLottie = element.dotLottie as DotLottie | DotLottieWorker;
+
+      await vi.waitFor(() => {
+        expect(dotLottie.isLoaded).toBe(true);
+      });
+
+      rerender({ src, segment: JSON.stringify([0, 20]) });
+
+      await vi.waitFor(() => {
+        expect(dotLottie.segment).toEqual([0, 20]);
+      });
+
+      const resetSegment = vi.spyOn(dotLottie, 'resetSegment');
+
+      rerender({ src, segment: JSON.stringify('invalid') });
+
+      expect(resetSegment).toHaveBeenCalledTimes(1);
+
+      resetSegment.mockClear();
+      rerender({ src, segment: JSON.stringify([10, 30]) });
 
       rerender({ src });
 
-      expect(setSegment).toHaveBeenCalledTimes(2);
-      expect(setSegment).toHaveBeenCalledWith(0, dotLottie.totalFrames);
+      expect(resetSegment).toHaveBeenCalledTimes(1);
 
       await vi.waitFor(() => {
-        expect(dotLottie.segment).toEqual([0, dotLottie.totalFrames]);
+        expect(dotLottie.segment).toBeUndefined();
       });
     });
 
