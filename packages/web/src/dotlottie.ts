@@ -68,8 +68,13 @@ const createCoreLayout = (layout: Layout | undefined, module: MainModule): { ali
   };
 };
 
+interface RenderSurface {
+  height: number;
+  width: number;
+}
+
 export class DotLottie {
-  private readonly _canvas: HTMLCanvasElement | OffscreenCanvas;
+  private readonly _canvas: HTMLCanvasElement | OffscreenCanvas | RenderSurface;
 
   private _context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
 
@@ -99,9 +104,12 @@ export class DotLottie {
 
   private readonly _pointerExitMethod: (event: PointerEvent) => void;
 
-  public constructor(config: Config) {
+  public constructor(
+    config: Omit<Config, 'canvas'> & {
+      canvas: HTMLCanvasElement | OffscreenCanvas | RenderSurface;
+    },
+  ) {
     this._canvas = config.canvas;
-    this._context = this._canvas.getContext('2d');
 
     this._eventManager = new EventManager();
     this._frameManager = new AnimationFrameManager();
@@ -273,6 +281,12 @@ export class DotLottie {
       .catch((error) => this._dispatchError(`Failed to load animation data from URL: ${src}. ${error}`));
   }
 
+  public get buffer(): Uint8Array | null {
+    if (!this._dotLottieCore) return null;
+
+    return this._dotLottieCore.buffer() as Uint8Array;
+  }
+
   public get activeAnimationId(): string | undefined {
     return this._dotLottieCore?.activeAnimationId();
   }
@@ -433,7 +447,7 @@ export class DotLottie {
     return this._dotLottieCore?.segmentDuration() ?? 0;
   }
 
-  public get canvas(): HTMLCanvasElement | OffscreenCanvas {
+  public get canvas(): HTMLCanvasElement | OffscreenCanvas | RenderSurface {
     return this._canvas;
   }
 
@@ -471,28 +485,36 @@ export class DotLottie {
   }
 
   private _render(): boolean {
-    if (this._dotLottieCore === null || this._context === null) return false;
+    if (this._dotLottieCore === null) return false;
+
+    // Only try to get context if canvas has getContext method and no context exists yet
+    if (!this._context && 'getContext' in this._canvas && typeof this._canvas.getContext === 'function') {
+      this._context = this._canvas.getContext('2d');
+    }
 
     const rendered = this._dotLottieCore.render();
 
     if (rendered) {
-      const buffer = this._dotLottieCore.buffer() as ArrayBuffer;
-      const clampedBuffer = new Uint8ClampedArray(buffer, 0, this._canvas.width * this._canvas.height * 4);
+      // Only process visual output if we have a canvas with a valid context
+      if (this._context) {
+        const buffer = this._dotLottieCore.buffer() as ArrayBuffer;
+        const clampedBuffer = new Uint8ClampedArray(buffer, 0, this._canvas.width * this._canvas.height * 4);
 
-      let imageData = null;
+        let imageData = null;
 
-      /* 
-        In Node.js, the ImageData constructor is not available. 
-        You can use createImageData function in the canvas context to create ImageData object.
-      */
-      if (typeof ImageData === 'undefined') {
-        imageData = this._context.createImageData(this._canvas.width, this._canvas.height);
-        imageData.data.set(clampedBuffer);
-      } else {
-        imageData = new ImageData(clampedBuffer, this._canvas.width, this._canvas.height);
+        /* 
+          In Node.js, the ImageData constructor is not available. 
+          You can use createImageData function in the canvas context to create ImageData object.
+        */
+        if (typeof ImageData === 'undefined') {
+          imageData = this._context.createImageData(this._canvas.width, this._canvas.height);
+          imageData.data.set(clampedBuffer);
+        } else {
+          imageData = new ImageData(clampedBuffer, this._canvas.width, this._canvas.height);
+        }
+
+        this._context.putImageData(imageData, 0, 0);
       }
-
-      this._context.putImageData(imageData, 0, 0);
 
       this._eventManager.dispatch({
         type: 'render',

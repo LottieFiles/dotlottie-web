@@ -66,7 +66,7 @@ export class DotLottieWorker {
 
   private readonly _worker: Worker;
 
-  private readonly _canvas: HTMLCanvasElement;
+  private readonly _canvas: HTMLCanvasElement | OffscreenCanvas;
 
   private _dotLottieInstanceState: DotLottieInstanceState = {
     loopCount: 0,
@@ -333,7 +333,7 @@ export class DotLottieWorker {
     return this._dotLottieInstanceState.mode;
   }
 
-  public get canvas(): HTMLCanvasElement | null {
+  public get canvas(): HTMLCanvasElement | OffscreenCanvas | null {
     return this._canvas;
   }
 

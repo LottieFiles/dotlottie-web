@@ -18,7 +18,7 @@ export interface Layout {
 export interface Config {
   autoplay?: boolean;
   backgroundColor?: string;
-  canvas: HTMLCanvasElement;
+  canvas: HTMLCanvasElement | OffscreenCanvas;
   data?: Data;
   layout?: Layout;
   loop?: boolean;
