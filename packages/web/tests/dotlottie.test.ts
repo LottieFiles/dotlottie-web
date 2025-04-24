@@ -4,6 +4,7 @@ import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
 import type { Config, Layout, Mode } from '../src';
 import { DotLottie as DotLottieClass, DotLottieWorker as DotLottieWorkerClass } from '../src';
+import type { DotLottiePlayer } from '../src/core';
 import { getDefaultDPR } from '../src/utils';
 
 import { createCanvas, sleep } from './test-utils';
@@ -548,6 +549,30 @@ describe.each([
       expect(onPlay).toHaveBeenCalledTimes(1);
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
+  });
+
+  (isWorker ? test.skip : test)('trigger renderError event when failed to render', async () => {
+    const onReady = vi.fn();
+    const onRenderError = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+      autoplay: true,
+    });
+
+    dotLottie.addEventListener('renderError', onRenderError);
+    dotLottie.addEventListener('ready', onReady);
+
+    await vi.waitFor(() => expect(onReady).toHaveBeenCalledTimes(1));
+
+    const dotLottieCore = (dotLottie as DotLottieClass)['_dotLottieCore'] as DotLottiePlayer;
+
+    vi.spyOn(dotLottieCore, 'render').mockImplementationOnce(() => {
+      throw new Error('Failed to render');
+    });
+
+    await vi.waitFor(() => expect(onRenderError).toHaveBeenCalledTimes(1));
   });
 
   describe('resize', () => {

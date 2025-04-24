@@ -164,6 +164,7 @@ export class DotLottieWorker {
       | 'onPlay'
       | 'onStop'
       | 'onLoadError'
+      | 'onRenderError'
       | 'onReady'
       | 'onLoop'
     > = event.data;
@@ -230,6 +231,11 @@ export class DotLottieWorker {
 
       if (rpcResponse.method === 'onLoadError' && rpcResponse.result.instanceId === this._id) {
         await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onRenderError' && rpcResponse.result.instanceId === this._id) {
+        // Dont update the instance, since the Core crashed its no long accessible. Calling _updateDotLottieInstanceState will cause it to hang indefinitely.
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 

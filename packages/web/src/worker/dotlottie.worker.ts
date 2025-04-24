@@ -8,6 +8,7 @@ import type {
   FrameEvent,
   FreezeEvent,
   LoadErrorEvent,
+  RenderErrorEvent,
   LoadEvent,
   LoopEvent,
   PauseEvent,
@@ -69,6 +70,19 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
       result: {
         instanceId,
         event: loadErrorEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  renderError: (instanceId: string) => (event: Event) => {
+    const renderErrorEvent = event as RenderErrorEvent;
+    const response: RpcResponse<'onRenderError'> = {
+      id: '',
+      method: 'onRenderError',
+      result: {
+        instanceId,
+        event: renderErrorEvent,
       },
     };
 
@@ -397,6 +411,7 @@ const commands: {
       'frame',
       'load',
       'loadError',
+      'renderError',
       'loop',
       'pause',
       'play',

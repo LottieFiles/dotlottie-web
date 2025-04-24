@@ -6,6 +6,7 @@ export type EventType =
   | 'frame'
   | 'load'
   | 'loadError'
+  | 'renderError'
   | 'loop'
   | 'pause'
   | 'play'
@@ -27,6 +28,8 @@ type EventByType<T> = T extends 'complete'
   ? LoadEvent
   : T extends 'loadError'
   ? LoadErrorEvent
+  : T extends 'renderError'
+  ? RenderErrorEvent
   : T extends 'loop'
   ? LoopEvent
   : T extends 'pause'
@@ -106,6 +109,14 @@ export interface LoadErrorEvent extends BaseEvent {
 }
 
 /**
+ * Event fired when a loading error occurs.
+ */
+export interface RenderErrorEvent extends BaseEvent {
+  error: Error;
+  type: 'renderError';
+}
+
+/**
  * Event fired when a completion action occurs.
  */
 export interface CompleteEvent extends BaseEvent {
@@ -148,6 +159,7 @@ export type Event =
   | FrameEvent
   | LoadEvent
   | LoadErrorEvent
+  | RenderErrorEvent
   | CompleteEvent
   | PauseEvent
   | PlayEvent
