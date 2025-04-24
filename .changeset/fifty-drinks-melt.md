@@ -2,4 +2,4 @@
 '@lottiefiles/dotlottie-web': patch
 ---
 
-added a loadError fire when a render error occurs.
+added a renderError event fire when a render error occurs.

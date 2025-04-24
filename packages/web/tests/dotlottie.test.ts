@@ -11,7 +11,6 @@ import { createCanvas, sleep } from './test-utils';
 const wasmUrl = new URL('../src/core/dotlottie-player.wasm', import.meta.url).href;
 const jsonSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
-const failingAnimation = new URL('./__fixtures__/failingLottie.lottie', import.meta.url).href;
 
 DotLottieClass.setWasmUrl(wasmUrl);
 DotLottieWorkerClass.setWasmUrl(wasmUrl);
@@ -551,28 +550,30 @@ describe.each([
     });
   });
 
-  describe('draw', () => {
-    (isWorker ? test.skip : test.only)('fires renderError if it fails to render', async () => {
-      const onReady = vi.fn();
-      const onRenderError = vi.fn();
+  (isWorker ? test.skip : test)('draw', async () => {
+    const onReady = vi.fn();
+    const onRenderError = vi.fn();
 
-      dotLottie = new DotLottie({
-        canvas,
-        src: jsonSrc,
-        autoplay: true,
-      });
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+      autoplay: true,
+    });
 
-      dotLottie.addEventListener('renderError', onRenderError);
-      dotLottie.addEventListener('ready', onReady);
+    dotLottie.addEventListener('renderError', onRenderError);
+    dotLottie.addEventListener('ready', onReady);
 
-      await vi.waitFor(() => expect(onReady).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(onReady).toHaveBeenCalledTimes(1));
 
-      vi.spyOn(dotLottie['_dotLottieCore'], 'render').mockImplementationOnce(() => {
+    const dotLottieCore = (dotLottie as DotLottieClass)['_dotLottieCore'];
+
+    if (dotLottieCore) {
+      vi.spyOn(dotLottieCore, 'render').mockImplementationOnce(() => {
         throw new Error('Failed to render');
       });
+    }
 
-      await vi.waitFor(() => expect(onRenderError).toHaveBeenCalledTimes(1));
-    });
+    await vi.waitFor(() => expect(onRenderError).toHaveBeenCalledTimes(1));
   });
 
   describe('resize', () => {
