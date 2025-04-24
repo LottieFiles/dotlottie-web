@@ -552,8 +552,12 @@ describe.each([
   });
 
   (isWorker ? test.skip : test)('trigger renderError event when failed to render', async () => {
+    const fakeWebAssemblyRuntimeError = new WebAssembly.RuntimeError('memory access out of bounds');
+    const consoleErrorSpy = vi.spyOn(console, 'error');
+
     const onReady = vi.fn();
     const onRenderError = vi.fn();
+    const onDestroy = vi.fn();
 
     dotLottie = new DotLottie({
       canvas,
@@ -561,6 +565,7 @@ describe.each([
       autoplay: true,
     });
 
+    dotLottie.addEventListener('destroy', onDestroy);
     dotLottie.addEventListener('renderError', onRenderError);
     dotLottie.addEventListener('ready', onReady);
 
@@ -569,10 +574,21 @@ describe.each([
     const dotLottieCore = (dotLottie as DotLottieClass)['_dotLottieCore'] as DotLottiePlayer;
 
     vi.spyOn(dotLottieCore, 'render').mockImplementationOnce(() => {
-      throw new Error('Failed to render');
+      throw fakeWebAssemblyRuntimeError;
     });
 
-    await vi.waitFor(() => expect(onRenderError).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => {
+      expect(onRenderError).toHaveBeenCalledTimes(1);
+      expect(onRenderError).toHaveBeenCalledWith({
+        type: 'renderError',
+        error: fakeWebAssemblyRuntimeError,
+      });
+    });
+
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Error in animation frame:', fakeWebAssemblyRuntimeError);
+
+    expect(onDestroy).toHaveBeenCalledTimes(1);
   });
 
   describe('resize', () => {
@@ -2247,5 +2263,52 @@ describe.each([
     expect(() => dotLottie.resize()).not.toThrow();
 
     canvas.style.display = 'block';
+  });
+
+  (isWorker ? test.skip : test)('play animation with no canvas', async () => {
+    const onLoad = vi.fn();
+    const onPlay = vi.fn();
+    const onComplete = vi.fn();
+    const onFrame = vi.fn();
+
+    // info: cast DotLottie to any to bypass the type check, since this is only for the non-worker version
+    dotLottie = new (DotLottie as unknown)({
+      canvas: {
+        width: 100,
+        height: 100,
+      },
+      src,
+      autoplay: true,
+      useFrameInterpolation: false,
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+    dotLottie.addEventListener('play', onPlay);
+    dotLottie.addEventListener('complete', onComplete);
+    dotLottie.addEventListener('frame', onFrame);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+      expect(onPlay).toHaveBeenCalledTimes(1);
+    });
+
+    await vi.waitFor(
+      () => {
+        expect(onComplete).toHaveBeenCalledTimes(1);
+      },
+      {
+        timeout: dotLottie.duration * 1000 + 500,
+      },
+    );
+
+    expect(onFrame).toHaveBeenNthCalledWith(1, {
+      type: 'frame',
+      currentFrame: 0,
+    });
+
+    expect(onFrame).toHaveBeenNthCalledWith(dotLottie.totalFrames, {
+      type: 'frame',
+      currentFrame: dotLottie.totalFrames - 1,
+    });
   });
 });
