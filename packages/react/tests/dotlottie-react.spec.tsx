@@ -453,7 +453,12 @@ describe.each([
     const resetSegment = vi.spyOn(dotLottie, 'resetSegment');
 
     rerender(
-      <Component src={dotLottieSrc} autoplay segment={'invalid' as unknown} dotLottieRefCallback={dotLottieRefCallback} />,
+      <Component
+        src={dotLottieSrc}
+        autoplay
+        segment={'invalid' as unknown as [number, number]}
+        dotLottieRefCallback={dotLottieRefCallback}
+      />,
     );
 
     await vi.waitFor(() => {
@@ -463,7 +468,12 @@ describe.each([
     resetSegment.mockClear();
 
     rerender(
-      <Component src={dotLottieSrc} autoplay segment={[0] as unknown} dotLottieRefCallback={dotLottieRefCallback} />,
+      <Component
+        src={dotLottieSrc}
+        autoplay
+        segment={[0] as unknown as [number, number]}
+        dotLottieRefCallback={dotLottieRefCallback}
+      />,
     );
 
     await vi.waitFor(() => {
@@ -473,7 +483,12 @@ describe.each([
     resetSegment.mockClear();
 
     rerender(
-      <Component src={dotLottieSrc} autoplay segment={['a', 'b'] as unknown} dotLottieRefCallback={dotLottieRefCallback} />,
+      <Component
+        src={dotLottieSrc}
+        autoplay
+        segment={['a', 'b'] as unknown as [number, number]}
+        dotLottieRefCallback={dotLottieRefCallback}
+      />,
     );
 
     await vi.waitFor(() => {
