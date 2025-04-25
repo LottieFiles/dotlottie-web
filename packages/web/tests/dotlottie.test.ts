@@ -2272,7 +2272,7 @@ describe.each([
     const onFrame = vi.fn();
 
     // info: cast DotLottie to any to bypass the type check, since this is only for the non-worker version
-    dotLottie = new (DotLottie as unknown)({
+    dotLottie = new (DotLottie as any)({
       canvas: {
         width: 100,
         height: 100,
