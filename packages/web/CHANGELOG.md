@@ -1,5 +1,17 @@
 # @lottiefiles/dotlottie-web
 
+## 0.44.0
+
+### Minor Changes
+
+- 57d4e8a: feat: add `buffer` getter on `DotLottie` instance
+- 3320fe2: added a renderError event fire when a render error occurs.
+
+### Patch Changes
+
+- 57d4e8a: refactor: delay canvas context acquisition until render time instead of during initialization to optimize
+  resource usage
+
 ## 0.43.0
 
 ### Minor Changes
