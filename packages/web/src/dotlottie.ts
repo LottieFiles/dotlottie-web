@@ -528,7 +528,7 @@ export class DotLottie {
   }
 
   private _draw(): void {
-    if (this._dotLottieCore === null || this._context === null || !this._dotLottieCore.isPlaying()) return;
+    if (this._dotLottieCore === null || !this._dotLottieCore.isPlaying()) return;
 
     try {
       const nextFrame = Math.round(this._dotLottieCore.requestFrame() * 1000) / 1000;
@@ -562,12 +562,11 @@ export class DotLottie {
     } catch (error) {
       console.error('Error in animation frame:', error);
 
-      // Allows users to catch rendering errors
-      this._eventManager.dispatch({ type: 'renderError', error: new Error(`Error in animation frame: ${error}`) });
+      this._eventManager.dispatch({ type: 'renderError', error: error as unknown as Error });
 
-      if (this._animationFrameId !== null) {
-        this._frameManager.cancelAnimationFrame(this._animationFrameId);
-        this._animationFrameId = null;
+      // destroy the instance if it's a runtime error
+      if (error instanceof WebAssembly.RuntimeError) {
+        this.destroy();
       }
     }
   }

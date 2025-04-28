@@ -3,6 +3,7 @@ import { DotLottieWorkerReact, DotLottieWorker, setWasmUrl } from '@lottiefiles/
 import React, { useState } from 'react';
 
 const animations = [
+  'https://lottie.host/68f06eea-5f90-4e58-b51e-3abe1fbd74b8/llUlrzgWDQ.lottie',
   'https://lottie.host/e641272e-039b-4612-96de-138acfbede6e/bc0sW78EeR.lottie',
   './markers_example.json',
   'https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie',
