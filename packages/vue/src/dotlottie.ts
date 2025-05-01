@@ -184,8 +184,8 @@ export const DotLottieVue = defineComponent({
     });
 
     onBeforeUnmount(() => {
-      canvas.value?.addEventListener('mouseenter', hoverHandler);
-      canvas.value?.addEventListener('mouseleave', hoverHandler);
+      canvas.value?.removeEventListener('mouseenter', hoverHandler);
+      canvas.value?.removeEventListener('mouseleave', hoverHandler);
       dotLottie?.destroy();
     });
 
