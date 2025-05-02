@@ -125,7 +125,7 @@ export const DotLottieVue = defineComponent({
       },
     );
     watch(
-      () => props.themeData,
+      () => props.themeId,
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
           dotLottie.setTheme(newVal);
@@ -133,7 +133,7 @@ export const DotLottieVue = defineComponent({
       },
     );
     watch(
-      () => props.themeId,
+      () => props.themeData,
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
           dotLottie.setThemeData(newVal);

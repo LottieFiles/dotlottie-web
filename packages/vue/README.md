@@ -2,14 +2,14 @@
 
 ![npm](https://img.shields.io/npm/v/@lottiefiles/dotlottie-vue)
 ![npm bundle size](https://img.shields.io/bundlephobia/minzip/%40lottiefiles%2Fdotlottie-vue)
-![npm](https://img.shields.io/npm/dt/%40lottiefiles/dotlottie-vue)
+![npm](https://img.shields.io/npm/dw/%40lottiefiles/dotlottie-vue)
 ![NPM](https://img.shields.io/npm/l/@lottiefiles/dotlottie-vue)
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/23125742/201124166-c2a0bc2a-018b-463b-b291-944fb767b5c2.png" />
+  <img src="https://user-images.githubusercontent.com/23125742/201124166-c2a0bc2a-018b-463b-b291-944fb767b5c2.png" alt="dotLottie Logo" />
 </p>
 
-## Contents
+## Table of Contents
 
 * [Introduction](#introduction)
   * [What is dotLottie?](#what-is-dotlottie)
@@ -17,7 +17,8 @@
 * [Usage](#usage)
 * [Live Examples](#live-examples)
 * [APIs](#apis)
-  * [DotLottieVue Props](#dotlottievue-props)
+  * [Props](#props)
+  * [Methods](#methods)
   * [Listening to Events](#listening-to-events)
 * [Development](#development)
   * [Setup](#setup)
@@ -26,7 +27,7 @@
 
 ## Introduction
 
-A Vue library for rendering [lottie](https://lottiefiles.github.io/lottie-docs/) and [dotLottie](https://dotlottie.io) animations in the browser.
+A Vue library for rendering [Lottie](https://lottiefiles.github.io/lottie-docs/) and [dotLottie](https://dotlottie.io) animations in the browser.
 
 ### What is dotLottie?
 
@@ -48,17 +49,22 @@ import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
 </script>
 
 <template>
-  <DotLottieVue style="height: 500px; width: 500px" autoplay loop src="https://path-to-lottie.lottie" />
+  <DotLottieVue 
+    style="height: 500px; width: 500px" 
+    autoplay 
+    loop 
+    src="https://path-to-lottie.lottie" 
+  />
 </template>
 ```
 
 ## Live Examples
 
-* <a href="https://codepen.io/lottiefiles/pen/yLwgeoJ" target="_blank">Basic Example</a>
+* [Basic Example](https://codepen.io/lottiefiles/pen/yLwgeoJ)
 
 ## APIs
 
-### DotLottieVue Props
+### Props
 
 | Property name           | Type                  | Required | Default               | Description                                                                                                                                                                                                                                        |
 | ----------------------- | --------------------- | :------: | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -71,41 +77,85 @@ import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
 | `backgroundColor`       | string                |          | undefined             | Background color of the canvas. Accepts 6-digit or 8-digit hex color string (e.g., "#000000", "#000000FF"),                                                                                                                                        |
 | `segment`               | \[number, number]     |          | \[0, totalFrames - 1] | Animation segment. Accepts an array of two numbers, where the first number is the start frame and the second number is the end frame.                                                                                                              |
 | `renderConfig`          | RenderConfig          |          | `{}`                  | Configuration for rendering the animation.                                                                                                                                                                                                         |
-| `useFrameInterpolation` | boolean               |          | false                 | Determines if the animation should update on subframes. If set to false, the original AE frame rate will be maintained. If set to true, it will refresh at each requestAnimationFrame, including intermediate values. The default setting is true. |
+| `useFrameInterpolation` | boolean               |          | true                  | Determines if the animation should update on subframes. If set to false, the original AE frame rate will be maintained. If set to true, it will refresh at each requestAnimationFrame, including intermediate values. The default setting is true. |
 | `marker`                | string                |          | undefined             | Sets a specific marker to be played                                                                                                                                                                                                                |
-| `autoResizeCanvas`      | boolean               |          | true                  | Enable or disable auto resize of canvas                                                                                                                                                                                                            |
 | `playOnHover`           | boolean               |          | false                 | When enabled it plays animation only on hover                                                                                                                                                                                                      |
 | `animationId`           | string                |          | undefined             | Plays specific animation within .lottie                                                                                                                                                                                                            |
 | `themeId`               | string                |          | undefined             | Loads a specific theme within .lottie                                                                                                                                                                                                              |
-| `themeData`             | string                |          | undefined             | Load theme data.                                                                                                                                                                                                                                   |
+| `themeData`             | string                |          | undefined             | Sets theme data for the animation                                                                                                                                                                                                                  |
 
 #### RenderConfig
 
 The `renderConfig` object accepts the following properties:
 
-| Property name      | Type   | Required | Default                       | Description             |
-| ------------------ | ------ | :------: | ----------------------------- | ----------------------- |
-| `devicePixelRatio` | number |          | window\.devicePixelRatio \| 1 | The device pixel ratio. |
+| Property name       | Type    | Required | Default                       | Description                                            |
+| ------------------- | ------- | :------: | ----------------------------- | ------------------------------------------------------ |
+| `devicePixelRatio`  | number  |          | window\.devicePixelRatio \| 1 | The device pixel ratio.                                |
+| `autoResize`        | boolean |          | false                         | Automatically resize the canvas to the parent element. |
+| `freezeOnOffscreen` | boolean |          | true                          | Freeze the animation when it's offscreen.              |
+
+### Methods
+
+The Vue component provides a way to access the underlying [dotLottie](../web/README.md) instance using the `getDotLottieInstance()` method on the component reference:
+
+```vue
+<script setup>
+import { ref, onMounted } from 'vue';
+import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
+
+const playerRef = ref(null);
+
+onMounted(() => {
+  if (playerRef.value) {
+    const dotLottie = playerRef.value.getDotLottieInstance();
+    
+    // Now you can call methods on the dotLottie instance
+    dotLottie.play();
+    dotLottie.setSpeed(2);
+    dotLottie.setLoop(true);
+    // etc.
+  }
+});
+</script>
+
+<template>
+  <DotLottieVue ref="playerRef" src="path-to-lottie.lottie" />
+</template>
+```
+
+For a complete list of available methods, refer to the [dotlottie-web](../web/README.md#methods) documentation.
 
 ### Listening to Events
 
-```javascript
+You can listen to events emitted by the player by accessing the dotLottie instance and adding event listeners:
+
+```vue
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
 import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
 const playerRef = ref(null);
 
 onMounted(() => {
   if (playerRef.value) {
     const dotLottie = playerRef.value.getDotLottieInstance();
+    
     dotLottie.addEventListener('pause', () => {
-      console.log('paused')
+      console.log('Animation paused');
     });
+    
+    dotLottie.addEventListener('play', () => {
+      console.log('Animation started playing');
+    });
+    
     dotLottie.addEventListener('frame', ({ currentFrame }) => {
-      console.log('Frame:', currentFrame)
+      console.log('Current frame:', currentFrame);
+    });
+    
+    dotLottie.addEventListener('complete', () => {
+      console.log('Animation completed');
     });
   }
-})
+});
 </script>
 
 <template>
@@ -113,7 +163,7 @@ onMounted(() => {
 </template>
 ```
 
-> Refer to [dotlottie-web](../web/README.md) Events sections to know more about all available events.
+For a complete list of available events, refer to the [dotlottie-web](../web/README.md#events) documentation.
 
 ## Development
 
