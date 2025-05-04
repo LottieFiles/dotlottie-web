@@ -5,9 +5,13 @@ export default defineConfig({
     include: ['tests/**/*.{test,spec}.ts', '!tests/**/*.node.{test,spec}.ts'],
     browser: {
       enabled: true,
-      name: 'chromium',
       provider: 'playwright',
       screenshotFailures: false,
+      instances: [
+        {
+          browser: 'chromium',
+        },
+      ],
     },
     retry: 1,
     coverage: {
