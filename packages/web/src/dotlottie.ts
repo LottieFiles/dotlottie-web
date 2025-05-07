@@ -92,6 +92,8 @@ export class DotLottie {
 
   private _isFrozen: boolean = false;
 
+  private _isDestroyed: boolean = false;
+
   private _backgroundColor: string | null = null;
 
   private readonly _pointerUpMethod: (event: PointerEvent) => void;
@@ -122,6 +124,10 @@ export class DotLottie {
 
     DotLottieWasmLoader.load()
       .then((module) => {
+        if (this._isDestroyed) {
+          return;
+        }
+
         DotLottie._wasmModule = module;
 
         this._dotLottieCore = new module.DotLottiePlayer({
@@ -403,6 +409,10 @@ export class DotLottie {
 
   public get speed(): number {
     return this._dotLottieCore?.config().speed ?? 0;
+  }
+
+  public get isDestroyed(): boolean {
+    return this._isDestroyed;
   }
 
   public get isReady(): boolean {
@@ -691,6 +701,10 @@ export class DotLottie {
   }
 
   public destroy(): void {
+    if (this._isDestroyed) return;
+
+    this._isDestroyed = true;
+
     if (this._animationFrameId !== null) {
       this._frameManager.cancelAnimationFrame(this._animationFrameId);
       this._animationFrameId = null;
