@@ -16,6 +16,14 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
+const StrictModeWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <React.StrictMode>
+      <>{children}</>
+    </React.StrictMode>
+  );
+};
+
 const render = (ui: React.ReactNode, options?: ComponentRenderOptions): RenderResult =>
   vitestRender(ui, { wrapper: Wrapper, ...options });
 
@@ -766,5 +774,25 @@ describe.each([
     });
 
     expect(setLayout).toHaveBeenCalledWith({ fit: 'cover' });
+  });
+});
+
+describe('DotLottieWorkerReact in StrictMode', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  test('should not throw InvalidStateError in StrictMode', async () => {
+    const dotLottieRefCallback = vi.fn();
+
+    render(<DotLottieWorkerReact src={dotLottieSrc} dotLottieRefCallback={dotLottieRefCallback} />, {
+      wrapper: StrictModeWrapper,
+    });
+
+    await vi.waitFor(() => {
+      expect(document.querySelector('canvas')).not.toBeNull();
+    });
+
+    expect(dotLottieRefCallback).toHaveBeenCalled();
   });
 });

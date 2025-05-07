@@ -5,6 +5,8 @@ import type { Config, DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-
 import { useState, useEffect, useCallback, useRef, type ComponentProps, type RefCallback } from 'react';
 import type { JSX } from 'react';
 
+const transferredCanvases = new WeakMap<HTMLCanvasElement, boolean>();
+
 export type BaseDotLottieProps<T extends DotLottie | DotLottieWorker> = Omit<Config, 'canvas'> &
   ComponentProps<'canvas'> & {
     animationId?: string;
@@ -110,12 +112,16 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     canvasRef.current = canvas;
 
     if (canvas) {
-      const dotLottieInstance = createDotLottie({
-        ...configRef.current,
-        canvas,
-      });
+      if (!transferredCanvases.has(canvas)) {
+        transferredCanvases.set(canvas, true);
+        
+        const dotLottieInstance = createDotLottie({
+          ...configRef.current,
+          canvas,
+        });
 
-      setDotLottie(dotLottieInstance as T);
+        setDotLottie(dotLottieInstance as T);
+      }
     } else {
       dotLottie?.destroy();
       setDotLottie(null);
@@ -149,6 +155,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
       if (dotLottie) {
         dotLottie.destroy();
         setDotLottie(null);
+        
       }
     };
   }, [dotLottie]);
