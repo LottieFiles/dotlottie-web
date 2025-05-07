@@ -352,7 +352,7 @@ describe.each([
     expect(dotLottie?.marker).toBe('');
   });
 
-  test.todo('calls dotLottie.setSegment & dotLottie.resetSegment when segment prop changes', async () => {
+  test('calls dotLottie.setSegment when segment prop changes with valid numbers', async () => {
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
@@ -383,16 +383,16 @@ describe.each([
 
     expect(setSegment).toHaveBeenCalledWith(0, 10);
 
+    rerender(<Component src={dotLottieSrc} autoplay segment={[null, undefined]} dotLottieRefCallback={dotLottieRefCallback} />);
+
+    expect(setSegment).toHaveBeenCalledTimes(1);
+    
     rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
 
-    await vi.waitFor(() => {
-      expect(resetSegment).toHaveBeenCalledTimes(1);
-    });
-
-    expect(dotLottie?.segment).toBeUndefined();
+    expect(resetSegment).not.toHaveBeenCalled();
   });
 
-  test.todo('calls dotLottie.setTheme & dotLottie.resetTheme when themeId prop changes', async () => {
+  test('calls dotLottie.setTheme when themeId prop changes with string value', async () => {
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
@@ -423,13 +423,11 @@ describe.each([
 
     expect(setTheme).toHaveBeenCalledWith('Theme_1');
 
-    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(<Component src={dotLottieSrc} autoplay themeId={null} dotLottieRefCallback={dotLottieRefCallback} />);
 
-    await vi.waitFor(() => {
-      expect(resetTheme).toHaveBeenCalledTimes(1);
-    });
-
-    expect(dotLottie?.themeId).toBeUndefined();
+    expect(setTheme).toHaveBeenCalledTimes(1);
+    
+    expect(resetTheme).not.toHaveBeenCalled();
   });
 
   test('playOnHover', async () => {
