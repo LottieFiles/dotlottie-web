@@ -191,6 +191,7 @@ export interface Marker {
 }
 
 export interface Config {
+  animationId: EmbindString;
   autoplay: boolean;
   backgroundColor: number;
   layout: Layout;
