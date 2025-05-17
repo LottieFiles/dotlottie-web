@@ -10,7 +10,7 @@ import minimist from 'minimist';
 const wasmBase64 = fs
   .readFileSync('./node_modules/@lottiefiles/dotlottie-web/dist/dotlottie-player.wasm')
   .toString('base64');
-const wasmDataUri = `data:application/octet-stream;base64,${wasmBase64}`;
+const wasmDataUri = `data:application/wasm;base64,${wasmBase64}`;
 
 // This is only required for testing the local version of the renderer
 DotLottie.setWasmUrl(wasmDataUri);

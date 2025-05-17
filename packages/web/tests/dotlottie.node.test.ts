@@ -7,7 +7,7 @@ import { DotLottie } from '../src';
 
 beforeAll(() => {
   const wasmBase64 = fs.readFileSync(path.resolve(__dirname, '../src/core/dotlottie-player.wasm')).toString('base64');
-  const wasmDataUri = `data:application/octet-stream;base64,${wasmBase64}`;
+  const wasmDataUri = `data:application/wasm;base64,${wasmBase64}`;
 
   DotLottie.setWasmUrl(wasmDataUri);
 });
