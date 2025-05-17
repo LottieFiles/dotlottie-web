@@ -15,10 +15,8 @@ import {
 export { type DotLottie };
 
 export interface DotLottieVueProps extends Omit<Config, 'canvas'> {
-  animationId?: string;
   playOnHover?: boolean;
   themeData?: string;
-  themeId?: string;
 }
 
 interface DotLottieVueExposed {
@@ -46,7 +44,18 @@ export const DotLottieVue = defineComponent({
 
   setup(props: DotLottieVueProps, { attrs, expose }: SetupContext): () => VNode {
     const canvas: Ref<HTMLCanvasElement | undefined> = ref(undefined);
-    const { backgroundColor, loop, marker, mode, playOnHover, segment, speed, useFrameInterpolation } = toRefs(props);
+    const {
+      animationId,
+      backgroundColor,
+      loop,
+      marker,
+      mode,
+      playOnHover,
+      segment,
+      speed,
+      themeId,
+      useFrameInterpolation,
+    } = toRefs(props);
     let dotLottie: DotLottie | null = null;
 
     // Prop change
@@ -112,7 +121,7 @@ export const DotLottieVue = defineComponent({
       },
     );
     watch(
-      () => props.animationId,
+      () => animationId?.value,
       (newVal) => {
         if (
           dotLottie &&
@@ -133,10 +142,10 @@ export const DotLottieVue = defineComponent({
       },
     );
     watch(
-      () => props.themeId,
+      () => themeId?.value,
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
-          dotLottie.setThemeData(newVal);
+          dotLottie.setTheme(newVal);
         }
       },
     );

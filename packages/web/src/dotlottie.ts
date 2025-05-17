@@ -125,6 +125,7 @@ export class DotLottie {
         DotLottie._wasmModule = module;
 
         this._dotLottieCore = new module.DotLottiePlayer({
+          animationId: config.animationId ?? '',
           themeId: config.themeId ?? '',
           stateMachineId: '',
           autoplay: config.autoplay ?? false,
@@ -462,6 +463,7 @@ export class DotLottie {
     this._isFrozen = false;
 
     this._dotLottieCore.setConfig({
+      animationId: config.animationId ?? '',
       themeId: config.themeId ?? '',
       stateMachineId: '',
       autoplay: config.autoplay ?? false,

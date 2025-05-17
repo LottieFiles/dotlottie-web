@@ -32,7 +32,7 @@ module.exports = defineConfig({
   outDir: './dist',
   format: ['esm', 'cjs'],
   platform: 'neutral',
-  target: ['es2015', 'node18'],
+  target: ['es2020', 'node18'],
   tsconfig: 'tsconfig.build.json',
   esbuildPlugins: [
     // This plugin is used to inline the workers as base64 strings in the output bundle

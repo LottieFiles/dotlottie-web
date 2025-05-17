@@ -84,15 +84,16 @@ The `DotLottieReactProps` extends the `HTMLCanvasElement` Props and accepts all 
 | `dotLottieRefCallback`  | React.RefCallback\<DotLottie \|  null> |          | undefined             | Callback function that receives a reference to the [`dotLottie`](../web/README.md) web player instance.                                                                                                                                            |   |
 | `useFrameInterpolation` | boolean                                |          | true                  | Determines if the animation should update on subframes. If set to false, the original AE frame rate will be maintained. If set to true, it will refresh at each requestAnimationFrame, including intermediate values. The default setting is true. |   |
 | `marker`                | string                                 |          | undefined             | The Lottie named marker to play.                                                                                                                                                                                                                   |   |
+| `animationId`           | string                                 |          | undefined             | The ID of the animation to play.                                                                                                                                                                                                                   |   |
 
 #### RenderConfig
 
 The `renderConfig` object accepts the following properties:
 
-| Property name      | Type   | Required | Default                       | Description             |
-| ------------------ | ------ | :------: | ----------------------------- | ----------------------- |
-| `devicePixelRatio` | number |          | window\.devicePixelRatio \| 1 | The device pixel ratio. |
-| `renderConfig.autoResize`       | boolean|          | true                          | Determines if the canvas should resize automatically to its container |
+| Property name             | Type    | Required | Default                       | Description                                                           |
+| ------------------------- | ------- | :------: | ----------------------------- | --------------------------------------------------------------------- |
+| `devicePixelRatio`        | number  |          | window\.devicePixelRatio \| 1 | The device pixel ratio.                                               |
+| `renderConfig.autoResize` | boolean |          | true                          | Determines if the canvas should resize automatically to its container |
 
 ## Custom Playback Controls
 
@@ -100,53 +101,29 @@ The `renderConfig` object accepts the following properties:
 
 Here is an example:
 
-```js
+```jsx
 import React from 'react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 const App = () => {
-  const [dotLottie, setDotLottie] = React.useState(null);
-
-  const dotLottieRefCallback = (dotLottie) => {
-    setDotLottie(dotLottie);
-  };
-
-  function play(){
-    if(dotLottie){
-      dotLottie.play();
-    }
-  }
-
-  function pause(){
-    if(dotLottie){
-      dotLottie.pause();
-    }
-  }
-
-  function stop(){
-    if(dotLottie){
-      dotLottie.stop();
-    }
-  }
-
-  function seek(){
-    if(dotLottie){
-      dotLottie.setFrame(30);
-    }
-  }
+  const dotLottieRef = React.useRef(null);
 
   return (
-    <DotLottieReact
-      src="path/to/animation.lottie"
-      loop
-      autoplay
-      dotLottieRefCallback={dotLottieRefCallback}
-    />
     <div>
-      <button onClick={play}>Play</button>
-      <button onClick={pause}>Pause</button>
-      <button onClick={stop}>Stop</button>
-      <button onClick={seek}>Seek to frame no. 30</button>
+      <DotLottieReact
+        src="path/to/animation.lottie"
+        loop
+        autoplay
+        dotLottieRefCallback={(dotLottie) => {
+          dotLottieRef.current = dotLottie;
+        }}
+      />
+      <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+        <button onClick={() => dotLottieRef.current?.play()}>Play</button>
+        <button onClick={() => dotLottieRef.current?.pause()}>Pause</button>
+        <button onClick={() => dotLottieRef.current?.stop()}>Stop</button>
+        <button onClick={() => dotLottieRef.current?.setFrame(30)}>Seek to frame 30</button>
+      </div>
     </div>
   );
 };
@@ -165,59 +142,34 @@ import React from 'react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 const App = () => {
-  const [dotLottie, setDotLottie] = React.useState(null);
 
-  React.useEffect(() => {
+  const onPlay = () => {
+    console.log('Animation start playing');
+  }
 
-    // This function will be called when the animation starts playing.
-    function onPlay() {
-      console.log('Animation start playing');
-    }
+  const onPause = () => {
+    console.log('Animation paused');
+  }
 
-    // This function will be called when the animation is paused.
-    function onPause() {
-      console.log('Animation paused');
-    }
+  const onComplete = () => {
+    console.log('Animation completed');
+  }
 
-    // This function will be called when the animation is completed.
-    function onComplete() {
-      console.log('Animation completed');
-    }
-
-    function onFrameChange({currentFrame}) {
-      console.log('Current frame: ', currentFrame);
-    }
-
-    // Listen to events emitted by the DotLottie instance when it is available.
-    if (dotLottie) {
-      dotLottie.addEventListener('play', onPlay);
-      dotLottie.addEventListener('pause', onPause);
-      dotLottie.addEventListener('complete', onComplete);
-      dotLottie.addEventListener('frame', onFrameChange);
-    }
-
-    return () => {
-      // Remove event listeners when the component is unmounted.
-      if (dotLottie) {
-        dotLottie.removeEventListener('play', onPlay);
-        dotLottie.removeEventListener('pause', onPause);
-        dotLottie.removeEventListener('complete', onComplete);
-        dotLottie.removeEventListener('frame', onFrameChange);
-      }
-    };
-  }, [dotLottie]);
-
-
-  const dotLottieRefCallback = (dotLottie) => {
-    setDotLottie(dotLottie);
-  };
+  const onFrameChange = ({currentFrame}) => {
+    console.log('Current frame: ', currentFrame);
+  }
 
   return (
     <DotLottieReact
       src="path/to/animation.lottie"
       loop
       autoplay
-      dotLottieRefCallback={dotLottieRefCallback}
+      dotLottieRefCallback={(dotLottie) => {
+        dotLottie.addEventListener('play', onPlay);
+        dotLottie.addEventListener('pause', onPause);
+        dotLottie.addEventListener('complete', onComplete);
+        dotLottie.addEventListener('frame', onFrameChange);
+      }}
     />
   );
 };

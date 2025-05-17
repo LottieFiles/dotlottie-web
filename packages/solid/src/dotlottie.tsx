@@ -6,11 +6,9 @@ import { useDotLottie } from './use-dotlottie';
 export type DotLottieSolidProps = Omit<Config, 'canvas'> &
   ComponentProps<'canvas'> &
   Partial<{
-    animationId?: string;
     dotLottieRefCallback: (dotLottie: DotLottie) => void;
     playOnHover: boolean;
     themeData?: string;
-    themeId?: string;
   }>;
 
 export const DotLottieSolid = (props: DotLottieSolidProps): JSX.Element => {

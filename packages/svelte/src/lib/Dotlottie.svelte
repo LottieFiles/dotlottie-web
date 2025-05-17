@@ -18,10 +18,10 @@
 	export let useFrameInterpolation: Config['useFrameInterpolation'] = true;
 	export let marker: Config['marker'] = undefined;
 	export let layout: Config['layout'] = undefined;
+	export let animationId: Config['animationId'] = '';
+	export let themeId: Config['themeId'] = '';
 
 	export let playOnHover: boolean = false;
-	export let animationId: string = '';
-	export let themeId: string = '';
 	export let themeData: string = '';
 
 	export let dotLottieRefCallback: (dotLottie: DotLottie) => void = () => {};
@@ -54,7 +54,9 @@
 			segment,
 			useFrameInterpolation,
 			backgroundColor,
-			mode
+			mode,
+			animationId,
+			themeId
 		});
 
 		if (dotLottieRefCallback) {
@@ -134,7 +136,9 @@
             backgroundColor,
             mode,
 			marker,
-			layout
+			layout,
+			animationId,
+			themeId
         });
         prevSrc = src; 
     }
@@ -152,7 +156,9 @@
 			backgroundColor,
 			mode,
 			marker,
-			layout
+			layout,
+			animationId,
+			themeId
 		});
 		prevData = data;
 	}

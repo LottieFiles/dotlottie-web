@@ -39,10 +39,8 @@ function DotLottieComponent({
 
 export type DotLottieConfig = Omit<Config, 'canvas'> &
   Partial<{
-    animationId?: string;
     playOnHover: boolean;
     themeData?: string;
-    themeId?: string;
   }>;
 
 export interface UseDotLottieReturn {
