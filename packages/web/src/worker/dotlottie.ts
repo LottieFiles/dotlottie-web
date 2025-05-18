@@ -615,6 +615,12 @@ export class DotLottieWorker {
     return this._sendMessage('setViewport', { x, y, width, height, instanceId: this._id });
   }
 
+  public async animationSize(): Promise<{ height: number; width: number }> {
+    if (!this._created) return { height: 0, width: 0 };
+
+    return this._sendMessage('animationSize', { instanceId: this._id });
+  }
+
   private async _sendMessage<T extends keyof MethodParamsMap>(
     method: T,
     params: MethodParamsMap[T],
