@@ -7,4 +7,4 @@
 '@lottiefiles/dotlottie-vue': minor
 ---
 
-chore: update dotlottie-rs WASM bindings to v0.1.41
+chore: update dotlottie-rs WASM bindings to v0.1.42
