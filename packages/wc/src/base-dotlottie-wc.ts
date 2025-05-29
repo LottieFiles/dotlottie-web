@@ -4,7 +4,7 @@ import { LitElement, html, css } from 'lit';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { property, state } from 'lit/decorators.js';
 
-export abstract class AbstractDotLottieWC<T extends DotLottie | DotLottieWorker> extends LitElement {
+export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> extends LitElement {
   @property({ type: String })
   public animationId?: string;
 
@@ -83,6 +83,7 @@ export abstract class AbstractDotLottieWC<T extends DotLottie | DotLottieWorker>
       renderConfig: this.renderConfig,
       useFrameInterpolation: this.useFrameInterpolation,
       themeId: this.themeId,
+      animationId: this.animationId,
 
       workerId: this.workerId,
     });
@@ -194,6 +195,7 @@ export abstract class AbstractDotLottieWC<T extends DotLottie | DotLottieWorker>
         renderConfig: this.renderConfig,
         useFrameInterpolation: this.useFrameInterpolation,
         themeId: this.themeId,
+        animationId: this.animationId,
       });
     }
   }

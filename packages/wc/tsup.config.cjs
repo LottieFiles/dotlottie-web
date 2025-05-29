@@ -14,7 +14,7 @@ module.exports = defineConfig({
   entry: ['./src/*.ts'],
   format: ['esm'],
   platform: 'browser',
-  target: ['es2020', 'chrome58', 'firefox57', 'safari11'],
+  target: ['es2020'],
   tsconfig: 'tsconfig.build.json',
   // To ensure the ESM bundle is self-contained and usable via CDN
   noExternal: Object.keys(pkg.dependencies),

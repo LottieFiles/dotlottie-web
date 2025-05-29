@@ -223,20 +223,20 @@ describe.each([
         const expectedEndFrame =
           config.mode === 'reverse' || config.mode === 'reverse-bounce'
             ? config.segment?.[0] ?? 0
-            : config.segment?.[1] ?? dotLottie.totalFrames;
+            : config.segment?.[1] ?? dotLottie.totalFrames - 1;
         const expectedStartFrame =
           config.mode === 'reverse' || config.mode === 'reverse-bounce'
-            ? config.segment?.[1] ?? dotLottie.totalFrames
+            ? config.segment?.[1] ?? dotLottie.totalFrames - 1
             : config.segment?.[0] ?? 0;
 
         const startFrame =
           config.mode === 'reverse' || config.mode === 'reverse-bounce'
-            ? dotLottie.segment?.[1] ?? dotLottie.totalFrames
+            ? dotLottie.segment?.[1] ?? dotLottie.totalFrames - 1
             : dotLottie.segment?.[0] ?? 0;
         const endFrame =
           config.mode === 'reverse' || config.mode === 'reverse-bounce'
             ? dotLottie.segment?.[0] ?? 0
-            : dotLottie.segment?.[1] ?? dotLottie.totalFrames;
+            : dotLottie.segment?.[1] ?? dotLottie.totalFrames - 1;
 
         expect(startFrame).toBe(expectedStartFrame);
         expect(endFrame).toBe(expectedEndFrame);
@@ -319,20 +319,20 @@ describe.each([
         const expectedEndFrame =
           config.mode === 'reverse' || config.mode === 'reverse-bounce'
             ? config.segment?.[0] ?? 0
-            : config.segment?.[1] ?? dotLottie.totalFrames;
+            : config.segment?.[1] ?? dotLottie.totalFrames - 1;
         const expectedStartFrame =
           config.mode === 'reverse' || config.mode === 'reverse-bounce'
-            ? config.segment?.[1] ?? dotLottie.totalFrames
+            ? config.segment?.[1] ?? dotLottie.totalFrames - 1
             : config.segment?.[0] ?? 0;
 
         const startFrame =
           config.mode === 'reverse' || config.mode === 'reverse-bounce'
-            ? dotLottie.segment?.[1] ?? dotLottie.totalFrames
+            ? dotLottie.segment?.[1] ?? dotLottie.totalFrames - 1
             : dotLottie.segment?.[0] ?? 0;
         const endFrame =
           config.mode === 'reverse' || config.mode === 'reverse-bounce'
             ? dotLottie.segment?.[0] ?? 0
-            : dotLottie.segment?.[1] ?? dotLottie.totalFrames;
+            : dotLottie.segment?.[1] ?? dotLottie.totalFrames - 1;
 
         expect(startFrame).toBe(expectedStartFrame);
         expect(endFrame).toBe(expectedEndFrame);
@@ -482,12 +482,12 @@ describe.each([
         });
 
         const startFrame = dotLottie.mode.includes('reverse')
-          ? dotLottie.segment?.[1] ?? dotLottie.totalFrames
+          ? dotLottie.segment?.[1] ?? dotLottie.totalFrames - 1
           : dotLottie.segment?.[0] ?? 0;
         const endFrame = dotLottie.mode.includes('reverse')
           ? dotLottie.segment?.[0] ?? 0
-          : dotLottie.segment?.[1] ?? dotLottie.totalFrames;
-        const totalFrames = (config.segment?.[1] ?? dotLottie.totalFrames) - (config.segment?.[0] ?? 0);
+          : dotLottie.segment?.[1] ?? dotLottie.totalFrames - 1;
+        const totalFrames = (config.segment?.[1] ?? dotLottie.totalFrames - 1) - (config.segment?.[0] ?? 0);
 
         expect(onFrame).toHaveBeenNthCalledWith(1, {
           type: 'frame',
@@ -1039,7 +1039,7 @@ describe.each([
 
         const startFrame =
           config.mode === 'reverse' || config.mode === 'reverse-bounce'
-            ? config.segment?.[1] ?? dotLottie.totalFrames
+            ? config.segment?.[1] ?? dotLottie.totalFrames - 1
             : config.segment?.[0] ?? 0;
 
         expect(onFrame).toHaveBeenNthCalledWith(1, {
@@ -1632,7 +1632,7 @@ describe.each([
 
       expect(onFrame).toHaveBeenLastCalledWith({
         type: 'frame',
-        currentFrame: dotLottie.totalFrames,
+        currentFrame: dotLottie.totalFrames - 1,
       });
 
       expect(dotLottie.marker).toBe('');
@@ -1874,203 +1874,205 @@ describe.each([
     expect(updated).toBe(true);
   });
 
-  test('freezeOnOffscreen defaults to true when not defined', async () => {
-    const onFreeze = vi.fn();
+  describe('freezeOnOffscreen', () => {
+    test('freezeOnOffscreen defaults to true when not defined', async () => {
+      const onFreeze = vi.fn();
 
-    canvas.style.marginTop = '100vh';
+      canvas.style.marginTop = '100vh';
 
-    dotLottie = new DotLottie({
-      canvas,
-      src: jsonSrc,
-      autoplay: true,
-      // freezeOnOffscreen is not explicitly defined
+      dotLottie = new DotLottie({
+        canvas,
+        src: jsonSrc,
+        autoplay: true,
+        // freezeOnOffscreen is not explicitly defined
+      });
+
+      dotLottie.addEventListener('freeze', onFreeze);
+
+      await vi.waitFor(() => {
+        expect(onFreeze).toHaveBeenCalledTimes(1);
+      });
+
+      expect(dotLottie.isFrozen).toBe(true);
     });
 
-    dotLottie.addEventListener('freeze', onFreeze);
+    test('freeze when canvas is initially offscreen and freezeOnOffscreen is true', async () => {
+      const onFreeze = vi.fn();
 
-    await vi.waitFor(() => {
-      expect(onFreeze).toHaveBeenCalledTimes(1);
+      canvas.style.marginTop = '100vh';
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: jsonSrc,
+        autoplay: true,
+        renderConfig: {
+          freezeOnOffscreen: true,
+        },
+      });
+
+      dotLottie.addEventListener('freeze', onFreeze);
+
+      await vi.waitFor(() => {
+        expect(onFreeze).toHaveBeenCalledTimes(1);
+      });
+
+      expect(dotLottie.isFrozen).toBe(true);
     });
 
-    expect(dotLottie.isFrozen).toBe(true);
-  });
+    test('do not freeze when canvas is initially offscreen and freezeOnOffscreen is false', async () => {
+      const onFreeze = vi.fn();
 
-  test('freeze when canvas is initially offscreen and freezeOnOffscreen is true', async () => {
-    const onFreeze = vi.fn();
+      canvas.style.marginTop = '100vh';
 
-    canvas.style.marginTop = '100vh';
+      dotLottie = new DotLottie({
+        canvas,
+        src: jsonSrc,
+        autoplay: true,
+        renderConfig: {
+          freezeOnOffscreen: false,
+        },
+      });
 
-    dotLottie = new DotLottie({
-      canvas,
-      src: jsonSrc,
-      autoplay: true,
-      renderConfig: {
-        freezeOnOffscreen: true,
-      },
+      dotLottie.addEventListener('freeze', onFreeze);
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      expect(onFreeze).not.toHaveBeenCalled();
+
+      expect(dotLottie.isFrozen).toBe(false);
     });
 
-    dotLottie.addEventListener('freeze', onFreeze);
+    test('freeze when canvas goes offscreen during animation', async () => {
+      const onFreeze = vi.fn();
+      const onUnfreeze = vi.fn();
 
-    await vi.waitFor(() => {
-      expect(onFreeze).toHaveBeenCalledTimes(1);
+      dotLottie = new DotLottie({
+        canvas,
+        src: jsonSrc,
+        autoplay: true,
+        renderConfig: {
+          freezeOnOffscreen: true,
+        },
+      });
+
+      dotLottie.addEventListener('freeze', onFreeze);
+      dotLottie.addEventListener('unfreeze', onUnfreeze);
+
+      await vi.waitFor(() => {
+        expect(dotLottie.isPlaying).toBe(true);
+      });
+
+      canvas.style.marginTop = '100vh';
+
+      await vi.waitFor(() => {
+        expect(onFreeze).toHaveBeenCalledTimes(1);
+      });
+
+      expect(dotLottie.isFrozen).toBe(true);
     });
 
-    expect(dotLottie.isFrozen).toBe(true);
-  });
+    test('unfreeze when canvas comes back into the viewport', async () => {
+      const onFreeze = vi.fn();
+      const onUnfreeze = vi.fn();
 
-  test('do not freeze when canvas is initially offscreen and freezeOnOffscreen is false', async () => {
-    const onFreeze = vi.fn();
+      canvas.style.marginTop = '100vh';
 
-    canvas.style.marginTop = '100vh';
+      dotLottie = new DotLottie({
+        canvas,
+        src: jsonSrc,
+        autoplay: true,
+        renderConfig: {
+          freezeOnOffscreen: true,
+        },
+      });
 
-    dotLottie = new DotLottie({
-      canvas,
-      src: jsonSrc,
-      autoplay: true,
-      renderConfig: {
-        freezeOnOffscreen: false,
-      },
-    });
+      dotLottie.addEventListener('freeze', onFreeze);
+      dotLottie.addEventListener('unfreeze', onUnfreeze);
 
-    dotLottie.addEventListener('freeze', onFreeze);
+      await vi.waitFor(() => {
+        expect(onFreeze).toHaveBeenCalledTimes(1);
+      });
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    expect(onFreeze).not.toHaveBeenCalled();
+      canvas.style.marginTop = '0';
 
-    expect(dotLottie.isFrozen).toBe(false);
-  });
+      await vi.waitFor(() => {
+        expect(onUnfreeze).toHaveBeenCalledTimes(1);
+      });
 
-  test('freeze when canvas goes offscreen during animation', async () => {
-    const onFreeze = vi.fn();
-    const onUnfreeze = vi.fn();
-
-    dotLottie = new DotLottie({
-      canvas,
-      src: jsonSrc,
-      autoplay: true,
-      renderConfig: {
-        freezeOnOffscreen: true,
-      },
-    });
-
-    dotLottie.addEventListener('freeze', onFreeze);
-    dotLottie.addEventListener('unfreeze', onUnfreeze);
-
-    await vi.waitFor(() => {
       expect(dotLottie.isPlaying).toBe(true);
+      expect(dotLottie.isFrozen).toBe(false);
     });
 
-    canvas.style.marginTop = '100vh';
+    test('stay frozen if canvas remains offscreen and freezeOnOffscreen is true', async () => {
+      const onFreeze = vi.fn();
+      const onUnfreeze = vi.fn();
 
-    await vi.waitFor(() => {
+      canvas.style.marginTop = '100vh';
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: jsonSrc,
+        autoplay: true,
+        renderConfig: {
+          freezeOnOffscreen: true,
+        },
+      });
+
+      dotLottie.addEventListener('freeze', onFreeze);
+      dotLottie.addEventListener('unfreeze', onUnfreeze);
+
+      await vi.waitFor(() => {
+        expect(onFreeze).toHaveBeenCalledTimes(1);
+      });
+
+      expect(dotLottie.isFrozen).toBe(true);
+      expect(onUnfreeze).not.toHaveBeenCalled();
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      expect(dotLottie.isFrozen).toBe(true);
+    });
+
+    test('update freezeOnOffscreen using setRenderConfig', async () => {
+      const onFreeze = vi.fn();
+      const onUnfreeze = vi.fn();
+
+      canvas.style.marginTop = '100vh';
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: jsonSrc,
+        autoplay: true,
+        renderConfig: {
+          freezeOnOffscreen: true,
+        },
+      });
+
+      dotLottie.addEventListener('freeze', onFreeze);
+      dotLottie.addEventListener('unfreeze', onUnfreeze);
+
+      await vi.waitFor(() => {
+        expect(onFreeze).toHaveBeenCalledTimes(1);
+      });
+
+      expect(dotLottie.isFrozen).toBe(true);
+
+      await dotLottie.setRenderConfig({
+        freezeOnOffscreen: false,
+      });
+
+      canvas.style.marginTop = '0';
+
+      await vi.waitFor(() => {
+        expect(onUnfreeze).toHaveBeenCalledTimes(1);
+      });
+
+      canvas.style.marginTop = '100vh';
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       expect(onFreeze).toHaveBeenCalledTimes(1);
+
+      expect(dotLottie.isFrozen).toBe(false);
     });
-
-    expect(dotLottie.isFrozen).toBe(true);
-  });
-
-  test('unfreeze when canvas comes back into the viewport', async () => {
-    const onFreeze = vi.fn();
-    const onUnfreeze = vi.fn();
-
-    canvas.style.marginTop = '100vh';
-
-    dotLottie = new DotLottie({
-      canvas,
-      src: jsonSrc,
-      autoplay: true,
-      renderConfig: {
-        freezeOnOffscreen: true,
-      },
-    });
-
-    dotLottie.addEventListener('freeze', onFreeze);
-    dotLottie.addEventListener('unfreeze', onUnfreeze);
-
-    await vi.waitFor(() => {
-      expect(onFreeze).toHaveBeenCalledTimes(1);
-    });
-
-    canvas.style.marginTop = '0';
-
-    await vi.waitFor(() => {
-      expect(onUnfreeze).toHaveBeenCalledTimes(1);
-    });
-
-    expect(dotLottie.isPlaying).toBe(true);
-    expect(dotLottie.isFrozen).toBe(false);
-  });
-
-  test('stay frozen if canvas remains offscreen and freezeOnOffscreen is true', async () => {
-    const onFreeze = vi.fn();
-    const onUnfreeze = vi.fn();
-
-    canvas.style.marginTop = '100vh';
-
-    dotLottie = new DotLottie({
-      canvas,
-      src: jsonSrc,
-      autoplay: true,
-      renderConfig: {
-        freezeOnOffscreen: true,
-      },
-    });
-
-    dotLottie.addEventListener('freeze', onFreeze);
-    dotLottie.addEventListener('unfreeze', onUnfreeze);
-
-    await vi.waitFor(() => {
-      expect(onFreeze).toHaveBeenCalledTimes(1);
-    });
-
-    expect(dotLottie.isFrozen).toBe(true);
-    expect(onUnfreeze).not.toHaveBeenCalled();
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    expect(dotLottie.isFrozen).toBe(true);
-  });
-
-  test('update freezeOnOffscreen using setRenderConfig', async () => {
-    const onFreeze = vi.fn();
-    const onUnfreeze = vi.fn();
-
-    canvas.style.marginTop = '100vh';
-
-    dotLottie = new DotLottie({
-      canvas,
-      src: jsonSrc,
-      autoplay: true,
-      renderConfig: {
-        freezeOnOffscreen: true,
-      },
-    });
-
-    dotLottie.addEventListener('freeze', onFreeze);
-    dotLottie.addEventListener('unfreeze', onUnfreeze);
-
-    await vi.waitFor(() => {
-      expect(onFreeze).toHaveBeenCalledTimes(1);
-    });
-
-    expect(dotLottie.isFrozen).toBe(true);
-
-    await dotLottie.setRenderConfig({
-      freezeOnOffscreen: false,
-    });
-
-    canvas.style.marginTop = '0';
-
-    await vi.waitFor(() => {
-      expect(onUnfreeze).toHaveBeenCalledTimes(1);
-    });
-
-    canvas.style.marginTop = '100vh';
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    expect(onFreeze).toHaveBeenCalledTimes(1);
-
-    expect(dotLottie.isFrozen).toBe(false);
   });
 
   describe('autoResize', () => {
