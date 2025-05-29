@@ -667,6 +667,22 @@ const commands: {
 
     return instance.setViewport(x, y, width, height);
   },
+  animationSize(request: RpcRequest<'animationSize'>) {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    const { height, width } = instance.animationSize();
+
+    return {
+      height,
+      width,
+    };
+  },
   setMarker(request) {
     const instanceId = request.params.instanceId;
     const marker = request.params.marker;

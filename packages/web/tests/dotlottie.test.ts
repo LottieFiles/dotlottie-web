@@ -591,6 +591,26 @@ describe.each([
     expect(onDestroy).toHaveBeenCalledTimes(1);
   });
 
+  test('animationSize() returns the animation dimensions', async () => {
+    const onLoad = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src,
+    });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const size = await dotLottie.animationSize();
+
+    expect(size.width).toBeGreaterThan(0);
+    expect(size.height).toBeGreaterThan(0);
+  });
+
   describe('resize', () => {
     test('resize the canvas drawing surface to maintain high quality animation', async () => {
       dotLottie = new DotLottie({
@@ -2274,7 +2294,7 @@ describe.each([
     const onFrame = vi.fn();
 
     // info: cast DotLottie to any to bypass the type check, since this is only for the non-worker version
-    dotLottie = new (DotLottie as any)({
+    dotLottie = new (DotLottie as unknown as typeof DotLottieClass)({
       canvas: {
         width: 100,
         height: 100,
