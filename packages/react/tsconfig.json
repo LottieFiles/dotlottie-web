@@ -5,6 +5,7 @@
   // Compiler options
   "compilerOptions": {
     "jsx": "react-jsx",
-    "exactOptionalPropertyTypes": false
+    "exactOptionalPropertyTypes": false,
+    "moduleResolution": "bundler"
   }
 }

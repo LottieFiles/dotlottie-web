@@ -2,7 +2,7 @@
 'use client';
 
 import type { Config, DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-web';
-import { useState, useEffect, useCallback, useRef, type ComponentProps, type RefCallback } from 'react';
+import { useEffect, useCallback, useRef, type ComponentProps, type RefCallback } from 'react';
 import type { JSX } from 'react';
 
 export type BaseDotLottieProps<T extends DotLottie | DotLottieWorker> = Omit<Config, 'canvas'> &
@@ -17,10 +17,10 @@ export type BaseDotLottieProps<T extends DotLottie | DotLottieWorker> = Omit<Con
      *
      * @example
      * ```tsx
-     * const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
+     * const dotLottieRef = useRef<DotLottie | null>(null);
      *
      * <DotLottieReact
-     *   dotLottieRefCallback={setDotLottie}
+     *   dotLottieRefCallback={(instance) => dotLottieRef.current = instance}
      * />
      * ```
      */
@@ -50,7 +50,6 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   animationId,
   autoplay,
   backgroundColor,
-  className,
   createDotLottie,
   data,
   dotLottieRefCallback,
@@ -62,7 +61,6 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   segment,
   speed,
   src,
-  style,
   themeData,
   themeId,
   useFrameInterpolation,
@@ -71,11 +69,8 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
 }: BaseDotLottieProps<T> & {
   createDotLottie: (config: T extends DotLottieWorker ? Config & { workerId?: string } : Config) => T;
 }): JSX.Element => {
-  const [dotLottie, setDotLottie] = useState<T | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dotLottieRef = useRef<T | null>(null);
-  const dotLottieRefCallbackRef = useRef<RefCallback<T | null> | undefined>(dotLottieRefCallback);
-
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const config: Omit<Config, 'canvas'> & {
     workerId?: T extends DotLottieWorker ? string : undefined;
   } = {
@@ -97,29 +92,38 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
 
   const configRef = useRef<Omit<BaseDotLottieProps<T>, 'createDotLottie' | 'dotLottieRefCallback'> | undefined>(config);
 
-  dotLottieRefCallbackRef.current = dotLottieRefCallback;
-  dotLottieRef.current = dotLottie;
   configRef.current = config;
 
-  useEffect(() => {
-    if (typeof dotLottieRefCallbackRef.current === 'function' && dotLottie) {
-      dotLottieRefCallbackRef.current(dotLottie);
-    }
-  }, [dotLottie]);
+  const setContainerRef = useCallback((container: HTMLDivElement | null) => {
+    containerRef.current = container;
 
-  const setCanvasRef = useCallback((canvas: HTMLCanvasElement | null) => {
-    canvasRef.current = canvas;
+    if (container) {
+      const canvas = document.createElement('canvas');
 
-    if (canvas) {
+      // Set the canvas to the same size as the container
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+
+      container.appendChild(canvas);
+
       const dotLottieInstance = createDotLottie({
         ...configRef.current,
         canvas,
       });
 
-      setDotLottie(dotLottieInstance as T);
+      dotLottieRef.current = dotLottieInstance as T;
+
+      if (typeof dotLottieRefCallback === 'function') {
+        dotLottieRefCallback(dotLottieInstance as T);
+      }
     } else {
-      dotLottie?.destroy();
-      setDotLottie(null);
+      dotLottieRef.current?.destroy();
+      (dotLottieRef.current?.canvas as HTMLCanvasElement).remove();
+      dotLottieRef.current = null;
+
+      if (typeof dotLottieRefCallback === 'function') {
+        dotLottieRefCallback(null);
+      }
     }
   }, []);
 
@@ -136,23 +140,14 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
       }
     };
 
-    canvasRef.current?.addEventListener('mouseenter', handlePlayOnHover);
-    canvasRef.current?.addEventListener('mouseleave', handlePlayOnHover);
+    containerRef.current?.addEventListener('mouseenter', handlePlayOnHover);
+    containerRef.current?.addEventListener('mouseleave', handlePlayOnHover);
 
     return () => {
-      canvasRef.current?.removeEventListener('mouseenter', handlePlayOnHover);
-      canvasRef.current?.removeEventListener('mouseleave', handlePlayOnHover);
+      containerRef.current?.removeEventListener('mouseenter', handlePlayOnHover);
+      containerRef.current?.removeEventListener('mouseleave', handlePlayOnHover);
     };
   }, [playOnHover]);
-
-  useEffect(() => {
-    return () => {
-      if (dotLottie) {
-        dotLottie.destroy();
-        setDotLottie(null);
-      }
-    };
-  }, [dotLottie]);
 
   useEffect(() => {
     dotLottieRef.current?.setSpeed(speed ?? 1);
@@ -232,24 +227,13 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
 
   return (
     <div
-      className={className}
-      {...(!className && {
-        style: {
-          width: '100%',
-          height: '100%',
-          lineHeight: 0,
-          ...style,
-        },
-      })}
-    >
-      <canvas
-        ref={setCanvasRef}
-        style={{
-          width: '100%',
-          height: '100%',
-        }}
-        {...props}
-      />
-    </div>
+      ref={setContainerRef}
+      style={{
+        width: '100%',
+        height: '100%',
+        lineHeight: 0,
+      }}
+      {...props}
+    />
   );
 };
