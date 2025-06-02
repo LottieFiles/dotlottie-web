@@ -19,6 +19,9 @@ import type { Config, Layout, Mode, RenderConfig } from '../types';
 import type { DotLottieInstanceState } from './dotlottie';
 
 export interface MethodParamsMap {
+  animationSize: {
+    instanceId: string;
+  };
   create: {
     config: Config;
     height: number;
@@ -168,6 +171,10 @@ export interface RpcRequest<T extends keyof MethodParamsMap> {
 }
 
 export interface MethodResultMap {
+  animationSize: {
+    height: number;
+    width: number;
+  };
   create: {
     instanceId: string;
   };

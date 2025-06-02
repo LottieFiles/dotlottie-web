@@ -45,4 +45,5 @@ releases/
 dotlottie-player.js
 dotlottie.worker.js
 
-apps/dotlottie-viewer
+# Ignore all apps
+apps/
