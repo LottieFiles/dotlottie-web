@@ -1,5 +1,14 @@
 # @lottiefiles/dotlottie-web
 
+## 0.45.0
+
+### Minor Changes
+
+- 8e8ed12: feat: added animationSize method to DotLottieWorker
+- 6c07dae: chore: update dotlottie-rs WASM bindings to v0.1.42
+- 6c07dae: fix: dotLottie.totalframes return correct Lottie total frames count
+- 6c07dae: feat: add `animationId` to `Config` for initial loading of a specific animation
+
 ## 0.44.0
 
 ### Minor Changes
