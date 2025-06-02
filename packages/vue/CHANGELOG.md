@@ -1,5 +1,20 @@
 # @lottiefiles/dotlottie-vue
 
+## 0.7.0
+
+### Minor Changes
+
+- 6c07dae: chore: update dotlottie-rs WASM bindings to v0.1.42
+- 6c07dae: fix: dotLottie.totalframes return correct Lottie total frames count
+
+### Patch Changes
+
+- Updated dependencies [8e8ed12]
+- Updated dependencies [6c07dae]
+- Updated dependencies [6c07dae]
+- Updated dependencies [6c07dae]
+  - @lottiefiles/dotlottie-web@0.45.0
+
 ## 0.6.3
 
 ### Patch Changes
