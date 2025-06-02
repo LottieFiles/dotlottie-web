@@ -2274,7 +2274,7 @@ describe.each([
     const onFrame = vi.fn();
 
     // info: cast DotLottie to any to bypass the type check, since this is only for the non-worker version
-    dotLottie = new (DotLottie as any)({
+    dotLottie = new (DotLottie as unknown)({
       canvas: {
         width: 100,
         height: 100,
@@ -2311,6 +2311,152 @@ describe.each([
     expect(onFrame).toHaveBeenNthCalledWith(dotLottie.totalFrames, {
       type: 'frame',
       currentFrame: dotLottie.totalFrames - 1,
+    });
+  });
+
+  describe('setSegment', () => {
+    test('sets playback segment between two frames', async () => {
+      const onLoad = vi.fn();
+      const onFrame = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+        useFrameInterpolation: false,
+        autoplay: false,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+      dotLottie.addEventListener('frame', onFrame);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+
+      const segmentStart = 5;
+      const segmentEnd = 15;
+
+      expect(dotLottie.segment).toBeUndefined();
+
+      await dotLottie.setSegment(segmentStart, segmentEnd);
+
+      expect(dotLottie.segment).toEqual([segmentStart, segmentEnd]);
+
+      onFrame.mockClear();
+
+      await dotLottie.play();
+
+      await vi.waitFor(
+        () => {
+          expect(onFrame).toHaveBeenCalledWith({
+            type: 'frame',
+            currentFrame: segmentStart,
+          });
+          expect(onFrame).toHaveBeenLastCalledWith({
+            type: 'frame',
+            currentFrame: segmentEnd,
+          });
+        },
+        { timeout: 1000 },
+      );
+    });
+  });
+
+  describe('resetSegment', () => {
+    test('resets segment to full animation range', async () => {
+      const onLoad = vi.fn();
+      const onFrame = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+        autoplay: false,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+      dotLottie.addEventListener('frame', onFrame);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+
+      const segmentStart = 5;
+      const segmentEnd = 15;
+
+      await dotLottie.setSegment(segmentStart, segmentEnd);
+      expect(dotLottie.segment).toEqual([segmentStart, segmentEnd]);
+
+      await dotLottie.resetSegment();
+
+      expect(dotLottie.segment).toBeUndefined();
+
+      await dotLottie.play();
+
+      await vi.waitFor(
+        () => {
+          expect(onFrame).toHaveBeenCalledWith({
+            type: 'frame',
+            currentFrame: 0,
+          });
+        },
+        { timeout: 1000 },
+      );
+    });
+
+    test('resetSegment works during active playback', async () => {
+      const onLoad = vi.fn();
+      const onFrame = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+        autoplay: true,
+        segment: [5, 15],
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+      dotLottie.addEventListener('frame', onFrame);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+
+      expect(dotLottie.segment).toEqual([5, 15]);
+
+      await dotLottie.resetSegment();
+
+      expect(dotLottie.segment).toBeUndefined();
+
+      expect(dotLottie.isPlaying).toBe(true);
+    });
+
+    test('resetSegment maintains mode and other configuration', async () => {
+      const onLoad = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+        mode: 'reverse',
+        speed: 2,
+        autoplay: false,
+        segment: [10, 20],
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+
+      expect(dotLottie.segment).toEqual([10, 20]);
+      expect(dotLottie.mode).toBe('reverse');
+      expect(dotLottie.speed).toBe(2);
+
+      await dotLottie.resetSegment();
+
+      expect(dotLottie.segment).toBeUndefined();
+      expect(dotLottie.mode).toBe('reverse');
+      expect(dotLottie.speed).toBe(2);
     });
   });
 });

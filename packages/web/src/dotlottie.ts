@@ -757,6 +757,15 @@ export class DotLottie {
     }
   }
 
+  public resetSegment(): void {
+    if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
+
+    this._dotLottieCore.setConfig({
+      ...this._dotLottieCore.config(),
+      segment: createCoreSegment([], DotLottie._wasmModule),
+    });
+  }
+
   public setSegment(startFrame: number, endFrame: number): void {
     if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 

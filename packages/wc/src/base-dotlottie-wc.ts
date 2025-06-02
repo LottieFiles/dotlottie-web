@@ -126,9 +126,7 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
       ) {
         this.dotLottie.setSegment(segment[0], segment[1]);
       } else {
-        // reset segment
-        // Consider adding this function to the core dotlottie-web library
-        this.dotLottie.setSegment(0, this.dotLottie.totalFrames);
+        this.dotLottie.resetSegment();
       }
     }
 
@@ -149,7 +147,11 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
     }
 
     if (name === 'themeid') {
-      this.dotLottie.setTheme(value ?? '');
+      if (value) {
+        this.dotLottie.setTheme(value);
+      } else {
+        this.dotLottie.resetTheme();
+      }
     }
 
     if (name === 'backgroundcolor') {
