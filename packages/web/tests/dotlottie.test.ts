@@ -19,12 +19,7 @@ DotLottieWorkerClass.setWasmUrl(wasmUrl);
 let cleanupCSPPolicy: () => void;
 
 beforeAll(() => {
-  /**
-   * Adds a Content Security Policy rule allowing scripts from the same origin ('self'),
-   * inline scripts ('unsafe-inline'), and WebAssembly with relaxed evaluation rules ('wasm-unsafe-eval').
-   * This is useful when running WASM code that relies on dynamic evaluation methods like `new Function()` or similar.
-   */
-  cleanupCSPPolicy = addCSPPolicy(['script-src', 'self', 'unsafe-inline', 'wasm-unsafe-eval']);
+  cleanupCSPPolicy = addCSPPolicy();
 });
 
 afterAll(() => {
