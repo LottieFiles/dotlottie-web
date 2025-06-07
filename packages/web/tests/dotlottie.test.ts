@@ -1,13 +1,13 @@
 /* eslint-disable node/no-unsupported-features/node-builtins */
 /* eslint-disable require-atomic-updates */
-import { describe, beforeEach, afterEach, test, expect, vi } from 'vitest';
+import { describe, beforeAll, afterAll, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
 import type { Config, Layout, Mode } from '../src';
 import { DotLottie as DotLottieClass, DotLottieWorker as DotLottieWorkerClass } from '../src';
 import type { DotLottiePlayer } from '../src/core';
 import { getDefaultDPR } from '../src/utils';
 
-import { createCanvas, sleep } from './test-utils';
+import { createCanvas, sleep, addWasmCSPPolicy } from './test-utils';
 
 const wasmUrl = new URL('../src/core/dotlottie-player.wasm', import.meta.url).href;
 const jsonSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
@@ -15,6 +15,16 @@ const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
 
 DotLottieClass.setWasmUrl(wasmUrl);
 DotLottieWorkerClass.setWasmUrl(wasmUrl);
+
+let cleanupWasmCSPPolicy: () => void;
+
+beforeAll(() => {
+  cleanupWasmCSPPolicy = addWasmCSPPolicy();
+});
+
+afterAll(() => {
+  cleanupWasmCSPPolicy();
+});
 
 describe.each([
   {
