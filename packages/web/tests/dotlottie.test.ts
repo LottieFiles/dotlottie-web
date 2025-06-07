@@ -7,7 +7,7 @@ import { DotLottie as DotLottieClass, DotLottieWorker as DotLottieWorkerClass } 
 import type { DotLottiePlayer } from '../src/core';
 import { getDefaultDPR } from '../src/utils';
 
-import { createCanvas, sleep, addCSPPolicy } from './test-utils';
+import { createCanvas, sleep, addWasmCSPPolicy } from './test-utils';
 
 const wasmUrl = new URL('../src/core/dotlottie-player.wasm', import.meta.url).href;
 const jsonSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
@@ -16,14 +16,14 @@ const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
 DotLottieClass.setWasmUrl(wasmUrl);
 DotLottieWorkerClass.setWasmUrl(wasmUrl);
 
-let cleanupCSPPolicy: () => void;
+let cleanupWasmCSPPolicy: () => void;
 
 beforeAll(() => {
-  cleanupCSPPolicy = addCSPPolicy();
+  cleanupWasmCSPPolicy = addWasmCSPPolicy();
 });
 
 afterAll(() => {
-  cleanupCSPPolicy();
+  cleanupWasmCSPPolicy();
 });
 
 describe.each([
