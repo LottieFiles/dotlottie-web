@@ -20,9 +20,207 @@ import type {
 } from '../event-manager';
 
 import type { DotLottieInstanceState } from './dotlottie';
-import type { MethodParamsMap, RpcRequest, MethodResultMap, RpcResponse } from './types';
+import type { 
+  MethodParamsMap, 
+  RpcRequest, 
+  MethodResultMap, 
+  RpcResponse, 
+  BatchedFrameEvents, 
+  BatchedRenderEvents, 
+  StateChange, 
+  StateUpdate,
+  EventSubscriptionConfig 
+} from './types';
 
 const instancesMap = new Map<string, DotLottie>();
+
+// Track event subscriptions per instance
+const eventSubscriptions = new Map<string, Set<EventType>>();
+
+// Track high-frequency event configurations
+const highFrequencyConfigs = new Map<string, {
+  batchFrameEvents?: boolean;
+  batchRenderEvents?: boolean;
+  frameEventThrottleMs?: number;
+  renderEventThrottleMs?: number;
+}>();
+
+// Batching storage
+const frameBatches = new Map<string, FrameEvent[]>();
+const renderBatches = new Map<string, RenderEvent[]>();
+
+// State tracking for incremental updates
+const lastStates = new Map<string, DotLottieInstanceState>();
+const stateTimestamps = new Map<string, number>();
+
+// Throttling for high-frequency events
+const lastFrameEventTime = new Map<string, number>();
+const lastRenderEventTime = new Map<string, number>();
+
+// Batch flush timers
+const batchTimers = new Map<string, number>();
+
+function flushBatches(instanceId: string): void {
+  const frameEvents = frameBatches.get(instanceId);
+  const renderEvents = renderBatches.get(instanceId);
+
+  if (frameEvents && frameEvents.length > 0) {
+    const batch: BatchedFrameEvents = {
+      instanceId,
+      events: frameEvents,
+      lastFrame: frameEvents[frameEvents.length - 1].currentFrame,
+    };
+
+    const response: RpcResponse<'onBatchedFrames'> = {
+      id: '',
+      method: 'onBatchedFrames',
+      result: { batch },
+    };
+
+    self.postMessage(response);
+    frameBatches.set(instanceId, []);
+  }
+
+  if (renderEvents && renderEvents.length > 0) {
+    const batch: BatchedRenderEvents = {
+      instanceId,
+      events: renderEvents,
+      count: renderEvents.length,
+    };
+
+    const response: RpcResponse<'onBatchedRenders'> = {
+      id: '',
+      method: 'onBatchedRenders',
+      result: { batch },
+    };
+
+    self.postMessage(response);
+    renderBatches.set(instanceId, []);
+  }
+}
+
+function shouldSendEvent(instanceId: string, eventType: EventType): boolean {
+  const subscriptions = eventSubscriptions.get(instanceId);
+  return subscriptions ? subscriptions.has(eventType) : false;
+}
+
+function handleHighFrequencyEvent(instanceId: string, event: Event, eventType: 'frame' | 'render'): boolean {
+  const config = highFrequencyConfigs.get(instanceId);
+  const now = Date.now();
+
+  if (eventType === 'frame') {
+    const shouldBatch = config?.batchFrameEvents;
+    const throttleMs = config?.frameEventThrottleMs || 16; // ~60fps default
+    const lastTime = lastFrameEventTime.get(instanceId) || 0;
+
+    if (shouldBatch) {
+      if (!frameBatches.has(instanceId)) {
+        frameBatches.set(instanceId, []);
+      }
+      frameBatches.get(instanceId)!.push(event as FrameEvent);
+
+      // Set timer to flush batch if not already set
+      if (!batchTimers.has(instanceId)) {
+        const timerId = self.setTimeout(() => {
+          flushBatches(instanceId);
+          batchTimers.delete(instanceId);
+        }, 50); // Flush every 50ms
+        batchTimers.set(instanceId, timerId);
+      }
+      return true; // Event handled
+    } else if (now - lastTime < throttleMs) {
+      return true; // Event throttled
+    }
+
+    lastFrameEventTime.set(instanceId, now);
+  } else if (eventType === 'render') {
+    const shouldBatch = config?.batchRenderEvents;
+    const throttleMs = config?.renderEventThrottleMs || 16;
+    const lastTime = lastRenderEventTime.get(instanceId) || 0;
+
+    if (shouldBatch) {
+      if (!renderBatches.has(instanceId)) {
+        renderBatches.set(instanceId, []);
+      }
+      renderBatches.get(instanceId)!.push(event as RenderEvent);
+
+      if (!batchTimers.has(instanceId)) {
+        const timerId = self.setTimeout(() => {
+          flushBatches(instanceId);
+          batchTimers.delete(instanceId);
+        }, 50);
+        batchTimers.set(instanceId, timerId);
+      }
+      return true;
+    } else if (now - lastTime < throttleMs) {
+      return true;
+    }
+
+    lastRenderEventTime.set(instanceId, now);
+  }
+
+  return false; // Send event normally
+}
+
+function getStateChanges(instanceId: string): StateChange[] {
+  const instance = instancesMap.get(instanceId);
+  if (!instance) return [];
+
+  const currentState: DotLottieInstanceState = {
+    loopCount: instance.loopCount,
+    isLoaded: instance.isLoaded,
+    isPaused: instance.isPaused,
+    isPlaying: instance.isPlaying,
+    isStopped: instance.isStopped,
+    isFrozen: instance.isFrozen,
+    loop: instance.loop,
+    mode: instance.mode,
+    speed: instance.speed,
+    currentFrame: instance.currentFrame,
+    totalFrames: instance.totalFrames,
+    duration: instance.duration,
+    useFrameInterpolation: instance.useFrameInterpolation,
+    renderConfig: instance.renderConfig,
+    marker: instance.marker,
+    backgroundColor: instance.backgroundColor,
+    markers: instance.markers(),
+    activeAnimationId: instance.activeAnimationId,
+    activeThemeId: instance.activeThemeId,
+    autoplay: instance.autoplay,
+    segment: instance.segment,
+    layout: instance.layout,
+    segmentDuration: instance.segmentDuration,
+    isReady: instance.isReady,
+    manifest: instance.manifest,
+  };
+
+  const lastState = lastStates.get(instanceId);
+  const changes: StateChange[] = [];
+
+  if (!lastState) {
+    // First time, send all properties
+    Object.keys(currentState).forEach((key) => {
+      changes.push({
+        property: key as keyof DotLottieInstanceState,
+        value: currentState[key as keyof DotLottieInstanceState],
+      });
+    });
+  } else {
+    // Compare with last state
+    Object.keys(currentState).forEach((key) => {
+      const prop = key as keyof DotLottieInstanceState;
+      if (JSON.stringify(currentState[prop]) !== JSON.stringify(lastState[prop])) {
+        changes.push({
+          property: prop,
+          value: currentState[prop],
+        });
+      }
+    });
+  }
+
+  lastStates.set(instanceId, currentState);
+  return changes;
+}
 
 const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) => void> = {
   ready: (instanceId: string) => (event) => {
@@ -141,6 +339,16 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
     self.postMessage(response);
   },
   frame: (instanceId: string) => (event: Event) => {
+    // Check if frame events are subscribed to
+    if (!shouldSendEvent(instanceId, 'frame')) {
+      return;
+    }
+
+    // Handle high-frequency event optimization
+    if (handleHighFrequencyEvent(instanceId, event, 'frame')) {
+      return; // Event was batched or throttled
+    }
+
     const frameEvent = event as FrameEvent;
     const response: RpcResponse<'onFrame'> = {
       id: '',
@@ -154,6 +362,16 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
     self.postMessage(response);
   },
   render: (instanceId: string) => (event: Event) => {
+    // Check if render events are subscribed to
+    if (!shouldSendEvent(instanceId, 'render')) {
+      return;
+    }
+
+    // Handle high-frequency event optimization
+    if (handleHighFrequencyEvent(instanceId, event, 'render')) {
+      return; // Event was batched or throttled
+    }
+
     const renderEvent = event as RenderEvent;
     const response: RpcResponse<'onRender'> = {
       id: '',
@@ -406,6 +624,9 @@ const commands: {
 
     instancesMap.set(instanceId, instance);
 
+    // Initialize with no event subscriptions - they will be added explicitly
+    eventSubscriptions.set(instanceId, new Set());
+
     const events: EventType[] = [
       'complete',
       'frame',
@@ -423,6 +644,7 @@ const commands: {
       'ready',
     ];
 
+    // Add all event listeners but only send events if subscribed
     events.forEach((event) => {
       instance.addEventListener(event, eventHandlerMap[event](instanceId));
     });
@@ -714,6 +936,76 @@ const commands: {
     return {
       success: true,
     };
+  },
+  subscribeToEvents(request) {
+    const { instanceId, eventTypes, highFrequencyBatching } = request.params;
+
+    if (!eventSubscriptions.has(instanceId)) {
+      eventSubscriptions.set(instanceId, new Set());
+    }
+
+    const subscriptions = eventSubscriptions.get(instanceId)!;
+    eventTypes.forEach(eventType => subscriptions.add(eventType));
+
+    // Configure high-frequency batching if specified
+    if (highFrequencyBatching?.enabled) {
+      if (!highFrequencyConfigs.has(instanceId)) {
+        highFrequencyConfigs.set(instanceId, {});
+      }
+      const config = highFrequencyConfigs.get(instanceId)!;
+      
+      if (eventTypes.includes('frame')) {
+        config.batchFrameEvents = true;
+        config.frameEventThrottleMs = highFrequencyBatching.throttleMs || 16;
+      }
+      if (eventTypes.includes('render')) {
+        config.batchRenderEvents = true;
+        config.renderEventThrottleMs = highFrequencyBatching.throttleMs || 16;
+      }
+    }
+  },
+  unsubscribeFromEvents(request) {
+    const { instanceId, eventTypes } = request.params;
+
+    const subscriptions = eventSubscriptions.get(instanceId);
+    if (subscriptions) {
+      eventTypes.forEach(eventType => subscriptions.delete(eventType));
+    }
+
+    // Clear high-frequency configs for unsubscribed events
+    const config = highFrequencyConfigs.get(instanceId);
+    if (config) {
+      if (eventTypes.includes('frame')) {
+        config.batchFrameEvents = false;
+        delete config.frameEventThrottleMs;
+      }
+      if (eventTypes.includes('render')) {
+        config.batchRenderEvents = false;
+        delete config.renderEventThrottleMs;
+      }
+    }
+  },
+  getStateChanges(request) {
+    const { instanceId, lastTimestamp } = request.params;
+    const changes = getStateChanges(instanceId);
+    const currentTimestamp = Date.now();
+
+    stateTimestamps.set(instanceId, currentTimestamp);
+
+    return {
+      changes,
+      currentTimestamp,
+    };
+  },
+  setHighFrequencyEventConfig(request) {
+    const { instanceId, config } = request.params;
+
+    if (!highFrequencyConfigs.has(instanceId)) {
+      highFrequencyConfigs.set(instanceId, {});
+    }
+
+    const existingConfig = highFrequencyConfigs.get(instanceId)!;
+    Object.assign(existingConfig, config);
   },
 };
 

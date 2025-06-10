@@ -1,6 +1,7 @@
 import type {
   CompleteEvent,
   DestroyEvent,
+  EventType,
   FrameEvent,
   FreezeEvent,
   LoadErrorEvent,
@@ -17,6 +18,40 @@ import type {
 import type { Config, Layout, Mode, RenderConfig } from '../types';
 
 import type { DotLottieInstanceState } from './dotlottie';
+
+// New types for optimization
+export interface EventSubscriptionConfig {
+  instanceId: string;
+  eventTypes: EventType[];
+  highFrequencyBatching?: {
+    enabled: boolean;
+    batchSize?: number;
+    throttleMs?: number;
+  };
+}
+
+export interface BatchedFrameEvents {
+  instanceId: string;
+  events: FrameEvent[];
+  lastFrame: number;
+}
+
+export interface BatchedRenderEvents {
+  instanceId: string;
+  events: RenderEvent[];
+  count: number;
+}
+
+export interface StateChange {
+  property: keyof DotLottieInstanceState;
+  value: any;
+}
+
+export interface StateUpdate {
+  instanceId: string;
+  changes: StateChange[];
+  timestamp: number;
+}
 
 export interface MethodParamsMap {
   animationSize: {
@@ -162,6 +197,24 @@ export interface MethodParamsMap {
   unfreeze: {
     instanceId: string;
   };
+  subscribeToEvents: EventSubscriptionConfig;
+  unsubscribeFromEvents: {
+    instanceId: string;
+    eventTypes: EventType[];
+  };
+  getStateChanges: {
+    instanceId: string;
+    lastTimestamp?: number;
+  };
+  setHighFrequencyEventConfig: {
+    instanceId: string;
+    config: {
+      batchFrameEvents?: boolean;
+      batchRenderEvents?: boolean;
+      frameEventThrottleMs?: number;
+      renderEventThrottleMs?: number;
+    };
+  };
 }
 
 export interface RpcRequest<T extends keyof MethodParamsMap> {
@@ -270,6 +323,22 @@ export interface MethodResultMap {
   stop: void;
   stopStateMachine: boolean;
   unfreeze: void;
+  subscribeToEvents: void;
+  unsubscribeFromEvents: void;
+  getStateChanges: {
+    changes: StateChange[];
+    currentTimestamp: number;
+  };
+  setHighFrequencyEventConfig: void;
+  onBatchedFrames: {
+    batch: BatchedFrameEvents;
+  };
+  onBatchedRenders: {
+    batch: BatchedRenderEvents;
+  };
+  onStateUpdate: {
+    update: StateUpdate;
+  };
 }
 
 export interface RpcResponse<U extends keyof MethodResultMap> {

@@ -7,7 +7,16 @@ import { CanvasResizeObserver } from '../resize-observer';
 import type { Config, Layout, Manifest, Mode, RenderConfig } from '../types';
 import { getDefaultDPR, isElementInViewport } from '../utils';
 
-import type { MethodParamsMap, MethodResultMap, RpcRequest, RpcResponse } from './types';
+import type { 
+  MethodParamsMap, 
+  MethodResultMap, 
+  RpcRequest, 
+  RpcResponse, 
+  StateChange,
+  StateUpdate,
+  BatchedFrameEvents,
+  BatchedRenderEvents 
+} from './types';
 import { WorkerManager } from './worker-manager';
 
 function getCanvasSize(
@@ -112,6 +121,13 @@ export class DotLottieWorker {
 
   private readonly _pointerExitMethod: (event: PointerEvent) => void;
 
+  // Optimization properties
+  private _subscribedEvents = new Set<EventType>();
+
+  private _lastStateTimestamp = 0;
+
+  private _highFrequencyBatchingEnabled = false;
+
   public constructor(config: Config & { workerId?: string }) {
     this._canvas = config.canvas;
 
@@ -167,12 +183,56 @@ export class DotLottieWorker {
       | 'onRenderError'
       | 'onReady'
       | 'onLoop'
+      | 'onBatchedFrames'
+      | 'onBatchedRenders'
+      | 'onStateUpdate'
     > = event.data;
 
     if (!rpcResponse.id) {
-      if (rpcResponse.method === 'onLoad' && rpcResponse.result.instanceId === this._id) {
-        await this._updateDotLottieInstanceState();
-        this._eventManager.dispatch(rpcResponse.result.event);
+      // Handle batched frame events
+      if (rpcResponse.method === 'onBatchedFrames' && 'batch' in rpcResponse.result) {
+        const batch = (rpcResponse.result as { batch: BatchedFrameEvents }).batch;
+        if (batch.instanceId === this._id) {
+          // Update current frame with the last frame in the batch
+          this._dotLottieInstanceState.currentFrame = batch.lastFrame;
+          
+          // Dispatch all frame events in the batch
+          batch.events.forEach(frameEvent => {
+            this._eventManager.dispatch(frameEvent);
+          });
+        }
+        return;
+      }
+
+      // Handle batched render events
+      if (rpcResponse.method === 'onBatchedRenders' && 'batch' in rpcResponse.result) {
+        const batch = (rpcResponse.result as { batch: BatchedRenderEvents }).batch;
+        if (batch.instanceId === this._id) {
+          // Dispatch render events
+          batch.events.forEach(renderEvent => {
+            this._eventManager.dispatch(renderEvent);
+          });
+        }
+        return;
+      }
+
+      // Handle incremental state updates
+      if (rpcResponse.method === 'onStateUpdate' && 'update' in rpcResponse.result) {
+        const update = (rpcResponse.result as { update: StateUpdate }).update;
+        if (update.instanceId === this._id) {
+          // Apply state changes incrementally
+          update.changes.forEach(change => {
+            (this._dotLottieInstanceState as any)[change.property] = change.value;
+          });
+          this._lastStateTimestamp = update.timestamp;
+        }
+        return;
+      }
+
+      // Handle standard events (for non-high-frequency events)
+      if (rpcResponse.method === 'onLoad' && 'instanceId' in rpcResponse.result && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceStateOptimized();
+        this._eventManager.dispatch((rpcResponse.result as any).event);
 
         if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
           if (this._dotLottieInstanceState.renderConfig.freezeOnOffscreen) {
@@ -185,52 +245,54 @@ export class DotLottieWorker {
         }
       }
 
-      if (rpcResponse.method === 'onComplete' && rpcResponse.result.instanceId === this._id) {
-        await this._updateDotLottieInstanceState();
-        this._eventManager.dispatch(rpcResponse.result.event);
+      if (rpcResponse.method === 'onComplete' && 'instanceId' in rpcResponse.result && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceStateOptimized();
+        this._eventManager.dispatch((rpcResponse.result as any).event);
       }
 
-      if (rpcResponse.method === 'onDestroy' && rpcResponse.result.instanceId === this._id) {
-        this._eventManager.dispatch(rpcResponse.result.event);
+      if (rpcResponse.method === 'onDestroy' && 'instanceId' in rpcResponse.result && rpcResponse.result.instanceId === this._id) {
+        this._eventManager.dispatch((rpcResponse.result as any).event);
       }
 
       if (rpcResponse.method === 'onUnfreeze' && rpcResponse.result.instanceId === this._id) {
-        await this._updateDotLottieInstanceState();
+        await this._updateDotLottieInstanceStateOptimized();
         this._dotLottieInstanceState.isFrozen = false;
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
+      // Handle individual frame events (only if not using batching)
       if (rpcResponse.method === 'onFrame' && rpcResponse.result.instanceId === this._id) {
         this._dotLottieInstanceState.currentFrame = (rpcResponse.result.event as FrameEvent).currentFrame;
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
+      // Handle individual render events (only if not using batching)
       if (rpcResponse.method === 'onRender' && rpcResponse.result.instanceId === this._id) {
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
       if (rpcResponse.method === 'onFreeze' && rpcResponse.result.instanceId === this._id) {
-        await this._updateDotLottieInstanceState();
+        await this._updateDotLottieInstanceStateOptimized();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
       if (rpcResponse.method === 'onPause' && rpcResponse.result.instanceId === this._id) {
-        await this._updateDotLottieInstanceState();
+        await this._updateDotLottieInstanceStateOptimized();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
       if (rpcResponse.method === 'onPlay' && rpcResponse.result.instanceId === this._id) {
-        await this._updateDotLottieInstanceState();
+        await this._updateDotLottieInstanceStateOptimized();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
       if (rpcResponse.method === 'onStop' && rpcResponse.result.instanceId === this._id) {
-        await this._updateDotLottieInstanceState();
+        await this._updateDotLottieInstanceStateOptimized();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
       if (rpcResponse.method === 'onLoadError' && rpcResponse.result.instanceId === this._id) {
-        await this._updateDotLottieInstanceState();
+        await this._updateDotLottieInstanceStateOptimized();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
@@ -240,12 +302,12 @@ export class DotLottieWorker {
       }
 
       if (rpcResponse.method === 'onReady' && rpcResponse.result.instanceId === this._id) {
-        await this._updateDotLottieInstanceState();
+        await this._updateDotLottieInstanceStateOptimized();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
       if (rpcResponse.method === 'onLoop' && rpcResponse.result.instanceId === this._id) {
-        await this._updateDotLottieInstanceState();
+        await this._updateDotLottieInstanceStateOptimized();
         this._eventManager.dispatch(rpcResponse.result.event);
       }
     }
@@ -387,7 +449,7 @@ export class DotLottieWorker {
     if (!this._created) return;
 
     await this._sendMessage('play', { instanceId: this._id });
-    await this._updateDotLottieInstanceState();
+    await this._updateDotLottieInstanceStateOptimized();
 
     /* 
       Check if the canvas is offscreen and freezing is enabled
@@ -408,35 +470,35 @@ export class DotLottieWorker {
     if (!this._created) return;
 
     await this._sendMessage('pause', { instanceId: this._id });
-    await this._updateDotLottieInstanceState();
+    await this._updateDotLottieInstanceStateOptimized();
   }
 
   public async stop(): Promise<void> {
     if (!this._created) return;
 
     await this._sendMessage('stop', { instanceId: this._id });
-    await this._updateDotLottieInstanceState();
+    await this._updateDotLottieInstanceStateOptimized();
   }
 
   public async setSpeed(speed: number): Promise<void> {
     if (!this._created) return;
 
     await this._sendMessage('setSpeed', { instanceId: this._id, speed });
-    await this._updateDotLottieInstanceState();
+    await this._updateDotLottieInstanceStateOptimized();
   }
 
   public async setMode(mode: Mode): Promise<void> {
     if (!this._created) return;
 
     await this._sendMessage('setMode', { instanceId: this._id, mode });
-    await this._updateDotLottieInstanceState();
+    await this._updateDotLottieInstanceStateOptimized();
   }
 
   public async setFrame(frame: number): Promise<void> {
     if (!this._created) return;
 
     await this._sendMessage('setFrame', { frame, instanceId: this._id });
-    await this._updateDotLottieInstanceState();
+    await this._updateDotLottieInstanceStateOptimized();
   }
 
   public async setSegment(start: number, end: number): Promise<void> {
@@ -583,9 +645,26 @@ export class DotLottieWorker {
   private async _updateDotLottieInstanceState(): Promise<void> {
     if (!this._created) return;
 
-    const result = await this._sendMessage('getDotLottieInstanceState', { instanceId: this._id });
+    const { state } = await this._sendMessage('getDotLottieInstanceState', { instanceId: this._id });
 
-    this._dotLottieInstanceState = result.state;
+    this._dotLottieInstanceState = state;
+  }
+
+  private async _updateDotLottieInstanceStateOptimized(): Promise<void> {
+    if (!this._created) return;
+
+    // Use incremental state updates instead of full state fetch
+    const { changes, currentTimestamp } = await this._sendMessage('getStateChanges', { 
+      instanceId: this._id, 
+      lastTimestamp: this._lastStateTimestamp 
+    });
+
+    // Apply changes incrementally
+    changes.forEach(change => {
+      (this._dotLottieInstanceState as any)[change.property] = change.value;
+    });
+
+    this._lastStateTimestamp = currentTimestamp;
   }
 
   public markers(): Marker[] {
@@ -656,10 +735,67 @@ export class DotLottieWorker {
 
   public addEventListener<T extends EventType>(type: T, listener: EventListener<T>): void {
     this._eventManager.addEventListener(type, listener);
+    
+    // Subscribe to this event type in the worker if not already subscribed
+    if (!this._subscribedEvents.has(type)) {
+      this._subscribedEvents.add(type);
+      
+      // Enable batching for high-frequency events by default
+      const highFrequencyEvents: EventType[] = ['frame', 'render'];
+      const shouldBatch = highFrequencyEvents.includes(type);
+      
+      this._sendMessage('subscribeToEvents', {
+        instanceId: this._id,
+        eventTypes: [type],
+        highFrequencyBatching: shouldBatch ? {
+          enabled: true,
+          batchSize: 10,
+          throttleMs: 16, // ~60fps
+        } : undefined,
+      }).catch(console.error);
+    }
   }
 
   public removeEventListener<T extends EventType>(type: T, listener?: EventListener<T>): void {
     this._eventManager.removeEventListener(type, listener);
+    
+    // Check if we should unsubscribe from this event type
+    // (This is a simplified check - you might want to track listener counts)
+    this._sendMessage('unsubscribeFromEvents', {
+      instanceId: this._id,
+      eventTypes: [type],
+    }).catch(console.error);
+    
+    this._subscribedEvents.delete(type);
+  }
+
+  public enableHighFrequencyBatching(options?: {
+    frameEventThrottleMs?: number;
+    renderEventThrottleMs?: number;
+  }): void {
+    this._highFrequencyBatchingEnabled = true;
+    
+    this._sendMessage('setHighFrequencyEventConfig', {
+      instanceId: this._id,
+      config: {
+        batchFrameEvents: true,
+        batchRenderEvents: true,
+        frameEventThrottleMs: options?.frameEventThrottleMs || 16,
+        renderEventThrottleMs: options?.renderEventThrottleMs || 16,
+      },
+    }).catch(console.error);
+  }
+
+  public disableHighFrequencyBatching(): void {
+    this._highFrequencyBatchingEnabled = false;
+    
+    this._sendMessage('setHighFrequencyEventConfig', {
+      instanceId: this._id,
+      config: {
+        batchFrameEvents: false,
+        batchRenderEvents: false,
+      },
+    }).catch(console.error);
   }
 
   public static setWasmUrl(url: string): void {
