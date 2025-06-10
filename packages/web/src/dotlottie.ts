@@ -1,5 +1,5 @@
 import { AnimationFrameManager } from './animation-frame-manager';
-import { IS_BROWSER } from './constants';
+import { IS_BROWSER, BYTES_PER_PIXEL } from './constants';
 import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker, Fit as CoreFit } from './core';
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
@@ -501,7 +501,7 @@ export class DotLottie {
       if (this._context) {
         const buffer = this._dotLottieCore.buffer() as ArrayBuffer;
 
-        const expectedLength = this._canvas.width * this._canvas.height * 4;
+        const expectedLength = this._canvas.width * this._canvas.height * BYTES_PER_PIXEL;
 
         if (buffer.byteLength !== expectedLength) {
           console.warn(`Buffer size mismatch: got ${buffer.byteLength}, expected ${expectedLength}`);
