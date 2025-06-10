@@ -13,3 +13,18 @@ export const createCanvas = (): HTMLCanvasElement => {
 
   return canvas;
 };
+
+const CSP_POLICY = "script-src 'self' 'wasm-unsafe-eval'";
+
+export const addWasmCSPPolicy = (): (() => void) => {
+  const meta = document.createElement('meta');
+
+  meta.httpEquiv = 'Content-Security-Policy';
+  meta.content = CSP_POLICY;
+
+  document.head.appendChild(meta);
+
+  return (): void => {
+    meta.remove();
+  };
+};
