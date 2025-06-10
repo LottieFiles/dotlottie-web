@@ -500,9 +500,18 @@ export class DotLottie {
       // Only process visual output if we have a canvas with a valid context
       if (this._context) {
         const buffer = this._dotLottieCore.buffer() as ArrayBuffer;
-        const clampedBuffer = new Uint8ClampedArray(buffer, 0, this._canvas.width * this._canvas.height * 4);
+
+        const expectedLength = this._canvas.width * this._canvas.height * 4;
+
+        if (buffer.byteLength !== expectedLength) {
+          console.warn(`Buffer size mismatch: got ${buffer.byteLength}, expected ${expectedLength}`);
+
+          return false;
+        }
 
         let imageData = null;
+
+        const clampedBuffer = new Uint8ClampedArray(buffer, 0, buffer.byteLength);
 
         /* 
           In Node.js, the ImageData constructor is not available. 
