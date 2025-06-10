@@ -4,6 +4,7 @@ import { describe, beforeAll, afterAll, beforeEach, afterEach, test, expect, vi 
 
 import type { Config, Layout, Mode } from '../src';
 import { DotLottie as DotLottieClass, DotLottieWorker as DotLottieWorkerClass } from '../src';
+import { BYTES_PER_PIXEL } from '../src/constants';
 import type { DotLottiePlayer } from '../src/core';
 import { getDefaultDPR } from '../src/utils';
 
@@ -599,6 +600,46 @@ describe.each([
     expect(consoleErrorSpy).toHaveBeenCalledWith('Error in animation frame:', fakeWebAssemblyRuntimeError);
 
     expect(onDestroy).toHaveBeenCalledTimes(1);
+  });
+
+  (isWorker ? test.skip : test)('logs warning and exits early on buffer size mismatch', async () => {
+    const consoleWarnSpy = vi.spyOn(console, 'warn');
+
+    const onReady = vi.fn();
+    const onRender = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: jsonSrc,
+      autoplay: true,
+    });
+
+    dotLottie.addEventListener('ready', onReady);
+    dotLottie.addEventListener('render', onRender);
+
+    await vi.waitFor(() => expect(onReady).toHaveBeenCalledTimes(1));
+
+    const dotLottieCore = (dotLottie as DotLottieClass)['_dotLottieCore'] as DotLottiePlayer;
+
+    vi.spyOn(dotLottieCore, 'render').mockReturnValue(true);
+
+    const wrongSizeBuffer = new ArrayBuffer(10);
+
+    vi.spyOn(dotLottieCore, 'buffer').mockReturnValue(wrongSizeBuffer);
+
+    const expectedLength = canvas.width * canvas.height * BYTES_PER_PIXEL;
+
+    onRender.mockClear();
+
+    await dotLottie.setFrame(1);
+
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      `Buffer size mismatch: got ${wrongSizeBuffer.byteLength}, expected ${expectedLength}`,
+    );
+
+    expect(onRender).not.toHaveBeenCalled();
+
+    consoleWarnSpy.mockRestore();
   });
 
   test('animationSize() returns the animation dimensions', async () => {
