@@ -1,6 +1,6 @@
 {
 	"name": "@lottiefiles/dotlottie-svelte",
-	"version": "0.6.1",
+	"version": "0.6.2",
 	"type": "module",
 	"description": "Svelte component wrapper around the dotlottie-web library to render Lottie and dotLottie animations",
 	"repository": {

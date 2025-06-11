@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.46.1
+
+### Patch Changes
+
+- 93bae08: fix: validate exact buffer size equality in canvas rendering
+
 ## 0.46.0
 
 ### Minor Changes
