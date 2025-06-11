@@ -9,3 +9,5 @@ export const PACKAGE_VERSION = '__PACKAGE_VERSION__';
 export const PACKAGE_NAME = '__PACKAGE_NAME__';
 
 export const DEFAULT_DPR_FACTOR = 0.75;
+
+export const BYTES_PER_PIXEL = 4;
