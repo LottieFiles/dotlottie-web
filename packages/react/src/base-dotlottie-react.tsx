@@ -2,7 +2,7 @@
 'use client';
 
 import type { Config, DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-web';
-import { useState, useEffect, useCallback, useRef, type ComponentProps, type RefCallback } from 'react';
+import { useEffect, useCallback, useRef, type ComponentProps, type RefCallback } from 'react';
 import type { JSX } from 'react';
 
 export type BaseDotLottieProps<T extends DotLottie | DotLottieWorker> = Omit<Config, 'canvas'> &
@@ -71,9 +71,8 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
 }: BaseDotLottieProps<T> & {
   createDotLottie: (config: T extends DotLottieWorker ? Config & { workerId?: string } : Config) => T;
 }): JSX.Element => {
-  const [dotLottie, setDotLottie] = useState<T | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dotLottieRef = useRef<T | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dotLottieRefCallbackRef = useRef<RefCallback<T | null> | undefined>(dotLottieRefCallback);
 
   const config: Omit<Config, 'canvas'> & {
@@ -98,29 +97,22 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   const configRef = useRef<Omit<BaseDotLottieProps<T>, 'createDotLottie' | 'dotLottieRefCallback'> | undefined>(config);
 
   dotLottieRefCallbackRef.current = dotLottieRefCallback;
-  dotLottieRef.current = dotLottie;
   configRef.current = config;
-
-  useEffect(() => {
-    if (typeof dotLottieRefCallbackRef.current === 'function' && dotLottie) {
-      dotLottieRefCallbackRef.current(dotLottie);
-    }
-  }, [dotLottie]);
 
   const setCanvasRef = useCallback((canvas: HTMLCanvasElement | null) => {
     canvasRef.current = canvas;
 
     if (canvas) {
-      const dotLottieInstance = createDotLottie({
+      dotLottieRef.current = createDotLottie({
         ...configRef.current,
         canvas,
       });
-
-      setDotLottie(dotLottieInstance as T);
     } else {
-      dotLottie?.destroy();
-      setDotLottie(null);
+      dotLottieRef.current?.destroy();
+      dotLottieRef.current = null;
     }
+
+    dotLottieRefCallbackRef.current?.(dotLottieRef.current);
   }, []);
 
   useEffect(() => {
@@ -144,15 +136,6 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
       canvasRef.current?.removeEventListener('mouseleave', handlePlayOnHover);
     };
   }, [playOnHover]);
-
-  useEffect(() => {
-    return () => {
-      if (dotLottie) {
-        dotLottie.destroy();
-        setDotLottie(null);
-      }
-    };
-  }, [dotLottie]);
 
   useEffect(() => {
     dotLottieRef.current?.setSpeed(speed ?? 1);
