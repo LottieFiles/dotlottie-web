@@ -34,7 +34,7 @@ export const DotLottieVue = defineComponent({
     mode: { type: String as () => Mode as PropType<DotLottieVueProps['mode']>, required: false },
     renderConfig: { type: Object as PropType<DotLottieVueProps['renderConfig']>, required: false },
     segment: {
-      type: Array as unknown as () => [number, number] as PropType<DotLottieVueProps['segment']>,
+      type: Array as PropType<[number, number]>,
       required: false,
     },
     speed: { type: Number as PropType<DotLottieVueProps['speed']>, required: false },
