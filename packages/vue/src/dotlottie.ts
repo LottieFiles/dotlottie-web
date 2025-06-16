@@ -1,4 +1,4 @@
-import { type Config, DotLottie, type Mode } from '@lottiefiles/dotlottie-web';
+import { type Config, DotLottie } from '@lottiefiles/dotlottie-web';
 import {
   type VNode,
   h,
@@ -34,7 +34,7 @@ export const DotLottieVue = defineComponent({
     mode: { type: String as PropType<DotLottieVueProps['mode']>, required: false },
     renderConfig: { type: Object as PropType<DotLottieVueProps['renderConfig']>, required: false },
     segment: {
-      type: Array as unknown as  PropType<[number, number]>,
+      type: Array as unknown as PropType<[number, number]>,
       required: false,
     },
     speed: { type: Number as PropType<DotLottieVueProps['speed']>, required: false },
