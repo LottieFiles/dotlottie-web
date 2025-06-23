@@ -1,4 +1,4 @@
-import { type Config, DotLottie, type Mode } from '@lottiefiles/dotlottie-web';
+import { type Config, DotLottie } from '@lottiefiles/dotlottie-web';
 import {
   type VNode,
   h,
@@ -10,6 +10,7 @@ import {
   onBeforeUnmount,
   defineComponent,
   toRefs,
+  type PropType,
 } from 'vue';
 
 export { type DotLottie };
@@ -25,21 +26,24 @@ interface DotLottieVueExposed {
 
 export const DotLottieVue = defineComponent({
   props: {
-    animationId: { type: String, required: false },
-    autoplay: { type: Boolean, required: false },
-    backgroundColor: { type: String, required: false },
-    data: { type: [String, ArrayBuffer], required: false },
-    loop: { type: Boolean, required: false },
-    mode: { type: String as () => Mode, required: false },
-    renderConfig: { type: Object, required: false },
-    segment: { type: Array as unknown as () => [number, number], required: false },
-    speed: { type: Number, required: false },
-    src: { type: String, required: false },
-    useFrameInterpolation: { type: Boolean, required: false },
-    marker: { type: String, required: false },
-    playOnHover: { type: Boolean, required: false },
-    themeData: { type: String, required: false },
-    themeId: { type: String, required: false },
+    animationId: { type: String as PropType<DotLottieVueProps['animationId']>, required: false },
+    autoplay: { type: Boolean as PropType<DotLottieVueProps['autoplay']>, required: false },
+    backgroundColor: { type: String as PropType<DotLottieVueProps['backgroundColor']>, required: false },
+    data: { type: [String, ArrayBuffer] as PropType<DotLottieVueProps['data']>, required: false },
+    loop: { type: Boolean as PropType<DotLottieVueProps['loop']>, required: false },
+    mode: { type: String as PropType<DotLottieVueProps['mode']>, required: false },
+    renderConfig: { type: Object as PropType<DotLottieVueProps['renderConfig']>, required: false },
+    segment: {
+      type: Array as unknown as PropType<[number, number]>,
+      required: false,
+    },
+    speed: { type: Number as PropType<DotLottieVueProps['speed']>, required: false },
+    src: { type: String as PropType<DotLottieVueProps['src']>, required: false },
+    useFrameInterpolation: { type: Boolean as PropType<DotLottieVueProps['useFrameInterpolation']>, required: false },
+    marker: { type: String as PropType<DotLottieVueProps['marker']>, required: false },
+    playOnHover: { type: Boolean as PropType<DotLottieVueProps['playOnHover']>, required: false },
+    themeData: { type: String as PropType<DotLottieVueProps['themeData']>, required: false },
+    themeId: { type: String as PropType<DotLottieVueProps['themeId']>, required: false },
   },
 
   setup(props: DotLottieVueProps, { attrs, expose }: SetupContext): () => VNode {
