@@ -11,6 +11,7 @@ import {
   defineComponent,
   toRefs,
   type PropType,
+  computed,
 } from 'vue';
 
 export { type DotLottie };
@@ -44,6 +45,7 @@ export const DotLottieVue = defineComponent({
     playOnHover: { type: Boolean as PropType<DotLottieVueProps['playOnHover']>, required: false },
     themeData: { type: String as PropType<DotLottieVueProps['themeData']>, required: false },
     themeId: { type: String as PropType<DotLottieVueProps['themeId']>, required: false },
+    layout: { type: Object as PropType<DotLottieVueProps['layout']>, required: false },
   },
 
   setup(props: DotLottieVueProps, { attrs, expose }: SetupContext): () => VNode {
@@ -51,16 +53,56 @@ export const DotLottieVue = defineComponent({
     const {
       animationId,
       backgroundColor,
+      data,
+      layout,
       loop,
       marker,
       mode,
       playOnHover,
+      renderConfig,
       segment,
       speed,
+      src,
       themeId,
       useFrameInterpolation,
     } = toRefs(props);
     let dotLottie: DotLottie | null = null;
+    const shouldAutoplay = computed(() => {
+      let _shouldAutoplay = props.autoplay;
+
+      if (typeof playOnHover?.value !== 'undefined' && playOnHover.value) {
+        _shouldAutoplay = false;
+      }
+
+      return _shouldAutoplay;
+    });
+
+    /**
+     * Wrap dotLottie-web's load function
+     */
+    const load: DotLottie['load'] = (config = {}) => {
+      if (dotLottie === null) {
+        return;
+      }
+
+      dotLottie.load({
+        animationId: animationId?.value,
+        backgroundColor: backgroundColor?.value,
+        data: data?.value,
+        layout: layout?.value,
+        loop: loop?.value,
+        marker: marker?.value,
+        mode: mode?.value,
+        autoplay: shouldAutoplay.value,
+        renderConfig: renderConfig?.value,
+        segment: segment?.value,
+        speed: speed?.value,
+        src: src?.value,
+        themeId: themeId?.value,
+        useFrameInterpolation: useFrameInterpolation?.value,
+        ...config,
+      });
+    };
 
     // Prop change
     watch(
@@ -174,20 +216,58 @@ export const DotLottieVue = defineComponent({
         }
       },
     );
+    watch(
+      () => layout?.value,
+      (newVal) => {
+        if (dotLottie && typeof newVal !== 'undefined') {
+          dotLottie.setLayout(newVal);
+        }
+      },
+      { deep: true },
+    );
+
+    watch(
+      () => renderConfig?.value,
+      (newVal) => {
+        if (dotLottie && typeof newVal !== 'undefined') {
+          dotLottie.setRenderConfig(newVal);
+        }
+      },
+      { deep: true },
+    );
+
+    watch(
+      () => data?.value,
+      (newVal) => {
+        const isStrOrObject = typeof newVal === 'object' || typeof newVal === 'string';
+
+        if (dotLottie && isStrOrObject) {
+          load({
+            data: newVal,
+          });
+        }
+      },
+      { deep: true },
+    );
+
+    watch(
+      () => src?.value,
+      (newVal) => {
+        if (dotLottie && typeof newVal !== 'undefined') {
+          load({
+            src: newVal,
+          });
+        }
+      },
+    );
 
     onMounted(() => {
       if (!canvas.value) return;
 
-      let shouldAutoplay = props.autoplay;
-
-      if (typeof playOnHover?.value !== 'undefined' && playOnHover.value) {
-        shouldAutoplay = false;
-      }
-
       dotLottie = new DotLottie({
         canvas: canvas.value,
         ...props,
-        autoplay: shouldAutoplay,
+        autoplay: shouldAutoplay.value,
       });
 
       if (playOnHover?.value) {
