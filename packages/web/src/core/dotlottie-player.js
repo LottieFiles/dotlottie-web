@@ -13,18 +13,18 @@ var createDotLottiePlayerModule = (() => {
       }),
       da = Object.assign({}, k),
       ea = './this.program',
-      p = '',
+      q = '',
       ia;
-    'undefined' != typeof document && document.currentScript && (p = document.currentScript.src);
-    _scriptName && (p = _scriptName);
-    p.startsWith('blob:') ? (p = '') : (p = p.substr(0, p.replace(/[?#].*/, '').lastIndexOf('/') + 1));
+    'undefined' != typeof document && document.currentScript && (q = document.currentScript.src);
+    _scriptName && (q = _scriptName);
+    q.startsWith('blob:') ? (q = '') : (q = q.substr(0, q.replace(/[?#].*/, '').lastIndexOf('/') + 1));
     ia = async (a) => {
       a = await fetch(a, { credentials: 'same-origin' });
       if (a.ok) return a.arrayBuffer();
       throw Error(a.status + ' : ' + a.url);
     };
     var ja = k.print || console.log.bind(console),
-      q = k.printErr || console.error.bind(console);
+      r = k.printErr || console.error.bind(console);
     Object.assign(k, da);
     da = null;
     k.thisProgram && (ea = k.thisProgram);
@@ -32,22 +32,22 @@ var createDotLottiePlayerModule = (() => {
       la,
       ma = !1,
       na,
-      r,
       u,
-      v,
       x,
+      y,
       z,
-      C,
+      A,
+      B,
       oa,
       pa;
     function qa() {
       var a = la.buffer;
-      k.HEAP8 = r = new Int8Array(a);
-      k.HEAP16 = v = new Int16Array(a);
-      k.HEAPU8 = u = new Uint8Array(a);
-      k.HEAPU16 = x = new Uint16Array(a);
-      k.HEAP32 = z = new Int32Array(a);
-      k.HEAPU32 = C = new Uint32Array(a);
+      k.HEAP8 = u = new Int8Array(a);
+      k.HEAP16 = y = new Int16Array(a);
+      k.HEAPU8 = x = new Uint8Array(a);
+      k.HEAPU16 = z = new Uint16Array(a);
+      k.HEAP32 = A = new Int32Array(a);
+      k.HEAPU32 = B = new Uint32Array(a);
       k.HEAPF32 = oa = new Float32Array(a);
       k.HEAPF64 = pa = new Float64Array(a);
     }
@@ -58,12 +58,12 @@ var createDotLottiePlayerModule = (() => {
       var a = k.preRun.shift();
       ra.unshift(a);
     }
-    var D = 0,
-      E = null;
+    var C = 0,
+      D = null;
     function va(a) {
       k.onAbort?.(a);
       a = 'Aborted(' + a + ')';
-      q(a);
+      r(a);
       ma = !0;
       a = new WebAssembly.RuntimeError(a + '. Build with -sASSERTIONS for more info.');
       ba(a);
@@ -86,7 +86,7 @@ var createDotLottiePlayerModule = (() => {
         var c = await ya(a);
         return await WebAssembly.instantiate(c, b);
       } catch (d) {
-        q(`failed to asynchronously prepare wasm: ${d}`), va(d);
+        r(`failed to asynchronously prepare wasm: ${d}`), va(d);
       }
     }
     async function Aa(a) {
@@ -96,7 +96,7 @@ var createDotLottiePlayerModule = (() => {
           var c = fetch(b, { credentials: 'same-origin' });
           return await WebAssembly.instantiateStreaming(c, a);
         } catch (d) {
-          q(`wasm streaming compile failed: ${d}`), q('falling back to ArrayBuffer instantiation');
+          r(`wasm streaming compile failed: ${d}`), r('falling back to ArrayBuffer instantiation');
         }
       return za(b, a);
     }
@@ -112,7 +112,7 @@ var createDotLottiePlayerModule = (() => {
       },
       Da = k.noExitRuntime || !0,
       Ea = 'undefined' != typeof TextDecoder ? new TextDecoder() : void 0,
-      H = (a, b = 0, c = NaN) => {
+      G = (a, b = 0, c = NaN) => {
         var d = b + c;
         for (c = b; a[c] && !(c >= d); ) ++c;
         if (16 < c - b && a.buffer && Ea) return Ea.decode(a.subarray(b, c));
@@ -135,31 +135,30 @@ var createDotLottiePlayerModule = (() => {
         }
         return d;
       },
-      Fa = [],
-      Ga = 0,
       I = 0;
-    class Ha {
+    class Fa {
       constructor(a) {
-        this.Ec = a;
-        this.dc = a - 24;
+        this.Pa = a - 24;
       }
     }
-    var Ja = (a) => {
-        var b = I;
+    var Ha = () => {
+        var a = [],
+          b = I;
         if (!b) return J(0), 0;
-        var c = new Ha(b);
-        C[(c.dc + 16) >> 2] = b;
-        var d = C[(c.dc + 4) >> 2];
+        var c = new Fa(b);
+        B[(c.Pa + 16) >> 2] = b;
+        var d = B[(c.Pa + 4) >> 2];
         if (!d) return J(0), b;
         for (var e of a) {
           if (0 === e || e === d) break;
-          if (Ia(e, d, c.dc + 16)) return J(e), b;
+          if (Ga(e, d, c.Pa + 16)) return J(e), b;
         }
         J(d);
         return b;
       },
+      Ia = 0,
       K = (a, b, c) => {
-        var d = u;
+        var d = x;
         if (0 < c) {
           c = b + c - 1;
           for (var e = 0; e < a.length; ++e) {
@@ -192,27 +191,27 @@ var createDotLottiePlayerModule = (() => {
           d[b] = 0;
         }
       },
-      Ka = {},
-      La = (a) => {
+      Ja = {},
+      Ka = (a) => {
         for (; a.length; ) {
           var b = a.pop();
           a.pop()(b);
         }
       };
     function L(a) {
-      return this.fromWireType(C[a >> 2]);
+      return this.fromWireType(B[a >> 2]);
     }
     var M = {},
       N = {},
-      Ma = {},
-      Na,
+      La = {},
+      Ma,
       P = (a, b, c) => {
         function d(g) {
           g = c(g);
-          if (g.length !== a.length) throw new Na('Mismatched type converter count');
+          if (g.length !== a.length) throw new Ma('Mismatched type converter count');
           for (var l = 0; l < a.length; ++l) O(a[l], g[l]);
         }
-        a.forEach((g) => (Ma[g] = b));
+        a.forEach((g) => (La[g] = b));
         var e = Array(b.length),
           f = [],
           h = 0;
@@ -229,168 +228,168 @@ var createDotLottiePlayerModule = (() => {
         });
         0 === f.length && d(e);
       },
-      Oa,
+      Na,
       Q = (a) => {
-        for (var b = ''; u[a]; ) b += Oa[u[a++]];
+        for (var b = ''; x[a]; ) b += Na[x[a++]];
         return b;
       },
       R;
-    function Pa(a, b, c = {}) {
+    function Oa(a, b, c = {}) {
       var d = b.name;
       if (!a) throw new R(`type "${d}" must have a positive integer typeid pointer`);
       if (N.hasOwnProperty(a)) {
-        if (c.Lc) return;
+        if (c.vb) return;
         throw new R(`Cannot register type '${d}' twice`);
       }
       N[a] = b;
-      delete Ma[a];
+      delete La[a];
       M.hasOwnProperty(a) && ((b = M[a]), delete M[a], b.forEach((e) => e()));
     }
     function O(a, b, c = {}) {
-      return Pa(a, b, c);
+      return Oa(a, b, c);
     }
-    var Ra = (a) => {
-        throw new R(a.cc.fc.ec.name + ' instance already deleted');
+    var Qa = (a) => {
+        throw new R(a.Oa.Ra.Qa.name + ' instance already deleted');
       },
-      Sa = !1,
-      Ta = () => {},
-      Ua = (a, b, c) => {
+      Ra = !1,
+      Sa = () => {},
+      Ta = (a, b, c) => {
         if (b === c) return a;
-        if (void 0 === c.jc) return null;
-        a = Ua(a, b, c.jc);
-        return null === a ? null : c.Dc(a);
+        if (void 0 === c.Ua) return null;
+        a = Ta(a, b, c.Ua);
+        return null === a ? null : c.ob(a);
       },
+      Ua = {},
       Va = {},
-      Wa = {},
-      Xa = (a, b) => {
+      Wa = (a, b) => {
         if (void 0 === b) throw new R('ptr should not be undefined');
-        for (; a.jc; ) (b = a.tc(b)), (a = a.jc);
-        return Wa[b];
+        for (; a.Ua; ) (b = a.eb(b)), (a = a.Ua);
+        return Va[b];
       },
-      Za = (a, b) => {
-        if (!b.fc || !b.dc) throw new Na('makeClassHandle requires ptr and ptrType');
-        if (!!b.kc !== !!b.ic) throw new Na('Both smartPtrType and smartPtr must be specified');
+      Ya = (a, b) => {
+        if (!b.Ra || !b.Pa) throw new Ma('makeClassHandle requires ptr and ptrType');
+        if (!!b.Va !== !!b.Ta) throw new Ma('Both smartPtrType and smartPtr must be specified');
         b.count = { value: 1 };
-        return Ya(Object.create(a, { cc: { value: b, writable: !0 } }));
+        return Xa(Object.create(a, { Oa: { value: b, writable: !0 } }));
       },
-      Ya = (a) => {
-        if ('undefined' === typeof FinalizationRegistry) return (Ya = (b) => b), a;
-        Sa = new FinalizationRegistry((b) => {
-          b = b.cc;
+      Xa = (a) => {
+        if ('undefined' === typeof FinalizationRegistry) return (Xa = (b) => b), a;
+        Ra = new FinalizationRegistry((b) => {
+          b = b.Oa;
           --b.count.value;
-          0 === b.count.value && (b.ic ? b.kc.nc(b.ic) : b.fc.ec.nc(b.dc));
+          0 === b.count.value && (b.Ta ? b.Va.Ya(b.Ta) : b.Ra.Qa.Ya(b.Pa));
         });
-        Ya = (b) => {
-          var c = b.cc;
-          c.ic && Sa.register(b, { cc: c }, b);
+        Xa = (b) => {
+          var c = b.Oa;
+          c.Ta && Ra.register(b, { Oa: c }, b);
           return b;
         };
-        Ta = (b) => {
-          Sa.unregister(b);
+        Sa = (b) => {
+          Ra.unregister(b);
         };
-        return Ya(a);
+        return Xa(a);
       },
-      $a = [];
-    function ab() {}
-    var bb = (a, b) => Object.defineProperty(b, 'name', { value: a }),
-      cb = (a, b, c) => {
-        if (void 0 === a[b].hc) {
+      Za = [];
+    function $a() {}
+    var ab = (a, b) => Object.defineProperty(b, 'name', { value: a }),
+      bb = (a, b, c) => {
+        if (void 0 === a[b].Sa) {
           var d = a[b];
           a[b] = function (...e) {
-            if (!a[b].hc.hasOwnProperty(e.length))
+            if (!a[b].Sa.hasOwnProperty(e.length))
               throw new R(
-                `Function '${c}' called with an invalid number of arguments (${e.length}) - expects one of (${a[b].hc})!`,
+                `Function '${c}' called with an invalid number of arguments (${e.length}) - expects one of (${a[b].Sa})!`,
               );
-            return a[b].hc[e.length].apply(this, e);
+            return a[b].Sa[e.length].apply(this, e);
           };
-          a[b].hc = [];
-          a[b].hc[d.qc] = d;
+          a[b].Sa = [];
+          a[b].Sa[d.ab] = d;
         }
       },
-      db = (a, b, c) => {
+      cb = (a, b, c) => {
         if (k.hasOwnProperty(a)) {
-          if (void 0 === c || (void 0 !== k[a].hc && void 0 !== k[a].hc[c]))
+          if (void 0 === c || (void 0 !== k[a].Sa && void 0 !== k[a].Sa[c]))
             throw new R(`Cannot register public name '${a}' twice`);
-          cb(k, a, a);
-          if (k[a].hc.hasOwnProperty(c))
+          bb(k, a, a);
+          if (k[a].Sa.hasOwnProperty(c))
             throw new R(`Cannot register multiple overloads of a function with the same number of arguments (${c})!`);
-          k[a].hc[c] = b;
-        } else (k[a] = b), (k[a].qc = c);
+          k[a].Sa[c] = b;
+        } else (k[a] = b), (k[a].ab = c);
       },
-      eb = (a) => {
+      db = (a) => {
         a = a.replace(/[^a-zA-Z0-9_]/g, '$');
         var b = a.charCodeAt(0);
         return 48 <= b && 57 >= b ? `_${a}` : a;
       };
-    function fb(a, b, c, d, e, f, h, g) {
+    function eb(a, b, c, d, e, f, h, g) {
       this.name = a;
       this.constructor = b;
-      this.pc = c;
-      this.nc = d;
-      this.jc = e;
-      this.Gc = f;
-      this.tc = h;
-      this.Dc = g;
-      this.Nc = [];
+      this.$a = c;
+      this.Ya = d;
+      this.Ua = e;
+      this.qb = f;
+      this.eb = h;
+      this.ob = g;
+      this.xb = [];
     }
-    var gb = (a, b, c) => {
+    var fb = (a, b, c) => {
       for (; b !== c; ) {
-        if (!b.tc) throw new R(`Expected null or instance of ${c.name}, got an instance of ${b.name}`);
-        a = b.tc(a);
-        b = b.jc;
+        if (!b.eb) throw new R(`Expected null or instance of ${c.name}, got an instance of ${b.name}`);
+        a = b.eb(a);
+        b = b.Ua;
       }
       return a;
     };
-    function hb(a, b) {
+    function gb(a, b) {
       if (null === b) {
-        if (this.wc) throw new R(`null is not a valid ${this.name}`);
+        if (this.hb) throw new R(`null is not a valid ${this.name}`);
         return 0;
       }
-      if (!b.cc) throw new R(`Cannot pass "${ib(b)}" as a ${this.name}`);
-      if (!b.cc.dc) throw new R(`Cannot pass deleted object as a pointer of type ${this.name}`);
-      return gb(b.cc.dc, b.cc.fc.ec, this.ec);
+      if (!b.Oa) throw new R(`Cannot pass "${hb(b)}" as a ${this.name}`);
+      if (!b.Oa.Pa) throw new R(`Cannot pass deleted object as a pointer of type ${this.name}`);
+      return fb(b.Oa.Pa, b.Oa.Ra.Qa, this.Qa);
     }
-    function jb(a, b) {
+    function ib(a, b) {
       if (null === b) {
-        if (this.wc) throw new R(`null is not a valid ${this.name}`);
-        if (this.vc) {
-          var c = this.xc();
-          null !== a && a.push(this.nc, c);
+        if (this.hb) throw new R(`null is not a valid ${this.name}`);
+        if (this.gb) {
+          var c = this.ib();
+          null !== a && a.push(this.Ya, c);
           return c;
         }
         return 0;
       }
-      if (!b || !b.cc) throw new R(`Cannot pass "${ib(b)}" as a ${this.name}`);
-      if (!b.cc.dc) throw new R(`Cannot pass deleted object as a pointer of type ${this.name}`);
-      if (!this.uc && b.cc.fc.uc)
+      if (!b || !b.Oa) throw new R(`Cannot pass "${hb(b)}" as a ${this.name}`);
+      if (!b.Oa.Pa) throw new R(`Cannot pass deleted object as a pointer of type ${this.name}`);
+      if (!this.fb && b.Oa.Ra.fb)
         throw new R(
-          `Cannot convert argument of type ${b.cc.kc ? b.cc.kc.name : b.cc.fc.name} to parameter type ${this.name}`,
+          `Cannot convert argument of type ${b.Oa.Va ? b.Oa.Va.name : b.Oa.Ra.name} to parameter type ${this.name}`,
         );
-      c = gb(b.cc.dc, b.cc.fc.ec, this.ec);
-      if (this.vc) {
-        if (void 0 === b.cc.ic) throw new R('Passing raw pointer to smart pointer is illegal');
-        switch (this.Sc) {
+      c = fb(b.Oa.Pa, b.Oa.Ra.Qa, this.Qa);
+      if (this.gb) {
+        if (void 0 === b.Oa.Ta) throw new R('Passing raw pointer to smart pointer is illegal');
+        switch (this.Cb) {
           case 0:
-            if (b.cc.kc === this) c = b.cc.ic;
+            if (b.Oa.Va === this) c = b.Oa.Ta;
             else
               throw new R(
-                `Cannot convert argument of type ${b.cc.kc ? b.cc.kc.name : b.cc.fc.name} to parameter type ${
+                `Cannot convert argument of type ${b.Oa.Va ? b.Oa.Va.name : b.Oa.Ra.name} to parameter type ${
                   this.name
                 }`,
               );
             break;
           case 1:
-            c = b.cc.ic;
+            c = b.Oa.Ta;
             break;
           case 2:
-            if (b.cc.kc === this) c = b.cc.ic;
+            if (b.Oa.Va === this) c = b.Oa.Ta;
             else {
               var d = b.clone();
-              c = this.Oc(
+              c = this.yb(
                 c,
-                kb(() => d['delete']()),
+                jb(() => d['delete']()),
               );
-              null !== a && a.push(this.nc, c);
+              null !== a && a.push(this.Ya, c);
             }
             break;
           default:
@@ -399,104 +398,104 @@ var createDotLottiePlayerModule = (() => {
       }
       return c;
     }
-    function lb(a, b) {
+    function kb(a, b) {
       if (null === b) {
-        if (this.wc) throw new R(`null is not a valid ${this.name}`);
+        if (this.hb) throw new R(`null is not a valid ${this.name}`);
         return 0;
       }
-      if (!b.cc) throw new R(`Cannot pass "${ib(b)}" as a ${this.name}`);
-      if (!b.cc.dc) throw new R(`Cannot pass deleted object as a pointer of type ${this.name}`);
-      if (b.cc.fc.uc) throw new R(`Cannot convert argument of type ${b.cc.fc.name} to parameter type ${this.name}`);
-      return gb(b.cc.dc, b.cc.fc.ec, this.ec);
+      if (!b.Oa) throw new R(`Cannot pass "${hb(b)}" as a ${this.name}`);
+      if (!b.Oa.Pa) throw new R(`Cannot pass deleted object as a pointer of type ${this.name}`);
+      if (b.Oa.Ra.fb) throw new R(`Cannot convert argument of type ${b.Oa.Ra.name} to parameter type ${this.name}`);
+      return fb(b.Oa.Pa, b.Oa.Ra.Qa, this.Qa);
     }
-    function mb(a, b, c, d, e, f, h, g, l, m, n) {
+    function lb(a, b, c, d, e, f, h, g, l, m, n) {
       this.name = a;
-      this.ec = b;
-      this.wc = c;
-      this.uc = d;
-      this.vc = e;
-      this.Mc = f;
-      this.Sc = h;
-      this.Bc = g;
-      this.xc = l;
-      this.Oc = m;
-      this.nc = n;
-      e || void 0 !== b.jc ? (this.toWireType = jb) : ((this.toWireType = d ? hb : lb), (this.mc = null));
+      this.Qa = b;
+      this.hb = c;
+      this.fb = d;
+      this.gb = e;
+      this.wb = f;
+      this.Cb = h;
+      this.mb = g;
+      this.ib = l;
+      this.yb = m;
+      this.Ya = n;
+      e || void 0 !== b.Ua ? (this.toWireType = ib) : ((this.toWireType = d ? gb : kb), (this.Xa = null));
     }
-    var nb = (a, b, c) => {
-        if (!k.hasOwnProperty(a)) throw new Na('Replacing nonexistent public symbol');
-        void 0 !== k[a].hc && void 0 !== c ? (k[a].hc[c] = b) : ((k[a] = b), (k[a].qc = c));
+    var mb = (a, b, c) => {
+        if (!k.hasOwnProperty(a)) throw new Ma('Replacing nonexistent public symbol');
+        void 0 !== k[a].Sa && void 0 !== c ? (k[a].Sa[c] = b) : ((k[a] = b), (k[a].ab = c));
       },
       S,
-      ob = (a, b, c = []) => {
+      nb = (a, b, c = []) => {
         a.includes('j') ? ((a = a.replace(/p/g, 'i')), (b = (0, k['dynCall_' + a])(b, ...c))) : (b = S.get(b)(...c));
         return b;
       },
-      pb =
+      ob =
         (a, b) =>
         (...c) =>
-          ob(a, b, c),
+          nb(a, b, c),
       T = (a, b) => {
         a = Q(a);
-        var c = a.includes('j') ? pb(a, b) : S.get(b);
+        var c = a.includes('j') ? ob(a, b) : S.get(b);
         if ('function' != typeof c) throw new R(`unknown function pointer with signature ${a}: ${b}`);
         return c;
       },
-      qb,
-      sb = (a) => {
-        a = rb(a);
+      pb,
+      rb = (a) => {
+        a = qb(a);
         var b = Q(a);
         U(a);
         return b;
       },
-      tb = (a, b) => {
+      sb = (a, b) => {
         function c(f) {
-          e[f] || N[f] || (Ma[f] ? Ma[f].forEach(c) : (d.push(f), (e[f] = !0)));
+          e[f] || N[f] || (La[f] ? La[f].forEach(c) : (d.push(f), (e[f] = !0)));
         }
         var d = [],
           e = {};
         b.forEach(c);
-        throw new qb(`${a}: ` + d.map(sb).join([', ']));
+        throw new pb(`${a}: ` + d.map(rb).join([', ']));
       },
-      ub = (a, b) => {
-        for (var c = [], d = 0; d < a; d++) c.push(C[(b + 4 * d) >> 2]);
+      tb = (a, b) => {
+        for (var c = [], d = 0; d < a; d++) c.push(B[(b + 4 * d) >> 2]);
         return c;
       };
-    function vb(a) {
-      for (var b = 1; b < a.length; ++b) if (null !== a[b] && void 0 === a[b].mc) return !0;
+    function ub(a) {
+      for (var b = 1; b < a.length; ++b) if (null !== a[b] && void 0 === a[b].Xa) return !0;
       return !1;
     }
-    function wb(a, b, c, d, e) {
+    function vb(a, b, c, d, e) {
       var f = b.length;
       if (2 > f) throw new R("argTypes array size mismatch! Must at least get return value and 'this' types!");
       var h = null !== b[1] && null !== c,
-        g = vb(b),
+        g = ub(b),
         l = 'void' !== b[0].name,
         m = f - 2,
         n = Array(m),
-        t = [],
-        w = [];
-      return bb(a, function (...A) {
-        w.length = 0;
-        t.length = h ? 2 : 1;
-        t[0] = e;
+        p = [],
+        t = [];
+      return ab(a, function (...E) {
+        t.length = 0;
+        p.length = h ? 2 : 1;
+        p[0] = e;
         if (h) {
-          var y = b[1].toWireType(w, this);
-          t[1] = y;
+          var v = b[1].toWireType(t, this);
+          p[1] = v;
         }
-        for (var B = 0; B < m; ++B) (n[B] = b[B + 2].toWireType(w, A[B])), t.push(n[B]);
-        A = d(...t);
-        if (g) La(w);
+        for (var w = 0; w < m; ++w) (n[w] = b[w + 2].toWireType(t, E[w])), p.push(n[w]);
+        E = d(...p);
+        if (g) Ka(t);
         else
-          for (B = h ? 1 : 2; B < b.length; B++) {
-            var F = 1 === B ? y : n[B - 2];
-            null !== b[B].mc && b[B].mc(F);
+          for (w = h ? 1 : 2; w < b.length; w++) {
+            var H = 1 === w ? v : n[w - 2];
+            null !== b[w].Xa && b[w].Xa(H);
           }
-        y = l ? b[0].fromWireType(A) : void 0;
-        return y;
+        v = l ? b[0].fromWireType(E) : void 0;
+        return v;
       });
     }
-    var xb = (a) => {
+    var wb = (a) => {
         a = a.trim();
         const b = a.indexOf('(');
         return -1 !== b ? a.substr(0, b) : a;
@@ -510,7 +509,7 @@ var createDotLottiePlayerModule = (() => {
         if (!a) throw new R('Cannot use deleted val. handle = ' + a);
         return V[a];
       },
-      kb = (a) => {
+      jb = (a) => {
         switch (a) {
           case void 0:
             return 2;
@@ -534,52 +533,52 @@ var createDotLottiePlayerModule = (() => {
           zb(a);
           return b;
         },
-        toWireType: (a, b) => kb(b),
-        lc: 8,
+        toWireType: (a, b) => jb(b),
+        Wa: 8,
         readValueFromPointer: L,
-        mc: null,
+        Xa: null,
       },
       Cb = (a, b, c) => {
         switch (b) {
           case 1:
             return c
               ? function (d) {
-                  return this.fromWireType(r[d]);
+                  return this.fromWireType(u[d]);
                 }
               : function (d) {
-                  return this.fromWireType(u[d]);
+                  return this.fromWireType(x[d]);
                 };
           case 2:
             return c
               ? function (d) {
-                  return this.fromWireType(v[d >> 1]);
+                  return this.fromWireType(y[d >> 1]);
                 }
               : function (d) {
-                  return this.fromWireType(x[d >> 1]);
+                  return this.fromWireType(z[d >> 1]);
                 };
           case 4:
             return c
               ? function (d) {
-                  return this.fromWireType(z[d >> 2]);
+                  return this.fromWireType(A[d >> 2]);
                 }
               : function (d) {
-                  return this.fromWireType(C[d >> 2]);
+                  return this.fromWireType(B[d >> 2]);
                 };
           default:
             throw new TypeError(`invalid integer width (${b}): ${a}`);
         }
       },
-      Eb = (a, b) => {
+      Db = (a, b) => {
         var c = N[a];
-        if (void 0 === c) throw ((a = `${b} has unknown type ${sb(a)}`), new R(a));
+        if (void 0 === c) throw ((a = `${b} has unknown type ${rb(a)}`), new R(a));
         return c;
       },
-      ib = (a) => {
+      hb = (a) => {
         if (null === a) return 'null';
         var b = typeof a;
         return 'object' === b || 'array' === b || 'function' === b ? a.toString() : '' + a;
       },
-      Fb = (a, b) => {
+      Eb = (a, b) => {
         switch (b) {
           case 4:
             return function (c) {
@@ -593,47 +592,47 @@ var createDotLottiePlayerModule = (() => {
             throw new TypeError(`invalid float width (${b}): ${a}`);
         }
       },
-      Gb = (a, b, c) => {
+      Fb = (a, b, c) => {
         switch (b) {
           case 1:
-            return c ? (d) => r[d] : (d) => u[d];
+            return c ? (d) => u[d] : (d) => x[d];
           case 2:
-            return c ? (d) => v[d >> 1] : (d) => x[d >> 1];
+            return c ? (d) => y[d >> 1] : (d) => z[d >> 1];
           case 4:
-            return c ? (d) => z[d >> 2] : (d) => C[d >> 2];
+            return c ? (d) => A[d >> 2] : (d) => B[d >> 2];
           default:
             throw new TypeError(`invalid integer width (${b}): ${a}`);
         }
       },
-      Hb = Object.assign({ optional: !0 }, Bb),
-      Ib = 'undefined' != typeof TextDecoder ? new TextDecoder('utf-16le') : void 0,
-      Jb = (a, b) => {
+      Gb = Object.assign({ optional: !0 }, Bb),
+      Hb = 'undefined' != typeof TextDecoder ? new TextDecoder('utf-16le') : void 0,
+      Ib = (a, b) => {
         var c = a >> 1;
-        for (var d = c + b / 2; !(c >= d) && x[c]; ) ++c;
+        for (var d = c + b / 2; !(c >= d) && z[c]; ) ++c;
         c <<= 1;
-        if (32 < c - a && Ib) return Ib.decode(u.subarray(a, c));
+        if (32 < c - a && Hb) return Hb.decode(x.subarray(a, c));
         c = '';
         for (d = 0; !(d >= b / 2); ++d) {
-          var e = v[(a + 2 * d) >> 1];
+          var e = y[(a + 2 * d) >> 1];
           if (0 == e) break;
           c += String.fromCharCode(e);
         }
         return c;
       },
-      Kb = (a, b, c) => {
+      Jb = (a, b, c) => {
         c ??= 2147483647;
         if (2 > c) return 0;
         c -= 2;
         var d = b;
         c = c < 2 * a.length ? c / 2 : a.length;
-        for (var e = 0; e < c; ++e) (v[b >> 1] = a.charCodeAt(e)), (b += 2);
-        v[b >> 1] = 0;
+        for (var e = 0; e < c; ++e) (y[b >> 1] = a.charCodeAt(e)), (b += 2);
+        y[b >> 1] = 0;
         return b - d;
       },
-      Lb = (a) => 2 * a.length,
-      Mb = (a, b) => {
+      Kb = (a) => 2 * a.length,
+      Lb = (a, b) => {
         for (var c = 0, d = ''; !(c >= b / 4); ) {
-          var e = z[(a + 4 * c) >> 2];
+          var e = A[(a + 4 * c) >> 2];
           if (0 == e) break;
           ++c;
           65536 <= e
@@ -642,7 +641,7 @@ var createDotLottiePlayerModule = (() => {
         }
         return d;
       },
-      Nb = (a, b, c) => {
+      Mb = (a, b, c) => {
         c ??= 2147483647;
         if (4 > c) return 0;
         var d = b;
@@ -653,14 +652,14 @@ var createDotLottiePlayerModule = (() => {
             var h = a.charCodeAt(++e);
             f = (65536 + ((f & 1023) << 10)) | (h & 1023);
           }
-          z[b >> 2] = f;
+          A[b >> 2] = f;
           b += 4;
           if (b + 4 > c) break;
         }
-        z[b >> 2] = 0;
+        A[b >> 2] = 0;
         return b - d;
       },
-      Ob = (a) => {
+      Nb = (a) => {
         for (var b = 0, c = 0; c < a.length; ++c) {
           var d = a.charCodeAt(c);
           55296 <= d && 57343 >= d && ++c;
@@ -668,49 +667,49 @@ var createDotLottiePlayerModule = (() => {
         }
         return b;
       },
-      Pb = 0,
-      Qb = (a, b, c) => {
+      Ob = 0,
+      Pb = (a, b, c) => {
         var d = [];
         a = a.toWireType(d, c);
-        d.length && (C[b >> 2] = kb(d));
+        d.length && (B[b >> 2] = jb(d));
         return a;
       },
-      Rb = [],
-      Sb = (a) => {
-        var b = Rb.length;
-        Rb.push(a);
+      Qb = [],
+      Rb = (a) => {
+        var b = Qb.length;
+        Qb.push(a);
         return b;
       },
-      Tb = (a, b) => {
-        for (var c = Array(a), d = 0; d < a; ++d) c[d] = Eb(C[(b + 4 * d) >> 2], 'parameter ' + d);
+      Sb = (a, b) => {
+        for (var c = Array(a), d = 0; d < a; ++d) c[d] = Db(B[(b + 4 * d) >> 2], 'parameter ' + d);
         return c;
       },
-      Ub = Reflect.construct,
-      Vb = {},
-      Wb = (a) => {
+      Tb = Reflect.construct,
+      Ub = {},
+      Vb = (a) => {
         if (!(a instanceof Ba || 'unwind' == a)) throw a;
       },
-      Xb = (a) => {
+      Wb = (a) => {
         na = a;
-        Da || 0 < Pb || (k.onExit?.(a), (ma = !0));
+        Da || 0 < Ob || (k.onExit?.(a), (ma = !0));
         throw new Ba(a);
       },
-      Yb = (a) => {
+      Xb = (a) => {
         if (!ma)
           try {
-            if ((a(), !(Da || 0 < Pb)))
+            if ((a(), !(Da || 0 < Ob)))
               try {
-                (na = a = na), Xb(a);
+                (na = a = na), Wb(a);
               } catch (b) {
-                Wb(b);
+                Vb(b);
               }
           } catch (b) {
-            Wb(b);
+            Vb(b);
           }
       },
-      Zb = {},
-      ac = () => {
-        if (!$b) {
+      Yb = {},
+      $b = () => {
+        if (!Zb) {
           var a = {
               USER: 'web_user',
               LOGNAME: 'web_user',
@@ -725,122 +724,122 @@ var createDotLottiePlayerModule = (() => {
               _: ea || './this.program',
             },
             b;
-          for (b in Zb) void 0 === Zb[b] ? delete a[b] : (a[b] = Zb[b]);
+          for (b in Yb) void 0 === Yb[b] ? delete a[b] : (a[b] = Yb[b]);
           var c = [];
           for (b in a) c.push(`${b}=${a[b]}`);
-          $b = c;
+          Zb = c;
         }
-        return $b;
+        return Zb;
       },
-      $b,
-      bc = [null, [], []],
-      cc = () => {
+      Zb,
+      ac = [null, [], []],
+      bc = () => {
         if ('object' == typeof crypto && 'function' == typeof crypto.getRandomValues)
           return (a) => crypto.getRandomValues(a);
         va('initRandomDevice');
       },
-      dc = (a) => (dc = cc())(a);
-    Na = k.InternalError = class extends Error {
+      cc = (a) => (cc = bc())(a);
+    Ma = k.InternalError = class extends Error {
       constructor(a) {
         super(a);
         this.name = 'InternalError';
       }
     };
-    for (var ec = Array(256), fc = 0; 256 > fc; ++fc) ec[fc] = String.fromCharCode(fc);
-    Oa = ec;
+    for (var dc = Array(256), ec = 0; 256 > ec; ++ec) dc[ec] = String.fromCharCode(ec);
+    Na = dc;
     R = k.BindingError = class extends Error {
       constructor(a) {
         super(a);
         this.name = 'BindingError';
       }
     };
-    Object.assign(ab.prototype, {
+    Object.assign($a.prototype, {
       isAliasOf: function (a) {
-        if (!(this instanceof ab && a instanceof ab)) return !1;
-        var b = this.cc.fc.ec,
-          c = this.cc.dc;
-        a.cc = a.cc;
-        var d = a.cc.fc.ec;
-        for (a = a.cc.dc; b.jc; ) (c = b.tc(c)), (b = b.jc);
-        for (; d.jc; ) (a = d.tc(a)), (d = d.jc);
+        if (!(this instanceof $a && a instanceof $a)) return !1;
+        var b = this.Oa.Ra.Qa,
+          c = this.Oa.Pa;
+        a.Oa = a.Oa;
+        var d = a.Oa.Ra.Qa;
+        for (a = a.Oa.Pa; b.Ua; ) (c = b.eb(c)), (b = b.Ua);
+        for (; d.Ua; ) (a = d.eb(a)), (d = d.Ua);
         return b === d && c === a;
       },
       clone: function () {
-        this.cc.dc || Ra(this);
-        if (this.cc.sc) return (this.cc.count.value += 1), this;
-        var a = Ya,
+        this.Oa.Pa || Qa(this);
+        if (this.Oa.cb) return (this.Oa.count.value += 1), this;
+        var a = Xa,
           b = Object,
           c = b.create,
           d = Object.getPrototypeOf(this),
-          e = this.cc;
+          e = this.Oa;
         a = a(
           c.call(b, d, {
-            cc: { value: { count: e.count, rc: e.rc, sc: e.sc, dc: e.dc, fc: e.fc, ic: e.ic, kc: e.kc } },
+            Oa: { value: { count: e.count, bb: e.bb, cb: e.cb, Pa: e.Pa, Ra: e.Ra, Ta: e.Ta, Va: e.Va } },
           }),
         );
-        a.cc.count.value += 1;
-        a.cc.rc = !1;
+        a.Oa.count.value += 1;
+        a.Oa.bb = !1;
         return a;
       },
       ['delete']() {
-        this.cc.dc || Ra(this);
-        if (this.cc.rc && !this.cc.sc) throw new R('Object already scheduled for deletion');
-        Ta(this);
-        var a = this.cc;
+        this.Oa.Pa || Qa(this);
+        if (this.Oa.bb && !this.Oa.cb) throw new R('Object already scheduled for deletion');
+        Sa(this);
+        var a = this.Oa;
         --a.count.value;
-        0 === a.count.value && (a.ic ? a.kc.nc(a.ic) : a.fc.ec.nc(a.dc));
-        this.cc.sc || ((this.cc.ic = void 0), (this.cc.dc = void 0));
+        0 === a.count.value && (a.Ta ? a.Va.Ya(a.Ta) : a.Ra.Qa.Ya(a.Pa));
+        this.Oa.cb || ((this.Oa.Ta = void 0), (this.Oa.Pa = void 0));
       },
       isDeleted: function () {
-        return !this.cc.dc;
+        return !this.Oa.Pa;
       },
       deleteLater: function () {
-        this.cc.dc || Ra(this);
-        if (this.cc.rc && !this.cc.sc) throw new R('Object already scheduled for deletion');
-        $a.push(this);
-        this.cc.rc = !0;
+        this.Oa.Pa || Qa(this);
+        if (this.Oa.bb && !this.Oa.cb) throw new R('Object already scheduled for deletion');
+        Za.push(this);
+        this.Oa.bb = !0;
         return this;
       },
     });
-    Object.assign(mb.prototype, {
-      Hc(a) {
-        this.Bc && (a = this.Bc(a));
+    Object.assign(lb.prototype, {
+      rb(a) {
+        this.mb && (a = this.mb(a));
         return a;
       },
-      zc(a) {
-        this.nc?.(a);
+      kb(a) {
+        this.Ya?.(a);
       },
-      lc: 8,
+      Wa: 8,
       readValueFromPointer: L,
       fromWireType: function (a) {
         function b() {
-          return this.vc
-            ? Za(this.ec.pc, { fc: this.Mc, dc: c, kc: this, ic: a })
-            : Za(this.ec.pc, { fc: this, dc: a });
+          return this.gb
+            ? Ya(this.Qa.$a, { Ra: this.wb, Pa: c, Va: this, Ta: a })
+            : Ya(this.Qa.$a, { Ra: this, Pa: a });
         }
-        var c = this.Hc(a);
-        if (!c) return this.zc(a), null;
-        var d = Xa(this.ec, c);
+        var c = this.rb(a);
+        if (!c) return this.kb(a), null;
+        var d = Wa(this.Qa, c);
         if (void 0 !== d) {
-          if (0 === d.cc.count.value) return (d.cc.dc = c), (d.cc.ic = a), d.clone();
+          if (0 === d.Oa.count.value) return (d.Oa.Pa = c), (d.Oa.Ta = a), d.clone();
           d = d.clone();
-          this.zc(a);
+          this.kb(a);
           return d;
         }
-        d = this.ec.Gc(c);
-        d = Va[d];
+        d = this.Qa.qb(c);
+        d = Ua[d];
         if (!d) return b.call(this);
-        d = this.uc ? d.Cc : d.pointerType;
-        var e = Ua(c, this.ec, d.ec);
+        d = this.fb ? d.nb : d.pointerType;
+        var e = Ta(c, this.Qa, d.Qa);
         return null === e
           ? b.call(this)
-          : this.vc
-          ? Za(d.ec.pc, { fc: d, dc: e, kc: this, ic: a })
-          : Za(d.ec.pc, { fc: d, dc: e });
+          : this.gb
+          ? Ya(d.Qa.$a, { Ra: d, Pa: e, Va: this, Ta: a })
+          : Ya(d.Qa.$a, { Ra: d, Pa: e });
       },
     });
-    qb = k.UnboundTypeError = ((a, b) => {
-      var c = bb(b, function (d) {
+    pb = k.UnboundTypeError = ((a, b) => {
+      var c = ab(b, function (d) {
         this.name = b;
         this.message = d;
         d = Error(d).stack;
@@ -855,69 +854,54 @@ var createDotLottiePlayerModule = (() => {
     })(Error, 'UnboundTypeError');
     V.push(0, 1, void 0, 1, null, 1, !0, 1, !1, 1);
     k.count_emval_handles = () => V.length / 2 - 5 - yb.length;
-    var vd = {
-        l: (a, b, c, d) =>
+    var xc = {
+        d: (a, b, c, d) =>
           va(
-            `Assertion failed: ${a ? H(u, a) : ''}, at: ` +
-              [b ? (b ? H(u, b) : '') : 'unknown filename', c, d ? (d ? H(u, d) : '') : 'unknown function'],
+            `Assertion failed: ${a ? G(x, a) : ''}, at: ` +
+              [b ? (b ? G(x, b) : '') : 'unknown filename', c, d ? (d ? G(x, d) : '') : 'unknown function'],
           ),
-        Ca: (a) => {
-          var b = new Ha(a);
-          0 == r[b.dc + 12] && ((r[b.dc + 12] = 1), Ga--);
-          r[b.dc + 13] = 0;
-          Fa.push(b);
-          gc(a);
-          return hc(a);
-        },
-        Ba: () => {
-          W(0, 0);
-          var a = Fa.pop();
-          ic(a.Ec);
-          I = 0;
-        },
-        b: () => Ja([]),
-        o: (a, b) => Ja([a, b]),
-        u: (a, b, c) => {
-          var d = new Ha(a);
-          C[(d.dc + 16) >> 2] = 0;
-          C[(d.dc + 4) >> 2] = b;
-          C[(d.dc + 8) >> 2] = c;
+        c: () => Ha(),
+        n: (a, b, c) => {
+          var d = new Fa(a);
+          B[(d.Pa + 16) >> 2] = 0;
+          B[(d.Pa + 4) >> 2] = b;
+          B[(d.Pa + 8) >> 2] = c;
           I = a;
-          Ga++;
+          Ia++;
           throw I;
         },
-        d: (a) => {
+        e: (a) => {
           I ||= a;
           throw I;
         },
-        ra: () => {},
-        oa: () => {},
-        pa: () => {},
-        ta: function () {},
-        qa: () => {},
-        va: () => va(''),
-        J: (a) => {
-          var b = Ka[a];
-          delete Ka[a];
-          var c = b.xc,
-            d = b.nc,
-            e = b.Ac,
-            f = e.map((h) => h.Kc).concat(e.map((h) => h.Qc));
+        T: () => {},
+        Q: () => {},
+        R: () => {},
+        V: function () {},
+        S: () => {},
+        X: () => va(''),
+        w: (a) => {
+          var b = Ja[a];
+          delete Ja[a];
+          var c = b.ib,
+            d = b.Ya,
+            e = b.lb,
+            f = e.map((h) => h.ub).concat(e.map((h) => h.Ab));
           P([a], f, (h) => {
             var g = {};
             e.forEach((l, m) => {
               var n = h[m],
-                t = l.Ic,
-                w = l.Jc,
-                A = h[m + e.length],
-                y = l.Pc,
-                B = l.Rc;
-              g[l.Fc] = {
-                read: (F) => n.fromWireType(t(w, F)),
-                write: (F, fa) => {
-                  var G = [];
-                  y(B, F, A.toWireType(G, fa));
-                  La(G);
+                p = l.sb,
+                t = l.tb,
+                E = h[m + e.length],
+                v = l.zb,
+                w = l.Bb;
+              g[l.pb] = {
+                read: (H) => n.fromWireType(p(t, H)),
+                write: (H, fa) => {
+                  var F = [];
+                  v(w, H, E.toWireType(F, fa));
+                  Ka(F);
                 },
               };
             });
@@ -933,20 +917,20 @@ var createDotLottiePlayerModule = (() => {
                 },
                 toWireType: (l, m) => {
                   for (var n in g) if (!(n in m)) throw new TypeError(`Missing field: "${n}"`);
-                  var t = c();
-                  for (n in g) g[n].write(t, m[n]);
-                  null !== l && l.push(d, t);
-                  return t;
+                  var p = c();
+                  for (n in g) g[n].write(p, m[n]);
+                  null !== l && l.push(d, p);
+                  return p;
                 },
-                lc: 8,
+                Wa: 8,
                 readValueFromPointer: L,
-                mc: d,
+                Xa: d,
               },
             ];
           });
         },
-        ga: () => {},
-        Na: (a, b, c, d) => {
+        H: () => {},
+        fa: (a, b, c, d) => {
           b = Q(b);
           O(a, {
             name: b,
@@ -956,109 +940,109 @@ var createDotLottiePlayerModule = (() => {
             toWireType: function (e, f) {
               return f ? c : d;
             },
-            lc: 8,
+            Wa: 8,
             readValueFromPointer: function (e) {
-              return this.fromWireType(u[e]);
+              return this.fromWireType(x[e]);
             },
-            mc: null,
+            Xa: null,
           });
         },
-        H: (a, b, c, d, e, f, h, g, l, m, n, t, w) => {
+        u: (a, b, c, d, e, f, h, g, l, m, n, p, t) => {
           n = Q(n);
           f = T(e, f);
           g &&= T(h, g);
           m &&= T(l, m);
-          w = T(t, w);
-          var A = eb(n);
-          db(A, function () {
-            tb(`Cannot construct ${n} due to unbound types`, [d]);
+          t = T(p, t);
+          var E = db(n);
+          cb(E, function () {
+            sb(`Cannot construct ${n} due to unbound types`, [d]);
           });
-          P([a, b, c], d ? [d] : [], (y) => {
-            y = y[0];
+          P([a, b, c], d ? [d] : [], (v) => {
+            v = v[0];
             if (d) {
-              var B = y.ec;
-              var F = B.pc;
-            } else F = ab.prototype;
-            y = bb(n, function (...Qa) {
+              var w = v.Qa;
+              var H = w.$a;
+            } else H = $a.prototype;
+            v = ab(n, function (...Pa) {
               if (Object.getPrototypeOf(this) !== fa) throw new R("Use 'new' to construct " + n);
-              if (void 0 === G.oc) throw new R(n + ' has no accessible constructor');
-              var Db = G.oc[Qa.length];
-              if (void 0 === Db)
+              if (void 0 === F.Za) throw new R(n + ' has no accessible constructor');
+              var xb = F.Za[Pa.length];
+              if (void 0 === xb)
                 throw new R(
                   `Tried to invoke ctor of ${n} with invalid number of parameters (${
-                    Qa.length
-                  }) - expected (${Object.keys(G.oc).toString()}) parameters instead!`,
+                    Pa.length
+                  }) - expected (${Object.keys(F.Za).toString()}) parameters instead!`,
                 );
-              return Db.apply(this, Qa);
+              return xb.apply(this, Pa);
             });
-            var fa = Object.create(F, { constructor: { value: y } });
-            y.prototype = fa;
-            var G = new fb(n, y, fa, w, B, f, g, m);
-            if (G.jc) {
+            var fa = Object.create(H, { constructor: { value: v } });
+            v.prototype = fa;
+            var F = new eb(n, v, fa, t, w, f, g, m);
+            if (F.Ua) {
               var ha;
-              (ha = G.jc).yc ?? (ha.yc = []);
-              G.jc.yc.push(G);
+              (ha = F.Ua).jb ?? (ha.jb = []);
+              F.Ua.jb.push(F);
             }
-            B = new mb(n, G, !0, !1, !1);
-            ha = new mb(n + '*', G, !1, !1, !1);
-            F = new mb(n + ' const*', G, !1, !0, !1);
-            Va[a] = { pointerType: ha, Cc: F };
-            nb(A, y);
-            return [B, ha, F];
+            w = new lb(n, F, !0, !1, !1);
+            ha = new lb(n + '*', F, !1, !1, !1);
+            H = new lb(n + ' const*', F, !1, !0, !1);
+            Ua[a] = { pointerType: ha, nb: H };
+            mb(E, v);
+            return [w, ha, H];
           });
         },
-        G: (a, b, c, d, e, f) => {
-          var h = ub(b, c);
+        t: (a, b, c, d, e, f) => {
+          var h = tb(b, c);
           e = T(d, e);
           P([], [a], (g) => {
             g = g[0];
             var l = `constructor ${g.name}`;
-            void 0 === g.ec.oc && (g.ec.oc = []);
-            if (void 0 !== g.ec.oc[b - 1])
+            void 0 === g.Qa.Za && (g.Qa.Za = []);
+            if (void 0 !== g.Qa.Za[b - 1])
               throw new R(
                 `Cannot register multiple constructors with identical number of parameters (${b - 1}) for class '${
                   g.name
                 }'! Overload resolution is currently only performed using the parameter count, not actual type info!`,
               );
-            g.ec.oc[b - 1] = () => {
-              tb(`Cannot construct ${g.name} due to unbound types`, h);
+            g.Qa.Za[b - 1] = () => {
+              sb(`Cannot construct ${g.name} due to unbound types`, h);
             };
             P([], h, (m) => {
               m.splice(1, 0, null);
-              g.ec.oc[b - 1] = wb(l, m, null, e, f);
+              g.Qa.Za[b - 1] = vb(l, m, null, e, f);
               return [];
             });
             return [];
           });
         },
-        m: (a, b, c, d, e, f, h, g) => {
-          var l = ub(c, d);
+        h: (a, b, c, d, e, f, h, g) => {
+          var l = tb(c, d);
           b = Q(b);
-          b = xb(b);
+          b = wb(b);
           f = T(e, f);
           P([], [a], (m) => {
             function n() {
-              tb(`Cannot call ${t} due to unbound types`, l);
+              sb(`Cannot call ${p} due to unbound types`, l);
             }
             m = m[0];
-            var t = `${m.name}.${b}`;
+            var p = `${m.name}.${b}`;
             b.startsWith('@@') && (b = Symbol[b.substring(2)]);
-            g && m.ec.Nc.push(b);
-            var w = m.ec.pc,
-              A = w[b];
-            void 0 === A || (void 0 === A.hc && A.className !== m.name && A.qc === c - 2)
-              ? ((n.qc = c - 2), (n.className = m.name), (w[b] = n))
-              : (cb(w, b, t), (w[b].hc[c - 2] = n));
-            P([], l, (y) => {
-              y = wb(t, y, m, f, h);
-              void 0 === w[b].hc ? ((y.qc = c - 2), (w[b] = y)) : (w[b].hc[c - 2] = y);
+            g && m.Qa.xb.push(b);
+            var t = m.Qa.$a,
+              E = t[b];
+            void 0 === E || (void 0 === E.Sa && E.className !== m.name && E.ab === c - 2)
+              ? ((n.ab = c - 2), (n.className = m.name), (t[b] = n))
+              : (bb(t, b, p), (t[b].Sa[c - 2] = n));
+            P([], l, (v) => {
+              v = vb(p, v, m, f, h);
+              void 0 === t[b].Sa ? ((v.ab = c - 2), (t[b] = v)) : (t[b].Sa[c - 2] = v);
               return [];
             });
             return [];
           });
         },
-        La: (a) => O(a, Bb),
-        L: (a, b, c, d) => {
+        da: (a) => O(a, Bb),
+        y: (a, b, c, d) => {
           function e() {}
           b = Q(b);
           e.values = {};
@@ -1069,52 +1053,52 @@ var createDotLottiePlayerModule = (() => {
               return this.constructor.values[f];
             },
             toWireType: (f, h) => h.value,
-            lc: 8,
+            Wa: 8,
             readValueFromPointer: Cb(b, c, d),
-            mc: null,
+            Xa: null,
           });
-          db(b, e);
+          cb(b, e);
         },
-        v: (a, b, c) => {
-          var d = Eb(a, 'enum');
+        l: (a, b, c) => {
+          var d = Db(a, 'enum');
           b = Q(b);
           a = d.constructor;
           d = Object.create(d.constructor.prototype, {
             value: { value: c },
-            constructor: { value: bb(`${d.name}_${b}`, function () {}) },
+            constructor: { value: ab(`${d.name}_${b}`, function () {}) },
           });
           a.values[c] = d;
           a[b] = d;
         },
-        _: (a, b, c) => {
+        E: (a, b, c) => {
           b = Q(b);
           O(a, {
             name: b,
             fromWireType: (d) => d,
             toWireType: (d, e) => e,
-            lc: 8,
-            readValueFromPointer: Fb(b, c),
-            mc: null,
+            Wa: 8,
+            readValueFromPointer: Eb(b, c),
+            Xa: null,
           });
         },
-        I: (a, b, c, d, e, f) => {
-          var h = ub(b, c);
+        v: (a, b, c, d, e, f) => {
+          var h = tb(b, c);
           a = Q(a);
-          a = xb(a);
+          a = wb(a);
           e = T(d, e);
-          db(
+          cb(
             a,
             function () {
-              tb(`Cannot call ${a} due to unbound types`, h);
+              sb(`Cannot call ${a} due to unbound types`, h);
             },
             b - 1,
           );
           P([], h, (g) => {
-            nb(a, wb(a, [g[0], null].concat(g.slice(1)), null, e, f), b - 1);
+            mb(a, vb(a, [g[0], null].concat(g.slice(1)), null, e, f), b - 1);
             return [];
           });
         },
-        z: (a, b, c, d, e) => {
+        p: (a, b, c, d, e) => {
           b = Q(b);
           -1 === e && (e = 4294967295);
           e = (g) => g;
@@ -1129,41 +1113,41 @@ var createDotLottiePlayerModule = (() => {
             : function (g, l) {
                 return l;
               };
-          O(a, { name: b, fromWireType: e, toWireType: h, lc: 8, readValueFromPointer: Gb(b, c, 0 !== d), mc: null });
+          O(a, { name: b, fromWireType: e, toWireType: h, Wa: 8, readValueFromPointer: Fb(b, c, 0 !== d), Xa: null });
         },
-        s: (a, b, c) => {
+        k: (a, b, c) => {
           function d(f) {
-            return new e(r.buffer, C[(f + 4) >> 2], C[f >> 2]);
+            return new e(u.buffer, B[(f + 4) >> 2], B[f >> 2]);
           }
           var e = [Int8Array, Uint8Array, Int16Array, Uint16Array, Int32Array, Uint32Array, Float32Array, Float64Array][
             b
           ];
           c = Q(c);
-          O(a, { name: c, fromWireType: d, lc: 8, readValueFromPointer: d }, { Lc: !0 });
+          O(a, { name: c, fromWireType: d, Wa: 8, readValueFromPointer: d }, { vb: !0 });
         },
-        K: (a) => {
-          O(a, Hb);
+        x: (a) => {
+          O(a, Gb);
         },
-        Ta: (a, b, c, d, e, f, h, g, l, m, n, t) => {
+        la: (a, b, c, d, e, f, h, g, l, m, n, p) => {
           c = Q(c);
           f = T(e, f);
           g = T(h, g);
           m = T(l, m);
-          t = T(n, t);
-          P([a], [b], (w) => {
-            w = w[0];
-            return [new mb(c, w.ec, !1, !1, !0, w, d, f, g, m, t)];
+          p = T(n, p);
+          P([a], [b], (t) => {
+            t = t[0];
+            return [new lb(c, t.Qa, !1, !1, !0, t, d, f, g, m, p)];
           });
         },
-        Ma: (a, b) => {
+        ea: (a, b) => {
           b = Q(b);
           O(a, {
             name: b,
             fromWireType: function (c) {
-              for (var d = C[c >> 2], e = c + 4, f, h = e, g = 0; g <= d; ++g) {
+              for (var d = B[c >> 2], e = c + 4, f, h = e, g = 0; g <= d; ++g) {
                 var l = e + g;
-                if (g == d || 0 == u[l])
-                  (h = h ? H(u, h, l - h) : ''),
+                if (g == d || 0 == x[l])
+                  (h = h ? G(x, h, l - h) : ''),
                     void 0 === f ? (f = h) : ((f += String.fromCharCode(0)), (f += h)),
                     (h = l + 1);
               }
@@ -1182,42 +1166,42 @@ var createDotLottiePlayerModule = (() => {
                   127 >= g ? e++ : 2047 >= g ? (e += 2) : 55296 <= g && 57343 >= g ? ((e += 4), ++h) : (e += 3);
                 }
               else e = d.length;
-              h = jc(4 + e + 1);
+              h = fc(4 + e + 1);
               g = h + 4;
-              C[h >> 2] = e;
+              B[h >> 2] = e;
               if (f) K(d, g, e + 1);
               else if (f)
                 for (f = 0; f < e; ++f) {
                   var l = d.charCodeAt(f);
                   if (255 < l) throw (U(g), new R('String has UTF-16 code units that do not fit in 8 bits'));
-                  u[g + f] = l;
+                  x[g + f] = l;
                 }
-              else for (f = 0; f < e; ++f) u[g + f] = d[f];
+              else for (f = 0; f < e; ++f) x[g + f] = d[f];
               null !== c && c.push(U, h);
               return h;
             },
-            lc: 8,
+            Wa: 8,
             readValueFromPointer: L,
-            mc(c) {
+            Xa(c) {
               U(c);
             },
           });
         },
-        Q: (a, b, c) => {
+        A: (a, b, c) => {
           c = Q(c);
           if (2 === b) {
-            var d = Jb;
-            var e = Kb;
-            var f = Lb;
-            var h = (g) => x[g >> 1];
-          } else 4 === b && ((d = Mb), (e = Nb), (f = Ob), (h = (g) => C[g >> 2]));
+            var d = Ib;
+            var e = Jb;
+            var f = Kb;
+            var h = (g) => z[g >> 1];
+          } else 4 === b && ((d = Lb), (e = Mb), (f = Nb), (h = (g) => B[g >> 2]));
           O(a, {
             name: c,
             fromWireType: (g) => {
-              for (var l = C[g >> 2], m, n = g + 4, t = 0; t <= l; ++t) {
-                var w = g + 4 + t * b;
-                if (t == l || 0 == h(w))
-                  (n = d(n, w - n)), void 0 === m ? (m = n) : ((m += String.fromCharCode(0)), (m += n)), (n = w + b);
+              for (var l = B[g >> 2], m, n = g + 4, p = 0; p <= l; ++p) {
+                var t = g + 4 + p * b;
+                if (p == l || 0 == h(t))
+                  (n = d(n, t - n)), void 0 === m ? (m = n) : ((m += String.fromCharCode(0)), (m += n)), (n = t + b);
               }
               U(g);
               return m;
@@ -1225,93 +1209,90 @@ var createDotLottiePlayerModule = (() => {
             toWireType: (g, l) => {
               if ('string' != typeof l) throw new R(`Cannot pass non-string to C++ string type ${c}`);
               var m = f(l),
-                n = jc(4 + m + b);
-              C[n >> 2] = m / b;
+                n = fc(4 + m + b);
+              B[n >> 2] = m / b;
               e(l, n + 4, m + b);
               null !== g && g.push(U, n);
               return n;
             },
-            lc: 8,
+            Wa: 8,
             readValueFromPointer: L,
-            mc(g) {
+            Xa(g) {
               U(g);
             },
           });
         },
-        E: (a, b, c, d, e, f) => {
-          Ka[a] = { name: Q(b), xc: T(c, d), nc: T(e, f), Ac: [] };
+        s: (a, b, c, d, e, f) => {
+          Ja[a] = { name: Q(b), ib: T(c, d), Ya: T(e, f), lb: [] };
         },
-        x: (a, b, c, d, e, f, h, g, l, m) => {
-          Ka[a].Ac.push({ Fc: Q(b), Kc: c, Ic: T(d, e), Jc: f, Qc: h, Pc: T(g, l), Rc: m });
+        m: (a, b, c, d, e, f, h, g, l, m) => {
+          Ja[a].lb.push({ pb: Q(b), ub: c, sb: T(d, e), tb: f, Ab: h, zb: T(g, l), Bb: m });
         },
-        Oa: (a, b) => {
+        ga: (a, b) => {
           b = Q(b);
-          O(a, { Tc: !0, name: b, lc: 0, fromWireType: () => {}, toWireType: () => {} });
+          O(a, { Db: !0, name: b, Wa: 0, fromWireType: () => {}, toWireType: () => {} });
         },
-        Da: function () {
-          return Date.now();
-        },
-        ma: () => {
+        O: () => {
           Da = !1;
-          Pb = 0;
+          Ob = 0;
         },
-        ha: () => {
+        I: () => {
           throw Infinity;
         },
-        $: (a, b, c) => {
+        F: (a, b, c) => {
           a = Ab(a);
-          b = Eb(b, 'emval::as');
-          return Qb(b, c, a);
+          b = Db(b, 'emval::as');
+          return Pb(b, c, a);
         },
-        Ra: (a, b, c, d) => {
-          a = Rb[a];
+        ja: (a, b, c, d) => {
+          a = Qb[a];
           b = Ab(b);
           return a(null, b, c, d);
         },
-        Ga: zb,
-        Qa: (a, b, c) => {
-          var d = Tb(a, b),
+        M: zb,
+        ia: (a, b, c) => {
+          var d = Sb(a, b),
             e = d.shift();
           a--;
           var f = Array(a);
           b = `methodCaller<(${d.map((h) => h.name).join(', ')}) => ${e.name}>`;
-          return Sb(
-            bb(b, (h, g, l, m) => {
-              for (var n = 0, t = 0; t < a; ++t) (f[t] = d[t].readValueFromPointer(m + n)), (n += d[t].lc);
-              h = 1 === c ? Ub(g, f) : g.apply(h, f);
-              return Qb(e, l, h);
+          return Rb(
+            ab(b, (h, g, l, m) => {
+              for (var n = 0, p = 0; p < a; ++p) (f[p] = d[p].readValueFromPointer(m + n)), (n += d[p].Wa);
+              h = 1 === c ? Tb(g, f) : g.apply(h, f);
+              return Pb(e, l, h);
             }),
           );
         },
-        Sa: (a) => {
+        ka: (a) => {
           9 < a && (V[a + 1] += 1);
         },
-        Pa: (a) => {
+        ha: (a) => {
           var b = Ab(a);
-          La(b);
+          Ka(b);
           zb(a);
         },
-        D: (a, b) => {
-          a = Eb(a, '_emval_take_value');
+        r: (a, b) => {
+          a = Db(a, '_emval_take_value');
           a = a.readValueFromPointer(b);
-          return kb(a);
+          return jb(a);
         },
-        ja: (a, b) => {
-          Vb[a] && (clearTimeout(Vb[a].id), delete Vb[a]);
+        K: (a, b) => {
+          Ub[a] && (clearTimeout(Ub[a].id), delete Ub[a]);
           if (!b) return 0;
           var c = setTimeout(() => {
-            delete Vb[a];
-            Yb(() => kc(a, performance.now()));
+            delete Ub[a];
+            Xb(() => gc(a, performance.now()));
           }, b);
-          Vb[a] = { id: c, Uc: b };
+          Ub[a] = { id: c, Eb: b };
           return 0;
         },
-        ka: (a, b, c, d) => {
+        L: (a, b, c, d) => {
           var e = new Date().getFullYear(),
             f = new Date(e, 0, 1).getTimezoneOffset();
           e = new Date(e, 6, 1).getTimezoneOffset();
-          C[a >> 2] = 60 * Math.max(f, e);
-          z[b >> 2] = Number(f != e);
+          B[a >> 2] = 60 * Math.max(f, e);
+          A[b >> 2] = Number(f != e);
           b = (h) => {
             var g = Math.abs(h);
             return `UTC${0 <= h ? '-' : '+'}${String(Math.floor(g / 60)).padStart(2, '0')}${String(g % 60).padStart(
@@ -1323,8 +1304,9 @@ var createDotLottiePlayerModule = (() => {
           b = b(e);
           e < f ? (K(a, c, 17), K(b, d, 17)) : (K(a, d, 17), K(b, c, 17));
         },
-        la: (a) => {
-          var b = u.length;
+        ca: () => performance.now(),
+        N: (a) => {
+          var b = x.length;
           a >>>= 0;
           if (2147483648 < a) return !1;
           for (var c = 1; 4 >= c; c *= 2) {
@@ -1347,139 +1329,92 @@ var createDotLottiePlayerModule = (() => {
           }
           return !1;
         },
-        xa: (a, b) => {
+        Z: (a, b) => {
           var c = 0;
-          ac().forEach((d, e) => {
+          $b().forEach((d, e) => {
             var f = b + c;
-            e = C[(a + 4 * e) >> 2] = f;
-            for (f = 0; f < d.length; ++f) r[e++] = d.charCodeAt(f);
-            r[e] = 0;
+            e = B[(a + 4 * e) >> 2] = f;
+            for (f = 0; f < d.length; ++f) u[e++] = d.charCodeAt(f);
+            u[e] = 0;
             c += d.length + 1;
           });
           return 0;
         },
-        ya: (a, b) => {
-          var c = ac();
-          C[a >> 2] = c.length;
+        _: (a, b) => {
+          var c = $b();
+          B[a >> 2] = c.length;
           var d = 0;
           c.forEach((e) => (d += e.length + 1));
-          C[b >> 2] = d;
+          B[b >> 2] = d;
           return 0;
         },
-        ua: () => 52,
-        sa: () => 52,
-        R: (a, b, c, d) => {
+        W: () => 52,
+        U: () => 52,
+        B: (a, b, c, d) => {
           for (var e = 0, f = 0; f < c; f++) {
-            var h = C[b >> 2],
-              g = C[(b + 4) >> 2];
+            var h = B[b >> 2],
+              g = B[(b + 4) >> 2];
             b += 8;
             for (var l = 0; l < g; l++) {
               var m = a,
-                n = u[h + l],
-                t = bc[m];
-              0 === n || 10 === n ? ((1 === m ? ja : q)(H(t)), (t.length = 0)) : t.push(n);
+                n = x[h + l],
+                p = ac[m];
+              0 === n || 10 === n ? ((1 === m ? ja : r)(G(p)), (p.length = 0)) : p.push(n);
             }
             e += g;
           }
-          C[d >> 2] = e;
+          B[d >> 2] = e;
           return 0;
         },
-        za: lc,
-        Aa: mc,
-        ia: nc,
-        Ha: oc,
-        n: pc,
-        Z: qc,
-        Ia: rc,
-        g: sc,
-        w: tc,
-        P: uc,
-        C: vc,
-        F: wc,
-        f: xc,
-        Y: yc,
-        h: zc,
-        Ka: Ac,
-        k: Bc,
-        O: Cc,
-        q: Dc,
-        N: Ec,
-        T: Fc,
-        U: Gc,
-        Wa: Hc,
-        ab: Ic,
-        ba: Jc,
-        ea: Kc,
-        fa: Lc,
-        hb: Mc,
-        cb: Nc,
-        S: Oc,
-        a: Pc,
-        A: Qc,
-        B: Rc,
-        V: Sc,
-        c: Tc,
-        Ja: Uc,
-        Ea: Vc,
-        Fa: Wc,
-        e: Xc,
-        W: Yc,
-        M: Zc,
-        j: $c,
-        y: ad,
-        i: bd,
-        p: cd,
-        t: dd,
-        X: ed,
-        Ya: fd,
-        Xa: gd,
-        $a: hd,
-        _a: jd,
-        Za: kd,
-        bb: ld,
-        ca: md,
-        aa: nd,
-        Va: od,
-        eb: pd,
-        gb: qd,
-        fb: rd,
-        da: sd,
-        Ua: td,
-        db: ud,
-        r: (a) => a,
-        wa: Xb,
-        na: (a, b) => {
-          dc(u.subarray(a, a + b));
+        $: hc,
+        aa: ic,
+        J: jc,
+        j: kc,
+        i: lc,
+        g: mc,
+        ba: nc,
+        z: oc,
+        C: pc,
+        D: qc,
+        a: rc,
+        b: sc,
+        f: tc,
+        o: uc,
+        q: vc,
+        G: wc,
+        Y: Wb,
+        P: (a, b) => {
+          cc(x.subarray(a, a + b));
           return 0;
         },
       },
-      X;
+      W;
     (async function () {
       function a(d) {
-        X = d.exports;
-        la = X.ib;
+        W = d.exports;
+        la = W.ma;
         qa();
-        S = X.nb;
-        sa.unshift(X.jb);
-        D--;
-        k.monitorRunDependencies?.(D);
-        0 == D && E && ((d = E), (E = null), d());
-        return X;
+        S = W.ra;
+        sa.unshift(W.na);
+        C--;
+        k.monitorRunDependencies?.(C);
+        0 == C && D && ((d = D), (D = null), d());
+        return W;
       }
-      D++;
-      k.monitorRunDependencies?.(D);
-      var b = { a: vd };
+      C++;
+      k.monitorRunDependencies?.(C);
+      var b = { a: xc };
       if (k.instantiateWasm)
         try {
           return k.instantiateWasm(b, a);
         } catch (d) {
-          q(`Module.instantiateWasm callback failed with error: ${d}`), ba(d);
+          r(`Module.instantiateWasm callback failed with error: ${d}`), ba(d);
         }
       xa ??= wa('DotLottiePlayer.wasm')
         ? 'DotLottiePlayer.wasm'
         : k.locateFile
-        ? k.locateFile('DotLottiePlayer.wasm', p)
-        : p + 'DotLottiePlayer.wasm';
+        ? k.locateFile('DotLottiePlayer.wasm', q)
+        : q + 'DotLottiePlayer.wasm';
       try {
         var c = await Aa(b);
         a(c.instance);
@@ -1488,423 +1423,120 @@ var createDotLottiePlayerModule = (() => {
         ba(d);
       }
     })();
-    var jc = (a) => (jc = X.kb)(a),
-      rb = (a) => (rb = X.lb)(a),
-      U = (a) => (U = X.mb)(a),
-      kc = (a, b) => (kc = X.ob)(a, b),
-      W = (a, b) => (W = X.pb)(a, b),
-      J = (a) => (J = X.qb)(a),
-      Y = (a) => (Y = X.rb)(a),
-      Z = () => (Z = X.sb)(),
-      ic = (a) => (ic = X.tb)(a),
-      gc = (a) => (gc = X.ub)(a),
-      Ia = (a, b, c) => (Ia = X.vb)(a, b, c),
-      hc = (a) => (hc = X.wb)(a),
-      wd = (k.dynCall_ji = (a, b) => (wd = k.dynCall_ji = X.xb)(a, b)),
-      xd = (k.dynCall_viji = (a, b, c, d, e) => (xd = k.dynCall_viji = X.yb)(a, b, c, d, e)),
-      yd = (k.dynCall_jii = (a, b, c) => (yd = k.dynCall_jii = X.zb)(a, b, c));
-    k.dynCall_iijj = (a, b, c, d, e, f) => (k.dynCall_iijj = X.Ab)(a, b, c, d, e, f);
-    k.dynCall_vijj = (a, b, c, d, e, f) => (k.dynCall_vijj = X.Bb)(a, b, c, d, e, f);
-    var zd = (k.dynCall_vjiii = (a, b, c, d, e, f) => (zd = k.dynCall_vjiii = X.Cb)(a, b, c, d, e, f)),
-      Ad = (k.dynCall_vij = (a, b, c, d) => (Ad = k.dynCall_vij = X.Db)(a, b, c, d)),
-      Bd = (k.dynCall_viijii = (a, b, c, d, e, f, h) => (Bd = k.dynCall_viijii = X.Eb)(a, b, c, d, e, f, h)),
-      Cd = (k.dynCall_jjji = (a, b, c, d, e, f) => (Cd = k.dynCall_jjji = X.Fb)(a, b, c, d, e, f)),
-      Dd = (k.dynCall_viijj = (a, b, c, d, e, f, h) => (Dd = k.dynCall_viijj = X.Gb)(a, b, c, d, e, f, h)),
-      Ed = (k.dynCall_viijji = (a, b, c, d, e, f, h, g) => (Ed = k.dynCall_viijji = X.Hb)(a, b, c, d, e, f, h, g)),
-      Fd = (k.dynCall_viij = (a, b, c, d, e) => (Fd = k.dynCall_viij = X.Ib)(a, b, c, d, e)),
-      Gd = (k.dynCall_iiiijj = (a, b, c, d, e, f, h, g) => (Gd = k.dynCall_iiiijj = X.Jb)(a, b, c, d, e, f, h, g)),
-      Hd = (k.dynCall_viiij = (a, b, c, d, e, f) => (Hd = k.dynCall_viiij = X.Kb)(a, b, c, d, e, f)),
-      Id = (k.dynCall_viiji = (a, b, c, d, e, f) => (Id = k.dynCall_viiji = X.Lb)(a, b, c, d, e, f)),
-      Jd = (k.dynCall_jiii = (a, b, c, d) => (Jd = k.dynCall_jiii = X.Mb)(a, b, c, d)),
-      Kd = (k.dynCall_viiiji = (a, b, c, d, e, f, h) => (Kd = k.dynCall_viiiji = X.Nb)(a, b, c, d, e, f, h)),
-      Ld = (k.dynCall_viiijj = (a, b, c, d, e, f, h, g) => (Ld = k.dynCall_viiijj = X.Ob)(a, b, c, d, e, f, h, g)),
-      Md = (k.dynCall_viiiijjiiiiii = (a, b, c, d, e, f, h, g, l, m, n, t, w, A, y) =>
-        (Md = k.dynCall_viiiijjiiiiii = X.Pb)(a, b, c, d, e, f, h, g, l, m, n, t, w, A, y)),
-      Nd = (k.dynCall_viiiijjiiii = (a, b, c, d, e, f, h, g, l, m, n, t, w) =>
-        (Nd = k.dynCall_viiiijjiiii = X.Qb)(a, b, c, d, e, f, h, g, l, m, n, t, w)),
-      Od = (k.dynCall_iiiiiijjii = (a, b, c, d, e, f, h, g, l, m, n, t) =>
-        (Od = k.dynCall_iiiiiijjii = X.Rb)(a, b, c, d, e, f, h, g, l, m, n, t)),
-      Pd = (k.dynCall_viijiii = (a, b, c, d, e, f, h, g) => (Pd = k.dynCall_viijiii = X.Sb)(a, b, c, d, e, f, h, g)),
-      Qd = (k.dynCall_iji = (a, b, c, d) => (Qd = k.dynCall_iji = X.Tb)(a, b, c, d)),
-      Rd = (k.dynCall_vijjjj = (a, b, c, d, e, f, h, g, l, m) =>
-        (Rd = k.dynCall_vijjjj = X.Ub)(a, b, c, d, e, f, h, g, l, m));
-    k.dynCall_vjii = (a, b, c, d, e) => (k.dynCall_vjii = X.Vb)(a, b, c, d, e);
-    k.dynCall_vjfii = (a, b, c, d, e, f) => (k.dynCall_vjfii = X.Wb)(a, b, c, d, e, f);
-    k.dynCall_vj = (a, b, c) => (k.dynCall_vj = X.Xb)(a, b, c);
-    k.dynCall_vjiiiii = (a, b, c, d, e, f, h, g) => (k.dynCall_vjiiiii = X.Yb)(a, b, c, d, e, f, h, g);
-    k.dynCall_vjiffii = (a, b, c, d, e, f, h, g) => (k.dynCall_vjiffii = X.Zb)(a, b, c, d, e, f, h, g);
-    k.dynCall_vjiiii = (a, b, c, d, e, f, h) => (k.dynCall_vjiiii = X._b)(a, b, c, d, e, f, h);
-    k.dynCall_iiiiij = (a, b, c, d, e, f, h) => (k.dynCall_iiiiij = X.$b)(a, b, c, d, e, f, h);
-    k.dynCall_iiiiijj = (a, b, c, d, e, f, h, g, l) => (k.dynCall_iiiiijj = X.ac)(a, b, c, d, e, f, h, g, l);
-    k.dynCall_iiiiiijj = (a, b, c, d, e, f, h, g, l, m) => (k.dynCall_iiiiiijj = X.bc)(a, b, c, d, e, f, h, g, l, m);
-    function Tc(a, b, c) {
-      var d = Z();
-      try {
-        S.get(a)(b, c);
-      } catch (e) {
-        Y(d);
-        if (e !== e + 0) throw e;
-        W(1, 0);
-      }
-    }
-    function Pc(a, b) {
+    var fc = (a) => (fc = W.oa)(a),
+      qb = (a) => (qb = W.pa)(a),
+      U = (a) => (U = W.qa)(a),
+      gc = (a, b) => (gc = W.sa)(a, b),
+      X = (a, b) => (X = W.ta)(a, b),
+      J = (a) => (J = W.ua)(a),
+      Y = (a) => (Y = W.va)(a),
+      Z = () => (Z = W.wa)(),
+      Ga = (a, b, c) => (Ga = W.xa)(a, b, c);
+    k.dynCall_iijj = (a, b, c, d, e, f) => (k.dynCall_iijj = W.ya)(a, b, c, d, e, f);
+    k.dynCall_vijj = (a, b, c, d, e, f) => (k.dynCall_vijj = W.za)(a, b, c, d, e, f);
+    k.dynCall_jiii = (a, b, c, d) => (k.dynCall_jiii = W.Aa)(a, b, c, d);
+    var yc = (k.dynCall_vijjjj = (a, b, c, d, e, f, h, g, l, m) =>
+      (yc = k.dynCall_vijjjj = W.Ba)(a, b, c, d, e, f, h, g, l, m));
+    k.dynCall_jii = (a, b, c) => (k.dynCall_jii = W.Ca)(a, b, c);
+    k.dynCall_vjii = (a, b, c, d, e) => (k.dynCall_vjii = W.Da)(a, b, c, d, e);
+    k.dynCall_vjfii = (a, b, c, d, e, f) => (k.dynCall_vjfii = W.Ea)(a, b, c, d, e, f);
+    k.dynCall_vjiii = (a, b, c, d, e, f) => (k.dynCall_vjiii = W.Fa)(a, b, c, d, e, f);
+    k.dynCall_vj = (a, b, c) => (k.dynCall_vj = W.Ga)(a, b, c);
+    k.dynCall_vjiiiii = (a, b, c, d, e, f, h, g) => (k.dynCall_vjiiiii = W.Ha)(a, b, c, d, e, f, h, g);
+    k.dynCall_vjiffii = (a, b, c, d, e, f, h, g) => (k.dynCall_vjiffii = W.Ia)(a, b, c, d, e, f, h, g);
+    k.dynCall_vjiiii = (a, b, c, d, e, f, h) => (k.dynCall_vjiiii = W.Ja)(a, b, c, d, e, f, h);
+    k.dynCall_viijii = (a, b, c, d, e, f, h) => (k.dynCall_viijii = W.Ka)(a, b, c, d, e, f, h);
+    k.dynCall_iiiiij = (a, b, c, d, e, f, h) => (k.dynCall_iiiiij = W.La)(a, b, c, d, e, f, h);
+    k.dynCall_iiiiijj = (a, b, c, d, e, f, h, g, l) => (k.dynCall_iiiiijj = W.Ma)(a, b, c, d, e, f, h, g, l);
+    k.dynCall_iiiiiijj = (a, b, c, d, e, f, h, g, l, m) => (k.dynCall_iiiiiijj = W.Na)(a, b, c, d, e, f, h, g, l, m);
+    function rc(a, b) {
       var c = Z();
       try {
         S.get(a)(b);
       } catch (d) {
         Y(c);
         if (d !== d + 0) throw d;
-        W(1, 0);
+        X(1, 0);
       }
     }
-    function Xc(a, b, c, d) {
-      var e = Z();
-      try {
-        S.get(a)(b, c, d);
-      } catch (f) {
-        Y(e);
-        if (f !== f + 0) throw f;
-        W(1, 0);
-      }
-    }
-    function $c(a, b, c, d, e) {
+    function nc(a, b, c, d, e) {
       var f = Z();
       try {
-        S.get(a)(b, c, d, e);
+        return S.get(a)(b, c, d, e);
       } catch (h) {
         Y(f);
         if (h !== h + 0) throw h;
-        W(1, 0);
+        X(1, 0);
       }
     }
-    function sc(a, b) {
-      var c = Z();
-      try {
-        return S.get(a)(b);
-      } catch (d) {
-        Y(c);
-        if (d !== d + 0) throw d;
-        W(1, 0);
-      }
-    }
-    function xc(a, b, c) {
-      var d = Z();
-      try {
-        return S.get(a)(b, c);
-      } catch (e) {
-        Y(d);
-        if (e !== e + 0) throw e;
-        W(1, 0);
-      }
-    }
-    function qc(a, b, c) {
-      var d = Z();
-      try {
-        return S.get(a)(b, c);
-      } catch (e) {
-        Y(d);
-        if (e !== e + 0) throw e;
-        W(1, 0);
-      }
-    }
-    function bd(a, b, c, d, e, f) {
-      var h = Z();
-      try {
-        S.get(a)(b, c, d, e, f);
-      } catch (g) {
-        Y(h);
-        if (g !== g + 0) throw g;
-        W(1, 0);
-      }
-    }
-    function tc(a, b, c) {
-      var d = Z();
-      try {
-        return S.get(a)(b, c);
-      } catch (e) {
-        Y(d);
-        if (e !== e + 0) throw e;
-        W(1, 0);
-      }
-    }
-    function uc(a, b, c, d) {
-      var e = Z();
-      try {
-        return S.get(a)(b, c, d);
-      } catch (f) {
-        Y(e);
-        if (f !== f + 0) throw f;
-        W(1, 0);
-      }
-    }
-    function pc(a, b) {
-      var c = Z();
-      try {
-        return S.get(a)(b);
-      } catch (d) {
-        Y(c);
-        if (d !== d + 0) throw d;
-        W(1, 0);
-      }
-    }
-    function Rc(a, b, c) {
+    function sc(a, b, c) {
       var d = Z();
       try {
         S.get(a)(b, c);
       } catch (e) {
         Y(d);
         if (e !== e + 0) throw e;
-        W(1, 0);
+        X(1, 0);
       }
     }
-    function zc(a, b, c, d) {
+    function tc(a, b, c, d) {
       var e = Z();
       try {
-        return S.get(a)(b, c, d);
+        S.get(a)(b, c, d);
       } catch (f) {
         Y(e);
         if (f !== f + 0) throw f;
-        W(1, 0);
+        X(1, 0);
       }
     }
-    function Dc(a, b, c, d, e, f) {
-      var h = Z();
+    function kc(a, b) {
+      var c = Z();
       try {
-        return S.get(a)(b, c, d, e, f);
-      } catch (g) {
-        Y(h);
-        if (g !== g + 0) throw g;
-        W(1, 0);
-      }
-    }
-    function Ac(a, b, c, d, e) {
-      var f = Z();
-      try {
-        return S.get(a)(b, c, d, e);
-      } catch (h) {
-        Y(f);
-        if (h !== h + 0) throw h;
-        W(1, 0);
-      }
-    }
-    function Bc(a, b, c, d, e) {
-      var f = Z();
-      try {
-        return S.get(a)(b, c, d, e);
-      } catch (h) {
-        Y(f);
-        if (h !== h + 0) throw h;
-        W(1, 0);
-      }
-    }
-    function wc(a, b, c, d, e, f) {
-      var h = Z();
-      try {
-        return S.get(a)(b, c, d, e, f);
-      } catch (g) {
-        Y(h);
-        if (g !== g + 0) throw g;
-        W(1, 0);
-      }
-    }
-    function Uc(a, b, c, d, e) {
-      var f = Z();
-      try {
-        S.get(a)(b, c, d, e);
-      } catch (h) {
-        Y(f);
-        if (h !== h + 0) throw h;
-        W(1, 0);
-      }
-    }
-    function yc(a, b, c, d) {
-      var e = Z();
-      try {
-        return S.get(a)(b, c, d);
-      } catch (f) {
-        Y(e);
-        if (f !== f + 0) throw f;
-        W(1, 0);
-      }
-    }
-    function rc(a, b, c, d) {
-      var e = Z();
-      try {
-        return S.get(a)(b, c, d);
-      } catch (f) {
-        Y(e);
-        if (f !== f + 0) throw f;
-        W(1, 0);
+        return S.get(a)(b);
+      } catch (d) {
+        Y(c);
+        if (d !== d + 0) throw d;
+        X(1, 0);
       }
     }
     function vc(a, b, c, d, e, f) {
-      var h = Z();
-      try {
-        return S.get(a)(b, c, d, e, f);
-      } catch (g) {
-        Y(h);
-        if (g !== g + 0) throw g;
-        W(1, 0);
-      }
-    }
-    function Cc(a, b, c, d, e, f, h) {
-      var g = Z();
-      try {
-        return S.get(a)(b, c, d, e, f, h);
-      } catch (l) {
-        Y(g);
-        if (l !== l + 0) throw l;
-        W(1, 0);
-      }
-    }
-    function cd(a, b, c, d, e, f, h) {
-      var g = Z();
-      try {
-        S.get(a)(b, c, d, e, f, h);
-      } catch (l) {
-        Y(g);
-        if (l !== l + 0) throw l;
-        W(1, 0);
-      }
-    }
-    function dd(a, b, c, d, e, f, h, g) {
-      var l = Z();
-      try {
-        S.get(a)(b, c, d, e, f, h, g);
-      } catch (m) {
-        Y(l);
-        if (m !== m + 0) throw m;
-        W(1, 0);
-      }
-    }
-    function Qc(a, b, c, d) {
-      var e = Z();
-      try {
-        S.get(a)(b, c, d);
-      } catch (f) {
-        Y(e);
-        if (f !== f + 0) throw f;
-        W(1, 0);
-      }
-    }
-    function ed(a, b, c, d, e, f, h, g, l) {
-      var m = Z();
-      try {
-        S.get(a)(b, c, d, e, f, h, g, l);
-      } catch (n) {
-        Y(m);
-        if (n !== n + 0) throw n;
-        W(1, 0);
-      }
-    }
-    function Ec(a, b, c, d, e, f, h) {
-      var g = Z();
-      try {
-        return S.get(a)(b, c, d, e, f, h);
-      } catch (l) {
-        Y(g);
-        if (l !== l + 0) throw l;
-        W(1, 0);
-      }
-    }
-    function oc(a, b, c, d) {
-      var e = Z();
-      try {
-        return S.get(a)(b, c, d);
-      } catch (f) {
-        Y(e);
-        if (f !== f + 0) throw f;
-        W(1, 0);
-      }
-    }
-    function Wc(a, b, c, d, e, f, h) {
-      var g = Z();
-      try {
-        S.get(a)(b, c, d, e, f, h);
-      } catch (l) {
-        Y(g);
-        if (l !== l + 0) throw l;
-        W(1, 0);
-      }
-    }
-    function Yc(a, b, c, d, e) {
-      var f = Z();
-      try {
-        S.get(a)(b, c, d, e);
-      } catch (h) {
-        Y(f);
-        if (h !== h + 0) throw h;
-        W(1, 0);
-      }
-    }
-    function ad(a, b, c, d, e, f, h, g) {
-      var l = Z();
-      try {
-        S.get(a)(b, c, d, e, f, h, g);
-      } catch (m) {
-        Y(l);
-        if (m !== m + 0) throw m;
-        W(1, 0);
-      }
-    }
-    function Sc(a, b, c, d) {
-      var e = Z();
-      try {
-        S.get(a)(b, c, d);
-      } catch (f) {
-        Y(e);
-        if (f !== f + 0) throw f;
-        W(1, 0);
-      }
-    }
-    function Vc(a, b, c, d, e, f, h) {
-      var g = Z();
-      try {
-        S.get(a)(b, c, d, e, f, h);
-      } catch (l) {
-        Y(g);
-        if (l !== l + 0) throw l;
-        W(1, 0);
-      }
-    }
-    function Zc(a, b, c, d, e, f) {
       var h = Z();
       try {
         S.get(a)(b, c, d, e, f);
       } catch (g) {
         Y(h);
         if (g !== g + 0) throw g;
-        W(1, 0);
+        X(1, 0);
       }
     }
-    function Gc(a, b, c, d, e, f, h, g, l) {
-      var m = Z();
-      try {
-        return S.get(a)(b, c, d, e, f, h, g, l);
-      } catch (n) {
-        Y(m);
-        if (n !== n + 0) throw n;
-        W(1, 0);
-      }
-    }
-    function Fc(a, b, c, d, e, f, h, g) {
-      var l = Z();
-      try {
-        return S.get(a)(b, c, d, e, f, h, g);
-      } catch (m) {
-        Y(l);
-        if (m !== m + 0) throw m;
-        W(1, 0);
-      }
-    }
-    function Oc(a) {
+    function qc(a) {
       var b = Z();
       try {
         S.get(a)();
       } catch (c) {
         Y(b);
         if (c !== c + 0) throw c;
-        W(1, 0);
+        X(1, 0);
+      }
+    }
+    function uc(a, b, c, d, e) {
+      var f = Z();
+      try {
+        S.get(a)(b, c, d, e);
+      } catch (h) {
+        Y(f);
+        if (h !== h + 0) throw h;
+        X(1, 0);
+      }
+    }
+    function pc(a, b, c, d, e, f, h, g) {
+      var l = Z();
+      try {
+        return S.get(a)(b, c, d, e, f, h, g);
+      } catch (m) {
+        Y(l);
+        if (m !== m + 0) throw m;
+        X(1, 0);
       }
     }
     function mc(a, b, c, d) {
@@ -1914,257 +1546,77 @@ var createDotLottiePlayerModule = (() => {
       } catch (f) {
         Y(e);
         if (f !== f + 0) throw f;
-        W(1, 0);
+        X(1, 0);
       }
     }
-    function lc(a, b) {
-      var c = Z();
-      try {
-        return S.get(a)(b);
-      } catch (d) {
-        Y(c);
-        if (d !== d + 0) throw d;
-        W(1, 0);
-      }
-    }
-    function nc(a, b, c) {
+    function lc(a, b, c) {
       var d = Z();
       try {
         return S.get(a)(b, c);
       } catch (e) {
         Y(d);
         if (e !== e + 0) throw e;
-        W(1, 0);
+        X(1, 0);
       }
     }
-    function Lc(a, b, c) {
-      var d = Z();
+    function oc(a, b, c, d, e, f) {
+      var h = Z();
       try {
-        return yd(a, b, c);
-      } catch (e) {
-        Y(d);
-        if (e !== e + 0) throw e;
-        W(1, 0);
+        return S.get(a)(b, c, d, e, f);
+      } catch (g) {
+        Y(h);
+        if (g !== g + 0) throw g;
+        X(1, 0);
       }
     }
-    function Kc(a, b) {
+    function ic(a, b, c, d) {
+      var e = Z();
+      try {
+        return S.get(a)(b, c, d);
+      } catch (f) {
+        Y(e);
+        if (f !== f + 0) throw f;
+        X(1, 0);
+      }
+    }
+    function hc(a, b) {
       var c = Z();
       try {
-        return wd(a, b);
+        return S.get(a)(b);
       } catch (d) {
         Y(c);
         if (d !== d + 0) throw d;
-        W(1, 0);
+        X(1, 0);
       }
     }
-    function sd(a, b, c, d, e) {
-      var f = Z();
+    function jc(a, b, c) {
+      var d = Z();
       try {
-        xd(a, b, c, d, e);
-      } catch (h) {
-        Y(f);
-        if (h !== h + 0) throw h;
-        W(1, 0);
+        return S.get(a)(b, c);
+      } catch (e) {
+        Y(d);
+        if (e !== e + 0) throw e;
+        X(1, 0);
       }
     }
-    function md(a, b, c, d, e, f) {
-      var h = Z();
-      try {
-        Id(a, b, c, d, e, f);
-      } catch (g) {
-        Y(h);
-        if (g !== g + 0) throw g;
-        W(1, 0);
-      }
-    }
-    function Jc(a, b, c, d) {
-      var e = Z();
-      try {
-        return Qd(a, b, c, d);
-      } catch (f) {
-        Y(e);
-        if (f !== f + 0) throw f;
-        W(1, 0);
-      }
-    }
-    function nd(a, b, c, d, e, f, h) {
-      var g = Z();
-      try {
-        Bd(a, b, c, d, e, f, h);
-      } catch (l) {
-        Y(g);
-        if (l !== l + 0) throw l;
-        W(1, 0);
-      }
-    }
-    function Mc(a, b, c, d) {
-      var e = Z();
-      try {
-        return Jd(a, b, c, d);
-      } catch (f) {
-        Y(e);
-        if (f !== f + 0) throw f;
-        W(1, 0);
-      }
-    }
-    function qd(a, b, c, d, e, f, h, g) {
-      var l = Z();
-      try {
-        Ed(a, b, c, d, e, f, h, g);
-      } catch (m) {
-        Y(l);
-        if (m !== m + 0) throw m;
-        W(1, 0);
-      }
-    }
-    function rd(a, b, c, d) {
-      var e = Z();
-      try {
-        Ad(a, b, c, d);
-      } catch (f) {
-        Y(e);
-        if (f !== f + 0) throw f;
-        W(1, 0);
-      }
-    }
-    function pd(a, b, c, d, e, f, h) {
-      var g = Z();
-      try {
-        Dd(a, b, c, d, e, f, h);
-      } catch (l) {
-        Y(g);
-        if (l !== l + 0) throw l;
-        W(1, 0);
-      }
-    }
-    function ud(a, b, c, d, e, f) {
-      var h = Z();
-      try {
-        zd(a, b, c, d, e, f);
-      } catch (g) {
-        Y(h);
-        if (g !== g + 0) throw g;
-        W(1, 0);
-      }
-    }
-    function Nc(a, b, c, d, e, f) {
-      var h = Z();
-      try {
-        return Cd(a, b, c, d, e, f);
-      } catch (g) {
-        Y(h);
-        if (g !== g + 0) throw g;
-        W(1, 0);
-      }
-    }
-    function ld(a, b, c, d, e) {
-      var f = Z();
-      try {
-        Fd(a, b, c, d, e);
-      } catch (h) {
-        Y(f);
-        if (h !== h + 0) throw h;
-        W(1, 0);
-      }
-    }
-    function Ic(a, b, c, d, e, f, h, g) {
-      var l = Z();
-      try {
-        return Gd(a, b, c, d, e, f, h, g);
-      } catch (m) {
-        Y(l);
-        if (m !== m + 0) throw m;
-        W(1, 0);
-      }
-    }
-    function hd(a, b, c, d, e, f) {
-      var h = Z();
-      try {
-        Hd(a, b, c, d, e, f);
-      } catch (g) {
-        Y(h);
-        if (g !== g + 0) throw g;
-        W(1, 0);
-      }
-    }
-    function jd(a, b, c, d, e, f, h) {
-      var g = Z();
-      try {
-        Kd(a, b, c, d, e, f, h);
-      } catch (l) {
-        Y(g);
-        if (l !== l + 0) throw l;
-        W(1, 0);
-      }
-    }
-    function kd(a, b, c, d, e, f, h, g) {
-      var l = Z();
-      try {
-        Ld(a, b, c, d, e, f, h, g);
-      } catch (m) {
-        Y(l);
-        if (m !== m + 0) throw m;
-        W(1, 0);
-      }
-    }
-    function fd(a, b, c, d, e, f, h, g, l, m, n, t, w) {
-      var A = Z();
-      try {
-        Nd(a, b, c, d, e, f, h, g, l, m, n, t, w);
-      } catch (y) {
-        Y(A);
-        if (y !== y + 0) throw y;
-        W(1, 0);
-      }
-    }
-    function gd(a, b, c, d, e, f, h, g, l, m, n, t, w, A, y) {
-      var B = Z();
-      try {
-        Md(a, b, c, d, e, f, h, g, l, m, n, t, w, A, y);
-      } catch (F) {
-        Y(B);
-        if (F !== F + 0) throw F;
-        W(1, 0);
-      }
-    }
-    function Hc(a, b, c, d, e, f, h, g, l, m, n, t) {
-      var w = Z();
-      try {
-        return Od(a, b, c, d, e, f, h, g, l, m, n, t);
-      } catch (A) {
-        Y(w);
-        if (A !== A + 0) throw A;
-        W(1, 0);
-      }
-    }
-    function od(a, b, c, d, e, f, h, g) {
-      var l = Z();
-      try {
-        Pd(a, b, c, d, e, f, h, g);
-      } catch (m) {
-        Y(l);
-        if (m !== m + 0) throw m;
-        W(1, 0);
-      }
-    }
-    function td(a, b, c, d, e, f, h, g, l, m) {
+    function wc(a, b, c, d, e, f, h, g, l, m) {
       var n = Z();
       try {
-        Rd(a, b, c, d, e, f, h, g, l, m);
-      } catch (t) {
+        yc(a, b, c, d, e, f, h, g, l, m);
+      } catch (p) {
         Y(n);
-        if (t !== t + 0) throw t;
-        W(1, 0);
+        if (p !== p + 0) throw p;
+        X(1, 0);
       }
     }
-    var Sd;
-    E = function Td() {
-      Sd || Ud();
-      Sd || (E = Td);
+    var zc;
+    D = function Ac() {
+      zc || Bc();
+      zc || (D = Ac);
     };
-    function Ud() {
+    function Bc() {
       function a() {
-        if (!Sd && ((Sd = !0), (k.calledRun = !0), !ma)) {
+        if (!zc && ((zc = !0), (k.calledRun = !0), !ma)) {
           Ca(sa);
           aa(k);
           k.onRuntimeInitialized?.();
@@ -2176,10 +1628,10 @@ var createDotLottiePlayerModule = (() => {
           Ca(ta);
         }
       }
-      if (!(0 < D)) {
+      if (!(0 < C)) {
         if (k.preRun) for ('function' == typeof k.preRun && (k.preRun = [k.preRun]); k.preRun.length; ) ua();
         Ca(ra);
-        0 < D ||
+        0 < C ||
           (k.setStatus
             ? (k.setStatus('Running...'),
               setTimeout(() => {
@@ -2191,7 +1643,7 @@ var createDotLottiePlayerModule = (() => {
     }
     if (k.preInit)
       for ('function' == typeof k.preInit && (k.preInit = [k.preInit]); 0 < k.preInit.length; ) k.preInit.pop()();
-    Ud();
+    Bc();
     moduleRtn = ca;
 
     return moduleRtn;
