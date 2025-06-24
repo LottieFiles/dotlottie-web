@@ -1,5 +1,14 @@
 # @lottiefiles/dotlottie-vue
 
+## 0.7.2
+
+### Patch Changes
+
+- 022c98a: Fix vue props type reference
+- Updated dependencies [93bae08]
+- Updated dependencies [ff1cb3a]
+  - @lottiefiles/dotlottie-web@0.47.0
+
 ## 0.7.1
 
 ### Patch Changes

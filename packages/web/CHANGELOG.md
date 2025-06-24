@@ -1,5 +1,15 @@
 # @lottiefiles/dotlottie-web
 
+## 0.47.0
+
+### Minor Changes
+
+- ff1cb3a: chore: update dotLottie-rs WASM bindings to v0.1.44
+
+### Patch Changes
+
+- 93bae08: fix: validate exact buffer size equality in canvas rendering
+
 ## 0.46.0
 
 ### Minor Changes
