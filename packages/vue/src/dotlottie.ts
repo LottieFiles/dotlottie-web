@@ -239,12 +239,13 @@ export const DotLottieVue = defineComponent({
     watch(
       () => data?.value,
       (newVal) => {
-        if (dotLottie && typeof newVal !== 'object' && typeof newVal !== 'string') {
-          return;
+        const isStrOrObject = typeof newVal === 'object' || typeof newVal === 'string';
+
+        if (dotLottie && isStrOrObject) {
+          load({
+            data: newVal,
+          });
         }
-        load({
-          data: newVal,
-        });
       },
       { deep: true },
     );
