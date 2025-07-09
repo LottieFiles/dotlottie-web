@@ -18,5 +18,5 @@
     "@lottiefiles/dotlottie-wc": "0.6.2",
     "@lottiefiles/dotlottie-web": "0.47.0"
   },
-  "changesets": []
+  "changesets": ["new-walls-battle"]
 }
