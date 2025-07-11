@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-solid",
-  "version": "0.3.3-pre.0",
+  "version": "0.3.3",
   "type": "module",
   "description": "Solid wrapper around the dotlottie-web library",
   "repository": {
