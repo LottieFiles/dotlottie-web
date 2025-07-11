@@ -542,27 +542,34 @@ export class DotLottie {
     if (this._dotLottieCore === null || !this._dotLottieCore.isPlaying()) return;
 
     try {
-      const updated = this._dotLottieCore.tick();
+      if (this._dotLottieCore.isTweening()) {
+        if (this._dotLottieCore.tweenUpdate()) {
+          this._render();
+        }
+      } else {
+        const nextFrame = Math.round(this._dotLottieCore.requestFrame() * 1000) / 1000;
+        const updated = this._dotLottieCore.setFrame(nextFrame);
 
-      if (updated) {
-        this._eventManager.dispatch({
-          type: 'frame',
-          currentFrame: this.currentFrame,
-        });
+        if (updated) {
+          this._eventManager.dispatch({
+            type: 'frame',
+            currentFrame: this.currentFrame,
+          });
 
-        const rendered = this._render();
+          const rendered = this._render();
 
-        if (rendered) {
-          if (this._dotLottieCore.isComplete()) {
-            if (this._dotLottieCore.config().loopAnimation) {
-              this._eventManager.dispatch({
-                type: 'loop',
-                loopCount: this._dotLottieCore.loopCount(),
-              });
-            } else {
-              this._eventManager.dispatch({ type: 'complete' });
+          if (rendered) {
+            if (this._dotLottieCore.isComplete()) {
+              if (this._dotLottieCore.config().loopAnimation) {
+                this._eventManager.dispatch({
+                  type: 'loop',
+                  loopCount: this._dotLottieCore.loopCount(),
+                });
+              } else {
+                this._eventManager.dispatch({ type: 'complete' });
 
-              return;
+                return;
+              }
             }
           }
         }

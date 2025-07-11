@@ -621,6 +621,32 @@ export class DotLottieWorker {
     return this._sendMessage('animationSize', { instanceId: this._id });
   }
 
+  /**
+   * @experimental
+   * Start a tween animation between two frame values with custom easing
+   * @param frame - Starting frame value
+   * @param duration - Duration of the tween in seconds
+   * @returns true if tween was started successfully
+   */
+  public async tween(frame: number, duration: number): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('tween', { instanceId: this._id, frame, duration });
+  }
+
+  /**
+   * @experimental
+   * Start a tween animation to a specific marker
+   * @param marker - The marker name to tween to
+   * @param duration - Duration of the tween in seconds
+   * @returns true if tween was started successfully
+   */
+  public async tweenToMarker(marker: string, duration: number): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('tweenToMarker', { instanceId: this._id, marker, duration });
+  }
+
   private async _sendMessage<T extends keyof MethodParamsMap>(
     method: T,
     params: MethodParamsMap[T],

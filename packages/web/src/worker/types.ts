@@ -159,6 +159,16 @@ export interface MethodParamsMap {
   stopStateMachine: {
     instanceId: string;
   };
+  tween: {
+    duration: number;
+    frame: number;
+    instanceId: string;
+  };
+  tweenToMarker: {
+    duration: number;
+    instanceId: string;
+    marker: string;
+  };
   unfreeze: {
     instanceId: string;
   };
@@ -269,6 +279,8 @@ export interface MethodResultMap {
   startStateMachine: boolean;
   stop: void;
   stopStateMachine: boolean;
+  tween: boolean;
+  tweenToMarker: boolean;
   unfreeze: void;
 }
 
