@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.48.0-pre.0
+
+### Minor Changes
+
+- f40ebdc: feat: add experimental `tween` and `tweenToMarker` methods
+
 ## 0.47.0
 
 ### Minor Changes

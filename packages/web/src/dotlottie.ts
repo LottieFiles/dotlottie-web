@@ -542,28 +542,34 @@ export class DotLottie {
     if (this._dotLottieCore === null || !this._dotLottieCore.isPlaying()) return;
 
     try {
-      const nextFrame = Math.round(this._dotLottieCore.requestFrame() * 1000) / 1000;
-      const updated = this._dotLottieCore.setFrame(nextFrame);
+      if (this._dotLottieCore.isTweening()) {
+        if (this._dotLottieCore.tweenUpdate()) {
+          this._render();
+        }
+      } else {
+        const nextFrame = Math.round(this._dotLottieCore.requestFrame() * 1000) / 1000;
+        const updated = this._dotLottieCore.setFrame(nextFrame);
 
-      if (updated) {
-        this._eventManager.dispatch({
-          type: 'frame',
-          currentFrame: this.currentFrame,
-        });
+        if (updated) {
+          this._eventManager.dispatch({
+            type: 'frame',
+            currentFrame: this.currentFrame,
+          });
 
-        const rendered = this._render();
+          const rendered = this._render();
 
-        if (rendered) {
-          if (this._dotLottieCore.isComplete()) {
-            if (this._dotLottieCore.config().loopAnimation) {
-              this._eventManager.dispatch({
-                type: 'loop',
-                loopCount: this._dotLottieCore.loopCount(),
-              });
-            } else {
-              this._eventManager.dispatch({ type: 'complete' });
+          if (rendered) {
+            if (this._dotLottieCore.isComplete()) {
+              if (this._dotLottieCore.config().loopAnimation) {
+                this._eventManager.dispatch({
+                  type: 'loop',
+                  loopCount: this._dotLottieCore.loopCount(),
+                });
+              } else {
+                this._eventManager.dispatch({ type: 'complete' });
 
-              return;
+                return;
+              }
             }
           }
         }
@@ -1120,6 +1126,48 @@ export class DotLottie {
     }
 
     return points;
+  }
+
+  /**
+   * @experimental
+   * Start a tween animation between two frame values with custom easing
+   * @param frame - Starting frame value
+   * @param duration - Duration of the tween in seconds
+   * @returns true if tween was started successfully
+   */
+  public tween(frame: number, duration: number): boolean {
+    if (!DotLottie._wasmModule) return false;
+
+    // Default easing (linear)
+    const easing = [0, 0, 1, 1];
+
+    const easingVector = new DotLottie._wasmModule.VectorFloat();
+
+    for (const val of easing) {
+      easingVector.push_back(val);
+    }
+
+    return this._dotLottieCore?.tween(frame, duration, easingVector) ?? false;
+  }
+
+  /**
+   * @experimental
+   * Start a tween animation to a specific marker
+   * @param marker - The marker name to tween to
+   * @returns true if tween was started successfully
+   */
+  public tweenToMarker(marker: string, duration: number): boolean {
+    if (!DotLottie._wasmModule) return false;
+
+    const easing = [0, 0, 1, 1];
+
+    const easingVector = new DotLottie._wasmModule.VectorFloat();
+
+    for (const val of easing) {
+      easingVector.push_back(val);
+    }
+
+    return this._dotLottieCore?.tweenToMarker(marker, duration, easingVector) ?? false;
   }
 
   public static transformThemeToLottieSlots(theme: string, slots: string): string {

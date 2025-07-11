@@ -652,6 +652,32 @@ const commands: {
 
     instance.unfreeze();
   },
+  tween: (request) => {
+    const instanceId = request.params.instanceId;
+    const frame = request.params.frame;
+    const duration = request.params.duration;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.tween(frame, duration);
+  },
+  tweenToMarker: (request) => {
+    const instanceId = request.params.instanceId;
+    const marker = request.params.marker;
+    const duration = request.params.duration;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.tweenToMarker(marker, duration);
+  },
   setViewport(request) {
     const instanceId = request.params.instanceId;
     const x = request.params.x;
