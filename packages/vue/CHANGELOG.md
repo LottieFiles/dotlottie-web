@@ -1,5 +1,16 @@
 # @lottiefiles/dotlottie-vue
 
+## 0.8.0
+
+### Minor Changes
+
+- 2084081: feat: adding missing options
+
+### Patch Changes
+
+- Updated dependencies [950ad52]
+  - @lottiefiles/dotlottie-web@0.48.0
+
 ## 0.7.3-pre.0
 
 ### Patch Changes
