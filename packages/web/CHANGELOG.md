@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.49.0
+
+### Minor Changes
+
+- e3c09bb: chore: upgrade dotLottie-rs v0.1.45 WASM bindings
+
 ## 0.48.0
 
 ### Minor Changes
