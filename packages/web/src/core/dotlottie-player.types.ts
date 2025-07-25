@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable typescript-sort-keys/interface */
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
@@ -61,11 +62,69 @@ export interface OpenUrl {
   whitelist: VectorString;
 }
 
+export interface Observer extends ClassHandle {
+  on_load(): void;
+  on_load_error(): void;
+  on_play(): void;
+  on_pause(): void;
+  on_stop(): void;
+  on_complete(): void;
+  on_loop(_0: number): void;
+  on_frame(_0: number): void;
+  on_render(_0: number): void;
+}
+
+export interface CallbackObserver extends Observer {
+  setOnComplete(_0: unknown): void;
+  setOnLoad(_0: unknown): void;
+  setOnLoadError(_0: unknown): void;
+  setOnPlay(_0: unknown): void;
+  setOnPause(_0: unknown): void;
+  setOnStop(_0: unknown): void;
+  setOnFrame(_0: unknown): void;
+  setOnRender(_0: unknown): void;
+  setOnLoop(_0: unknown): void;
+}
+
+export interface StateMachineObserver extends ClassHandle {
+  on_start(): void;
+  on_stop(): void;
+  on_transition(_0: EmbindString, _1: EmbindString): void;
+  on_state_entered(_0: EmbindString): void;
+  on_state_exit(_0: EmbindString): void;
+  on_custom_event(_0: EmbindString): void;
+  on_string_input_value_change(_0: EmbindString, _1: EmbindString, _2: EmbindString): void;
+  on_numeric_input_value_change(_0: EmbindString, _1: number, _2: number): void;
+  on_boolean_input_value_change(_0: EmbindString, _1: boolean, _2: boolean): void;
+  on_input_fired(_0: EmbindString): void;
+  on_error(_0: EmbindString): void;
+}
+
+export interface CallbackStateMachineObserver extends StateMachineObserver {
+  setOnStart(_0: unknown): void;
+  setOnStop(_0: unknown): void;
+  setOnTransition(_0: unknown): void;
+  setOnStateEntered(_0: unknown): void;
+  setOnStateExit(_0: unknown): void;
+  setOnCustomEvent(_0: unknown): void;
+  setOnStringInputValueChange(_0: unknown): void;
+  setOnNumericInputValueChange(_0: unknown): void;
+  setOnBooleanInputValueChange(_0: unknown): void;
+  setOnInputFired(_0: unknown): void;
+  setOnError(_0: unknown): void;
+}
+
 export interface DotLottiePlayer extends ClassHandle {
   markers(): VectorMarker;
   animationSize(): VectorFloat;
+  subscribe(_0: Observer | null): Observer | null;
   stateMachineFrameworkSetup(): VectorString;
+  stateMachineSubscribe(_0: StateMachineObserver | null): StateMachineObserver | null;
+  stateMachineFrameworkSubscribe(_0: StateMachineObserver | null): StateMachineObserver | null;
   clear(): void;
+  unsubscribe(_0: Observer | null): void;
+  stateMachineUnsubscribe(_0: StateMachineObserver | null): void;
+  stateMachineFrameworkUnsubscribe(_0: StateMachineObserver | null): void;
   isLoaded(): boolean;
   isPaused(): boolean;
   isPlaying(): boolean;
@@ -132,9 +191,9 @@ export interface DotLottiePlayer extends ClassHandle {
 }
 
 export interface Marker {
-  duration: number;
   name: string;
   time: number;
+  duration: number;
 }
 
 export interface Config {
@@ -174,6 +233,14 @@ interface EmbindModule {
   createDefaultLayout(): Layout;
   OpenUrlMode: { Deny: OpenUrlModeValue<1>; Interaction: OpenUrlModeValue<2>; Allow: OpenUrlModeValue<3> };
   createDefaultOpenURL(): OpenUrl;
+  Observer: {};
+  CallbackObserver: {
+    new (): CallbackObserver;
+  };
+  StateMachineObserver: {};
+  CallbackStateMachineObserver: {
+    new (): CallbackStateMachineObserver;
+  };
   DotLottiePlayer: {
     new (_0: Config): DotLottiePlayer;
   };
