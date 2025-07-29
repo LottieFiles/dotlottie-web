@@ -48,13 +48,17 @@ test('should render correctly in node', async () => {
   for (let i = 0; i < frameCount; i += 1) {
     dotLottie.setFrame(i);
     expect(dotLottie.buffer?.toString()).toMatchFileSnapshot(`./__snapshots__/frame-buffer-${i}.txt`, `frame ${i}`);
-    expect(onFrame).toHaveBeenNthCalledWith(i + 1, {
-      type: 'frame',
-      currentFrame: i,
+    await vi.waitFor(() => {
+      expect(onFrame).toHaveBeenNthCalledWith(i + 1, {
+        type: 'frame',
+        currentFrame: i,
+      });
     });
-    expect(onRender).toHaveBeenNthCalledWith(i + 1, {
-      type: 'render',
-      currentFrame: i,
+    await vi.waitFor(() => {
+      expect(onRender).toHaveBeenNthCalledWith(i + 1, {
+        type: 'render',
+        currentFrame: i,
+      });
     });
   }
 
