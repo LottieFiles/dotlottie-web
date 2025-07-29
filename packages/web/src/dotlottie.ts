@@ -1,6 +1,14 @@
 import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER, BYTES_PER_PIXEL } from './constants';
-import type { DotLottiePlayer, MainModule, Mode as CoreMode, VectorFloat, Marker, Fit as CoreFit } from './core';
+import type {
+  DotLottiePlayer,
+  MainModule,
+  Mode as CoreMode,
+  VectorFloat,
+  Marker,
+  Fit as CoreFit,
+  Observer,
+} from './core';
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
@@ -86,6 +94,8 @@ export class DotLottie {
 
   private _dotLottieCore: DotLottiePlayer | null = null;
 
+  private _dotLottieObserverHandle: Observer | null = null;
+
   private static _wasmModule: MainModule | null = null;
 
   private _renderConfig: RenderConfig = {};
@@ -124,6 +134,76 @@ export class DotLottie {
       .then((module) => {
         DotLottie._wasmModule = module;
 
+        const callbackObserver = new module.CallbackObserver();
+
+        callbackObserver.setOnLoad(() => {
+          setTimeout(() => {
+            this._eventManager.dispatch({
+              type: 'load',
+            });
+          }, 0);
+        });
+        callbackObserver.setOnLoadError(() => {
+          setTimeout(() => {
+            this._eventManager.dispatch({
+              type: 'loadError',
+              error: new Error('failed to load'),
+            });
+          }, 0);
+        });
+        callbackObserver.setOnPlay(() => {
+          setTimeout(() => {
+            this._eventManager.dispatch({
+              type: 'play',
+            });
+          }, 0);
+        });
+        callbackObserver.setOnPause(() => {
+          setTimeout(() => {
+            this._eventManager.dispatch({
+              type: 'pause',
+            });
+          }, 0);
+        });
+        callbackObserver.setOnStop(() => {
+          setTimeout(() => {
+            this._eventManager.dispatch({
+              type: 'stop',
+            });
+          }, 0);
+        });
+        callbackObserver.setOnLoop((loopCount: number) => {
+          setTimeout(() => {
+            this._eventManager.dispatch({
+              type: 'loop',
+              loopCount,
+            });
+          }, 0);
+        });
+        callbackObserver.setOnComplete(() => {
+          setTimeout(() => {
+            this._eventManager.dispatch({
+              type: 'complete',
+            });
+          }, 0);
+        });
+        callbackObserver.setOnFrame((currentFrame: number) => {
+          setTimeout(() => {
+            this._eventManager.dispatch({
+              type: 'frame',
+              currentFrame,
+            });
+          }, 0);
+        });
+        callbackObserver.setOnRender((currentFrame: number) => {
+          setTimeout(() => {
+            this._eventManager.dispatch({
+              type: 'render',
+              currentFrame,
+            });
+          }, 0);
+        });
+
         this._dotLottieCore = new module.DotLottiePlayer({
           animationId: config.animationId ?? '',
           themeId: config.themeId ?? '',
@@ -138,6 +218,8 @@ export class DotLottie {
           marker: config.marker ?? '',
           layout: createCoreLayout(config.layout, module),
         });
+
+        this._dotLottieObserverHandle = this._dotLottieCore.subscribe(callbackObserver);
 
         this._eventManager.dispatch({ type: 'ready' });
 
@@ -239,40 +321,30 @@ export class DotLottie {
     }
 
     if (loaded) {
-      this._eventManager.dispatch({ type: 'load' });
+      this._draw();
 
       if (IS_BROWSER) {
         this.resize();
       }
 
-      this._eventManager.dispatch({
-        type: 'frame',
-        currentFrame: this.currentFrame,
-      });
-
-      this._render();
-
-      if (this._dotLottieCore.config().autoplay) {
-        this._dotLottieCore.play();
-        if (this._dotLottieCore.isPlaying()) {
-          this._eventManager.dispatch({ type: 'play' });
-          this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
-        } else {
-          console.error('something went wrong, the animation was suppose to autoplay');
-        }
+      if (this._dotLottieCore.isPlaying()) {
+        this._startAnimationLoop();
       }
 
       if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
         if (this._renderConfig.freezeOnOffscreen) {
           OffscreenObserver.observe(this._canvas, this);
+
+          // Check if canvas is initially offscreen and freeze if necessary
+          if (!isElementInViewport(this._canvas)) {
+            this.freeze();
+          }
         }
 
         if (this._renderConfig.autoResize) {
           CanvasResizeObserver.observe(this._canvas, this);
         }
       }
-    } else {
-      this._dispatchError('Failed to load animation data');
     }
   }
 
@@ -455,9 +527,13 @@ export class DotLottie {
   public load(config: Omit<Config, 'canvas'>): void {
     if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 
-    if (this._animationFrameId !== null) {
-      this._frameManager.cancelAnimationFrame(this._animationFrameId);
-      this._animationFrameId = null;
+    this._stopAnimationLoop();
+
+    // Clean up previous observers if in browser environment
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      OffscreenObserver.unobserve(this._canvas);
+      CanvasResizeObserver.unobserve(this._canvas);
+      this._cleanupStateMachineListeners();
     }
 
     this._isFrozen = false;
@@ -486,96 +562,74 @@ export class DotLottie {
     this.setBackgroundColor(config.backgroundColor ?? '');
   }
 
-  private _render(): boolean {
-    if (this._dotLottieCore === null) return false;
+  private _draw(): void {
+    if (this._dotLottieCore === null) return;
 
     // Only try to get context if canvas has getContext method and no context exists yet
     if (!this._context && 'getContext' in this._canvas && typeof this._canvas.getContext === 'function') {
       this._context = this._canvas.getContext('2d');
     }
 
-    const rendered = this._dotLottieCore.render();
+    // Only process visual output if we have a canvas with a valid context
+    if (this._context) {
+      const buffer = this._dotLottieCore.buffer() as ArrayBuffer;
 
-    if (rendered) {
-      // Only process visual output if we have a canvas with a valid context
-      if (this._context) {
-        const buffer = this._dotLottieCore.buffer() as ArrayBuffer;
+      const expectedLength = this._canvas.width * this._canvas.height * BYTES_PER_PIXEL;
 
-        const expectedLength = this._canvas.width * this._canvas.height * BYTES_PER_PIXEL;
+      if (buffer.byteLength !== expectedLength) {
+        console.warn(`Buffer size mismatch: got ${buffer.byteLength}, expected ${expectedLength}`);
 
-        if (buffer.byteLength !== expectedLength) {
-          console.warn(`Buffer size mismatch: got ${buffer.byteLength}, expected ${expectedLength}`);
-
-          return false;
-        }
-
-        let imageData = null;
-
-        const clampedBuffer = new Uint8ClampedArray(buffer, 0, buffer.byteLength);
-
-        /* 
-          In Node.js, the ImageData constructor is not available. 
-          You can use createImageData function in the canvas context to create ImageData object.
-        */
-        if (typeof ImageData === 'undefined') {
-          imageData = this._context.createImageData(this._canvas.width, this._canvas.height);
-          imageData.data.set(clampedBuffer);
-        } else {
-          imageData = new ImageData(clampedBuffer, this._canvas.width, this._canvas.height);
-        }
-
-        this._context.putImageData(imageData, 0, 0);
+        return;
       }
 
-      this._eventManager.dispatch({
-        type: 'render',
-        currentFrame: this.currentFrame,
-      });
+      let imageData = null;
 
-      return true;
+      const clampedBuffer = new Uint8ClampedArray(buffer, 0, buffer.byteLength);
+
+      /* 
+        In Node.js, the ImageData constructor is not available. 
+        You can use createImageData function in the canvas context to create ImageData object.
+      */
+      if (typeof ImageData === 'undefined') {
+        imageData = this._context.createImageData(this._canvas.width, this._canvas.height);
+        imageData.data.set(clampedBuffer);
+      } else {
+        imageData = new ImageData(clampedBuffer, this._canvas.width, this._canvas.height);
+      }
+
+      this._context.putImageData(imageData, 0, 0);
     }
-
-    return false;
   }
 
-  private _draw(): void {
-    if (this._dotLottieCore === null || !this._dotLottieCore.isPlaying()) return;
+  private _stopAnimationLoop(): void {
+    if (this._animationFrameId !== null) {
+      this._frameManager.cancelAnimationFrame(this._animationFrameId);
+      this._animationFrameId = null;
+    }
+  }
+
+  private _startAnimationLoop(): void {
+    // Only start if we don't already have an active loop and the animation should be playing
+    if (this._animationFrameId === null && this._dotLottieCore && this._dotLottieCore.isPlaying() && !this._isFrozen) {
+      this._animationFrameId = this._frameManager.requestAnimationFrame(this._animationLoop.bind(this));
+    }
+  }
+
+  private _animationLoop(): void {
+    if (this._dotLottieCore === null || !this._dotLottieCore.isPlaying()) {
+      this._stopAnimationLoop();
+
+      return;
+    }
 
     try {
-      if (this._dotLottieCore.isTweening()) {
-        if (this._dotLottieCore.tweenUpdate()) {
-          this._render();
-        }
-      } else {
-        const nextFrame = Math.round(this._dotLottieCore.requestFrame() * 1000) / 1000;
-        const updated = this._dotLottieCore.setFrame(nextFrame);
+      const advanced = this._dotLottieCore.tick();
 
-        if (updated) {
-          this._eventManager.dispatch({
-            type: 'frame',
-            currentFrame: this.currentFrame,
-          });
-
-          const rendered = this._render();
-
-          if (rendered) {
-            if (this._dotLottieCore.isComplete()) {
-              if (this._dotLottieCore.config().loopAnimation) {
-                this._eventManager.dispatch({
-                  type: 'loop',
-                  loopCount: this._dotLottieCore.loopCount(),
-                });
-              } else {
-                this._eventManager.dispatch({ type: 'complete' });
-
-                return;
-              }
-            }
-          }
-        }
+      if (advanced) {
+        this._draw();
       }
 
-      this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
+      this._animationFrameId = this._frameManager.requestAnimationFrame(this._animationLoop.bind(this));
     } catch (error) {
       console.error('Error in animation frame:', error);
 
@@ -589,19 +643,16 @@ export class DotLottie {
   }
 
   public play(): void {
-    if (this._dotLottieCore === null) return;
+    if (this._dotLottieCore === null || !this.isLoaded) return;
 
-    if (this._animationFrameId !== null) {
-      this._frameManager.cancelAnimationFrame(this._animationFrameId);
-      this._animationFrameId = null;
-    }
+    this._stopAnimationLoop();
 
-    const ok = this._dotLottieCore.play();
+    const playing = this._dotLottieCore.play();
 
-    if (ok || this._dotLottieCore.isPlaying()) {
+    // Always unfreeze and start animation loop if core is playing, regardless of play() return value
+    if (playing || this._dotLottieCore.isPlaying()) {
       this._isFrozen = false;
-      this._eventManager.dispatch({ type: 'play' });
-      this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
+      this._startAnimationLoop();
     }
 
     /* 
@@ -622,11 +673,9 @@ export class DotLottie {
   public pause(): void {
     if (this._dotLottieCore === null) return;
 
-    const ok = this._dotLottieCore.pause();
+    this._dotLottieCore.pause();
 
-    if (ok || this._dotLottieCore.isPaused()) {
-      this._eventManager.dispatch({ type: 'pause' });
-    }
+    this._stopAnimationLoop();
   }
 
   public stop(): void {
@@ -634,12 +683,10 @@ export class DotLottie {
 
     const ok = this._dotLottieCore.stop();
 
+    this._stopAnimationLoop();
+
     if (ok) {
-      this._eventManager.dispatch({ type: 'frame', currentFrame: this.currentFrame });
-
-      this._render();
-
-      this._eventManager.dispatch({ type: 'stop' });
+      this._draw();
     }
   }
 
@@ -648,12 +695,14 @@ export class DotLottie {
 
     if (frame < 0 || frame > this._dotLottieCore.totalFrames()) return;
 
-    const ok = this._dotLottieCore.seek(frame);
+    const frameUpdated = this._dotLottieCore.seek(frame);
 
-    if (ok) {
-      this._eventManager.dispatch({ type: 'frame', currentFrame: this.currentFrame });
+    if (frameUpdated) {
+      const rendered = this._dotLottieCore.render();
 
-      this._render();
+      if (rendered) {
+        this._draw();
+      }
     }
   }
 
@@ -708,14 +757,17 @@ export class DotLottie {
   }
 
   public destroy(): void {
-    if (this._animationFrameId !== null) {
-      this._frameManager.cancelAnimationFrame(this._animationFrameId);
-      this._animationFrameId = null;
-    }
+    this._stopAnimationLoop();
 
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       OffscreenObserver.unobserve(this._canvas);
       CanvasResizeObserver.unobserve(this._canvas);
+    }
+
+    if (this._dotLottieObserverHandle) {
+      this._dotLottieCore?.unsubscribe(this._dotLottieObserverHandle);
+      this._dotLottieObserverHandle.delete();
+      this._dotLottieObserverHandle = null;
     }
 
     this._dotLottieCore?.delete();
@@ -733,8 +785,7 @@ export class DotLottie {
   public freeze(): void {
     if (this._animationFrameId === null) return;
 
-    this._frameManager.cancelAnimationFrame(this._animationFrameId);
-    this._animationFrameId = null;
+    this._stopAnimationLoop();
 
     this._isFrozen = true;
 
@@ -744,11 +795,11 @@ export class DotLottie {
   public unfreeze(): void {
     if (this._animationFrameId !== null) return;
 
-    this._animationFrameId = this._frameManager.requestAnimationFrame(this._draw.bind(this));
-
     this._isFrozen = false;
 
     this._eventManager.dispatch({ type: 'unfreeze' });
+
+    this._startAnimationLoop();
   }
 
   public resize(): void {
@@ -765,10 +816,10 @@ export class DotLottie {
       }
     }
 
-    const ok = this._dotLottieCore.resize(this._canvas.width, this._canvas.height);
+    const resized = this._dotLottieCore.resize(this._canvas.width, this._canvas.height);
 
-    if (ok) {
-      this._render();
+    if (resized) {
+      this._draw();
     }
   }
 
@@ -810,6 +861,11 @@ export class DotLottie {
 
       if (this._renderConfig.freezeOnOffscreen) {
         OffscreenObserver.observe(this._canvas, this);
+
+        // Check if canvas is currently offscreen and freeze if necessary
+        if (!isElementInViewport(this._canvas)) {
+          this.freeze();
+        }
       } else {
         OffscreenObserver.unobserve(this._canvas);
         // If the animation was previously frozen, we need to unfreeze it now
@@ -827,13 +883,7 @@ export class DotLottie {
     const loaded = this._dotLottieCore.loadAnimation(animationId, this._canvas.width, this._canvas.height);
 
     if (loaded) {
-      this._eventManager.dispatch({ type: 'load' });
       this.resize();
-    } else {
-      this._eventManager.dispatch({
-        type: 'loadError',
-        error: new Error(`Failed to animation :${animationId}`),
-      });
     }
   }
 
@@ -871,27 +921,37 @@ export class DotLottie {
   public setTheme(themeId: string): boolean {
     if (this._dotLottieCore === null) return false;
 
-    const loaded = this._dotLottieCore.setTheme(themeId);
+    const themeLoaded = this._dotLottieCore.setTheme(themeId);
 
-    this._render();
+    if (themeLoaded) {
+      this._draw();
+    }
 
-    return loaded;
+    return themeLoaded;
   }
 
   public resetTheme(): boolean {
     if (this._dotLottieCore === null) return false;
 
-    return this._dotLottieCore.resetTheme();
+    const themeReset = this._dotLottieCore.resetTheme();
+
+    if (themeReset) {
+      this._draw();
+    }
+
+    return themeReset;
   }
 
   public setThemeData(themeData: string): boolean {
     if (this._dotLottieCore === null) return false;
 
-    const loaded = this._dotLottieCore.setThemeData(themeData);
+    const themeLoaded = this._dotLottieCore.setThemeData(themeData);
 
-    this._render();
+    if (themeLoaded) {
+      this._draw();
+    }
 
-    return loaded;
+    return themeLoaded;
   }
 
   public setSlots(slots: string): void {

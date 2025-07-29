@@ -1,6 +1,13 @@
-import { describe, test, expect } from 'vitest';
+import { beforeEach, describe, expect, test } from 'vitest';
 
-import { hexStringToRGBAInt, isHexColor, isLottie, isDotLottie, getDefaultDPR } from '../src/utils';
+import {
+  getDefaultDPR,
+  hexStringToRGBAInt,
+  isDotLottie,
+  isElementInViewport,
+  isHexColor,
+  isLottie,
+} from '../src/utils';
 
 import lottieUrl from './__fixtures__/test.json?url';
 import dotLottieUrl from './__fixtures__/test.lottie?url';
@@ -92,5 +99,159 @@ describe('isLottie', () => {
 describe('getDefaultDotLottieDPR', () => {
   test('return 75% of device pixel ratio', () => {
     expect(getDefaultDPR()).toBe(1 + (window.devicePixelRatio - 1) * 0.75);
+  });
+});
+
+describe('isElementInViewport', () => {
+  beforeEach(() => {
+    // Mock window dimensions
+    Object.defineProperty(window, 'innerWidth', { value: 1000, writable: true });
+    Object.defineProperty(window, 'innerHeight', { value: 800, writable: true });
+  });
+
+  test('returns true for fully visible element', () => {
+    const mockElement = {
+      getBoundingClientRect: () => ({
+        top: 100,
+        left: 100,
+        bottom: 200,
+        right: 200,
+      }),
+    } as HTMLElement;
+
+    expect(isElementInViewport(mockElement)).toBe(true);
+  });
+
+  test('returns true for partially visible element (cut off at bottom)', () => {
+    const mockElement = {
+      getBoundingClientRect: () => ({
+        // Near bottom of viewport (800px height)
+        top: 700,
+        left: 100,
+        // Extends below viewport
+        bottom: 900,
+        right: 200,
+      }),
+    } as HTMLElement;
+
+    expect(isElementInViewport(mockElement)).toBe(true);
+  });
+
+  test('returns true for partially visible element (cut off at top)', () => {
+    const mockElement = {
+      getBoundingClientRect: () => ({
+        // Starts above viewport
+        top: -50,
+        left: 100,
+        // Ends within viewport
+        bottom: 50,
+        right: 200,
+      }),
+    } as HTMLElement;
+
+    expect(isElementInViewport(mockElement)).toBe(true);
+  });
+
+  test('returns true for partially visible element (cut off at right)', () => {
+    const mockElement = {
+      getBoundingClientRect: () => ({
+        top: 100,
+        // Near right edge of viewport (1000px width)
+        left: 900,
+        bottom: 200,
+        // Extends beyond viewport
+        right: 1100,
+      }),
+    } as HTMLElement;
+
+    expect(isElementInViewport(mockElement)).toBe(true);
+  });
+
+  test('returns true for partially visible element (cut off at left)', () => {
+    const mockElement = {
+      getBoundingClientRect: () => ({
+        top: 100,
+        // Starts before viewport
+        left: -50,
+        bottom: 200,
+        // Ends within viewport
+        right: 50,
+      }),
+    } as HTMLElement;
+
+    expect(isElementInViewport(mockElement)).toBe(true);
+  });
+
+  test('returns false for element completely above viewport', () => {
+    const mockElement = {
+      getBoundingClientRect: () => ({
+        top: -200,
+        left: 100,
+        // Completely above viewport
+        bottom: -50,
+        right: 200,
+      }),
+    } as HTMLElement;
+
+    expect(isElementInViewport(mockElement)).toBe(false);
+  });
+
+  test('returns false for element completely below viewport', () => {
+    const mockElement = {
+      getBoundingClientRect: () => ({
+        // Below viewport (800px height)
+        top: 900,
+        left: 100,
+        bottom: 1000,
+        right: 200,
+      }),
+    } as HTMLElement;
+
+    expect(isElementInViewport(mockElement)).toBe(false);
+  });
+
+  test('returns false for element completely to the left of viewport', () => {
+    const mockElement = {
+      getBoundingClientRect: () => ({
+        top: 100,
+        left: -200,
+        bottom: 200,
+        // Completely to the left of viewport
+        right: -50,
+      }),
+    } as HTMLElement;
+
+    expect(isElementInViewport(mockElement)).toBe(false);
+  });
+
+  test('returns false for element completely to the right of viewport', () => {
+    const mockElement = {
+      getBoundingClientRect: () => ({
+        top: 100,
+        // Beyond viewport (1000px width)
+        left: 1100,
+        bottom: 200,
+        right: 1200,
+      }),
+    } as HTMLElement;
+
+    expect(isElementInViewport(mockElement)).toBe(false);
+  });
+
+  test('handles edge case where element exactly touches viewport boundary', () => {
+    const mockElement = {
+      getBoundingClientRect: () => ({
+        // Exactly at top edge
+        top: 0,
+        // Exactly at left edge
+        left: 0,
+        // Exactly at bottom edge
+        bottom: 800,
+        // Exactly at right edge
+        right: 1000,
+      }),
+    } as HTMLElement;
+
+    expect(isElementInViewport(mockElement)).toBe(true);
   });
 });

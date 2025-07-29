@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <canvas style="width: 200px"></canvas>
+        <button id="play-btn">Play</button>
+        <button id="pause-btn">Pause</button>
+        <button id="stop-btn">Stop</button>
+        <script type="module">
+            import { DotLottie } from './dist/index.js';
+
+            DotLottie.setWasmUrl('./src/core/dotlottie-player.wasm');
+
+            const dotLottie = new DotLottie({
+                canvas: document.querySelector('canvas'),
+                src: 'https://lottie.host/0cbdb3ef-2fa5-4d1d-9e4e-f66c879e010d/D0bRr9d93F.lottie',
+                loop: true,
+                autoplay: true,
+            });
+
+            // dotLottie.addEventListener("ready", console.log);
+            // dotLottie.addEventListener("load", console.log);
+            // dotLottie.addEventListener("loadError", console.log);
+            // dotLottie.addEventListener("play", console.log);
+            // dotLottie.addEventListener("pause", console.log);
+            // dotLottie.addEventListener("stop", console.log);
+            dotLottie.addEventListener('loop', console.log);
+            // dotLottie.addEventListener("complete", console.log);
+            // dotLottie.addEventListener("render", console.log);
+            dotLottie.addEventListener('renderError', console.log);
+            // dotLottie.addEventListener("frame", console.log);
+
+            const playBtn = document.getElementById('play-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const stopBtn = document.getElementById('stop-btn');
+
+            playBtn.addEventListener('click', () => {
+                dotLottie.play();
+            });
+
+            pauseBtn.addEventListener('click', () => {
+                dotLottie.pause();
+            });
+
+            stopBtn.addEventListener('click', () => {
+                dotLottie.stop();
+            });
+        </script>
+    </body>
+</html>

@@ -177,6 +177,11 @@ export class DotLottieWorker {
         if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
           if (this._dotLottieInstanceState.renderConfig.freezeOnOffscreen) {
             OffscreenObserver.observe(this._canvas, this);
+
+            // Check if canvas is initially offscreen and freeze if necessary
+            if (!isElementInViewport(this._canvas)) {
+              await this.freeze();
+            }
           }
 
           if (this._dotLottieInstanceState.renderConfig.autoResize) {
@@ -473,6 +478,11 @@ export class DotLottieWorker {
 
       if (this._dotLottieInstanceState.renderConfig.freezeOnOffscreen) {
         OffscreenObserver.observe(this._canvas, this);
+
+        // Check if canvas is currently offscreen and freeze if necessary
+        if (!isElementInViewport(this._canvas)) {
+          await this.freeze();
+        }
       } else {
         OffscreenObserver.unobserve(this._canvas);
         // If the animation was previously frozen, we need to unfreeze it now
