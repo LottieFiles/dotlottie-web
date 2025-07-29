@@ -1,5 +1,18 @@
 # @lottiefiles/dotlottie-react
 
+## 0.15.0
+
+### Minor Changes
+
+- a01796d: refactor: Replace manual event dispatching with WASM CallbackObserver integration
+
+### Patch Changes
+
+- Updated dependencies [a01796d]
+- Updated dependencies [a01796d]
+- Updated dependencies [a01796d]
+  - @lottiefiles/dotlottie-web@0.50.0
+
 ## 0.14.4
 
 ### Patch Changes

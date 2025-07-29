@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-web
 
+## 0.50.0
+
+### Minor Changes
+
+- a01796d: refactor: Replace manual event dispatching with WASM CallbackObserver integration
+- a01796d: chore: upgrade dotlottie-rs WASM bindings to v0.1.46
+- a01796d: fix: Canvas off-screen optimization condition in `isElementInViewport`
+
 ## 0.49.0
 
 ### Minor Changes
