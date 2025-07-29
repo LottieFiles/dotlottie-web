@@ -1,3 +1,4 @@
+/* eslint-disable no-warning-comments */
 import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER, BYTES_PER_PIXEL } from './constants';
 import type {
@@ -321,7 +322,17 @@ export class DotLottie {
     }
 
     if (loaded) {
-      this._draw();
+      // FIXME: frame is not triggered from the dotlottie-rs core
+      this._eventManager.dispatch({
+        type: 'frame',
+        currentFrame: this.currentFrame,
+      });
+
+      const rendered = this._dotLottieCore.render();
+
+      if (rendered) {
+        this._draw();
+      }
 
       if (IS_BROWSER) {
         this.resize();
@@ -686,14 +697,16 @@ export class DotLottie {
     this._stopAnimationLoop();
 
     if (ok) {
+      // FIXME: frame is not triggered from the dotlottie-rs core on stop()
+      this._eventManager.dispatch({ type: 'frame', currentFrame: this.currentFrame });
+      // FIXME: stop() doesn't trigger render() internally
+      this._dotLottieCore.render();
       this._draw();
     }
   }
 
   public setFrame(frame: number): void {
     if (this._dotLottieCore === null) return;
-
-    if (frame < 0 || frame > this._dotLottieCore.totalFrames()) return;
 
     const frameUpdated = this._dotLottieCore.seek(frame);
 

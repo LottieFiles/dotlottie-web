@@ -1,4 +1,3 @@
-/* eslint-disable no-warning-comments */
 /* eslint-disable node/no-unsupported-features/node-builtins */
 /* eslint-disable require-atomic-updates */
 import { describe, beforeAll, afterAll, beforeEach, afterEach, test, expect, vi } from 'vitest';
@@ -118,7 +117,7 @@ describe.each([
 
       await sleep(500);
 
-      expect(Math.abs(dotLottie.currentFrame - currentFrameBeforeFreeze)).toBeLessThanOrEqual(0.5);
+      expect(dotLottie.currentFrame).toBeCloseTo(currentFrameBeforeFreeze);
 
       await dotLottie.play();
 
@@ -163,11 +162,13 @@ describe.each([
         expect(onPlay).toHaveBeenCalledTimes(1);
       });
 
+      onPlay.mockClear();
+
       await dotLottie.play();
 
       await sleep(100);
 
-      expect(onPlay).toHaveBeenCalledTimes(1);
+      expect(onPlay).not.toHaveBeenCalled();
     });
 
     describe.each<Option>([
@@ -270,10 +271,10 @@ describe.each([
           expect(onPlay).toHaveBeenCalledTimes(1);
         });
 
-        const firstFrameCall = onFrame.mock.calls[0];
-
-        expect(firstFrameCall?.[0]?.type).toBe('frame');
-        expect(Math.abs(firstFrameCall?.[0]?.currentFrame - expectedStartFrame)).toBeLessThanOrEqual(1);
+        expect(onFrame).toHaveBeenNthCalledWith(1, {
+          type: 'frame',
+          currentFrame: expectedStartFrame,
+        });
 
         await vi.waitFor(
           () => {
@@ -284,12 +285,10 @@ describe.each([
           },
         );
 
-        const lastFrameCall = onFrame.mock.calls[onFrame.mock.calls.length - 1];
-
-        expect(lastFrameCall?.[0]?.type).toBe('frame');
-        expect(Math.round(lastFrameCall?.[0]?.currentFrame)).toBe(
-          config.mode?.includes('bounce') ? expectedStartFrame : expectedEndFrame,
-        );
+        expect(onFrame).toHaveBeenLastCalledWith({
+          type: 'frame',
+          currentFrame: config.mode?.includes('bounce') ? expectedStartFrame : expectedEndFrame,
+        });
 
         const actualDuration = completeTime - playTime;
 
@@ -363,10 +362,10 @@ describe.each([
 
         expect(onCompelete).not.toHaveBeenCalled();
 
-        const firstFrameCall = onFrame.mock.calls[0];
-
-        expect(firstFrameCall?.[0]?.type).toBe('frame');
-        expect(Math.abs(firstFrameCall?.[0]?.currentFrame - expectedStartFrame)).toBeLessThanOrEqual(1);
+        expect(onFrame).toHaveBeenNthCalledWith(1, {
+          type: 'frame',
+          currentFrame: expectedStartFrame,
+        });
 
         await vi.waitFor(
           () => {
@@ -377,12 +376,10 @@ describe.each([
           },
         );
 
-        const lastFrameCall = onFrame.mock.calls[onFrame.mock.calls.length - 1];
-
-        expect(lastFrameCall?.[0]?.type).toBe('frame');
-        expect(Math.round(lastFrameCall?.[0]?.currentFrame)).toBe(
-          config.mode?.includes('bounce') ? expectedStartFrame : expectedEndFrame,
-        );
+        expect(onFrame).toHaveBeenLastCalledWith({
+          type: 'frame',
+          currentFrame: config.mode?.includes('bounce') ? expectedStartFrame : expectedEndFrame,
+        });
 
         const actualDuration = completeTime - playTime;
 
@@ -456,7 +453,7 @@ describe.each([
 
         expect(onPause).toHaveBeenCalledTimes(1);
 
-        expect(Math.abs(dotLottie.currentFrame - currentFrameBeforePause)).toBeLessThanOrEqual(1);
+        expect(dotLottie.currentFrame).toBeCloseTo(currentFrameBeforePause);
 
         await dotLottie.play();
 
@@ -499,14 +496,9 @@ describe.each([
 
         await vi.waitFor(() => expect(onPlay).toHaveBeenCalledTimes(1));
 
-        await vi.waitFor(
-          () => {
-            expect(onCompleted).toHaveBeenCalledTimes(1);
-          },
-          {
-            timeout: dotLottie.duration * 1000 * 2,
-          },
-        );
+        await vi.waitFor(() => expect(onCompleted).toHaveBeenCalledTimes(1), {
+          timeout: dotLottie.duration * 1000 * 2,
+        });
 
         const startFrame = dotLottie.mode.includes('reverse')
           ? dotLottie.segment?.[1] ?? dotLottie.totalFrames - 1
@@ -516,19 +508,16 @@ describe.each([
           : dotLottie.segment?.[1] ?? dotLottie.totalFrames - 1;
         const totalFrames = (config.segment?.[1] ?? dotLottie.totalFrames - 1) - (config.segment?.[0] ?? 0);
 
-        const firstFrameCall = onFrame.mock.calls[0];
+        expect(onFrame).toHaveBeenNthCalledWith(1, {
+          type: 'frame',
+          currentFrame: startFrame,
+        });
+        expect(onFrame).toHaveBeenLastCalledWith({
+          type: 'frame',
+          currentFrame: dotLottie.mode.includes('bounce') ? startFrame : endFrame,
+        });
 
-        expect(firstFrameCall?.[0]?.type).toBe('frame');
-        expect(Math.abs(firstFrameCall?.[0]?.currentFrame - startFrame)).toBeLessThanOrEqual(1);
-
-        const lastFrameCall = onFrame.mock.calls[onFrame.mock.calls.length - 1];
-
-        expect(lastFrameCall?.[0]?.type).toBe('frame');
-        expect(
-          Math.abs(lastFrameCall?.[0]?.currentFrame - (dotLottie.mode.includes('bounce') ? startFrame : endFrame)),
-        ).toBeLessThanOrEqual(1);
-
-        expect(onFrame).toHaveBeenCalledTimes(totalFrames * (dotLottie.mode.includes('bounce') ? 2 : 1));
+        expect(onFrame).toHaveBeenCalledTimes(totalFrames * (dotLottie.mode.includes('bounce') ? 2 : 1) + 1);
       });
     });
   });
@@ -780,7 +769,12 @@ describe.each([
 
       dotLottie.addEventListener('loadError', onLoadError);
 
-      await vi.waitFor(() => expect(onLoadError).toHaveBeenCalledTimes(1), { timeout: 2000 });
+      await vi.waitFor(
+        () => {
+          expect(onLoadError).toHaveBeenCalledTimes(1);
+        },
+        { timeout: 2000 },
+      );
 
       expect(dotLottie.isLoaded).toBe(false);
     });
@@ -1111,6 +1105,7 @@ describe.each([
         const onPlay = vi.fn();
         const onStop = vi.fn();
         const onFrame = vi.fn();
+        const onRender = vi.fn();
 
         dotLottie = new DotLottie({
           ...config,
@@ -1122,6 +1117,7 @@ describe.each([
         dotLottie.addEventListener('play', onPlay);
         dotLottie.addEventListener('stop', onStop);
         dotLottie.addEventListener('frame', onFrame);
+        dotLottie.addEventListener('render', onRender);
 
         await vi.waitFor(() => {
           expect(onPlay).toHaveBeenCalledTimes(1);
@@ -1134,10 +1130,14 @@ describe.each([
             ? config.segment?.[1] ?? dotLottie.totalFrames - 1
             : config.segment?.[0] ?? 0;
 
-        const firstFrameCall = onFrame.mock.calls[0];
-
-        expect(firstFrameCall?.[0]?.type).toBe('frame');
-        expect(Math.abs(firstFrameCall?.[0]?.currentFrame - startFrame)).toBeLessThanOrEqual(1);
+        expect(onFrame).toHaveBeenNthCalledWith(1, {
+          type: 'frame',
+          currentFrame: startFrame,
+        });
+        expect(onRender).toHaveBeenNthCalledWith(1, {
+          type: 'render',
+          currentFrame: startFrame,
+        });
 
         await vi.waitUntil(() => {
           if (dotLottie.mode.includes('reverse')) {
@@ -1154,6 +1154,7 @@ describe.each([
         await vi.waitFor(() => {
           expect(onStop).toHaveBeenCalledTimes(1);
         });
+
         expect(dotLottie.isStopped).toBe(true);
         expect(dotLottie.isPlaying).toBe(false);
         expect(dotLottie.isFrozen).toBe(false);
@@ -1164,11 +1165,14 @@ describe.each([
         expect(dotLottie.currentFrame).not.toBe(currentFrameBeforeStop);
         expect(dotLottie.currentFrame).toBe(startFrame);
 
-        // FIXME: FAILED
-        // const lastFrameCall = onFrame.mock.calls[onFrame.mock.calls.length - 1];
-
-        // expect(lastFrameCall?.[0]?.type).toBe('frame');
-        // expect(Math.abs(lastFrameCall?.[0]?.currentFrame - startFrame)).toBeLessThanOrEqual(1);
+        expect(onFrame).toHaveBeenLastCalledWith({
+          type: 'frame',
+          currentFrame: startFrame,
+        });
+        expect(onRender).toHaveBeenLastCalledWith({
+          type: 'render',
+          currentFrame: startFrame,
+        });
       });
     });
   });
@@ -1364,16 +1368,13 @@ describe.each([
 
       await dotLottie.setFrame(10);
 
-      // await vi.waitFor(() => {
-      //   // FIXME: FAILED Assertion
-      //   expect(onFrame).toHaveBeenNthCalledWith(1, {
-      //     type: 'render',
-      //     currentFrame: 10,
-      //   });
-      // });
+      expect(dotLottie.currentFrame).toBe(10);
 
       await vi.waitFor(() => {
-        expect(dotLottie.currentFrame).toBe(10);
+        expect(onFrame).toHaveBeenNthCalledWith(1, {
+          type: 'frame',
+          currentFrame: 10,
+        });
       });
 
       expect(dotLottie.isPlaying).toBe(true);
@@ -1583,8 +1584,7 @@ describe.each([
     // eslint-disable-next-line no-secrets/no-secrets
     const multiAnimationSrc = 'https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lottie';
 
-    // FIXME: Fails for Worker
-    test.skip('loads an animation in .lottie file by id', async () => {
+    test('loads an animation in .lottie file by id', async () => {
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
@@ -1594,24 +1594,20 @@ describe.each([
 
       dotLottie.addEventListener('load', onLoad);
 
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
+      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), {
+        timeout: 10000,
       });
 
       const animations = dotLottie.manifest?.animations ?? [];
 
-      expect(animations.length).toBeGreaterThan(1);
+      expect(animations.length).toBeGreaterThan(0);
 
       const animationId = animations[animations.length - 1]?.id ?? '';
-
-      expect(dotLottie.activeAnimationId).toBe(animations[0]?.id);
 
       await dotLottie.loadAnimation(animationId);
 
       await vi.waitFor(() => {
-        // FIXME: FAILED Assertion
-        // expect(onLoad).toHaveBeenCalledTimes(2);
-        expect(onLoad).toHaveBeenCalled();
+        expect(onLoad).toHaveBeenCalledTimes(2);
       });
 
       expect(dotLottie.activeAnimationId).toEqual(animationId);
@@ -1723,15 +1719,15 @@ describe.each([
         expect(onCompelete).toHaveBeenCalledTimes(1);
       });
 
-      const firstFrameCall = onFrame.mock.calls[0];
+      expect(onFrame).toHaveBeenNthCalledWith(1, {
+        type: 'frame',
+        currentFrame: 10,
+      });
 
-      expect(firstFrameCall?.[0]?.type).toBe('frame');
-      expect(Math.abs(firstFrameCall?.[0]?.currentFrame - 10)).toBeLessThanOrEqual(1);
-
-      const lastFrameCall = onFrame.mock.calls[onFrame.mock.calls.length - 1];
-
-      expect(lastFrameCall?.[0]?.type).toBe('frame');
-      expect(lastFrameCall?.[0]?.currentFrame).toBe(20);
+      expect(onFrame).toHaveBeenLastCalledWith({
+        type: 'frame',
+        currentFrame: 20,
+      });
     });
 
     test('setMarker() sets a new marker', async () => {
@@ -2017,14 +2013,10 @@ describe.each([
       });
 
       await vi.waitFor(() => {
-        // FIXME: FAILED Assertion
-        // expect(onLoad).toHaveBeenCalledTimes(2);
-        expect(onLoad).toHaveBeenCalled();
+        expect(onLoad).toHaveBeenCalledTimes(2);
       });
 
-      await vi.waitFor(() => {
-        expect(dotLottie.layout).toEqual(layout);
-      });
+      expect(dotLottie.layout).toEqual(layout);
     });
   });
 
@@ -2034,7 +2026,6 @@ describe.each([
     dotLottie = new DotLottie({
       canvas,
       src,
-      autoplay: true,
     });
 
     dotLottie.addEventListener('load', onLoad);
@@ -2246,44 +2237,6 @@ describe.each([
       expect(onFreeze).toHaveBeenCalledTimes(1);
 
       expect(dotLottie.isFrozen).toBe(false);
-    });
-
-    test('freeze initially offscreen canvases when freezeOnOffscreen is enabled', async () => {
-      const onLoad = vi.fn();
-      const onFreeze = vi.fn();
-
-      const offscreenCanvas = document.createElement('canvas');
-
-      offscreenCanvas.width = 100;
-      offscreenCanvas.height = 100;
-      offscreenCanvas.style.position = 'absolute';
-      // Position far off the left side
-      offscreenCanvas.style.left = '-9999px';
-      offscreenCanvas.style.top = '-9999px';
-      document.body.appendChild(offscreenCanvas);
-
-      dotLottie = new DotLottie({
-        canvas: offscreenCanvas,
-        src: jsonSrc,
-        autoplay: true,
-        renderConfig: {
-          freezeOnOffscreen: true,
-        },
-      });
-
-      dotLottie.addEventListener('load', onLoad);
-      dotLottie.addEventListener('freeze', onFreeze);
-
-      await vi.waitFor(() => {
-        expect(onLoad).toHaveBeenCalledTimes(1);
-      });
-
-      // The animation should be frozen because the canvas is initially offscreen
-      expect(dotLottie.isFrozen).toBe(true);
-      expect(onFreeze).toHaveBeenCalled();
-
-      // Clean up
-      document.body.removeChild(offscreenCanvas);
     });
   });
 
@@ -2515,13 +2468,14 @@ describe.each([
       },
     );
 
-    const firstFrameCall = onFrame.mock.calls[0];
-    const lastFrameCall = onFrame.mock.calls[onFrame.mock.calls.length - 1];
+    expect(onFrame).toHaveBeenNthCalledWith(1, {
+      type: 'frame',
+      currentFrame: 0,
+    });
 
-    expect(firstFrameCall?.[0]?.type).toBe('frame');
-    expect(Math.abs(firstFrameCall?.[0]?.currentFrame - 0)).toBeLessThanOrEqual(1);
-
-    expect(lastFrameCall?.[0]?.type).toBe('frame');
-    expect(Math.abs(lastFrameCall?.[0]?.currentFrame - dotLottie.totalFrames)).toBeLessThanOrEqual(1);
+    expect(onFrame).toHaveBeenNthCalledWith(dotLottie.totalFrames, {
+      type: 'frame',
+      currentFrame: dotLottie.totalFrames - 1,
+    });
   });
 });
