@@ -3,51 +3,275 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Document</title>
+        <title>DotLottie Examples</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                padding: 20px;
+                background-color: #f5f5f5;
+                min-height: 200vh;
+            }
+            .examples-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            .example-container {
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .example-title {
+                font-size: 18px;
+                font-weight: bold;
+                margin-bottom: 15px;
+                color: #333;
+                text-align: center;
+            }
+            canvas {
+                border: 1px solid #ddd;
+                border-radius: 4px;
+            }
+        </style>
     </head>
     <body>
-        <canvas style="width: 200px"></canvas>
-        <button id="play-btn">Play</button>
-        <button id="pause-btn">Pause</button>
-        <button id="stop-btn">Stop</button>
+        <h1>DotLottie State Machine Examples</h1>
+
+        <div class="examples-grid">
+            <div class="example-container">
+                <div class="example-title">Toggle Example</div>
+                <canvas id="canvas-toggle" style="width: 200px; height: 200px"></canvas>
+            </div>
+
+            <div class="example-container">
+                <div class="example-title">Hover Example</div>
+                <canvas id="canvas-hover" style="width: 200px; height: 200px"></canvas>
+            </div>
+
+            <div class="example-container">
+                <div class="example-title">Star Rating Example</div>
+                <canvas id="canvas-star-rating" style="width: 200px; height: 200px"></canvas>
+            </div>
+
+            <div class="example-container">
+                <div class="example-title">Smiley Slider Example</div>
+                <canvas id="canvas-smiley-slider" style="width: 200px; height: 200px"></canvas>
+            </div>
+
+            <div class="example-container">
+                <div class="example-title">Theme Switching Example</div>
+                <canvas id="canvas-theme-switching" style="width: 200px; height: 200px"></canvas>
+            </div>
+
+            <div class="example-container">
+                <div class="example-title">Click Interaction Example</div>
+                <canvas id="canvas-click-interaction" style="width: 200px; height: 200px"></canvas>
+            </div>
+
+            <div class="example-container">
+                <div class="example-title">Cursor Controlled Example</div>
+                <canvas id="canvas-cursor-controlled" style="width: 200px; height: 200px"></canvas>
+            </div>
+
+            <div class="example-container">
+                <div class="example-title">Scroll Controlled Example</div>
+                <canvas id="canvas-scroll-controlled" style="width: 200px; height: 200px"></canvas>
+            </div>
+
+            <div class="example-container">
+                <div class="example-title">Hold Interaction Example</div>
+                <canvas id="canvas-hold-interaction" style="width: 200px; height: 200px"></canvas>
+            </div>
+        </div>
+
         <script type="module">
             import { DotLottie } from './dist/index.js';
 
             DotLottie.setWasmUrl('./src/core/dotlottie-player.wasm');
 
-            const dotLottie = new DotLottie({
-                canvas: document.querySelector('canvas'),
-                src: 'https://lottie.host/0cbdb3ef-2fa5-4d1d-9e4e-f66c879e010d/D0bRr9d93F.lottie',
-                loop: true,
-                autoplay: true,
+            const dotLottieInstances = {
+                toggle: new DotLottie({
+                    canvas: document.getElementById('canvas-toggle'),
+                    src: './tests/__fixtures__/sm/toggle.lottie',
+                    stateMachineId: 'toggle',
+                }),
+                hover: new DotLottie({
+                    canvas: document.getElementById('canvas-hover'),
+                    src: './tests/__fixtures__/sm/hover.lottie',
+                    stateMachineId: 'hover',
+                }),
+                starRating: new DotLottie({
+                    canvas: document.getElementById('canvas-star-rating'),
+                    src: './tests/__fixtures__/sm/star-rating.lottie',
+                    stateMachineId: 'star-rating',
+                }),
+                smileySlider: new DotLottie({
+                    canvas: document.getElementById('canvas-smiley-slider'),
+                    src: './tests/__fixtures__/sm/smiley_slider.lottie',
+                    stateMachineId: 'interactive_slider',
+                }),
+                themeSwitching: new DotLottie({
+                    canvas: document.getElementById('canvas-theme-switching'),
+                    src: 'https://lottie.host/8e34d211-e22e-459e-bfc7-7400b283be87/6RKEZ9wCqO.lottie',
+                }),
+                clickInteraction: new DotLottie({
+                    canvas: document.getElementById('canvas-click-interaction'),
+                    src: 'https://lottie.host/fba88936-b753-4751-a6ca-94db246157cf/5pGajCeC0B.json',
+                    loop: false,
+                    autoplay: false,
+                }),
+                cursorControlled: new DotLottie({
+                    canvas: document.getElementById('canvas-cursor-controlled'),
+                    src: 'https://lottie.host/fba88936-b753-4751-a6ca-94db246157cf/5pGajCeC0B.json',
+                }),
+                scrollControlled: new DotLottie({
+                    canvas: document.getElementById('canvas-scroll-controlled'),
+                    src: 'https://lottie.host/fba88936-b753-4751-a6ca-94db246157cf/5pGajCeC0B.json',
+                }),
+                holdInteraction: new DotLottie({
+                    canvas: document.getElementById('canvas-hold-interaction'),
+                    src: 'https://lottie.host/cb480e3f-1db1-4fb9-a812-592cd1aaef3a/Qda343MSSf.lottie',
+                }),
+            };
+
+            Object.entries(dotLottieInstances).forEach(([name, instance]) => {
+                // instance.addEventListener('ready', () => console.log(`${name} ready`));
+                // instance.addEventListener('load', () => console.log(`${name} loaded`));
+                // instance.addEventListener('play', () => console.log(`${name} playing`));
+                // instance.addEventListener('pause', () => console.log(`${name} paused`));
+                // instance.addEventListener('render', () => console.log(`${name} rendering`));
+                // instance.addEventListener('frame', () => console.log(`${name} frame`));
+                // instance.addEventListener('renderError', () => console.log(`${name} render error`));
+                // instance.addEventListener('stateMachineError', (...args) => console.log(`${name} error`, ...args));
+                // instance.addEventListener('stateMachineTransition', (...args) =>
+                //     console.log(`${name} transition`, ...args),
+                // );
+                // instance.addEventListener('stateMachineStateEntered', (...args) =>
+                //     console.log(`${name} state entered`, ...args),
+                // );
+                // instance.addEventListener('stateMachineStateExit', (...args) =>
+                //     console.log(`${name} state exit`, ...args),
+                // );
+                instance.addEventListener('stateMachineStart', () => console.log(`${name} state machine started`));
+                instance.addEventListener('stateMachineStop', () => console.log(`${name} state machine stopped`));
+                // instance.addEventListener('stateMachineInputFired', (...args) =>
+                //     console.log(`${name} input fired`, ...args),
+                // );
+                // instance.addEventListener('stateMachineCustomEvent', (...args) =>
+                //     console.log(`${name} fire event`, ...args),
+                // );
             });
 
-            // dotLottie.addEventListener("ready", console.log);
-            // dotLottie.addEventListener("load", console.log);
-            // dotLottie.addEventListener("loadError", console.log);
-            // dotLottie.addEventListener("play", console.log);
-            // dotLottie.addEventListener("pause", console.log);
-            // dotLottie.addEventListener("stop", console.log);
-            dotLottie.addEventListener('loop', console.log);
-            // dotLottie.addEventListener("complete", console.log);
-            // dotLottie.addEventListener("render", console.log);
-            dotLottie.addEventListener('renderError', console.log);
-            // dotLottie.addEventListener("frame", console.log);
+            // Helper function to load JSON files
+            async function loadStateMachineData(filePath) {
+                try {
+                    const response = await fetch(filePath);
+                    if (!response.ok) {
+                        throw new Error(`Failed to load ${filePath}: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    return JSON.stringify(data);
+                } catch (error) {
+                    console.error(`Error loading state machine data from ${filePath}:`, error);
+                    return null;
+                }
+            }
 
-            const playBtn = document.getElementById('play-btn');
-            const pauseBtn = document.getElementById('pause-btn');
-            const stopBtn = document.getElementById('stop-btn');
-
-            playBtn.addEventListener('click', () => {
-                dotLottie.play();
+            dotLottieInstances.themeSwitching.addEventListener('load', async () => {
+                const themeMachineData = await loadStateMachineData('./tests/__fixtures__/sm/theme-machine.json');
+                if (themeMachineData) {
+                    dotLottieInstances.themeSwitching.stateMachineLoadData(themeMachineData);
+                    dotLottieInstances.themeSwitching.stateMachineStart();
+                }
             });
 
-            pauseBtn.addEventListener('click', () => {
-                dotLottie.pause();
+            dotLottieInstances.clickInteraction.addEventListener('load', async () => {
+                const clickMachineData = await loadStateMachineData('./tests/__fixtures__/sm/click-machine.json');
+                if (clickMachineData) {
+                    dotLottieInstances.clickInteraction.stateMachineLoadData(clickMachineData);
+                    dotLottieInstances.clickInteraction.stateMachineStart();
+                }
             });
 
-            stopBtn.addEventListener('click', () => {
-                dotLottie.stop();
+            // Special handling for cursor controlled example
+            dotLottieInstances.cursorControlled.addEventListener('load', async () => {
+                const cursorMachineData = await loadStateMachineData('./tests/__fixtures__/sm/cursor-machine.json');
+                if (cursorMachineData) {
+                    console.log({
+                        cursorMachineData: JSON.parse(cursorMachineData),
+                    });
+                    dotLottieInstances.cursorControlled.stateMachineLoadData(cursorMachineData);
+                    dotLottieInstances.cursorControlled.stateMachineStart();
+
+                    const canvasContainer = document
+                        .getElementById('canvas-cursor-controlled')
+                        .closest('.example-container');
+
+                    const syncToCursor = (event) => {
+                        const rect = canvasContainer.getBoundingClientRect();
+                        const relativeX = event.clientX - rect.left;
+                        const pos = Math.max(0, Math.min(relativeX / rect.width, 1));
+
+                        const frame = dotLottieInstances.cursorControlled.totalFrames * pos;
+
+                        dotLottieInstances.cursorControlled.stateMachineSetNumericInput('cursorFrame', frame);
+                        dotLottieInstances.cursorControlled.stateMachineFireEvent('cursorMoved');
+                    };
+
+                    canvasContainer.addEventListener('mousemove', syncToCursor);
+                }
+            });
+
+            dotLottieInstances.scrollControlled.addEventListener('load', async () => {
+                const scrollMachineData = await loadStateMachineData('./tests/__fixtures__/sm/scroll-machine.json');
+                if (scrollMachineData) {
+                    dotLottieInstances.scrollControlled.stateMachineLoadData(scrollMachineData);
+                    dotLottieInstances.scrollControlled.stateMachineStart();
+
+                    const canvasContainer = document
+                        .getElementById('canvas-scroll-controlled')
+                        .closest('.example-container');
+
+                    const syncToScrollCb = () => {
+                        const rect = canvasContainer.getBoundingClientRect();
+                        const containerTop = rect.top;
+                        const containerHeight = rect.height;
+                        const windowHeight = window.innerHeight;
+
+                        // Calculate how much of the container is visible and scrolled
+                        const visibleTop = Math.max(0, windowHeight - containerTop);
+                        const visibleBottom = Math.max(0, windowHeight - (containerTop + containerHeight));
+                        const visibleHeight = Math.max(0, windowHeight - visibleTop - visibleBottom);
+
+                        // Calculate scroll progress within the container
+                        const scrollProgress =
+                            visibleHeight > 0 ? Math.max(0, Math.min(1, visibleHeight / containerHeight)) * 100 : 0;
+
+                        dotLottieInstances.scrollControlled.stateMachineSetNumericInput(
+                            'scrollProgress',
+                            scrollProgress,
+                        );
+                        dotLottieInstances.scrollControlled.stateMachineFireEvent('updateScroll');
+                    };
+
+                    window.addEventListener('scroll', syncToScrollCb);
+                    // Also trigger on load to set initial position
+                    syncToScrollCb();
+                }
+            });
+
+            dotLottieInstances.holdInteraction.addEventListener('load', async () => {
+                const holdMachineData = await loadStateMachineData('./tests/__fixtures__/sm/hold-machine.json');
+                if (holdMachineData) {
+                    dotLottieInstances.holdInteraction.stateMachineLoadData(holdMachineData);
+                    dotLottieInstances.holdInteraction.stateMachineStart();
+                }
             });
         </script>
     </body>

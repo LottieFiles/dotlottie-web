@@ -628,7 +628,7 @@ export class DotLottie {
   private _startAnimationLoop(): void {
     // Start if we don't already have an active loop and either:
     // 1. The animation should be playing, OR
-    // 2. The state machine is running (to handle state machine events)
+    // 2. The state machine is running
     if (
       this._animationFrameId === null &&
       this._dotLottieCore &&
@@ -1069,6 +1069,60 @@ export class DotLottie {
     return this._dotLottieCore?.tweenToMarker(marker, duration, easingVector) ?? false;
   }
 
+  public animationSize(): { height: number; width: number } {
+    const width = this._dotLottieCore?.animationSize().get(0) ?? 0;
+    const height = this._dotLottieCore?.animationSize().get(1) ?? 0;
+
+    return {
+      width,
+      height,
+    };
+  }
+
+  /**
+   * Get the Oriented Bounding Box (OBB) points of a layer by its name
+   * @param layerName - The name of the layer
+   * @returns An array of 8 numbers representing 4 points (x,y) of the OBB in clockwise order starting from top-left
+   *          [x0, y0, x1, y1, x2, y2, x3, y3]
+   *
+   * @example
+   * ```typescript
+   * // Draw a polygon around the layer 'Layer 1'
+   * dotLottie.addEventListener('render', () => {
+   *   const obbPoints = dotLottie.getLayerBoundingBox('Layer 1');
+   *
+   *   if (obbPoints) {
+   *     context.beginPath();
+   *     context.moveTo(obbPoints[0], obbPoints[1]); // First point
+   *     context.lineTo(obbPoints[2], obbPoints[3]); // Second point
+   *     context.lineTo(obbPoints[4], obbPoints[5]); // Third point
+   *     context.lineTo(obbPoints[6], obbPoints[7]); // Fourth point
+   *     context.closePath();
+   *     context.stroke();
+   *   }
+   * });
+   * ```
+   */
+  public getLayerBoundingBox(layerName: string): number[] | undefined {
+    const bounds = this._dotLottieCore?.getLayerBounds(layerName);
+
+    if (!bounds) return undefined;
+
+    if (bounds.size() !== 8) return undefined;
+
+    const points: number[] = [];
+
+    for (let i = 0; i < 8; i += 1) {
+      points.push(bounds.get(i) as number);
+    }
+
+    return points;
+  }
+
+  public static transformThemeToLottieSlots(theme: string, slots: string): string {
+    return DotLottie._wasmModule?.transformThemeToLottieSlots(theme, slots) ?? '';
+  }
+
   // #region State Machine
   private _setupStateMachineObservers(): void {
     if (!this._dotLottieCore || !DotLottie._wasmModule) return;
@@ -1303,8 +1357,8 @@ export class DotLottie {
    * @param name - The name of the boolean input
    * @param value - The boolean value to set
    */
-  public stateMachineSetBooleanInput(name: string, value: boolean): void {
-    this._dotLottieCore?.stateMachineSetBooleanInput(name, value);
+  public stateMachineSetBooleanInput(name: string, value: boolean): boolean {
+    return this._dotLottieCore?.stateMachineSetBooleanInput(name, value) ?? false;
   }
 
   /**
@@ -1313,8 +1367,8 @@ export class DotLottie {
    * @param name - The name of the numeric input
    * @param value - The numeric value to set
    */
-  public stateMachineSetNumericInput(name: string, value: number): void {
-    this._dotLottieCore?.stateMachineSetNumericInput(name, value);
+  public stateMachineSetNumericInput(name: string, value: number): boolean {
+    return this._dotLottieCore?.stateMachineSetNumericInput(name, value) ?? false;
   }
 
   /**
@@ -1365,7 +1419,6 @@ export class DotLottie {
   public stateMachineFireEvent(name: string): void {
     this._dotLottieCore?.stateMachineFireEvent(name);
   }
-  // #endregion
 
   /**
    * Calculate pointer position relative to the canvas coordinate system
@@ -1480,58 +1533,4 @@ export class DotLottie {
     }
   }
   // #endregion
-
-  public animationSize(): { height: number; width: number } {
-    const width = this._dotLottieCore?.animationSize().get(0) ?? 0;
-    const height = this._dotLottieCore?.animationSize().get(1) ?? 0;
-
-    return {
-      width,
-      height,
-    };
-  }
-
-  /**
-   * Get the Oriented Bounding Box (OBB) points of a layer by its name
-   * @param layerName - The name of the layer
-   * @returns An array of 8 numbers representing 4 points (x,y) of the OBB in clockwise order starting from top-left
-   *          [x0, y0, x1, y1, x2, y2, x3, y3]
-   *
-   * @example
-   * ```typescript
-   * // Draw a polygon around the layer 'Layer 1'
-   * dotLottie.addEventListener('render', () => {
-   *   const obbPoints = dotLottie.getLayerBoundingBox('Layer 1');
-   *
-   *   if (obbPoints) {
-   *     context.beginPath();
-   *     context.moveTo(obbPoints[0], obbPoints[1]); // First point
-   *     context.lineTo(obbPoints[2], obbPoints[3]); // Second point
-   *     context.lineTo(obbPoints[4], obbPoints[5]); // Third point
-   *     context.lineTo(obbPoints[6], obbPoints[7]); // Fourth point
-   *     context.closePath();
-   *     context.stroke();
-   *   }
-   * });
-   * ```
-   */
-  public getLayerBoundingBox(layerName: string): number[] | undefined {
-    const bounds = this._dotLottieCore?.getLayerBounds(layerName);
-
-    if (!bounds) return undefined;
-
-    if (bounds.size() !== 8) return undefined;
-
-    const points: number[] = [];
-
-    for (let i = 0; i < 8; i += 1) {
-      points.push(bounds.get(i) as number);
-    }
-
-    return points;
-  }
-
-  public static transformThemeToLottieSlots(theme: string, slots: string): string {
-    return DotLottie._wasmModule?.transformThemeToLottieSlots(theme, slots) ?? '';
-  }
 }

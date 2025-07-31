@@ -232,17 +232,17 @@ export interface EventListener<T extends EventType> {
  * Manages registration and dispatching of event listeners.
  */
 export class EventManager {
-  private readonly _eventListeners: Map<EventType, Set<(event: Event) => void>> = new Map();
+  private readonly _eventListeners: Map<EventType, Set<EventListener<EventType>>> = new Map();
 
   public addEventListener<T extends EventType>(type: T, listener: EventListener<T>): void {
     let listeners = this._eventListeners.get(type);
 
     if (!listeners) {
-      listeners = new Set<(event: Event) => void>();
+      listeners = new Set<EventListener<EventType>>();
       this._eventListeners.set(type, listeners);
     }
 
-    listeners.add(listener as (event: Event) => void);
+    listeners.add(listener as unknown as EventListener<EventType>);
   }
 
   public removeEventListener<T extends EventType>(type: T, listener?: EventListener<T>): void {
@@ -251,7 +251,7 @@ export class EventManager {
     if (!listeners) return;
 
     if (listener) {
-      listeners.delete(listener as (event: Event) => void);
+      listeners.delete(listener as unknown as EventListener<EventType>);
 
       if (listeners.size === 0) {
         this._eventListeners.delete(type);
@@ -264,11 +264,7 @@ export class EventManager {
   public dispatch<T extends EventType>(event: EventByType<T>): void {
     const listeners = this._eventListeners.get(event.type);
 
-    if (listeners) {
-      for (const listener of listeners) {
-        listener(event);
-      }
-    }
+    listeners?.forEach((listener) => listener(event));
   }
 
   public removeAllEventListeners(): void {
