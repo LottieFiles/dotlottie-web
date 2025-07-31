@@ -656,7 +656,11 @@ export class DotLottie {
     try {
       const advanced = this._dotLottieCore.tick();
 
-      if (advanced) {
+      if (
+        advanced ||
+        // FIXME: This is a workaround to fix the SetFrame action in the state machine
+        this._dotLottieCore.render()
+      ) {
         this._draw();
       }
 
