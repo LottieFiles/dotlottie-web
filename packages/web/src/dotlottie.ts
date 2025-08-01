@@ -109,7 +109,7 @@ export class DotLottie {
 
   private _stateMachineObserverHandle: StateMachineObserver | null = null;
 
-  private _stateMachineInternalObserverHandle: StateMachineObserver | null = null;
+  private _stateMachineOpenUrlObserver: StateMachineObserver | null = null;
 
   private _dotLottieObserverHandle: Observer | null = null;
 
@@ -817,10 +817,10 @@ export class DotLottie {
       this._stateMachineObserverHandle = null;
     }
 
-    if (this._stateMachineInternalObserverHandle) {
-      this._dotLottieCore?.stateMachineFrameworkUnsubscribe(this._stateMachineInternalObserverHandle);
-      this._stateMachineInternalObserverHandle.delete();
-      this._stateMachineInternalObserverHandle = null;
+    if (this._stateMachineOpenUrlObserver) {
+      this._dotLottieCore?.stateMachineFrameworkUnsubscribe(this._stateMachineOpenUrlObserver);
+      this._stateMachineOpenUrlObserver.delete();
+      this._stateMachineOpenUrlObserver = null;
     }
 
     if (this._dotLottieObserverHandle) {
@@ -1186,15 +1186,36 @@ export class DotLottie {
       this._eventManager.dispatch({ type: 'stateMachineError', error });
     });
 
-    const smInternalCallbackObserver = new DotLottie._wasmModule.CallbackStateMachineObserver();
+    const openUrlObserver = new DotLottie._wasmModule.CallbackStateMachineObserver();
 
-    smInternalCallbackObserver.setOnCustomEvent((_eventName: string) => {
-      // TODO: open url handling here
+    openUrlObserver.setOnCustomEvent((eventName: string) => {
+      if (eventName.startsWith('OpenUrl: ')) {
+        const content = eventName.replace('OpenUrl: ', '');
+
+        const targetSeparatorIndex = content.indexOf(' | Target: ');
+        let urlToOpen: string;
+        let target: string;
+
+        if (targetSeparatorIndex === -1) {
+          // Format: "OpenUrl: {url}"
+          urlToOpen = content;
+          target = '_blank';
+        } else {
+          // Format: "OpenUrl: {url} | Target: {target}"
+          urlToOpen = content.substring(0, targetSeparatorIndex);
+          target = content.substring(targetSeparatorIndex + ' | Target: '.length);
+        }
+
+        this._eventManager.dispatch({ type: 'stateMachineOpenUrl', url: urlToOpen, target });
+
+        if (IS_BROWSER) {
+          window.open(urlToOpen, target);
+        }
+      }
     });
 
     this._stateMachineObserverHandle = this._dotLottieCore.stateMachineSubscribe(smCallbackObserver);
-    this._stateMachineInternalObserverHandle =
-      this._dotLottieCore.stateMachineFrameworkSubscribe(smInternalCallbackObserver);
+    this._stateMachineOpenUrlObserver = this._dotLottieCore.stateMachineFrameworkSubscribe(openUrlObserver);
   }
 
   private _cleanupStateMachineObservers(): void {
@@ -1203,10 +1224,10 @@ export class DotLottie {
       this._stateMachineObserverHandle.delete();
       this._stateMachineObserverHandle = null;
     }
-    if (this._stateMachineInternalObserverHandle) {
-      this._dotLottieCore?.stateMachineFrameworkUnsubscribe(this._stateMachineInternalObserverHandle);
-      this._stateMachineInternalObserverHandle.delete();
-      this._stateMachineInternalObserverHandle = null;
+    if (this._stateMachineOpenUrlObserver) {
+      this._dotLottieCore?.stateMachineFrameworkUnsubscribe(this._stateMachineOpenUrlObserver);
+      this._stateMachineOpenUrlObserver.delete();
+      this._stateMachineOpenUrlObserver = null;
     }
   }
 

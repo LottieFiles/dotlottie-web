@@ -26,7 +26,8 @@ export type EventType =
   | 'stateMachineBooleanInputValueChange'
   | 'stateMachineNumericInputValueChange'
   | 'stateMachineStringInputValueChange'
-  | 'stateMachineInputFired';
+  | 'stateMachineInputFired'
+  | 'stateMachineOpenUrl';
 
 /**
  * Maps an event type string to its respective event interface.
@@ -194,6 +195,12 @@ export interface StateMachineInputFiredEvent extends BaseEvent {
   type: 'stateMachineInputFired';
 }
 
+export interface StateMachineOpenUrlEvent extends BaseEvent {
+  target: string;
+  type: 'stateMachineOpenUrl';
+  url: string;
+}
+
 /**
  * Type representing all possible event types.
  */
@@ -222,7 +229,8 @@ export type Event =
   | StateMachineBooleanInputValueChangeEvent
   | StateMachineNumericInputValueChangeEvent
   | StateMachineStringInputValueChangeEvent
-  | StateMachineInputFiredEvent;
+  | StateMachineInputFiredEvent
+  | StateMachineOpenUrlEvent;
 
 export interface EventListener<T extends EventType> {
   (event: EventByType<T>): void;

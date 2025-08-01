@@ -88,6 +88,11 @@
                 <div class="example-title">Hold Interaction Example</div>
                 <canvas id="canvas-hold-interaction" style="width: 200px; height: 200px"></canvas>
             </div>
+
+            <div class="example-container">
+                <div class="example-title">Open URL Example</div>
+                <canvas id="canvas-open-url" style="width: 200px; height: 200px"></canvas>
+            </div>
         </div>
 
         <script type="module">
@@ -138,6 +143,10 @@
                 holdInteraction: new DotLottie({
                     canvas: document.getElementById('canvas-hold-interaction'),
                     src: 'https://lottie.host/cb480e3f-1db1-4fb9-a812-592cd1aaef3a/Qda343MSSf.lottie',
+                }),
+                openUrl: new DotLottie({
+                    canvas: document.getElementById('canvas-open-url'),
+                    src: window.location.origin + '/tests/__fixtures__/sm/star-rating.lottie',
                 }),
             };
 
@@ -272,6 +281,14 @@
                 if (holdMachineData) {
                     dotLottieInstances.holdInteraction.stateMachineLoadData(holdMachineData);
                     dotLottieInstances.holdInteraction.stateMachineStart();
+                }
+            });
+
+            dotLottieInstances.openUrl.addEventListener('load', async () => {
+                const openUrlMachineData = await loadStateMachineData('./tests/__fixtures__/sm/open-url-machine.json');
+                if (openUrlMachineData) {
+                    dotLottieInstances.openUrl.stateMachineLoadData(openUrlMachineData);
+                    dotLottieInstances.openUrl.stateMachineStart();
                 }
             });
         </script>

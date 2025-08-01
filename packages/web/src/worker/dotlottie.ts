@@ -1,6 +1,6 @@
 import { IS_BROWSER } from '../constants';
 import type { Marker } from '../core';
-import type { EventType, EventListener, FrameEvent } from '../event-manager';
+import type { EventType, EventListener, FrameEvent, StateMachineOpenUrlEvent } from '../event-manager';
 import { EventManager } from '../event-manager';
 import { OffscreenObserver } from '../offscreen-observer';
 import { CanvasResizeObserver } from '../resize-observer';
@@ -159,6 +159,7 @@ export class DotLottieWorker {
       | 'onStateMachineNumericInputValueChange'
       | 'onStateMachineStringInputValueChange'
       | 'onStateMachineInputFired'
+      | 'onStateMachineOpenUrl'
     > = event.data;
 
     if (!rpcResponse.id) {
@@ -308,6 +309,20 @@ export class DotLottieWorker {
       if (rpcResponse.method === 'onStateMachineInputFired' && rpcResponse.result.instanceId === this._id) {
         await this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineOpenUrl' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+
+        const { event: urlEvent } = rpcResponse.result;
+
+        this._eventManager.dispatch(urlEvent);
+
+        const openUrlEvent = urlEvent as unknown as StateMachineOpenUrlEvent;
+
+        if (IS_BROWSER) {
+          window.open(openUrlEvent.url, openUrlEvent.target);
+        }
       }
     }
   }
