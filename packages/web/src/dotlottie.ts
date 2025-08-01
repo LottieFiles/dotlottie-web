@@ -119,6 +119,19 @@ export class DotLottie {
 
   private _backgroundColor: string | null = null;
 
+  // Bound event listeners for state machine
+  private _boundOnClick: ((event: MouseEvent) => void) | null = null;
+
+  private _boundOnPointerUp: ((event: PointerEvent) => void) | null = null;
+
+  private _boundOnPointerDown: ((event: PointerEvent) => void) | null = null;
+
+  private _boundOnPointerMove: ((event: PointerEvent) => void) | null = null;
+
+  private _boundOnPointerEnter: ((event: PointerEvent) => void) | null = null;
+
+  private _boundOnPointerLeave: ((event: PointerEvent) => void) | null = null;
+
   public constructor(
     config: Omit<Config, 'canvas'> & {
       canvas: HTMLCanvasElement | OffscreenCanvas | RenderSurface;
@@ -1556,35 +1569,62 @@ export class DotLottie {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this._dotLottieCore !== null && this.isLoaded) {
       const listeners = this.stateMachineGetListeners();
 
+      // Clean up any existing listeners first
+      this._cleanupStateMachineListeners();
+
       if (listeners.includes('Click')) {
-        this._canvas.addEventListener('click', this._onClick.bind(this));
+        this._boundOnClick = this._onClick.bind(this);
+        this._canvas.addEventListener('click', this._boundOnClick);
       }
       if (listeners.includes('PointerUp')) {
-        this._canvas.addEventListener('pointerup', this._onPointerUp.bind(this));
+        this._boundOnPointerUp = this._onPointerUp.bind(this);
+        this._canvas.addEventListener('pointerup', this._boundOnPointerUp);
       }
       if (listeners.includes('PointerDown')) {
-        this._canvas.addEventListener('pointerdown', this._onPointerDown.bind(this));
+        this._boundOnPointerDown = this._onPointerDown.bind(this);
+        this._canvas.addEventListener('pointerdown', this._boundOnPointerDown);
       }
       if (listeners.includes('PointerMove')) {
-        this._canvas.addEventListener('pointermove', this._onPointerMove.bind(this));
+        this._boundOnPointerMove = this._onPointerMove.bind(this);
+        this._canvas.addEventListener('pointermove', this._boundOnPointerMove);
       }
       if (listeners.includes('PointerEnter')) {
-        this._canvas.addEventListener('pointerenter', this._onPointerEnter.bind(this));
+        this._boundOnPointerEnter = this._onPointerEnter.bind(this);
+        this._canvas.addEventListener('pointerenter', this._boundOnPointerEnter);
       }
       if (listeners.includes('PointerExit')) {
-        this._canvas.addEventListener('pointerleave', this._onPointerLeave.bind(this));
+        this._boundOnPointerLeave = this._onPointerLeave.bind(this);
+        this._canvas.addEventListener('pointerleave', this._boundOnPointerLeave);
       }
     }
   }
 
   private _cleanupStateMachineListeners(): void {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
-      this._canvas.removeEventListener('click', this._onClick.bind(this));
-      this._canvas.removeEventListener('pointerup', this._onPointerUp.bind(this));
-      this._canvas.removeEventListener('pointerdown', this._onPointerDown.bind(this));
-      this._canvas.removeEventListener('pointermove', this._onPointerMove.bind(this));
-      this._canvas.removeEventListener('pointerenter', this._onPointerEnter.bind(this));
-      this._canvas.removeEventListener('pointerleave', this._onPointerLeave.bind(this));
+      if (this._boundOnClick) {
+        this._canvas.removeEventListener('click', this._boundOnClick);
+        this._boundOnClick = null;
+      }
+      if (this._boundOnPointerUp) {
+        this._canvas.removeEventListener('pointerup', this._boundOnPointerUp);
+        this._boundOnPointerUp = null;
+      }
+      if (this._boundOnPointerDown) {
+        this._canvas.removeEventListener('pointerdown', this._boundOnPointerDown);
+        this._boundOnPointerDown = null;
+      }
+      if (this._boundOnPointerMove) {
+        this._canvas.removeEventListener('pointermove', this._boundOnPointerMove);
+        this._boundOnPointerMove = null;
+      }
+      if (this._boundOnPointerEnter) {
+        this._canvas.removeEventListener('pointerenter', this._boundOnPointerEnter);
+        this._boundOnPointerEnter = null;
+      }
+      if (this._boundOnPointerLeave) {
+        this._canvas.removeEventListener('pointerleave', this._boundOnPointerLeave);
+        this._boundOnPointerLeave = null;
+      }
     }
   }
   // #endregion
