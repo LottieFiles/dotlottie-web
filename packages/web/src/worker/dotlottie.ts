@@ -734,7 +734,7 @@ export class DotLottieWorker {
     transfer?: Transferable[],
   ): Promise<MethodResultMap[T]> {
     const rpcRequest: RpcRequest<T> = {
-      id: generateUniqueId(),
+      id: `dotlottie-request-${generateUniqueId()}`,
       method,
       params,
     };

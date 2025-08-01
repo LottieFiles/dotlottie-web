@@ -103,8 +103,6 @@ export class DotLottie {
 
   private _dotLottieCore: DotLottiePlayer | null = null;
 
-  private _stateMachineId: string = '';
-
   private _isStateMachineRunning: boolean = false;
 
   private _stateMachineObserverHandle: StateMachineObserver | null = null;
@@ -227,8 +225,6 @@ export class DotLottie {
           layout: createCoreLayout(config.layout, module),
         });
 
-        this._stateMachineId = config.stateMachineId ?? '';
-
         this._dotLottieObserverHandle = this._dotLottieCore.subscribe(callbackObserver);
 
         this._eventManager.dispatch({ type: 'ready' });
@@ -337,17 +333,7 @@ export class DotLottie {
 
       this._draw();
 
-      if (this._stateMachineId) {
-        const smLoaded = this.stateMachineLoad(this._stateMachineId);
-
-        if (smLoaded) {
-          const smStarted = this.stateMachineStart();
-
-          if (smStarted) {
-            this._startAnimationLoop();
-          }
-        }
-      } else if (this._dotLottieCore.isPlaying()) {
+      if (this._dotLottieCore.isPlaying()) {
         this._startAnimationLoop();
       }
 

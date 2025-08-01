@@ -29,7 +29,6 @@ export interface Config {
   segment?: [number, number];
   speed?: number;
   src?: string;
-  stateMachineId?: string;
   themeId?: string;
   useFrameInterpolation?: boolean;
 }
