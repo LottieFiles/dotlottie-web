@@ -15,40 +15,24 @@ export type EventType =
   | 'freeze'
   | 'unfreeze'
   | 'render'
-  | 'ready';
+  | 'ready'
+  | 'stateMachineStart'
+  | 'stateMachineStop'
+  | 'stateMachineTransition'
+  | 'stateMachineStateEntered'
+  | 'stateMachineStateExit'
+  | 'stateMachineCustomEvent'
+  | 'stateMachineError'
+  | 'stateMachineBooleanInputValueChange'
+  | 'stateMachineNumericInputValueChange'
+  | 'stateMachineStringInputValueChange'
+  | 'stateMachineInputFired'
+  | 'stateMachineOpenUrl';
 
 /**
  * Maps an event type string to its respective event interface.
  */
-type EventByType<T> = T extends 'complete'
-  ? CompleteEvent
-  : T extends 'frame'
-  ? FrameEvent
-  : T extends 'load'
-  ? LoadEvent
-  : T extends 'loadError'
-  ? LoadErrorEvent
-  : T extends 'renderError'
-  ? RenderErrorEvent
-  : T extends 'loop'
-  ? LoopEvent
-  : T extends 'pause'
-  ? PauseEvent
-  : T extends 'play'
-  ? PlayEvent
-  : T extends 'stop'
-  ? StopEvent
-  : T extends 'destroy'
-  ? DestroyEvent
-  : T extends 'freeze'
-  ? FreezeEvent
-  : T extends 'unfreeze'
-  ? UnfreezeEvent
-  : T extends 'render'
-  ? RenderEvent
-  : T extends 'ready'
-  ? ReadyEvent
-  : never;
+type EventByType<T extends EventType> = Extract<Event, { type: T }>;
 
 /**
  * Base interface for all events.
@@ -151,6 +135,72 @@ export interface ReadyEvent extends BaseEvent {
   type: 'ready';
 }
 
+export interface StateMachineStartEvent extends BaseEvent {
+  type: 'stateMachineStart';
+}
+
+export interface StateMachineStopEvent extends BaseEvent {
+  type: 'stateMachineStop';
+}
+
+export interface StateMachineTransitionEvent extends BaseEvent {
+  fromState: string;
+  toState: string;
+  type: 'stateMachineTransition';
+}
+
+export interface StateMachineStateEnteredEvent extends BaseEvent {
+  state: string;
+  type: 'stateMachineStateEntered';
+}
+
+export interface StateMachineStateExitEvent extends BaseEvent {
+  state: string;
+  type: 'stateMachineStateExit';
+}
+
+export interface StateMachineCustomEvent extends BaseEvent {
+  eventName: string;
+  type: 'stateMachineCustomEvent';
+}
+
+export interface StateMachineErrorEvent extends BaseEvent {
+  error: string;
+  type: 'stateMachineError';
+}
+
+export interface StateMachineBooleanInputValueChangeEvent extends BaseEvent {
+  inputName: string;
+  newValue: boolean;
+  oldValue: boolean;
+  type: 'stateMachineBooleanInputValueChange';
+}
+
+export interface StateMachineNumericInputValueChangeEvent extends BaseEvent {
+  inputName: string;
+  newValue: number;
+  oldValue: number;
+  type: 'stateMachineNumericInputValueChange';
+}
+
+export interface StateMachineStringInputValueChangeEvent extends BaseEvent {
+  inputName: string;
+  newValue: string;
+  oldValue: string;
+  type: 'stateMachineStringInputValueChange';
+}
+
+export interface StateMachineInputFiredEvent extends BaseEvent {
+  inputName: string;
+  type: 'stateMachineInputFired';
+}
+
+export interface StateMachineOpenUrlEvent extends BaseEvent {
+  target: string;
+  type: 'stateMachineOpenUrl';
+  url: string;
+}
+
 /**
  * Type representing all possible event types.
  */
@@ -168,7 +218,19 @@ export type Event =
   | FreezeEvent
   | UnfreezeEvent
   | RenderEvent
-  | ReadyEvent;
+  | ReadyEvent
+  | StateMachineStartEvent
+  | StateMachineStopEvent
+  | StateMachineTransitionEvent
+  | StateMachineStateEnteredEvent
+  | StateMachineStateExitEvent
+  | StateMachineCustomEvent
+  | StateMachineErrorEvent
+  | StateMachineBooleanInputValueChangeEvent
+  | StateMachineNumericInputValueChangeEvent
+  | StateMachineStringInputValueChangeEvent
+  | StateMachineInputFiredEvent
+  | StateMachineOpenUrlEvent;
 
 export interface EventListener<T extends EventType> {
   (event: EventByType<T>): void;
@@ -184,11 +246,11 @@ export class EventManager {
     let listeners = this._eventListeners.get(type);
 
     if (!listeners) {
-      listeners = new Set<EventListener<T>>();
+      listeners = new Set<EventListener<EventType>>();
       this._eventListeners.set(type, listeners);
     }
 
-    listeners.add(listener);
+    listeners.add(listener as unknown as EventListener<EventType>);
   }
 
   public removeEventListener<T extends EventType>(type: T, listener?: EventListener<T>): void {
@@ -197,7 +259,7 @@ export class EventManager {
     if (!listeners) return;
 
     if (listener) {
-      listeners.delete(listener);
+      listeners.delete(listener as unknown as EventListener<EventType>);
 
       if (listeners.size === 0) {
         this._eventListeners.delete(type);

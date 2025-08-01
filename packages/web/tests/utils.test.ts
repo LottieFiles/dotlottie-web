@@ -1,7 +1,8 @@
-import { beforeEach, describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
   getDefaultDPR,
+  getPointerPosition,
   hexStringToRGBAInt,
   isDotLottie,
   isElementInViewport,
@@ -253,5 +254,266 @@ describe('isElementInViewport', () => {
     } as HTMLElement;
 
     expect(isElementInViewport(mockElement)).toBe(true);
+  });
+});
+
+describe('getPointerPosition', () => {
+  const createCanvas = (
+    canvasWidth: number,
+    canvasHeight: number,
+    rectLeft: number,
+    rectTop: number,
+    rectWidth: number,
+    rectHeight: number,
+  ): HTMLCanvasElement => {
+    const canvas = document.createElement('canvas');
+
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    document.body.appendChild(canvas);
+    canvas.style.position = 'absolute';
+    canvas.style.left = `${rectLeft}px`;
+    canvas.style.top = `${rectTop}px`;
+    canvas.style.width = `${rectWidth}px`;
+    canvas.style.height = `${rectHeight}px`;
+
+    return canvas;
+  };
+
+  const createMockEvent = (clientX: number, clientY: number, target: HTMLCanvasElement): MouseEvent => {
+    return {
+      clientX,
+      clientY,
+      target,
+    } as unknown as MouseEvent;
+  };
+
+  afterEach(() => {
+    document.querySelectorAll('canvas').forEach((canvas) => canvas.remove());
+  });
+
+  test('returns correct position for valid canvas with 1:1 scaling', () => {
+    const canvas = createCanvas(400, 300, 0, 0, 400, 300);
+    const event = createMockEvent(200, 150, canvas);
+
+    const result = getPointerPosition(event);
+
+    expect(result).toEqual({ x: 200, y: 150 });
+  });
+
+  test('returns correct position with upscaled canvas (canvas larger than display)', () => {
+    // Canvas is 800x600, but displayed as 400x300 (2x scale)
+    const canvas = createCanvas(800, 600, 0, 0, 400, 300);
+    const event = createMockEvent(200, 150, canvas);
+
+    const result = getPointerPosition(event);
+
+    // Coordinates should be scaled up by 2x
+    expect(result).toEqual({ x: 400, y: 300 });
+  });
+
+  test('returns correct position with downscaled canvas (canvas smaller than display)', () => {
+    // Canvas is 200x150, but displayed as 400x300 (0.5x scale)
+    const canvas = createCanvas(200, 150, 0, 0, 400, 300);
+    const event = createMockEvent(200, 150, canvas);
+
+    const result = getPointerPosition(event);
+
+    // Coordinates should be scaled down by 0.5x
+    expect(result).toEqual({ x: 100, y: 75 });
+  });
+
+  test('returns correct position with canvas offset from origin', () => {
+    // Canvas displayed at position (100, 50) with 1:1 scaling
+    const canvas = createCanvas(400, 300, 100, 50, 400, 300);
+    const event = createMockEvent(250, 150, canvas);
+
+    const result = getPointerPosition(event);
+
+    // Should subtract the offset (250-100=150, 150-50=100)
+    expect(result).toEqual({ x: 150, y: 100 });
+  });
+
+  test('returns correct position with both scaling and offset', () => {
+    // Canvas is 800x600, displayed as 400x300 at position (50, 25)
+    const canvas = createCanvas(800, 600, 50, 25, 400, 300);
+    const event = createMockEvent(250, 175, canvas);
+
+    const result = getPointerPosition(event);
+
+    // First subtract offset: (250-50=200, 175-25=150)
+    // Then scale by 2x: (200*2=400, 150*2=300)
+    expect(result).toEqual({ x: 400, y: 300 });
+  });
+
+  test('returns null when target is not HTMLCanvasElement', () => {
+    const div = document.createElement('div');
+    const event = {
+      clientX: 200,
+      clientY: 150,
+      target: div,
+    } as unknown as MouseEvent;
+
+    const result = getPointerPosition(event);
+
+    expect(result).toBeNull();
+  });
+
+  test('returns null when target is null', () => {
+    const event = {
+      clientX: 200,
+      clientY: 150,
+      target: null,
+    } as MouseEvent;
+
+    const result = getPointerPosition(event);
+
+    expect(result).toBeNull();
+  });
+
+  test('returns null when canvas width is 0', () => {
+    const canvas = createCanvas(0, 300, 0, 0, 400, 300);
+    const event = createMockEvent(200, 150, canvas);
+
+    const result = getPointerPosition(event);
+
+    expect(result).toBeNull();
+  });
+
+  test('returns null when canvas height is 0', () => {
+    const canvas = createCanvas(400, 0, 0, 0, 400, 300);
+    const event = createMockEvent(200, 150, canvas);
+
+    const result = getPointerPosition(event);
+
+    expect(result).toBeNull();
+  });
+
+  test('returns null when rect width is 0', () => {
+    const canvas = createCanvas(400, 300, 0, 0, 0, 300);
+    const event = createMockEvent(200, 150, canvas);
+
+    const result = getPointerPosition(event);
+
+    expect(result).toBeNull();
+  });
+
+  test('returns null when rect height is 0', () => {
+    const canvas = createCanvas(400, 300, 0, 0, 400, 0);
+    const event = createMockEvent(200, 150, canvas);
+
+    const result = getPointerPosition(event);
+
+    expect(result).toBeNull();
+  });
+
+  test('handles negative coordinates correctly', () => {
+    // Canvas at position (100, 100), click at (50, 50) - outside canvas area
+    const canvas = createCanvas(400, 300, 100, 100, 400, 300);
+    const event = createMockEvent(50, 50, canvas);
+
+    const result = getPointerPosition(event);
+
+    // Should calculate negative coordinates: (50-100=-50, 50-100=-50)
+    expect(result).toEqual({ x: -50, y: -50 });
+  });
+
+  test('returns null when calculation results in NaN', () => {
+    // Create a canvas that would cause NaN in calculations
+    const canvas = document.createElement('canvas');
+
+    canvas.width = 400;
+    canvas.height = 300;
+    document.body.appendChild(canvas);
+
+    // Mock getBoundingClientRect to return NaN which would cause NaN in calculations
+    const originalGetBoundingClientRect = canvas.getBoundingClientRect.bind(canvas);
+
+    canvas.getBoundingClientRect = vi.fn(
+      (): DOMRect => ({
+        left: NaN,
+        top: 0,
+        width: 400,
+        height: 300,
+        right: 400,
+        bottom: 300,
+        x: NaN,
+        y: 0,
+        // Comment: Empty toJSON function is required for DOMRect interface
+        toJSON: (): Record<string, unknown> => ({}),
+      }),
+    );
+
+    const event = createMockEvent(200, 150, canvas);
+
+    const result = getPointerPosition(event);
+
+    expect(result).toBeNull();
+
+    // Restore original method
+    canvas.getBoundingClientRect = originalGetBoundingClientRect;
+    canvas.remove();
+  });
+
+  test('returns null when calculation results in Infinity', () => {
+    // Create a canvas that would cause Infinity in calculations (division by zero)
+    const canvas = document.createElement('canvas');
+
+    canvas.width = 400;
+    canvas.height = 300;
+    document.body.appendChild(canvas);
+
+    // Mock getBoundingClientRect to return 0 width which causes division by zero
+    const originalGetBoundingClientRect = canvas.getBoundingClientRect.bind(canvas);
+
+    canvas.getBoundingClientRect = vi.fn(
+      (): DOMRect => ({
+        left: 0,
+        top: 0,
+        // This will cause division by zero when calculating scale
+        width: 0,
+        height: 300,
+        right: 0,
+        bottom: 300,
+        x: 0,
+        y: 0,
+        // Comment: Empty toJSON function is required for DOMRect interface
+        toJSON: (): Record<string, unknown> => ({}),
+      }),
+    );
+
+    const event = createMockEvent(200, 150, canvas);
+
+    const result = getPointerPosition(event);
+
+    expect(result).toBeNull();
+
+    canvas.getBoundingClientRect = originalGetBoundingClientRect;
+    canvas.remove();
+  });
+
+  test('handles fractional coordinates and scaling', () => {
+    const canvas = createCanvas(300, 200, 0, 0, 100, 100);
+    const event = createMockEvent(33.5, 66.7, canvas);
+
+    const result = getPointerPosition(event);
+
+    // Scale factors: scaleX = 300/100 = 3, scaleY = 200/100 = 2
+    // Expected: x = 33.5 * 3 = 100.5, y = 66.7 * 2 = 133.4
+    expect(result).toEqual({ x: 100.5, y: 133.4 });
+  });
+
+  test('works with PointerEvent as well as MouseEvent', () => {
+    const canvas = createCanvas(400, 300, 0, 0, 400, 300);
+    const pointerEvent = {
+      clientX: 200,
+      clientY: 150,
+      target: canvas,
+    } as unknown as PointerEvent;
+
+    const result = getPointerPosition(pointerEvent);
+
+    expect(result).toEqual({ x: 200, y: 150 });
   });
 });
