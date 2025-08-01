@@ -91,29 +91,30 @@
         </div>
 
         <script type="module">
-            import { DotLottie } from './dist/index.js';
+            // import { DotLottie } from './dist/index.js';
+            import { DotLottieWorker as DotLottie } from './dist/index.js';
 
-            DotLottie.setWasmUrl('./src/core/dotlottie-player.wasm');
+            DotLottie.setWasmUrl(window.location.origin + '/src/core/dotlottie-player.wasm');
 
             const dotLottieInstances = {
                 toggle: new DotLottie({
                     canvas: document.getElementById('canvas-toggle'),
-                    src: './tests/__fixtures__/sm/toggle.lottie',
+                    src: window.location.origin + '/tests/__fixtures__/sm/toggle.lottie',
                     stateMachineId: 'toggle',
                 }),
                 hover: new DotLottie({
                     canvas: document.getElementById('canvas-hover'),
-                    src: './tests/__fixtures__/sm/hover.lottie',
+                    src: window.location.origin + '/tests/__fixtures__/sm/hover.lottie',
                     stateMachineId: 'hover',
                 }),
                 starRating: new DotLottie({
                     canvas: document.getElementById('canvas-star-rating'),
-                    src: './tests/__fixtures__/sm/star-rating.lottie',
+                    src: window.location.origin + '/tests/__fixtures__/sm/star-rating.lottie',
                     stateMachineId: 'star-rating',
                 }),
                 smileySlider: new DotLottie({
                     canvas: document.getElementById('canvas-smiley-slider'),
-                    src: './tests/__fixtures__/sm/smiley_slider.lottie',
+                    src: window.location.origin + '/tests/__fixtures__/sm/smiley_slider.lottie',
                     stateMachineId: 'interactive_slider',
                 }),
                 themeSwitching: new DotLottie({

@@ -17,7 +17,14 @@ import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
 import { CanvasResizeObserver } from './resize-observer';
 import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data } from './types';
-import { getDefaultDPR, hexStringToRGBAInt, isDotLottie, isElementInViewport, isLottie } from './utils';
+import {
+  getDefaultDPR,
+  getPointerPosition,
+  hexStringToRGBAInt,
+  isDotLottie,
+  isElementInViewport,
+  isLottie,
+} from './utils';
 
 const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
   if (mode === 'reverse') {
@@ -1381,8 +1388,8 @@ export class DotLottie {
    * @param name - The name of the string input
    * @param value - The string value to set
    */
-  public stateMachineSetStringInput(name: string, value: string): void {
-    this._dotLottieCore?.stateMachineSetStringInput(name, value);
+  public stateMachineSetStringInput(name: string, value: string): boolean {
+    return this._dotLottieCore?.stateMachineSetStringInput(name, value) ?? false;
   }
 
   /**
@@ -1425,79 +1432,116 @@ export class DotLottie {
   }
 
   /**
-   * Calculate pointer position relative to the canvas coordinate system
-   * @param event - The mouse or pointer event
-   * @returns The calculated position or null if calculation fails
+   * @experimental
+   * Post a click event to the state machine
+   * @param x - The x coordinate of the click
+   * @param y - The y coordinate of the click
+   * @returns The event result or undefined
    */
-  private _getPointerPosition(event: MouseEvent | PointerEvent): { x: number; y: number } | null {
-    if (this._canvas instanceof HTMLCanvasElement) {
-      const rect = this._canvas.getBoundingClientRect();
+  public stateMachinePostClickEvent(x: number, y: number): number | undefined {
+    return this._dotLottieCore?.stateMachinePostClickEvent(x, y);
+  }
 
-      if (rect.width === 0 || rect.height === 0 || this._canvas.width === 0 || this._canvas.height === 0) {
-        return null;
-      }
+  /**
+   * @experimental
+   * Post a pointer up event to the state machine
+   * @param x - The x coordinate of the pointer
+   * @param y - The y coordinate of the pointer
+   * @returns The event result or undefined
+   */
+  public stateMachinePostPointerUpEvent(x: number, y: number): number | undefined {
+    return this._dotLottieCore?.stateMachinePostPointerUpEvent(x, y);
+  }
 
-      const scaleX = this._canvas.width / rect.width;
-      const scaleY = this._canvas.height / rect.height;
+  /**
+   * @experimental
+   * Post a pointer down event to the state machine
+   * @param x - The x coordinate of the pointer
+   * @param y - The y coordinate of the pointer
+   * @returns The event result or undefined
+   */
+  public stateMachinePostPointerDownEvent(x: number, y: number): number | undefined {
+    return this._dotLottieCore?.stateMachinePostPointerDownEvent(x, y);
+  }
 
-      const x = (event.clientX - rect.left) * scaleX;
-      const y = (event.clientY - rect.top) * scaleY;
+  /**
+   * @experimental
+   * Post a pointer move event to the state machine
+   * @param x - The x coordinate of the pointer
+   * @param y - The y coordinate of the pointer
+   * @returns The event result or undefined
+   */
+  public stateMachinePostPointerMoveEvent(x: number, y: number): number | undefined {
+    return this._dotLottieCore?.stateMachinePostPointerMoveEvent(x, y);
+  }
 
-      if (!Number.isFinite(x) || !Number.isFinite(y) || Number.isNaN(x) || Number.isNaN(y)) {
-        return null;
-      }
+  /**
+   * @experimental
+   * Post a pointer enter event to the state machine
+   * @param x - The x coordinate of the pointer
+   * @param y - The y coordinate of the pointer
+   * @returns The event result or undefined
+   */
+  public stateMachinePostPointerEnterEvent(x: number, y: number): number | undefined {
+    return this._dotLottieCore?.stateMachinePostPointerEnterEvent(x, y);
+  }
 
-      return { x, y };
-    }
-
-    return null;
+  /**
+   * @experimental
+   * Post a pointer exit event to the state machine
+   * @param x - The x coordinate of the pointer
+   * @param y - The y coordinate of the pointer
+   * @returns The event result or undefined
+   */
+  public stateMachinePostPointerExitEvent(x: number, y: number): number | undefined {
+    return this._dotLottieCore?.stateMachinePostPointerExitEvent(x, y);
   }
 
   private _onClick(event: MouseEvent): void {
-    const position = this._getPointerPosition(event);
+    const position = getPointerPosition(event);
 
     if (position) {
-      this._dotLottieCore?.stateMachinePostClickEvent(position.x, position.y);
+      this.stateMachinePostClickEvent(position.x, position.y);
     }
   }
 
   private _onPointerUp(event: PointerEvent): void {
-    const position = this._getPointerPosition(event);
+    const position = getPointerPosition(event);
 
     if (position) {
-      this._dotLottieCore?.stateMachinePostPointerUpEvent(position.x, position.y);
+      this.stateMachinePostPointerUpEvent(position.x, position.y);
     }
   }
 
   private _onPointerDown(event: PointerEvent): void {
-    const position = this._getPointerPosition(event);
+    const position = getPointerPosition(event);
 
     if (position) {
-      this._dotLottieCore?.stateMachinePostPointerDownEvent(position.x, position.y);
+      this.stateMachinePostPointerDownEvent(position.x, position.y);
     }
   }
 
   private _onPointerMove(event: PointerEvent): void {
-    const position = this._getPointerPosition(event);
+    const position = getPointerPosition(event);
 
     if (position) {
-      this._dotLottieCore?.stateMachinePostPointerMoveEvent(position.x, position.y);
+      this.stateMachinePostPointerMoveEvent(position.x, position.y);
     }
   }
 
   private _onPointerEnter(event: PointerEvent): void {
-    const position = this._getPointerPosition(event);
+    const position = getPointerPosition(event);
 
     if (position) {
-      this._dotLottieCore?.stateMachinePostPointerEnterEvent(position.x, position.y);
+      this.stateMachinePostPointerEnterEvent(position.x, position.y);
     }
   }
 
   private _onPointerLeave(event: PointerEvent): void {
-    const position = this._getPointerPosition(event);
+    const position = getPointerPosition(event);
 
     if (position) {
-      this._dotLottieCore?.stateMachinePostPointerExitEvent(position.x, position.y);
+      this.stateMachinePostPointerExitEvent(position.x, position.y);
     }
   }
 

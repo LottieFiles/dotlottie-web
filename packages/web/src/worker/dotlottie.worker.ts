@@ -17,6 +17,17 @@ import type {
   RenderEvent,
   StopEvent,
   UnfreezeEvent,
+  StateMachineStartEvent,
+  StateMachineStopEvent,
+  StateMachineTransitionEvent,
+  StateMachineStateEnteredEvent,
+  StateMachineStateExitEvent,
+  StateMachineCustomEvent,
+  StateMachineErrorEvent,
+  StateMachineBooleanInputValueChangeEvent,
+  StateMachineNumericInputValueChangeEvent,
+  StateMachineStringInputValueChangeEvent,
+  StateMachineInputFiredEvent,
 } from '../event-manager';
 
 import type { DotLottieInstanceState } from './dotlottie';
@@ -205,6 +216,162 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
 
     self.postMessage(response);
   },
+  stateMachineStart: (instanceId: string) => (event: Event) => {
+    const stateMachineStartEvent = event as StateMachineStartEvent;
+
+    const response: RpcResponse<'onStateMachineStart'> = {
+      id: '',
+      method: 'onStateMachineStart',
+      result: {
+        instanceId,
+        event: stateMachineStartEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineStop: (instanceId: string) => (event: Event) => {
+    const stateMachineStopEvent = event as StateMachineStopEvent;
+
+    const response: RpcResponse<'onStateMachineStop'> = {
+      id: '',
+      method: 'onStateMachineStop',
+      result: {
+        instanceId,
+        event: stateMachineStopEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineTransition: (instanceId: string) => (event: Event) => {
+    const stateMachineTransitionEvent = event as StateMachineTransitionEvent;
+
+    const response: RpcResponse<'onStateMachineTransition'> = {
+      id: '',
+      method: 'onStateMachineTransition',
+      result: {
+        instanceId,
+        event: stateMachineTransitionEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineStateEntered: (instanceId: string) => (event: Event) => {
+    const stateMachineStateEnteredEvent = event as StateMachineStateEnteredEvent;
+
+    const response: RpcResponse<'onStateMachineStateEntered'> = {
+      id: '',
+      method: 'onStateMachineStateEntered',
+      result: {
+        instanceId,
+        event: stateMachineStateEnteredEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineStateExit: (instanceId: string) => (event: Event) => {
+    const stateMachineStateExitEvent = event as StateMachineStateExitEvent;
+
+    const response: RpcResponse<'onStateMachineStateExit'> = {
+      id: '',
+      method: 'onStateMachineStateExit',
+      result: {
+        instanceId,
+        event: stateMachineStateExitEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineCustomEvent: (instanceId: string) => (event: Event) => {
+    const stateMachineCustomEvent = event as StateMachineCustomEvent;
+
+    const response: RpcResponse<'onStateMachineCustomEvent'> = {
+      id: '',
+      method: 'onStateMachineCustomEvent',
+      result: {
+        instanceId,
+        event: stateMachineCustomEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineError: (instanceId: string) => (event: Event) => {
+    const stateMachineErrorEvent = event as StateMachineErrorEvent;
+
+    const response: RpcResponse<'onStateMachineError'> = {
+      id: '',
+      method: 'onStateMachineError',
+      result: {
+        instanceId,
+        event: stateMachineErrorEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineBooleanInputValueChange: (instanceId: string) => (event: Event) => {
+    const stateMachineBooleanInputValueChangeEvent = event as StateMachineBooleanInputValueChangeEvent;
+
+    const response: RpcResponse<'onStateMachineBooleanInputValueChange'> = {
+      id: '',
+      method: 'onStateMachineBooleanInputValueChange',
+      result: {
+        instanceId,
+        event: stateMachineBooleanInputValueChangeEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineNumericInputValueChange: (instanceId: string) => (event: Event) => {
+    const stateMachineNumericInputValueChangeEvent = event as StateMachineNumericInputValueChangeEvent;
+
+    // eslint-disable-next-line no-secrets/no-secrets
+    const response: RpcResponse<'onStateMachineNumericInputValueChange'> = {
+      id: '',
+      // eslint-disable-next-line no-secrets/no-secrets
+      method: 'onStateMachineNumericInputValueChange',
+      result: {
+        instanceId,
+        event: stateMachineNumericInputValueChangeEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineStringInputValueChange: (instanceId: string) => (event: Event) => {
+    const stateMachineStringInputValueChangeEvent = event as StateMachineStringInputValueChangeEvent;
+
+    const response: RpcResponse<'onStateMachineStringInputValueChange'> = {
+      id: '',
+      method: 'onStateMachineStringInputValueChange',
+      result: {
+        instanceId,
+        event: stateMachineStringInputValueChangeEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  stateMachineInputFired: (instanceId: string) => (event: Event) => {
+    const stateMachineInputFiredEvent = event as StateMachineInputFiredEvent;
+
+    const response: RpcResponse<'onStateMachineInputFired'> = {
+      id: '',
+      method: 'onStateMachineInputFired',
+      result: {
+        instanceId,
+        event: stateMachineInputFiredEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
 };
 
 const commands: {
@@ -267,7 +434,7 @@ const commands: {
       success: true,
     };
   },
-  getStateMachineListeners(request) {
+  stateMachineGetListeners(request) {
     const instanceId = request.params.instanceId;
 
     const instance = instancesMap.get(instanceId);
@@ -276,74 +443,9 @@ const commands: {
       throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    return instance.getStateMachineListeners();
+    return instance.stateMachineGetListeners();
   },
-  postPointerDownEvent(request) {
-    const instanceId = request.params.instanceId;
-    const x = request.params.x;
-    const y = request.params.y;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.postPointerDownEvent(x, y);
-  },
-  postPointerEnterEvent(request) {
-    const instanceId = request.params.instanceId;
-    const x = request.params.x;
-    const y = request.params.y;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.postPointerEnterEvent(x, y);
-  },
-  postPointerExitEvent(request) {
-    const instanceId = request.params.instanceId;
-    const x = request.params.x;
-    const y = request.params.y;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.postPointerExitEvent(x, y);
-  },
-  postPointerMoveEvent(request) {
-    const instanceId = request.params.instanceId;
-    const x = request.params.x;
-    const y = request.params.y;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.postPointerMoveEvent(x, y);
-  },
-  postPointerUpEvent(request) {
-    const instanceId = request.params.instanceId;
-    const x = request.params.x;
-    const y = request.params.y;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.postPointerUpEvent(x, y);
-  },
-  startStateMachine(request) {
+  stateMachineStart(request) {
     const instanceId = request.params.instanceId;
 
     const instance = instancesMap.get(instanceId);
@@ -352,9 +454,9 @@ const commands: {
       throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    return instance.startStateMachine();
+    return instance.stateMachineStart();
   },
-  stopStateMachine(request) {
+  stateMachineStop(request) {
     const instanceId = request.params.instanceId;
 
     const instance = instancesMap.get(instanceId);
@@ -363,9 +465,9 @@ const commands: {
       throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    return instance.stopStateMachine();
+    return instance.stateMachineStop();
   },
-  loadStateMachine(request) {
+  stateMachineLoad(request) {
     const instanceId = request.params.instanceId;
     const stateMachineId = request.params.stateMachineId;
 
@@ -375,9 +477,9 @@ const commands: {
       throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    return instance.loadStateMachine(stateMachineId);
+    return instance.stateMachineLoad(stateMachineId);
   },
-  loadStateMachineData(request) {
+  stateMachineLoadData(request) {
     const instanceId = request.params.instanceId;
     const stateMachineData = request.params.stateMachineData;
 
@@ -387,7 +489,230 @@ const commands: {
       throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    return instance.loadStateMachineData(stateMachineData);
+    return instance.stateMachineLoadData(stateMachineData);
+  },
+  stateMachinePostClickEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachinePostClickEvent(x, y);
+  },
+  stateMachinePostPointerUpEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachinePostPointerUpEvent(x, y);
+  },
+  stateMachinePostPointerDownEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachinePostPointerDownEvent(x, y);
+  },
+  stateMachinePostPointerMoveEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachinePostPointerMoveEvent(x, y);
+  },
+  stateMachinePostPointerEnterEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachinePostPointerEnterEvent(x, y);
+  },
+  stateMachinePostPointerExitEvent(request) {
+    const instanceId = request.params.instanceId;
+    const x = request.params.x;
+    const y = request.params.y;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachinePostPointerExitEvent(x, y);
+  },
+  stateMachineSetNumericInput: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+    const value = request.params.value;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineSetNumericInput(name, value);
+  },
+  stateMachineSetBooleanInput: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+    const value = request.params.value;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineSetBooleanInput(name, value);
+  },
+  stateMachineSetStringInput: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+    const value = request.params.value;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineSetStringInput(name, value);
+  },
+  stateMachineGetNumericInput: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineGetNumericInput(name);
+  },
+  stateMachineGetBooleanInput: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineGetBooleanInput(name);
+  },
+  stateMachineGetStringInput: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineGetStringInput(name);
+  },
+  stateMachineFireEvent: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineFireEvent(name);
+  },
+  stateMachineGetStatus: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineGetStatus();
+  },
+  stateMachineGetCurrentState: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineGetCurrentState();
+  },
+  stateMachineGetActiveId: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineGetActiveId();
+  },
+  stateMachineOverrideState: (request) => {
+    const instanceId = request.params.instanceId;
+    const state = request.params.state;
+    const immediate = request.params.immediate;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineOverrideState(state, immediate);
+  },
+  stateMachineGet: (request) => {
+    const instanceId = request.params.instanceId;
+    const stateMachineId = request.params.stateMachineId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineGet(stateMachineId);
   },
   create: (request) => {
     const instanceId = request.params.instanceId;
@@ -421,6 +746,17 @@ const commands: {
       'unfreeze',
       'render',
       'ready',
+      'stateMachineStart',
+      'stateMachineStop',
+      'stateMachineTransition',
+      'stateMachineStateEntered',
+      'stateMachineStateExit',
+      'stateMachineCustomEvent',
+      'stateMachineError',
+      'stateMachineBooleanInputValueChange',
+      'stateMachineNumericInputValueChange',
+      'stateMachineStringInputValueChange',
+      'stateMachineInputFired',
     ];
 
     events.forEach((event) => {

@@ -13,6 +13,17 @@ import type {
   RenderEvent,
   StopEvent,
   UnfreezeEvent,
+  StateMachineStartEvent,
+  StateMachineStopEvent,
+  StateMachineTransitionEvent,
+  StateMachineStateEnteredEvent,
+  StateMachineStateExitEvent,
+  StateMachineCustomEvent,
+  StateMachineErrorEvent,
+  StateMachineBooleanInputValueChangeEvent,
+  StateMachineNumericInputValueChangeEvent,
+  StateMachineStringInputValueChangeEvent,
+  StateMachineInputFiredEvent,
 } from '../event-manager';
 import type { Config, Layout, Mode, RenderConfig } from '../types';
 
@@ -37,9 +48,6 @@ export interface MethodParamsMap {
   getDotLottieInstanceState: {
     instanceId: string;
   };
-  getStateMachineListeners: {
-    instanceId: string;
-  };
   load: {
     config: Omit<Config, 'canvas'>;
     instanceId: string;
@@ -48,44 +56,11 @@ export interface MethodParamsMap {
     animationId: string;
     instanceId: string;
   };
-  loadStateMachine: {
-    instanceId: string;
-    stateMachineId: string;
-  };
-  loadStateMachineData: {
-    instanceId: string;
-    stateMachineData: string;
-  };
   pause: {
     instanceId: string;
   };
   play: {
     instanceId: string;
-  };
-  postPointerDownEvent: {
-    instanceId: string;
-    x: number;
-    y: number;
-  };
-  postPointerEnterEvent: {
-    instanceId: string;
-    x: number;
-    y: number;
-  };
-  postPointerExitEvent: {
-    instanceId: string;
-    x: number;
-    y: number;
-  };
-  postPointerMoveEvent: {
-    instanceId: string;
-    x: number;
-    y: number;
-  };
-  postPointerUpEvent: {
-    instanceId: string;
-    x: number;
-    y: number;
   };
   resize: {
     height: number;
@@ -150,13 +125,103 @@ export interface MethodParamsMap {
   setWasmUrl: {
     url: string;
   };
-  startStateMachine: {
+  stateMachineFireEvent: {
+    instanceId: string;
+    name: string;
+  };
+  stateMachineGet: {
+    instanceId: string;
+    stateMachineId: string;
+  };
+  stateMachineGetActiveId: {
+    instanceId: string;
+  };
+  stateMachineGetBooleanInput: {
+    instanceId: string;
+    name: string;
+  };
+  stateMachineGetCurrentState: {
+    instanceId: string;
+  };
+  stateMachineGetListeners: {
+    instanceId: string;
+  };
+  stateMachineGetNumericInput: {
+    instanceId: string;
+    name: string;
+  };
+  stateMachineGetStatus: {
+    instanceId: string;
+  };
+  stateMachineGetStringInput: {
+    instanceId: string;
+    name: string;
+  };
+  stateMachineLoad: {
+    instanceId: string;
+    stateMachineId: string;
+  };
+  stateMachineLoadData: {
+    instanceId: string;
+    stateMachineData: string;
+  };
+  stateMachineOverrideState: {
+    immediate?: boolean;
+    instanceId: string;
+    state: string;
+  };
+  stateMachinePostClickEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachinePostPointerDownEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachinePostPointerEnterEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachinePostPointerExitEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachinePostPointerMoveEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachinePostPointerUpEvent: {
+    instanceId: string;
+    x: number;
+    y: number;
+  };
+  stateMachineSetBooleanInput: {
+    instanceId: string;
+    name: string;
+    value: boolean;
+  };
+  stateMachineSetNumericInput: {
+    instanceId: string;
+    name: string;
+    value: number;
+  };
+  stateMachineSetStringInput: {
+    instanceId: string;
+    name: string;
+    value: string;
+  };
+  stateMachineStart: {
+    instanceId: string;
+  };
+  stateMachineStop: {
     instanceId: string;
   };
   stop: {
-    instanceId: string;
-  };
-  stopStateMachine: {
     instanceId: string;
   };
   tween: {
@@ -193,11 +258,8 @@ export interface MethodResultMap {
   getDotLottieInstanceState: {
     state: DotLottieInstanceState;
   };
-  getStateMachineListeners: string[];
   load: void;
   loadAnimation: void;
-  loadStateMachine: boolean;
-  loadStateMachineData: boolean;
   onComplete: {
     event: CompleteEvent;
     instanceId: string;
@@ -246,6 +308,50 @@ export interface MethodResultMap {
     event: RenderErrorEvent;
     instanceId: string;
   };
+  onStateMachineBooleanInputValueChange: {
+    event: StateMachineBooleanInputValueChangeEvent;
+    instanceId: string;
+  };
+  onStateMachineCustomEvent: {
+    event: StateMachineCustomEvent;
+    instanceId: string;
+  };
+  onStateMachineError: {
+    event: StateMachineErrorEvent;
+    instanceId: string;
+  };
+  onStateMachineInputFired: {
+    event: StateMachineInputFiredEvent;
+    instanceId: string;
+  };
+  onStateMachineNumericInputValueChange: {
+    event: StateMachineNumericInputValueChangeEvent;
+    instanceId: string;
+  };
+  onStateMachineStart: {
+    event: StateMachineStartEvent;
+    instanceId: string;
+  };
+  onStateMachineStateEntered: {
+    event: StateMachineStateEnteredEvent;
+    instanceId: string;
+  };
+  onStateMachineStateExit: {
+    event: StateMachineStateExitEvent;
+    instanceId: string;
+  };
+  onStateMachineStop: {
+    event: StateMachineStopEvent;
+    instanceId: string;
+  };
+  onStateMachineStringInputValueChange: {
+    event: StateMachineStringInputValueChangeEvent;
+    instanceId: string;
+  };
+  onStateMachineTransition: {
+    event: StateMachineTransitionEvent;
+    instanceId: string;
+  };
   onStop: {
     event: StopEvent;
     instanceId: string;
@@ -256,11 +362,6 @@ export interface MethodResultMap {
   };
   pause: void;
   play: void;
-  postPointerDownEvent: number | undefined;
-  postPointerEnterEvent: number | undefined;
-  postPointerExitEvent: number | undefined;
-  postPointerMoveEvent: number | undefined;
-  postPointerUpEvent: number | undefined;
   resize: void;
   setBackgroundColor: void;
   setFrame: void;
@@ -276,9 +377,30 @@ export interface MethodResultMap {
   setUseFrameInterpolation: void;
   setViewport: boolean;
   setWasmUrl: void;
-  startStateMachine: boolean;
+  stateMachineFireEvent: void;
+  stateMachineGet: string;
+  stateMachineGetActiveId: string;
+  stateMachineGetBooleanInput: boolean | undefined;
+  stateMachineGetCurrentState: string;
+  stateMachineGetListeners: string[];
+  stateMachineGetNumericInput: number | undefined;
+  stateMachineGetStatus: string;
+  stateMachineGetStringInput: string | undefined;
+  stateMachineLoad: boolean;
+  stateMachineLoadData: boolean;
+  stateMachineOverrideState: boolean;
+  stateMachinePostClickEvent: number | undefined;
+  stateMachinePostPointerDownEvent: number | undefined;
+  stateMachinePostPointerEnterEvent: number | undefined;
+  stateMachinePostPointerExitEvent: number | undefined;
+  stateMachinePostPointerMoveEvent: number | undefined;
+  stateMachinePostPointerUpEvent: number | undefined;
+  stateMachineSetBooleanInput: boolean;
+  stateMachineSetNumericInput: boolean;
+  stateMachineSetStringInput: boolean;
+  stateMachineStart: boolean;
+  stateMachineStop: boolean;
   stop: void;
-  stopStateMachine: boolean;
   tween: boolean;
   tweenToMarker: boolean;
   unfreeze: void;

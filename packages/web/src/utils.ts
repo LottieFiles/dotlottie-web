@@ -65,3 +65,35 @@ export function isElementInViewport(element: HTMLElement): boolean {
 
   return !(rect.bottom < 0 || rect.top > viewportHeight || rect.right < 0 || rect.left > viewportWidth);
 }
+
+/**
+ * Calculate pointer position relative to the canvas coordinate system
+ * @param event - The mouse or pointer event (target should be the canvas element)
+ * @returns The calculated position or null if calculation fails or target is not a valid canvas
+ */
+export function getPointerPosition(event: MouseEvent | PointerEvent): { x: number; y: number } | null {
+  const canvas = event.target;
+
+  if (canvas instanceof HTMLCanvasElement) {
+    const rect = canvas.getBoundingClientRect();
+
+    if (rect.width === 0 || rect.height === 0 || canvas.width === 0 || canvas.height === 0) {
+      return null;
+    }
+
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const x = (event.clientX - rect.left) * scaleX;
+    const y = (event.clientY - rect.top) * scaleY;
+
+    if (!Number.isFinite(x) || !Number.isFinite(y) || Number.isNaN(x) || Number.isNaN(y)) {
+      return null;
+    }
+
+    return { x, y };
+  }
+
+  // Return null if target is not an HTMLCanvasElement or calculation fails
+  return null;
+}
