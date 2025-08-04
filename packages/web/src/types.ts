@@ -10,6 +10,8 @@ export type Data = string | ArrayBuffer | Record<string, unknown>;
 
 export type Fit = 'contain' | 'cover' | 'fill' | 'none' | 'fit-width' | 'fit-height';
 
+export type OpenUrlMode = 'deny' | 'interaction' | 'allow';
+
 export interface Layout {
   align?: [number, number];
   fit?: Fit;
@@ -29,8 +31,17 @@ export interface Config {
   segment?: [number, number];
   speed?: number;
   src?: string;
+  stateMachineConfig?: StateMachineConfig;
+  stateMachineId?: string;
   themeId?: string;
   useFrameInterpolation?: boolean;
+}
+
+export interface StateMachineConfig {
+  openUrl?: {
+    mode: OpenUrlMode;
+    whitelist?: string[];
+  };
 }
 
 export interface Manifest {

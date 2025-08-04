@@ -4,7 +4,7 @@ import type { EventType, EventListener, FrameEvent, StateMachineOpenUrlEvent } f
 import { EventManager } from '../event-manager';
 import { OffscreenObserver } from '../offscreen-observer';
 import { CanvasResizeObserver } from '../resize-observer';
-import type { Config, Layout, Manifest, Mode, RenderConfig } from '../types';
+import type { Config, Layout, Manifest, Mode, RenderConfig, StateMachineConfig } from '../types';
 import { getDefaultDPR, getPointerPosition, isElementInViewport } from '../utils';
 
 import type { MethodParamsMap, MethodResultMap, RpcRequest, RpcResponse } from './types';
@@ -873,6 +873,17 @@ export class DotLottieWorker {
     if (!this._created) return false;
 
     return this._sendMessage('stateMachineSetBooleanInput', { instanceId: this._id, name, value });
+  }
+
+  /**
+   * @experimental
+   * Set the state machine config
+   * @param config - The state machine config
+   */
+  public async stateMachineSetConfig(config: StateMachineConfig | null): Promise<void> {
+    if (!this._created) return;
+
+    this._sendMessage('stateMachineSetConfig', { instanceId: this._id, config });
   }
 
   /**

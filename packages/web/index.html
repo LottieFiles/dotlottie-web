@@ -105,22 +105,22 @@
                 toggle: new DotLottie({
                     canvas: document.getElementById('canvas-toggle'),
                     src: window.location.origin + '/tests/__fixtures__/sm/toggle.lottie',
-                    // stateMachineId: 'toggle',
+                    stateMachineId: 'toggle',
                 }),
                 hover: new DotLottie({
                     canvas: document.getElementById('canvas-hover'),
                     src: window.location.origin + '/tests/__fixtures__/sm/hover.lottie',
-                    // stateMachineId: 'hover',
+                    stateMachineId: 'hover',
                 }),
                 starRating: new DotLottie({
                     canvas: document.getElementById('canvas-star-rating'),
                     src: window.location.origin + '/tests/__fixtures__/sm/star-rating.lottie',
-                    // stateMachineId: 'star-rating',
+                    stateMachineId: 'star-rating',
                 }),
                 smileySlider: new DotLottie({
                     canvas: document.getElementById('canvas-smiley-slider'),
                     src: window.location.origin + '/tests/__fixtures__/sm/smiley_slider.lottie',
-                    // stateMachineId: 'interactive_slider',
+                    stateMachineId: 'interactive_slider',
                 }),
                 themeSwitching: new DotLottie({
                     canvas: document.getElementById('canvas-theme-switching'),
@@ -147,6 +147,11 @@
                 openUrl: new DotLottie({
                     canvas: document.getElementById('canvas-open-url'),
                     src: window.location.origin + '/tests/__fixtures__/sm/star-rating.lottie',
+                    stateMachineConfig: {
+                        openUrl: {
+                            mode: 'interaction',
+                        },
+                    },
                 }),
             };
 
@@ -192,26 +197,6 @@
                     return null;
                 }
             }
-
-            dotLottieInstances.toggle.addEventListener('load', async () => {
-                dotLottieInstances.toggle.stateMachineLoad('toggle');
-                dotLottieInstances.toggle.stateMachineStart();
-            });
-
-            dotLottieInstances.hover.addEventListener('load', async () => {
-                dotLottieInstances.hover.stateMachineLoad('hover');
-                dotLottieInstances.hover.stateMachineStart();
-            });
-
-            dotLottieInstances.starRating.addEventListener('load', async () => {
-                dotLottieInstances.starRating.stateMachineLoad('star-rating');
-                dotLottieInstances.starRating.stateMachineStart();
-            });
-
-            dotLottieInstances.smileySlider.addEventListener('load', async () => {
-                dotLottieInstances.smileySlider.stateMachineLoad('interactive_slider');
-                dotLottieInstances.smileySlider.stateMachineStart();
-            });
 
             dotLottieInstances.themeSwitching.addEventListener('load', async () => {
                 const themeMachineData = await loadStateMachineData('./tests/__fixtures__/sm/theme-machine.json');
@@ -307,6 +292,11 @@
             dotLottieInstances.openUrl.addEventListener('load', async () => {
                 const openUrlMachineData = await loadStateMachineData('./tests/__fixtures__/sm/open-url-machine.json');
                 if (openUrlMachineData) {
+                    // dotLottieInstances.openUrl.stateMachineSetConfig({
+                    //     openUrl: {
+                    //         mode: 'allow',
+                    //     },
+                    // });
                     dotLottieInstances.openUrl.stateMachineLoadData(openUrlMachineData);
                     dotLottieInstances.openUrl.stateMachineStart();
                 }

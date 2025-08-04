@@ -26,7 +26,7 @@ import type {
   StateMachineInputFiredEvent,
   StateMachineOpenUrlEvent,
 } from '../event-manager';
-import type { Config, Layout, Mode, RenderConfig } from '../types';
+import type { Config, Layout, Mode, RenderConfig, StateMachineConfig } from '../types';
 
 import type { DotLottieInstanceState } from './dotlottie';
 
@@ -205,6 +205,10 @@ export interface MethodParamsMap {
     instanceId: string;
     name: string;
     value: boolean;
+  };
+  stateMachineSetConfig: {
+    config: StateMachineConfig | null;
+    instanceId: string;
   };
   stateMachineSetNumericInput: {
     instanceId: string;
@@ -401,6 +405,7 @@ export interface MethodResultMap {
   stateMachinePostPointerMoveEvent: number | undefined;
   stateMachinePostPointerUpEvent: number | undefined;
   stateMachineSetBooleanInput: boolean;
+  stateMachineSetConfig: void;
   stateMachineSetNumericInput: boolean;
   stateMachineSetStringInput: boolean;
   stateMachineStart: boolean;

@@ -610,6 +610,18 @@ const commands: {
 
     return instance.stateMachineSetBooleanInput(name, value);
   },
+  stateMachineSetConfig: (request) => {
+    const instanceId = request.params.instanceId;
+    const config = request.params.config;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.stateMachineSetConfig(config);
+  },
   stateMachineSetStringInput: (request) => {
     const instanceId = request.params.instanceId;
     const name = request.params.name;

@@ -16,7 +16,7 @@ import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
 import { CanvasResizeObserver } from './resize-observer';
-import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data } from './types';
+import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data, StateMachineConfig } from './types';
 import {
   getDefaultDPR,
   getPointerPosition,
@@ -102,6 +102,10 @@ export class DotLottie {
   private readonly _frameManager: AnimationFrameManager;
 
   private _dotLottieCore: DotLottiePlayer | null = null;
+
+  private _stateMachineId: string = '';
+
+  private _stateMachineConfig: StateMachineConfig | null = null;
 
   private _isStateMachineRunning: boolean = false;
 
@@ -238,6 +242,9 @@ export class DotLottie {
           layout: createCoreLayout(config.layout, module),
         });
 
+        this._stateMachineId = config.stateMachineId ?? '';
+        this._stateMachineConfig = config.stateMachineConfig ?? null;
+
         this._dotLottieObserverHandle = this._dotLottieCore.subscribe(callbackObserver);
 
         this._eventManager.dispatch({ type: 'ready' });
@@ -346,7 +353,17 @@ export class DotLottie {
 
       this._draw();
 
-      if (this._dotLottieCore.isPlaying()) {
+      if (this._stateMachineId) {
+        const smLoaded = this.stateMachineLoad(this._stateMachineId);
+
+        if (smLoaded) {
+          const smStarted = this.stateMachineStart();
+
+          if (smStarted) {
+            this._startAnimationLoop();
+          }
+        }
+      } else if (this._dotLottieCore.isPlaying()) {
         this._startAnimationLoop();
       }
 
@@ -1272,15 +1289,44 @@ export class DotLottie {
 
   /**
    * @experimental
+   * Set the state machine config
+   * @param config - The state machine config
+   */
+  public stateMachineSetConfig(config: StateMachineConfig | null): void {
+    this._stateMachineConfig = config;
+  }
+
+  /**
+   * @experimental
    * Start the state machine
    * @returns true if the state machine was started successfully
    */
   public stateMachineStart(): boolean {
     if (DotLottie._wasmModule === null || this._dotLottieCore === null) return false;
 
-    const openUrl = DotLottie._wasmModule.createDefaultOpenURL();
+    const coreOpenUrl = DotLottie._wasmModule.createDefaultOpenURL();
 
-    const started = this._dotLottieCore.stateMachineStart(openUrl);
+    if (this._stateMachineConfig) {
+      const openUrl = this._stateMachineConfig.openUrl;
+
+      if (openUrl && openUrl.mode === 'allow') {
+        coreOpenUrl.mode = DotLottie._wasmModule.OpenUrlMode.Allow;
+      } else if (openUrl && openUrl.mode === 'interaction') {
+        coreOpenUrl.mode = DotLottie._wasmModule.OpenUrlMode.Interaction;
+      } else {
+        coreOpenUrl.mode = DotLottie._wasmModule.OpenUrlMode.Deny;
+      }
+
+      if (openUrl?.whitelist) {
+        coreOpenUrl.whitelist = new DotLottie._wasmModule.VectorString();
+
+        for (const url of openUrl.whitelist) {
+          coreOpenUrl.whitelist.push_back(url);
+        }
+      }
+    }
+
+    const started = this._dotLottieCore.stateMachineStart(coreOpenUrl);
 
     if (started) {
       this._isStateMachineRunning = true;
