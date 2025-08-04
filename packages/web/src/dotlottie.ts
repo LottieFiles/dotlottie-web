@@ -1311,8 +1311,6 @@ export class DotLottie {
 
       if (openUrl && openUrl.mode === 'allow') {
         coreOpenUrl.mode = DotLottie._wasmModule.OpenUrlMode.Allow;
-      } else if (openUrl && openUrl.mode === 'interaction') {
-        coreOpenUrl.mode = DotLottie._wasmModule.OpenUrlMode.Interaction;
       } else {
         coreOpenUrl.mode = DotLottie._wasmModule.OpenUrlMode.Deny;
       }

@@ -10,7 +10,7 @@ export type Data = string | ArrayBuffer | Record<string, unknown>;
 
 export type Fit = 'contain' | 'cover' | 'fill' | 'none' | 'fit-width' | 'fit-height';
 
-export type OpenUrlMode = 'deny' | 'interaction' | 'allow';
+export type OpenUrlMode = 'deny' | 'allow';
 
 export interface Layout {
   align?: [number, number];
@@ -38,6 +38,21 @@ export interface Config {
 }
 
 export interface StateMachineConfig {
+  /**
+   * Security configuration for URL opening in animations.
+   *
+   * @example
+   * ```typescript
+   * // Block all URLs
+   * openUrl: { mode: 'deny' }
+   *
+   * // Allow specific domains only
+   * openUrl: {
+   *   mode: 'allow',
+   *   whitelist: ["https://example.com"]
+   * }
+   * ```
+   */
   openUrl?: {
     mode: OpenUrlMode;
     whitelist?: string[];
