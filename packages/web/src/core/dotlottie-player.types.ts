@@ -21,20 +21,20 @@ export interface VectorFloat extends ClassHandle {
   set(_0: number, _1: number): boolean;
 }
 
-export interface VectorMarker extends ClassHandle {
-  size(): number;
-  get(_0: number): Marker | undefined;
-  push_back(_0: Marker): void;
-  resize(_0: number, _1: Marker): void;
-  set(_0: number, _1: Marker): boolean;
-}
-
 export interface VectorString extends ClassHandle {
   size(): number;
   get(_0: number): EmbindString | undefined;
   push_back(_0: EmbindString): void;
   resize(_0: number, _1: EmbindString): void;
   set(_0: number, _1: EmbindString): boolean;
+}
+
+export interface VectorMarker extends ClassHandle {
+  size(): number;
+  get(_0: number): Marker | undefined;
+  push_back(_0: Marker): void;
+  resize(_0: number, _1: Marker): void;
+  set(_0: number, _1: Marker): boolean;
 }
 
 export interface ModeValue<T extends number> {
@@ -50,16 +50,6 @@ export type Fit = FitValue<1> | FitValue<3> | FitValue<2> | FitValue<4> | FitVal
 export interface Layout {
   fit: Fit;
   align: VectorFloat;
-}
-
-export interface OpenUrlModeValue<T extends number> {
-  value: T;
-}
-export type OpenUrlMode = OpenUrlModeValue<1> | OpenUrlModeValue<2> | OpenUrlModeValue<3>;
-
-export interface OpenUrl {
-  mode: OpenUrlMode;
-  whitelist: VectorString;
 }
 
 export interface Observer extends ClassHandle {
@@ -114,17 +104,25 @@ export interface CallbackStateMachineObserver extends StateMachineObserver {
   setOnError(_0: unknown): void;
 }
 
+export interface StateMachineInternalObserver extends ClassHandle {
+  on_message(_0: EmbindString): void;
+}
+
+export interface CallbackStateMachineInternalObserver extends StateMachineInternalObserver {
+  setOnMessage(_0: unknown): void;
+}
+
 export interface DotLottiePlayer extends ClassHandle {
   markers(): VectorMarker;
   animationSize(): VectorFloat;
   subscribe(_0: Observer | null): Observer | null;
   stateMachineFrameworkSetup(): VectorString;
   stateMachineSubscribe(_0: StateMachineObserver | null): StateMachineObserver | null;
-  stateMachineFrameworkSubscribe(_0: StateMachineObserver | null): StateMachineObserver | null;
+  stateMachineInternalSubscribe(_0: StateMachineInternalObserver | null): StateMachineInternalObserver | null;
   clear(): void;
   unsubscribe(_0: Observer | null): void;
   stateMachineUnsubscribe(_0: StateMachineObserver | null): void;
-  stateMachineFrameworkUnsubscribe(_0: StateMachineObserver | null): void;
+  stateMachineInternalUnsubscribe(_0: StateMachineInternalObserver | null): void;
   isLoaded(): boolean;
   isPaused(): boolean;
   isPlaying(): boolean;
@@ -135,7 +133,7 @@ export interface DotLottiePlayer extends ClassHandle {
   stop(): boolean;
   isComplete(): boolean;
   resetTheme(): boolean;
-  stateMachineStart(_0: OpenUrl): boolean;
+  stateMachineStart(_0: OpenUrlPolicy): boolean;
   stateMachineStop(): boolean;
   tick(): boolean;
   tweenStop(): boolean;
@@ -152,12 +150,12 @@ export interface DotLottiePlayer extends ClassHandle {
   totalFrames(): number;
   segmentDuration(): number;
   tween(_0: number, _1?: number, _2?: VectorFloat): boolean;
-  stateMachinePostClickEvent(_0: number, _1: number): number;
-  stateMachinePostPointerDownEvent(_0: number, _1: number): number;
-  stateMachinePostPointerUpEvent(_0: number, _1: number): number;
-  stateMachinePostPointerMoveEvent(_0: number, _1: number): number;
-  stateMachinePostPointerEnterEvent(_0: number, _1: number): number;
-  stateMachinePostPointerExitEvent(_0: number, _1: number): number;
+  stateMachinePostClickEvent(_0: number, _1: number): void;
+  stateMachinePostPointerDownEvent(_0: number, _1: number): void;
+  stateMachinePostPointerUpEvent(_0: number, _1: number): void;
+  stateMachinePostPointerMoveEvent(_0: number, _1: number): void;
+  stateMachinePostPointerEnterEvent(_0: number, _1: number): void;
+  stateMachinePostPointerExitEvent(_0: number, _1: number): void;
   config(): Config;
   setConfig(_0: Config): void;
   loadAnimationData(_0: EmbindString, _1: number, _2: number): boolean;
@@ -190,6 +188,11 @@ export interface DotLottiePlayer extends ClassHandle {
   buffer(): unknown;
 }
 
+export interface OpenUrlPolicy {
+  requireUserInteraction: boolean;
+  whitelist: VectorString;
+}
+
 export interface Marker {
   name: string;
   time: number;
@@ -215,11 +218,11 @@ interface EmbindModule {
   VectorFloat: {
     new (): VectorFloat;
   };
-  VectorMarker: {
-    new (): VectorMarker;
-  };
   VectorString: {
     new (): VectorString;
+  };
+  VectorMarker: {
+    new (): VectorMarker;
   };
   Mode: { Forward: ModeValue<1>; Reverse: ModeValue<2>; Bounce: ModeValue<3>; ReverseBounce: ModeValue<4> };
   Fit: {
@@ -231,8 +234,6 @@ interface EmbindModule {
     None: FitValue<6>;
   };
   createDefaultLayout(): Layout;
-  OpenUrlMode: { Deny: OpenUrlModeValue<1>; Interaction: OpenUrlModeValue<2>; Allow: OpenUrlModeValue<3> };
-  createDefaultOpenURL(): OpenUrl;
   Observer: {};
   CallbackObserver: {
     new (): CallbackObserver;
@@ -241,9 +242,14 @@ interface EmbindModule {
   CallbackStateMachineObserver: {
     new (): CallbackStateMachineObserver;
   };
+  StateMachineInternalObserver: {};
+  CallbackStateMachineInternalObserver: {
+    new (): CallbackStateMachineInternalObserver;
+  };
   DotLottiePlayer: {
     new (_0: Config): DotLottiePlayer;
   };
+  createDefaultOpenUrlPolicy(): OpenUrlPolicy;
   createDefaultConfig(): Config;
   transformThemeToLottieSlots(_0: EmbindString, _1: EmbindString): string;
 }
