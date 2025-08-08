@@ -53,8 +53,8 @@ export interface StateMachineConfig {
    * }
    * ```
    */
-  openUrl?: {
-    mode: OpenUrlMode;
+  openUrlPolicy?: {
+    requireUserInteraction?: boolean;
     whitelist?: string[];
   };
 }

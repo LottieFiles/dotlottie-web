@@ -1022,7 +1022,7 @@ export class DotLottieWorker {
    * @param y - The y coordinate of the click
    * @returns The event result or undefined
    */
-  public async stateMachinePostClickEvent(x: number, y: number): Promise<number | undefined> {
+  public async stateMachinePostClickEvent(x: number, y: number): Promise<void> {
     if (!this._created) return undefined;
 
     return this._sendMessage('stateMachinePostClickEvent', { instanceId: this._id, x, y });
@@ -1035,7 +1035,7 @@ export class DotLottieWorker {
    * @param y - The y coordinate of the pointer
    * @returns The event result or undefined
    */
-  public async stateMachinePostPointerUpEvent(x: number, y: number): Promise<number | undefined> {
+  public async stateMachinePostPointerUpEvent(x: number, y: number): Promise<void> {
     if (!this._created) return undefined;
 
     return this._sendMessage('stateMachinePostPointerUpEvent', { instanceId: this._id, x, y });
@@ -1048,7 +1048,7 @@ export class DotLottieWorker {
    * @param y - The y coordinate of the pointer
    * @returns The event result or undefined
    */
-  public async stateMachinePostPointerDownEvent(x: number, y: number): Promise<number | undefined> {
+  public async stateMachinePostPointerDownEvent(x: number, y: number): Promise<void> {
     if (!this._created) return undefined;
 
     return this._sendMessage('stateMachinePostPointerDownEvent', { instanceId: this._id, x, y });
@@ -1061,7 +1061,7 @@ export class DotLottieWorker {
    * @param y - The y coordinate of the pointer
    * @returns The event result or undefined
    */
-  public async stateMachinePostPointerMoveEvent(x: number, y: number): Promise<number | undefined> {
+  public async stateMachinePostPointerMoveEvent(x: number, y: number): Promise<void> {
     if (!this._created) return undefined;
 
     return this._sendMessage('stateMachinePostPointerMoveEvent', { instanceId: this._id, x, y });
@@ -1074,7 +1074,7 @@ export class DotLottieWorker {
    * @param y - The y coordinate of the pointer
    * @returns The event result or undefined
    */
-  public async stateMachinePostPointerEnterEvent(x: number, y: number): Promise<number | undefined> {
+  public async stateMachinePostPointerEnterEvent(x: number, y: number): Promise<void> {
     if (!this._created) return undefined;
 
     return this._sendMessage('stateMachinePostPointerEnterEvent', { instanceId: this._id, x, y });
@@ -1087,7 +1087,7 @@ export class DotLottieWorker {
    * @param y - The y coordinate of the pointer
    * @returns The event result or undefined
    */
-  public async stateMachinePostPointerExitEvent(x: number, y: number): Promise<number | undefined> {
+  public async stateMachinePostPointerExitEvent(x: number, y: number): Promise<void> {
     if (!this._created) return undefined;
 
     return this._sendMessage('stateMachinePostPointerExitEvent', { instanceId: this._id, x, y });

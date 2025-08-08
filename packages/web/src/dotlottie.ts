@@ -10,6 +10,7 @@ import type {
   Fit as CoreFit,
   Observer,
   StateMachineObserver,
+  StateMachineInternalObserver,
 } from './core';
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
@@ -111,7 +112,7 @@ export class DotLottie {
 
   private _stateMachineObserverHandle: StateMachineObserver | null = null;
 
-  private _stateMachineOpenUrlObserver: StateMachineObserver | null = null;
+  private _stateMachineOpenUrlObserver: StateMachineInternalObserver | null = null;
 
   private _dotLottieObserverHandle: Observer | null = null;
 
@@ -834,7 +835,7 @@ export class DotLottie {
     }
 
     if (this._stateMachineOpenUrlObserver) {
-      this._dotLottieCore?.stateMachineFrameworkUnsubscribe(this._stateMachineOpenUrlObserver);
+      this._dotLottieCore?.stateMachineInternalUnsubscribe(this._stateMachineOpenUrlObserver);
       this._stateMachineOpenUrlObserver.delete();
       this._stateMachineOpenUrlObserver = null;
     }
@@ -1202,11 +1203,11 @@ export class DotLottie {
       this._eventManager.dispatch({ type: 'stateMachineError', error });
     });
 
-    const openUrlObserver = new DotLottie._wasmModule.CallbackStateMachineObserver();
+    const openUrlObserver = new DotLottie._wasmModule.CallbackStateMachineInternalObserver();
 
-    openUrlObserver.setOnCustomEvent((eventName: string) => {
-      if (eventName.startsWith('OpenUrl: ')) {
-        const content = eventName.replace('OpenUrl: ', '');
+    openUrlObserver.setOnMessage((message: string) => {
+      if (message.startsWith('OpenUrl: ')) {
+        const content = message.replace('OpenUrl: ', '');
 
         const targetSeparatorIndex = content.indexOf(' | Target: ');
         let urlToOpen: string;
@@ -1231,7 +1232,7 @@ export class DotLottie {
     });
 
     this._stateMachineObserverHandle = this._dotLottieCore.stateMachineSubscribe(smCallbackObserver);
-    this._stateMachineOpenUrlObserver = this._dotLottieCore.stateMachineFrameworkSubscribe(openUrlObserver);
+    this._stateMachineOpenUrlObserver = this._dotLottieCore.stateMachineInternalSubscribe(openUrlObserver);
   }
 
   private _cleanupStateMachineObservers(): void {
@@ -1241,7 +1242,7 @@ export class DotLottie {
       this._stateMachineObserverHandle = null;
     }
     if (this._stateMachineOpenUrlObserver) {
-      this._dotLottieCore?.stateMachineFrameworkUnsubscribe(this._stateMachineOpenUrlObserver);
+      this._dotLottieCore?.stateMachineInternalUnsubscribe(this._stateMachineOpenUrlObserver);
       this._stateMachineOpenUrlObserver.delete();
       this._stateMachineOpenUrlObserver = null;
     }
@@ -1304,21 +1305,21 @@ export class DotLottie {
   public stateMachineStart(): boolean {
     if (DotLottie._wasmModule === null || this._dotLottieCore === null) return false;
 
-    const coreOpenUrl = DotLottie._wasmModule.createDefaultOpenURL();
+    const coreOpenUrl = DotLottie._wasmModule.createDefaultOpenUrlPolicy();
 
     if (this._stateMachineConfig) {
-      const openUrl = this._stateMachineConfig.openUrl;
+      const openUrlPolicy = this._stateMachineConfig.openUrlPolicy;
 
-      if (openUrl && openUrl.mode === 'allow') {
-        coreOpenUrl.mode = DotLottie._wasmModule.OpenUrlMode.Allow;
+      if (openUrlPolicy && openUrlPolicy.requireUserInteraction) {
+        coreOpenUrl.requireUserInteraction = true;
       } else {
-        coreOpenUrl.mode = DotLottie._wasmModule.OpenUrlMode.Deny;
+        coreOpenUrl.requireUserInteraction = false;
       }
 
-      if (openUrl?.whitelist) {
+      if (openUrlPolicy?.whitelist) {
         coreOpenUrl.whitelist = new DotLottie._wasmModule.VectorString();
 
-        for (const url of openUrl.whitelist) {
+        for (const url of openUrlPolicy.whitelist) {
           coreOpenUrl.whitelist.push_back(url);
         }
       }
@@ -1502,8 +1503,8 @@ export class DotLottie {
    * @param y - The y coordinate of the click
    * @returns The event result or undefined
    */
-  public stateMachinePostClickEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.stateMachinePostClickEvent(x, y);
+  public stateMachinePostClickEvent(x: number, y: number): void {
+    this._dotLottieCore?.stateMachinePostClickEvent(x, y);
   }
 
   /**
@@ -1513,8 +1514,8 @@ export class DotLottie {
    * @param y - The y coordinate of the pointer
    * @returns The event result or undefined
    */
-  public stateMachinePostPointerUpEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.stateMachinePostPointerUpEvent(x, y);
+  public stateMachinePostPointerUpEvent(x: number, y: number): void {
+    this._dotLottieCore?.stateMachinePostPointerUpEvent(x, y);
   }
 
   /**
@@ -1524,8 +1525,8 @@ export class DotLottie {
    * @param y - The y coordinate of the pointer
    * @returns The event result or undefined
    */
-  public stateMachinePostPointerDownEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.stateMachinePostPointerDownEvent(x, y);
+  public stateMachinePostPointerDownEvent(x: number, y: number): void {
+    this._dotLottieCore?.stateMachinePostPointerDownEvent(x, y);
   }
 
   /**
@@ -1535,8 +1536,8 @@ export class DotLottie {
    * @param y - The y coordinate of the pointer
    * @returns The event result or undefined
    */
-  public stateMachinePostPointerMoveEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.stateMachinePostPointerMoveEvent(x, y);
+  public stateMachinePostPointerMoveEvent(x: number, y: number): void {
+    this._dotLottieCore?.stateMachinePostPointerMoveEvent(x, y);
   }
 
   /**
@@ -1546,8 +1547,8 @@ export class DotLottie {
    * @param y - The y coordinate of the pointer
    * @returns The event result or undefined
    */
-  public stateMachinePostPointerEnterEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.stateMachinePostPointerEnterEvent(x, y);
+  public stateMachinePostPointerEnterEvent(x: number, y: number): void {
+    this._dotLottieCore?.stateMachinePostPointerEnterEvent(x, y);
   }
 
   /**
@@ -1557,8 +1558,8 @@ export class DotLottie {
    * @param y - The y coordinate of the pointer
    * @returns The event result or undefined
    */
-  public stateMachinePostPointerExitEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.stateMachinePostPointerExitEvent(x, y);
+  public stateMachinePostPointerExitEvent(x: number, y: number): void {
+    this._dotLottieCore?.stateMachinePostPointerExitEvent(x, y);
   }
 
   private _onClick(event: MouseEvent): void {

@@ -398,12 +398,12 @@ export interface MethodResultMap {
   stateMachineLoad: boolean;
   stateMachineLoadData: boolean;
   stateMachineOverrideState: boolean;
-  stateMachinePostClickEvent: number | undefined;
-  stateMachinePostPointerDownEvent: number | undefined;
-  stateMachinePostPointerEnterEvent: number | undefined;
-  stateMachinePostPointerExitEvent: number | undefined;
-  stateMachinePostPointerMoveEvent: number | undefined;
-  stateMachinePostPointerUpEvent: number | undefined;
+  stateMachinePostClickEvent: void;
+  stateMachinePostPointerDownEvent: void;
+  stateMachinePostPointerEnterEvent: void;
+  stateMachinePostPointerExitEvent: void;
+  stateMachinePostPointerMoveEvent: void;
+  stateMachinePostPointerUpEvent: void;
   stateMachineSetBooleanInput: boolean;
   stateMachineSetConfig: void;
   stateMachineSetNumericInput: boolean;

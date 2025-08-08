@@ -96,8 +96,8 @@
         </div>
 
         <script type="module">
-            // import { DotLottie } from './dist/index.js';
-            import { DotLottieWorker as DotLottie } from './dist/index.js';
+            import { DotLottie } from './dist/index.js';
+            // import { DotLottieWorker as DotLottie } from './dist/index.js';
 
             DotLottie.setWasmUrl(window.location.origin + '/src/core/dotlottie-player.wasm');
 
@@ -148,8 +148,9 @@
                     canvas: document.getElementById('canvas-open-url'),
                     src: window.location.origin + '/tests/__fixtures__/sm/star-rating.lottie',
                     stateMachineConfig: {
-                        openUrl: {
-                            mode: 'interaction',
+                        openUrlPolicy: {
+                            requireUserInteraction: false,
+                            whitelist: ['https://www.lottiefiles.com'],
                         },
                     },
                 }),
@@ -292,11 +293,6 @@
             dotLottieInstances.openUrl.addEventListener('load', async () => {
                 const openUrlMachineData = await loadStateMachineData('./tests/__fixtures__/sm/open-url-machine.json');
                 if (openUrlMachineData) {
-                    // dotLottieInstances.openUrl.stateMachineSetConfig({
-                    //     openUrl: {
-                    //         mode: 'allow',
-                    //     },
-                    // });
                     dotLottieInstances.openUrl.stateMachineLoadData(openUrlMachineData);
                     dotLottieInstances.openUrl.stateMachineStart();
                 }
