@@ -1,11 +1,11 @@
 import { IS_BROWSER } from '../constants';
-import type { Marker } from '../core';
-import type { EventType, EventListener, FrameEvent } from '../event-manager';
+import type { Marker } from '../core/dotlottie-player.types';
+import type { EventType, EventListener, FrameEvent, StateMachineInternalMessage } from '../event-manager';
 import { EventManager } from '../event-manager';
 import { OffscreenObserver } from '../offscreen-observer';
 import { CanvasResizeObserver } from '../resize-observer';
-import type { Config, Layout, Manifest, Mode, RenderConfig } from '../types';
-import { getDefaultDPR, isElementInViewport } from '../utils';
+import type { Config, Layout, Manifest, Mode, RenderConfig, StateMachineConfig } from '../types';
+import { getDefaultDPR, getPointerPosition, handleOpenUrl, isElementInViewport } from '../utils';
 
 import type { MethodParamsMap, MethodResultMap, RpcRequest, RpcResponse } from './types';
 import { WorkerManager } from './worker-manager';
@@ -102,15 +102,18 @@ export class DotLottieWorker {
 
   private _created: boolean = false;
 
-  private readonly _pointerUpMethod: (event: PointerEvent) => void;
+  // Bound event listeners for state machine
+  private _boundOnClick: ((event: MouseEvent) => void) | null = null;
 
-  private readonly _pointerDownMethod: (event: PointerEvent) => void;
+  private _boundOnPointerUp: ((event: PointerEvent) => void) | null = null;
 
-  private readonly _pointerMoveMethod: (event: PointerEvent) => void;
+  private _boundOnPointerDown: ((event: PointerEvent) => void) | null = null;
 
-  private readonly _pointerEnterMethod: (event: PointerEvent) => void;
+  private _boundOnPointerMove: ((event: PointerEvent) => void) | null = null;
 
-  private readonly _pointerExitMethod: (event: PointerEvent) => void;
+  private _boundOnPointerEnter: ((event: PointerEvent) => void) | null = null;
+
+  private _boundOnPointerLeave: ((event: PointerEvent) => void) | null = null;
 
   public constructor(config: Config & { workerId?: string }) {
     this._canvas = config.canvas;
@@ -139,16 +142,6 @@ export class DotLottieWorker {
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this._worker.addEventListener('message', this._handleWorkerEvent.bind(this));
-
-    this._pointerUpMethod = this._onPointerUp.bind(this);
-
-    this._pointerDownMethod = this._onPointerDown.bind(this);
-
-    this._pointerMoveMethod = this._onPointerMove.bind(this);
-
-    this._pointerEnterMethod = this._onPointerEnter.bind(this);
-
-    this._pointerExitMethod = this._onPointerLeave.bind(this);
   }
 
   private async _handleWorkerEvent(event: MessageEvent): Promise<void> {
@@ -167,6 +160,19 @@ export class DotLottieWorker {
       | 'onRenderError'
       | 'onReady'
       | 'onLoop'
+      | 'onStateMachineStart'
+      | 'onStateMachineStop'
+      | 'onStateMachineTransition'
+      | 'onStateMachineStateEntered'
+      | 'onStateMachineStateExit'
+      | 'onStateMachineCustomEvent'
+      | 'onStateMachineError'
+      | 'onStateMachineBooleanInputValueChange'
+      // eslint-disable-next-line no-secrets/no-secrets
+      | 'onStateMachineNumericInputValueChange'
+      | 'onStateMachineStringInputValueChange'
+      | 'onStateMachineInputFired'
+      | 'onStateMachineInternalMessage'
     > = event.data;
 
     if (!rpcResponse.id) {
@@ -252,6 +258,80 @@ export class DotLottieWorker {
       if (rpcResponse.method === 'onLoop' && rpcResponse.result.instanceId === this._id) {
         await this._updateDotLottieInstanceState();
         this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineStart' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._setupStateMachineListeners();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineStop' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._cleanupStateMachineListeners();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineTransition' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineStateEntered' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineStateExit' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineCustomEvent' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineError' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (
+        rpcResponse.method === 'onStateMachineBooleanInputValueChange' &&
+        rpcResponse.result.instanceId === this._id
+      ) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (
+        // eslint-disable-next-line no-secrets/no-secrets
+        rpcResponse.method === 'onStateMachineNumericInputValueChange' &&
+        rpcResponse.result.instanceId === this._id
+      ) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineStringInputValueChange' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineInputFired' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+        this._eventManager.dispatch(rpcResponse.result.event);
+      }
+
+      if (rpcResponse.method === 'onStateMachineInternalMessage' && rpcResponse.result.instanceId === this._id) {
+        await this._updateDotLottieInstanceState();
+
+        const internalEvent = rpcResponse.result.event as StateMachineInternalMessage;
+
+        if (internalEvent.message.startsWith('OpenUrl: ')) {
+          handleOpenUrl(internalEvent.message);
+        }
       }
     }
   }
@@ -702,130 +782,430 @@ export class DotLottieWorker {
     DotLottieWorker._wasmUrl = url;
   }
 
-  public async loadStateMachine(stateMachineId: string): Promise<boolean> {
+  /**
+   * @experimental
+   * Load a state machine by ID
+   * @param stateMachineId - The ID of the state machine to load
+   * @returns true if the state machine was loaded successfully
+   */
+  public async stateMachineLoad(stateMachineId: string): Promise<boolean> {
     if (!this._created) return false;
 
-    const result = await this._sendMessage('loadStateMachine', { instanceId: this._id, stateMachineId });
+    const result = await this._sendMessage('stateMachineLoad', { instanceId: this._id, stateMachineId });
 
     await this._updateDotLottieInstanceState();
 
     return result;
   }
 
-  public async loadStateMachineData(stateMachineData: string): Promise<boolean> {
+  /**
+   * @experimental
+   * Load a state machine from data string
+   * @param stateMachineData - The state machine data as a string
+   * @returns true if the state machine was loaded successfully
+   */
+  public async stateMachineLoadData(stateMachineData: string): Promise<boolean> {
     if (!this._created) return false;
 
-    const result = await this._sendMessage('loadStateMachineData', { instanceId: this._id, stateMachineData });
+    const result = await this._sendMessage('stateMachineLoadData', { instanceId: this._id, stateMachineData });
 
     await this._updateDotLottieInstanceState();
 
     return result;
   }
 
-  public async startStateMachine(): Promise<boolean> {
+  /**
+   * @experimental
+   * Start the state machine
+   * @returns true if the state machine was started successfully
+   */
+  public async stateMachineStart(): Promise<boolean> {
     if (!this._created) return false;
 
-    this._setupStateMachineListeners();
+    const started = await this._sendMessage('stateMachineStart', { instanceId: this._id });
 
-    const result = await this._sendMessage('startStateMachine', { instanceId: this._id });
+    if (started) {
+      this._setupStateMachineListeners();
+      await this._updateDotLottieInstanceState();
+    }
 
-    await this._updateDotLottieInstanceState();
-
-    return result;
+    return started;
   }
 
-  public async stopStateMachine(): Promise<boolean> {
+  /**
+   * @experimental
+   * Stop the state machine
+   * @returns true if the state machine was stopped successfully
+   */
+  public async stateMachineStop(): Promise<boolean> {
     if (!this._created) return false;
 
     this._cleanupStateMachineListeners();
 
-    return this._sendMessage('stopStateMachine', { instanceId: this._id });
+    return this._sendMessage('stateMachineStop', { instanceId: this._id });
   }
 
-  public async getStateMachineListeners(): Promise<string[]> {
+  /**
+   * @experimental
+   * Set a numeric input value for the state machine
+   * @param name - The name of the numeric input
+   * @param value - The numeric value to set
+   * @returns true if the input was set successfully
+   */
+  public async stateMachineSetNumericInput(name: string, value: number): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('stateMachineSetNumericInput', { instanceId: this._id, name, value });
+  }
+
+  /**
+   * @experimental
+   * Set a boolean input value for the state machine
+   * @param name - The name of the boolean input
+   * @param value - The boolean value to set
+   * @returns true if the input was set successfully
+   */
+  public async stateMachineSetBooleanInput(name: string, value: boolean): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('stateMachineSetBooleanInput', { instanceId: this._id, name, value });
+  }
+
+  /**
+   * @experimental
+   * Set the state machine config
+   * @param config - The state machine config
+   */
+  public async stateMachineSetConfig(config: StateMachineConfig | null): Promise<void> {
+    if (!this._created) return;
+
+    this._sendMessage('stateMachineSetConfig', { instanceId: this._id, config });
+  }
+
+  /**
+   * @experimental
+   * Set a string input value for the state machine
+   * @param name - The name of the string input
+   * @param value - The string value to set
+   * @returns true if the input was set successfully
+   */
+  public async stateMachineSetStringInput(name: string, value: string): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('stateMachineSetStringInput', { instanceId: this._id, name, value });
+  }
+
+  /**
+   * @experimental
+   * Get a numeric input value from the state machine
+   * @param name - The name of the numeric input
+   * @returns The numeric value or undefined if not found
+   */
+  public async stateMachineGetNumericInput(name: string): Promise<number | undefined> {
+    if (!this._created) return undefined;
+
+    return this._sendMessage('stateMachineGetNumericInput', { instanceId: this._id, name });
+  }
+
+  /**
+   * @experimental
+   * Get a boolean input value from the state machine
+   * @param name - The name of the boolean input
+   * @returns The boolean value or undefined if not found
+   */
+  public async stateMachineGetBooleanInput(name: string): Promise<boolean | undefined> {
+    if (!this._created) return undefined;
+
+    return this._sendMessage('stateMachineGetBooleanInput', { instanceId: this._id, name });
+  }
+
+  /**
+   * @experimental
+   * Get a string input value from the state machine
+   * @param name - The name of the string input
+   * @returns The string value or undefined if not found
+   */
+  public async stateMachineGetStringInput(name: string): Promise<string | undefined> {
+    if (!this._created) return undefined;
+
+    return this._sendMessage('stateMachineGetStringInput', { instanceId: this._id, name });
+  }
+
+  /**
+   * @experimental
+   * Fire an event in the state machine
+   * @param name - The name of the event to fire
+   */
+  public async stateMachineFireEvent(name: string): Promise<void> {
+    if (!this._created) return;
+
+    this._sendMessage('stateMachineFireEvent', { instanceId: this._id, name });
+  }
+
+  /**
+   * @experimental
+   * Get the current status of the state machine
+   * @returns The current status of the state machine as a string
+   */
+  public async stateMachineGetStatus(): Promise<string> {
+    if (!this._created) return '';
+
+    return this._sendMessage('stateMachineGetStatus', { instanceId: this._id });
+  }
+
+  /**
+   * @experimental
+   * Get the current state of the state machine
+   * @returns The current state of the state machine as a string
+   */
+  public async stateMachineGetCurrentState(): Promise<string> {
+    if (!this._created) return '';
+
+    return this._sendMessage('stateMachineGetCurrentState', { instanceId: this._id });
+  }
+
+  /**
+   * @experimental
+   * Get the active state machine ID
+   * @returns The active state machine ID as a string
+   */
+  public async stateMachineGetActiveId(): Promise<string> {
+    if (!this._created) return '';
+
+    return this._sendMessage('stateMachineGetActiveId', { instanceId: this._id });
+  }
+
+  /**
+   * @experimental
+   * Override the current state of the state machine
+   * @param state - The state to override to
+   * @param immediate - Whether to immediately transition to the state
+   * @returns true if the state override was successful
+   */
+  public async stateMachineOverrideState(state: string, immediate: boolean = false): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('stateMachineOverrideState', { instanceId: this._id, state, immediate });
+  }
+
+  /**
+   * @experimental
+   * Get a specific state machine by ID
+   * @param stateMachineId - The ID of the state machine to get
+   * @returns The state machine data as a string
+   */
+  public async stateMachineGet(stateMachineId: string): Promise<string> {
+    if (!this._created) return '';
+
+    return this._sendMessage('stateMachineGet', { instanceId: this._id, stateMachineId });
+  }
+
+  /**
+   * @experimental
+   * Get the list of state machine listeners
+   * @returns Array of listener names
+   */
+  public async stateMachineGetListeners(): Promise<string[]> {
     if (!this._created) return [];
 
-    return this._sendMessage('getStateMachineListeners', { instanceId: this._id });
+    return this._sendMessage('stateMachineGetListeners', { instanceId: this._id });
   }
 
-  private _getPointerPosition(event: PointerEvent): { x: number; y: number } {
-    const rect = (this._canvas as HTMLCanvasElement).getBoundingClientRect();
-    const scaleX = this._canvas.width / rect.width;
-    const scaleY = this._canvas.height / rect.height;
+  /**
+   * @experimental
+   * Post a click event to the state machine
+   * @param x - The x coordinate of the click
+   * @param y - The y coordinate of the click
+   * @returns The event result or undefined
+   */
+  public async stateMachinePostClickEvent(x: number, y: number): Promise<void> {
+    if (!this._created) return undefined;
 
-    const devicePixelRatio = this._dotLottieInstanceState.renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
-    const x = ((event.clientX - rect.left) * scaleX) / devicePixelRatio;
-    const y = ((event.clientY - rect.top) * scaleY) / devicePixelRatio;
+    return this._sendMessage('stateMachinePostClickEvent', { instanceId: this._id, x, y });
+  }
 
-    return {
-      x,
-      y,
-    };
+  /**
+   * @experimental
+   * Post a pointer up event to the state machine
+   * @param x - The x coordinate of the pointer
+   * @param y - The y coordinate of the pointer
+   * @returns The event result or undefined
+   */
+  public async stateMachinePostPointerUpEvent(x: number, y: number): Promise<void> {
+    if (!this._created) return undefined;
+
+    return this._sendMessage('stateMachinePostPointerUpEvent', { instanceId: this._id, x, y });
+  }
+
+  /**
+   * @experimental
+   * Post a pointer down event to the state machine
+   * @param x - The x coordinate of the pointer
+   * @param y - The y coordinate of the pointer
+   * @returns The event result or undefined
+   */
+  public async stateMachinePostPointerDownEvent(x: number, y: number): Promise<void> {
+    if (!this._created) return undefined;
+
+    return this._sendMessage('stateMachinePostPointerDownEvent', { instanceId: this._id, x, y });
+  }
+
+  /**
+   * @experimental
+   * Post a pointer move event to the state machine
+   * @param x - The x coordinate of the pointer
+   * @param y - The y coordinate of the pointer
+   * @returns The event result or undefined
+   */
+  public async stateMachinePostPointerMoveEvent(x: number, y: number): Promise<void> {
+    if (!this._created) return undefined;
+
+    return this._sendMessage('stateMachinePostPointerMoveEvent', { instanceId: this._id, x, y });
+  }
+
+  /**
+   * @experimental
+   * Post a pointer enter event to the state machine
+   * @param x - The x coordinate of the pointer
+   * @param y - The y coordinate of the pointer
+   * @returns The event result or undefined
+   */
+  public async stateMachinePostPointerEnterEvent(x: number, y: number): Promise<void> {
+    if (!this._created) return undefined;
+
+    return this._sendMessage('stateMachinePostPointerEnterEvent', { instanceId: this._id, x, y });
+  }
+
+  /**
+   * @experimental
+   * Post a pointer exit event to the state machine
+   * @param x - The x coordinate of the pointer
+   * @param y - The y coordinate of the pointer
+   * @returns The event result or undefined
+   */
+  public async stateMachinePostPointerExitEvent(x: number, y: number): Promise<void> {
+    if (!this._created) return undefined;
+
+    return this._sendMessage('stateMachinePostPointerExitEvent', { instanceId: this._id, x, y });
+  }
+
+  private _onClick(event: MouseEvent): void {
+    const position = getPointerPosition(event);
+
+    if (position) {
+      this._sendMessage('stateMachinePostClickEvent', { instanceId: this._id, x: position.x, y: position.y });
+    }
   }
 
   private _onPointerUp(event: PointerEvent): void {
-    const { x, y } = this._getPointerPosition(event);
+    const position = getPointerPosition(event);
 
-    this._sendMessage('postPointerUpEvent', { instanceId: this._id, x, y });
+    if (position) {
+      this._sendMessage('stateMachinePostPointerUpEvent', { instanceId: this._id, x: position.x, y: position.y });
+    }
   }
 
   private _onPointerDown(event: PointerEvent): void {
-    const { x, y } = this._getPointerPosition(event);
+    const position = getPointerPosition(event);
 
-    this._sendMessage('postPointerDownEvent', { instanceId: this._id, x, y });
+    if (position) {
+      this._sendMessage('stateMachinePostPointerDownEvent', { instanceId: this._id, x: position.x, y: position.y });
+    }
   }
 
   private _onPointerMove(event: PointerEvent): void {
-    const { x, y } = this._getPointerPosition(event);
+    const position = getPointerPosition(event);
 
-    this._sendMessage('postPointerMoveEvent', { instanceId: this._id, x, y });
+    if (position) {
+      this._sendMessage('stateMachinePostPointerMoveEvent', { instanceId: this._id, x: position.x, y: position.y });
+    }
   }
 
   private _onPointerEnter(event: PointerEvent): void {
-    const { x, y } = this._getPointerPosition(event);
+    const position = getPointerPosition(event);
 
-    this._sendMessage('postPointerEnterEvent', { instanceId: this._id, x, y });
+    if (position) {
+      this._sendMessage('stateMachinePostPointerEnterEvent', { instanceId: this._id, x: position.x, y: position.y });
+    }
   }
 
   private _onPointerLeave(event: PointerEvent): void {
-    const { x, y } = this._getPointerPosition(event);
+    const position = getPointerPosition(event);
 
-    this._sendMessage('postPointerExitEvent', { instanceId: this._id, x, y });
+    if (position) {
+      this._sendMessage('stateMachinePostPointerExitEvent', { instanceId: this._id, x: position.x, y: position.y });
+    }
   }
 
   private async _setupStateMachineListeners(): Promise<void> {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this.isLoaded) {
-      const listeners = await this._sendMessage('getStateMachineListeners', { instanceId: this._id });
+      const listeners = await this._sendMessage('stateMachineGetListeners', { instanceId: this._id });
+
+      if (listeners.length === 0) {
+        return;
+      }
+
+      // Clean up any existing listeners first
+      this._cleanupStateMachineListeners();
+
+      if (listeners.includes('Click')) {
+        this._boundOnClick = this._onClick.bind(this);
+        this._canvas.addEventListener('click', this._boundOnClick);
+      }
 
       if (listeners.includes('PointerUp')) {
-        this._canvas.addEventListener('pointerup', this._pointerUpMethod);
+        this._boundOnPointerUp = this._onPointerUp.bind(this);
+        this._canvas.addEventListener('pointerup', this._boundOnPointerUp);
       }
 
       if (listeners.includes('PointerDown')) {
-        this._canvas.addEventListener('pointerdown', this._pointerDownMethod);
+        this._boundOnPointerDown = this._onPointerDown.bind(this);
+        this._canvas.addEventListener('pointerdown', this._boundOnPointerDown);
       }
 
       if (listeners.includes('PointerMove')) {
-        this._canvas.addEventListener('pointermove', this._pointerMoveMethod);
+        this._boundOnPointerMove = this._onPointerMove.bind(this);
+        this._canvas.addEventListener('pointermove', this._boundOnPointerMove);
       }
 
       if (listeners.includes('PointerEnter')) {
-        this._canvas.addEventListener('pointerenter', this._pointerEnterMethod);
+        this._boundOnPointerEnter = this._onPointerEnter.bind(this);
+        this._canvas.addEventListener('pointerenter', this._boundOnPointerEnter);
       }
 
       if (listeners.includes('PointerExit')) {
-        this._canvas.addEventListener('pointerleave', this._pointerExitMethod);
+        this._boundOnPointerLeave = this._onPointerLeave.bind(this);
+        this._canvas.addEventListener('pointerleave', this._boundOnPointerLeave);
       }
     }
   }
 
   private _cleanupStateMachineListeners(): void {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
-      this._canvas.removeEventListener('pointerup', this._pointerUpMethod);
-      this._canvas.removeEventListener('pointerdown', this._pointerDownMethod);
-      this._canvas.removeEventListener('pointermove', this._pointerMoveMethod);
-      this._canvas.removeEventListener('pointerenter', this._pointerEnterMethod);
-      this._canvas.removeEventListener('pointerleave', this._pointerExitMethod);
+      if (this._boundOnClick) {
+        this._canvas.removeEventListener('click', this._boundOnClick);
+        this._boundOnClick = null;
+      }
+      if (this._boundOnPointerUp) {
+        this._canvas.removeEventListener('pointerup', this._boundOnPointerUp);
+        this._boundOnPointerUp = null;
+      }
+      if (this._boundOnPointerDown) {
+        this._canvas.removeEventListener('pointerdown', this._boundOnPointerDown);
+        this._boundOnPointerDown = null;
+      }
+      if (this._boundOnPointerMove) {
+        this._canvas.removeEventListener('pointermove', this._boundOnPointerMove);
+        this._boundOnPointerMove = null;
+      }
+      if (this._boundOnPointerEnter) {
+        this._canvas.removeEventListener('pointerenter', this._boundOnPointerEnter);
+        this._boundOnPointerEnter = null;
+      }
+      if (this._boundOnPointerLeave) {
+        this._canvas.removeEventListener('pointerleave', this._boundOnPointerLeave);
+        this._boundOnPointerLeave = null;
+      }
     }
   }
 }

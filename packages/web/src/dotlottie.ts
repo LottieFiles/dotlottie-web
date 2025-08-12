@@ -9,14 +9,24 @@ import type {
   Marker,
   Fit as CoreFit,
   Observer,
+  StateMachineObserver,
+  StateMachineInternalObserver,
 } from './core';
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
 import { CanvasResizeObserver } from './resize-observer';
-import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data } from './types';
-import { getDefaultDPR, hexStringToRGBAInt, isDotLottie, isElementInViewport, isLottie } from './utils';
+import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data, StateMachineConfig } from './types';
+import {
+  getDefaultDPR,
+  getPointerPosition,
+  handleOpenUrl,
+  hexStringToRGBAInt,
+  isDotLottie,
+  isElementInViewport,
+  isLottie,
+} from './utils';
 
 const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
   if (mode === 'reverse') {
@@ -95,6 +105,16 @@ export class DotLottie {
 
   private _dotLottieCore: DotLottiePlayer | null = null;
 
+  private _stateMachineId: string = '';
+
+  private _stateMachineConfig: StateMachineConfig | null = null;
+
+  private _isStateMachineRunning: boolean = false;
+
+  private _stateMachineObserverHandle: StateMachineObserver | null = null;
+
+  private _stateMachineInternalMessageObserver: StateMachineInternalObserver | null = null;
+
   private _dotLottieObserverHandle: Observer | null = null;
 
   private static _wasmModule: MainModule | null = null;
@@ -105,15 +125,18 @@ export class DotLottie {
 
   private _backgroundColor: string | null = null;
 
-  private readonly _pointerUpMethod: (event: PointerEvent) => void;
+  // Bound event listeners for state machine
+  private _boundOnClick: ((event: MouseEvent) => void) | null = null;
 
-  private readonly _pointerDownMethod: (event: PointerEvent) => void;
+  private _boundOnPointerUp: ((event: PointerEvent) => void) | null = null;
 
-  private readonly _pointerMoveMethod: (event: PointerEvent) => void;
+  private _boundOnPointerDown: ((event: PointerEvent) => void) | null = null;
 
-  private readonly _pointerEnterMethod: (event: PointerEvent) => void;
+  private _boundOnPointerMove: ((event: PointerEvent) => void) | null = null;
 
-  private readonly _pointerExitMethod: (event: PointerEvent) => void;
+  private _boundOnPointerEnter: ((event: PointerEvent) => void) | null = null;
+
+  private _boundOnPointerLeave: ((event: PointerEvent) => void) | null = null;
 
   public constructor(
     config: Omit<Config, 'canvas'> & {
@@ -208,6 +231,7 @@ export class DotLottie {
         this._dotLottieCore = new module.DotLottiePlayer({
           animationId: config.animationId ?? '',
           themeId: config.themeId ?? '',
+          // FIXME: state machine id is not useful, since the load and start of state machine require to be controlled by the framework
           stateMachineId: '',
           autoplay: config.autoplay ?? false,
           backgroundColor: 0,
@@ -219,6 +243,9 @@ export class DotLottie {
           marker: config.marker ?? '',
           layout: createCoreLayout(config.layout, module),
         });
+
+        this._stateMachineId = config.stateMachineId ?? '';
+        this._stateMachineConfig = config.stateMachineConfig ?? null;
 
         this._dotLottieObserverHandle = this._dotLottieCore.subscribe(callbackObserver);
 
@@ -240,16 +267,6 @@ export class DotLottie {
           error: new Error(`Failed to load wasm module: ${error}`),
         });
       });
-
-    this._pointerUpMethod = this._onPointerUp.bind(this);
-
-    this._pointerDownMethod = this._onPointerDown.bind(this);
-
-    this._pointerMoveMethod = this._onPointerMove.bind(this);
-
-    this._pointerEnterMethod = this._onPointerEnter.bind(this);
-
-    this._pointerExitMethod = this._onPointerLeave.bind(this);
   }
 
   private _dispatchError(message: string): void {
@@ -322,23 +339,33 @@ export class DotLottie {
     }
 
     if (loaded) {
-      // FIXME: frame is not triggered from the dotlottie-rs core
-      this._eventManager.dispatch({
-        type: 'frame',
-        currentFrame: this.currentFrame,
-      });
-
-      const rendered = this._dotLottieCore.render();
-
-      if (rendered) {
-        this._draw();
-      }
-
       if (IS_BROWSER) {
         this.resize();
       }
 
-      if (this._dotLottieCore.isPlaying()) {
+      setTimeout(() => {
+        // FIXME: frame is not triggered from the dotlottie-rs core
+        this._eventManager.dispatch({
+          type: 'frame',
+          currentFrame: this.currentFrame,
+        });
+      }, 0);
+
+      this._dotLottieCore.render();
+
+      this._draw();
+
+      if (this._stateMachineId) {
+        const smLoaded = this.stateMachineLoad(this._stateMachineId);
+
+        if (smLoaded) {
+          const smStarted = this.stateMachineStart();
+
+          if (smStarted) {
+            this._startAnimationLoop();
+          }
+        }
+      } else if (this._dotLottieCore.isPlaying()) {
         this._startAnimationLoop();
       }
 
@@ -471,6 +498,10 @@ export class DotLottie {
 
   public get isFrozen(): boolean {
     return this._isFrozen;
+  }
+
+  public get isStateMachineRunning(): boolean {
+    return this._isStateMachineRunning;
   }
 
   public get backgroundColor(): string {
@@ -620,14 +651,28 @@ export class DotLottie {
   }
 
   private _startAnimationLoop(): void {
-    // Only start if we don't already have an active loop and the animation should be playing
-    if (this._animationFrameId === null && this._dotLottieCore && this._dotLottieCore.isPlaying() && !this._isFrozen) {
+    // Start if we don't already have an active loop and either:
+    // 1. The animation should be playing, OR
+    // 2. The state machine is running
+    if (
+      this._animationFrameId === null &&
+      this._dotLottieCore &&
+      !this._isFrozen &&
+      (this._dotLottieCore.isPlaying() || this._isStateMachineRunning)
+    ) {
       this._animationFrameId = this._frameManager.requestAnimationFrame(this._animationLoop.bind(this));
     }
   }
 
   private _animationLoop(): void {
-    if (this._dotLottieCore === null || !this._dotLottieCore.isPlaying()) {
+    if (this._dotLottieCore === null) {
+      this._stopAnimationLoop();
+
+      return;
+    }
+
+    // Continue the loop if either the animation is playing OR the state machine is running
+    if (!this._dotLottieCore.isPlaying() && !this._isStateMachineRunning) {
       this._stopAnimationLoop();
 
       return;
@@ -636,7 +681,11 @@ export class DotLottie {
     try {
       const advanced = this._dotLottieCore.tick();
 
-      if (advanced) {
+      if (
+        advanced ||
+        // FIXME: This is a workaround to fix the SetFrame action in the state machine
+        this._dotLottieCore.render()
+      ) {
         this._draw();
       }
 
@@ -772,9 +821,24 @@ export class DotLottie {
   public destroy(): void {
     this._stopAnimationLoop();
 
+    // Reset state machine status
+    this._isStateMachineRunning = false;
+
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       OffscreenObserver.unobserve(this._canvas);
       CanvasResizeObserver.unobserve(this._canvas);
+    }
+
+    if (this._stateMachineObserverHandle) {
+      this._dotLottieCore?.stateMachineUnsubscribe(this._stateMachineObserverHandle);
+      this._stateMachineObserverHandle.delete();
+      this._stateMachineObserverHandle = null;
+    }
+
+    if (this._stateMachineInternalMessageObserver) {
+      this._dotLottieCore?.stateMachineInternalUnsubscribe(this._stateMachineInternalMessageObserver);
+      this._stateMachineInternalMessageObserver.delete();
+      this._stateMachineInternalMessageObserver = null;
     }
 
     if (this._dotLottieObserverHandle) {
@@ -992,215 +1056,6 @@ export class DotLottie {
     DotLottieWasmLoader.setWasmUrl(url);
   }
 
-  public loadStateMachine(stateMachineId: string): boolean {
-    return this._dotLottieCore?.stateMachineLoad(stateMachineId) ?? false;
-  }
-
-  public startStateMachine(): boolean {
-    if (DotLottie._wasmModule === null || this._dotLottieCore === null) return false;
-
-    const openUrl = DotLottie._wasmModule.createDefaultOpenURL();
-
-    const started = this._dotLottieCore.stateMachineStart(openUrl);
-
-    if (started) {
-      this._setupStateMachineListeners();
-    }
-
-    return started;
-  }
-
-  public stopStateMachine(): boolean {
-    const stopped = this._dotLottieCore?.stateMachineStop() ?? false;
-
-    if (stopped) {
-      this._cleanupStateMachineListeners();
-    }
-
-    return stopped;
-  }
-
-  private _getPointerPosition(event: PointerEvent): { x: number; y: number } {
-    const rect = (this._canvas as HTMLCanvasElement).getBoundingClientRect();
-    const scaleX = this._canvas.width / rect.width;
-    const scaleY = this._canvas.height / rect.height;
-
-    const devicePixelRatio = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
-    const x = ((event.clientX - rect.left) * scaleX) / devicePixelRatio;
-    const y = ((event.clientY - rect.top) * scaleY) / devicePixelRatio;
-
-    return {
-      x,
-      y,
-    };
-  }
-
-  private _onPointerUp(event: PointerEvent): void {
-    const { x, y } = this._getPointerPosition(event);
-
-    this.postPointerUpEvent(x, y);
-  }
-
-  private _onPointerDown(event: PointerEvent): void {
-    const { x, y } = this._getPointerPosition(event);
-
-    this.postPointerDownEvent(x, y);
-  }
-
-  private _onPointerMove(event: PointerEvent): void {
-    const { x, y } = this._getPointerPosition(event);
-
-    this.postPointerMoveEvent(x, y);
-  }
-
-  private _onPointerEnter(event: PointerEvent): void {
-    const { x, y } = this._getPointerPosition(event);
-
-    this.postPointerEnterEvent(x, y);
-  }
-
-  private _onPointerLeave(event: PointerEvent): void {
-    const { x, y } = this._getPointerPosition(event);
-
-    this.postPointerExitEvent(x, y);
-  }
-
-  public postPointerUpEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.stateMachinePostPointerUpEvent(x, y);
-  }
-
-  public postPointerDownEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.stateMachinePostPointerDownEvent(x, y);
-  }
-
-  public postPointerMoveEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.stateMachinePostPointerMoveEvent(x, y);
-  }
-
-  public postPointerEnterEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.stateMachinePostPointerEnterEvent(x, y);
-  }
-
-  public postPointerExitEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.stateMachinePostPointerExitEvent(x, y);
-  }
-
-  public getStateMachineListeners(): string[] {
-    if (!this._dotLottieCore) return [];
-
-    const listenersVector = this._dotLottieCore.stateMachineFrameworkSetup();
-
-    const listeners = [];
-
-    for (let i = 0; i < listenersVector.size(); i += 1) {
-      listeners.push(listenersVector.get(i) as string);
-    }
-
-    return listeners;
-  }
-
-  private _setupStateMachineListeners(): void {
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this._dotLottieCore !== null && this.isLoaded) {
-      const listeners = this.getStateMachineListeners();
-
-      if (listeners.includes('PointerUp')) {
-        this._canvas.addEventListener('pointerup', this._pointerUpMethod);
-      }
-
-      if (listeners.includes('PointerDown')) {
-        this._canvas.addEventListener('pointerdown', this._pointerDownMethod);
-      }
-
-      if (listeners.includes('PointerMove')) {
-        this._canvas.addEventListener('pointermove', this._pointerMoveMethod);
-      }
-
-      if (listeners.includes('PointerEnter')) {
-        this._canvas.addEventListener('pointerenter', this._pointerEnterMethod);
-      }
-
-      if (listeners.includes('PointerExit')) {
-        this._canvas.addEventListener('pointerleave', this._pointerExitMethod);
-      }
-    }
-  }
-
-  private _cleanupStateMachineListeners(): void {
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
-      this._canvas.removeEventListener('pointerup', this._pointerUpMethod);
-      this._canvas.removeEventListener('pointerdown', this._pointerDownMethod);
-      this._canvas.removeEventListener('pointermove', this._pointerMoveMethod);
-      this._canvas.removeEventListener('pointerenter', this._pointerEnterMethod);
-      this._canvas.removeEventListener('pointerleave', this._pointerExitMethod);
-    }
-  }
-
-  public loadStateMachineData(stateMachineData: string): boolean {
-    return this._dotLottieCore?.stateMachineLoadData(stateMachineData) ?? false;
-  }
-
-  public animationSize(): { height: number; width: number } {
-    const width = this._dotLottieCore?.animationSize().get(0) ?? 0;
-    const height = this._dotLottieCore?.animationSize().get(1) ?? 0;
-
-    return {
-      width,
-      height,
-    };
-  }
-
-  public setStateMachineBooleanContext(name: string, value: boolean): boolean {
-    return this._dotLottieCore?.stateMachineSetBooleanInput(name, value) ?? false;
-  }
-
-  public setStateMachineNumericContext(name: string, value: number): boolean {
-    return this._dotLottieCore?.stateMachineSetNumericInput(name, value) ?? false;
-  }
-
-  public setStateMachineStringContext(name: string, value: string): boolean {
-    return this._dotLottieCore?.stateMachineSetStringInput(name, value) ?? false;
-  }
-
-  /**
-   * Get the Oriented Bounding Box (OBB) points of a layer by its name
-   * @param layerName - The name of the layer
-   * @returns An array of 8 numbers representing 4 points (x,y) of the OBB in clockwise order starting from top-left
-   *          [x0, y0, x1, y1, x2, y2, x3, y3]
-   *
-   * @example
-   * ```typescript
-   * // Draw a polygon around the layer 'Layer 1'
-   * dotLottie.addEventListener('render', () => {
-   *   const obbPoints = dotLottie.getLayerBoundingBox('Layer 1');
-   *
-   *   if (obbPoints) {
-   *     context.beginPath();
-   *     context.moveTo(obbPoints[0], obbPoints[1]); // First point
-   *     context.lineTo(obbPoints[2], obbPoints[3]); // Second point
-   *     context.lineTo(obbPoints[4], obbPoints[5]); // Third point
-   *     context.lineTo(obbPoints[6], obbPoints[7]); // Fourth point
-   *     context.closePath();
-   *     context.stroke();
-   *   }
-   * });
-   * ```
-   */
-  public getLayerBoundingBox(layerName: string): number[] | undefined {
-    const bounds = this._dotLottieCore?.getLayerBounds(layerName);
-
-    if (!bounds) return undefined;
-
-    if (bounds.size() !== 8) return undefined;
-
-    const points: number[] = [];
-
-    for (let i = 0; i < 8; i += 1) {
-      points.push(bounds.get(i) as number);
-    }
-
-    return points;
-  }
-
   /**
    * @experimental
    * Start a tween animation between two frame values with custom easing
@@ -1243,7 +1098,565 @@ export class DotLottie {
     return this._dotLottieCore?.tweenToMarker(marker, duration, easingVector) ?? false;
   }
 
+  public animationSize(): { height: number; width: number } {
+    const width = this._dotLottieCore?.animationSize().get(0) ?? 0;
+    const height = this._dotLottieCore?.animationSize().get(1) ?? 0;
+
+    return {
+      width,
+      height,
+    };
+  }
+
+  /**
+   * Get the Oriented Bounding Box (OBB) points of a layer by its name
+   * @param layerName - The name of the layer
+   * @returns An array of 8 numbers representing 4 points (x,y) of the OBB in clockwise order starting from top-left
+   *          [x0, y0, x1, y1, x2, y2, x3, y3]
+   *
+   * @example
+   * ```typescript
+   * // Draw a polygon around the layer 'Layer 1'
+   * dotLottie.addEventListener('render', () => {
+   *   const obbPoints = dotLottie.getLayerBoundingBox('Layer 1');
+   *
+   *   if (obbPoints) {
+   *     context.beginPath();
+   *     context.moveTo(obbPoints[0], obbPoints[1]); // First point
+   *     context.lineTo(obbPoints[2], obbPoints[3]); // Second point
+   *     context.lineTo(obbPoints[4], obbPoints[5]); // Third point
+   *     context.lineTo(obbPoints[6], obbPoints[7]); // Fourth point
+   *     context.closePath();
+   *     context.stroke();
+   *   }
+   * });
+   * ```
+   */
+  public getLayerBoundingBox(layerName: string): number[] | undefined {
+    const bounds = this._dotLottieCore?.getLayerBounds(layerName);
+
+    if (!bounds) return undefined;
+
+    if (bounds.size() !== 8) return undefined;
+
+    const points: number[] = [];
+
+    for (let i = 0; i < 8; i += 1) {
+      points.push(bounds.get(i) as number);
+    }
+
+    return points;
+  }
+
   public static transformThemeToLottieSlots(theme: string, slots: string): string {
     return DotLottie._wasmModule?.transformThemeToLottieSlots(theme, slots) ?? '';
   }
+
+  // #region State Machine
+  private _setupStateMachineObservers(): void {
+    if (!this._dotLottieCore || !DotLottie._wasmModule) return;
+
+    const smCallbackObserver = new DotLottie._wasmModule.CallbackStateMachineObserver();
+
+    smCallbackObserver.setOnStart(() => {
+      setTimeout(() => {
+        this._isStateMachineRunning = true;
+        this._eventManager.dispatch({ type: 'stateMachineStart' });
+        this._startAnimationLoop();
+      }, 0);
+    });
+    smCallbackObserver.setOnStop(() => {
+      setTimeout(() => {
+        this._isStateMachineRunning = false;
+        this._eventManager.dispatch({ type: 'stateMachineStop' });
+
+        // Stop animation loop if animation is not playing
+        if (!this._dotLottieCore?.isPlaying()) {
+          this._stopAnimationLoop();
+        }
+      }, 0);
+    });
+    smCallbackObserver.setOnCustomEvent((eventName: string) => {
+      this._eventManager.dispatch({ type: 'stateMachineCustomEvent', eventName });
+    });
+    smCallbackObserver.setOnBooleanInputValueChange((inputName: string, newValue: boolean, oldValue: boolean) => {
+      this._eventManager.dispatch({ type: 'stateMachineBooleanInputValueChange', inputName, newValue, oldValue });
+    });
+    smCallbackObserver.setOnNumericInputValueChange((inputName: string, newValue: number, oldValue: number) => {
+      this._eventManager.dispatch({ type: 'stateMachineNumericInputValueChange', inputName, newValue, oldValue });
+    });
+    smCallbackObserver.setOnStringInputValueChange((inputName: string, newValue: string, oldValue: string) => {
+      this._eventManager.dispatch({ type: 'stateMachineStringInputValueChange', inputName, newValue, oldValue });
+    });
+    smCallbackObserver.setOnInputFired((inputName: string) => {
+      this._eventManager.dispatch({ type: 'stateMachineInputFired', inputName });
+    });
+    smCallbackObserver.setOnTransition((fromState: string, toState: string) => {
+      this._eventManager.dispatch({ type: 'stateMachineTransition', fromState, toState });
+    });
+    smCallbackObserver.setOnStateEntered((state: string) => {
+      this._eventManager.dispatch({ type: 'stateMachineStateEntered', state });
+    });
+    smCallbackObserver.setOnStateExit((state: string) => {
+      this._eventManager.dispatch({ type: 'stateMachineStateExit', state });
+    });
+    smCallbackObserver.setOnError((error: string) => {
+      this._eventManager.dispatch({ type: 'stateMachineError', error });
+    });
+
+    const smInternalMessageObserver = new DotLottie._wasmModule.CallbackStateMachineInternalObserver();
+
+    smInternalMessageObserver.setOnMessage((message: string) => {
+      if (IS_BROWSER) {
+        if (message.startsWith('OpenUrl: ')) {
+          handleOpenUrl(message);
+        }
+      } else {
+        this._eventManager.dispatch({ type: 'stateMachineInternalMessage', message });
+      }
+    });
+
+    this._stateMachineObserverHandle = this._dotLottieCore.stateMachineSubscribe(smCallbackObserver);
+    this._stateMachineInternalMessageObserver =
+      this._dotLottieCore.stateMachineInternalSubscribe(smInternalMessageObserver);
+  }
+
+  private _cleanupStateMachineObservers(): void {
+    if (this._stateMachineObserverHandle) {
+      this._dotLottieCore?.stateMachineUnsubscribe(this._stateMachineObserverHandle);
+      this._stateMachineObserverHandle.delete();
+      this._stateMachineObserverHandle = null;
+    }
+    if (this._stateMachineInternalMessageObserver) {
+      this._dotLottieCore?.stateMachineInternalUnsubscribe(this._stateMachineInternalMessageObserver);
+      this._stateMachineInternalMessageObserver.delete();
+      this._stateMachineInternalMessageObserver = null;
+    }
+  }
+
+  /**
+   * @experimental
+   * Load a state machine by ID
+   * @param stateMachineId - The ID of the state machine to load
+   * @returns true if the state machine was loaded successfully
+   */
+  public stateMachineLoad(stateMachineId: string): boolean {
+    if (!this._dotLottieCore || !DotLottie._wasmModule) return false;
+
+    this._cleanupStateMachineObservers();
+
+    const loaded = this._dotLottieCore.stateMachineLoad(stateMachineId);
+
+    if (loaded) {
+      this._setupStateMachineObservers();
+    }
+
+    return loaded;
+  }
+
+  /**
+   * @experimental
+   * Load a state machine from data string
+   * @param stateMachineData - The state machine data as a string
+   * @returns true if the state machine was loaded successfully
+   */
+  public stateMachineLoadData(stateMachineData: string): boolean {
+    if (!this._dotLottieCore || !DotLottie._wasmModule) return false;
+
+    this._cleanupStateMachineObservers();
+
+    const loaded = this._dotLottieCore.stateMachineLoadData(stateMachineData);
+
+    if (loaded) {
+      this._setupStateMachineObservers();
+    }
+
+    return loaded;
+  }
+
+  /**
+   * @experimental
+   * Set the state machine config
+   * @param config - The state machine config
+   */
+  public stateMachineSetConfig(config: StateMachineConfig | null): void {
+    this._stateMachineConfig = config;
+  }
+
+  /**
+   * @experimental
+   * Start the state machine
+   * @returns true if the state machine was started successfully
+   */
+  public stateMachineStart(): boolean {
+    if (DotLottie._wasmModule === null || this._dotLottieCore === null) return false;
+
+    const coreOpenUrl = DotLottie._wasmModule.createDefaultOpenUrlPolicy();
+
+    if (this._stateMachineConfig) {
+      const openUrlPolicy = this._stateMachineConfig.openUrlPolicy;
+
+      if (openUrlPolicy && openUrlPolicy.requireUserInteraction) {
+        coreOpenUrl.requireUserInteraction = true;
+      } else {
+        coreOpenUrl.requireUserInteraction = false;
+      }
+
+      if (openUrlPolicy?.whitelist) {
+        coreOpenUrl.whitelist = new DotLottie._wasmModule.VectorString();
+
+        for (const url of openUrlPolicy.whitelist) {
+          coreOpenUrl.whitelist.push_back(url);
+        }
+      }
+    }
+
+    const started = this._dotLottieCore.stateMachineStart(coreOpenUrl);
+
+    if (started) {
+      this._isStateMachineRunning = true;
+      this._setupStateMachineListeners();
+      this._startAnimationLoop();
+    }
+
+    return started;
+  }
+
+  /**
+   * @experimental
+   * Stop the state machine
+   * @returns true if the state machine was stopped successfully
+   */
+  public stateMachineStop(): boolean {
+    if (!this._dotLottieCore) return false;
+
+    const stopped = this._dotLottieCore.stateMachineStop();
+
+    if (stopped) {
+      this._cleanupStateMachineObservers();
+      this._isStateMachineRunning = false;
+      this._cleanupStateMachineListeners();
+
+      // Stop animation loop if animation is not playing
+      if (!this._dotLottieCore.isPlaying()) {
+        this._stopAnimationLoop();
+      }
+    }
+
+    return stopped;
+  }
+
+  /**
+   * @experimental
+   * Get the current status of the state machine
+   * @returns The current status of the state machine as a string
+   */
+  public stateMachineGetStatus(): string {
+    return this._dotLottieCore?.stateMachineStatus() ?? '';
+  }
+
+  /**
+   * @experimental
+   * Get the current state of the state machine
+   * @returns The current state of the state machine as a string
+   */
+  public stateMachineGetCurrentState(): string {
+    return this._dotLottieCore?.stateMachineCurrentState() ?? '';
+  }
+
+  /**
+   * @experimental
+   * Get the active state machine ID
+   * @returns The active state machine ID as a string
+   */
+  public stateMachineGetActiveId(): string {
+    return this._dotLottieCore?.activeStateMachineId() ?? '';
+  }
+
+  /**
+   * @experimental
+   * Override the current state of the state machine
+   * @param state - The state to override to
+   * @param immediate - Whether to immediately transition to the state
+   * @returns true if the state override was successful
+   */
+  public stateMachineOverrideState(state: string, immediate: boolean = false): boolean {
+    return this._dotLottieCore?.stateMachineOverrideCurrentState(state, immediate) ?? false;
+  }
+
+  /**
+   * @experimental
+   * Get a specific state machine by ID
+   * @param stateMachineId - The ID of the state machine to get
+   * @returns The state machine data as a string
+   */
+  public stateMachineGet(stateMachineId: string): string {
+    return this._dotLottieCore?.getStateMachine(stateMachineId) ?? '';
+  }
+
+  /**
+   * @experimental
+   * Get the list of state machine listeners
+   * @returns Array of listener names
+   */
+  public stateMachineGetListeners(): string[] {
+    if (!this._dotLottieCore) return [];
+
+    const listenersVector = this._dotLottieCore.stateMachineFrameworkSetup();
+
+    const listeners = [];
+
+    for (let i = 0; i < listenersVector.size(); i += 1) {
+      listeners.push(listenersVector.get(i) as string);
+    }
+
+    return listeners;
+  }
+
+  /**
+   * @experimental
+   * Set a boolean input value for the state machine
+   * @param name - The name of the boolean input
+   * @param value - The boolean value to set
+   */
+  public stateMachineSetBooleanInput(name: string, value: boolean): boolean {
+    return this._dotLottieCore?.stateMachineSetBooleanInput(name, value) ?? false;
+  }
+
+  /**
+   * @experimental
+   * Set a numeric input value for the state machine
+   * @param name - The name of the numeric input
+   * @param value - The numeric value to set
+   */
+  public stateMachineSetNumericInput(name: string, value: number): boolean {
+    return this._dotLottieCore?.stateMachineSetNumericInput(name, value) ?? false;
+  }
+
+  /**
+   * @experimental
+   * Set a string input value for the state machine
+   * @param name - The name of the string input
+   * @param value - The string value to set
+   */
+  public stateMachineSetStringInput(name: string, value: string): boolean {
+    return this._dotLottieCore?.stateMachineSetStringInput(name, value) ?? false;
+  }
+
+  /**
+   * @experimental
+   * Get a boolean input value from the state machine
+   * @param name - The name of the boolean input
+   * @returns The boolean value or undefined if not found
+   */
+  public stateMachineGetBooleanInput(name: string): boolean | undefined {
+    return this._dotLottieCore?.stateMachineGetBooleanInput(name);
+  }
+
+  /**
+   * @experimental
+   * Get a numeric input value from the state machine
+   * @param name - The name of the numeric input
+   * @returns The numeric value or undefined if not found
+   */
+  public stateMachineGetNumericInput(name: string): number | undefined {
+    return this._dotLottieCore?.stateMachineGetNumericInput(name);
+  }
+
+  /**
+   * @experimental
+   * Get a string input value from the state machine
+   * @param name - The name of the string input
+   * @returns The string value or undefined if not found
+   */
+  public stateMachineGetStringInput(name: string): string | undefined {
+    return this._dotLottieCore?.stateMachineGetStringInput(name);
+  }
+
+  /**
+   * @experimental
+   * Fire an event in the state machine
+   * @param name - The name of the event to fire
+   */
+  public stateMachineFireEvent(name: string): void {
+    this._dotLottieCore?.stateMachineFireEvent(name);
+  }
+
+  /**
+   * @experimental
+   * Post a click event to the state machine
+   * @param x - The x coordinate of the click
+   * @param y - The y coordinate of the click
+   * @returns The event result or undefined
+   */
+  public stateMachinePostClickEvent(x: number, y: number): void {
+    this._dotLottieCore?.stateMachinePostClickEvent(x, y);
+  }
+
+  /**
+   * @experimental
+   * Post a pointer up event to the state machine
+   * @param x - The x coordinate of the pointer
+   * @param y - The y coordinate of the pointer
+   * @returns The event result or undefined
+   */
+  public stateMachinePostPointerUpEvent(x: number, y: number): void {
+    this._dotLottieCore?.stateMachinePostPointerUpEvent(x, y);
+  }
+
+  /**
+   * @experimental
+   * Post a pointer down event to the state machine
+   * @param x - The x coordinate of the pointer
+   * @param y - The y coordinate of the pointer
+   * @returns The event result or undefined
+   */
+  public stateMachinePostPointerDownEvent(x: number, y: number): void {
+    this._dotLottieCore?.stateMachinePostPointerDownEvent(x, y);
+  }
+
+  /**
+   * @experimental
+   * Post a pointer move event to the state machine
+   * @param x - The x coordinate of the pointer
+   * @param y - The y coordinate of the pointer
+   * @returns The event result or undefined
+   */
+  public stateMachinePostPointerMoveEvent(x: number, y: number): void {
+    this._dotLottieCore?.stateMachinePostPointerMoveEvent(x, y);
+  }
+
+  /**
+   * @experimental
+   * Post a pointer enter event to the state machine
+   * @param x - The x coordinate of the pointer
+   * @param y - The y coordinate of the pointer
+   * @returns The event result or undefined
+   */
+  public stateMachinePostPointerEnterEvent(x: number, y: number): void {
+    this._dotLottieCore?.stateMachinePostPointerEnterEvent(x, y);
+  }
+
+  /**
+   * @experimental
+   * Post a pointer exit event to the state machine
+   * @param x - The x coordinate of the pointer
+   * @param y - The y coordinate of the pointer
+   * @returns The event result or undefined
+   */
+  public stateMachinePostPointerExitEvent(x: number, y: number): void {
+    this._dotLottieCore?.stateMachinePostPointerExitEvent(x, y);
+  }
+
+  private _onClick(event: MouseEvent): void {
+    const position = getPointerPosition(event);
+
+    if (position) {
+      this.stateMachinePostClickEvent(position.x, position.y);
+    }
+  }
+
+  private _onPointerUp(event: PointerEvent): void {
+    const position = getPointerPosition(event);
+
+    if (position) {
+      this.stateMachinePostPointerUpEvent(position.x, position.y);
+    }
+  }
+
+  private _onPointerDown(event: PointerEvent): void {
+    const position = getPointerPosition(event);
+
+    if (position) {
+      this.stateMachinePostPointerDownEvent(position.x, position.y);
+    }
+  }
+
+  private _onPointerMove(event: PointerEvent): void {
+    const position = getPointerPosition(event);
+
+    if (position) {
+      this.stateMachinePostPointerMoveEvent(position.x, position.y);
+    }
+  }
+
+  private _onPointerEnter(event: PointerEvent): void {
+    const position = getPointerPosition(event);
+
+    if (position) {
+      this.stateMachinePostPointerEnterEvent(position.x, position.y);
+    }
+  }
+
+  private _onPointerLeave(event: PointerEvent): void {
+    const position = getPointerPosition(event);
+
+    if (position) {
+      this.stateMachinePostPointerExitEvent(position.x, position.y);
+    }
+  }
+
+  private _setupStateMachineListeners(): void {
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this._dotLottieCore !== null && this.isLoaded) {
+      const listeners = this.stateMachineGetListeners();
+
+      // Clean up any existing listeners first
+      this._cleanupStateMachineListeners();
+
+      if (listeners.includes('Click')) {
+        this._boundOnClick = this._onClick.bind(this);
+        this._canvas.addEventListener('click', this._boundOnClick);
+      }
+      if (listeners.includes('PointerUp')) {
+        this._boundOnPointerUp = this._onPointerUp.bind(this);
+        this._canvas.addEventListener('pointerup', this._boundOnPointerUp);
+      }
+      if (listeners.includes('PointerDown')) {
+        this._boundOnPointerDown = this._onPointerDown.bind(this);
+        this._canvas.addEventListener('pointerdown', this._boundOnPointerDown);
+      }
+      if (listeners.includes('PointerMove')) {
+        this._boundOnPointerMove = this._onPointerMove.bind(this);
+        this._canvas.addEventListener('pointermove', this._boundOnPointerMove);
+      }
+      if (listeners.includes('PointerEnter')) {
+        this._boundOnPointerEnter = this._onPointerEnter.bind(this);
+        this._canvas.addEventListener('pointerenter', this._boundOnPointerEnter);
+      }
+      if (listeners.includes('PointerExit')) {
+        this._boundOnPointerLeave = this._onPointerLeave.bind(this);
+        this._canvas.addEventListener('pointerleave', this._boundOnPointerLeave);
+      }
+    }
+  }
+
+  private _cleanupStateMachineListeners(): void {
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      if (this._boundOnClick) {
+        this._canvas.removeEventListener('click', this._boundOnClick);
+        this._boundOnClick = null;
+      }
+      if (this._boundOnPointerUp) {
+        this._canvas.removeEventListener('pointerup', this._boundOnPointerUp);
+        this._boundOnPointerUp = null;
+      }
+      if (this._boundOnPointerDown) {
+        this._canvas.removeEventListener('pointerdown', this._boundOnPointerDown);
+        this._boundOnPointerDown = null;
+      }
+      if (this._boundOnPointerMove) {
+        this._canvas.removeEventListener('pointermove', this._boundOnPointerMove);
+        this._boundOnPointerMove = null;
+      }
+      if (this._boundOnPointerEnter) {
+        this._canvas.removeEventListener('pointerenter', this._boundOnPointerEnter);
+        this._boundOnPointerEnter = null;
+      }
+      if (this._boundOnPointerLeave) {
+        this._canvas.removeEventListener('pointerleave', this._boundOnPointerLeave);
+        this._boundOnPointerLeave = null;
+      }
+    }
+  }
+  // #endregion
 }
