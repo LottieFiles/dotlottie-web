@@ -10,8 +10,6 @@ export type Data = string | ArrayBuffer | Record<string, unknown>;
 
 export type Fit = 'contain' | 'cover' | 'fill' | 'none' | 'fit-width' | 'fit-height';
 
-export type OpenUrlMode = 'deny' | 'allow';
-
 export interface Layout {
   align?: [number, number];
   fit?: Fit;
