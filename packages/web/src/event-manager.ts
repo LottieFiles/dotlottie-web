@@ -27,7 +27,7 @@ export type EventType =
   | 'stateMachineNumericInputValueChange'
   | 'stateMachineStringInputValueChange'
   | 'stateMachineInputFired'
-  | 'stateMachineOpenUrl';
+  | 'stateMachineInternalMessage';
 
 /**
  * Maps an event type string to its respective event interface.
@@ -195,10 +195,9 @@ export interface StateMachineInputFiredEvent extends BaseEvent {
   type: 'stateMachineInputFired';
 }
 
-export interface StateMachineOpenUrlEvent extends BaseEvent {
-  target: string;
-  type: 'stateMachineOpenUrl';
-  url: string;
+export interface StateMachineInternalMessage extends BaseEvent {
+  message: string;
+  type: 'stateMachineInternalMessage';
 }
 
 /**
@@ -230,7 +229,7 @@ export type Event =
   | StateMachineNumericInputValueChangeEvent
   | StateMachineStringInputValueChangeEvent
   | StateMachineInputFiredEvent
-  | StateMachineOpenUrlEvent;
+  | StateMachineInternalMessage;
 
 export interface EventListener<T extends EventType> {
   (event: EventByType<T>): void;

@@ -1,8 +1,21 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable typescript-sort-keys/interface */
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
-
+declare namespace RuntimeExports {
+  let HEAPF32: unknown;
+  let HEAPF64: unknown;
+  let HEAP_DATA_VIEW: unknown;
+  let HEAP8: unknown;
+  let HEAPU8: unknown;
+  let HEAP16: unknown;
+  let HEAPU16: unknown;
+  let HEAP32: unknown;
+  let HEAPU32: unknown;
+  let HEAP64: unknown;
+  let HEAPU64: unknown;
+}
 interface WasmModule {}
 
 type EmbindString = ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string;
@@ -254,4 +267,4 @@ interface EmbindModule {
   transformThemeToLottieSlots(_0: EmbindString, _1: EmbindString): string;
 }
 
-export type MainModule = WasmModule & EmbindModule;
+export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;

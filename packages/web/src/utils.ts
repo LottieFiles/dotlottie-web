@@ -97,3 +97,23 @@ export function getPointerPosition(event: MouseEvent | PointerEvent): { x: numbe
   // Return null if target is not an HTMLCanvasElement or calculation fails
   return null;
 }
+
+export function handleOpenUrl(message: string): void {
+  const content = message.replace('OpenUrl: ', '');
+
+  const targetSeparatorIndex = content.indexOf(' | Target: ');
+  let urlToOpen: string;
+  let target: string;
+
+  if (targetSeparatorIndex === -1) {
+    // Format: "OpenUrl: {url}"
+    urlToOpen = content;
+    target = '_blank';
+  } else {
+    // Format: "OpenUrl: {url} | Target: {target}"
+    urlToOpen = content.substring(0, targetSeparatorIndex);
+    target = content.substring(targetSeparatorIndex + ' | Target: '.length);
+  }
+
+  window.open(urlToOpen, target);
+}

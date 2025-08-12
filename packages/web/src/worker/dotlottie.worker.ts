@@ -28,7 +28,7 @@ import type {
   StateMachineNumericInputValueChangeEvent,
   StateMachineStringInputValueChangeEvent,
   StateMachineInputFiredEvent,
-  StateMachineOpenUrlEvent,
+  StateMachineInternalMessage,
 } from '../event-manager';
 
 import type { DotLottieInstanceState } from './dotlottie';
@@ -373,15 +373,15 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
 
     self.postMessage(response);
   },
-  stateMachineOpenUrl: (instanceId: string) => (event: Event) => {
-    const stateMachineOpenUrlEvent = event as StateMachineOpenUrlEvent;
+  stateMachineInternalMessage: (instanceId: string) => (event: Event) => {
+    const stateMachineInternalMessage = event as StateMachineInternalMessage;
 
-    const response: RpcResponse<'onStateMachineOpenUrl'> = {
+    const response: RpcResponse<'onStateMachineInternalMessage'> = {
       id: '',
-      method: 'onStateMachineOpenUrl',
+      method: 'onStateMachineInternalMessage',
       result: {
         instanceId,
-        event: stateMachineOpenUrlEvent,
+        event: stateMachineInternalMessage,
       },
     };
 
@@ -784,7 +784,7 @@ const commands: {
       'stateMachineNumericInputValueChange',
       'stateMachineStringInputValueChange',
       'stateMachineInputFired',
-      'stateMachineOpenUrl',
+      'stateMachineInternalMessage',
     ];
 
     events.forEach((event) => {

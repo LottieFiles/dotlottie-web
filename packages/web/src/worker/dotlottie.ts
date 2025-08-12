@@ -1,11 +1,11 @@
 import { IS_BROWSER } from '../constants';
-import type { Marker } from '../core';
-import type { EventType, EventListener, FrameEvent, StateMachineOpenUrlEvent } from '../event-manager';
+import type { Marker } from '../core/dotlottie-player.types';
+import type { EventType, EventListener, FrameEvent, StateMachineInternalMessage } from '../event-manager';
 import { EventManager } from '../event-manager';
 import { OffscreenObserver } from '../offscreen-observer';
 import { CanvasResizeObserver } from '../resize-observer';
 import type { Config, Layout, Manifest, Mode, RenderConfig, StateMachineConfig } from '../types';
-import { getDefaultDPR, getPointerPosition, isElementInViewport } from '../utils';
+import { getDefaultDPR, getPointerPosition, handleOpenUrl, isElementInViewport } from '../utils';
 
 import type { MethodParamsMap, MethodResultMap, RpcRequest, RpcResponse } from './types';
 import { WorkerManager } from './worker-manager';
@@ -172,7 +172,7 @@ export class DotLottieWorker {
       | 'onStateMachineNumericInputValueChange'
       | 'onStateMachineStringInputValueChange'
       | 'onStateMachineInputFired'
-      | 'onStateMachineOpenUrl'
+      | 'onStateMachineInternalMessage'
     > = event.data;
 
     if (!rpcResponse.id) {
@@ -324,17 +324,13 @@ export class DotLottieWorker {
         this._eventManager.dispatch(rpcResponse.result.event);
       }
 
-      if (rpcResponse.method === 'onStateMachineOpenUrl' && rpcResponse.result.instanceId === this._id) {
+      if (rpcResponse.method === 'onStateMachineInternalMessage' && rpcResponse.result.instanceId === this._id) {
         await this._updateDotLottieInstanceState();
 
-        const { event: urlEvent } = rpcResponse.result;
+        const internalEvent = rpcResponse.result.event as StateMachineInternalMessage;
 
-        this._eventManager.dispatch(urlEvent);
-
-        const openUrlEvent = urlEvent as unknown as StateMachineOpenUrlEvent;
-
-        if (IS_BROWSER) {
-          window.open(openUrlEvent.url, openUrlEvent.target);
+        if (internalEvent.message.startsWith('OpenUrl: ')) {
+          handleOpenUrl(internalEvent.message);
         }
       }
     }

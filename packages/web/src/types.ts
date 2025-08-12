@@ -39,19 +39,33 @@ export interface Config {
 
 export interface StateMachineConfig {
   /**
-   * Security configuration for URL opening in animations.
+   * Controls whether and which URLs can be opened by a state machine.
+   *
+   * - requireUserInteraction: When true, URLs open only after an explicit user action
+   *   (e.g., click/pointer down) on the animation.
+   * - whitelist: List of allowed URL patterns. An empty list blocks all URLs. Use
+   *   "*" to allow all URLs. Wildcards are supported in host and path (e.g.,
+   *   "*.example.com/*").
    *
    * @example
    * ```typescript
-   * // Block all URLs
-   * openUrl: { mode: 'deny' }
+   * // Require user interaction before opening any URL
+   * openUrlPolicy: { requireUserInteraction: true, whitelist: ["*"] }
    *
-   * // Allow specific domains only
-   * openUrl: {
-   *   mode: 'allow',
-   *   whitelist: ["https://example.com"]
-   * }
+   * // Block all URLs
+   * openUrlPolicy: { whitelist: [] }
+   *
+   * // Allow all URLs
+   * openUrlPolicy: { whitelist: ["*"] }
+   *
+   * // Allow a specific domain only
+   * openUrlPolicy: { whitelist: ["https://example.com"] }
+   *
+   * // Allow subdomains and any path under lottiefiles.com
+   * openUrlPolicy: { whitelist: ["*.lottiefiles.com/*"] }
    * ```
+   *
+   * By default, URLs are denied and require user interaction.
    */
   openUrlPolicy?: {
     requireUserInteraction?: boolean;

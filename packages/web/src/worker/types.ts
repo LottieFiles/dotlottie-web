@@ -24,7 +24,7 @@ import type {
   StateMachineNumericInputValueChangeEvent,
   StateMachineStringInputValueChangeEvent,
   StateMachineInputFiredEvent,
-  StateMachineOpenUrlEvent,
+  StateMachineInternalMessage,
 } from '../event-manager';
 import type { Config, Layout, Mode, RenderConfig, StateMachineConfig } from '../types';
 
@@ -329,12 +329,12 @@ export interface MethodResultMap {
     event: StateMachineInputFiredEvent;
     instanceId: string;
   };
-  onStateMachineNumericInputValueChange: {
-    event: StateMachineNumericInputValueChangeEvent;
+  onStateMachineInternalMessage: {
+    event: StateMachineInternalMessage;
     instanceId: string;
   };
-  onStateMachineOpenUrl: {
-    event: StateMachineOpenUrlEvent;
+  onStateMachineNumericInputValueChange: {
+    event: StateMachineNumericInputValueChangeEvent;
     instanceId: string;
   };
   onStateMachineStart: {

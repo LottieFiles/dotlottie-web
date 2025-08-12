@@ -21,6 +21,7 @@ import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data, StateMach
 import {
   getDefaultDPR,
   getPointerPosition,
+  handleOpenUrl,
   hexStringToRGBAInt,
   isDotLottie,
   isElementInViewport,
@@ -112,7 +113,7 @@ export class DotLottie {
 
   private _stateMachineObserverHandle: StateMachineObserver | null = null;
 
-  private _stateMachineOpenUrlObserver: StateMachineInternalObserver | null = null;
+  private _stateMachineInternalMessageObserver: StateMachineInternalObserver | null = null;
 
   private _dotLottieObserverHandle: Observer | null = null;
 
@@ -834,10 +835,10 @@ export class DotLottie {
       this._stateMachineObserverHandle = null;
     }
 
-    if (this._stateMachineOpenUrlObserver) {
-      this._dotLottieCore?.stateMachineInternalUnsubscribe(this._stateMachineOpenUrlObserver);
-      this._stateMachineOpenUrlObserver.delete();
-      this._stateMachineOpenUrlObserver = null;
+    if (this._stateMachineInternalMessageObserver) {
+      this._dotLottieCore?.stateMachineInternalUnsubscribe(this._stateMachineInternalMessageObserver);
+      this._stateMachineInternalMessageObserver.delete();
+      this._stateMachineInternalMessageObserver = null;
     }
 
     if (this._dotLottieObserverHandle) {
@@ -1203,36 +1204,21 @@ export class DotLottie {
       this._eventManager.dispatch({ type: 'stateMachineError', error });
     });
 
-    const openUrlObserver = new DotLottie._wasmModule.CallbackStateMachineInternalObserver();
+    const smInternalMessageObserver = new DotLottie._wasmModule.CallbackStateMachineInternalObserver();
 
-    openUrlObserver.setOnMessage((message: string) => {
-      if (message.startsWith('OpenUrl: ')) {
-        const content = message.replace('OpenUrl: ', '');
-
-        const targetSeparatorIndex = content.indexOf(' | Target: ');
-        let urlToOpen: string;
-        let target: string;
-
-        if (targetSeparatorIndex === -1) {
-          // Format: "OpenUrl: {url}"
-          urlToOpen = content;
-          target = '_blank';
-        } else {
-          // Format: "OpenUrl: {url} | Target: {target}"
-          urlToOpen = content.substring(0, targetSeparatorIndex);
-          target = content.substring(targetSeparatorIndex + ' | Target: '.length);
+    smInternalMessageObserver.setOnMessage((message: string) => {
+      if (IS_BROWSER) {
+        if (message.startsWith('OpenUrl: ')) {
+          handleOpenUrl(message);
         }
-
-        this._eventManager.dispatch({ type: 'stateMachineOpenUrl', url: urlToOpen, target });
-
-        if (IS_BROWSER) {
-          window.open(urlToOpen, target);
-        }
+      } else {
+        this._eventManager.dispatch({ type: 'stateMachineInternalMessage', message });
       }
     });
 
     this._stateMachineObserverHandle = this._dotLottieCore.stateMachineSubscribe(smCallbackObserver);
-    this._stateMachineOpenUrlObserver = this._dotLottieCore.stateMachineInternalSubscribe(openUrlObserver);
+    this._stateMachineInternalMessageObserver =
+      this._dotLottieCore.stateMachineInternalSubscribe(smInternalMessageObserver);
   }
 
   private _cleanupStateMachineObservers(): void {
@@ -1241,10 +1227,10 @@ export class DotLottie {
       this._stateMachineObserverHandle.delete();
       this._stateMachineObserverHandle = null;
     }
-    if (this._stateMachineOpenUrlObserver) {
-      this._dotLottieCore?.stateMachineInternalUnsubscribe(this._stateMachineOpenUrlObserver);
-      this._stateMachineOpenUrlObserver.delete();
-      this._stateMachineOpenUrlObserver = null;
+    if (this._stateMachineInternalMessageObserver) {
+      this._dotLottieCore?.stateMachineInternalUnsubscribe(this._stateMachineInternalMessageObserver);
+      this._stateMachineInternalMessageObserver.delete();
+      this._stateMachineInternalMessageObserver = null;
     }
   }
 
@@ -1308,7 +1294,7 @@ export class DotLottie {
     const coreOpenUrl = DotLottie._wasmModule.createDefaultOpenUrlPolicy();
 
     if (this._stateMachineConfig) {
-      const openUrlPolicy = this._stateMachineConfig.openUrlPolicy;
+      const openUrlPolicy = this._stateMachineConfig.openUrl;
 
       if (openUrlPolicy && openUrlPolicy.requireUserInteraction) {
         coreOpenUrl.requireUserInteraction = true;
