@@ -1294,7 +1294,7 @@ export class DotLottie {
     const coreOpenUrl = DotLottie._wasmModule.createDefaultOpenUrlPolicy();
 
     if (this._stateMachineConfig) {
-      const openUrlPolicy = this._stateMachineConfig.openUrl;
+      const openUrlPolicy = this._stateMachineConfig.openUrlPolicy;
 
       if (openUrlPolicy && openUrlPolicy.requireUserInteraction) {
         coreOpenUrl.requireUserInteraction = true;

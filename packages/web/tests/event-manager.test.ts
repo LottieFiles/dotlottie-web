@@ -7,7 +7,7 @@ import type {
   LoopEvent,
   StateMachineTransitionEvent,
   StateMachineBooleanInputValueChangeEvent,
-  StateMachineOpenUrlEvent,
+  StateMachineInternalMessage,
   RenderErrorEvent,
 } from '../src/event-manager';
 
@@ -205,22 +205,21 @@ describe('EventManager', () => {
       expect(listener).toHaveBeenCalledWith(inputEvent);
     });
 
-    test('dispatches StateMachineOpenUrlEvent with url and target data', () => {
+    test('dispatches StateMachineInternalMessage with message data', () => {
       const manager = new EventManager();
       const listener = vi.fn();
 
-      manager.addEventListener('stateMachineOpenUrl', listener);
+      manager.addEventListener('stateMachineInternalMessage', listener);
 
-      const openUrlEvent: StateMachineOpenUrlEvent = {
-        type: 'stateMachineOpenUrl',
-        url: 'https://example.com',
-        target: '_blank',
+      const internalMessageEvent: StateMachineInternalMessage = {
+        type: 'stateMachineInternalMessage',
+        message: 'OpenUrl: https://example.com',
       };
 
-      manager.dispatch(openUrlEvent);
+      manager.dispatch(internalMessageEvent);
 
       expect(listener).toHaveBeenCalledTimes(1);
-      expect(listener).toHaveBeenCalledWith(openUrlEvent);
+      expect(listener).toHaveBeenCalledWith(internalMessageEvent);
     });
 
     test('handles all state machine event types', () => {
@@ -233,7 +232,7 @@ describe('EventManager', () => {
         customEvent: vi.fn(),
         error: vi.fn(),
         inputFired: vi.fn(),
-        openUrl: vi.fn(),
+        internalMessage: vi.fn(),
       };
 
       manager.addEventListener('stateMachineStart', listeners.start);
@@ -243,7 +242,7 @@ describe('EventManager', () => {
       manager.addEventListener('stateMachineCustomEvent', listeners.customEvent);
       manager.addEventListener('stateMachineError', listeners.error);
       manager.addEventListener('stateMachineInputFired', listeners.inputFired);
-      manager.addEventListener('stateMachineOpenUrl', listeners.openUrl);
+      manager.addEventListener('stateMachineInternalMessage', listeners.internalMessage);
 
       manager.dispatch({ type: 'stateMachineStart' });
       manager.dispatch({ type: 'stateMachineStop' });
@@ -252,7 +251,7 @@ describe('EventManager', () => {
       manager.dispatch({ type: 'stateMachineCustomEvent', eventName: 'customAction' });
       manager.dispatch({ type: 'stateMachineError', error: 'Something went wrong' });
       manager.dispatch({ type: 'stateMachineInputFired', inputName: 'trigger' });
-      manager.dispatch({ type: 'stateMachineOpenUrl', url: 'https://test.com', target: '_self' });
+      manager.dispatch({ type: 'stateMachineInternalMessage', message: 'OpenUrl: https://test.com' });
 
       expect(listeners.start).toHaveBeenCalledTimes(1);
       expect(listeners.stop).toHaveBeenCalledTimes(1);
@@ -261,7 +260,7 @@ describe('EventManager', () => {
       expect(listeners.customEvent).toHaveBeenCalledTimes(1);
       expect(listeners.error).toHaveBeenCalledTimes(1);
       expect(listeners.inputFired).toHaveBeenCalledTimes(1);
-      expect(listeners.openUrl).toHaveBeenCalledTimes(1);
+      expect(listeners.internalMessage).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -496,10 +495,9 @@ describe('EventManager', () => {
         expect(event.type).toBe('stateMachineTransition');
       });
 
-      manager.addEventListener('stateMachineOpenUrl', (event) => {
-        expect(typeof event.url).toBe('string');
-        expect(typeof event.target).toBe('string');
-        expect(event.type).toBe('stateMachineOpenUrl');
+      manager.addEventListener('stateMachineInternalMessage', (event) => {
+        expect(typeof event.message).toBe('string');
+        expect(event.type).toBe('stateMachineInternalMessage');
       });
 
       const frameEvent: FrameEvent = { type: 'frame', currentFrame: 5 };
@@ -509,16 +507,15 @@ describe('EventManager', () => {
         fromState: 'a',
         toState: 'b',
       };
-      const openUrlEvent: StateMachineOpenUrlEvent = {
-        type: 'stateMachineOpenUrl',
-        url: 'https://example.com',
-        target: '_blank',
+      const internalMessageEvent: StateMachineInternalMessage = {
+        type: 'stateMachineInternalMessage',
+        message: 'OpenUrl: https://example.com',
       };
 
       manager.dispatch(frameEvent);
       manager.dispatch(errorEvent);
       manager.dispatch(transitionEvent);
-      manager.dispatch(openUrlEvent);
+      manager.dispatch(internalMessageEvent);
     });
   });
 });
