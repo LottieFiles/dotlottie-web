@@ -1296,10 +1296,8 @@ export class DotLottie {
     if (this._stateMachineConfig) {
       const openUrlPolicy = this._stateMachineConfig.openUrlPolicy;
 
-      if (openUrlPolicy && openUrlPolicy.requireUserInteraction) {
-        coreOpenUrl.requireUserInteraction = true;
-      } else {
-        coreOpenUrl.requireUserInteraction = false;
+      if (openUrlPolicy && typeof openUrlPolicy.requireUserInteraction === 'boolean') {
+        coreOpenUrl.requireUserInteraction = openUrlPolicy.requireUserInteraction;
       }
 
       if (openUrlPolicy?.whitelist) {
