@@ -2,7 +2,7 @@ module.exports = [
   {
     name: '@lottiefiles/dotlottie-web',
     path: 'packages/web/dist/index.js',
-    import: '{ DotLottie }',
+    import: '*',
   },
   {
     name: '@lottiefiles/dotlottie-web WASM',
