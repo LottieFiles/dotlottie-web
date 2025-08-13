@@ -1,5 +1,21 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.7.0
+
+### Minor Changes
+
+- a01796d: refactor: Replace manual event dispatching with WASM CallbackObserver integration
+
+### Patch Changes
+
+- Updated dependencies [a01796d]
+- Updated dependencies [41dff2e]
+- Updated dependencies [5bd67a5]
+- Updated dependencies [a01796d]
+- Updated dependencies [a01796d]
+- Updated dependencies [1744a2c]
+  - @lottiefiles/dotlottie-web@0.50.0
+
 ## 0.6.4
 
 ### Patch Changes
