@@ -209,7 +209,7 @@ export type OpenUrlPolicy = {
 };
 
 export type Marker = {
-  name: EmbindString;
+  name: string;
   time: number;
   duration: number;
 };
