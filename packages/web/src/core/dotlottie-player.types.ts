@@ -1,20 +1,22 @@
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-namespace */
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable typescript-sort-keys/interface */
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
-  let HEAPF32: unknown;
-  let HEAPF64: unknown;
-  let HEAP_DATA_VIEW: unknown;
-  let HEAP8: unknown;
-  let HEAPU8: unknown;
-  let HEAP16: unknown;
-  let HEAPU16: unknown;
-  let HEAP32: unknown;
-  let HEAPU32: unknown;
-  let HEAP64: unknown;
-  let HEAPU64: unknown;
+  let HEAPF32: any;
+  let HEAPF64: any;
+  let HEAP_DATA_VIEW: any;
+  let HEAP8: any;
+  let HEAPU8: any;
+  let HEAP16: any;
+  let HEAPU16: any;
+  let HEAP32: any;
+  let HEAPU32: any;
+  let HEAP64: any;
+  let HEAPU64: any;
 }
 interface WasmModule {}
 
@@ -60,10 +62,10 @@ export interface FitValue<T extends number> {
 }
 export type Fit = FitValue<1> | FitValue<3> | FitValue<2> | FitValue<4> | FitValue<5> | FitValue<6>;
 
-export interface Layout {
+export type Layout = {
   fit: Fit;
   align: VectorFloat;
-}
+};
 
 export interface Observer extends ClassHandle {
   on_load(): void;
@@ -78,15 +80,15 @@ export interface Observer extends ClassHandle {
 }
 
 export interface CallbackObserver extends Observer {
-  setOnComplete(_0: unknown): void;
-  setOnLoad(_0: unknown): void;
-  setOnLoadError(_0: unknown): void;
-  setOnPlay(_0: unknown): void;
-  setOnPause(_0: unknown): void;
-  setOnStop(_0: unknown): void;
-  setOnFrame(_0: unknown): void;
-  setOnRender(_0: unknown): void;
-  setOnLoop(_0: unknown): void;
+  setOnComplete(_0: any): void;
+  setOnLoad(_0: any): void;
+  setOnLoadError(_0: any): void;
+  setOnPlay(_0: any): void;
+  setOnPause(_0: any): void;
+  setOnStop(_0: any): void;
+  setOnFrame(_0: any): void;
+  setOnRender(_0: any): void;
+  setOnLoop(_0: any): void;
 }
 
 export interface StateMachineObserver extends ClassHandle {
@@ -104,17 +106,17 @@ export interface StateMachineObserver extends ClassHandle {
 }
 
 export interface CallbackStateMachineObserver extends StateMachineObserver {
-  setOnStart(_0: unknown): void;
-  setOnStop(_0: unknown): void;
-  setOnTransition(_0: unknown): void;
-  setOnStateEntered(_0: unknown): void;
-  setOnStateExit(_0: unknown): void;
-  setOnCustomEvent(_0: unknown): void;
-  setOnStringInputValueChange(_0: unknown): void;
-  setOnNumericInputValueChange(_0: unknown): void;
-  setOnBooleanInputValueChange(_0: unknown): void;
-  setOnInputFired(_0: unknown): void;
-  setOnError(_0: unknown): void;
+  setOnStart(_0: any): void;
+  setOnStop(_0: any): void;
+  setOnTransition(_0: any): void;
+  setOnStateEntered(_0: any): void;
+  setOnStateExit(_0: any): void;
+  setOnCustomEvent(_0: any): void;
+  setOnStringInputValueChange(_0: any): void;
+  setOnNumericInputValueChange(_0: any): void;
+  setOnBooleanInputValueChange(_0: any): void;
+  setOnInputFired(_0: any): void;
+  setOnError(_0: any): void;
 }
 
 export interface StateMachineInternalObserver extends ClassHandle {
@@ -122,7 +124,7 @@ export interface StateMachineInternalObserver extends ClassHandle {
 }
 
 export interface CallbackStateMachineInternalObserver extends StateMachineInternalObserver {
-  setOnMessage(_0: unknown): void;
+  setOnMessage(_0: any): void;
 }
 
 export interface DotLottiePlayer extends ClassHandle {
@@ -198,21 +200,21 @@ export interface DotLottiePlayer extends ClassHandle {
   stateMachineCurrentState(): string;
   stateMachineOverrideCurrentState(_0: EmbindString, _1: boolean): boolean;
   stateMachineStatus(): string;
-  buffer(): unknown;
+  buffer(): any;
 }
 
-export interface OpenUrlPolicy {
+export type OpenUrlPolicy = {
   requireUserInteraction: boolean;
   whitelist: VectorString;
-}
+};
 
-export interface Marker {
-  name: string;
+export type Marker = {
+  name: EmbindString;
   time: number;
   duration: number;
-}
+};
 
-export interface Config {
+export type Config = {
   autoplay: boolean;
   loopAnimation: boolean;
   mode: Mode;
@@ -225,7 +227,7 @@ export interface Config {
   themeId: EmbindString;
   stateMachineId: EmbindString;
   animationId: EmbindString;
-}
+};
 
 interface EmbindModule {
   VectorFloat: {
