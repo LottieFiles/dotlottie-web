@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.50.1
+
+### Patch Changes
+
+- 43ebcec: fix: newValue and oldValue parameters in state machine input callbacks
+
 ## 0.50.0
 
 ### Minor Changes
