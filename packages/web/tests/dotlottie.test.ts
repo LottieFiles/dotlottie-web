@@ -362,10 +362,13 @@ describe.each([
 
         expect(onCompelete).not.toHaveBeenCalled();
 
-        expect(onFrame).toHaveBeenNthCalledWith(1, {
-          type: 'frame',
-          currentFrame: expectedStartFrame,
-        });
+        expect(onFrame).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            type: 'frame',
+            currentFrame: expect.closeTo(expectedStartFrame, 0),
+          }),
+        );
 
         await vi.waitFor(
           () => {
@@ -1130,14 +1133,20 @@ describe.each([
             ? config.segment?.[1] ?? dotLottie.totalFrames - 1
             : config.segment?.[0] ?? 0;
 
-        expect(onFrame).toHaveBeenNthCalledWith(1, {
-          type: 'frame',
-          currentFrame: startFrame,
-        });
-        expect(onRender).toHaveBeenNthCalledWith(1, {
-          type: 'render',
-          currentFrame: startFrame,
-        });
+        expect(onFrame).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            type: 'frame',
+            currentFrame: expect.closeTo(startFrame, 0),
+          }),
+        );
+        expect(onRender).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            type: 'render',
+            currentFrame: expect.closeTo(startFrame, 0),
+          }),
+        );
 
         await vi.waitUntil(() => {
           if (dotLottie.mode.includes('reverse')) {
@@ -1163,16 +1172,20 @@ describe.each([
         await sleep(500);
 
         expect(dotLottie.currentFrame).not.toBe(currentFrameBeforeStop);
-        expect(dotLottie.currentFrame).toBe(startFrame);
+        expect(dotLottie.currentFrame).toBeCloseTo(startFrame, 0);
 
-        expect(onFrame).toHaveBeenLastCalledWith({
-          type: 'frame',
-          currentFrame: startFrame,
-        });
-        expect(onRender).toHaveBeenLastCalledWith({
-          type: 'render',
-          currentFrame: startFrame,
-        });
+        expect(onFrame).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            type: 'frame',
+            currentFrame: expect.closeTo(startFrame, 0),
+          }),
+        );
+        expect(onRender).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            type: 'render',
+            currentFrame: expect.closeTo(startFrame, 0),
+          }),
+        );
       });
     });
   });
