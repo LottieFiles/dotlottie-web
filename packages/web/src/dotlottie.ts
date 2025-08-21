@@ -1179,13 +1179,13 @@ export class DotLottie {
     smCallbackObserver.setOnCustomEvent((eventName: string) => {
       this._eventManager.dispatch({ type: 'stateMachineCustomEvent', eventName });
     });
-    smCallbackObserver.setOnBooleanInputValueChange((inputName: string, newValue: boolean, oldValue: boolean) => {
+    smCallbackObserver.setOnBooleanInputValueChange((inputName: string, oldValue: boolean, newValue: boolean) => {
       this._eventManager.dispatch({ type: 'stateMachineBooleanInputValueChange', inputName, newValue, oldValue });
     });
-    smCallbackObserver.setOnNumericInputValueChange((inputName: string, newValue: number, oldValue: number) => {
+    smCallbackObserver.setOnNumericInputValueChange((inputName: string, oldValue: number, newValue: number) => {
       this._eventManager.dispatch({ type: 'stateMachineNumericInputValueChange', inputName, newValue, oldValue });
     });
-    smCallbackObserver.setOnStringInputValueChange((inputName: string, newValue: string, oldValue: string) => {
+    smCallbackObserver.setOnStringInputValueChange((inputName: string, oldValue: string, newValue: string) => {
       this._eventManager.dispatch({ type: 'stateMachineStringInputValueChange', inputName, newValue, oldValue });
     });
     smCallbackObserver.setOnInputFired((inputName: string) => {
