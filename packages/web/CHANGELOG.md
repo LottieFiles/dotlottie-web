@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.51.0-pre.0
+
+### Minor Changes
+
+- 3aad9f5: feat: add WebGL and WebGPU support in DotLottie
+
 ## 0.50.1
 
 ### Patch Changes
