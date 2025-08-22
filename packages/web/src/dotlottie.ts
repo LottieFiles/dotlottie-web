@@ -655,7 +655,13 @@ export class DotLottie {
   public get buffer(): Uint8ClampedArray | null {
     if (!this._dotLottieCore) return null;
 
-    return this._frameBufferView;
+    // Only software rendering has a frame buffer view
+    if (this._activeBackend === 'software') {
+      return this._frameBufferView;
+    }
+
+    // WebGL and WebGPU render directly to canvas, no accessible buffer
+    return null;
   }
 
   public get activeAnimationId(): string | undefined {
@@ -1125,13 +1131,18 @@ export class DotLottie {
       DotLottie._glContextCount -= 1;
     }
 
-    this._surfaceHandle = null;
-    DotLottie._wgpuSurfaceCount -= 1;
-    if (DotLottie._wgpuSurfaceCount <= 0) {
-      if (DotLottie._deviceHandle && DotLottie._wasmModule)
+    if (this._surfaceHandle !== null) {
+      this._surfaceHandle = null;
+      DotLottie._wgpuSurfaceCount = Math.max(0, DotLottie._wgpuSurfaceCount - 1);
+
+      if (DotLottie._deviceHandle && DotLottie._wasmModule) {
         DotLottie._wasmModule.wgpu_device_release(DotLottie._deviceHandle);
-      if (DotLottie._instanceHandle && DotLottie._wasmModule)
+        DotLottie._deviceHandle = null;
+      }
+      if (DotLottie._instanceHandle && DotLottie._wasmModule) {
         DotLottie._wasmModule.wgpu_instance_release(DotLottie._instanceHandle);
+        DotLottie._instanceHandle = null;
+      }
     }
 
     this._dotLottieCore?.delete();
