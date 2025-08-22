@@ -59,6 +59,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   mode,
   playOnHover,
   renderConfig,
+  renderer,
   segment,
   speed,
   src,
@@ -92,6 +93,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     layout,
     renderConfig,
     animationId,
+    renderer,
   };
 
   const configRef = useRef<Omit<BaseDotLottieProps<T>, 'createDotLottie' | 'dotLottieRefCallback'> | undefined>(config);
