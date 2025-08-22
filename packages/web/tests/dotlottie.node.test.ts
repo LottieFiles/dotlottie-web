@@ -40,7 +40,7 @@ test('should render correctly in node', async () => {
     expect(onLoad).toHaveBeenCalledOnce();
   });
 
-  expect(dotLottie.buffer).toBeInstanceOf(Uint8Array);
+  expect(dotLottie.buffer).toBeInstanceOf(Uint8ClampedArray);
   expect(dotLottie.buffer).toHaveLength(dotLottie.canvas.width * dotLottie.canvas.height * 4);
 
   const frameCount = dotLottie.totalFrames;

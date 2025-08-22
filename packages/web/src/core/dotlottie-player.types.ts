@@ -18,7 +18,10 @@ declare namespace RuntimeExports {
   let HEAP64: any;
   let HEAPU64: any;
 }
-interface WasmModule {}
+interface WasmModule {
+  _malloc(_0: number): number;
+  _free(_0: number): void;
+}
 
 type EmbindString = ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string;
 export interface ClassHandle {
@@ -61,6 +64,11 @@ export interface FitValue<T extends number> {
   value: T;
 }
 export type Fit = FitValue<1> | FitValue<3> | FitValue<2> | FitValue<4> | FitValue<5> | FitValue<6>;
+
+export interface ColorSpaceValue<T extends number> {
+  value: T;
+}
+export type ColorSpace = ColorSpaceValue<1> | ColorSpaceValue<2> | ColorSpaceValue<3> | ColorSpaceValue<4>;
 
 export type Layout = {
   fit: Fit;
@@ -134,7 +142,6 @@ export interface DotLottiePlayer extends ClassHandle {
   stateMachineFrameworkSetup(): VectorString;
   stateMachineSubscribe(_0: StateMachineObserver | null): StateMachineObserver | null;
   stateMachineInternalSubscribe(_0: StateMachineInternalObserver | null): StateMachineInternalObserver | null;
-  clear(): void;
   unsubscribe(_0: Observer | null): void;
   stateMachineUnsubscribe(_0: StateMachineObserver | null): void;
   stateMachineInternalUnsubscribe(_0: StateMachineInternalObserver | null): void;
@@ -156,6 +163,9 @@ export interface DotLottiePlayer extends ClassHandle {
   setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
   loopCount(): number;
   resize(_0: number, _1: number): boolean;
+  setSwTarget(_0: bigint, _1: number, _2: number, _3: number, _4: ColorSpace): boolean;
+  setGlTarget(_0: bigint, _1: number, _2: number, _3: number, _4: ColorSpace): boolean;
+  setWgTarget(_0: bigint, _1: bigint, _2: bigint, _3: number, _4: number, _5: ColorSpace, _6: number): boolean;
   tweenUpdate(_0?: number): boolean;
   currentFrame(): number;
   duration(): number;
@@ -200,7 +210,6 @@ export interface DotLottiePlayer extends ClassHandle {
   stateMachineCurrentState(): string;
   stateMachineOverrideCurrentState(_0: EmbindString, _1: boolean): boolean;
   stateMachineStatus(): string;
-  buffer(): any;
 }
 
 export type OpenUrlPolicy = {
@@ -248,6 +257,12 @@ interface EmbindModule {
     FitHeight: FitValue<5>;
     None: FitValue<6>;
   };
+  ColorSpace: {
+    ABGR8888: ColorSpaceValue<1>;
+    ABGR8888S: ColorSpaceValue<2>;
+    ARGB8888: ColorSpaceValue<3>;
+    ARGB8888S: ColorSpaceValue<4>;
+  };
   createDefaultLayout(): Layout;
   Observer: {};
   CallbackObserver: {
@@ -265,8 +280,17 @@ interface EmbindModule {
     new (_0: Config): DotLottiePlayer;
   };
   createDefaultOpenUrlPolicy(): OpenUrlPolicy;
+  webgpu_get_device(): number;
+  webgpu_get_instance(): number;
+  wgpu_instance_release(_0: number): void;
+  wgpu_device_release(_0: number): void;
+  webgl_context_make_current(_0: number): number;
+  is_webgl_context_lost(_0: number): boolean;
+  webgl_context_destroy(_0: number): void;
   createDefaultConfig(): Config;
   transformThemeToLottieSlots(_0: EmbindString, _1: EmbindString): string;
+  webgpu_get_surface(_0: EmbindString): number;
+  webgl_context_create(_0: EmbindString): number;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;
