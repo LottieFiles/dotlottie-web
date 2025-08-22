@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.16.0-pre.1
+
+### Minor Changes
+
+- 81b8bc1: feat: add renderer prop to DotLottieReact component
+
 ## 0.15.2-pre.0
 
 ### Patch Changes
