@@ -885,9 +885,8 @@ export class DotLottie {
       }
 
       if (this._context && this._frameBufferPtr && this._frameBufferView) {
-        const expectedLength = this._canvas.width * this._canvas.height * BYTES_PER_PIXEL;
-
-        if (this._frameBufferView.byteLength !== expectedLength) {
+        // Only recreate if the buffer size actually changed (not just the expected length)
+        if (this._frameBufferView.byteLength !== this._frameBufferSize) {
           this._frameBufferView = new Uint8ClampedArray(
             DotLottie._wasmModule.HEAPU8.buffer,
             this._frameBufferPtr,
