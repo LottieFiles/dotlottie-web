@@ -1,5 +1,5 @@
 // import { DotLottieReact, DotLottie, setWasmUrl } from '@lottiefiles/dotlottie-react';
-import { DotLottieWorkerReact, DotLottieWorker, setWasmUrl } from '@lottiefiles/dotlottie-react';
+import { setWasmUrl, DotLottieReact, DotLottie } from '@lottiefiles/dotlottie-react';
 import React, { useState } from 'react';
 
 const animations = [
@@ -14,7 +14,7 @@ const animations = [
 setWasmUrl(new URL('../../../packages/web/src/core/dotlottie-player.wasm', import.meta.url).href);
 
 function App() {
-  const [dotLottie, setDotLottie] = useState<DotLottieWorker | null>(null);
+  const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
   const [loop, setLoop] = useState(true);
   const [speed, setSpeed] = useState(1);
   const [currentFrame, setCurrentFrame] = useState(0);
@@ -69,7 +69,7 @@ function App() {
           marginBottom: '2000px',
         }}
       ></div>
-      <DotLottieWorkerReact
+      <DotLottieReact
         dotLottieRefCallback={setDotLottie}
         useFrameInterpolation={useFrameInterpolation}
         src={animations[srcIdx]}
@@ -77,6 +77,7 @@ function App() {
         loop={loop}
         speed={speed}
         playOnHover={playOnHover}
+        renderer="webgpu"
         renderConfig={{
           autoResize: autoResizeCanvas,
         }}

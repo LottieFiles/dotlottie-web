@@ -1,3 +1,5 @@
+export type RendererBackend = 'software' | 'webgl' | 'webgpu';
+
 export interface RenderConfig {
   autoResize?: boolean;
   devicePixelRatio?: number;
@@ -26,6 +28,7 @@ export interface Config {
   marker?: string;
   mode?: Mode;
   renderConfig?: RenderConfig;
+  renderer?: RendererBackend;
   segment?: [number, number];
   speed?: number;
   src?: string;

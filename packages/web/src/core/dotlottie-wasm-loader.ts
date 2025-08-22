@@ -15,8 +15,17 @@ export class DotLottieWasmLoader {
     throw new Error('RendererLoader is a static class and cannot be instantiated.');
   }
 
-  private static async _tryLoad(url: string): Promise<MainModule> {
-    const module = await createDotLottiePlayerModule({ locateFile: () => url });
+  private static async _tryLoad({
+    preinitializedWebGPUDevice,
+    url,
+  }: {
+    preinitializedWebGPUDevice: () => Promise<GPUDevice | null>;
+    url: string;
+  }): Promise<MainModule> {
+    const module = await createDotLottiePlayerModule({
+      locateFile: () => url,
+      preinitializedWebGPUDevice: await preinitializedWebGPUDevice(),
+    });
 
     return module;
   }
@@ -26,16 +35,26 @@ export class DotLottieWasmLoader {
    * Throws an error if both URLs fail to load the module.
    * @returns Promise<Module> - A promise that resolves to the loaded module.
    */
-  private static async _loadWithBackup(): Promise<MainModule> {
+  private static async _loadWithBackup({
+    preinitializedWebGPUDevice,
+  }: {
+    preinitializedWebGPUDevice: () => Promise<GPUDevice | null>;
+  }): Promise<MainModule> {
     if (!this._ModulePromise) {
-      this._ModulePromise = this._tryLoad(this._wasmURL).catch(async (initialError): Promise<MainModule> => {
+      this._ModulePromise = this._tryLoad({
+        url: this._wasmURL,
+        preinitializedWebGPUDevice,
+      }).catch(async (initialError): Promise<MainModule> => {
         const backupUrl = `https://unpkg.com/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/dotlottie-player.wasm`;
 
         console.warn(`Primary WASM load failed from ${this._wasmURL}. Error: ${(initialError as Error).message}`);
         console.warn(`Attempting to load WASM from backup URL: ${backupUrl}`);
 
         try {
-          return await this._tryLoad(backupUrl);
+          return await this._tryLoad({
+            url: backupUrl,
+            preinitializedWebGPUDevice,
+          });
         } catch (backupError) {
           console.error(`Primary WASM URL failed: ${(initialError as Error).message}`);
           console.error(`Backup WASM URL failed: ${(backupError as Error).message}`);
@@ -52,8 +71,12 @@ export class DotLottieWasmLoader {
    * Utilizes a primary and backup URL for robustness.
    * @returns Promise<Module> - A promise that resolves to the loaded module.
    */
-  public static async load(): Promise<MainModule> {
-    return this._loadWithBackup();
+  public static async load({
+    preinitializedWebGPUDevice,
+  }: {
+    preinitializedWebGPUDevice: () => Promise<GPUDevice | null>;
+  }): Promise<MainModule> {
+    return this._loadWithBackup({ preinitializedWebGPUDevice });
   }
 
   /**

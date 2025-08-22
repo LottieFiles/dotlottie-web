@@ -106,43 +106,52 @@
                     canvas: document.getElementById('canvas-toggle'),
                     src: window.location.origin + '/tests/__fixtures__/sm/toggle.lottie',
                     stateMachineId: 'toggle',
+                    renderer: 'webgpu',
                 }),
                 hover: new DotLottie({
                     canvas: document.getElementById('canvas-hover'),
                     src: window.location.origin + '/tests/__fixtures__/sm/hover.lottie',
                     stateMachineId: 'hover',
+                    renderer: 'webgpu',
                 }),
                 starRating: new DotLottie({
                     canvas: document.getElementById('canvas-star-rating'),
                     src: window.location.origin + '/tests/__fixtures__/sm/star-rating.lottie',
                     stateMachineId: 'star-rating',
+                    renderer: 'webgpu',
                 }),
                 smileySlider: new DotLottie({
                     canvas: document.getElementById('canvas-smiley-slider'),
                     src: window.location.origin + '/tests/__fixtures__/sm/smiley_slider.lottie',
                     stateMachineId: 'interactive_slider',
+                    renderer: 'webgpu',
                 }),
                 themeSwitching: new DotLottie({
                     canvas: document.getElementById('canvas-theme-switching'),
                     src: 'https://lottie.host/8e34d211-e22e-459e-bfc7-7400b283be87/6RKEZ9wCqO.lottie',
+                    renderer: 'webgpu',
                 }),
                 clickInteraction: new DotLottie({
                     canvas: document.getElementById('canvas-click-interaction'),
                     src: 'https://lottie.host/fba88936-b753-4751-a6ca-94db246157cf/5pGajCeC0B.json',
                     loop: false,
                     autoplay: false,
+                    renderer: 'webgpu',
                 }),
                 cursorControlled: new DotLottie({
                     canvas: document.getElementById('canvas-cursor-controlled'),
                     src: 'https://lottie.host/fba88936-b753-4751-a6ca-94db246157cf/5pGajCeC0B.json',
+                    renderer: 'webgpu',
                 }),
                 scrollControlled: new DotLottie({
                     canvas: document.getElementById('canvas-scroll-controlled'),
                     src: 'https://lottie.host/fba88936-b753-4751-a6ca-94db246157cf/5pGajCeC0B.json',
+                    renderer: 'webgpu',
                 }),
                 holdInteraction: new DotLottie({
                     canvas: document.getElementById('canvas-hold-interaction'),
                     src: 'https://lottie.host/cb480e3f-1db1-4fb9-a812-592cd1aaef3a/Qda343MSSf.lottie',
+                    renderer: 'webgpu',
                 }),
                 openUrl: new DotLottie({
                     canvas: document.getElementById('canvas-open-url'),
@@ -153,6 +162,7 @@
                             whitelist: ['https://www.lottiefiles.com'],
                         },
                     },
+                    renderer: 'webgpu',
                 }),
             };
 

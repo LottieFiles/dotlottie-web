@@ -117,3 +117,43 @@ export function handleOpenUrl(message: string): void {
 
   window.open(urlToOpen, target);
 }
+
+// WebGL feature detection and validation utilities
+export const isWebGLSupported = (): boolean => {
+  if (!IS_BROWSER) return false;
+
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+    return gl !== null;
+  } catch {
+    return false;
+  }
+};
+
+// WebGPU feature detection and validation utilities
+export const isWebGPUSupported = (): boolean => {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  return IS_BROWSER && 'gpu' in navigator && navigator.gpu !== undefined;
+};
+
+export const createWebGPUDevice = async (): Promise<GPUDevice | null> => {
+  try {
+    const adapter = await navigator.gpu.requestAdapter();
+
+    if (!adapter) {
+      console.warn('WebGPU adapter not found');
+
+      return null;
+    }
+
+    const device = await adapter.requestDevice();
+
+    return device;
+  } catch (error) {
+    console.warn('Failed to create secure WebGPU device:', error);
+
+    return null;
+  }
+};

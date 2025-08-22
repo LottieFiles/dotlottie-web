@@ -1,6 +1,6 @@
 /* eslint-disable no-warning-comments */
 import { AnimationFrameManager } from './animation-frame-manager';
-import { IS_BROWSER, BYTES_PER_PIXEL } from './constants';
+import { BYTES_PER_PIXEL, IS_BROWSER } from './constants';
 import type {
   DotLottiePlayer,
   MainModule,
@@ -17,8 +17,19 @@ import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
 import { CanvasResizeObserver } from './resize-observer';
-import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data, StateMachineConfig } from './types';
+import type {
+  Mode,
+  Fit,
+  Config,
+  Layout,
+  Manifest,
+  RenderConfig,
+  Data,
+  StateMachineConfig,
+  RendererBackend,
+} from './types';
 import {
+  createWebGPUDevice,
   getDefaultDPR,
   getPointerPosition,
   handleOpenUrl,
@@ -26,7 +37,11 @@ import {
   isDotLottie,
   isElementInViewport,
   isLottie,
+  isWebGLSupported,
+  isWebGPUSupported,
 } from './utils';
+
+let canvasId = 0;
 
 const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
   if (mode === 'reverse') {
@@ -119,11 +134,41 @@ export class DotLottie {
 
   private static _wasmModule: MainModule | null = null;
 
+  private static _webglSupported: boolean | null = null;
+
+  private static _webgpuSupported: boolean | null = null;
+
   private _renderConfig: RenderConfig = {};
+
+  private _activeBackend: RendererBackend = 'software';
 
   private _isFrozen: boolean = false;
 
   private _backgroundColor: string | null = null;
+
+  // Software target
+  private _frameBufferPtr: number | null = null;
+
+  private _frameBufferSize: number = 0;
+
+  private _frameBufferView: Uint8ClampedArray | null = null;
+
+  private _imageData: ImageData | null = null;
+
+  // WebGL target
+  private _glContext: number | null = null;
+
+  private static _glContextCount: number = 0;
+
+  // WebGPU target
+
+  private static _wgpuSurfaceCount: number = 0;
+
+  private static _deviceHandle: number | null = null;
+
+  private static _instanceHandle: number | null = null;
+
+  private _surfaceHandle: number | null = null;
 
   // Bound event listeners for state machine
   private _boundOnClick: ((event: MouseEvent) => void) | null = null;
@@ -145,6 +190,8 @@ export class DotLottie {
   ) {
     this._canvas = config.canvas;
 
+    this._activeBackend = config.renderer || 'software';
+
     this._eventManager = new EventManager();
     this._frameManager = new AnimationFrameManager();
     this._renderConfig = {
@@ -154,7 +201,15 @@ export class DotLottie {
       freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
     };
 
-    DotLottieWasmLoader.load()
+    DotLottieWasmLoader.load({
+      preinitializedWebGPUDevice: async () => {
+        if (this._activeBackend === 'webgpu') {
+          return createWebGPUDevice();
+        }
+
+        return null;
+      },
+    })
       .then((module) => {
         DotLottie._wasmModule = module;
 
@@ -244,6 +299,52 @@ export class DotLottie {
           layout: createCoreLayout(config.layout, module),
         });
 
+        if (this._activeBackend === 'webgl') {
+          if (DotLottie._glContextCount >= 16) {
+            this._fallbackToSoftware('Maximum WebGL context limit reached');
+          } else if (DotLottie._checkWebGLSupport()) {
+            try {
+              this._initializeWebGL();
+
+              if (this._glContext === null) {
+                this._fallbackToSoftware('Failed to create WebGL context');
+              } else {
+                this._setGlTarget(this._canvas.width, this._canvas.height);
+              }
+            } catch (error) {
+              this._fallbackToSoftware(
+                `WebGL initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+              );
+            }
+          } else {
+            this._fallbackToSoftware('WebGL is not supported in this browser');
+          }
+        }
+
+        if (this._activeBackend === 'webgpu') {
+          if (DotLottie._checkWebGPUSupport()) {
+            try {
+              this._initializeWebGPUCanvas();
+
+              if (!DotLottie._deviceHandle || !DotLottie._instanceHandle || !this._surfaceHandle) {
+                this._fallbackToSoftware('Failed to get WebGPU handles from WASM module');
+              } else {
+                this._setWgTarget(this._canvas.width, this._canvas.height);
+              }
+            } catch (error) {
+              this._fallbackToSoftware(
+                `WebGPU initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+              );
+            }
+          } else {
+            this._fallbackToSoftware('WebGPU is not supported in this browser');
+          }
+        }
+
+        if (this._activeBackend === 'software') {
+          this._setSwTarget(this._canvas.width, this._canvas.height);
+        }
+
         this._stateMachineId = config.stateMachineId ?? '';
         this._stateMachineConfig = config.stateMachineConfig ?? null;
 
@@ -262,16 +363,175 @@ export class DotLottie {
         }
       })
       .catch((error) => {
+        console.error('WASM module loading failed:', error);
+
+        // Final fallback error handling
         this._eventManager.dispatch({
           type: 'loadError',
-          error: new Error(`Failed to load wasm module: ${error}`),
+          error: new Error(`Failed to load wasm module with ${this._activeBackend} backend: ${error.message}`),
         });
       });
+  }
+
+  private _setSwTarget(width: number, height: number): void {
+    if (!this._dotLottieCore || !DotLottie._wasmModule) return;
+
+    if (this._frameBufferPtr) {
+      DotLottie._wasmModule._free(this._frameBufferPtr);
+    }
+
+    this._frameBufferSize = width * height * BYTES_PER_PIXEL;
+    this._frameBufferPtr = DotLottie._wasmModule._malloc(this._frameBufferSize);
+
+    if (!this._frameBufferPtr) {
+      this._dispatchError('Failed to allocate frame buffer');
+
+      return;
+    }
+
+    if (
+      !this._dotLottieCore.setSwTarget(
+        BigInt(this._frameBufferPtr),
+        width,
+        width,
+        height,
+        DotLottie._wasmModule.ColorSpace.ABGR8888S,
+      )
+    ) {
+      this._dispatchError('Failed to set software target');
+    }
+  }
+
+  private _initializeWebGL(): void {
+    if (!IS_BROWSER || !(this._canvas instanceof HTMLCanvasElement) || !DotLottie._wasmModule) {
+      throw new Error('WebGL backend requires browser environment with HTMLCanvasElement and loaded WASM module');
+    }
+
+    let canvasSelector = '';
+
+    if (this._canvas.id) {
+      canvasSelector = `#${this._canvas.id}`;
+    } else {
+      canvasId += 1;
+      this._canvas.setAttribute('dl-id', `${canvasId}`);
+
+      canvasSelector = `[dl-id="${canvasId}"]`;
+    }
+
+    this._glContext = DotLottie._wasmModule.webgl_context_create(canvasSelector);
+
+    if (this._glContext === 0) {
+      this._glContext = null;
+    } else {
+      DotLottie._glContextCount += 1;
+    }
+  }
+
+  private _setGlTarget(width: number, height: number): void {
+    if (!this._dotLottieCore || !DotLottie._wasmModule || this._glContext === null) return;
+
+    if (DotLottie._wasmModule.webgl_context_make_current(this._glContext as number) === 0) {
+      const result = this._dotLottieCore.setGlTarget(
+        BigInt(this._glContext),
+        0,
+        width,
+        height,
+        DotLottie._wasmModule.ColorSpace.ABGR8888S,
+      );
+
+      if (!result) {
+        this._dispatchError('Failed to set WebGL target - context may have been lost');
+      }
+    }
+  }
+
+  private _initializeWebGPUCanvas(): void {
+    if (!this._dotLottieCore || !DotLottie._wasmModule || !(this._canvas instanceof HTMLCanvasElement)) {
+      throw new Error('WebGPU backend requires browser environment with HTMLCanvasElement and loaded WASM module');
+    }
+
+    if (!DotLottie._deviceHandle) {
+      DotLottie._deviceHandle = DotLottie._wasmModule.webgpu_get_device();
+    }
+
+    if (!DotLottie._instanceHandle) {
+      DotLottie._instanceHandle = DotLottie._wasmModule.webgpu_get_instance();
+    }
+
+    let canvasSelector = '';
+
+    if (this._canvas.id) {
+      canvasSelector = `#${this._canvas.id}`;
+    } else {
+      canvasId += 1;
+      this._canvas.setAttribute('dl-id', `${canvasId}`);
+
+      canvasSelector = `[dl-id="${canvasId}"]`;
+    }
+
+    this._surfaceHandle = DotLottie._wasmModule.webgpu_get_surface(canvasSelector);
+
+    DotLottie._wgpuSurfaceCount += 1;
+  }
+
+  private _setWgTarget(width: number, height: number): void {
+    if (
+      !this._dotLottieCore ||
+      !DotLottie._wasmModule ||
+      !(this._canvas instanceof HTMLCanvasElement) ||
+      !DotLottie._deviceHandle ||
+      !DotLottie._instanceHandle ||
+      !this._surfaceHandle
+    )
+      return;
+
+    const result = this._dotLottieCore.setWgTarget(
+      BigInt(DotLottie._deviceHandle),
+      BigInt(DotLottie._instanceHandle),
+      BigInt(this._surfaceHandle),
+      width,
+      height,
+      DotLottie._wasmModule.ColorSpace.ABGR8888S,
+      0,
+    );
+
+    if (!result) {
+      this._dispatchError('Failed to set WebGPU target');
+    }
   }
 
   private _dispatchError(message: string): void {
     console.error(message);
     this._eventManager.dispatch({ type: 'loadError', error: new Error(message) });
+  }
+
+  private _fallbackToSoftware(reason: string): void {
+    console.warn(`Falling back to software renderer: ${reason}`);
+    this._activeBackend = 'software';
+
+    if (this._canvas.width && this._canvas.height) {
+      this._setSwTarget(this._canvas.width, this._canvas.height);
+    }
+  }
+
+  private static _checkWebGLSupport(): boolean {
+    if (DotLottie._webglSupported !== null) {
+      return DotLottie._webglSupported;
+    }
+
+    DotLottie._webglSupported = isWebGLSupported();
+
+    return DotLottie._webglSupported;
+  }
+
+  private static _checkWebGPUSupport(): boolean {
+    if (DotLottie._webgpuSupported !== null) {
+      return DotLottie._webgpuSupported;
+    }
+
+    DotLottie._webgpuSupported = isWebGPUSupported();
+
+    return DotLottie._webgpuSupported;
   }
 
   private async _fetchData(src: string): Promise<string | ArrayBuffer> {
@@ -392,10 +652,16 @@ export class DotLottie {
       .catch((error) => this._dispatchError(`Failed to load animation data from URL: ${src}. ${error}`));
   }
 
-  public get buffer(): Uint8Array | null {
+  public get buffer(): Uint8ClampedArray | null {
     if (!this._dotLottieCore) return null;
 
-    return this._dotLottieCore.buffer() as Uint8Array;
+    // Only software rendering has a frame buffer view
+    if (this._activeBackend === 'software') {
+      return this._frameBufferView;
+    }
+
+    // WebGL and WebGPU render directly to canvas, no accessible buffer
+    return null;
   }
 
   public get activeAnimationId(): string | undefined {
@@ -605,41 +871,45 @@ export class DotLottie {
   }
 
   private _draw(): void {
-    if (this._dotLottieCore === null) return;
+    if (this._dotLottieCore === null || !DotLottie._wasmModule) return;
 
-    // Only try to get context if canvas has getContext method and no context exists yet
-    if (!this._context && 'getContext' in this._canvas && typeof this._canvas.getContext === 'function') {
-      this._context = this._canvas.getContext('2d');
-    }
-
-    // Only process visual output if we have a canvas with a valid context
-    if (this._context) {
-      const buffer = this._dotLottieCore.buffer() as ArrayBuffer;
-
-      const expectedLength = this._canvas.width * this._canvas.height * BYTES_PER_PIXEL;
-
-      if (buffer.byteLength !== expectedLength) {
-        console.warn(`Buffer size mismatch: got ${buffer.byteLength}, expected ${expectedLength}`);
-
-        return;
+    if (this._activeBackend === 'software') {
+      // Only try to get context if canvas has getContext method and no context exists yet
+      if (!this._context && 'getContext' in this._canvas && typeof this._canvas.getContext === 'function') {
+        this._context = this._canvas.getContext('2d');
       }
 
-      let imageData = null;
-
-      const clampedBuffer = new Uint8ClampedArray(buffer, 0, buffer.byteLength);
-
-      /* 
-        In Node.js, the ImageData constructor is not available. 
-        You can use createImageData function in the canvas context to create ImageData object.
-      */
-      if (typeof ImageData === 'undefined') {
-        imageData = this._context.createImageData(this._canvas.width, this._canvas.height);
-        imageData.data.set(clampedBuffer);
-      } else {
-        imageData = new ImageData(clampedBuffer, this._canvas.width, this._canvas.height);
+      if (
+        (!this._frameBufferView && this._frameBufferPtr) ||
+        (this._frameBufferView && this._frameBufferView.buffer.byteLength === 0 && this._frameBufferPtr)
+      ) {
+        this._frameBufferView = new Uint8ClampedArray(
+          DotLottie._wasmModule.HEAPU8.buffer,
+          this._frameBufferPtr,
+          this._frameBufferSize,
+        );
       }
 
-      this._context.putImageData(imageData, 0, 0);
+      if (this._context && this._frameBufferPtr && this._frameBufferView) {
+        // Only recreate if the buffer size actually changed (not just the expected length)
+        if (this._frameBufferView.byteLength !== this._frameBufferSize) {
+          this._frameBufferView = new Uint8ClampedArray(
+            DotLottie._wasmModule.HEAPU8.buffer,
+            this._frameBufferPtr,
+            this._frameBufferSize,
+          );
+        }
+
+        if (
+          !this._imageData ||
+          this._imageData.width !== this._canvas.width ||
+          this._imageData.height !== this._canvas.height
+        ) {
+          this._imageData = this._context.createImageData(this._canvas.width, this._canvas.height);
+        }
+        this._imageData.data.set(this._frameBufferView);
+        this._context.putImageData(this._imageData, 0, 0);
+      }
     }
   }
 
@@ -847,6 +1117,34 @@ export class DotLottie {
       this._dotLottieObserverHandle = null;
     }
 
+    // Clean up software rendering resources
+    if (DotLottie._wasmModule && this._frameBufferPtr !== null) {
+      DotLottie._wasmModule._free(this._frameBufferPtr);
+    }
+    this._frameBufferPtr = null;
+    this._imageData = null;
+
+    // Clean up WebGL resources
+    if (DotLottie._wasmModule && this._glContext !== null) {
+      DotLottie._wasmModule.webgl_context_destroy(this._glContext);
+      this._glContext = null;
+      DotLottie._glContextCount -= 1;
+    }
+
+    if (this._surfaceHandle !== null) {
+      this._surfaceHandle = null;
+      DotLottie._wgpuSurfaceCount = Math.max(0, DotLottie._wgpuSurfaceCount - 1);
+
+      if (DotLottie._deviceHandle && DotLottie._wasmModule) {
+        DotLottie._wasmModule.wgpu_device_release(DotLottie._deviceHandle);
+        DotLottie._deviceHandle = null;
+      }
+      if (DotLottie._instanceHandle && DotLottie._wasmModule) {
+        DotLottie._wasmModule.wgpu_instance_release(DotLottie._instanceHandle);
+        DotLottie._instanceHandle = null;
+      }
+    }
+
     this._dotLottieCore?.delete();
     this._dotLottieCore = null;
     this._context = null;
@@ -882,20 +1180,38 @@ export class DotLottie {
   public resize(): void {
     if (!this._dotLottieCore || !this.isLoaded) return;
 
+    let newWidth = this._canvas.width;
+    let newHeight = this._canvas.height;
+
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
 
       const { height: clientHeight, width: clientWidth } = this._canvas.getBoundingClientRect();
 
       if (clientHeight !== 0 && clientWidth !== 0) {
-        this._canvas.width = clientWidth * dpr;
-        this._canvas.height = clientHeight * dpr;
+        newWidth = clientWidth * dpr;
+        newHeight = clientHeight * dpr;
       }
+
+      if (newWidth === this._canvas.width && newHeight === this._canvas.height) {
+        return;
+      }
+
+      this._canvas.width = newWidth;
+      this._canvas.height = newHeight;
     }
 
     const resized = this._dotLottieCore.resize(this._canvas.width, this._canvas.height);
 
     if (resized) {
+      if (this._activeBackend === 'webgl') {
+        this._setGlTarget(this._canvas.width, this._canvas.height);
+      } else if (this._activeBackend === 'webgpu') {
+        this._setWgTarget(this._canvas.width, this._canvas.height);
+      } else {
+        this._setSwTarget(this._canvas.width, this._canvas.height);
+      }
+
       this._draw();
     }
   }
@@ -1054,6 +1370,22 @@ export class DotLottie {
 
   public static setWasmUrl(url: string): void {
     DotLottieWasmLoader.setWasmUrl(url);
+  }
+
+  /**
+   * Check if WebGL is supported in the current browser environment
+   * @returns true if WebGL is supported, false otherwise
+   */
+  public static isWebGLSupported(): boolean {
+    return DotLottie._checkWebGLSupport();
+  }
+
+  /**
+   * Check if WebGPU is supported in the current browser environment
+   * @returns true if WebGPU is supported, false otherwise
+   */
+  public static isWebGPUSupported(): boolean {
+    return DotLottie._checkWebGPUSupport();
   }
 
   /**
