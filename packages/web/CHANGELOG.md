@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.50.2
+
+### Patch Changes
+
+- 7090211: fix: reset playback config when state machine is stopped
+
 ## 0.50.1
 
 ### Patch Changes
