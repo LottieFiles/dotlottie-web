@@ -605,6 +605,13 @@ export class DotLottieWorker {
     await this._updateDotLottieInstanceState();
   }
 
+  public async setLoopCount(loopCount: number): Promise<void> {
+    if (!this._created) return;
+
+    await this._sendMessage('setLoopCount', { instanceId: this._id, loopCount });
+    await this._updateDotLottieInstanceState();
+  }
+
   public async resize(): Promise<void> {
     if (!this._created) return;
 

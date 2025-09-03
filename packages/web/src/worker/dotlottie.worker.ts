@@ -1105,6 +1105,22 @@ const commands: {
       success: true,
     };
   },
+  setLoopCount(request) {
+    const instanceId = request.params.instanceId;
+    const loopCount = request.params.loopCount;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.setLoopCount(loopCount);
+
+    return {
+      success: true,
+    };
+  },
 };
 
 function executeCommand<T extends keyof MethodParamsMap>(rpcRequest: RpcRequest<T>): MethodResultMap[T] {

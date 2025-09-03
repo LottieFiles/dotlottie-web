@@ -217,6 +217,7 @@ export type Marker = {
 export type Config = {
   autoplay: boolean;
   loopAnimation: boolean;
+  loopCount: number;
   mode: Mode;
   speed: number;
   useFrameInterpolation: boolean;

@@ -23,6 +23,7 @@ export interface Config {
   data?: Data;
   layout?: Layout;
   loop?: boolean;
+  loopCount?: number;
   marker?: string;
   mode?: Mode;
   renderConfig?: RenderConfig;
