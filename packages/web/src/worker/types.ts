@@ -84,6 +84,10 @@ export interface MethodParamsMap {
     instanceId: string;
     loop: boolean;
   };
+  setLoopCount: {
+    instanceId: string;
+    loopCount: number;
+  };
   setMarker: {
     instanceId: string;
     marker: string;
@@ -376,6 +380,7 @@ export interface MethodResultMap {
   setFrame: void;
   setLayout: void;
   setLoop: void;
+  setLoopCount: void;
   setMarker: void;
   setMode: void;
   setRenderConfig: void;

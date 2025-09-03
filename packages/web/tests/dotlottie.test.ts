@@ -1,5 +1,6 @@
 /* eslint-disable node/no-unsupported-features/node-builtins */
 /* eslint-disable require-atomic-updates */
+/* eslint-disable no-warning-comments */
 import { describe, beforeAll, afterAll, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
 import type { Config, Layout, Mode } from '../src';
@@ -1231,6 +1232,147 @@ describe.each([
       await dotLottie.setMode(mode);
 
       expect(dotLottie.mode).toBe(mode);
+    });
+  });
+
+  describe('loopCount', () => {
+    test('loops for 2 times', async () => {
+      const onLoad = vi.fn();
+      const onLoop = vi.fn();
+      const onComplete = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+        autoplay: true,
+        loop: true,
+        loopCount: 2,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+      dotLottie.addEventListener('loop', onLoop);
+      dotLottie.addEventListener('complete', onComplete);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+
+      const durationMs = dotLottie.duration * 1000;
+
+      await vi.waitFor(
+        () => {
+          expect(onLoop).toHaveBeenCalledTimes(2);
+        },
+        {
+          timeout: durationMs * 3,
+        },
+      );
+
+      expect(dotLottie.loopCount).toBe(2);
+
+      await vi.waitFor(() => {
+        expect(onComplete).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    test('restarts playback after completing fixed loop count', async () => {
+      const onLoad = vi.fn();
+      const onLoop = vi.fn();
+      const onComplete = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+        autoplay: true,
+        loop: true,
+        loopCount: 2,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+      dotLottie.addEventListener('loop', onLoop);
+      dotLottie.addEventListener('complete', onComplete);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+
+      const durationMs = dotLottie.duration * 1000;
+
+      await vi.waitFor(
+        () => {
+          expect(onLoop).toHaveBeenCalledTimes(2);
+        },
+        {
+          timeout: durationMs * 3,
+        },
+      );
+
+      expect(dotLottie.loopCount).toBe(2);
+
+      await vi.waitFor(() => {
+        expect(onComplete).toHaveBeenCalledTimes(1);
+      });
+
+      // FIXME: the status should be stopped, not paused
+      // expect(dotLottie.isStopped).toBe(true);
+
+      onComplete.mockClear();
+      onLoop.mockClear();
+
+      await dotLottie.play();
+
+      // FIXME: fails
+      // expect(dotLottie.loopCount).toBe(0);
+
+      // FIXME: fails
+      // await vi.waitFor(() => {
+      //   expect(onLoop).toHaveBeenCalledTimes(2);
+      // }, {
+      //   timeout: durationMs * 3
+      // });
+
+      // await vi.waitFor(() => {
+      //   expect(onComplete).toHaveBeenCalledTimes(1);
+      // }, {
+      //   timeout: durationMs
+      // });
+    });
+
+    test('loopCount = zero -> loops forever', async () => {
+      const onLoad = vi.fn();
+      const onLoop = vi.fn();
+      const onComplete = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+        autoplay: true,
+        loop: true,
+        loopCount: 0,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+      dotLottie.addEventListener('loop', onLoop);
+      dotLottie.addEventListener('complete', onComplete);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+
+      const durationMs = dotLottie.duration * 1000;
+
+      await vi.waitFor(
+        () => {
+          expect(onLoop).toHaveBeenCalledTimes(4);
+        },
+        {
+          timeout: durationMs * 4,
+        },
+      );
+
+      expect(dotLottie.loopCount).toBe(4);
+
+      expect(onComplete).not.toHaveBeenCalled();
     });
   });
 

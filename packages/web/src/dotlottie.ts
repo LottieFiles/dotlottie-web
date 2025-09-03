@@ -236,6 +236,7 @@ export class DotLottie {
           autoplay: config.autoplay ?? false,
           backgroundColor: 0,
           loopAnimation: config.loop ?? false,
+          loopCount: config.loopCount ?? 0,
           mode: createCoreMode(config.mode ?? 'forward', module),
           segment: createCoreSegment(config.segment ?? [], module),
           speed: config.speed ?? 1,
@@ -587,6 +588,7 @@ export class DotLottie {
       autoplay: config.autoplay ?? false,
       backgroundColor: 0,
       loopAnimation: config.loop ?? false,
+      loopCount: config.loopCount ?? 0,
       mode: createCoreMode(config.mode ?? 'forward', DotLottie._wasmModule),
       segment: createCoreSegment(config.segment ?? [], DotLottie._wasmModule),
       speed: config.speed ?? 1,
@@ -798,6 +800,15 @@ export class DotLottie {
     this._dotLottieCore.setConfig({
       ...this._dotLottieCore.config(),
       loopAnimation: loop,
+    });
+  }
+
+  public setLoopCount(loopCount: number): void {
+    if (this._dotLottieCore === null) return;
+
+    this._dotLottieCore.setConfig({
+      ...this._dotLottieCore.config(),
+      loopCount,
     });
   }
 
