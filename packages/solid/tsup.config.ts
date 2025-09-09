@@ -9,5 +9,5 @@ export default defineConfig({
   format: ['esm'],
   tsconfig: 'tsconfig.build.json',
   external: ['solid-js'],
-  esbuildPlugins: [solidPlugin()],
+  esbuildPlugins: [solidPlugin() as any],
 });
