@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-wc",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "type": "module",
   "description": "Web component wrapper around the dotlottie-web library",
   "repository": {

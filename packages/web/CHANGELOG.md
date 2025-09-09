@@ -1,5 +1,15 @@
 # @lottiefiles/dotlottie-web
 
+## 0.51.0
+
+### Minor Changes
+
+- bfac3c6: feat: added loopCount to DotLottie's config to control the number of playback loops
+
+### Patch Changes
+
+- e72e6e8: fix: rerender on canvas resize
+
 ## 0.50.2
 
 ### Patch Changes
