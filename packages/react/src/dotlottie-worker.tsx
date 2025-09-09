@@ -2,6 +2,7 @@
 
 import type { Config } from '@lottiefiles/dotlottie-web';
 import { DotLottieWorker } from '@lottiefiles/dotlottie-web';
+import type { JSX } from 'react';
 
 import { BaseDotLottieReact } from './base-dotlottie-react';
 import type { BaseDotLottieProps } from './base-dotlottie-react';
