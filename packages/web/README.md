@@ -16,6 +16,7 @@
   * [What is dotLottie?](#what-is-dotlottie)
 * [Documentation](#documentation)
 * [Supported Platforms](#supported-platforms)
+  * [Browser Requirements](#browser-requirements)
 * [Live Examples](#live-examples)
 * [Contributing](#contributing)
 * [Issues](#issues)
@@ -37,6 +38,39 @@ To get started with `@lottiefiles/dotlottie-web`, follow the [documentation here
 ## Supported Platforms
 
 `@lottiefiles/dotlottie-web` is an isomorphic library designed to work in both browser and Node.js environments. It supports Node.js version 18 and higher, as well as all major web browsers.
+
+### Browser Requirements
+
+The library requires modern browser features for optimal performance. The following browser APIs are essential:
+
+| Feature             | Required   | Can I Use                                                      |
+| ------------------- | ---------- | -------------------------------------------------------------- |
+| **WebAssembly**     | ✅ Yes      | [WebAssembly support](https://caniuse.com/wasm)                |
+| **Canvas 2D API**   | ✅ Yes      | [Canvas 2D support](https://caniuse.com/canvas)                |
+| **Fetch API**       | ✅ Yes      | [Fetch API support](https://caniuse.com/fetch)                 |
+| **Web Workers**     | Optional\* | [Web Workers support](https://caniuse.com/webworkers)          |
+| **OffscreenCanvas** | Optional\* | [OffscreenCanvas support](https://caniuse.com/offscreencanvas) |
+
+\*Optional features enhance performance but aren't required for basic functionality.
+
+#### Minimum Browser Versions
+
+Based on WebAssembly support requirements:
+
+* **Chrome**: 57+ (March 2017)
+* **Firefox**: 52+ (March 2017)
+* **Safari**: 11+ (September 2017)
+* **Edge**: 16+ (October 2017)
+* **Opera**: 44+ (March 2017)
+* **iOS Safari**: 11+ (September 2017)
+* **Android Browser**: 81+ (February 2020)
+
+#### Enhanced Features
+
+* **Web Workers**: Enable background processing for better performance
+* **OffscreenCanvas**: Allow rendering on worker threads for improved responsiveness
+
+For legacy browser support, consider using WebAssembly polyfills, though performance may be significantly reduced.
 
 ## Live Examples
 
