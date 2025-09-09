@@ -1,5 +1,17 @@
 # @lottiefiles/dotlottie-react
 
+## 0.16.0
+
+### Minor Changes
+
+- 21239a9: chore: update React and TypeScript type definitions to version 19
+
+### Patch Changes
+
+- Updated dependencies [e72e6e8]
+- Updated dependencies [bfac3c6]
+  - @lottiefiles/dotlottie-web@0.51.0
+
 ## 0.15.2
 
 ### Patch Changes
