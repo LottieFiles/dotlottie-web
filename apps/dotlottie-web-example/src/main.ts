@@ -461,17 +461,17 @@ fetch(
         themeSelect.appendChild(option);
       }
 
-      // const markers = dotLottie.markers();
+      const markers = dotLottie.markers();
 
-      // for (const marker of markers) {
-      //   const option = document.createElement('option');
+      for (const marker of markers) {
+        const option = document.createElement('option');
 
-        // option.value = marker.name;
+        option.value = marker.name;
 
-        // option.textContent = marker.name;
+        option.textContent = marker.name;
 
-      //   markerSelect.appendChild(option);
-      // }
+        markerSelect.appendChild(option);
+      }
 
       activeAnimationSpan.textContent = dotLottie.activeAnimationId ?? 'None';
 
