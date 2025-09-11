@@ -1,6 +1,5 @@
 /* eslint-disable node/no-unsupported-features/node-builtins */
 /* eslint-disable require-atomic-updates */
-/* eslint-disable no-warning-comments */
 import { describe, beforeAll, afterAll, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
 import type { Config, Layout, Mode } from '../src';
@@ -1268,7 +1267,7 @@ describe.each([
         },
       );
 
-      expect(dotLottie.loopCount).toBe(2);
+      expect(dotLottie.loopCount).toBe(0);
 
       await vi.waitFor(() => {
         expect(onComplete).toHaveBeenCalledTimes(1);
@@ -1307,35 +1306,38 @@ describe.each([
         },
       );
 
-      expect(dotLottie.loopCount).toBe(2);
+      expect(dotLottie.loopCount).toBe(0);
 
       await vi.waitFor(() => {
         expect(onComplete).toHaveBeenCalledTimes(1);
       });
 
-      // FIXME: the status should be stopped, not paused
-      // expect(dotLottie.isStopped).toBe(true);
+      expect(dotLottie.isStopped).toBe(true);
 
       onComplete.mockClear();
       onLoop.mockClear();
 
       await dotLottie.play();
 
-      // FIXME: fails
-      // expect(dotLottie.loopCount).toBe(0);
+      expect(dotLottie.loopCount).toBe(0);
 
-      // FIXME: fails
-      // await vi.waitFor(() => {
-      //   expect(onLoop).toHaveBeenCalledTimes(2);
-      // }, {
-      //   timeout: durationMs * 3
-      // });
+      await vi.waitFor(
+        () => {
+          expect(onLoop).toHaveBeenCalledTimes(2);
+        },
+        {
+          timeout: durationMs * 3,
+        },
+      );
 
-      // await vi.waitFor(() => {
-      //   expect(onComplete).toHaveBeenCalledTimes(1);
-      // }, {
-      //   timeout: durationMs
-      // });
+      await vi.waitFor(
+        () => {
+          expect(onComplete).toHaveBeenCalledTimes(1);
+        },
+        {
+          timeout: durationMs,
+        },
+      );
     });
 
     test('loopCount = zero -> loops forever', async () => {
