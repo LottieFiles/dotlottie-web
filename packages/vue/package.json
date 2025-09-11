@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-vue",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "type": "module",
   "description": "Vue wrapper around the dotlottie-web library",
   "repository": {

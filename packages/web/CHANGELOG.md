@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.51.1
+
+### Patch Changes
+
+- f353c46: fix: resetting the loops count after play
+
 ## 0.51.0
 
 ### Minor Changes
