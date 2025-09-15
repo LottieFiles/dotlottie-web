@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.51.2
+
+### Patch Changes
+
+- 30c6770: fixed on_complete firing
+
 ## 0.51.1
 
 ### Patch Changes
