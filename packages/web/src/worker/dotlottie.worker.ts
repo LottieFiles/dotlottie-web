@@ -392,6 +392,28 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
 const commands: {
   [K in keyof MethodParamsMap]: (request: RpcRequest<K>) => MethodResultMap[K];
 } = {
+  setTransform(request) {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.setTransform(request.params.transform);
+  },
+  getTransform(request) {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.getTransform();
+  },
   getDotLottieInstanceState(request) {
     const instanceId = request.params.instanceId;
 

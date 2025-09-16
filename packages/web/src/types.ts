@@ -1,3 +1,5 @@
+export type Transform = [number, number, number, number, number, number, number, number, number];
+
 export interface RenderConfig {
   autoResize?: boolean;
   devicePixelRatio?: number;
