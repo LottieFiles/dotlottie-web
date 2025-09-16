@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.52.1
+
+### Patch Changes
+
+- 11b1fc1: fix: rerender after animation transform
+
 ## 0.52.0
 
 ### Minor Changes
