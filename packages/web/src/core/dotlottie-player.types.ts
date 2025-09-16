@@ -132,6 +132,7 @@ export interface DotLottiePlayer extends ClassHandle {
   animationSize(): VectorFloat;
   subscribe(_0: Observer | null): Observer | null;
   stateMachineFrameworkSetup(): VectorString;
+  getTransform(): VectorFloat;
   stateMachineSubscribe(_0: StateMachineObserver | null): StateMachineObserver | null;
   stateMachineInternalSubscribe(_0: StateMachineInternalObserver | null): StateMachineInternalObserver | null;
   clear(): void;
@@ -153,6 +154,7 @@ export interface DotLottiePlayer extends ClassHandle {
   tick(): boolean;
   tweenStop(): boolean;
   isTweening(): boolean;
+  setTransform(_0: VectorFloat): boolean;
   setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
   loopCount(): number;
   resize(_0: number, _1: number): boolean;

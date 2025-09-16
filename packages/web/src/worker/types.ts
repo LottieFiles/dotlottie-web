@@ -26,7 +26,7 @@ import type {
   StateMachineInputFiredEvent,
   StateMachineInternalMessage,
 } from '../event-manager';
-import type { Config, Layout, Mode, RenderConfig, StateMachineConfig } from '../types';
+import type { Config, Layout, Mode, RenderConfig, StateMachineConfig, Transform } from '../types';
 
 import type { DotLottieInstanceState } from './dotlottie';
 
@@ -47,6 +47,9 @@ export interface MethodParamsMap {
     instanceId: string;
   };
   getDotLottieInstanceState: {
+    instanceId: string;
+  };
+  getTransform: {
     instanceId: string;
   };
   load: {
@@ -115,6 +118,10 @@ export interface MethodParamsMap {
   setThemeData: {
     instanceId: string;
     themeData: string;
+  };
+  setTransform: {
+    instanceId: string;
+    transform: Transform;
   };
   setUseFrameInterpolation: {
     instanceId: string;
@@ -267,6 +274,7 @@ export interface MethodResultMap {
   getDotLottieInstanceState: {
     state: DotLottieInstanceState;
   };
+  getTransform: Transform | undefined;
   load: void;
   loadAnimation: void;
   onComplete: {
@@ -388,6 +396,7 @@ export interface MethodResultMap {
   setSpeed: void;
   setTheme: boolean;
   setThemeData: boolean;
+  setTransform: boolean;
   setUseFrameInterpolation: void;
   setViewport: boolean;
   setWasmUrl: void;

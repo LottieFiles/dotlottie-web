@@ -17,7 +17,7 @@ import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
 import { CanvasResizeObserver } from './resize-observer';
-import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data, StateMachineConfig } from './types';
+import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data, StateMachineConfig, Transform } from './types';
 import {
   getDefaultDPR,
   getPointerPosition,
@@ -905,6 +905,32 @@ export class DotLottie {
     if (resized) {
       this._draw();
     }
+  }
+
+  public setTransform(transform: Transform): boolean {
+    if (!this._dotLottieCore || !DotLottie._wasmModule) return false;
+
+    const transformVector = new DotLottie._wasmModule.VectorFloat();
+
+    for (const val of transform) {
+      transformVector.push_back(val);
+    }
+
+    return this._dotLottieCore.setTransform(transformVector);
+  }
+
+  public getTransform(): Transform | undefined {
+    if (!this._dotLottieCore) return undefined;
+
+    const transform: Transform = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    const transformVector = this._dotLottieCore.getTransform();
+
+    for (let i = 0; i < transformVector.size(); i += 1) {
+      transform[i] = transformVector.get(i) as number;
+    }
+
+    return transform;
   }
 
   public setSegment(startFrame: number, endFrame: number): void {

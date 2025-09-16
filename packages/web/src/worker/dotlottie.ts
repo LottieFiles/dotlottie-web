@@ -4,7 +4,7 @@ import type { EventType, EventListener, FrameEvent, StateMachineInternalMessage 
 import { EventManager } from '../event-manager';
 import { OffscreenObserver } from '../offscreen-observer';
 import { CanvasResizeObserver } from '../resize-observer';
-import type { Config, Layout, Manifest, Mode, RenderConfig, StateMachineConfig } from '../types';
+import type { Config, Layout, Manifest, Mode, RenderConfig, StateMachineConfig, Transform } from '../types';
 import { getDefaultDPR, getPointerPosition, handleOpenUrl, isElementInViewport } from '../utils';
 
 import type { MethodParamsMap, MethodResultMap, RpcRequest, RpcResponse } from './types';
@@ -742,6 +742,18 @@ export class DotLottieWorker {
     if (!this._created) return false;
 
     return this._sendMessage('tweenToMarker', { instanceId: this._id, marker, duration });
+  }
+
+  public async setTransform(transform: Transform): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('setTransform', { instanceId: this._id, transform });
+  }
+
+  public async getTransform(): Promise<Transform | undefined> {
+    if (!this._created) return undefined;
+
+    return this._sendMessage('getTransform', { instanceId: this._id });
   }
 
   private async _sendMessage<T extends keyof MethodParamsMap>(
