@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.52.0
+
+### Minor Changes
+
+- 0a5dd40: feat: add animation getTransform and setTransform methods
+
 ## 0.51.2
 
 ### Patch Changes
