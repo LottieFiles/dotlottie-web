@@ -916,7 +916,13 @@ export class DotLottie {
       transformVector.push_back(val);
     }
 
-    return this._dotLottieCore.setTransform(transformVector);
+    const ok = this._dotLottieCore.setTransform(transformVector);
+
+    if (ok && this._dotLottieCore.render()) {
+      this._draw();
+    }
+
+    return ok;
   }
 
   public getTransform(): Transform | undefined {
