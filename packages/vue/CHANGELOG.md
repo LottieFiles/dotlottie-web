@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-vue
 
+## 0.10.0
+
+### Minor Changes
+
+- 7c812dc: feat: add stateMachineId and stateMachineConfig props
+
 ## 0.9.7
 
 ### Patch Changes
