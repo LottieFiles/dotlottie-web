@@ -20,6 +20,8 @@
 	export let layout: Config['layout'] = undefined;
 	export let animationId: Config['animationId'] = '';
 	export let themeId: Config['themeId'] = '';
+	export let stateMachineId: Config['stateMachineId'] = undefined;
+	export let stateMachineConfig: Config['stateMachineConfig'] = undefined;
 
 	export let playOnHover: boolean = false;
 	export let themeData: string = '';
@@ -56,7 +58,9 @@
 			backgroundColor,
 			mode,
 			animationId,
-			themeId
+			themeId,
+			stateMachineId,
+			stateMachineConfig
 		});
 
 		if (dotLottieRefCallback) {
@@ -138,9 +142,11 @@
 			marker,
 			layout,
 			animationId,
-			themeId
+			themeId,
+			stateMachineId,
+			stateMachineConfig
         });
-        prevSrc = src; 
+        prevSrc = src;
     }
 
 	$: if (dotLottie && data !== prevData) {
@@ -158,7 +164,9 @@
 			marker,
 			layout,
 			animationId,
-			themeId
+			themeId,
+			stateMachineId,
+			stateMachineConfig
 		});
 		prevData = data;
 	}
@@ -173,6 +181,26 @@
 
 	$: if (dotLottie && dotLottie.isLoaded) {
 		dotLottie.setThemeData(themeData);
+	}
+
+	$: {
+		if (dotLottie && dotLottie.isLoaded) {
+			if (typeof stateMachineId === 'string' && stateMachineId) {
+				const smLoaded = dotLottie.stateMachineLoad(stateMachineId);
+				
+				if (smLoaded) {
+					dotLottie.stateMachineStart();
+				}
+			} else {
+				dotLottie.stateMachineStop();
+			}
+		}
+	}
+
+	$: {
+		if (dotLottie) {
+			dotLottie.stateMachineSetConfig(stateMachineConfig ?? null);
+		}
 	}
 </script>
 

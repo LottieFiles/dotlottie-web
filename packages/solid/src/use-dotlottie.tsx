@@ -286,6 +286,42 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
     ),
   );
 
+  createEffect(
+    on(
+      () => config.stateMachineId,
+      () => {
+        const dotLottieInstance = dotLottie();
+
+        if (!dotLottieInstance) return;
+
+        if (dotLottieInstance.isLoaded) {
+          if (typeof config.stateMachineId === 'string' && config.stateMachineId.length > 0) {
+            const smLoaded = dotLottieInstance.stateMachineLoad(config.stateMachineId);
+
+            if (smLoaded) {
+              dotLottieInstance.stateMachineStart();
+            }
+          } else {
+            dotLottieInstance.stateMachineStop();
+          }
+        }
+      },
+    ),
+  );
+
+  createEffect(
+    on(
+      () => config.stateMachineConfig,
+      () => {
+        const dotLottieInstance = dotLottie();
+
+        if (!dotLottieInstance) return;
+
+        dotLottieInstance.stateMachineSetConfig(config.stateMachineConfig ?? null);
+      },
+    ),
+  );
+
   return {
     dotLottie,
     setCanvasRef,

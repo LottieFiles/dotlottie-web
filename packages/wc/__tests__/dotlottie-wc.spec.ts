@@ -7,6 +7,7 @@ import type { DotLottieWC } from '../src/dotlottie-wc';
 
 const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
 const lottieSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
+const smSrc = new URL('./__fixtures__/sm.lottie', import.meta.url).href;
 
 setWasmUrl(new URL('../../web/src/core/dotlottie-player.wasm', import.meta.url).href);
 
@@ -496,6 +497,49 @@ describe.each([{ elementName: 'dotlottie-wc' as const }, { elementName: 'dotlott
 
       expect(destroy).toHaveBeenCalledTimes(1);
       expect(element.dotLottie).not.toBe(dotLottie);
+    });
+
+    test('calls stateMachineLoad and stateMachineStart when statemachineid attribute changes', async () => {
+      const { element, rerender } = render(elementName, { src: smSrc });
+
+      const dotLottie = element.dotLottie as DotLottie | DotLottieWorker;
+
+      await vi.waitFor(() => {
+        expect(dotLottie.isLoaded).toBe(true);
+      });
+
+      const stateMachineLoad = vi.spyOn(dotLottie, 'stateMachineLoad').mockReturnValue(true);
+      const stateMachineStart = vi.spyOn(dotLottie, 'stateMachineStart');
+      const stateMachineStop = vi.spyOn(dotLottie, 'stateMachineStop');
+
+      rerender({ src: smSrc, statemachineid: 'testSM' });
+
+      expect(stateMachineLoad).toHaveBeenCalledTimes(1);
+      expect(stateMachineLoad).toHaveBeenCalledWith('testSM');
+      expect(stateMachineStart).toHaveBeenCalledTimes(1);
+
+      rerender({ src: smSrc });
+
+      expect(stateMachineStop).toHaveBeenCalledTimes(1);
+    });
+
+    test('calls stateMachineSetConfig when statemachineconfig attribute changes', async () => {
+      const { element, rerender } = render(elementName, { src: smSrc });
+
+      const dotLottie = element.dotLottie as DotLottie | DotLottieWorker;
+
+      await vi.waitFor(() => {
+        expect(dotLottie.isLoaded).toBe(true);
+      });
+
+      const stateMachineSetConfig = vi.spyOn(dotLottie, 'stateMachineSetConfig');
+
+      const config = { openUrlPolicy: { whitelist: ['*'] } };
+
+      rerender({ src: smSrc, statemachineconfig: JSON.stringify(config) });
+
+      expect(stateMachineSetConfig).toHaveBeenCalledTimes(1);
+      expect(stateMachineSetConfig).toHaveBeenCalledWith(config);
     });
   },
 );

@@ -47,6 +47,12 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
   @property({ type: String })
   public workerId?: string;
 
+  @property({ type: String })
+  public stateMachineId: Config['stateMachineId'];
+
+  @property({ type: Object })
+  public stateMachineConfig: Config['stateMachineConfig'];
+
   @state()
   public dotLottie: T | null = null;
 
@@ -84,6 +90,8 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
       useFrameInterpolation: this.useFrameInterpolation,
       themeId: this.themeId,
       animationId: this.animationId,
+      stateMachineConfig: this.stateMachineConfig,
+      stateMachineId: this.stateMachineId,
 
       workerId: this.workerId,
     });
@@ -180,6 +188,8 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
         renderConfig: this.renderConfig,
         useFrameInterpolation: this.useFrameInterpolation,
         themeId: this.themeId,
+        stateMachineConfig: this.stateMachineConfig,
+        stateMachineId: this.stateMachineId,
       });
     }
 
@@ -196,7 +206,27 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
         useFrameInterpolation: this.useFrameInterpolation,
         themeId: this.themeId,
         animationId: this.animationId,
+        stateMachineConfig: this.stateMachineConfig,
+        stateMachineId: this.stateMachineId,
       });
+    }
+
+    if (name === 'statemachineid') {
+      if (this.dotLottie.isLoaded) {
+        if (value) {
+          const smLoaded = this.dotLottie.stateMachineLoad(value);
+
+          if (smLoaded) {
+            this.dotLottie.stateMachineStart();
+          }
+        } else {
+          this.dotLottie.stateMachineStop();
+        }
+      }
+    }
+
+    if (name === 'statemachineconfig') {
+      this.dotLottie.stateMachineSetConfig(value ? JSON.parse(value) : null);
     }
   }
 

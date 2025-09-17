@@ -46,6 +46,8 @@ export const DotLottieVue = defineComponent({
     themeData: { type: String as PropType<DotLottieVueProps['themeData']>, required: false },
     themeId: { type: String as PropType<DotLottieVueProps['themeId']>, required: false },
     layout: { type: Object as PropType<DotLottieVueProps['layout']>, required: false },
+    stateMachineId: { type: String as PropType<DotLottieVueProps['stateMachineId']>, required: false },
+    stateMachineConfig: { type: Object as PropType<DotLottieVueProps['stateMachineConfig']>, required: false },
   },
 
   setup(props: DotLottieVueProps, { attrs, expose }: SetupContext): () => VNode {
@@ -63,6 +65,8 @@ export const DotLottieVue = defineComponent({
       segment,
       speed,
       src,
+      stateMachineConfig,
+      stateMachineId,
       themeId,
       useFrameInterpolation,
     } = toRefs(props);
@@ -98,6 +102,8 @@ export const DotLottieVue = defineComponent({
         segment: segment?.value,
         speed: speed?.value,
         src: src?.value,
+        stateMachineConfig: stateMachineConfig?.value,
+        stateMachineId: stateMachineId?.value,
         themeId: themeId?.value,
         useFrameInterpolation: useFrameInterpolation?.value,
         ...config,
@@ -259,6 +265,33 @@ export const DotLottieVue = defineComponent({
           });
         }
       },
+    );
+
+    watch(
+      () => stateMachineId?.value,
+      (newVal) => {
+        if (dotLottie && dotLottie.isLoaded) {
+          if (typeof newVal === 'string' && newVal) {
+            const smLoaded = dotLottie.stateMachineLoad(newVal);
+
+            if (smLoaded) {
+              dotLottie.stateMachineStart();
+            }
+          } else {
+            dotLottie.stateMachineStop();
+          }
+        }
+      },
+    );
+
+    watch(
+      () => stateMachineConfig?.value,
+      (newVal) => {
+        if (dotLottie) {
+          dotLottie.stateMachineSetConfig(newVal ?? null);
+        }
+      },
+      { deep: true },
     );
 
     onMounted(() => {
