@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.8.0
+
+### Minor Changes
+
+- 7c812dc: feat: add stateMachineId and stateMachineConfig props
+
 ## 0.7.7
 
 ### Patch Changes

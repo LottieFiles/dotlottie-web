@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-react
 
+## 0.17.0
+
+### Minor Changes
+
+- 7c812dc: feat: add stateMachineId and stateMachineConfig props
+
 ## 0.16.4
 
 ### Patch Changes

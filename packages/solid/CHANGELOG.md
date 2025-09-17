@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.5.0
+
+### Minor Changes
+
+- 7c812dc: feat: add stateMachineId and stateMachineConfig props
+
 ## 0.4.7
 
 ### Patch Changes
