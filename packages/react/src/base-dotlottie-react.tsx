@@ -61,6 +61,8 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   segment,
   speed,
   src,
+  stateMachineConfig,
+  stateMachineId,
   style,
   themeData,
   themeId,
@@ -91,6 +93,8 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     layout,
     renderConfig,
     animationId,
+    stateMachineConfig,
+    stateMachineId,
   };
 
   const configRef = useRef<Omit<BaseDotLottieProps<T>, 'createDotLottie' | 'dotLottieRefCallback'> | undefined>(config);
@@ -211,6 +215,24 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   useEffect(() => {
     dotLottieRef.current?.setLayout(layout ?? {});
   }, [layout?.fit, layout?.align && layout.align[0], layout?.align && layout.align[1]]);
+
+  useEffect(() => {
+    if (dotLottieRef.current?.isLoaded) {
+      if (typeof stateMachineId === 'string' && stateMachineId) {
+        const smLoaded = dotLottieRef.current.stateMachineLoad(stateMachineId);
+
+        if (smLoaded) {
+          dotLottieRef.current.stateMachineStart();
+        }
+      } else {
+        dotLottieRef.current.stateMachineStop();
+      }
+    }
+  }, [stateMachineId]);
+
+  useEffect(() => {
+    dotLottieRef.current?.stateMachineSetConfig(stateMachineConfig ?? null);
+  }, [stateMachineConfig]);
 
   return (
     <div

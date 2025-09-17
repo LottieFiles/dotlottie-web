@@ -17,6 +17,7 @@ import {
   setCurrentState,
   setLoop,
   setMarkers,
+  setStateMachines,
   setThemes,
   setTotalFrames,
 } from '../store/viewer-slice';
@@ -46,6 +47,7 @@ export default function Players() {
   const segment = useAppSelector((state) => state.viewer.segment);
   const useFrameInterpolation = useAppSelector((state) => state.viewer.useFrameInterpolation);
   const activeMarker = useAppSelector((state) => state.viewer.activeMarker);
+  const activeStateMachineId = useAppSelector((state) => state.viewer.activeStateMachineId);
   const dispatch = useAppDispatch();
 
   const onLoad = useCallback(() => {
@@ -57,6 +59,7 @@ export default function Players() {
       }
       dispatch(setAnimations(dotLottie?.manifest?.animations?.map((item) => item.id) || []));
       dispatch(setThemes(dotLottie?.manifest?.themes || []));
+      dispatch(setStateMachines(dotLottie?.manifest?.stateMachines || []));
       dispatch(setMarkers(dotLottie?.markers()?.map((marker) => marker.name) || []));
     }
   }, [src, dotLottie, dispatch, activeAnimationId]);
@@ -119,6 +122,7 @@ export default function Players() {
     if (!dotLottie) return;
     dispatch(setAnimations(dotLottie?.manifest?.animations?.map((item) => item.id) || []));
     dispatch(setThemes(dotLottie?.manifest?.themes || []));
+    dispatch(setStateMachines(dotLottie?.manifest?.stateMachines || []));
   }, [dotLottie, dispatch]);
 
   return (
@@ -140,6 +144,7 @@ export default function Players() {
                   speed={speed}
                   themeId={activeThemeId}
                   animationId={activeAnimationId}
+                  stateMachineId={activeStateMachineId}
                   segment={segment as [number, number]}
                   marker={activeMarker}
                   dotLottieRefCallback={setDotLottie}

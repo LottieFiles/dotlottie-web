@@ -2,6 +2,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   setActiveAnimationId,
   setActiveMarker,
+  setActiveStateMachineId,
   setActiveThemeId,
   setBackgroundColor,
   setMdode,
@@ -26,6 +27,8 @@ export default function Controls() {
   const segmentInput = useAppSelector((state) => state.viewer.segmentInput);
   const useFrameInterpolation = useAppSelector((state) => state.viewer.useFrameInterpolation);
   const markers = useAppSelector((state) => state.viewer.markers);
+  const stateMachines = useAppSelector((state) => state.viewer.stateMachines);
+  const activeStateMachineId = useAppSelector((state) => state.viewer.activeStateMachineId);
 
   const dispatch = useAppDispatch();
 
@@ -130,6 +133,21 @@ export default function Controls() {
                     label: animation,
                   }))
             }
+          />
+        </InputLabel>
+        <InputLabel lablel="State Machine">
+          <BaseSelect
+            className="w-full"
+            onChange={(event) => {
+              dispatch(setActiveStateMachineId(event.target.value));
+            }}
+            value={activeStateMachineId}
+            placeholder="Select a state machine"
+            emptyMessage="No state machines available for this animation"
+            items={stateMachines.map((stateMachine) => ({
+              value: stateMachine.id,
+              label: stateMachine.id,
+            }))}
           />
         </InputLabel>
         <InputLabel lablel="Themes">

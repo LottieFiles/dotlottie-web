@@ -11,6 +11,8 @@ import { DotLottieReact, DotLottieWorkerReact } from '../src';
 const dotLottieSrc = new URL('./__fixtures__/test.lottie', import.meta.url).href;
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
 const lottieSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
+// eslint-disable-next-line node/no-unsupported-features/node-builtins
+const smSrc = new URL('./__fixtures__/sm.lottie', import.meta.url).href;
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
@@ -766,5 +768,69 @@ describe.each([
     });
 
     expect(setLayout).toHaveBeenCalledWith({ fit: 'cover' });
+  });
+
+  test('calls stateMachineLoad and stateMachineStart when stateMachineId prop changes', async () => {
+    const onLoad = vi.fn();
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = render(<Component src={smSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    dotLottie?.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const stateMachineLoad = vi.spyOn(dotLottie, 'stateMachineLoad').mockReturnValue(true);
+    const stateMachineStart = vi.spyOn(dotLottie, 'stateMachineStart');
+    const stateMachineStop = vi.spyOn(dotLottie, 'stateMachineStop');
+
+    rerender(<Component src={smSrc} autoplay stateMachineId="testSM" dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(stateMachineLoad).toHaveBeenCalledTimes(1);
+      expect(stateMachineStart).toHaveBeenCalledTimes(1);
+    });
+
+    expect(stateMachineLoad).toHaveBeenCalledWith('testSM');
+
+    rerender(<Component src={smSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(stateMachineStop).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  test('calls stateMachineSetConfig when stateMachineConfig prop changes', async () => {
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = render(<Component src={smSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    const stateMachineSetConfig = vi.spyOn(dotLottie, 'stateMachineSetConfig');
+
+    const config = { openUrlPolicy: { whitelist: ['*'] } };
+
+    rerender(
+      <Component src={smSrc} autoplay stateMachineConfig={config} dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(stateMachineSetConfig).toHaveBeenCalledTimes(1);
+    });
+
+    expect(stateMachineSetConfig).toHaveBeenCalledWith(config);
   });
 });
