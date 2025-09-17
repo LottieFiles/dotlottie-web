@@ -28,6 +28,8 @@ interface AnimationSlice {
   };
   markers: string[];
   activeMarker: string;
+  stateMachines: { id: string }[];
+  activeStateMachineId: string;
 }
 
 export const DEFAULT_SRC = 'https://lottie.host/779299c1-d174-4359-a66b-6253897b33e7/yRJTT0fCfq.lottie';
@@ -58,6 +60,8 @@ const initialState: AnimationSlice = {
   },
   markers: [],
   activeMarker: '',
+  stateMachines: [],
+  activeStateMachineId: '',
 };
 
 export const animationSlice = createSlice({
@@ -68,6 +72,8 @@ export const animationSlice = createSlice({
       state.activeAnimationId = '';
       state.activeMarker = '';
       state.markers = [];
+      state.activeStateMachineId = '';
+      state.stateMachines = [];
       state.src = action.payload;
       if (state.src.endsWith('.json') || state.src.startsWith('data:application/json')) {
         state.isJson = true;
@@ -126,6 +132,8 @@ export const animationSlice = createSlice({
       state.activeAnimationId = '';
       state.activeMarker = '';
       state.markers = [];
+      state.activeStateMachineId = '';
+      state.stateMachines = [];
       state.src = DEFAULT_SRC;
       if (state.src.endsWith('.json') || state.src.startsWith('data:application/json')) {
         state.isJson = true;
@@ -153,6 +161,12 @@ export const animationSlice = createSlice({
     },
     setActiveMarker: (state, action) => {
       state.activeMarker = action.payload;
+    },
+    setStateMachines: (state, action) => {
+      state.stateMachines = action.payload;
+    },
+    setActiveStateMachineId: (state, action) => {
+      state.activeStateMachineId = action.payload;
     },
   },
 });
@@ -183,6 +197,8 @@ export const {
   setUseFrameInterpolation,
   setMarkers,
   setActiveMarker,
+  setStateMachines,
+  setActiveStateMachineId,
 } = animationSlice.actions;
 
 export default animationSlice.reducer;
