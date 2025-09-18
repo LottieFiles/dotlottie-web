@@ -93,6 +93,11 @@
                 <div class="example-title">Open URL Example</div>
                 <canvas id="canvas-open-url" style="width: 200px; height: 200px"></canvas>
             </div>
+
+            <div class="example-container">
+                <div class="example-title">OnLoopComplete example</div>
+                <canvas id="canvas-on-loop-complete" style="width: 200px; height: 200px"></canvas>
+            </div>
         </div>
 
         <script type="module">
@@ -153,6 +158,11 @@
                             whitelist: ['https://www.lottiefiles.com'],
                         },
                     },
+                }),
+                onLoopComplete: new DotLottie({
+                    canvas: document.getElementById('canvas-on-loop-complete'),
+                    src: 'https://asset-cdn.lottiefiles.dev/83b48a21-dfb0-4cd0-bad5-238662bfcd8a/57MLQJY15B.lottie',
+                    stateMachineId: 'StateMachine1',
                 }),
             };
 
