@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.52.2
+
+### Patch Changes
+
+- 9ffec52: fixes the state machines internal state whilst tweening
+
 ## 0.52.1
 
 ### Patch Changes
