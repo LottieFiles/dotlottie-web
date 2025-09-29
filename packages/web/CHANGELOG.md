@@ -1,5 +1,17 @@
 # @lottiefiles/dotlottie-web
 
+## 0.53.0
+
+### Minor Changes
+
+- 7f87fe1: feat: upgrade dotlottie-rs v0.1.48 wasm bindings
+- 7f87fe1: feat: added a new `quality` property (0-100) to `renderConfig` that allows balancing the quality and
+  performance of layer effects
+
+### Patch Changes
+
+- 7d8b5aa: fixed open url config creation before starting state machine
+
 ## 0.52.2
 
 ### Patch Changes
