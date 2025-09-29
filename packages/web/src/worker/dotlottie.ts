@@ -534,7 +534,7 @@ export class DotLottieWorker {
   public async setRenderConfig(renderConfig: RenderConfig): Promise<void> {
     if (!this._created) return;
 
-    const { devicePixelRatio, freezeOnOffscreen, ...restConfig } = renderConfig;
+    const { devicePixelRatio, freezeOnOffscreen, quality, ...restConfig } = renderConfig;
 
     await this._sendMessage('setRenderConfig', {
       instanceId: this._id,
@@ -544,6 +544,7 @@ export class DotLottieWorker {
         // devicePixelRatio is a special case, it should be set to the default value if it's not provided
         devicePixelRatio: devicePixelRatio || getDefaultDPR(),
         freezeOnOffscreen: freezeOnOffscreen ?? true,
+        ...(quality !== undefined && { quality }),
       },
     });
 
