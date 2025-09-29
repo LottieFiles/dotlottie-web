@@ -155,6 +155,7 @@ export interface DotLottiePlayer extends ClassHandle {
   tweenStop(): boolean;
   isTweening(): boolean;
   setTransform(_0: VectorFloat): boolean;
+  setQuality(_0: number): boolean;
   setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
   loopCount(): number;
   resize(_0: number, _1: number): boolean;

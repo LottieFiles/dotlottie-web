@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define version and other variables
-VERSION="0.1.47"
+VERSION="0.1.48"
 URL="https://github.com/LottieFiles/dotlottie-rs/releases/download/v${VERSION}/dotlottie-player.wasm.tar.gz"
 TARGET_DIR="./src/core"
 TEMP_DIR="./.tmp/wasm"
@@ -33,6 +33,7 @@ echo "Copying DotLottiePlayer.mjs and DotLottiePlayer.wasm to $TARGET_DIR"
 cp DotLottiePlayer.wasm "../../${TARGET_DIR}/dotlottie-player.wasm"
 cp DotLottiePlayer.mjs "../../${TARGET_DIR}/dotlottie-player.js"
 cp DotLottiePlayer.d.ts "../../${TARGET_DIR}/dotlottie-player.types.ts"
+cp version.txt "../../${TARGET_DIR}/dotlottie-player.version.txt"
 check_success "Copy"
 
 echo "Operation completed successfully."
