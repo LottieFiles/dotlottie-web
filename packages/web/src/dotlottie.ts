@@ -340,6 +340,10 @@ export class DotLottie {
     }
 
     if (loaded) {
+      if (this._renderConfig.quality !== undefined) {
+        this._dotLottieCore.setQuality(this._renderConfig.quality);
+      }
+
       if (IS_BROWSER) {
         this.resize();
       }
@@ -958,7 +962,7 @@ export class DotLottie {
   }
 
   public setRenderConfig(config: RenderConfig): void {
-    const { devicePixelRatio, freezeOnOffscreen, ...restConfig } = config;
+    const { devicePixelRatio, freezeOnOffscreen, quality, ...restConfig } = config;
 
     this._renderConfig = {
       ...this._renderConfig,
@@ -966,7 +970,12 @@ export class DotLottie {
       // devicePixelRatio is a special case, it should be set to the default value if it's not provided
       devicePixelRatio: devicePixelRatio || getDefaultDPR(),
       freezeOnOffscreen: freezeOnOffscreen ?? true,
+      ...(quality !== undefined && { quality }),
     };
+
+    if (quality !== undefined && this._dotLottieCore) {
+      this._dotLottieCore.setQuality(quality);
+    }
 
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       if (this._renderConfig.autoResize) {
@@ -999,6 +1008,9 @@ export class DotLottie {
     const loaded = this._dotLottieCore.loadAnimation(animationId, this._canvas.width, this._canvas.height);
 
     if (loaded) {
+      if (this._renderConfig.quality !== undefined) {
+        this._dotLottieCore.setQuality(this._renderConfig.quality);
+      }
       this.resize();
     }
   }
