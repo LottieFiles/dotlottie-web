@@ -11,6 +11,7 @@
                 background-color: #f5f5f5;
                 min-height: 200vh;
             }
+
             .examples-grid {
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -18,6 +19,7 @@
                 max-width: 1200px;
                 margin: 0 auto;
             }
+
             .example-container {
                 background: white;
                 border-radius: 8px;
@@ -27,6 +29,7 @@
                 flex-direction: column;
                 align-items: center;
             }
+
             .example-title {
                 font-size: 18px;
                 font-weight: bold;
@@ -34,12 +37,14 @@
                 color: #333;
                 text-align: center;
             }
+
             canvas {
                 border: 1px solid #ddd;
                 border-radius: 4px;
             }
         </style>
     </head>
+
     <body>
         <h1>DotLottie State Machine Examples</h1>
 
@@ -116,6 +121,9 @@
                     canvas: document.getElementById('canvas-hover'),
                     src: window.location.origin + '/tests/__fixtures__/sm/hover.lottie',
                     stateMachineId: 'hover',
+                    layout: {
+                        fit: 'none',
+                    },
                 }),
                 starRating: new DotLottie({
                     canvas: document.getElementById('canvas-star-rating'),
