@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.53.1
+
+### Patch Changes
+
+- b4d63f3: fix: preserve animation layout when starting state machine
+
 ## 0.53.0
 
 ### Minor Changes
