@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.54.1
+
+### Patch Changes
+
+- 7fc33a7: fix: 🐛 re-render after applying a theme/slots
+
 ## 0.54.0
 
 ### Minor Changes
