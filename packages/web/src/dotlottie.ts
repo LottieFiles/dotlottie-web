@@ -1052,6 +1052,7 @@ export class DotLottie {
     const themeLoaded = this._dotLottieCore.setTheme(themeId);
 
     if (themeLoaded) {
+      this._dotLottieCore.render();
       this._draw();
     }
 
@@ -1064,6 +1065,7 @@ export class DotLottie {
     const themeReset = this._dotLottieCore.resetTheme();
 
     if (themeReset) {
+      this._dotLottieCore.render();
       this._draw();
     }
 
@@ -1076,6 +1078,7 @@ export class DotLottie {
     const themeLoaded = this._dotLottieCore.setThemeData(themeData);
 
     if (themeLoaded) {
+      this._dotLottieCore.render();
       this._draw();
     }
 
@@ -1085,7 +1088,10 @@ export class DotLottie {
   public setSlots(slots: string): void {
     if (this._dotLottieCore === null) return;
 
-    this._dotLottieCore.setSlots(slots);
+    if (this._dotLottieCore.setSlots(slots)) {
+      this._dotLottieCore.render();
+      this._draw();
+    }
   }
 
   public setLayout(layout: Layout): void {
