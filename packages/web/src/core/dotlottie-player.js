@@ -1444,13 +1444,13 @@ var createDotLottiePlayerModule = (() => {
         X(1, 0);
       }
     }
-    function dc(a, b, c) {
-      var d = Z();
+    function ec(a, b, c, d) {
+      var e = Z();
       try {
-        return R.get(a)(b, c);
-      } catch (e) {
-        Y(d);
-        if (e !== e + 0) throw e;
+        return R.get(a)(b, c, d);
+      } catch (f) {
+        Y(e);
+        if (f !== f + 0) throw f;
         X(1, 0);
       }
     }
@@ -1464,26 +1464,6 @@ var createDotLottiePlayerModule = (() => {
         X(1, 0);
       }
     }
-    function gc(a) {
-      var b = Z();
-      try {
-        R.get(a)();
-      } catch (c) {
-        Y(b);
-        if (c !== c + 0) throw c;
-        X(1, 0);
-      }
-    }
-    function ec(a, b, c, d) {
-      var e = Z();
-      try {
-        return R.get(a)(b, c, d);
-      } catch (f) {
-        Y(e);
-        if (f !== f + 0) throw f;
-        X(1, 0);
-      }
-    }
     function kc(a, b, c, d, e) {
       var f = Z();
       try {
@@ -1491,6 +1471,26 @@ var createDotLottiePlayerModule = (() => {
       } catch (k) {
         Y(f);
         if (k !== k + 0) throw k;
+        X(1, 0);
+      }
+    }
+    function dc(a, b, c) {
+      var d = Z();
+      try {
+        return R.get(a)(b, c);
+      } catch (e) {
+        Y(d);
+        if (e !== e + 0) throw e;
+        X(1, 0);
+      }
+    }
+    function gc(a) {
+      var b = Z();
+      try {
+        R.get(a)();
+      } catch (c) {
+        Y(b);
+        if (c !== c + 0) throw c;
         X(1, 0);
       }
     }
