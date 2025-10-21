@@ -155,6 +155,9 @@ export interface MethodParamsMap {
   stateMachineGetCurrentState: {
     instanceId: string;
   };
+  stateMachineGetInputs: {
+    instanceId: string;
+  };
   stateMachineGetListeners: {
     instanceId: string;
   };
@@ -405,6 +408,7 @@ export interface MethodResultMap {
   stateMachineGetActiveId: string;
   stateMachineGetBooleanInput: boolean | undefined;
   stateMachineGetCurrentState: string;
+  stateMachineGetInputs: string[];
   stateMachineGetListeners: string[];
   stateMachineGetNumericInput: number | undefined;
   stateMachineGetStatus: string;

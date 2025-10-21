@@ -13,6 +13,7 @@ import { createCanvas, sleep, addWasmCSPPolicy } from './test-utils';
 const wasmUrl = new URL('../src/core/dotlottie-player.wasm', import.meta.url).href;
 const jsonSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
+const smSrc = new URL('./__fixtures__/sm/all-inputs.json', import.meta.url).href;
 
 DotLottieClass.setWasmUrl(wasmUrl);
 DotLottieWorkerClass.setWasmUrl(wasmUrl);
@@ -2394,6 +2395,71 @@ describe.each([
       expect(onFreeze).toHaveBeenCalledTimes(1);
 
       expect(dotLottie.isFrozen).toBe(false);
+    });
+  });
+
+  describe('stateMachineGetInputs', () => {
+    test('gets all inputs correctly', async () => {
+      canvas.style.display = 'none';
+
+      const onLoad = vi.fn();
+      const onPlay = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+        autoplay: true,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+      dotLottie.addEventListener('play', onPlay);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+        expect(onPlay).toHaveBeenCalledTimes(1);
+      });
+
+      const response = await fetch(smSrc);
+      const smData = await response.json();
+
+      await dotLottie.stateMachineLoadData(JSON.stringify(smData));
+      await dotLottie.stateMachineStart();
+
+      const inputs = await dotLottie.stateMachineGetInputs();
+
+      // Assert and narrow the type
+      expect(inputs).toBeDefined();
+      const definedInputs = inputs as string[];
+
+      const predefinedInputs: string[] = [
+        'a_exited',
+        'Boolean',
+        'Step',
+        'Event',
+        'rating',
+        'Numeric',
+        'b_exited',
+        'String',
+      ];
+
+      expect(definedInputs.length).toBe(predefinedInputs.length);
+      expect(definedInputs.length % 2).toBe(0);
+
+      // Helper function to convert array to set of pair strings
+      function toSet(arr: string[]): Set<string> {
+        const pairs: string[] = [];
+
+        for (let i = 0; i < arr.length; i += 2) {
+          pairs.push(JSON.stringify([arr[i], arr[i + 1]]));
+        }
+
+        return new Set(pairs);
+      }
+
+      const inputSet = toSet(definedInputs);
+      const predefinedSet = toSet(predefinedInputs);
+
+      expect(inputSet).toEqual(predefinedSet);
     });
   });
 

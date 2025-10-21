@@ -693,6 +693,17 @@ const commands: {
 
     return instance.stateMachineGetStringInput(name);
   },
+  stateMachineGetInputs: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineGetInputs();
+  },
   stateMachineFireEvent: (request) => {
     const instanceId = request.params.instanceId;
     const name = request.params.name;
