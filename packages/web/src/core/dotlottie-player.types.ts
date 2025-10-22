@@ -195,6 +195,7 @@ export interface DotLottiePlayer extends ClassHandle {
   stateMachineGetNumericInput(_0: EmbindString): number;
   stateMachineGetStringInput(_0: EmbindString): string;
   stateMachineGetBooleanInput(_0: EmbindString): boolean;
+  stateMachineGetInputs(): VectorString;
   intersect(_0: number, _1: number, _2: EmbindString): boolean;
   getLayerBounds(_0: EmbindString): VectorFloat;
   tweenToMarker(_0: EmbindString, _1?: number, _2?: VectorFloat): boolean;

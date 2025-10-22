@@ -1530,6 +1530,25 @@ export class DotLottie {
 
   /**
    * @experimental
+   * Get all the inputs of the current state machine. Returns the key name, followed by it's type as a string.
+   * @returns An array of input keys followed by it's type at n+1.
+   */
+  public stateMachineGetInputs(): string[] {
+    if (!this._dotLottieCore) return [];
+
+    const inputsVector = this._dotLottieCore.stateMachineGetInputs();
+
+    const inputs = [];
+
+    for (let i = 0; i < inputsVector.size(); i += 1) {
+      inputs.push(inputsVector.get(i) as string);
+    }
+
+    return inputs;
+  }
+
+  /**
+   * @experimental
    * Fire an event in the state machine
    * @param name - The name of the event to fire
    */

@@ -953,6 +953,17 @@ export class DotLottieWorker {
 
   /**
    * @experimental
+   * Get all inputs
+   * @returns All input keys, followed by their type
+   */
+  public async stateMachineGetInputs(): Promise<string[] | undefined> {
+    if (!this._created) return undefined;
+
+    return this._sendMessage('stateMachineGetInputs', { instanceId: this._id });
+  }
+
+  /**
+   * @experimental
    * Fire an event in the state machine
    * @param name - The name of the event to fire
    */
