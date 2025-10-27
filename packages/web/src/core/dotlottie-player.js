@@ -4,6 +4,28 @@ var createDotLottiePlayerModule = (() => {
   return function (moduleArg = {}) {
     var moduleRtn;
 
+    function _defineProperty(e, r, t) {
+      return (
+        (r = _toPropertyKey(r)) in e
+          ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 })
+          : (e[r] = t),
+        e
+      );
+    }
+    function _toPropertyKey(t) {
+      var i = _toPrimitive(t, 'string');
+      return 'symbol' == typeof i ? i : i + '';
+    }
+    function _toPrimitive(t, r) {
+      if ('object' != typeof t || !t) return t;
+      var e = t[Symbol.toPrimitive];
+      if (void 0 !== e) {
+        var i = e.call(t, r || 'default');
+        if ('object' != typeof i) return i;
+        throw new TypeError('@@toPrimitive must return a primitive value.');
+      }
+      return ('string' === r ? String : Number)(t);
+    }
     var h = moduleArg,
       aa,
       ba,
@@ -60,7 +82,8 @@ var createDotLottiePlayerModule = (() => {
     var F = 0,
       G = null;
     function ua(a) {
-      h.onAbort?.(a);
+      var _h$onAbort;
+      (_h$onAbort = h.onAbort) === null || _h$onAbort === void 0 || _h$onAbort.call(h, a);
       a = 'Aborted(' + a + ')';
       t(a);
       la = !0;
@@ -100,8 +123,8 @@ var createDotLottiePlayerModule = (() => {
       return ya(b, a);
     }
     class Aa {
-      name = 'ExitStatus';
       constructor(a) {
+        _defineProperty(this, 'name', 'ExitStatus');
         this.message = `Program terminated with exit(${a})`;
         this.status = a;
       }
@@ -111,7 +134,9 @@ var createDotLottiePlayerModule = (() => {
       },
       Ca = h.noExitRuntime || !0,
       Da = 'undefined' != typeof TextDecoder ? new TextDecoder() : void 0,
-      Ea = (a = 0, b = NaN) => {
+      Ea = function () {
+        let a = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        let b = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : NaN;
         var c = x,
           d = a + b;
         for (b = a; c[b] && !(b >= d); ) ++b;
@@ -219,7 +244,8 @@ var createDotLottiePlayerModule = (() => {
         return b;
       },
       P;
-    function Ma(a, b, c = {}) {
+    function Ma(a, b) {
+      let c = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       var d = b.name;
       if (!a) throw new P(`type "${d}" must have a positive integer typeid pointer`);
       if (K.hasOwnProperty(a)) {
@@ -230,7 +256,8 @@ var createDotLottiePlayerModule = (() => {
       delete Ka[a];
       J.hasOwnProperty(a) && ((b = J[a]), delete J[a], b.forEach((e) => e()));
     }
-    function M(a, b, c = {}) {
+    function M(a, b) {
+      let c = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       return Ma(a, b, c);
     }
     var Oa = (a) => {
@@ -280,7 +307,10 @@ var createDotLottiePlayerModule = (() => {
       Za = (a, b, c) => {
         if (void 0 === a[b].Ea) {
           var d = a[b];
-          a[b] = function (...e) {
+          a[b] = function () {
+            for (var _len = arguments.length, e = new Array(_len), _key = 0; _key < _len; _key++) {
+              e[_key] = arguments[_key];
+            }
             if (!a[b].Ea.hasOwnProperty(e.length))
               throw new P(
                 `Function '${c}' called with an invalid number of arguments (${e.length}) - expects one of (${a[b].Ea})!`,
@@ -412,14 +442,18 @@ var createDotLottiePlayerModule = (() => {
         void 0 !== h[a].Ea && void 0 !== c ? (h[a].Ea[c] = b) : ((h[a] = b), (h[a].Na = c));
       },
       R,
-      kb = (a, b, c = []) => {
+      kb = function (a, b) {
+        let c = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
         a.includes('j') ? ((a = a.replace(/p/g, 'i')), (b = (0, h['dynCall_' + a])(b, ...c))) : (b = R.get(b)(...c));
         return b;
       },
-      lb =
-        (a, b) =>
-        (...c) =>
-          kb(a, b, c),
+      lb = (a, b) =>
+        function () {
+          for (var _len2 = arguments.length, c = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+            c[_key2] = arguments[_key2];
+          }
+          return kb(a, b, c);
+        },
       S = (a, b) => {
         a = O(a);
         var c = a.includes('j') ? lb(a, b) : R.get(b);
@@ -460,7 +494,10 @@ var createDotLottiePlayerModule = (() => {
         m = Array(n),
         q = [],
         r = [];
-      return Ya(a, function (...A) {
+      return Ya(a, function () {
+        for (var _len3 = arguments.length, A = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+          A[_key3] = arguments[_key3];
+        }
         r.length = 0;
         q.length = k ? 2 : 1;
         q[0] = e;
@@ -605,7 +642,8 @@ var createDotLottiePlayerModule = (() => {
         return c;
       },
       Fb = (a, b, c) => {
-        c ??= 2147483647;
+        var _c;
+        (_c = c) !== null && _c !== void 0 ? _c : (c = 2147483647);
         if (2 > c) return 0;
         c -= 2;
         var d = b;
@@ -627,7 +665,8 @@ var createDotLottiePlayerModule = (() => {
         return d;
       },
       Ib = (a, b, c) => {
-        c ??= 2147483647;
+        var _c2;
+        (_c2 = c) !== null && _c2 !== void 0 ? _c2 : (c = 2147483647);
         if (4 > c) return 0;
         var d = b;
         c = d + c - 4;
@@ -675,8 +714,9 @@ var createDotLottiePlayerModule = (() => {
         if (!(a instanceof Aa || 'unwind' == a)) throw a;
       },
       Sb = (a) => {
+        var _h$onExit;
         ma = a;
-        Ca || 0 < Kb || (h.onExit?.(a), (la = !0));
+        Ca || 0 < Kb || ((_h$onExit = h.onExit) !== null && _h$onExit !== void 0 && _h$onExit.call(h, a), (la = !0));
         throw new Aa(a);
       },
       Tb = (a) => {
@@ -791,7 +831,8 @@ var createDotLottiePlayerModule = (() => {
         return a;
       },
       Wa(a) {
-        this.Ka?.(a);
+        var _this$Ka;
+        (_this$Ka = this.Ka) === null || _this$Ka === void 0 || _this$Ka.call(this, a);
       },
       Ia: 8,
       readValueFromPointer: I,
@@ -929,8 +970,8 @@ var createDotLottiePlayerModule = (() => {
         m: (a, b, c, d, e, f, k, g, l, n, m, q, r) => {
           m = O(m);
           f = S(e, f);
-          g &&= S(k, g);
-          n &&= S(l, n);
+          g && (g = S(k, g));
+          n && (n = S(l, n));
           r = S(q, r);
           var A = ab(m);
           $a(A, function () {
@@ -942,9 +983,12 @@ var createDotLottiePlayerModule = (() => {
               var w = v.Ba;
               var E = w.Ma;
             } else E = Xa.prototype;
-            v = Ya(m, function (...Na) {
+            v = Ya(m, function () {
               if (Object.getPrototypeOf(this) !== da) throw new P("Use 'new' to construct " + m);
               if (void 0 === B.La) throw new P(m + ' has no accessible constructor');
+              for (var _len4 = arguments.length, Na = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+                Na[_key4] = arguments[_key4];
+              }
               var ub = B.La[Na.length];
               if (void 0 === ub)
                 throw new P(
@@ -958,8 +1002,9 @@ var createDotLottiePlayerModule = (() => {
             v.prototype = da;
             var B = new bb(m, v, da, r, w, f, g, n);
             if (B.Ga) {
+              var _ea$Va;
               var ea;
-              (ea = B.Ga).Va ?? (ea.Va = []);
+              (_ea$Va = (ea = B.Ga).Va) !== null && _ea$Va !== void 0 ? _ea$Va : (ea.Va = []);
               B.Ga.Va.push(B);
             }
             w = new ib(m, B, !0, !1, !1);
@@ -1350,20 +1395,25 @@ var createDotLottiePlayerModule = (() => {
         },
       },
       W;
-    (async function () {
+    (async function (_h$monitorRunDependen2, _wa) {
       function a(d) {
+        var _h$monitorRunDependen;
         W = d.exports;
         ka = W.da;
         pa();
         R = W.ga;
         ra.unshift(W.ea);
         F--;
-        h.monitorRunDependencies?.(F);
+        (_h$monitorRunDependen = h.monitorRunDependencies) === null ||
+          _h$monitorRunDependen === void 0 ||
+          _h$monitorRunDependen.call(h, F);
         0 == F && G && ((d = G), (G = null), d());
         return W;
       }
       F++;
-      h.monitorRunDependencies?.(F);
+      (_h$monitorRunDependen2 = h.monitorRunDependencies) === null ||
+        _h$monitorRunDependen2 === void 0 ||
+        _h$monitorRunDependen2.call(h, F);
       var b = { a: lc };
       if (h.instantiateWasm)
         try {
@@ -1371,11 +1421,13 @@ var createDotLottiePlayerModule = (() => {
         } catch (d) {
           t(`Module.instantiateWasm callback failed with error: ${d}`), ba(d);
         }
-      wa ??= va('DotLottiePlayer.wasm')
-        ? 'DotLottiePlayer.wasm'
-        : h.locateFile
-        ? h.locateFile('DotLottiePlayer.wasm', p)
-        : p + 'DotLottiePlayer.wasm';
+      (_wa = wa) !== null && _wa !== void 0
+        ? _wa
+        : (wa = va('DotLottiePlayer.wasm')
+            ? 'DotLottiePlayer.wasm'
+            : h.locateFile
+            ? h.locateFile('DotLottiePlayer.wasm', p)
+            : p + 'DotLottiePlayer.wasm');
       try {
         var c = await za(b);
         a(c.instance);
@@ -1444,13 +1496,13 @@ var createDotLottiePlayerModule = (() => {
         X(1, 0);
       }
     }
-    function ec(a, b, c, d) {
-      var e = Z();
+    function dc(a, b, c) {
+      var d = Z();
       try {
-        return R.get(a)(b, c, d);
-      } catch (f) {
-        Y(e);
-        if (f !== f + 0) throw f;
+        return R.get(a)(b, c);
+      } catch (e) {
+        Y(d);
+        if (e !== e + 0) throw e;
         X(1, 0);
       }
     }
@@ -1458,26 +1510,6 @@ var createDotLottiePlayerModule = (() => {
       var d = Z();
       try {
         R.get(a)(b, c);
-      } catch (e) {
-        Y(d);
-        if (e !== e + 0) throw e;
-        X(1, 0);
-      }
-    }
-    function kc(a, b, c, d, e) {
-      var f = Z();
-      try {
-        R.get(a)(b, c, d, e);
-      } catch (k) {
-        Y(f);
-        if (k !== k + 0) throw k;
-        X(1, 0);
-      }
-    }
-    function dc(a, b, c) {
-      var d = Z();
-      try {
-        return R.get(a)(b, c);
       } catch (e) {
         Y(d);
         if (e !== e + 0) throw e;
@@ -1494,6 +1526,26 @@ var createDotLottiePlayerModule = (() => {
         X(1, 0);
       }
     }
+    function ec(a, b, c, d) {
+      var e = Z();
+      try {
+        return R.get(a)(b, c, d);
+      } catch (f) {
+        Y(e);
+        if (f !== f + 0) throw f;
+        X(1, 0);
+      }
+    }
+    function kc(a, b, c, d, e) {
+      var f = Z();
+      try {
+        R.get(a)(b, c, d, e);
+      } catch (k) {
+        Y(f);
+        if (k !== k + 0) throw k;
+        X(1, 0);
+      }
+    }
     var mc;
     G = function nc() {
       mc || oc();
@@ -1502,9 +1554,12 @@ var createDotLottiePlayerModule = (() => {
     function oc() {
       function a() {
         if (!mc && ((mc = !0), (h.calledRun = !0), !la)) {
+          var _h$onRuntimeInitializ;
           Ba(ra);
           aa(h);
-          h.onRuntimeInitialized?.();
+          (_h$onRuntimeInitializ = h.onRuntimeInitialized) === null ||
+            _h$onRuntimeInitializ === void 0 ||
+            _h$onRuntimeInitializ.call(h);
           if (h.postRun)
             for ('function' == typeof h.postRun && (h.postRun = [h.postRun]); h.postRun.length; ) {
               var b = h.postRun.shift();
