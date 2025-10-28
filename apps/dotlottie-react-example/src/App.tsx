@@ -70,6 +70,7 @@ function App() {
         }}
       ></div>
       <DotLottieWorkerReact
+        workerUrl="/dotlottie-worker.js"
         dotLottieRefCallback={setDotLottie}
         useFrameInterpolation={useFrameInterpolation}
         src={animations[srcIdx]}

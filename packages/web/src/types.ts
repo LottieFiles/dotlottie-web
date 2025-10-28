@@ -37,6 +37,7 @@ export interface Config {
   stateMachineId?: string;
   themeId?: string;
   useFrameInterpolation?: boolean;
+  workerUrl?: string;
 }
 
 export interface StateMachineConfig {

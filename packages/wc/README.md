@@ -16,9 +16,11 @@
 * [Installation](#installation)
 * [Usage](#usage)
   * [Via npm](#via-npm)
+  * [Using dotlottie-worker-wc](#using-dotlottie-worker-wc)
   * [Via CDN](#via-cdn)
 * [APIs](#apis)
   * [Attributes](#attributes)
+  * [dotlottie-worker-wc Attributes](#dotlottie-worker-wc-attributes)
 * [RenderConfig](#renderconfig)
   * [Properties](#properties)
 * [Development](#development)
@@ -58,6 +60,51 @@ And import it in your JavaScript or TypeScript module:
 import '@lottiefiles/dotlottie-wc';
 ```
 
+### Using dotlottie-worker-wc
+
+For performance-intensive applications, use `dotlottie-worker-wc` to offload animation rendering to a Web Worker thread. You must provide the `workerUrl` attribute pointing to the worker file.
+
+```html
+<dotlottie-worker-wc
+  src="https://lottie.host/4db68bbd-31f6-4cd8-84eb-189de081159a/IGmMCqhzpt.lottie"
+  workerUrl="/workers/dotlottie-worker.js"
+  autoplay="true"
+  loop="true">
+</dotlottie-worker-wc>
+```
+
+#### Serving the Worker File
+
+You must serve the worker file from your application. Choose one of the following approaches:
+
+**Option 1: Copy to public directory**
+
+```bash
+# Copy worker file to public directory
+cp node_modules/@lottiefiles/dotlottie-web/dist/dotlottie-worker.js public/workers/
+```
+
+Then reference it in your HTML:
+
+```html
+<dotlottie-worker-wc workerUrl="/workers/dotlottie-worker.js" src="..."></dotlottie-worker-wc>
+```
+
+**Option 2: Use with bundler**
+
+If using a bundler like Vite, import the worker and pass the URL dynamically:
+
+```js
+import workerUrl from '@lottiefiles/dotlottie-web/worker?url';
+
+const element = document.createElement('dotlottie-worker-wc');
+element.setAttribute('workerUrl', workerUrl);
+element.setAttribute('src', 'animation.lottie');
+document.body.appendChild(element);
+```
+
+Note: The `workerUrl` attribute is required for `dotlottie-worker-wc` to ensure CSP compliance.
+
 ### Via CDN
 
 You can also use the component directly via a npm CDN:
@@ -93,6 +140,14 @@ The `dotlottie-wc` component accepts all configuration attributes of [`DotLottie
 | `mode`            | string                | Animation play mode (e.g., "forward", "bounce").                                                 |
 | `backgroundColor` | string                | Background color of the canvas. Accepts 6-digit or 8-digit hex color string (e.g., "#000000FF"). |
 | `renderConfig`    | Object (RenderConfig) | Configuration for rendering the animation.                                                       |
+
+### dotlottie-worker-wc Attributes
+
+The `dotlottie-worker-wc` component accepts all attributes from `dotlottie-wc` plus one additional required attribute:
+
+| Attribute   | Type   | Required | Description                                                                                                                          |
+| ----------- | ------ | :------: | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `workerUrl` | string |     ✅    | **Required.** Path to the dotLottie worker file. See [Using dotlottie-worker-wc](#using-dotlottie-worker-wc) for setup instructions. |
 
 ## RenderConfig
 

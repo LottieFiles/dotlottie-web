@@ -14,6 +14,10 @@ const lottieSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
 const smSrc = new URL('./__fixtures__/sm.lottie', import.meta.url).href;
 
+// Worker URL for tests - load from web package
+// eslint-disable-next-line node/no-unsupported-features/node-builtins
+const TEST_WORKER_URL = new URL('../../web/dist/dotlottie-worker.js', import.meta.url).href;
+
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
@@ -22,9 +26,12 @@ const render = (ui: React.ReactNode, options?: ComponentRenderOptions): RenderRe
   vitestRender(ui, { wrapper: Wrapper, ...options });
 
 describe.each([
-  { component: DotLottieReact, instanceType: DotLottie },
-  { component: DotLottieWorkerReact, instanceType: DotLottieWorker },
-])('$component.name', ({ component: Component, instanceType }) => {
+  { component: DotLottieReact, instanceType: DotLottie, isWorker: false },
+  { component: DotLottieWorkerReact, instanceType: DotLottieWorker, isWorker: true },
+])('$component.name', ({ component: Component, instanceType, isWorker }) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getWorkerProps = (): any => (isWorker ? { workerUrl: TEST_WORKER_URL } : {});
+
   afterEach(() => {
     cleanup();
   });
@@ -36,7 +43,7 @@ describe.each([
     const dotLottieRefCallback = vi.fn();
 
     const { container, unmount } = render(
-      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
     );
 
     expect(container).toMatchSnapshot();
@@ -75,7 +82,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -93,7 +102,9 @@ describe.each([
 
     expect(dotLottie?.loop).toBe(false);
 
-    rerender(<Component src={dotLottieSrc} autoplay loop dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component src={dotLottieSrc} autoplay loop dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(setLoop).toHaveBeenCalledTimes(1);
@@ -105,7 +116,9 @@ describe.each([
       expect(dotLottie?.loop).toBe(true);
     });
 
-    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(setLoop).toHaveBeenCalledTimes(2);
@@ -122,7 +135,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -140,7 +155,15 @@ describe.each([
 
     expect(dotLottie?.speed).toBe(1);
 
-    rerender(<Component src={dotLottieSrc} autoplay speed={2} dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component
+        src={dotLottieSrc}
+        autoplay
+        speed={2}
+        dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
+      />,
+    );
 
     await vi.waitFor(() => {
       expect(setSpeed).toHaveBeenCalledTimes(1);
@@ -152,7 +175,9 @@ describe.each([
       expect(dotLottie?.speed).toBe(2);
     });
 
-    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(setSpeed).toHaveBeenCalledTimes(2);
@@ -169,7 +194,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -187,7 +214,15 @@ describe.each([
 
     expect(dotLottie?.mode).toBe('forward');
 
-    rerender(<Component src={dotLottieSrc} autoplay mode="reverse" dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component
+        src={dotLottieSrc}
+        autoplay
+        mode="reverse"
+        dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
+      />,
+    );
 
     await vi.waitFor(() => {
       expect(setMode).toHaveBeenCalledTimes(1);
@@ -199,7 +234,9 @@ describe.each([
       expect(dotLottie?.mode).toBe('reverse');
     });
 
-    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(setMode).toHaveBeenCalledTimes(2);
@@ -216,7 +253,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -240,6 +279,7 @@ describe.each([
         autoplay
         useFrameInterpolation={false}
         dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
       />,
     );
 
@@ -253,7 +293,9 @@ describe.each([
       expect(dotLottie?.useFrameInterpolation).toBe(false);
     });
 
-    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(setUseFrameInterpolation).toHaveBeenCalledTimes(2);
@@ -270,7 +312,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -289,7 +333,13 @@ describe.each([
     expect(dotLottie?.backgroundColor).toBe('');
 
     rerender(
-      <Component src={dotLottieSrc} autoplay backgroundColor="#00ff00ff" dotLottieRefCallback={dotLottieRefCallback} />,
+      <Component
+        src={dotLottieSrc}
+        autoplay
+        backgroundColor="#00ff00ff"
+        dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
+      />,
     );
 
     await vi.waitFor(() => {
@@ -298,7 +348,9 @@ describe.each([
 
     expect(setBackgroundColor).toHaveBeenCalledWith('#00ff00ff');
 
-    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(setBackgroundColor).toHaveBeenCalledTimes(2);
@@ -311,7 +363,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -329,7 +383,15 @@ describe.each([
 
     expect(dotLottie?.marker).toBe('');
 
-    rerender(<Component src={dotLottieSrc} autoplay marker="Marker_1" dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component
+        src={dotLottieSrc}
+        autoplay
+        marker="Marker_1"
+        dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
+      />,
+    );
 
     await vi.waitFor(() => {
       expect(setMarker).toHaveBeenCalledTimes(1);
@@ -337,7 +399,9 @@ describe.each([
 
     expect(setMarker).toHaveBeenCalledWith('Marker_1');
 
-    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(setMarker).toHaveBeenCalledTimes(2);
@@ -350,7 +414,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -369,7 +435,15 @@ describe.each([
 
     expect(dotLottie?.segment).toBeUndefined();
 
-    rerender(<Component src={dotLottieSrc} autoplay segment={[0, 10]} dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component
+        src={dotLottieSrc}
+        autoplay
+        segment={[0, 10]}
+        dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
+      />,
+    );
 
     await vi.waitFor(() => {
       expect(setSegment).toHaveBeenCalledTimes(1);
@@ -377,7 +451,9 @@ describe.each([
 
     expect(setSegment).toHaveBeenCalledWith(0, 10);
 
-    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(resetSegment).toHaveBeenCalledTimes(1);
@@ -390,7 +466,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -409,7 +487,15 @@ describe.each([
 
     expect(dotLottie?.themeId).toBeUndefined();
 
-    rerender(<Component src={dotLottieSrc} autoplay themeId="Theme_1" dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component
+        src={dotLottieSrc}
+        autoplay
+        themeId="Theme_1"
+        dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
+      />,
+    );
 
     await vi.waitFor(() => {
       expect(setTheme).toHaveBeenCalledTimes(1);
@@ -417,7 +503,9 @@ describe.each([
 
     expect(setTheme).toHaveBeenCalledWith('Theme_1');
 
-    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(resetTheme).toHaveBeenCalledTimes(1);
@@ -439,6 +527,7 @@ describe.each([
         autoplay
         playOnHover
         dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
       />,
     );
 
@@ -477,6 +566,7 @@ describe.each([
         src={dotLottieSrc}
         autoplay
         dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
       />,
     );
 
@@ -515,7 +605,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -532,7 +624,13 @@ describe.each([
     const loadAnimation = vi.spyOn(dotLottie, 'loadAnimation');
 
     rerender(
-      <Component src={dotLottieSrc} autoplay animationId="Animation_1" dotLottieRefCallback={dotLottieRefCallback} />,
+      <Component
+        src={dotLottieSrc}
+        autoplay
+        animationId="Animation_1"
+        dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
+      />,
     );
 
     await vi.waitFor(() => {
@@ -541,7 +639,9 @@ describe.each([
 
     expect(loadAnimation).toHaveBeenCalledWith('Animation_1');
 
-    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(loadAnimation).toHaveBeenCalledTimes(2);
@@ -558,7 +658,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -585,6 +687,7 @@ describe.each([
           freezeOnOffscreen: false,
         }}
         dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
       />,
     );
 
@@ -597,7 +700,9 @@ describe.each([
       freezeOnOffscreen: false,
     });
 
-    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(setRenderConfig).toHaveBeenCalledTimes(2);
@@ -617,7 +722,7 @@ describe.each([
     const animationData = await response.json();
 
     const { rerender } = render(
-      <Component data={animationData} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+      <Component data={animationData} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
     );
 
     await vi.waitFor(() => {
@@ -638,26 +743,37 @@ describe.each([
     const dotLottieAnimationData = await response.arrayBuffer();
 
     rerender(
-      <Component data={dotLottieAnimationData} autoplay loop speed={2} dotLottieRefCallback={dotLottieRefCallback} />,
+      <Component
+        data={dotLottieAnimationData}
+        autoplay
+        loop
+        speed={2}
+        dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
+      />,
     );
 
     await vi.waitFor(() => {
       expect(load).toHaveBeenCalledTimes(1);
     });
 
-    expect(load).toHaveBeenCalledWith({
-      data: dotLottieAnimationData,
-      loop: true,
-      autoplay: true,
-      speed: 2,
-    });
+    expect(load).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: dotLottieAnimationData,
+        loop: true,
+        autoplay: true,
+        speed: 2,
+      }),
+    );
   });
 
   test('calls dotLottie.load when src prop changes', async () => {
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -673,25 +789,38 @@ describe.each([
 
     const load = vi.spyOn(dotLottie, 'load');
 
-    rerender(<Component src={lottieSrc} autoplay loop speed={2} dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component
+        src={lottieSrc}
+        autoplay
+        loop
+        speed={2}
+        dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
+      />,
+    );
 
     await vi.waitFor(() => {
       expect(load).toHaveBeenCalledTimes(1);
     });
 
-    expect(load).toHaveBeenCalledWith({
-      src: lottieSrc,
-      loop: true,
-      autoplay: true,
-      speed: 2,
-    });
+    expect(load).toHaveBeenCalledWith(
+      expect.objectContaining({
+        src: lottieSrc,
+        loop: true,
+        autoplay: true,
+        speed: 2,
+      }),
+    );
   });
 
   test('calls dotLottie.setLayout when layout prop changes', async () => {
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -713,6 +842,7 @@ describe.each([
         autoplay
         layout={{ align: [0.5, 0.5], fit: 'contain' }}
         dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
       />,
     );
 
@@ -722,7 +852,9 @@ describe.each([
 
     expect(setLayout).toHaveBeenCalledWith({ align: [0.5, 0.5], fit: 'contain' });
 
-    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(setLayout).toHaveBeenCalledTimes(2);
@@ -735,7 +867,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -752,7 +886,13 @@ describe.each([
     const setLayout = vi.spyOn(dotLottie, 'setLayout');
 
     rerender(
-      <Component src={dotLottieSrc} autoplay layout={{ fit: 'cover' }} dotLottieRefCallback={dotLottieRefCallback} />,
+      <Component
+        src={dotLottieSrc}
+        autoplay
+        layout={{ fit: 'cover' }}
+        dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
+      />,
     );
 
     await vi.waitFor(() => {
@@ -761,7 +901,9 @@ describe.each([
 
     expect(setLayout).toHaveBeenCalledWith({ fit: 'cover' });
 
-    rerender(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(setLayout).toHaveBeenCalledTimes(2);
@@ -774,7 +916,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={smSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = render(
+      <Component src={smSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -792,7 +936,15 @@ describe.each([
     const stateMachineStart = vi.spyOn(dotLottie, 'stateMachineStart');
     const stateMachineStop = vi.spyOn(dotLottie, 'stateMachineStop');
 
-    rerender(<Component src={smSrc} autoplay stateMachineId="testSM" dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(
+      <Component
+        src={smSrc}
+        autoplay
+        stateMachineId="testSM"
+        dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
+      />,
+    );
 
     await vi.waitFor(() => {
       expect(stateMachineLoad).toHaveBeenCalledTimes(1);
@@ -801,7 +953,7 @@ describe.each([
 
     expect(stateMachineLoad).toHaveBeenCalledWith('testSM');
 
-    rerender(<Component src={smSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(<Component src={smSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />);
 
     await vi.waitFor(() => {
       expect(stateMachineStop).toHaveBeenCalledTimes(1);
@@ -811,7 +963,9 @@ describe.each([
   test('calls stateMachineSetConfig when stateMachineConfig prop changes', async () => {
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={smSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = render(
+      <Component src={smSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} {...getWorkerProps()} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -824,7 +978,13 @@ describe.each([
     const config = { openUrlPolicy: { whitelist: ['*'] } };
 
     rerender(
-      <Component src={smSrc} autoplay stateMachineConfig={config} dotLottieRefCallback={dotLottieRefCallback} />,
+      <Component
+        src={smSrc}
+        autoplay
+        stateMachineConfig={config}
+        dotLottieRefCallback={dotLottieRefCallback}
+        {...getWorkerProps()}
+      />,
     );
 
     await vi.waitFor(() => {

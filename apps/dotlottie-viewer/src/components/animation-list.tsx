@@ -17,7 +17,13 @@ function ListItem(props: ListItemProps) {
       className="rounded-lg bg-white border border-transparent hover:border-lottie"
     >
       <div>
-        <DotLottieWorkerReact style={{ height: '120px' }} src={props.url} autoplay loop />
+        <DotLottieWorkerReact
+          workerUrl="/dotlottie-worker.js"
+          style={{ height: '120px' }}
+          src={props.url}
+          autoplay
+          loop
+        />
       </div>
       <div className="text-xs py-1 bg-strong rounded-b-lg">{props.name}</div>
     </button>

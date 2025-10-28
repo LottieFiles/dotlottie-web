@@ -15,9 +15,12 @@
   * [What is dotLottie?](#what-is-dotlottie)
 * [Installation](#installation)
 * [Usage](#usage)
+  * [Basic Usage](#basic-usage)
+  * [Using DotLottieWorkerReact](#using-dotlottieworkerreact)
 * [Live Examples](#live-examples)
 * [APIs](#apis)
   * [DotLottieReactProps](#dotlottiereactprops)
+  * [DotLottieWorkerReactProps](#dotlottieworkerreactprops)
 * [Custom Playback Controls](#custom-playback-controls)
 * [Listening to Events](#listening-to-events)
 * [Development](#development)
@@ -43,6 +46,8 @@ npm install @lottiefiles/dotlottie-react
 
 ## Usage
 
+### Basic Usage
+
 ```jsx
 import React from 'react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
@@ -57,6 +62,53 @@ const App = () => {
   );
 };
 ```
+
+### Using DotLottieWorkerReact
+
+For performance-intensive applications, use `DotLottieWorkerReact` to offload animation rendering to a Web Worker thread. You must provide the `workerUrl` prop pointing to the worker file.
+
+```jsx
+import React from 'react';
+import { DotLottieWorkerReact } from '@lottiefiles/dotlottie-react';
+import workerUrl from '@lottiefiles/dotlottie-web/worker?url';
+
+const App = () => {
+  return (
+    <DotLottieWorkerReact
+      src="path/to/animation.lottie"
+      workerUrl={workerUrl}
+      loop
+      autoplay
+    />
+  );
+};
+```
+
+#### Serving the Worker File
+
+You have two options for serving the worker file:
+
+**Option 1: Use bundler import (recommended for Vite)**
+
+```jsx
+import workerUrl from '@lottiefiles/dotlottie-web/worker?url';
+
+<DotLottieWorkerReact workerUrl={workerUrl} src="..." />
+```
+
+**Option 2: Copy to public directory**
+
+```bash
+cp node_modules/@lottiefiles/dotlottie-web/dist/dotlottie-worker.js public/workers/
+```
+
+Then use a static path:
+
+```jsx
+<DotLottieWorkerReact workerUrl="/workers/dotlottie-worker.js" src="..." />
+```
+
+Note: The `workerUrl` prop is required for `DotLottieWorkerReact` to ensure CSP compliance. See the [migration guide](../../docs/migration-guides/csp-safe-worker.md) for more details.
 
 ## Live Examples
 
@@ -85,6 +137,16 @@ The `DotLottieReactProps` extends the `HTMLCanvasElement` Props and accepts all 
 | `useFrameInterpolation` | boolean                                |          | true                  | Determines if the animation should update on subframes. If set to false, the original AE frame rate will be maintained. If set to true, it will refresh at each requestAnimationFrame, including intermediate values. The default setting is true. |   |
 | `marker`                | string                                 |          | undefined             | The Lottie named marker to play.                                                                                                                                                                                                                   |   |
 | `animationId`           | string                                 |          | undefined             | The ID of the animation to play.                                                                                                                                                                                                                   |   |
+
+### DotLottieWorkerReactProps
+
+`DotLottieWorkerReactProps` extends `DotLottieReactProps` with an additional required prop for Web Worker support:
+
+| Property name | Type   | Required | Default   | Description                                                                                                                            |
+| ------------- | ------ | :------: | --------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `workerUrl`   | string |     ✅    | undefined | **Required.** Path to the dotLottie worker file. See [Using DotLottieWorkerReact](#using-dotlottieworkerreact) for setup instructions. |
+
+All other props from `DotLottieReactProps` are also supported.
 
 #### RenderConfig
 

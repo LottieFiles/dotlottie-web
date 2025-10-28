@@ -10,7 +10,9 @@ export type BaseDotLottieProps<T extends DotLottie | DotLottieWorker> = Omit<Con
     /**
      * A function that creates a `DotLottie` or `DotLottieWorker` instance.
      */
-    createDotLottie: (config: T extends DotLottieWorker ? Config & { workerId?: string } : Config) => T;
+    createDotLottie: (
+      config: T extends DotLottieWorker ? Config & { workerId?: string; workerUrl: string } : Config,
+    ) => T;
     /**
      * A callback function that receives the `DotLottie` or `DotLottieWorker` instance.
      *
@@ -43,6 +45,7 @@ export type BaseDotLottieProps<T extends DotLottie | DotLottieWorker> = Omit<Con
     playOnHover?: boolean;
     themeData?: string;
     workerId?: T extends DotLottieWorker ? string : undefined;
+    workerUrl?: T extends DotLottieWorker ? string : undefined;
   };
 
 export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
@@ -68,9 +71,12 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   themeId,
   useFrameInterpolation,
   workerId,
+  workerUrl,
   ...props
 }: BaseDotLottieProps<T> & {
-  createDotLottie: (config: T extends DotLottieWorker ? Config & { workerId?: string } : Config) => T;
+  createDotLottie: (
+    config: T extends DotLottieWorker ? Config & { workerId?: string; workerUrl: string } : Config,
+  ) => T;
 }): JSX.Element => {
   const dotLottieRef = useRef<T | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -78,6 +84,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
 
   const config: Omit<Config, 'canvas'> & {
     workerId?: T extends DotLottieWorker ? string : undefined;
+    workerUrl?: T extends DotLottieWorker ? string : undefined;
   } = {
     speed,
     mode,
@@ -88,6 +95,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     autoplay,
     themeId,
     workerId,
+    workerUrl,
     src,
     data,
     layout,
@@ -109,7 +117,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
       dotLottieRef.current = createDotLottie({
         ...configRef.current,
         canvas,
-      });
+      } as T extends DotLottieWorker ? Config & { workerId?: string; workerUrl: string } : Config);
     } else {
       dotLottieRef.current?.destroy();
       dotLottieRef.current = null;

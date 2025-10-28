@@ -60,3 +60,6 @@ tsdoc-metadata.json
 *.tsbuildinfo
 
 .parcel-cache/
+
+# Development worktrees
+.worktrees/

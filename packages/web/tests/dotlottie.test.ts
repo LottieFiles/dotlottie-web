@@ -10,6 +10,9 @@ import { getDefaultDPR } from '../src/utils';
 
 import { createCanvas, sleep, addWasmCSPPolicy } from './test-utils';
 
+// Mock worker URL for tests
+const TEST_WORKER_URL = '/dist/dotlottie-worker.js';
+
 const wasmUrl = new URL('../src/core/dotlottie-player.wasm', import.meta.url).href;
 const jsonSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
@@ -42,6 +45,10 @@ describe.each([
   let dotLottie: DotLottieClass | DotLottieWorkerClass;
   const isWorker = DotLottie === DotLottieWorkerClass;
 
+  // Helper to add workerUrl when testing DotLottieWorker
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const workerConfig = (isWorker ? { workerUrl: TEST_WORKER_URL } : {}) as any;
+
   type Option = Omit<Omit<Config, 'canvas'>, 'src'>;
 
   beforeEach(() => {
@@ -59,6 +66,7 @@ describe.each([
       const onLoop = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         loop: true,
@@ -95,6 +103,7 @@ describe.each([
       const onPlay = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         autoplay: true,
@@ -131,6 +140,7 @@ describe.each([
       const onPlay = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -150,6 +160,7 @@ describe.each([
       const onPlay = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         autoplay: true,
@@ -213,6 +224,7 @@ describe.each([
         const onFrame = vi.fn();
 
         dotLottie = new DotLottie({
+          ...workerConfig,
           ...config,
           canvas,
           src,
@@ -305,6 +317,7 @@ describe.each([
         const onFrame = vi.fn();
 
         dotLottie = new DotLottie({
+          ...workerConfig,
           canvas,
           src,
           autoplay: true,
@@ -399,6 +412,7 @@ describe.each([
         const onPause = vi.fn();
 
         dotLottie = new DotLottie({
+          ...workerConfig,
           canvas,
           src,
           autoplay: true,
@@ -487,6 +501,7 @@ describe.each([
         const onPlay = vi.fn();
 
         dotLottie = new DotLottie({
+          ...workerConfig,
           ...config,
           canvas,
           src,
@@ -532,6 +547,7 @@ describe.each([
       const onPause = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -555,6 +571,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         autoplay: true,
@@ -583,6 +600,7 @@ describe.each([
     const onDestroy = vi.fn();
 
     dotLottie = new DotLottie({
+      ...workerConfig,
       canvas,
       src: jsonSrc,
       autoplay: true,
@@ -621,6 +639,7 @@ describe.each([
     const onRender = vi.fn();
 
     dotLottie = new DotLottie({
+      ...workerConfig,
       canvas,
       src: jsonSrc,
       autoplay: true,
@@ -658,6 +677,7 @@ describe.each([
     const onLoad = vi.fn();
 
     dotLottie = new DotLottie({
+      ...workerConfig,
       canvas,
       src,
     });
@@ -677,6 +697,7 @@ describe.each([
   describe('resize', () => {
     test('resize the canvas drawing surface to maintain high quality animation', async () => {
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         autoplay: true,
@@ -714,6 +735,7 @@ describe.each([
       const fetch = vi.spyOn(window, 'fetch');
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -745,6 +767,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
       });
@@ -767,6 +790,7 @@ describe.each([
       const onLoadError = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: invalidSrc,
       });
@@ -788,6 +812,7 @@ describe.each([
       const data = await res.arrayBuffer();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         data,
       });
@@ -808,6 +833,7 @@ describe.each([
       const data = await res.text();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         data,
       });
@@ -826,6 +852,7 @@ describe.each([
       const data = await res.json();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         data,
       });
@@ -843,6 +870,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
       });
 
@@ -876,6 +904,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
       });
 
@@ -913,6 +942,7 @@ describe.each([
       const onLoadError = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         data: JSON.stringify({}),
       });
@@ -935,6 +965,7 @@ describe.each([
       const onLoadError = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         data: new ArrayBuffer(0),
       });
@@ -959,6 +990,7 @@ describe.each([
       const onLoadError = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         data: 1 as unknown as string,
       });
@@ -986,6 +1018,7 @@ describe.each([
       const onLoadError = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -1010,6 +1043,7 @@ describe.each([
       const onStop = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -1035,6 +1069,7 @@ describe.each([
       const onPause = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         autoplay: true,
@@ -1112,6 +1147,7 @@ describe.each([
         const onRender = vi.fn();
 
         dotLottie = new DotLottie({
+          ...workerConfig,
           ...config,
           canvas,
           src,
@@ -1196,6 +1232,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         autoplay: true,
@@ -1217,6 +1254,7 @@ describe.each([
       const onFrame = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         autoplay: true,
@@ -1242,6 +1280,7 @@ describe.each([
       const onComplete = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         autoplay: true,
@@ -1281,6 +1320,7 @@ describe.each([
       const onComplete = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         autoplay: true,
@@ -1347,6 +1387,7 @@ describe.each([
       const onComplete = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         autoplay: true,
@@ -1384,6 +1425,7 @@ describe.each([
       const onPlay = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         autoplay: true,
         src,
@@ -1406,6 +1448,7 @@ describe.each([
       const onPlay = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         autoplay: true,
         src,
@@ -1440,6 +1483,7 @@ describe.each([
       const onPlay = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         autoplay: true,
@@ -1470,6 +1514,7 @@ describe.each([
       const onPlay = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         autoplay: true,
@@ -1496,6 +1541,7 @@ describe.each([
       const onFrame = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -1512,6 +1558,7 @@ describe.each([
       const onFrame = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         autoplay: true,
@@ -1543,6 +1590,7 @@ describe.each([
       const onFrame = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         mode: 'reverse',
@@ -1568,6 +1616,7 @@ describe.each([
   describe('tween', () => {
     test('tween() does nothing when the animation is not loaded', async () => {
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -1581,6 +1630,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -1598,6 +1648,7 @@ describe.each([
   describe('tweenToMarker', () => {
     test('tweenToMarker() does nothing when the animation is not loaded', async () => {
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -1611,6 +1662,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -1630,6 +1682,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -1655,6 +1708,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -1670,6 +1724,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -1689,6 +1744,7 @@ describe.each([
       const defaultDPR = getDefaultDPR();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -1713,6 +1769,7 @@ describe.each([
       const defaultDPR = getDefaultDPR();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         renderConfig: {
@@ -1746,6 +1803,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: multiAnimationSrc,
       });
@@ -1776,6 +1834,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: multiAnimationSrc,
       });
@@ -1801,6 +1860,7 @@ describe.each([
       const onLoadError = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
       });
 
@@ -1817,6 +1877,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
       });
@@ -1834,6 +1895,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
       });
@@ -1857,6 +1919,7 @@ describe.each([
       const onCompelete = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
         autoplay: true,
@@ -1894,6 +1957,7 @@ describe.each([
       const onCompelete = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
         autoplay: true,
@@ -1927,6 +1991,7 @@ describe.each([
       const onCompelete = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
         autoplay: true,
@@ -1967,6 +2032,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -1988,6 +2054,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -2011,6 +2078,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -2047,6 +2115,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
       });
@@ -2066,6 +2135,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
       });
@@ -2087,6 +2157,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
       });
@@ -2132,6 +2203,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         layout,
@@ -2150,6 +2222,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
       });
@@ -2182,6 +2255,7 @@ describe.each([
     const onLoad = vi.fn();
 
     dotLottie = new DotLottie({
+      ...workerConfig,
       canvas,
       src,
     });
@@ -2204,6 +2278,7 @@ describe.each([
       canvas.style.marginTop = '100vh';
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
         autoplay: true,
@@ -2225,6 +2300,7 @@ describe.each([
       canvas.style.marginTop = '100vh';
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
         autoplay: true,
@@ -2248,6 +2324,7 @@ describe.each([
       canvas.style.marginTop = '100vh';
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
         autoplay: true,
@@ -2269,6 +2346,7 @@ describe.each([
       const onUnfreeze = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
         autoplay: true,
@@ -2300,6 +2378,7 @@ describe.each([
       canvas.style.marginTop = '100vh';
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
         autoplay: true,
@@ -2332,6 +2411,7 @@ describe.each([
       canvas.style.marginTop = '100vh';
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
         autoplay: true,
@@ -2362,6 +2442,7 @@ describe.each([
       canvas.style.marginTop = '100vh';
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
         autoplay: true,
@@ -2406,6 +2487,7 @@ describe.each([
       const onPlay = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src,
         autoplay: true,
@@ -2468,6 +2550,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
       });
@@ -2485,6 +2568,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
         renderConfig: {
@@ -2505,6 +2589,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
         renderConfig: {
@@ -2525,6 +2610,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
         renderConfig: {
@@ -2556,6 +2642,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
         renderConfig: {
@@ -2587,6 +2674,7 @@ describe.each([
       const onLoad = vi.fn();
 
       dotLottie = new DotLottie({
+        ...workerConfig,
         canvas,
         src: jsonSrc,
         renderConfig: {
@@ -2637,6 +2725,7 @@ describe.each([
     const onPlay = vi.fn();
 
     dotLottie = new DotLottie({
+      ...workerConfig,
       canvas,
       src,
       autoplay: true,
@@ -2700,5 +2789,21 @@ describe.each([
       type: 'frame',
       currentFrame: dotLottie.totalFrames - 1,
     });
+  });
+});
+
+// DotLottieWorker-specific tests
+describe('DotLottieWorker', () => {
+  test('throws error when workerUrl is not provided', () => {
+    const canvas = document.createElement('canvas');
+
+    expect(() => {
+      // @ts-expect-error Testing runtime error
+      // eslint-disable-next-line no-new
+      new DotLottieWorkerClass({
+        canvas,
+        src: 'https://example.com/animation.lottie',
+      });
+    }).toThrow('workerUrl is required');
   });
 });

@@ -1,10 +1,15 @@
 # @lottiefiles/dotlottie-web
 
-## 0.55.0
+## Unreleased
 
-### Minor Changes
+### Major Changes
 
-- 34b3f1a: chore: update dotlottie-rs v0.1.50 wasm bindings
+- **BREAKING**: `DotLottieWorker` now requires `workerUrl` parameter for CSP-compliant worker initialization
+  - Removed blob-based worker instantiation (fixes #579)
+  - Worker file now distributed separately as `dist/dotlottie-worker.js`
+  - Users must provide path to worker file: `new DotLottieWorker({ canvas, workerUrl: '/workers/dotlottie-worker.js' })`
+  - See migration guide in `docs/migration-guides/csp-safe-worker.md`
+  - Enables strict CSP policies with `worker-src: 'self'` instead of requiring `worker-src: blob:`
 
 ## 0.54.1
 

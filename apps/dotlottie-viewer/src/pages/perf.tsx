@@ -317,6 +317,7 @@ export const Perf = (): JSX.Element => {
               )}
               {player.id === 1 && (
                 <DotLottieWorkerReact
+                  workerUrl="/dotlottie-worker.js"
                   src={anim.lottieURL}
                   style={size}
                   loop

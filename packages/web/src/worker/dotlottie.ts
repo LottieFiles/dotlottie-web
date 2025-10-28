@@ -115,14 +115,24 @@ export class DotLottieWorker {
 
   private _boundOnPointerLeave: ((event: PointerEvent) => void) | null = null;
 
-  public constructor(config: Config & { workerId?: string }) {
+  public constructor(config: Config & { workerId?: string; workerUrl: string }) {
+    // Validate workerUrl is provided
+    if (!config.workerUrl) {
+      throw new Error(
+        'workerUrl is required for CSP-compliant worker initialization. ' +
+          'Please provide the path to dotlottie-worker.js. ' +
+          'Example: { workerUrl: "/workers/dotlottie-worker.js" } ' +
+          'or import from package: import workerUrl from "@lottiefiles/dotlottie-web/worker"',
+      );
+    }
+
     this._canvas = config.canvas;
 
     this._id = `dotlottie-${generateUniqueId()}`;
     const workerId = config.workerId || 'defaultWorker';
 
-    // creates or gets the worker
-    this._worker = DotLottieWorker._workerManager.getWorker(workerId);
+    // Pass workerUrl to getWorker
+    this._worker = DotLottieWorker._workerManager.getWorker(workerId, config.workerUrl);
 
     DotLottieWorker._workerManager.assignAnimationToWorker(this._id, workerId);
 

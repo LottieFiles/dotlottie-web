@@ -1,5 +1,3 @@
-// resolved to a Worker constructor by plugin-inline-worker
-import DotLottieWebWorker from './dotlottie.worker?worker&inline';
 import type { MethodParamsMap, RpcRequest } from './types';
 
 export class WorkerManager {
@@ -7,9 +5,9 @@ export class WorkerManager {
 
   private readonly _animationWorkerMap = new Map<string, string>();
 
-  public getWorker(workerId: string): Worker {
+  public getWorker(workerId: string, workerUrl: string): Worker {
     if (!this._workers.has(workerId)) {
-      this._workers.set(workerId, new DotLottieWebWorker());
+      this._workers.set(workerId, new Worker(workerUrl));
     }
 
     return this._workers.get(workerId) as Worker;
@@ -24,7 +22,11 @@ export class WorkerManager {
   }
 
   public sendMessage(workerId: string, message: RpcRequest<keyof MethodParamsMap>, transfer?: Transferable[]): void {
-    this.getWorker(workerId).postMessage(message, transfer || []);
+    const worker = this._workers.get(workerId);
+
+    if (worker) {
+      worker.postMessage(message, transfer || []);
+    }
   }
 
   public terminateWorker(workerId: string): void {

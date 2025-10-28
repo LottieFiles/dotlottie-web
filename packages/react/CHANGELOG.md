@@ -1,11 +1,18 @@
 # @lottiefiles/dotlottie-react
 
-## 0.17.6
+## Unreleased
+
+### Major Changes
+
+- **BREAKING**: `DotLottieWorkerReact` component now requires `workerUrl` prop for CSP-compliant worker initialization
+  - Example: `<DotLottieWorker workerUrl="/workers/dotlottie-worker.js" src="animation.lottie" />`
+  - See migration guide in `docs/migration-guides/csp-safe-worker.md`
+  - Enables strict CSP policies with `worker-src: 'self'` instead of requiring `worker-src: blob:`
 
 ### Patch Changes
 
-- Updated dependencies [34b3f1a]
-  - @lottiefiles/dotlottie-web@0.55.0
+- Updated dependencies
+  - @lottiefiles/dotlottie-web@X.0.0
 
 ## 0.17.5
 

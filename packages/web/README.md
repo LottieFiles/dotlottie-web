@@ -17,6 +17,10 @@
 * [Documentation](#documentation)
 * [Supported Platforms](#supported-platforms)
   * [Browser Requirements](#browser-requirements)
+* [Using DotLottieWorker](#using-dotlottieworker)
+  * [Basic Usage](#basic-usage)
+  * [Serving the Worker File](#serving-the-worker-file)
+  * [Content Security Policy](#content-security-policy)
 * [Live Examples](#live-examples)
 * [Contributing](#contributing)
 * [Issues](#issues)
@@ -71,6 +75,98 @@ Based on WebAssembly support requirements:
 * **OffscreenCanvas**: Allow rendering on worker threads for improved responsiveness
 
 For legacy browser support, consider using WebAssembly polyfills, though performance may be significantly reduced.
+
+## Using DotLottieWorker
+
+For performance-intensive applications, `DotLottieWorker` offloads animation rendering to a Web Worker thread. As of the latest version, you must provide the path to the worker file via the `workerUrl` parameter for CSP compliance.
+
+### Basic Usage
+
+```typescript
+import { DotLottieWorker } from '@lottiefiles/dotlottie-web';
+
+const canvas = document.querySelector('canvas');
+
+const dotLottie = new DotLottieWorker({
+  canvas,
+  workerUrl: '/workers/dotlottie-worker.js', // Required: Path to worker file
+  src: 'https://lottie.host/path/to/animation.lottie',
+  autoplay: true,
+  loop: true,
+});
+```
+
+### Serving the Worker File
+
+You must serve the worker file from your application. Choose one of the following approaches:
+
+#### Option 1: Copy to Public Directory
+
+Copy the worker file to your public/static directory during your build process:
+
+```bash
+# Manual copy
+cp node_modules/@lottiefiles/dotlottie-web/dist/dotlottie-worker.js public/workers/
+
+# Or add to your build script in package.json
+{
+  "scripts": {
+    "postinstall": "mkdir -p public/workers && cp node_modules/@lottiefiles/dotlottie-web/dist/dotlottie-worker.js public/workers/"
+  }
+}
+```
+
+Then reference it with a static path:
+
+```typescript
+const dotLottie = new DotLottieWorker({
+  canvas,
+  workerUrl: '/workers/dotlottie-worker.js',
+  src: 'animation.lottie',
+});
+```
+
+#### Option 2: Import with Bundler
+
+Modern bundlers like Vite can handle the worker import automatically:
+
+```typescript
+import workerUrl from '@lottiefiles/dotlottie-web/worker?url';
+
+const dotLottie = new DotLottieWorker({
+  canvas,
+  workerUrl,
+  src: 'animation.lottie',
+});
+```
+
+For webpack 5, use asset modules:
+
+```typescript
+import workerUrl from '@lottiefiles/dotlottie-web/worker';
+
+const dotLottie = new DotLottieWorker({
+  canvas,
+  workerUrl,
+  src: 'animation.lottie',
+});
+```
+
+### Content Security Policy
+
+This approach allows you to use strict CSP policies without allowing blob workers:
+
+```
+Content-Security-Policy: worker-src 'self';
+```
+
+If hosting the worker on a CDN:
+
+```
+Content-Security-Policy: worker-src 'self' https://cdn.example.com;
+```
+
+Note: The old blob-based worker instantiation is no longer supported. The `workerUrl` parameter is required for all `DotLottieWorker` instances.
 
 ## Live Examples
 
