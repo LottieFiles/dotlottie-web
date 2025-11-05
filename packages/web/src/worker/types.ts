@@ -66,6 +66,10 @@ export interface MethodParamsMap {
   play: {
     instanceId: string;
   };
+  registerFont: {
+    fontName: string;
+    fontSource: string | ArrayBuffer | Uint8Array;
+  };
   resize: {
     height: number;
     instanceId: string;
@@ -386,6 +390,7 @@ export interface MethodResultMap {
   };
   pause: void;
   play: void;
+  registerFont: boolean;
   resize: void;
   setBackgroundColor: void;
   setFrame: void;

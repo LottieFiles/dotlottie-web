@@ -27,6 +27,12 @@ export class WorkerManager {
     this.getWorker(workerId).postMessage(message, transfer || []);
   }
 
+  public broadcastMessage(message: RpcRequest<keyof MethodParamsMap>, transfer?: Transferable[]): void {
+    this._workers.forEach((worker) => {
+      worker.postMessage(message, transfer || []);
+    });
+  }
+
   public terminateWorker(workerId: string): void {
     const worker = this._workers.get(workerId);
 

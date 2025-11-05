@@ -2701,4 +2701,49 @@ describe.each([
       currentFrame: dotLottie.totalFrames - 1,
     });
   });
+
+  test('registerFont via URL and verify animation loads', async () => {
+    const fontUrl = new URL('./__fixtures__/fonts/Impact.ttf', import.meta.url).href;
+    const textAnimSrc = new URL('./__fixtures__/text.json', import.meta.url).href;
+
+    const onReady = vi.fn();
+    const onLoad = vi.fn();
+    const onLoadError = vi.fn();
+    const onCompelete = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: textAnimSrc,
+      autoplay: true,
+    });
+
+    dotLottie.addEventListener('ready', onReady);
+    dotLottie.addEventListener('load', onLoad);
+    dotLottie.addEventListener('loadError', onLoadError);
+    dotLottie.addEventListener('complete', onCompelete);
+
+    const fontRegistered = await DotLottie.registerFont('Impact', fontUrl);
+
+    expect(fontRegistered).toBe(true);
+
+    await vi.waitFor(() => {
+      expect(onReady).toHaveBeenCalled();
+    });
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    expect(onLoadError).not.toHaveBeenCalled();
+
+    expect(dotLottie.isLoaded).toBe(true);
+    expect(dotLottie.totalFrames).toBeGreaterThan(0);
+
+    await vi.waitFor(
+      () => {
+        expect(onCompelete).toHaveBeenCalledTimes(1);
+      },
+      { timeout: dotLottie.duration * 1000 + 500 },
+    );
+  });
 });

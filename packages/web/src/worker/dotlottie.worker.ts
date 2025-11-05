@@ -390,7 +390,7 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
 };
 
 const commands: {
-  [K in keyof MethodParamsMap]: (request: RpcRequest<K>) => MethodResultMap[K];
+  [K in keyof MethodParamsMap]: (request: RpcRequest<K>) => MethodResultMap[K] | Promise<MethodResultMap[K]>;
 } = {
   setTransform(request) {
     const instanceId = request.params.instanceId;
@@ -466,10 +466,6 @@ const commands: {
     }
 
     instance.setLayout(layout);
-
-    return {
-      success: true,
-    };
   },
   stateMachineGetListeners(request) {
     const instanceId = request.params.instanceId;
@@ -920,6 +916,11 @@ const commands: {
 
     return instance.play();
   },
+  registerFont: async (request) => {
+    const { fontName, fontSource } = request.params;
+
+    return DotLottie.registerFont(fontName, fontSource);
+  },
   resize: (request) => {
     const instanceId = request.params.instanceId;
     const width = request.params.width;
@@ -935,10 +936,6 @@ const commands: {
     instance.canvas.width = width;
 
     instance.resize();
-
-    return {
-      success: true,
-    };
   },
   setBackgroundColor: (request) => {
     const instanceId = request.params.instanceId;
@@ -1117,10 +1114,6 @@ const commands: {
     }
 
     instance.setMarker(marker);
-
-    return {
-      success: true,
-    };
   },
   setLoop(request) {
     const instanceId = request.params.instanceId;
@@ -1133,10 +1126,6 @@ const commands: {
     }
 
     instance.setLoop(loop);
-
-    return {
-      success: true,
-    };
   },
   setLoopCount(request) {
     const instanceId = request.params.instanceId;
@@ -1149,14 +1138,12 @@ const commands: {
     }
 
     instance.setLoopCount(loopCount);
-
-    return {
-      success: true,
-    };
   },
 };
 
-function executeCommand<T extends keyof MethodParamsMap>(rpcRequest: RpcRequest<T>): MethodResultMap[T] {
+function executeCommand<T extends keyof MethodParamsMap>(
+  rpcRequest: RpcRequest<T>,
+): MethodResultMap[T] | Promise<MethodResultMap[T]> {
   const method = rpcRequest.method;
 
   if (typeof commands[method] === 'function') {
@@ -1166,9 +1153,9 @@ function executeCommand<T extends keyof MethodParamsMap>(rpcRequest: RpcRequest<
   }
 }
 
-self.onmessage = (event: { data: RpcRequest<keyof MethodParamsMap> }): void => {
+self.onmessage = async (event: { data: RpcRequest<keyof MethodParamsMap> }): Promise<void> => {
   try {
-    const result = executeCommand(event.data);
+    const result = await executeCommand(event.data);
 
     const response: RpcResponse<keyof MethodResultMap> = {
       id: event.data.id,
