@@ -1137,7 +1137,17 @@ export class DotLottie {
         }
         fontData = await response.arrayBuffer();
       } else if (fontSource instanceof Uint8Array) {
-        fontData = fontSource.buffer;
+        const tempBuffer = fontSource.buffer.slice(
+          fontSource.byteOffset,
+          fontSource.byteOffset + fontSource.byteLength,
+        );
+
+        if (tempBuffer instanceof ArrayBuffer) {
+          fontData = tempBuffer;
+        } else {
+          fontData = new ArrayBuffer(fontSource.byteLength);
+          new Uint8Array(fontData).set(fontSource);
+        }
       } else {
         fontData = fontSource;
       }

@@ -2721,7 +2721,11 @@ describe.each([
     dotLottie.addEventListener('loadError', onLoadError);
     dotLottie.addEventListener('complete', onCompelete);
 
-    const fontRegistered = await DotLottie.registerFont('Impact', impactFontUrl);
+    // Pre-fetch font data
+    const fontResponse = await fetch(impactFontUrl);
+    const fontData = await fontResponse.arrayBuffer();
+
+    const fontRegistered = await DotLottie.registerFont('Impact', fontData);
 
     expect(fontRegistered).toBe(true);
 
