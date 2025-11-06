@@ -1,5 +1,6 @@
 /* eslint-disable node/no-unsupported-features/node-builtins */
 /* eslint-disable require-atomic-updates */
+import impactFontUrl from '__fixtures__/fonts/Impact.ttf?url';
 import { describe, beforeAll, afterAll, beforeEach, afterEach, test, expect, vi } from 'vitest';
 
 import type { Config, Layout, Mode } from '../src';
@@ -8,6 +9,8 @@ import { BYTES_PER_PIXEL } from '../src/constants';
 import type { DotLottiePlayer } from '../src/core';
 import { getDefaultDPR } from '../src/utils';
 
+
+import textAnimSrc from './__fixtures__/text.json?url';
 import { createCanvas, sleep, addWasmCSPPolicy } from './test-utils';
 
 const wasmUrl = new URL('../src/core/dotlottie-player.wasm', import.meta.url).href;
@@ -2703,9 +2706,6 @@ describe.each([
   });
 
   test('registerFont via URL and verify animation loads', async () => {
-    const fontUrl = new URL('./__fixtures__/fonts/Impact.ttf', import.meta.url).href;
-    const textAnimSrc = new URL('./__fixtures__/text.json', import.meta.url).href;
-
     const onReady = vi.fn();
     const onLoad = vi.fn();
     const onLoadError = vi.fn();
@@ -2722,7 +2722,7 @@ describe.each([
     dotLottie.addEventListener('loadError', onLoadError);
     dotLottie.addEventListener('complete', onCompelete);
 
-    const fontRegistered = await DotLottie.registerFont('Impact', fontUrl);
+    const fontRegistered = await DotLottie.registerFont('Impact', impactFontUrl);
 
     expect(fontRegistered).toBe(true);
 
