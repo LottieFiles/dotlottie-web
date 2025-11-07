@@ -52,6 +52,14 @@ export interface VectorMarker extends ClassHandle {
   set(_0: number, _1: Marker): boolean;
 }
 
+export interface VectorChar extends ClassHandle {
+  push_back(_0: number): void;
+  resize(_0: number, _1: number): void;
+  size(): number;
+  get(_0: number): number | undefined;
+  set(_0: number, _1: number): boolean;
+}
+
 export interface ModeValue<T extends number> {
   value: T;
 }
@@ -132,6 +140,7 @@ export interface DotLottiePlayer extends ClassHandle {
   animationSize(): VectorFloat;
   subscribe(_0: Observer | null): Observer | null;
   stateMachineFrameworkSetup(): VectorString;
+  stateMachineGetInputs(): VectorString;
   getTransform(): VectorFloat;
   stateMachineSubscribe(_0: StateMachineObserver | null): StateMachineObserver | null;
   stateMachineInternalSubscribe(_0: StateMachineInternalObserver | null): StateMachineInternalObserver | null;
@@ -157,6 +166,7 @@ export interface DotLottiePlayer extends ClassHandle {
   setTransform(_0: VectorFloat): boolean;
   setQuality(_0: number): boolean;
   setViewport(_0: number, _1: number, _2: number, _3: number): boolean;
+  loadDotLottieData(_0: VectorChar, _1: number, _2: number): boolean;
   loopCount(): number;
   resize(_0: number, _1: number): boolean;
   tweenUpdate(_0?: number): boolean;
@@ -178,7 +188,6 @@ export interface DotLottiePlayer extends ClassHandle {
   setConfig(_0: Config): void;
   loadAnimationData(_0: EmbindString, _1: number, _2: number): boolean;
   loadAnimationPath(_0: EmbindString, _1: number, _2: number): boolean;
-  loadDotLottieData(_0: EmbindString, _1: number, _2: number): boolean;
   loadAnimation(_0: EmbindString, _1: number, _2: number): boolean;
   manifestString(): string;
   setTheme(_0: EmbindString): boolean;
@@ -195,7 +204,6 @@ export interface DotLottiePlayer extends ClassHandle {
   stateMachineGetNumericInput(_0: EmbindString): number;
   stateMachineGetStringInput(_0: EmbindString): string;
   stateMachineGetBooleanInput(_0: EmbindString): boolean;
-  stateMachineGetInputs(): VectorString;
   intersect(_0: number, _1: number, _2: EmbindString): boolean;
   getLayerBounds(_0: EmbindString): VectorFloat;
   tweenToMarker(_0: EmbindString, _1?: number, _2?: VectorFloat): boolean;
@@ -244,6 +252,9 @@ interface EmbindModule {
   VectorMarker: {
     new (): VectorMarker;
   };
+  VectorChar: {
+    new (): VectorChar;
+  };
   Mode: { Forward: ModeValue<1>; Reverse: ModeValue<2>; Bounce: ModeValue<3>; ReverseBounce: ModeValue<4> };
   Fit: {
     Contain: FitValue<1>;
@@ -272,6 +283,7 @@ interface EmbindModule {
   createDefaultOpenUrlPolicy(): OpenUrlPolicy;
   createDefaultConfig(): Config;
   transformThemeToLottieSlots(_0: EmbindString, _1: EmbindString): string;
+  registerFont(_0: EmbindString, _1: VectorChar): boolean;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;

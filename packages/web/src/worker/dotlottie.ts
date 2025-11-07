@@ -804,6 +804,37 @@ export class DotLottieWorker {
 
   /**
    * @experimental
+   *
+   * Register a custom font for use in animations in worker contexts
+   * @param fontName - The name of the font to register
+   * @param fontSource - Either a URL string to fetch the font, or ArrayBuffer/Uint8Array of font data
+   * @returns Promise<boolean> - true if registration message was sent successfully
+   */
+  public static async registerFont(fontName: string, fontSource: string | ArrayBuffer | Uint8Array): Promise<boolean> {
+    try {
+      const id = generateUniqueId();
+
+      DotLottieWorker._workerManager.broadcastMessage({
+        id,
+        method: 'registerFont',
+        params: {
+          fontName,
+          fontSource,
+        },
+      });
+
+      // Note: we can't easily wait for responses from all workers in a broadcast,
+      // so we return true if the broadcast was sent successfully
+      return true;
+    } catch (error) {
+      console.error(`Error broadcasting registerFont for "${fontName}":`, error);
+
+      return false;
+    }
+  }
+
+  /**
+   * @experimental
    * Load a state machine by ID
    * @param stateMachineId - The ID of the state machine to load
    * @returns true if the state machine was loaded successfully

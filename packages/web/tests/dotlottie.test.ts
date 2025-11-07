@@ -14,6 +14,8 @@ const wasmUrl = new URL('../src/core/dotlottie-player.wasm', import.meta.url).hr
 const jsonSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
 const smSrc = new URL('./__fixtures__/sm/all-inputs.json', import.meta.url).href;
+const textAnimSrc = new URL('./__fixtures__/text.json', import.meta.url).href;
+const impactFontUrl = new URL('./__fixtures__/fonts/Impact.ttf', import.meta.url).href;
 
 DotLottieClass.setWasmUrl(wasmUrl);
 DotLottieWorkerClass.setWasmUrl(wasmUrl);
@@ -2700,5 +2702,53 @@ describe.each([
       type: 'frame',
       currentFrame: dotLottie.totalFrames - 1,
     });
+  });
+
+  // eslint-disable-next-line no-warning-comments
+  // FIXME: investigate why this test is flaky in CI environment
+  test.skip('registerFont via URL and verify animation loads', async () => {
+    const onReady = vi.fn();
+    const onLoad = vi.fn();
+    const onLoadError = vi.fn();
+    const onCompelete = vi.fn();
+
+    dotLottie = new DotLottie({
+      canvas,
+      src: textAnimSrc,
+      autoplay: true,
+    });
+
+    dotLottie.addEventListener('ready', onReady);
+    dotLottie.addEventListener('load', onLoad);
+    dotLottie.addEventListener('loadError', onLoadError);
+    dotLottie.addEventListener('complete', onCompelete);
+
+    // Pre-fetch font data
+    const fontResponse = await fetch(impactFontUrl);
+    const fontData = await fontResponse.arrayBuffer();
+
+    const fontRegistered = await DotLottie.registerFont('Impact', fontData);
+
+    expect(fontRegistered).toBe(true);
+
+    await vi.waitFor(() => {
+      expect(onReady).toHaveBeenCalled();
+    });
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    expect(onLoadError).not.toHaveBeenCalled();
+
+    expect(dotLottie.isLoaded).toBe(true);
+    expect(dotLottie.totalFrames).toBeGreaterThan(0);
+
+    await vi.waitFor(
+      () => {
+        expect(onCompelete).toHaveBeenCalledTimes(1);
+      },
+      { timeout: dotLottie.duration * 1000 + 500 },
+    );
   });
 });

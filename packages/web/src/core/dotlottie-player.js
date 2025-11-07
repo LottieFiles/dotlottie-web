@@ -967,7 +967,7 @@ var createDotLottiePlayerModule = (() => {
             Ja: null,
           });
         },
-        m: (a, b, c, d, e, f, k, g, l, n, m, q, r) => {
+        k: (a, b, c, d, e, f, k, g, l, n, m, q, r) => {
           m = O(m);
           f = S(e, f);
           g && (g = S(k, g));
@@ -1083,7 +1083,7 @@ var createDotLottiePlayerModule = (() => {
           });
           $a(b, e);
         },
-        l: (a, b, c) => {
+        m: (a, b, c) => {
           var d = zb(a, 'enum');
           b = O(b);
           a = d.constructor;
@@ -1105,7 +1105,7 @@ var createDotLottiePlayerModule = (() => {
             Ja: null,
           });
         },
-        v: (a, b, c, d, e, f) => {
+        u: (a, b, c, d, e, f) => {
           var k = qb(b, c);
           a = O(a);
           a = tb(a);
@@ -1149,10 +1149,10 @@ var createDotLottiePlayerModule = (() => {
           c = O(c);
           M(a, { name: c, fromWireType: d, Ia: 8, readValueFromPointer: d }, { hb: !0 });
         },
-        q: (a) => {
+        o: (a) => {
           M(a, Cb);
         },
-        u: (a, b, c, d, e, f, k, g, l, n, m, q) => {
+        v: (a, b, c, d, e, f, k, g, l, n, m, q) => {
           c = O(c);
           f = S(e, f);
           g = S(k, g);
@@ -1268,7 +1268,7 @@ var createDotLottiePlayerModule = (() => {
           b = zb(b, 'emval::as');
           return Lb(b, c, a);
         },
-        p: (a, b, c, d) => {
+        q: (a, b, c, d) => {
           a = Mb[a];
           b = V(b);
           return a(null, b, c, d);
@@ -1279,7 +1279,7 @@ var createDotLottiePlayerModule = (() => {
           b = V(b);
           return a == b;
         },
-        o: (a, b, c) => {
+        p: (a, b, c) => {
           var d = Ob(a, b),
             e = d.shift();
           a--;
@@ -1301,7 +1301,7 @@ var createDotLottiePlayerModule = (() => {
           Ja(b);
           wb(a);
         },
-        t: (a, b) => {
+        s: (a, b) => {
           a = zb(a, '_emval_take_value');
           a = a.readValueFromPointer(b);
           return gb(a);
@@ -1379,7 +1379,7 @@ var createDotLottiePlayerModule = (() => {
         },
         S: () => 52,
         Q: () => 52,
-        k: cc,
+        l: cc,
         f: dc,
         e: ec,
         B: fc,
@@ -1387,7 +1387,7 @@ var createDotLottiePlayerModule = (() => {
         a: hc,
         b: ic,
         h: jc,
-        s: kc,
+        t: kc,
         U: Sb,
         L: (a, b) => {
           Yb(x.subarray(a, a + b));

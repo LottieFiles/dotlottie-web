@@ -27,6 +27,7 @@ import {
   isElementInViewport,
   isLottie,
 } from './utils';
+import { toVectorChar } from './utils/vector-char';
 
 const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
   if (mode === 'reverse') {
@@ -293,7 +294,7 @@ export class DotLottie {
   }
 
   private _loadFromData(data: Data): void {
-    if (this._dotLottieCore === null) return;
+    if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 
     const width = this._canvas.width;
     const height = this._canvas.height;
@@ -317,7 +318,7 @@ export class DotLottie {
 
         return;
       }
-      loaded = this._dotLottieCore.loadDotLottieData(data, width, height);
+      loaded = this._dotLottieCore.loadDotLottieData(toVectorChar(DotLottie._wasmModule, data), width, height);
     } else if (typeof data === 'object') {
       if (!isLottie(data as Record<string, unknown>)) {
         this._dispatchError(
@@ -1111,6 +1112,58 @@ export class DotLottie {
 
   public static setWasmUrl(url: string): void {
     DotLottieWasmLoader.setWasmUrl(url);
+  }
+
+  /**
+   * @experimental
+   * Register a custom font for use in animations
+   * @param fontName - The name of the font to register
+   * @param fontSource - Either a URL string to fetch the font, or ArrayBuffer/Uint8Array of font data
+   * @returns Promise<boolean> - true if registration succeeded, false otherwise
+   */
+  public static async registerFont(fontName: string, fontSource: string | ArrayBuffer | Uint8Array): Promise<boolean> {
+    try {
+      const module = await DotLottieWasmLoader.load();
+
+      let fontData: ArrayBuffer;
+
+      if (typeof fontSource === 'string') {
+        const response = await fetch(fontSource);
+
+        if (!response.ok) {
+          console.error(`Failed to fetch font from URL: ${fontSource}. Status: ${response.status}`);
+
+          return false;
+        }
+        fontData = await response.arrayBuffer();
+      } else if (fontSource instanceof Uint8Array) {
+        const tempBuffer = fontSource.buffer.slice(
+          fontSource.byteOffset,
+          fontSource.byteOffset + fontSource.byteLength,
+        );
+
+        if (tempBuffer instanceof ArrayBuffer) {
+          fontData = tempBuffer;
+        } else {
+          fontData = new ArrayBuffer(fontSource.byteLength);
+          new Uint8Array(fontData).set(fontSource);
+        }
+      } else {
+        fontData = fontSource;
+      }
+
+      const success = module.registerFont(fontName, toVectorChar(module, fontData));
+
+      if (!success) {
+        console.error(`Failed to register font "${fontName}". Font data may be invalid.`);
+      }
+
+      return success;
+    } catch (error) {
+      console.error(`Error registering font "${fontName}":`, error);
+
+      return false;
+    }
   }
 
   /**
