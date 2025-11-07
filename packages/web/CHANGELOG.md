@@ -1,5 +1,15 @@
 # @lottiefiles/dotlottie-web
 
+## 0.56.0
+
+### Minor Changes
+
+- 3d2eed2: feat: add `registerFont` static method in `DotLottie` and `DotLottieWorker` for custom font registration.
+
+  ```js
+  const fontRegistered = await DotLottie.registerFont('CustomFont', 'path/to/font.ttf');
+  ```
+
 ## 0.55.0
 
 ### Minor Changes
