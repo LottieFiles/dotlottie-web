@@ -93,7 +93,7 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
       animationId: this.animationId,
       stateMachineConfig: this.stateMachineConfig,
       stateMachineId: this.stateMachineId,
-
+      backgroundColor: this.backgroundColor,
       workerId: this.workerId,
     });
   }
@@ -192,6 +192,7 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
         themeId: this.themeId,
         stateMachineConfig: this.stateMachineConfig,
         stateMachineId: this.stateMachineId,
+        backgroundColor: this.backgroundColor,
       });
     }
 
@@ -211,6 +212,7 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
         animationId: this.animationId,
         stateMachineConfig: this.stateMachineConfig,
         stateMachineId: this.stateMachineId,
+        backgroundColor: this.backgroundColor,
       });
     }
 
