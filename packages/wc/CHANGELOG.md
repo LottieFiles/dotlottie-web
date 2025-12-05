@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.8.9
+
+### Patch Changes
+
+- 68c2e26: fix: backgroundColor prop not applied on initial render in dotlottie-wc
+
 ## 0.8.8
 
 ### Patch Changes
