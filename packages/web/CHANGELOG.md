@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.58.0
+
+### Minor Changes
+
+- 6091731: chore: bump dotlottie-rs v0.1.53 WASM
+
 ## 0.57.0
 
 ### Minor Changes
