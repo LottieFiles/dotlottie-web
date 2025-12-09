@@ -1,5 +1,26 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.8.10
+
+### Patch Changes
+
+- Updated dependencies [6091731]
+  - @lottiefiles/dotlottie-web@0.58.0
+
+## 0.8.9
+
+### Patch Changes
+
+- 68c2e26: fix: backgroundColor prop not applied on initial render in dotlottie-wc
+
+## 0.8.8
+
+### Patch Changes
+
+- d9e8f1d: fixed marker prop
+- Updated dependencies [4bf1e54]
+  - @lottiefiles/dotlottie-web@0.57.0
+
 ## 0.8.7
 
 ### Patch Changes
