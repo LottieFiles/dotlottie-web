@@ -1,0 +1,15 @@
+{
+  "wand_pos": {
+    "type": "Vector",
+    "value": [10.0, 10.0],
+    "bindings": {
+      "themes": [
+        {
+          "themeId": "wand",
+          "ruleId": "wand_pos",
+          "path": "value"
+        }
+      ]
+    }
+  }
+}

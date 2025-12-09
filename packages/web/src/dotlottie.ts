@@ -1,3 +1,4 @@
+/* eslint-disable no-secrets/no-secrets */
 /* eslint-disable no-warning-comments */
 import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER, BYTES_PER_PIXEL } from './constants';
@@ -11,6 +12,7 @@ import type {
   Observer,
   StateMachineObserver,
   StateMachineInternalObserver,
+  GlobalInputsObserver,
 } from './core';
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
@@ -56,6 +58,11 @@ const createCoreFit = (fit: Fit, module: MainModule): CoreFit => {
     return module.Fit.None;
   }
 };
+
+export interface GradientStop {
+  color: number[];
+  offset: number;
+}
 
 const createCoreAlign = (align: [number, number], module: MainModule): VectorFloat => {
   const coreAlign = new module.VectorFloat();
@@ -117,6 +124,8 @@ export class DotLottie {
   private _stateMachineInternalMessageObserver: StateMachineInternalObserver | null = null;
 
   private _dotLottieObserverHandle: Observer | null = null;
+
+  private _globalInputsObserverHandler: GlobalInputsObserver | null = null;
 
   private static _wasmModule: MainModule | null = null;
 
@@ -869,6 +878,7 @@ export class DotLottie {
 
     this._eventManager.removeAllEventListeners();
     this._cleanupStateMachineListeners();
+    this._cleanupGlobalInputsListeners();
   }
 
   public freeze(): void {
@@ -1786,4 +1796,334 @@ export class DotLottie {
     }
   }
   // #endregion
+
+  // #region global inputs
+  private _setupGlobalInputsListeners(): void {
+    if (!this._dotLottieCore || !DotLottie._wasmModule) return;
+
+    const globalInputsCallbackObserver = new DotLottie._wasmModule.CallbackGlobalInputsObserver();
+
+    globalInputsCallbackObserver.setOnBooleanGlobalInputValueChange(
+      (inputName: string, oldValue: boolean, newValue: boolean) => {
+        this._eventManager.dispatch({ type: 'globalInputsBooleanChange', inputName, oldValue, newValue });
+      },
+    );
+
+    globalInputsCallbackObserver.setOnColorGlobalInputValueChange(
+      (inputName: string, oldValue: number[], newValue: number[]) => {
+        this._eventManager.dispatch({
+          type: 'globalInputsColorChange',
+          inputName,
+          oldValue: this._wasmVectorToArray(oldValue),
+          newValue: this._wasmVectorToArray(newValue),
+        });
+      },
+    );
+
+    globalInputsCallbackObserver.setOnGradientGlobalInputValueChange(
+      (inputName: string, oldValue: number[], newValue: number[]) => {
+        this._eventManager.dispatch({
+          type: 'globalInputsGradientChange',
+          inputName,
+          oldValue: this._wasmVectorToArray(oldValue),
+          newValue: this._wasmVectorToArray(newValue),
+        });
+      },
+    );
+
+    globalInputsCallbackObserver.setOnNumericGlobalInputValueChange(
+      (inputName: string, oldValue: number, newValue: number) => {
+        this._eventManager.dispatch({ type: 'globalInputsNumericChange', inputName, oldValue, newValue });
+      },
+    );
+
+    globalInputsCallbackObserver.setOnStringGlobalInputValueChange(
+      (inputName: string, oldValue: string, newValue: string) => {
+        this._eventManager.dispatch({ type: 'globalInputsStringChange', inputName, oldValue, newValue });
+      },
+    );
+
+    globalInputsCallbackObserver.setOnVectorGlobalInputValueChange(
+      (inputName: string, oldValue: number[], newValue: number[]) => {
+        this._eventManager.dispatch({
+          type: 'globalInputsVectorChange',
+          inputName,
+          oldValue: this._wasmVectorToArray(oldValue),
+          newValue: this._wasmVectorToArray(newValue),
+        });
+      },
+    );
+
+    this._globalInputsObserverHandler = this._dotLottieCore.globalInputsSubscribe(globalInputsCallbackObserver);
+  }
+
+  private _wasmVectorToArray(wasmVector: unknown): number[] {
+    const result: number[] = [];
+
+    for (let i = 0; i < wasmVector.size(); i += 1) {
+      result.push(wasmVector.get(i));
+    }
+
+    return result;
+  }
+
+  private _cleanupGlobalInputsListeners(): void {
+    if (this._globalInputsObserverHandler) {
+      this._dotLottieCore?.globalInputsUnsubscribe(this._globalInputsObserverHandler);
+      this._globalInputsObserverHandler.delete();
+      this._stateMachineObserverHandle = null;
+    }
+  }
+
+  /**
+   * @experimental
+   * Load global inputs by ID from the dotLottie file
+   * @param id - The ID of the global inputs to load
+   * @returns True if loaded successfully
+   */
+  public globalInputsLoad(id: string): boolean {
+    const ret = this._dotLottieCore?.globalInputsLoad(id) ?? false;
+
+    if (ret) {
+      this._setupGlobalInputsListeners();
+    }
+
+    return ret;
+  }
+
+  /**
+   * @experimental
+   * Load global inputs from JSON data
+   * @param data - The JSON string containing global inputs data
+   * @returns True if loaded successfully
+   */
+  public globalInputsLoadData(data: string): boolean {
+    const ret = this._dotLottieCore?.globalInputsLoadData(data) ?? false;
+
+    if (ret) {
+      this._setupGlobalInputsListeners();
+    }
+
+    return ret;
+  }
+
+  /**
+   * @experimental
+   * Apply the loaded global inputs to the animation
+   * @returns True if applied successfully
+   */
+  public globalInputsApply(): boolean {
+    return this._dotLottieCore?.globalInputsApply() ?? false;
+  }
+
+  /**
+   * @experimental
+   * Remove/clear the global inputs
+   * @returns True if removed successfully
+   */
+  public globalInputsRemove(): boolean {
+    const ret = this._dotLottieCore?.globalInputsRemove() ?? false;
+
+    if (ret) {
+      this._cleanupGlobalInputsListeners();
+    }
+
+    return ret;
+  }
+
+  /**
+   * @experimental
+   * Set a string global input value
+   * @param bindingName - The name of the binding
+   * @param newValue - The new string value
+   * @returns True if set successfully
+   */
+  public globalInputsSetString(bindingName: string, newValue: string): boolean {
+    return this._dotLottieCore?.globalInputsSetString(bindingName, newValue) ?? false;
+  }
+
+  /**
+   * @experimental
+   * Set a color global input value
+   * @param bindingName - The name of the binding
+   * @param newValue - The new color value as [r, g, b, a] (0-1 range)
+   * @returns True if set successfully
+   */
+  public globalInputsSetColor(bindingName: string, newValue: number[]): boolean {
+    if (DotLottie._wasmModule === null || this._dotLottieCore === null) return false;
+
+    const colorVector = new DotLottie._wasmModule.VectorFloat();
+
+    for (const value of newValue) {
+      colorVector.push_back(value);
+    }
+
+    const result = this._dotLottieCore.globalInputsSetColor(bindingName, colorVector);
+
+    colorVector.delete();
+
+    return result;
+  }
+
+  /**
+   * @experimental
+   * Set a vector global input value
+   * @param bindingName - The name of the binding
+   * @param newValue - The new vector value as [x, y]
+   * @returns True if set successfully
+   */
+  public globalInputsSetVector(bindingName: string, newValue: number[]): boolean {
+    if (DotLottie._wasmModule === null || this._dotLottieCore === null) return false;
+
+    const vectorValue = new DotLottie._wasmModule.VectorFloat();
+
+    for (const value of newValue) {
+      vectorValue.push_back(value);
+    }
+
+    const result = this._dotLottieCore.globalInputsSetVector(bindingName, vectorValue);
+
+    vectorValue.delete();
+
+    return result;
+  }
+
+  /**
+   * @experimental
+   * Set a numeric global input value
+   * @param bindingName - The name of the binding
+   * @param newValue - The new numeric value
+   * @returns True if set successfully
+   */
+  public globalInputsSetNumeric(bindingName: string, newValue: number): boolean {
+    return this._dotLottieCore?.globalInputsSetNumeric(bindingName, newValue) ?? false;
+  }
+
+  /**
+   * @experimental
+   * Set a boolean global input value
+   * @param bindingName - The name of the binding
+   * @param newValue - The new boolean value
+   * @returns True if set successfully
+   */
+  public globalInputsSetBoolean(bindingName: string, newValue: boolean): boolean {
+    return this._dotLottieCore?.globalInputsSetBoolean(bindingName, newValue) ?? false;
+  }
+
+  /**
+   * @experimental
+   * Set a gradient global input value
+   * @param bindingName - The name of the binding
+   * @param newValue - The new gradient stops
+   * @returns True if set successfully
+   */
+  public globalInputsSetGradient(bindingName: string, newValue: GradientStop[]): boolean {
+    if (DotLottie._wasmModule === null || this._dotLottieCore === null) return false;
+
+    const gradientVector = new DotLottie._wasmModule.VectorGradientStop();
+
+    for (const stop of newValue) {
+      const colorVector = new DotLottie._wasmModule.VectorFloat();
+
+      for (const colorStop of stop.color) {
+        colorVector.push_back(colorStop);
+      }
+      gradientVector.push_back({ offset: stop.offset, color: colorVector });
+      colorVector.delete();
+    }
+
+    const result = this._dotLottieCore.globalInputsSetGradient(bindingName, gradientVector);
+
+    gradientVector.delete();
+
+    return result;
+  }
+
+  /**
+   * @experimental
+   * Get a string global input value
+   * @param bindingName - The name of the binding
+   * @returns The string value or undefined
+   */
+  public globalInputsGetString(bindingName: string): string | undefined {
+    return this._dotLottieCore?.globalInputsGetString(bindingName)?.toString() ?? undefined;
+  }
+
+  /**
+   * @experimental
+   * Get a color global input value
+   * @param bindingName - The name of the binding
+   * @returns The color value as [r, g, b, a] or empty array
+   */
+  public globalInputsGetColor(bindingName: string): number[] {
+    if (!this._dotLottieCore) return [];
+
+    const colorVector = this._dotLottieCore.globalInputsGetColor(bindingName);
+    const color: number[] = [];
+
+    for (let i = 0; i < colorVector.size(); i += 1) {
+      color.push(colorVector.get(i) as number);
+    }
+
+    return color;
+  }
+
+  /**
+   * @experimental
+   * Get a vector global input value
+   * @param bindingName - The name of the binding
+   * @returns The vector value as [x, y] or empty array
+   */
+  public globalInputsGetVector(bindingName: string): number[] {
+    if (!this._dotLottieCore) return [];
+
+    const vectorValue = this._dotLottieCore.globalInputsGetVector(bindingName);
+    const vector: number[] = [];
+
+    for (let i = 0; i < vectorValue.size(); i += 1) {
+      vector.push(vectorValue.get(i) as number);
+    }
+
+    return vector;
+  }
+
+  /**
+   * @experimental
+   * Get a numeric global input value
+   * @param bindingName - The name of the binding
+   * @returns The numeric value or undefined
+   */
+  public globalInputsGetNumeric(bindingName: string): number | undefined {
+    return this._dotLottieCore?.globalInputsGetNumeric(bindingName) ?? undefined;
+  }
+
+  /**
+   * @experimental
+   * Get a gradient global input value
+   * @param bindingName - The name of the binding
+   * @returns The gradient stops or empty array
+   */
+  public globalInputsGetGradient(bindingName: string): GradientStop[] {
+    if (!this._dotLottieCore) return [];
+
+    const gradientVector = this._dotLottieCore.globalInputsGetGradient(bindingName);
+    const gradient: GradientStop[] = [];
+
+    for (let i = 0; i < gradientVector.size(); i += 1) {
+      const stop = gradientVector.get(i);
+
+      if (!stop) continue;
+
+      const colorVector = stop.color;
+      const color: number[] = [];
+
+      for (let j = 0; j < colorVector.size(); j += 1) {
+        color.push(colorVector.get(j) as number);
+      }
+
+      gradient.push({ offset: stop.offset, color });
+    }
+
+    return gradient;
+  }
 }
