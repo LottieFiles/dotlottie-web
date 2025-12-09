@@ -1810,7 +1810,7 @@ export class DotLottie {
     );
 
     globalInputsCallbackObserver.setOnColorGlobalInputValueChange(
-      (inputName: string, oldValue: number[], newValue: number[]) => {
+      (inputName: string, oldValue: VectorFloat, newValue: VectorFloat) => {
         this._eventManager.dispatch({
           type: 'globalInputsColorChange',
           inputName,
@@ -1821,7 +1821,7 @@ export class DotLottie {
     );
 
     globalInputsCallbackObserver.setOnGradientGlobalInputValueChange(
-      (inputName: string, oldValue: number[], newValue: number[]) => {
+      (inputName: string, oldValue: VectorFloat, newValue: VectorFloat) => {
         this._eventManager.dispatch({
           type: 'globalInputsGradientChange',
           inputName,
@@ -1844,7 +1844,7 @@ export class DotLottie {
     );
 
     globalInputsCallbackObserver.setOnVectorGlobalInputValueChange(
-      (inputName: string, oldValue: number[], newValue: number[]) => {
+      (inputName: string, oldValue: VectorFloat, newValue: VectorFloat) => {
         this._eventManager.dispatch({
           type: 'globalInputsVectorChange',
           inputName,
@@ -1857,7 +1857,7 @@ export class DotLottie {
     this._globalInputsObserverHandler = this._dotLottieCore.globalInputsSubscribe(globalInputsCallbackObserver);
   }
 
-  private _wasmVectorToArray(wasmVector: unknown): number[] {
+  private _wasmVectorToArray(wasmVector: VectorFloat): number[] {
     const result: number[] = [];
 
     for (let i = 0; i < wasmVector.size(); i += 1) {
