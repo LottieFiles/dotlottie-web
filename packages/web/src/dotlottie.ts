@@ -1861,7 +1861,11 @@ export class DotLottie {
     const result: number[] = [];
 
     for (let i = 0; i < wasmVector.size(); i += 1) {
-      result.push(wasmVector.get(i));
+      const number = wasmVector.get(i);
+
+      if (number) {
+        result.push(number);
+      }
     }
 
     return result;
