@@ -1,3 +1,4 @@
+import type { GradientStop } from '../dotlottie';
 import type {
   CompleteEvent,
   DestroyEvent,
@@ -25,6 +26,12 @@ import type {
   StateMachineStringInputValueChangeEvent,
   StateMachineInputFiredEvent,
   StateMachineInternalMessage,
+  GlobalInputsColorChangeEvent,
+  GlobalInputsGradientChangeEvent,
+  GlobalInputsNumericChangeEvent,
+  GlobalInputsBooleanChangeEvent,
+  GlobalInputsStringChangeEvent,
+  GlobalInputsVectorChangeEvent,
 } from '../event-manager';
 import type { Config, Layout, Mode, RenderConfig, StateMachineConfig, Transform } from '../types';
 
@@ -50,6 +57,77 @@ export interface MethodParamsMap {
     instanceId: string;
   };
   getTransform: {
+    instanceId: string;
+  };
+  globalInputsGetBoolean: {
+    instanceId: string;
+    name: string;
+  };
+  globalInputsGetColor: {
+    instanceId: string;
+    name: string;
+  };
+  globalInputsGetGradient: {
+    instanceId: string;
+    name: string;
+  };
+  globalInputsGetNumeric: {
+    instanceId: string;
+    name: string;
+  };
+  globalInputsGetString: {
+    instanceId: string;
+    name: string;
+  };
+  globalInputsGetVector: {
+    instanceId: string;
+    name: string;
+  };
+  globalInputsLoad: {
+    id: string;
+    instanceId: string;
+  };
+  globalInputsLoadData: {
+    data: string;
+    instanceId: string;
+  };
+  globalInputsRemove: {
+    instanceId: string;
+  };
+  globalInputsSetBoolean: {
+    instanceId: string;
+    name: string;
+    value: boolean;
+  };
+  globalInputsSetColor: {
+    instanceId: string;
+    name: string;
+    value: number[];
+  };
+  globalInputsSetGradient: {
+    instanceId: string;
+    name: string;
+    value: GradientStop[];
+  };
+  globalInputsSetNumeric: {
+    instanceId: string;
+    name: string;
+    value: number;
+  };
+  globalInputsSetString: {
+    instanceId: string;
+    name: string;
+    value: string;
+  };
+  globalInputsSetVector: {
+    instanceId: string;
+    name: string;
+    value: number[];
+  };
+  globalInputsStart: {
+    instanceId: string;
+  };
+  globalInputsStop: {
     instanceId: string;
   };
   load: {
@@ -282,6 +360,23 @@ export interface MethodResultMap {
     state: DotLottieInstanceState;
   };
   getTransform: Transform | undefined;
+  globalInputsGetBoolean: boolean | undefined;
+  globalInputsGetColor: number[];
+  globalInputsGetGradient: GradientStop[];
+  globalInputsGetNumeric: number | undefined;
+  globalInputsGetString: string | undefined;
+  globalInputsGetVector: number[];
+  globalInputsLoad: boolean;
+  globalInputsLoadData: boolean;
+  globalInputsRemove: boolean;
+  globalInputsSetBoolean: boolean;
+  globalInputsSetColor: boolean;
+  globalInputsSetGradient: boolean;
+  globalInputsSetNumeric: boolean;
+  globalInputsSetString: boolean;
+  globalInputsSetVector: boolean;
+  globalInputsStart: boolean;
+  globalInputsStop: boolean;
   load: void;
   loadAnimation: void;
   onComplete: {
@@ -298,6 +393,30 @@ export interface MethodResultMap {
   };
   onFreeze: {
     event: FreezeEvent;
+    instanceId: string;
+  };
+  onGlobalInputsBooleanChange: {
+    event: GlobalInputsBooleanChangeEvent;
+    instanceId: string;
+  };
+  onGlobalInputsColorChange: {
+    event: GlobalInputsColorChangeEvent;
+    instanceId: string;
+  };
+  onGlobalInputsGradientChange: {
+    event: GlobalInputsGradientChangeEvent;
+    instanceId: string;
+  };
+  onGlobalInputsNumericChange: {
+    event: GlobalInputsNumericChangeEvent;
+    instanceId: string;
+  };
+  onGlobalInputsStringChange: {
+    event: GlobalInputsStringChangeEvent;
+    instanceId: string;
+  };
+  onGlobalInputsVectorChange: {
+    event: GlobalInputsVectorChangeEvent;
     instanceId: string;
   };
   onLoad: {

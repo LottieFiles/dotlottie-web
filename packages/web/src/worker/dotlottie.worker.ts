@@ -29,6 +29,12 @@ import type {
   StateMachineStringInputValueChangeEvent,
   StateMachineInputFiredEvent,
   StateMachineInternalMessage,
+  GlobalInputsColorChangeEvent,
+  GlobalInputsBooleanChangeEvent,
+  GlobalInputsGradientChangeEvent,
+  GlobalInputsNumericChangeEvent,
+  GlobalInputsStringChangeEvent,
+  GlobalInputsVectorChangeEvent,
 } from '../event-manager';
 
 import type { DotLottieInstanceState } from './dotlottie';
@@ -382,6 +388,96 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
       result: {
         instanceId,
         event: stateMachineInternalMessage,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  globalInputsColorChange: (instanceId: string) => (event: Event) => {
+    const globalInputsColorChangeEvent = event as GlobalInputsColorChangeEvent;
+
+    const response: RpcResponse<'onGlobalInputsColorChange'> = {
+      id: '',
+      method: 'onGlobalInputsColorChange',
+      result: {
+        instanceId,
+        event: globalInputsColorChangeEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  globalInputsBooleanChange: (instanceId: string) => (event: Event) => {
+    const globalInputsBooleanChangeEvent = event as GlobalInputsBooleanChangeEvent;
+
+    const response: RpcResponse<'onGlobalInputsBooleanChange'> = {
+      id: '',
+      method: 'onGlobalInputsBooleanChange',
+      result: {
+        instanceId,
+        event: globalInputsBooleanChangeEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  globalInputsGradientChange: (instanceId: string) => (event: Event) => {
+    const globalInputsGradientChange = event as GlobalInputsGradientChangeEvent;
+
+    const response: RpcResponse<'onGlobalInputsGradientChange'> = {
+      id: '',
+      method: 'onGlobalInputsGradientChange',
+      result: {
+        instanceId,
+        event: globalInputsGradientChange,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  globalInputsNumericChange: (instanceId: string) => (event: Event) => {
+    const globalInputsNumericChangeEvent = event as GlobalInputsNumericChangeEvent;
+
+    // eslint-disable-next-line no-secrets/no-secrets
+    const response: RpcResponse<'onGlobalInputsNumericChange'> = {
+      id: '',
+      // eslint-disable-next-line no-secrets/no-secrets
+      method: 'onGlobalInputsNumericChange',
+      result: {
+        instanceId,
+        event: globalInputsNumericChangeEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  globalInputsStringChange: (instanceId: string) => (event: Event) => {
+    const globalInputsStringChangeEvent = event as GlobalInputsStringChangeEvent;
+
+    // eslint-disable-next-line no-secrets/no-secrets
+    const response: RpcResponse<'onGlobalInputsStringChange'> = {
+      id: '',
+      // eslint-disable-next-line no-secrets/no-secrets
+      method: 'onGlobalInputsStringChange',
+      result: {
+        instanceId,
+        event: globalInputsStringChangeEvent,
+      },
+    };
+
+    self.postMessage(response);
+  },
+  globalInputsVectorChange: (instanceId: string) => (event: Event) => {
+    const globalInputsVectorChange = event as GlobalInputsVectorChangeEvent;
+
+    // eslint-disable-next-line no-secrets/no-secrets
+    const response: RpcResponse<'onGlobalInputsVectorChange'> = {
+      id: '',
+      // eslint-disable-next-line no-secrets/no-secrets
+      method: 'onGlobalInputsVectorChange',
+      result: {
+        instanceId,
+        event: globalInputsVectorChange,
       },
     };
 
@@ -769,6 +865,196 @@ const commands: {
     }
 
     return instance.stateMachineGet(stateMachineId);
+  },
+  globalInputsLoad: (request) => {
+    const instanceId = request.params.instanceId;
+    const instance = instancesMap.get(instanceId);
+    const globalInputsId = request.params.id;
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsLoad(globalInputsId);
+  },
+  globalInputsLoadData: (request) => {
+    const instanceId = request.params.instanceId;
+    const data = request.params.data;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsLoadData(data);
+  },
+  globalInputsRemove: (request) => {
+    const instanceId = request.params.instanceId;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsRemove();
+  },
+  globalInputsSetBoolean: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+    const value = request.params.value;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsSetBoolean(name, value);
+  },
+  globalInputsSetColor: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+    const value = request.params.value;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsSetColor(name, value);
+  },
+  globalInputsSetGradient: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+    const value = request.params.value;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsSetGradient(name, value);
+  },
+  globalInputsSetNumeric: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+    const value = request.params.value;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsSetNumeric(name, value);
+  },
+  globalInputsSetString: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+    const value = request.params.value;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsSetString(name, value);
+  },
+  globalInputsSetVector: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+    const value = request.params.value;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsSetVector(name, value);
+  },
+  globalInputsGetColor: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsGetColor(name);
+  },
+  globalInputsGetGradient: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsGetGradient(name);
+  },
+  globalInputsGetNumeric: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsGetNumeric(name);
+  },
+  globalInputsGetString: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsGetString(name);
+  },
+  globalInputsGetVector: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsGetVector(name);
+  },
+  globalInputsGetBoolean: (request) => {
+    const instanceId = request.params.instanceId;
+    const name = request.params.name;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsGetBoolean(name);
+  },
+  globalInputsStart: (request) => {
+    const instanceId = request.params.instanceId;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsStart();
+  },
+  globalInputsStop: (request) => {
+    const instanceId = request.params.instanceId;
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.globalInputsStop();
   },
   create: (request) => {
     const instanceId = request.params.instanceId;

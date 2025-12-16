@@ -1913,11 +1913,20 @@ export class DotLottie {
 
   /**
    * @experimental
-   * Apply the loaded global inputs to the animation
+   * Start applying the loaded global inputs to the animation
    * @returns True if applied successfully
    */
-  public globalInputsApply(): boolean {
-    return this._dotLottieCore?.globalInputsApply() ?? false;
+  public globalInputsStart(): boolean {
+    return this._dotLottieCore?.globalInputsStart() ?? false;
+  }
+
+  /**
+   * @experimental
+   * Stop applying the loaded global inputs to the animation. Global inputs can still be modifed, but won't affect the current theme or state machine.
+   * @returns True if applied successfully
+   */
+  public globalInputsStop(): boolean {
+    return this._dotLottieCore?.globalInputsStop() ?? false;
   }
 
   /**
@@ -2070,6 +2079,20 @@ export class DotLottie {
     }
 
     return color;
+  }
+
+  /**
+   * @experimental
+   * Get a boolean global input value
+   * @param bindingName - The name of the binding
+   * @returns The value as a boolean
+   */
+  public globalInputsGetBoolean(bindingName: string): boolean | undefined {
+    if (!this._dotLottieCore) return undefined;
+
+    const value = this._dotLottieCore.globalInputsGetBoolean(bindingName);
+
+    return value;
   }
 
   /**

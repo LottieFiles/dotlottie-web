@@ -46,7 +46,7 @@ async function main() {
     const st = dotLottie.setTheme('wand');
     console.log('Set theme:', st);
 
-    const apply = dotLottie.globalInputsApply();
+    const apply = dotLottie.globalInputsStart();
     console.log('[Debug]: Applied inputs:', apply);
   });
 
@@ -59,7 +59,7 @@ async function main() {
   // Track mouse state
   let mx = 0;
   let my = 0;
-  let leftDown = false;
+  // let leftDown = false;
 
   canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
@@ -70,10 +70,6 @@ async function main() {
     my = (e.clientY - rect.top) * scaleY;
 
     dotLottie.globalInputsSetVector('wand_pos', [mx, my]);
-  });
-
-  canvas.addEventListener('mouseleave', () => {
-    leftDown = false;
   });
 }
 

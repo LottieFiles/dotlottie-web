@@ -173,6 +173,15 @@ export class DotLottieWorker {
       | 'onStateMachineStringInputValueChange'
       | 'onStateMachineInputFired'
       | 'onStateMachineInternalMessage'
+      | 'onGlobalInputsBooleanChange'
+      | 'onGlobalInputsColorChange'
+      | 'onGlobalInputsGradientChange'
+      // eslint-disable-next-line no-secrets/no-secrets
+      | 'onGlobalInputsNumericChange'
+      // eslint-disable-next-line no-secrets/no-secrets
+      | 'onGlobalInputsStringChange'
+      // eslint-disable-next-line no-secrets/no-secrets
+      | 'onGlobalInputsVectorChange'
     > = event.data;
 
     if (!rpcResponse.id) {
