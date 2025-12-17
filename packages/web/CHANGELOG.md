@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.58.1
+
+### Patch Changes
+
+- d0ecda1: fix: buffer size mismatch warnings
+
 ## 0.58.0
 
 ### Minor Changes

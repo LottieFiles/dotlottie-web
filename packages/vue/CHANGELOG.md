@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-vue
 
+## 0.10.10
+
+### Patch Changes
+
+- Updated dependencies [d0ecda1]
+  - @lottiefiles/dotlottie-web@0.58.1
+
 ## 0.10.9
 
 ### Patch Changes

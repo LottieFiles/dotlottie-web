@@ -148,6 +148,10 @@ export class DotLottie {
 
   private _boundOnPointerLeave: ((event: PointerEvent) => void) | null = null;
 
+  private _bufferMismatchCount = 0;
+
+  private _lastExpectedBufferSize = 0;
+
   public constructor(
     config: Omit<Config, 'canvas'> & {
       canvas: HTMLCanvasElement | OffscreenCanvas | RenderSurface;
@@ -634,11 +638,31 @@ export class DotLottie {
 
       const expectedLength = this._canvas.width * this._canvas.height * BYTES_PER_PIXEL;
 
+      /* 
+        frame buffer size mismatch can occur temporarily during resize operations when the WASM buffer allocation hasn't completed yet
+      */
       if (buffer.byteLength !== expectedLength) {
-        console.warn(`Buffer size mismatch: got ${buffer.byteLength}, expected ${expectedLength}`);
+        if (this._lastExpectedBufferSize === expectedLength) {
+          this._bufferMismatchCount += 1;
+        } else {
+          this._bufferMismatchCount = 1;
+          this._lastExpectedBufferSize = expectedLength;
+        }
+
+        if (this._bufferMismatchCount === 10) {
+          console.warn(
+            `[dotlottie-web] Persistent buffer size mismatch detected. ` +
+              `Expected ${expectedLength} bytes for canvas ${this._canvas.width}x${this._canvas.height}, ` +
+              `but got ${buffer.byteLength} bytes. ` +
+              `This may indicate a WASM memory allocation issue or invalid canvas dimensions.`,
+          );
+        }
 
         return;
       }
+
+      this._bufferMismatchCount = 0;
+      this._lastExpectedBufferSize = expectedLength;
 
       let imageData = null;
 
@@ -918,6 +942,7 @@ export class DotLottie {
     const resized = this._dotLottieCore.resize(this._canvas.width, this._canvas.height);
 
     if (resized) {
+      this._dotLottieCore.render();
       this._draw();
     }
   }

@@ -617,9 +617,7 @@ describe.each([
     expect(onDestroy).toHaveBeenCalledTimes(1);
   });
 
-  (isWorker ? test.skip : test)('logs warning and exits early on buffer size mismatch', async () => {
-    const consoleWarnSpy = vi.spyOn(console, 'warn');
-
+  (isWorker ? test.skip : test)('exits early on buffer size mismatch without rendering', async () => {
     const onReady = vi.fn();
     const onRender = vi.fn();
 
@@ -642,19 +640,11 @@ describe.each([
 
     vi.spyOn(dotLottieCore, 'buffer').mockReturnValue(wrongSizeBuffer);
 
-    const expectedLength = canvas.width * canvas.height * BYTES_PER_PIXEL;
-
     onRender.mockClear();
 
     await dotLottie.setFrame(1);
 
-    expect(consoleWarnSpy).toHaveBeenCalledWith(
-      `Buffer size mismatch: got ${wrongSizeBuffer.byteLength}, expected ${expectedLength}`,
-    );
-
     expect(onRender).not.toHaveBeenCalled();
-
-    consoleWarnSpy.mockRestore();
   });
 
   test('animationSize() returns the animation dimensions', async () => {
@@ -708,6 +698,65 @@ describe.each([
         expect(canvas.width).toBe(2 * originalCanvasWidth);
         expect(canvas.height).toBe(2 * originalCanvasHeight);
       });
+    });
+
+    (isWorker ? test.skip : test)('should not warn for transient buffer mismatches during resize', async () => {
+      const consoleWarnSpy = vi.spyOn(console, 'warn');
+      const onReady = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+        autoplay: true,
+      });
+
+      dotLottie.addEventListener('ready', onReady);
+
+      await vi.waitFor(() => expect(onReady).toHaveBeenCalledTimes(1));
+
+      const dotLottieCore = (dotLottie as DotLottieClass)['_dotLottieCore'] as DotLottiePlayer;
+
+      const originalBuffer = dotLottieCore.buffer.bind(dotLottieCore);
+
+      const initialWidth = canvas.width;
+      const initialHeight = canvas.height;
+      const initialBufferSize = initialWidth * initialHeight * BYTES_PER_PIXEL;
+
+      const oldBuffer = new ArrayBuffer(initialBufferSize);
+
+      let resizeCallCount = 0;
+
+      vi.spyOn(dotLottieCore, 'resize').mockImplementation(() => {
+        resizeCallCount += 1;
+
+        return true;
+      });
+
+      let drawCallCount = 0;
+
+      vi.spyOn(dotLottieCore, 'buffer').mockImplementation(() => {
+        drawCallCount += 1;
+        if (resizeCallCount > 0 && drawCallCount < 10) {
+          return oldBuffer;
+        }
+
+        return originalBuffer();
+      });
+
+      canvas.style.width = '400px';
+      canvas.style.height = '400px';
+
+      dotLottie.resize();
+
+      await sleep(200);
+
+      const bufferWarnings = consoleWarnSpy.mock.calls.filter((call) =>
+        String(call[0]).includes('buffer size mismatch'),
+      );
+
+      expect(bufferWarnings.length).toBeLessThanOrEqual(1);
+
+      consoleWarnSpy.mockRestore();
     });
   });
 

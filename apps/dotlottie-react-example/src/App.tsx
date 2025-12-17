@@ -25,7 +25,12 @@ function App() {
   const [marker, setMarker] = useState('');
   const [allMarkers, setAllMarkers] = useState<string[]>([]);
   const [animationsIds, setAnimationsIds] = useState<string[]>([]);
-  const [currentAnimationId, setCurrentAnimationId] = useState<string>('crying');
+  const [currentAnimationId, setCurrentAnimationId] = useState<string>('');
+  const [isMounted, setIsMounted] = useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   React.useEffect(() => {
     function updateCurrentFrame(event: { currentFrame: number }) {
@@ -69,28 +74,31 @@ function App() {
           marginBottom: '2000px',
         }}
       ></div>
-      <DotLottieWorkerReact
-        dotLottieRefCallback={setDotLottie}
-        useFrameInterpolation={useFrameInterpolation}
-        src={animations[srcIdx]}
-        autoplay
-        loop={loop}
-        speed={speed}
-        playOnHover={playOnHover}
-        renderConfig={{
-          autoResize: autoResizeCanvas,
-        }}
-        marker={marker}
-        style={{
-          margin: '2px',
-          border: '1px solid white',
-        }}
-        animationId={currentAnimationId}
-      />
+      {isMounted && (
+        <DotLottieWorkerReact
+          dotLottieRefCallback={setDotLottie}
+          useFrameInterpolation={useFrameInterpolation}
+          src={animations[srcIdx]}
+          autoplay
+          loop={loop}
+          speed={speed}
+          playOnHover={playOnHover}
+          renderConfig={{
+            autoResize: autoResizeCanvas,
+          }}
+          marker={marker}
+          style={{
+            margin: '2px',
+            border: '1px solid white',
+          }}
+          animationId={currentAnimationId}
+        />
+      )}
       <input type="range" min="0" max="100" defaultValue="0" value={progress} />
       <label>
         Marker:
         <select
+          value={marker}
           onChange={(event) => {
             setMarker(event.target.value);
           }}
@@ -181,7 +189,8 @@ function App() {
       <div>
         <label>
           Animation ID:
-          <select value={currentAnimationId} onChange={(event) => setCurrentAnimationId(event.target.value)}>
+          <select value={currentAnimationId || ''} onChange={(event) => setCurrentAnimationId(event.target.value)}>
+            <option value="">Select an animation</option>
             {animationsIds.map((animationId) => (
               <option key={animationId} value={animationId}>
                 {animationId}
