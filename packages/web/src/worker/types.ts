@@ -60,28 +60,28 @@ export interface MethodParamsMap {
     instanceId: string;
   };
   globalInputsGetBoolean: {
+    inputName: string;
     instanceId: string;
-    name: string;
   };
   globalInputsGetColor: {
+    inputName: string;
     instanceId: string;
-    name: string;
   };
   globalInputsGetGradient: {
+    inputName: string;
     instanceId: string;
-    name: string;
   };
   globalInputsGetNumeric: {
+    inputName: string;
     instanceId: string;
-    name: string;
   };
   globalInputsGetString: {
+    inputName: string;
     instanceId: string;
-    name: string;
   };
   globalInputsGetVector: {
+    inputName: string;
     instanceId: string;
-    name: string;
   };
   globalInputsLoad: {
     id: string;
@@ -95,34 +95,34 @@ export interface MethodParamsMap {
     instanceId: string;
   };
   globalInputsSetBoolean: {
+    inputName: string;
     instanceId: string;
-    name: string;
-    value: boolean;
+    newValue: boolean;
   };
   globalInputsSetColor: {
+    inputName: string;
     instanceId: string;
-    name: string;
-    value: number[];
+    newValue: number[];
   };
   globalInputsSetGradient: {
+    inputName: string;
     instanceId: string;
-    name: string;
-    value: GradientStop[];
+    newValue: GradientStop[];
   };
   globalInputsSetNumeric: {
+    inputName: string;
     instanceId: string;
-    name: string;
-    value: number;
+    newValue: number;
   };
   globalInputsSetString: {
+    inputName: string;
     instanceId: string;
-    name: string;
-    value: string;
+    newValue: string;
   };
   globalInputsSetVector: {
+    inputName: string;
     instanceId: string;
-    name: string;
-    value: number[];
+    newValue: number[];
   };
   globalInputsStart: {
     instanceId: string;

@@ -1,5 +1,6 @@
 import { IS_BROWSER } from '../constants';
 import type { Marker } from '../core/dotlottie-player.types';
+import type { GradientStop } from '../dotlottie';
 import type { EventType, EventListener, FrameEvent, StateMachineInternalMessage } from '../event-manager';
 import { EventManager } from '../event-manager';
 import { OffscreenObserver } from '../offscreen-observer';
@@ -1278,5 +1279,214 @@ export class DotLottieWorker {
         this._boundOnPointerLeave = null;
       }
     }
+  }
+
+  /**
+   * @experimental
+   * Load global inputs from .lottie file
+   * @param id - The global inputs file to load
+   * @returns True if loaded successfully
+   */
+  public async globalInputsLoad(id: string): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('globalInputsLoad', { instanceId: this._id, id });
+  }
+
+  /**
+   * @experimental
+   * Load global inputs from JSON data
+   * @param data - The JSON string containing global inputs data
+   * @returns True if loaded successfully
+   */
+  public async globalInputsLoadData(data: string): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('globalInputsLoadData', { instanceId: this._id, data });
+  }
+
+  /**
+   * @experimental
+   * Start applying the loaded global inputs to the animation
+   * @returns True if applied successfully
+   */
+  public async globalInputsStart(): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('globalInputsStart', { instanceId: this._id });
+  }
+
+  /**
+   * @experimental
+   * Stop applying the loaded global inputs to the animation. Global inputs can still be modified, but won't affect the current theme or state machine.
+   * @returns True if applied successfully
+   */
+  public async globalInputsStop(): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('globalInputsStop', { instanceId: this._id });
+  }
+
+  /**
+   * @experimental
+   * Remove/clear the global inputs
+   * @returns True if removed successfully
+   */
+  public async globalInputsRemove(): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('globalInputsRemove', { instanceId: this._id });
+  }
+
+  /**
+   * @experimental
+   * Set a string global input value
+   * @param inputName - The name of the binding
+   * @param newValue - The new string value
+   * @returns True if set successfully
+   */
+  public async globalInputsSetString(inputName: string, newValue: string): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('globalInputsSetString', { instanceId: this._id, inputName, newValue });
+  }
+
+  /**
+   * @experimental
+   * Set a color global input value
+   * @param inputName - The name of the binding
+   * @param newValue - The new color value as [r, g, b, a] (0-1 range)
+   * @returns True if set successfully
+   */
+  public async globalInputsSetColor(inputName: string, newValue: number[]): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('globalInputsSetColor', { instanceId: this._id, inputName, newValue });
+  }
+
+  /**
+   * @experimental
+   * Set a vector global input value
+   * @param inputName - The name of the binding
+   * @param newValue - The new vector value as [x, y]
+   * @returns True if set successfully
+   */
+  public async globalInputsSetVector(inputName: string, newValue: number[]): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('globalInputsSetVector', { instanceId: this._id, inputName, newValue });
+  }
+
+  /**
+   * @experimental
+   * Set a numeric global input value
+   * @param inputName - The name of the binding
+   * @param newValue - The new numeric value
+   * @returns True if set successfully
+   */
+  public async globalInputsSetNumeric(inputName: string, newValue: number): Promise<boolean> {
+    if (!this._created) return false;
+
+    // eslint-disable-next-line no-secrets/no-secrets
+    return this._sendMessage('globalInputsSetNumeric', { instanceId: this._id, inputName, newValue });
+  }
+
+  /**
+   * @experimental
+   * Set a boolean global input value
+   * @param inputName - The name of the binding
+   * @param newValue - The new boolean value
+   * @returns True if set successfully
+   */
+  public async globalInputsSetBoolean(inputName: string, newValue: boolean): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('globalInputsSetBoolean', { instanceId: this._id, inputName, newValue });
+  }
+
+  /**
+   * @experimental
+   * Set a gradient global input value
+   * @param inputName - The name of the binding
+   * @param newValue - The new gradient stops
+   * @returns True if set successfully
+   */
+  public async globalInputsSetGradient(inputName: string, newValue: GradientStop[]): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('globalInputsSetGradient', { instanceId: this._id, inputName, newValue });
+  }
+
+  /**
+   * @experimental
+   * Get a string global input value
+   * @param inputName - The name of the binding
+   * @returns The string value or undefined
+   */
+  public async globalInputsGetString(inputName: string): Promise<string | undefined> {
+    if (!this._created) return undefined;
+
+    return this._sendMessage('globalInputsGetString', { instanceId: this._id, inputName });
+  }
+
+  /**
+   * @experimental
+   * Get a color global input value
+   * @param inputName - The name of the binding
+   * @returns The color value as [r, g, b, a] or empty array
+   */
+  public async globalInputsGetColor(inputName: string): Promise<number[]> {
+    if (!this._created) return [];
+
+    return this._sendMessage('globalInputsGetColor', { instanceId: this._id, inputName });
+  }
+
+  /**
+   * @experimental
+   * Get a boolean global input value
+   * @param inputName - The name of the binding
+   * @returns The value as a boolean
+   */
+  public async globalInputsGetBoolean(inputName: string): Promise<boolean | undefined> {
+    if (!this._created) return undefined;
+
+    return this._sendMessage('globalInputsGetBoolean', { instanceId: this._id, inputName });
+  }
+
+  /**
+   * @experimental
+   * Get a vector global input value
+   * @param inputName - The name of the binding
+   * @returns The vector value as [x, y] or empty array
+   */
+  public async globalInputsGetVector(inputName: string): Promise<number[]> {
+    if (!this._created) return [];
+
+    return this._sendMessage('globalInputsGetVector', { instanceId: this._id, inputName });
+  }
+
+  /**
+   * @experimental
+   * Get a numeric global input value
+   * @param inputName - The name of the binding
+   * @returns The numeric value or undefined
+   */
+  public async globalInputsGetNumeric(inputName: string): Promise<number | undefined> {
+    if (!this._created) return undefined;
+
+    // eslint-disable-next-line no-secrets/no-secrets
+    return this._sendMessage('globalInputsGetNumeric', { instanceId: this._id, inputName });
+  }
+
+  /**
+   * @experimental
+   * Get a gradient global input value
+   * @param inputName - The name of the binding
+   * @returns The gradient stops or empty array
+   */
+  public async globalInputsGetGradient(inputName: string): Promise<GradientStop[]> {
+    if (!this._created) return [];
+
+    return this._sendMessage('globalInputsGetGradient', { instanceId: this._id, inputName });
   }
 }

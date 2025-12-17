@@ -900,8 +900,8 @@ const commands: {
   },
   globalInputsSetBoolean: (request) => {
     const instanceId = request.params.instanceId;
-    const name = request.params.name;
-    const value = request.params.value;
+    const name = request.params.inputName;
+    const value = request.params.newValue;
     const instance = instancesMap.get(instanceId);
 
     if (!instance) {
@@ -912,8 +912,8 @@ const commands: {
   },
   globalInputsSetColor: (request) => {
     const instanceId = request.params.instanceId;
-    const name = request.params.name;
-    const value = request.params.value;
+    const name = request.params.inputName;
+    const value = request.params.newValue;
     const instance = instancesMap.get(instanceId);
 
     if (!instance) {
@@ -924,8 +924,8 @@ const commands: {
   },
   globalInputsSetGradient: (request) => {
     const instanceId = request.params.instanceId;
-    const name = request.params.name;
-    const value = request.params.value;
+    const name = request.params.inputName;
+    const value = request.params.newValue;
     const instance = instancesMap.get(instanceId);
 
     if (!instance) {
@@ -936,8 +936,8 @@ const commands: {
   },
   globalInputsSetNumeric: (request) => {
     const instanceId = request.params.instanceId;
-    const name = request.params.name;
-    const value = request.params.value;
+    const name = request.params.inputName;
+    const value = request.params.newValue;
     const instance = instancesMap.get(instanceId);
 
     if (!instance) {
@@ -948,8 +948,8 @@ const commands: {
   },
   globalInputsSetString: (request) => {
     const instanceId = request.params.instanceId;
-    const name = request.params.name;
-    const value = request.params.value;
+    const name = request.params.inputName;
+    const value = request.params.newValue;
     const instance = instancesMap.get(instanceId);
 
     if (!instance) {
@@ -960,8 +960,8 @@ const commands: {
   },
   globalInputsSetVector: (request) => {
     const instanceId = request.params.instanceId;
-    const name = request.params.name;
-    const value = request.params.value;
+    const name = request.params.inputName;
+    const value = request.params.newValue;
     const instance = instancesMap.get(instanceId);
 
     if (!instance) {
@@ -972,7 +972,7 @@ const commands: {
   },
   globalInputsGetColor: (request) => {
     const instanceId = request.params.instanceId;
-    const name = request.params.name;
+    const name = request.params.inputName;
     const instance = instancesMap.get(instanceId);
 
     if (!instance) {
@@ -983,7 +983,7 @@ const commands: {
   },
   globalInputsGetGradient: (request) => {
     const instanceId = request.params.instanceId;
-    const name = request.params.name;
+    const name = request.params.inputName;
     const instance = instancesMap.get(instanceId);
 
     if (!instance) {
@@ -994,7 +994,7 @@ const commands: {
   },
   globalInputsGetNumeric: (request) => {
     const instanceId = request.params.instanceId;
-    const name = request.params.name;
+    const name = request.params.inputName;
     const instance = instancesMap.get(instanceId);
 
     if (!instance) {
@@ -1005,7 +1005,7 @@ const commands: {
   },
   globalInputsGetString: (request) => {
     const instanceId = request.params.instanceId;
-    const name = request.params.name;
+    const name = request.params.inputName;
     const instance = instancesMap.get(instanceId);
 
     if (!instance) {
@@ -1016,7 +1016,7 @@ const commands: {
   },
   globalInputsGetVector: (request) => {
     const instanceId = request.params.instanceId;
-    const name = request.params.name;
+    const name = request.params.inputName;
     const instance = instancesMap.get(instanceId);
 
     if (!instance) {
@@ -1027,7 +1027,7 @@ const commands: {
   },
   globalInputsGetBoolean: (request) => {
     const instanceId = request.params.instanceId;
-    const name = request.params.name;
+    const name = request.params.inputName;
     const instance = instancesMap.get(instanceId);
 
     if (!instance) {

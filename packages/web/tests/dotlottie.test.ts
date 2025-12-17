@@ -5,15 +5,16 @@ import { describe, beforeAll, afterAll, beforeEach, afterEach, test, expect, vi 
 import type { Config, Layout, Mode } from '../src';
 import { DotLottie as DotLottieClass, DotLottieWorker as DotLottieWorkerClass } from '../src';
 import { BYTES_PER_PIXEL } from '../src/constants';
-import type { DotLottiePlayer } from '../src/core';
+import { type DotLottiePlayer } from '../src/core';
 import { getDefaultDPR } from '../src/utils';
 
 import { createCanvas, sleep, addWasmCSPPolicy } from './test-utils';
 
-const wasmUrl = new URL('../src/core/dotlottie-player.wasm', import.meta.url).href;
+const wasmUrl = new URL('../src/core/dotlottieå-player.wasm', import.meta.url).href;
 const jsonSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
 const smSrc = new URL('./__fixtures__/sm/all-inputs.json', import.meta.url).href;
+const allInputsSrc = new URL('./__fixtures__/global-inputs/all-global-inputs.lottie', import.meta.url).href;
 const textAnimSrc = new URL('./__fixtures__/text.json', import.meta.url).href;
 const impactFontUrl = new URL('./__fixtures__/fonts/Impact.ttf', import.meta.url).href;
 
@@ -2462,6 +2463,115 @@ describe.each([
       const predefinedSet = toSet(predefinedInputs);
 
       expect(inputSet).toEqual(predefinedSet);
+    });
+  });
+
+  describe('globalInputs', () => {
+    test('gets all inputs correctly', async () => {
+      canvas.style.display = 'none';
+
+      const onLoad = vi.fn();
+      const onPlay = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: allInputsSrc,
+        autoplay: true,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+      dotLottie.addEventListener('play', onPlay);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+        expect(onPlay).toHaveBeenCalledTimes(1);
+      });
+
+      const load = await dotLottie.globalInputsLoad('big_inputs_file');
+
+      expect(load).toBe(true);
+
+      const vectorStatic = await dotLottie.globalInputsGetVector('vector_static');
+      const numericStatic = await dotLottie.globalInputsGetNumeric('numeric_static');
+      const colorStatic = await dotLottie.globalInputsGetColor('color_static');
+      const gradientStatic = await dotLottie.globalInputsGetGradient('gradient_static');
+      const stringStatic = await dotLottie.globalInputsGetString('string_static');
+      const booleanStatic = await dotLottie.globalInputsGetBoolean('boolean_static');
+
+      expect(vectorStatic).toEqual([50, 50]);
+      expect(numericStatic).toEqual(50);
+      expect(colorStatic).toEqual([
+        expect.closeTo(0.9, 5),
+        expect.closeTo(0.9, 5),
+        expect.closeTo(0.9, 5),
+        expect.closeTo(1.0, 5),
+      ]);
+      expect(gradientStatic).toEqual([
+        { color: [0.0, 0.0, 0.0, 1.0], offset: 0.0 },
+        { color: [1.0, 1.0, 1.0, 1.0], offset: 1.0 },
+      ]);
+      expect(stringStatic).toEqual('First Try!');
+      expect(booleanStatic).toEqual(false);
+    });
+
+    test('sets all inputs to new values and gets them correctly', async () => {
+      canvas.style.display = 'none';
+
+      const onLoad = vi.fn();
+      const onPlay = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: allInputsSrc,
+        autoplay: true,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+      dotLottie.addEventListener('play', onPlay);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+        expect(onPlay).toHaveBeenCalledTimes(1);
+      });
+
+      const load = await dotLottie.globalInputsLoad('big_inputs_file');
+
+      expect(load).toBe(true);
+
+      // Set new values
+      await dotLottie.globalInputsSetVector('vector_static', [75, 25]);
+      await dotLottie.globalInputsSetNumeric('numeric_static', 123.45);
+      await dotLottie.globalInputsSetColor('color_static', [0.5, 0.2, 0.25, 0.75]);
+      await dotLottie.globalInputsSetGradient('gradient_static', [
+        { color: [0.25, 0.5, 0.75, 1.0], offset: 0.1 },
+        { color: [0.6, 0.7, 0.8, 0.9], offset: 0.9 },
+      ]);
+
+      await dotLottie.globalInputsSetString('string_static', 'Changed value.');
+      await dotLottie.globalInputsSetBoolean('boolean_static', true);
+
+      // Get the new values and check
+      const vectorSet = await dotLottie.globalInputsGetVector('vector_static');
+      const numericSet = await dotLottie.globalInputsGetNumeric('numeric_static');
+      const colorSet = await dotLottie.globalInputsGetColor('color_static');
+      // const gradientSet = await dotLottie.globalInputsGetGradient("gradient_static");
+      const stringSet = await dotLottie.globalInputsGetString('string_static');
+      const booleanSet = await dotLottie.globalInputsGetBoolean('boolean_static');
+
+      expect(vectorSet).toEqual([75, 25]);
+      expect(numericSet).toEqual(expect.closeTo(123.45, 5));
+      expect(colorSet).toEqual([
+        expect.closeTo(0.5, 5),
+        expect.closeTo(0.2, 5),
+        expect.closeTo(0.25, 5),
+        expect.closeTo(0.75, 5),
+      ]);
+      // expect(gradientSet).toEqual([
+      //   { color: [0.25, 0.5, 0.75, 1.0], offset: 0.1 },
+      //   { color: [0.6, 0.7, 0.8, 0.9], offset: 0.9 },
+      // ]);
+      expect(stringSet).toEqual('Changed value.');
+      expect(booleanSet).toEqual(true);
     });
   });
 
