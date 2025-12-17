@@ -885,7 +885,7 @@ var createDotLottiePlayerModule = (() => {
             `Assertion failed: ${a ? Ea(a) : ''}, at: ` +
               [b ? (b ? Ea(b) : '') : 'unknown filename', c, d ? (d ? Ea(d) : '') : 'unknown function'],
           ),
-        j: (a, b, c) => {
+        k: (a, b, c) => {
           var d = new Fa(a);
           D[(d.Ca + 16) >> 2] = 0;
           D[(d.Ca + 4) >> 2] = b;
@@ -967,7 +967,7 @@ var createDotLottiePlayerModule = (() => {
             Ja: null,
           });
         },
-        k: (a, b, c, d, e, f, k, g, l, n, m, q, r) => {
+        j: (a, b, c, d, e, f, k, g, l, n, m, q, r) => {
           m = O(m);
           f = S(e, f);
           g && (g = S(k, g));
@@ -1015,7 +1015,7 @@ var createDotLottiePlayerModule = (() => {
             return [w, ea, E];
           });
         },
-        r: (a, b, c, d, e, f) => {
+        o: (a, b, c, d, e, f) => {
           var k = qb(b, c);
           e = S(d, e);
           N([], [a], (g) => {
@@ -1083,7 +1083,7 @@ var createDotLottiePlayerModule = (() => {
           });
           $a(b, e);
         },
-        m: (a, b, c) => {
+        n: (a, b, c) => {
           var d = zb(a, 'enum');
           b = O(b);
           a = d.constructor;
@@ -1105,7 +1105,7 @@ var createDotLottiePlayerModule = (() => {
             Ja: null,
           });
         },
-        u: (a, b, c, d, e, f) => {
+        v: (a, b, c, d, e, f) => {
           var k = qb(b, c);
           a = O(a);
           a = tb(a);
@@ -1122,7 +1122,7 @@ var createDotLottiePlayerModule = (() => {
             return [];
           });
         },
-        n: (a, b, c, d, e) => {
+        r: (a, b, c, d, e) => {
           b = O(b);
           -1 === e && (e = 4294967295);
           e = (g) => g;
@@ -1149,10 +1149,10 @@ var createDotLottiePlayerModule = (() => {
           c = O(c);
           M(a, { name: c, fromWireType: d, Ia: 8, readValueFromPointer: d }, { hb: !0 });
         },
-        o: (a) => {
+        l: (a) => {
           M(a, Cb);
         },
-        v: (a, b, c, d, e, f, k, g, l, n, m, q) => {
+        u: (a, b, c, d, e, f, k, g, l, n, m, q) => {
           c = O(c);
           f = S(e, f);
           g = S(k, g);
@@ -1379,7 +1379,7 @@ var createDotLottiePlayerModule = (() => {
         },
         S: () => 52,
         Q: () => 52,
-        l: cc,
+        m: cc,
         f: dc,
         e: ec,
         B: fc,
@@ -1445,12 +1445,12 @@ var createDotLottiePlayerModule = (() => {
       Z = () => (Z = W.ma)();
     h.dynCall_jiii = (a, b, c, d) => (h.dynCall_jiii = W.na)(a, b, c, d);
     h.dynCall_jii = (a, b, c) => (h.dynCall_jii = W.oa)(a, b, c);
-    h.dynCall_vjii = (a, b, c, d, e) => (h.dynCall_vjii = W.pa)(a, b, c, d, e);
-    h.dynCall_vjfii = (a, b, c, d, e, f) => (h.dynCall_vjfii = W.qa)(a, b, c, d, e, f);
-    h.dynCall_vjiii = (a, b, c, d, e, f) => (h.dynCall_vjiii = W.ra)(a, b, c, d, e, f);
-    h.dynCall_vj = (a, b, c) => (h.dynCall_vj = W.sa)(a, b, c);
-    h.dynCall_vjiiiii = (a, b, c, d, e, f, k, g) => (h.dynCall_vjiiiii = W.ta)(a, b, c, d, e, f, k, g);
-    h.dynCall_vjiffii = (a, b, c, d, e, f, k, g) => (h.dynCall_vjiffii = W.ua)(a, b, c, d, e, f, k, g);
+    h.dynCall_vjiiiii = (a, b, c, d, e, f, k, g) => (h.dynCall_vjiiiii = W.pa)(a, b, c, d, e, f, k, g);
+    h.dynCall_vjiffii = (a, b, c, d, e, f, k, g) => (h.dynCall_vjiffii = W.qa)(a, b, c, d, e, f, k, g);
+    h.dynCall_vj = (a, b, c) => (h.dynCall_vj = W.ra)(a, b, c);
+    h.dynCall_vjii = (a, b, c, d, e) => (h.dynCall_vjii = W.sa)(a, b, c, d, e);
+    h.dynCall_vjfii = (a, b, c, d, e, f) => (h.dynCall_vjfii = W.ta)(a, b, c, d, e, f);
+    h.dynCall_vjiii = (a, b, c, d, e, f) => (h.dynCall_vjiii = W.ua)(a, b, c, d, e, f);
     h.dynCall_vjiiii = (a, b, c, d, e, f, k) => (h.dynCall_vjiiii = W.va)(a, b, c, d, e, f, k);
     h.dynCall_viijii = (a, b, c, d, e, f, k) => (h.dynCall_viijii = W.wa)(a, b, c, d, e, f, k);
     h.dynCall_iiiiij = (a, b, c, d, e, f, k) => (h.dynCall_iiiiij = W.xa)(a, b, c, d, e, f, k);

@@ -27,7 +27,16 @@ export type EventType =
   | 'stateMachineNumericInputValueChange'
   | 'stateMachineStringInputValueChange'
   | 'stateMachineInputFired'
-  | 'stateMachineInternalMessage';
+  | 'stateMachineInternalMessage'
+  | 'globalInputsColorChange'
+  // eslint-disable-next-line no-secrets/no-secrets
+  | 'globalInputsGradientChange'
+  // eslint-disable-next-line no-secrets/no-secrets
+  | 'globalInputsNumericChange'
+  | 'globalInputsBooleanChange'
+  | 'globalInputsStringChange'
+  // eslint-disable-next-line no-secrets/no-secrets
+  | 'globalInputsVectorChange';
 
 /**
  * Maps an event type string to its respective event interface.
@@ -200,6 +209,53 @@ export interface StateMachineInternalMessage extends BaseEvent {
   type: 'stateMachineInternalMessage';
 }
 
+// Global Inputs Events
+
+export interface GlobalInputsColorChangeEvent extends BaseEvent {
+  inputName: string;
+  newValue: number[];
+  oldValue: number[];
+  type: 'globalInputsColorChange';
+}
+
+export interface GlobalInputsGradientChangeEvent extends BaseEvent {
+  inputName: string;
+  newValue: number[];
+  oldValue: number[];
+  // eslint-disable-next-line no-secrets/no-secrets
+  type: 'globalInputsGradientChange';
+}
+
+export interface GlobalInputsNumericChangeEvent extends BaseEvent {
+  inputName: string;
+  newValue: number;
+  oldValue: number;
+  // eslint-disable-next-line no-secrets/no-secrets
+  type: 'globalInputsNumericChange';
+}
+
+export interface GlobalInputsBooleanChangeEvent extends BaseEvent {
+  inputName: string;
+  newValue: boolean;
+  oldValue: boolean;
+  type: 'globalInputsBooleanChange';
+}
+
+export interface GlobalInputsStringChangeEvent extends BaseEvent {
+  inputName: string;
+  newValue: string;
+  oldValue: string;
+  type: 'globalInputsStringChange';
+}
+
+export interface GlobalInputsVectorChangeEvent extends BaseEvent {
+  inputName: string;
+  newValue: number[];
+  oldValue: number[];
+  // eslint-disable-next-line no-secrets/no-secrets
+  type: 'globalInputsVectorChange';
+}
+
 /**
  * Type representing all possible event types.
  */
@@ -229,7 +285,13 @@ export type Event =
   | StateMachineNumericInputValueChangeEvent
   | StateMachineStringInputValueChangeEvent
   | StateMachineInputFiredEvent
-  | StateMachineInternalMessage;
+  | StateMachineInternalMessage
+  | GlobalInputsColorChangeEvent
+  | GlobalInputsGradientChangeEvent
+  | GlobalInputsNumericChangeEvent
+  | GlobalInputsBooleanChangeEvent
+  | GlobalInputsStringChangeEvent
+  | GlobalInputsVectorChangeEvent;
 
 export interface EventListener<T extends EventType> {
   (event: EventByType<T>): void;

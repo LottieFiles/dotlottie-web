@@ -264,6 +264,106 @@ describe('EventManager', () => {
     });
   });
 
+  test.only('handles all global inputs event types', () => {
+    const manager = new EventManager();
+    const listeners = {
+      colorChange: vi.fn(),
+      gradientChange: vi.fn(),
+      numericChange: vi.fn(),
+      booleanChange: vi.fn(),
+      stringChange: vi.fn(),
+      vectorChange: vi.fn(),
+    };
+
+    manager.addEventListener('globalInputsColorChange', listeners.colorChange);
+    // eslint-disable-next-line no-secrets/no-secrets
+    manager.addEventListener('globalInputsGradientChange', listeners.gradientChange);
+    // eslint-disable-next-line no-secrets/no-secrets
+    manager.addEventListener('globalInputsNumericChange', listeners.numericChange);
+    manager.addEventListener('globalInputsBooleanChange', listeners.booleanChange);
+    manager.addEventListener('globalInputsStringChange', listeners.stringChange);
+    // eslint-disable-next-line no-secrets/no-secrets
+    manager.addEventListener('globalInputsVectorChange', listeners.vectorChange);
+
+    // Minimal dummy event objects for each event type
+    manager.dispatch({
+      type: 'globalInputsColorChange',
+      inputName: 'fill',
+      newValue: [255, 170, 0],
+      oldValue: [0, 0, 0],
+    });
+    manager.dispatch({
+      type: 'globalInputsGradientChange',
+      inputName: 'gradient',
+      newValue: [255, 255, 255, 1],
+      oldValue: [0, 0, 0, 1],
+    });
+    manager.dispatch({ type: 'globalInputsNumericChange', inputName: 'num', newValue: 1.23, oldValue: 1.0 });
+    manager.dispatch({ type: 'globalInputsBooleanChange', inputName: 'toggle', newValue: true, oldValue: false });
+    manager.dispatch({ type: 'globalInputsStringChange', inputName: 'caption', newValue: 'next', oldValue: 'prev' });
+    manager.dispatch({ type: 'globalInputsVectorChange', inputName: 'vec', newValue: [1, 2, 3], oldValue: [0, 0, 0] });
+
+    expect(listeners.colorChange).toHaveBeenCalledTimes(1);
+    expect(listeners.gradientChange).toHaveBeenCalledTimes(1);
+    expect(listeners.numericChange).toHaveBeenCalledTimes(1);
+    expect(listeners.booleanChange).toHaveBeenCalledTimes(1);
+    expect(listeners.stringChange).toHaveBeenCalledTimes(1);
+    expect(listeners.vectorChange).toHaveBeenCalledTimes(1);
+
+    // Check received event params using types from event-manager.ts (214-257)
+    expect(listeners.colorChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'globalInputsColorChange',
+        inputName: 'fill',
+        newValue: [255, 170, 0],
+        oldValue: [0, 0, 0],
+      }),
+    );
+    expect(listeners.gradientChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // eslint-disable-next-line no-secrets/no-secrets
+        type: 'globalInputsGradientChange',
+        inputName: 'gradient',
+        newValue: [255, 255, 255, 1],
+        oldValue: [0, 0, 0, 1],
+      }),
+    );
+    expect(listeners.numericChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // eslint-disable-next-line no-secrets/no-secrets
+        type: 'globalInputsNumericChange',
+        inputName: 'num',
+        newValue: 1.23,
+        oldValue: 1.0,
+      }),
+    );
+    expect(listeners.booleanChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'globalInputsBooleanChange',
+        inputName: 'toggle',
+        newValue: true,
+        oldValue: false,
+      }),
+    );
+    expect(listeners.stringChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'globalInputsStringChange',
+        inputName: 'caption',
+        newValue: 'next',
+        oldValue: 'prev',
+      }),
+    );
+    expect(listeners.vectorChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // eslint-disable-next-line no-secrets/no-secrets
+        type: 'globalInputsVectorChange',
+        inputName: 'vec',
+        newValue: [1, 2, 3],
+        oldValue: [0, 0, 0],
+      }),
+    );
+  });
+
   describe('Multiple Listeners Execution', () => {
     test('calls all listeners for the same event type', () => {
       const manager = new EventManager();
