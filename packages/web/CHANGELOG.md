@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.59.0
+
+### Minor Changes
+
+- 57d4cd8: chore: bump dotlottie-rs WASM bindings to 0.1.54
+
 ## 0.58.1
 
 ### Patch Changes
