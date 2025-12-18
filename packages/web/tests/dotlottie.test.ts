@@ -10,7 +10,7 @@ import { getDefaultDPR } from '../src/utils';
 
 import { createCanvas, sleep, addWasmCSPPolicy } from './test-utils';
 
-const wasmUrl = new URL('../src/core/dotlottieå-player.wasm', import.meta.url).href;
+const wasmUrl = new URL('../src/core/dotlottie-player.wasm', import.meta.url).href;
 const jsonSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
 const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
 const smSrc = new URL('./__fixtures__/sm/all-inputs.json', import.meta.url).href;

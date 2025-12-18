@@ -1,4 +1,3 @@
-/* eslint-disable no-secrets/no-secrets */
 /* eslint-disable no-warning-comments */
 import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER, BYTES_PER_PIXEL } from './constants';
@@ -1848,6 +1847,7 @@ export class DotLottie {
     globalInputsCallbackObserver.setOnGradientGlobalInputValueChange(
       (inputName: string, oldValue: VectorFloat, newValue: VectorFloat) => {
         this._eventManager.dispatch({
+          // eslint-disable-next-line no-secrets/no-secrets
           type: 'globalInputsGradientChange',
           inputName,
           oldValue: this._wasmVectorToArray(oldValue),
@@ -1858,6 +1858,7 @@ export class DotLottie {
 
     globalInputsCallbackObserver.setOnNumericGlobalInputValueChange(
       (inputName: string, oldValue: number, newValue: number) => {
+        // eslint-disable-next-line no-secrets/no-secrets
         this._eventManager.dispatch({ type: 'globalInputsNumericChange', inputName, oldValue, newValue });
       },
     );
@@ -1871,6 +1872,7 @@ export class DotLottie {
     globalInputsCallbackObserver.setOnVectorGlobalInputValueChange(
       (inputName: string, oldValue: VectorFloat, newValue: VectorFloat) => {
         this._eventManager.dispatch({
+          // eslint-disable-next-line no-secrets/no-secrets
           type: 'globalInputsVectorChange',
           inputName,
           oldValue: this._wasmVectorToArray(oldValue),
