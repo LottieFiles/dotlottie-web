@@ -2603,7 +2603,7 @@ describe.each([
       const vectorSet = await dotLottie.globalInputsGetVector('vector_static');
       const numericSet = await dotLottie.globalInputsGetNumeric('numeric_static');
       const colorSet = await dotLottie.globalInputsGetColor('color_static');
-      // const gradientSet = await dotLottie.globalInputsGetGradient("gradient_static");
+      const gradientSet = await dotLottie.globalInputsGetGradient('gradient_static');
       const stringSet = await dotLottie.globalInputsGetString('string_static');
       const booleanSet = await dotLottie.globalInputsGetBoolean('boolean_static');
 
@@ -2615,10 +2615,10 @@ describe.each([
         expect.closeTo(0.25, 5),
         expect.closeTo(0.75, 5),
       ]);
-      // expect(gradientSet).toEqual([
-      //   { color: [0.25, 0.5, 0.75, 1.0], offset: 0.1 },
-      //   { color: [0.6, 0.7, 0.8, 0.9], offset: 0.9 },
-      // ]);
+      expect(gradientSet).toEqual([
+        { color: [0.25, 0.5, 0.75, 1.0].map((value) => expect.closeTo(value, 5)), offset: expect.closeTo(0.1, 5) },
+        { color: [0.6, 0.7, 0.8, 0.9].map((value) => expect.closeTo(value, 5)), offset: expect.closeTo(0.9, 5) },
+      ]);
       expect(stringSet).toEqual('Changed value.');
       expect(booleanSet).toEqual(true);
     });

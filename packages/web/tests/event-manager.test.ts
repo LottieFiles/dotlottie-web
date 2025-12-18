@@ -264,7 +264,7 @@ describe('EventManager', () => {
     });
   });
 
-  test.only('handles all global inputs event types', () => {
+  test('handles all global inputs event types', () => {
     const manager = new EventManager();
     const listeners = {
       colorChange: vi.fn(),

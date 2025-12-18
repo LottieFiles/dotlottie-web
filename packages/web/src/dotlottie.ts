@@ -1949,7 +1949,7 @@ export class DotLottie {
 
   /**
    * @experimental
-   * Stop applying the loaded global inputs to the animation. Global inputs can still be modifed, but won't affect the current theme or state machine.
+   * Stop applying the loaded global inputs to the animation. Global inputs can still be modified, but won't affect the current theme or state machine.
    * @returns True if applied successfully
    */
   public globalInputsStop(): boolean {
