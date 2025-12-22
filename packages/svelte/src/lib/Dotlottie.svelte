@@ -171,11 +171,11 @@
 		prevData = data;
 	}
 
-	$: if (dotLottie && dotLottie.isLoaded && animationId && dotLottie.activeAnimationId !== animationId) {
+	$: if (dotLottie && dotLottie.isLoaded && dotLottie.activeAnimationId !== animationId) {
 		dotLottie.loadAnimation(animationId);
 	}
 
-	$: if (dotLottie && dotLottie.isLoaded && themeId && dotLottie.activeThemeId !== themeId) {
+	$: if (dotLottie && dotLottie.isLoaded && dotLottie.activeThemeId !== themeId) {
 		dotLottie.setTheme(themeId);
 	}
 
