@@ -71,6 +71,7 @@
 		"vite": "^5.0.13",
 		"vitest": "^1.2.2"
 	},
+	"sideEffects": false,
 	"publishConfig": {
 		"access": "public",
 		"provenance": true
