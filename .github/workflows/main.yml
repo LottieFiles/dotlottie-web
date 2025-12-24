@@ -137,6 +137,7 @@ jobs:
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ''
 
   gpr-release:
     name: gpr-release
