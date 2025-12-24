@@ -123,8 +123,9 @@ jobs:
 
       - name: 📥 Install dependencies
         run: pnpm install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+
+      - name: ⬆️ Update npm for OIDC trusted publishing
+        run: npm install -g npm@latest
 
       - name: 🚀 Release to NPM
         uses: changesets/action@v1
@@ -136,10 +137,6 @@ jobs:
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
-
-      - name: Remove existing NPM .npmrc
-        run: rm -f "$HOME/.npmrc"
 
   gpr-release:
     name: gpr-release
