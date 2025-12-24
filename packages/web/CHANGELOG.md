@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.60.0
+
+### Minor Changes
+
+- 7ad6b24: feat: add setCanvas api
+
 ## 0.59.0
 
 ### Minor Changes

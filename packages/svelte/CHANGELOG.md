@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-svelte
 
+## 0.8.12
+
+### Patch Changes
+
+- 2b1ae7a: add support for svelte 5 and vite 7
+- Updated dependencies [7ad6b24]
+  - @lottiefiles/dotlottie-web@0.60.0
+
 ## 0.8.11
 
 ### Patch Changes
