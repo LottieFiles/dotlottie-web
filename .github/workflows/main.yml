@@ -117,7 +117,6 @@ jobs:
         with:
           cache: pnpm
           node-version: 20
-          registry-url: https://registry.npmjs.org
 
       - name: 📥 Install dependencies
         run: pnpm install
@@ -135,7 +134,6 @@ jobs:
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ''
 
   # gpr-release:
   #   name: gpr-release
