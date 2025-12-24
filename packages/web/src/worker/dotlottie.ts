@@ -66,7 +66,7 @@ export class DotLottieWorker {
 
   private readonly _worker: Worker;
 
-  private readonly _canvas: HTMLCanvasElement | OffscreenCanvas | null;
+  private _canvas: HTMLCanvasElement | OffscreenCanvas | null;
 
   private _dotLottieInstanceState: DotLottieInstanceState = {
     loopCount: 0,
@@ -465,7 +465,7 @@ export class DotLottieWorker {
       throw new Error('Cannot change canvas after worker instance is already created with a different canvas.');
     }
 
-    (this as unknown)._canvas = canvas;
+    this._canvas = canvas;
 
     if (!this._created && this._pendingConfig) {
       await this._create(this._pendingConfig);
