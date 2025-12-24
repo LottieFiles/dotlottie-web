@@ -782,8 +782,10 @@ const commands: {
 
     const instance = new DotLottie(config);
 
-    instance.canvas.height = height;
-    instance.canvas.width = width;
+    if (instance.canvas) {
+      instance.canvas.height = height;
+      instance.canvas.width = width;
+    }
 
     instancesMap.set(instanceId, instance);
 
@@ -932,8 +934,10 @@ const commands: {
       throw new Error(`Instance with id ${instanceId} does not exist.`);
     }
 
-    instance.canvas.height = height;
-    instance.canvas.width = width;
+    if (instance.canvas) {
+      instance.canvas.height = height;
+      instance.canvas.width = width;
+    }
 
     instance.resize();
   },

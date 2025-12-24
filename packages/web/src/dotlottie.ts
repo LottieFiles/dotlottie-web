@@ -17,7 +17,18 @@ import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
 import { CanvasResizeObserver } from './resize-observer';
-import type { Mode, Fit, Config, Layout, Manifest, RenderConfig, Data, StateMachineConfig, Transform } from './types';
+import type {
+  Mode,
+  Fit,
+  Config,
+  Layout,
+  Manifest,
+  RenderConfig,
+  Data,
+  StateMachineConfig,
+  Transform,
+  RenderSurface,
+} from './types';
 import {
   getDefaultDPR,
   getPointerPosition,
@@ -88,13 +99,10 @@ const createCoreLayout = (layout: Layout | undefined, module: MainModule): { ali
   };
 };
 
-interface RenderSurface {
-  height: number;
-  width: number;
-}
-
 export class DotLottie {
-  private readonly _canvas: HTMLCanvasElement | OffscreenCanvas | RenderSurface;
+  private _canvas: HTMLCanvasElement | OffscreenCanvas | RenderSurface | null = null;
+
+  private _pendingLoad: { data?: Data; src?: string } | null = null;
 
   private _context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
 
@@ -143,12 +151,8 @@ export class DotLottie {
 
   private _lastExpectedBufferSize = 0;
 
-  public constructor(
-    config: Omit<Config, 'canvas'> & {
-      canvas: HTMLCanvasElement | OffscreenCanvas | RenderSurface;
-    },
-  ) {
-    this._canvas = config.canvas;
+  public constructor(config: Config) {
+    this._canvas = config.canvas ?? null;
 
     this._eventManager = new EventManager();
     this._frameManager = new AnimationFrameManager();
@@ -258,9 +262,17 @@ export class DotLottie {
         this._eventManager.dispatch({ type: 'ready' });
 
         if (config.data) {
-          this._loadFromData(config.data);
+          if (this._canvas) {
+            this._loadFromData(config.data);
+          } else {
+            this._pendingLoad = { data: config.data };
+          }
         } else if (config.src) {
-          this._loadFromSrc(config.src);
+          if (this._canvas) {
+            this._loadFromSrc(config.src);
+          } else {
+            this._pendingLoad = { src: config.src };
+          }
         }
 
         if (config.backgroundColor) {
@@ -299,6 +311,12 @@ export class DotLottie {
 
   private _loadFromData(data: Data): void {
     if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
+
+    if (!this._canvas) {
+      console.warn('[dotlottie-web] Cannot load animation without canvas. Call setCanvas() first.');
+
+      return;
+    }
 
     const width = this._canvas.width;
     const height = this._canvas.height;
@@ -572,7 +590,7 @@ export class DotLottie {
     return this._dotLottieCore?.segmentDuration() ?? 0;
   }
 
-  public get canvas(): HTMLCanvasElement | OffscreenCanvas | RenderSurface {
+  public get canvas(): HTMLCanvasElement | OffscreenCanvas | RenderSurface | null {
     return this._canvas;
   }
 
@@ -581,12 +599,7 @@ export class DotLottie {
 
     this._stopAnimationLoop();
 
-    // Clean up previous observers if in browser environment
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
-      OffscreenObserver.unobserve(this._canvas);
-      CanvasResizeObserver.unobserve(this._canvas);
-      this._cleanupStateMachineListeners();
-    }
+    this._cleanupCanvas();
 
     this._isFrozen = false;
 
@@ -607,20 +620,37 @@ export class DotLottie {
     });
 
     if (config.data) {
-      this._loadFromData(config.data);
+      if (this._canvas) {
+        this._loadFromData(config.data);
+      } else {
+        this._pendingLoad = { data: config.data };
+      }
     } else if (config.src) {
-      this._loadFromSrc(config.src);
+      if (this._canvas) {
+        this._loadFromSrc(config.src);
+      } else {
+        this._pendingLoad = { src: config.src };
+      }
     }
 
     this.setBackgroundColor(config.backgroundColor ?? '');
   }
 
   private _draw(): void {
-    if (this._dotLottieCore === null) return;
+    if (this._dotLottieCore === null || this._canvas === null) return;
 
     // Only try to get context if canvas has getContext method and no context exists yet
-    if (!this._context && 'getContext' in this._canvas && typeof this._canvas.getContext === 'function') {
-      this._context = this._canvas.getContext('2d');
+    if (
+      !this._context &&
+      'getContext' in this._canvas &&
+      typeof this._canvas.getContext === 'function' &&
+      ((typeof HTMLCanvasElement !== 'undefined' && this._canvas instanceof HTMLCanvasElement) ||
+        (typeof OffscreenCanvas !== 'undefined' && this._canvas instanceof OffscreenCanvas))
+    ) {
+      this._context = this._canvas.getContext('2d') as
+        | CanvasRenderingContext2D
+        | OffscreenCanvasRenderingContext2D
+        | null;
     }
 
     // Only process visual output if we have a canvas with a valid context
@@ -671,6 +701,45 @@ export class DotLottie {
       }
 
       this._context.putImageData(imageData, 0, 0);
+    }
+  }
+
+  private _cleanupCanvas(): void {
+    if (this._canvas && IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      OffscreenObserver.unobserve(this._canvas);
+      CanvasResizeObserver.unobserve(this._canvas);
+      this._cleanupStateMachineListeners();
+    }
+  }
+
+  private _initializeCanvas(): void {
+    this._context = null;
+
+    if (this._canvas && IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this.isLoaded) {
+      if (this._renderConfig.freezeOnOffscreen) {
+        OffscreenObserver.observe(this._canvas, this);
+
+        if (!isElementInViewport(this._canvas)) {
+          this.freeze();
+        }
+      }
+
+      if (this._renderConfig.autoResize) {
+        CanvasResizeObserver.observe(this._canvas, this);
+      }
+
+      if (this._isStateMachineRunning) {
+        this._setupStateMachineListeners();
+      }
+    }
+
+    if (this._canvas && this._dotLottieCore && this.isLoaded) {
+      const resized = this._dotLottieCore.resize(this._canvas.width, this._canvas.height);
+
+      if (resized) {
+        this._dotLottieCore.render();
+        this._draw();
+      }
     }
   }
 
@@ -748,6 +817,7 @@ export class DotLottie {
       we immediately freeze the animation to avoid unnecessary rendering and performance overhead.
     */
     if (
+      this._canvas &&
       IS_BROWSER &&
       this._canvas instanceof HTMLCanvasElement &&
       this._renderConfig.freezeOnOffscreen &&
@@ -860,10 +930,7 @@ export class DotLottie {
     // Reset state machine status
     this._isStateMachineRunning = false;
 
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
-      OffscreenObserver.unobserve(this._canvas);
-      CanvasResizeObserver.unobserve(this._canvas);
-    }
+    this._cleanupCanvas();
 
     if (this._stateMachineObserverHandle) {
       this._dotLottieCore?.stateMachineUnsubscribe(this._stateMachineObserverHandle);
@@ -916,7 +983,7 @@ export class DotLottie {
   }
 
   public resize(): void {
-    if (!this._dotLottieCore || !this.isLoaded) return;
+    if (!this._dotLottieCore || !this.isLoaded || !this._canvas) return;
 
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
@@ -934,6 +1001,31 @@ export class DotLottie {
     if (resized) {
       this._dotLottieCore.render();
       this._draw();
+    }
+  }
+
+  public setCanvas(canvas: HTMLCanvasElement | OffscreenCanvas | RenderSurface): void {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!canvas || this._canvas === canvas) return;
+
+    if (this._canvas) {
+      this._cleanupCanvas();
+    }
+
+    this._canvas = canvas;
+
+    this._initializeCanvas();
+
+    if (this._pendingLoad) {
+      const pending = this._pendingLoad;
+
+      this._pendingLoad = null;
+
+      if (pending.data) {
+        this._loadFromData(pending.data);
+      } else if (pending.src) {
+        this._loadFromSrc(pending.src);
+      }
     }
   }
 
@@ -1029,7 +1121,8 @@ export class DotLottie {
   }
 
   public loadAnimation(animationId: string): void {
-    if (this._dotLottieCore === null || this._dotLottieCore.activeAnimationId() === animationId) return;
+    if (this._dotLottieCore === null || this._dotLottieCore.activeAnimationId() === animationId || !this._canvas)
+      return;
 
     const loaded = this._dotLottieCore.loadAnimation(animationId, this._canvas.width, this._canvas.height);
 

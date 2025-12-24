@@ -18,11 +18,16 @@ export interface Layout {
   fit?: Fit;
 }
 
+export interface RenderSurface {
+  height: number;
+  width: number;
+}
+
 export interface Config {
   animationId?: string;
   autoplay?: boolean;
   backgroundColor?: string;
-  canvas: HTMLCanvasElement | OffscreenCanvas;
+  canvas?: HTMLCanvasElement | OffscreenCanvas | RenderSurface;
   data?: Data;
   layout?: Layout;
   loop?: boolean;

@@ -41,7 +41,9 @@ test('should render correctly in node', async () => {
   });
 
   expect(dotLottie.buffer).toBeInstanceOf(Uint8Array);
-  expect(dotLottie.buffer).toHaveLength(dotLottie.canvas.width * dotLottie.canvas.height * 4);
+  expect(dotLottie.canvas).not.toBeNull();
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  expect(dotLottie.buffer).toHaveLength(dotLottie.canvas!.width * dotLottie.canvas!.height * 4);
 
   const frameCount = dotLottie.totalFrames;
 
