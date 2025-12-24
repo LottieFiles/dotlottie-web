@@ -14,7 +14,7 @@ function getCanvasSize(
   canvas: HTMLCanvasElement | OffscreenCanvas,
   devicePixelRatio: number,
 ): { height: number; width: number } {
-  if (canvas instanceof HTMLCanvasElement) {
+  if (typeof HTMLCanvasElement !== 'undefined' && canvas instanceof HTMLCanvasElement) {
     const { height: clientHeight, width: clientWidth } = canvas.getBoundingClientRect();
 
     if (clientHeight !== 0 && clientWidth !== 0) {
@@ -66,7 +66,7 @@ export class DotLottieWorker {
 
   private readonly _worker: Worker;
 
-  private readonly _canvas: HTMLCanvasElement | OffscreenCanvas;
+  private readonly _canvas: HTMLCanvasElement | OffscreenCanvas | null;
 
   private _dotLottieInstanceState: DotLottieInstanceState = {
     loopCount: 0,
@@ -115,8 +115,19 @@ export class DotLottieWorker {
 
   private _boundOnPointerLeave: ((event: PointerEvent) => void) | null = null;
 
+  private _pendingConfig: Config | null = null;
+
   public constructor(config: Config & { workerId?: string }) {
-    this._canvas = config.canvas;
+    if (config.canvas) {
+      const isHTMLCanvas = typeof HTMLCanvasElement !== 'undefined' && config.canvas instanceof HTMLCanvasElement;
+      const isOffscreenCanvas = typeof OffscreenCanvas !== 'undefined' && config.canvas instanceof OffscreenCanvas;
+
+      if (!isHTMLCanvas && !isOffscreenCanvas) {
+        throw new Error('Worker-based DotLottie requires HTMLCanvasElement or OffscreenCanvas');
+      }
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    this._canvas = (config.canvas as HTMLCanvasElement | OffscreenCanvas) ?? null;
 
     this._id = `dotlottie-${generateUniqueId()}`;
     const workerId = config.workerId || 'defaultWorker';
@@ -130,7 +141,7 @@ export class DotLottieWorker {
       this._sendMessage('setWasmUrl', { url: DotLottieWorker._wasmUrl });
     }
 
-    this._create({
+    const fullConfig = {
       ...config,
       renderConfig: {
         ...config.renderConfig,
@@ -138,7 +149,15 @@ export class DotLottieWorker {
         // freezeOnOffscreen is true by default to prevent unnecessary rendering when the canvas is offscreen
         freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
       },
-    });
+    };
+
+    this._pendingConfig = fullConfig;
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (this._canvas) {
+      this._create(fullConfig);
+      this._pendingConfig = null;
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this._worker.addEventListener('message', this._handleWorkerEvent.bind(this));
@@ -337,6 +356,10 @@ export class DotLottieWorker {
   }
 
   private async _create(config: Config): Promise<void> {
+    if (!this._canvas) {
+      return;
+    }
+
     let offscreen: OffscreenCanvas;
 
     if (this._canvas instanceof HTMLCanvasElement) {
@@ -426,6 +449,28 @@ export class DotLottieWorker {
 
   public get canvas(): HTMLCanvasElement | OffscreenCanvas | null {
     return this._canvas;
+  }
+
+  public async setCanvas(canvas: HTMLCanvasElement | OffscreenCanvas): Promise<void> {
+    const isHTMLCanvas = typeof HTMLCanvasElement !== 'undefined' && canvas instanceof HTMLCanvasElement;
+    const isOffscreenCanvas = typeof OffscreenCanvas !== 'undefined' && canvas instanceof OffscreenCanvas;
+
+    if (!isHTMLCanvas && !isOffscreenCanvas) {
+      throw new Error('Worker-based DotLottie requires HTMLCanvasElement or OffscreenCanvas');
+    }
+
+    if (this._canvas === canvas) return;
+
+    if (this._created && this._canvas !== null) {
+      throw new Error('Cannot change canvas after worker instance is already created with a different canvas.');
+    }
+
+    (this as unknown)._canvas = canvas;
+
+    if (!this._created && this._pendingConfig) {
+      await this._create(this._pendingConfig);
+      this._pendingConfig = null;
+    }
   }
 
   public get autoplay(): boolean {
@@ -593,7 +638,16 @@ export class DotLottieWorker {
   }
 
   public async load(config: Omit<Config, 'canvas'>): Promise<void> {
-    if (!this._created) return;
+    if (!this._created) {
+      if (this._pendingConfig) {
+        this._pendingConfig = {
+          ...this._pendingConfig,
+          ...config,
+        };
+      }
+
+      return;
+    }
 
     await this._sendMessage('load', { config, instanceId: this._id });
     await this._updateDotLottieInstanceState();
@@ -614,7 +668,7 @@ export class DotLottieWorker {
   }
 
   public async resize(): Promise<void> {
-    if (!this._created) return;
+    if (!this._created || !this._canvas) return;
 
     const { height, width } = getCanvasSize(
       this._canvas,
