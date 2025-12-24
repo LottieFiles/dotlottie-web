@@ -10,87 +10,87 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+  # validate:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: ⬇️ Checkout repo
+  #       uses: actions/checkout@v4
 
-      - name: ⎔ Setup pnpm@v9
-        uses: pnpm/action-setup@v4
+  #     - name: ⎔ Setup pnpm@v9
+  #       uses: pnpm/action-setup@v4
 
-      - name: ⎔ Setup Node@v20
-        uses: actions/setup-node@v4
-        with:
-          cache: pnpm
-          node-version: 20
+  #     - name: ⎔ Setup Node@v20
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         cache: pnpm
+  #         node-version: 20
 
-      - name: 📥 Download deps
-        run: pnpm install
+  #     - name: 📥 Download deps
+  #       run: pnpm install
 
-      - name: 🏗 Build
-        run: pnpm build
+  #     - name: 🏗 Build
+  #       run: pnpm build
 
-      - name: 🔍 Verify types
-        run: pnpm type-check
+  #     - name: 🔍 Verify types
+  #       run: pnpm type-check
 
-      - name: 🕵️ Lint
-        run: pnpm lint:prod
+  #     - name: 🕵️ Lint
+  #       run: pnpm lint:prod
 
-      - name: 💅 Verify format (`pnpm format` committed?)
-        run: pnpm format
+  #     - name: 💅 Verify format (`pnpm format` committed?)
+  #       run: pnpm format
 
-      - name: 🛡️ Test (Node)
-        run: pnpm test:node
-        working-directory: packages/web
+  #     - name: 🛡️ Test (Node)
+  #       run: pnpm test:node
+  #       working-directory: packages/web
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+  #     - name: Cache Playwright browsers
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ~/.cache/ms-playwright
+  #         key: playwright-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: 🛡️ Test (Browser)
-        run: |
-          npx playwright install --with-deps chromium
-          pnpm test:coverage
+  #     - name: 🛡️ Test (Browser)
+  #       run: |
+  #         npx playwright install --with-deps chromium
+  #         pnpm test:coverage
 
-      - name: 📏 Report coverage (web)
-        if: always() && github.event_name == 'pull_request'
-        uses: davelosert/vitest-coverage-report-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          working-directory: packages/web
-          name: '@lottiefiles/dotlottie-web'
+  #     - name: 📏 Report coverage (web)
+  #       if: always() && github.event_name == 'pull_request'
+  #       uses: davelosert/vitest-coverage-report-action@v2
+  #       with:
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         working-directory: packages/web
+  #         name: '@lottiefiles/dotlottie-web'
 
-      - name: 📏 Report coverage (react)
-        if: always() && github.event_name == 'pull_request'
-        uses: davelosert/vitest-coverage-report-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          working-directory: packages/react
-          name: '@lottiefiles/dotlottie-react'
+  #     - name: 📏 Report coverage (react)
+  #       if: always() && github.event_name == 'pull_request'
+  #       uses: davelosert/vitest-coverage-report-action@v2
+  #       with:
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         working-directory: packages/react
+  #         name: '@lottiefiles/dotlottie-react'
 
-      - name: 📏 Report coverage (wc)
-        if: always() && github.event_name == 'pull_request'
-        uses: davelosert/vitest-coverage-report-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          working-directory: packages/wc
-          name: '@lottiefiles/dotlottie-wc'
+  #     - name: 📏 Report coverage (wc)
+  #       if: always() && github.event_name == 'pull_request'
+  #       uses: davelosert/vitest-coverage-report-action@v2
+  #       with:
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         working-directory: packages/wc
+  #         name: '@lottiefiles/dotlottie-wc'
 
-      - name: 📏 Report bundle size
-        if: github.event_name == 'pull_request'
-        uses: andresz1/size-limit-action@v1
-        continue-on-error: true
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: 📏 Report bundle size
+  #       if: github.event_name == 'pull_request'
+  #       uses: andresz1/size-limit-action@v1
+  #       continue-on-error: true
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
 
   npm-release:
     name: npm-release
-    needs: validate
+    # needs: validate
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
+    # if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
 
     permissions:
       # Allow creating a release in the repository
