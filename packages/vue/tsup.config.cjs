@@ -1,17 +1,16 @@
 const { defineConfig } = require('tsup');
 
 module.exports = defineConfig({
-  bundle: true,
+  bundle: false,
   metafile: false,
-  splitting: false,
   treeshake: true,
   clean: true,
   dts: true,
   minify: false,
-  sourcemap: false,
+  sourcemap: true,
   entry: ['./src/**/*.ts'],
   format: ['esm'],
   platform: 'browser',
-  target: ['es2020', 'node18'],
+  target: ['es2020'],
   tsconfig: 'tsconfig.build.json',
 });
