@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ChevronUpDownIcon } from '@heroicons/react/20/solid';
 import { DotLottieWorkerReact, DotLottieReact, setWasmUrl as setDotLottieWasmUrl } from '@lottiefiles/dotlottie-react';
 import { Player as LottieWeb } from '@lottiefiles/react-lottie-player';
@@ -155,8 +156,6 @@ export const Perf = (): JSX.Element => {
     const load = async () => {
       if (selectedPlayer.id === 3) await loadCanvasKit();
 
-      loadProfiler();
-
       if (seed) {
         loadSeed(seed);
         return;
@@ -173,12 +172,6 @@ export const Perf = (): JSX.Element => {
   const loadCanvasKit = useCallback(async () => {
     const canvasKit = await InitCanvasKit({ locateFile: () => skottieWasmUrl });
     setCanvasKit(canvasKit);
-  }, []);
-
-  const loadProfiler = useCallback(() => {
-    const script = document.createElement('script');
-    script.src = `${window.location.origin + import.meta.env.BASE_URL}profiler.js`;
-    document.body.appendChild(script);
   }, []);
 
   const loadAnimationByCount = useCallback(async (count: number) => {
@@ -256,6 +249,11 @@ export const Perf = (): JSX.Element => {
   return (
     <div className="bg-gray-900 pt-4 pb-24 sm:pb-32 sm:pt-8">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <header className="mb-8">
+          <Link to="/" className="text-sm text-purple-400 hover:text-purple-300">
+            &larr; Back to Viewer
+          </Link>
+        </header>
         <div className="mx-auto max-w-2xl lg:mx-0">
           <div className="mt-6 flex gap-x-4">
             <Dropdown label="Player" options={playerOptions} selected={player} onChange={updatePlayerAndRefresh} />
