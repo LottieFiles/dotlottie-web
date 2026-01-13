@@ -151,6 +151,11 @@ export class DotLottie {
 
   private _lastExpectedBufferSize = 0;
 
+  /**
+   * Creates a new DotLottie player instance for rendering Lottie animations.
+   * Initializes the WASM module, event system, and loads animation if src or data is provided in config.
+   * @param config - Configuration object specifying animation source, playback settings, and rendering options
+   */
   public constructor(config: Config) {
     this._canvas = config.canvas ?? null;
 
@@ -420,20 +425,36 @@ export class DotLottie {
       .catch((error) => this._dispatchError(`Failed to load animation data from URL: ${src}. ${error}`));
   }
 
+  /**
+   * Gets the raw pixel buffer containing the rendered animation frame.
+   * Returns RGBA pixel data as a Uint8Array for advanced image processing or custom rendering.
+   */
   public get buffer(): Uint8Array | null {
     if (!this._dotLottieCore) return null;
 
     return this._dotLottieCore.buffer() as Uint8Array;
   }
 
+  /**
+   * Gets the ID of the currently active animation from a multi-animation dotLottie file.
+   * Returns undefined if no specific animation is active or for single-animation files.
+   */
   public get activeAnimationId(): string | undefined {
     return this._dotLottieCore?.activeAnimationId();
   }
 
+  /**
+   * Gets the ID of the currently active theme applied to the animation.
+   * Returns undefined if no theme is active. Themes modify colors and visual properties.
+   */
   public get activeThemeId(): string | undefined {
     return this._dotLottieCore?.activeThemeId();
   }
 
+  /**
+   * Gets the current layout configuration for positioning and scaling the animation.
+   * Includes fit mode (contain, cover, fill, etc.) and alignment [x, y] values (0-1 range).
+   */
   public get layout(): Layout | undefined {
     const layout = this._dotLottieCore?.config().layout;
 
@@ -470,12 +491,20 @@ export class DotLottie {
     return undefined;
   }
 
+  /**
+   * Gets the currently active marker name if a marker-based segment is set.
+   * Returns undefined if no marker is active. Use setMarker() to activate a named segment.
+   */
   public get marker(): string | undefined {
     const marker = this._dotLottieCore?.config().marker as string | undefined;
 
     return marker;
   }
 
+  /**
+   * Gets the animation manifest containing metadata about animations, themes, and states.
+   * Returns null if no manifest is available or if the loaded animation doesn't include one.
+   */
   public get manifest(): Manifest | null {
     try {
       const manifest = this._dotLottieCore?.manifestString();
@@ -492,10 +521,18 @@ export class DotLottie {
     }
   }
 
+  /**
+   * Gets the current rendering configuration.
+   * Includes settings like devicePixelRatio, autoResize, and freezeOnOffscreen.
+   */
   public get renderConfig(): RenderConfig {
     return this._renderConfig;
   }
 
+  /**
+   * Gets the currently active playback segment as [startFrame, endFrame].
+   * If no segment is set, returns undefined and the full animation plays.
+   */
   public get segment(): [number, number] | undefined {
     const segment = this._dotLottieCore?.config().segment;
 
@@ -506,10 +543,18 @@ export class DotLottie {
     return undefined;
   }
 
+  /**
+   * Gets the current loop configuration.
+   * Returns true if the animation is set to loop continuously.
+   */
   public get loop(): boolean {
     return this._dotLottieCore?.config().loopAnimation ?? false;
   }
 
+  /**
+   * Gets the current playback mode.
+   * Determines playback direction: 'forward', 'reverse', 'bounce' (forward then reverse), or 'reverse-bounce'.
+   */
   public get mode(): Mode {
     const mode = this._dotLottieCore?.config().mode;
 
@@ -524,76 +569,149 @@ export class DotLottie {
     }
   }
 
+  /**
+   * Indicates whether rendering is currently frozen.
+   * True when freeze() has been called and the rendering loop is paused to save resources.
+   */
   public get isFrozen(): boolean {
     return this._isFrozen;
   }
 
+  /**
+   * Indicates whether a state machine is currently active and running.
+   * True after stateMachineStart() is called and until stateMachineStop() is called.
+   */
   public get isStateMachineRunning(): boolean {
     return this._isStateMachineRunning;
   }
 
+  /**
+   * Gets the current background color.
+   * Returns the background color as a string (e.g., '#FFFFFF' or 'transparent').
+   */
   public get backgroundColor(): string {
     return this._backgroundColor ?? '';
   }
 
+  /**
+   * Gets the autoplay configuration.
+   * Returns true if the animation is configured to start playing automatically when loaded.
+   */
   public get autoplay(): boolean {
     return this._dotLottieCore?.config().autoplay ?? false;
   }
 
+  /**
+   * Gets the frame interpolation setting.
+   * Returns true if frame interpolation is enabled for smoother animation playback.
+   */
   public get useFrameInterpolation(): boolean {
     return this._dotLottieCore?.config().useFrameInterpolation ?? false;
   }
 
+  /**
+   * Gets the current playback speed.
+   * Returns the speed multiplier (1 = normal speed, 2 = double speed, 0.5 = half speed).
+   */
   public get speed(): number {
     return this._dotLottieCore?.config().speed ?? 0;
   }
 
+  /**
+   * Indicates whether the WASM module and core player have been initialized.
+   * Check this before performing operations that require the player to be ready.
+   */
   public get isReady(): boolean {
     return this._dotLottieCore !== null;
   }
 
+  /**
+   * Indicates whether an animation has been successfully loaded and is ready for playback.
+   * Check this before calling play() or other playback methods to ensure the animation is ready.
+   */
   public get isLoaded(): boolean {
     return this._dotLottieCore?.isLoaded() ?? false;
   }
 
+  /**
+   * Indicates whether the animation is currently playing.
+   * True when animation is actively playing, false when paused, stopped, or not started.
+   */
   public get isPlaying(): boolean {
     return this._dotLottieCore?.isPlaying() ?? false;
   }
 
+  /**
+   * Indicates whether the animation is currently paused.
+   * True when pause() has been called and animation is not playing or stopped.
+   */
   public get isPaused(): boolean {
     return this._dotLottieCore?.isPaused() ?? false;
   }
 
+  /**
+   * Indicates whether the animation is currently stopped.
+   * True when stop() has been called or animation hasn't started yet.
+   */
   public get isStopped(): boolean {
     return this._dotLottieCore?.isStopped() ?? false;
   }
 
+  /**
+   * Gets the current frame number of the animation.
+   * Useful for tracking playback position or implementing custom frame displays. Rounded to 2 decimal places.
+   */
   public get currentFrame(): number {
     if (!this._dotLottieCore) return 0;
 
     return Math.round(this._dotLottieCore.currentFrame() * 100) / 100;
   }
 
+  /**
+   * Gets the number of times the animation has completed a loop during the current playback.
+   * Increments each time the animation completes one full cycle.
+   */
   public get loopCount(): number {
     return this._dotLottieCore?.loopCount() ?? 0;
   }
 
+  /**
+   * Gets the total number of frames in the animation.
+   * Use with currentFrame to calculate playback progress as a percentage.
+   */
   public get totalFrames(): number {
     return this._dotLottieCore?.totalFrames() ?? 0;
   }
 
+  /**
+   * Gets the total duration of the animation in seconds.
+   * Represents the time to play from the first frame to the last at normal speed (speed = 1).
+   */
   public get duration(): number {
     return this._dotLottieCore?.duration() ?? 0;
   }
 
+  /**
+   * Gets the duration of the currently active segment in seconds.
+   * If no segment is set, returns the full animation duration.
+   */
   public get segmentDuration(): number {
     return this._dotLottieCore?.segmentDuration() ?? 0;
   }
 
+  /**
+   * Gets the canvas element used for rendering the animation.
+   * Returns the HTMLCanvasElement, OffscreenCanvas, or RenderSurface set during initialization.
+   */
   public get canvas(): HTMLCanvasElement | OffscreenCanvas | RenderSurface | null {
     return this._canvas;
   }
 
+  /**
+   * Dynamically loads a new animation, replacing the current one if any.
+   * Stops current playback, cleans up resources, and loads from the provided src or data.
+   * @param config - Configuration for the new animation (all Config properties except canvas)
+   */
   public load(config: Omit<Config, 'canvas'>): void {
     if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 
@@ -798,6 +916,10 @@ export class DotLottie {
     }
   }
 
+  /**
+   * Starts or resumes animation playback from the current frame.
+   * Unfreezes rendering if frozen and starts the animation loop. Updates isPlaying state to true.
+   */
   public play(): void {
     if (this._dotLottieCore === null || !this.isLoaded) return;
 
@@ -827,6 +949,10 @@ export class DotLottie {
     }
   }
 
+  /**
+   * Pauses animation playback at the current frame.
+   * Stops the animation loop while preserving the current frame position. Updates isPaused state to true.
+   */
   public pause(): void {
     if (this._dotLottieCore === null) return;
 
@@ -835,6 +961,10 @@ export class DotLottie {
     this._stopAnimationLoop();
   }
 
+  /**
+   * Stops animation playback and resets to the start frame.
+   * Halts the animation loop and returns to the beginning. Updates isStopped state to true.
+   */
   public stop(): void {
     if (this._dotLottieCore === null) return;
 
@@ -851,6 +981,11 @@ export class DotLottie {
     }
   }
 
+  /**
+   * Seeks to a specific frame in the animation and renders it.
+   * Useful for implementing custom scrubbing controls or precise frame positioning.
+   * @param frame - The target frame number to seek to
+   */
   public setFrame(frame: number): void {
     if (this._dotLottieCore === null) return;
 
@@ -865,6 +1000,11 @@ export class DotLottie {
     }
   }
 
+  /**
+   * Changes the animation playback speed.
+   * Values above 1 speed up playback, below 1 slow it down.
+   * @param speed - Playback speed multiplier (e.g., 2 for 2x speed, 0.5 for half speed)
+   */
   public setSpeed(speed: number): void {
     if (this._dotLottieCore === null) return;
 
@@ -874,6 +1014,11 @@ export class DotLottie {
     });
   }
 
+  /**
+   * Changes the background color of the canvas or animation.
+   * For HTMLCanvasElement, sets the CSS background. For other surfaces, renders behind the animation.
+   * @param color - CSS color string (e.g., '#FFFFFF', 'rgba(0,0,0,0.5)', 'transparent')
+   */
   public setBackgroundColor(color: string): void {
     if (this._dotLottieCore === null) return;
 
@@ -889,6 +1034,11 @@ export class DotLottie {
     this._backgroundColor = color;
   }
 
+  /**
+   * Enables or disables continuous looping of the animation.
+   * When enabled with loopCount set to 0, animation repeats indefinitely.
+   * @param loop - True to enable looping, false to play once
+   */
   public setLoop(loop: boolean): void {
     if (this._dotLottieCore === null) return;
 
@@ -898,6 +1048,11 @@ export class DotLottie {
     });
   }
 
+  /**
+   * Sets the number of times to loop the animation.
+   * Requires loop to be true. Use 0 for infinite loops, positive values for specific counts.
+   * @param loopCount - Number of loops (0 = infinite)
+   */
   public setLoopCount(loopCount: number): void {
     if (this._dotLottieCore === null) return;
 
@@ -907,6 +1062,11 @@ export class DotLottie {
     });
   }
 
+  /**
+   * Enables or disables frame interpolation for smoother playback.
+   * When enabled, interpolates between frames. When disabled, shows exact frame-by-frame animation.
+   * @param useFrameInterpolation - True for smooth interpolation, false for exact frames
+   */
   public setUseFrameInterpolation(useFrameInterpolation: boolean): void {
     if (this._dotLottieCore === null) return;
 
@@ -916,14 +1076,30 @@ export class DotLottie {
     });
   }
 
+  /**
+   * Subscribes to animation events like play, pause, frame, complete, etc.
+   * Use this to react to animation state changes and playback progress.
+   * @param type - Event type to listen for (e.g., 'play', 'frame', 'complete')
+   * @param listener - Callback function invoked when the event occurs
+   */
   public addEventListener<T extends EventType>(type: T, listener: EventListener<T>): void {
     this._eventManager.addEventListener(type, listener);
   }
 
+  /**
+   * Unsubscribes from animation events.
+   * If no listener is provided, removes all listeners for the given event type.
+   * @param type - Event type to stop listening for
+   * @param listener - Specific callback to remove, or undefined to remove all
+   */
   public removeEventListener<T extends EventType>(type: T, listener?: EventListener<T>): void {
     this._eventManager.removeEventListener(type, listener);
   }
 
+  /**
+   * Cleans up and destroys the player instance, releasing all resources.
+   * Stops playback, removes event listeners, and frees WASM memory. Call when the player is no longer needed.
+   */
   public destroy(): void {
     this._stopAnimationLoop();
 
@@ -962,6 +1138,10 @@ export class DotLottie {
     this._cleanupStateMachineListeners();
   }
 
+  /**
+   * Pauses the rendering loop without changing playback state.
+   * Useful for reducing CPU/GPU usage when the animation is offscreen or hidden. Dispatches 'freeze' event.
+   */
   public freeze(): void {
     if (this._animationFrameId === null) return;
 
@@ -972,6 +1152,10 @@ export class DotLottie {
     this._eventManager.dispatch({ type: 'freeze' });
   }
 
+  /**
+   * Resumes the rendering loop after being frozen.
+   * Restarts frame rendering while maintaining the current playback state. Dispatches 'unfreeze' event.
+   */
   public unfreeze(): void {
     if (this._animationFrameId !== null) return;
 
@@ -982,6 +1166,10 @@ export class DotLottie {
     this._startAnimationLoop();
   }
 
+  /**
+   * Recalculates and updates canvas dimensions based on current size.
+   * Call this when the canvas container size changes to maintain proper rendering. Usually handled by autoResize.
+   */
   public resize(): void {
     if (!this._dotLottieCore || !this.isLoaded || !this._canvas) return;
 
@@ -1004,6 +1192,11 @@ export class DotLottie {
     }
   }
 
+  /**
+   * Changes the canvas element used for rendering.
+   * Useful for moving the animation to a different canvas without recreating the player instance.
+   * @param canvas - New HTMLCanvasElement, OffscreenCanvas, or RenderSurface to render to
+   */
   public setCanvas(canvas: HTMLCanvasElement | OffscreenCanvas | RenderSurface): void {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!canvas || this._canvas === canvas) return;
@@ -1029,6 +1222,12 @@ export class DotLottie {
     }
   }
 
+  /**
+   * Applies a 3x3 transformation matrix to the entire animation on the canvas.
+   * Use this to translate, rotate, scale, or skew the animation rendering.
+   * @param transform - 9-element array representing the transformation matrix in row-major order
+   * @returns True if transformation was applied successfully, false otherwise
+   */
   public setTransform(transform: Transform): boolean {
     if (!this._dotLottieCore || !DotLottie._wasmModule) return false;
 
@@ -1047,6 +1246,11 @@ export class DotLottie {
     return ok;
   }
 
+  /**
+   * Gets the 3x3 transformation matrix applied to the animation.
+   * Returns a 9-element array representing affine transformations (translation, rotation, scale, skew).
+   * @returns Transform array of 9 numbers, or undefined if not available
+   */
   public getTransform(): Transform | undefined {
     if (!this._dotLottieCore) return undefined;
 
@@ -1061,6 +1265,12 @@ export class DotLottie {
     return transform;
   }
 
+  /**
+   * Sets a frame range to play instead of the full animation.
+   * Useful for playing specific sections or creating animation sequences from subsections.
+   * @param startFrame - Starting frame number (inclusive)
+   * @param endFrame - Ending frame number (inclusive)
+   */
   public setSegment(startFrame: number, endFrame: number): void {
     if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 
@@ -1070,6 +1280,11 @@ export class DotLottie {
     });
   }
 
+  /**
+   * Changes the playback direction mode.
+   * Controls whether animation plays forward, in reverse, or alternates (bounce).
+   * @param mode - Playback mode: 'forward', 'reverse', 'bounce', or 'reverse-bounce'
+   */
   public setMode(mode: Mode): void {
     if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 
@@ -1079,6 +1294,11 @@ export class DotLottie {
     });
   }
 
+  /**
+   * Updates rendering configuration like autoResize, devicePixelRatio, and freezeOnOffscreen.
+   * Dynamically changes how the canvas behaves without reloading the animation.
+   * @param config - Partial RenderConfig with properties to update
+   */
   public setRenderConfig(config: RenderConfig): void {
     const { devicePixelRatio, freezeOnOffscreen, quality, ...restConfig } = config;
 
@@ -1120,6 +1340,11 @@ export class DotLottie {
     }
   }
 
+  /**
+   * Switches to a different animation within a multi-animation dotLottie file.
+   * Use this to load a different animation by its ID without creating a new player instance.
+   * @param animationId - ID of the animation to load (must exist in the manifest)
+   */
   public loadAnimation(animationId: string): void {
     if (this._dotLottieCore === null || this._dotLottieCore.activeAnimationId() === animationId || !this._canvas)
       return;
@@ -1134,6 +1359,11 @@ export class DotLottie {
     }
   }
 
+  /**
+   * Activates a named marker to play only that marked segment.
+   * Markers define named sections within an animation. Use markers() to list available markers.
+   * @param marker - Name of the marker to activate
+   */
   public setMarker(marker: string): void {
     if (this._dotLottieCore === null) return;
 
@@ -1143,6 +1373,11 @@ export class DotLottie {
     });
   }
 
+  /**
+   * Gets all markers defined in the animation with their time and duration.
+   * Markers represent named sections that can be played using setMarker().
+   * @returns Array of marker objects with name, time, and duration properties
+   */
   public markers(): Marker[] {
     const markers = this._dotLottieCore?.markers();
 
@@ -1165,6 +1400,12 @@ export class DotLottie {
     return [];
   }
 
+  /**
+   * Applies a theme to the animation, modifying colors and visual properties.
+   * Themes are predefined in the dotLottie manifest. Returns true if theme was successfully loaded.
+   * @param themeId - ID of the theme to apply (must exist in manifest)
+   * @returns True if theme loaded successfully, false otherwise
+   */
   public setTheme(themeId: string): boolean {
     if (this._dotLottieCore === null) return false;
 
@@ -1178,6 +1419,11 @@ export class DotLottie {
     return themeLoaded;
   }
 
+  /**
+   * Removes the currently applied theme and restores original animation colors.
+   * Use this to revert to the default appearance after applying a theme.
+   * @returns True if theme was reset successfully, false otherwise
+   */
   public resetTheme(): boolean {
     if (this._dotLottieCore === null) return false;
 
@@ -1191,6 +1437,12 @@ export class DotLottie {
     return themeReset;
   }
 
+  /**
+   * Applies a custom theme from raw theme data instead of manifest theme ID.
+   * Useful for dynamically generated or user-created themes not in the manifest.
+   * @param themeData - Theme data as a JSON string
+   * @returns True if theme loaded successfully, false otherwise
+   */
   public setThemeData(themeData: string): boolean {
     if (this._dotLottieCore === null) return false;
 
@@ -1204,6 +1456,11 @@ export class DotLottie {
     return themeLoaded;
   }
 
+  /**
+   * Sets slot values for parameterized animations with named slots.
+   * Slots allow runtime customization of text, images, or colors in the animation.
+   * @param slots - Slot values as a JSON string mapping slot names to values
+   */
   public setSlots(slots: string): void {
     if (this._dotLottieCore === null) return;
 
@@ -1213,6 +1470,11 @@ export class DotLottie {
     }
   }
 
+  /**
+   * Updates the layout configuration for positioning and scaling the animation.
+   * Changes how the animation fits and aligns within the canvas without requiring a reload.
+   * @param layout - New layout configuration with fit mode and alignment values
+   */
   public setLayout(layout: Layout): void {
     if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
 
@@ -1222,12 +1484,26 @@ export class DotLottie {
     });
   }
 
+  /**
+   * Sets a custom viewport region for rendering a portion of the animation.
+   * Defines a rectangular area to render, useful for implementing animation clipping or panning effects.
+   * @param x - X coordinate of the viewport's top-left corner
+   * @param y - Y coordinate of the viewport's top-left corner
+   * @param width - Width of the viewport in pixels
+   * @param height - Height of the viewport in pixels
+   * @returns True if viewport was set successfully, false otherwise
+   */
   public setViewport(x: number, y: number, width: number, height: number): boolean {
     if (this._dotLottieCore === null) return false;
 
     return this._dotLottieCore.setViewport(x, y, width, height);
   }
 
+  /**
+   * Configures the URL for loading the WASM module.
+   * Call this before creating any player instances to load the WASM from a custom CDN or local path.
+   * @param url - URL pointing to the dotlottie WASM file
+   */
   public static setWasmUrl(url: string): void {
     DotLottieWasmLoader.setWasmUrl(url);
   }
@@ -1286,10 +1562,11 @@ export class DotLottie {
 
   /**
    * @experimental
-   * Start a tween animation between two frame values with custom easing
-   * @param frame - Starting frame value
-   * @param duration - Duration of the tween in seconds
-   * @returns true if tween was started successfully
+   * Animates smoothly to a specific frame over a duration using linear easing.
+   * Creates a tween animation transitioning from the current frame to the target frame.
+   * @param frame - Target frame number to tween to
+   * @param duration - Duration of the tween animation in seconds
+   * @returns True if tween started successfully, false otherwise
    */
   public tween(frame: number, duration: number): boolean {
     if (!DotLottie._wasmModule) return false;
@@ -1310,6 +1587,7 @@ export class DotLottie {
    * @experimental
    * Start a tween animation to a specific marker
    * @param marker - The marker name to tween to
+   * @param duration - Duration of the tween animation in seconds
    * @returns true if tween was started successfully
    */
   public tweenToMarker(marker: string, duration: number): boolean {
@@ -1326,6 +1604,11 @@ export class DotLottie {
     return this._dotLottieCore?.tweenToMarker(marker, duration, easingVector) ?? false;
   }
 
+  /**
+   * Gets the original dimensions of the animation as defined in the source file.
+   * Returns width and height in pixels representing the animation's intrinsic size.
+   * @returns Object with width and height properties in pixels
+   */
   public animationSize(): { height: number; width: number } {
     const width = this._dotLottieCore?.animationSize().get(0) ?? 0;
     const height = this._dotLottieCore?.animationSize().get(1) ?? 0;
@@ -1337,28 +1620,10 @@ export class DotLottie {
   }
 
   /**
-   * Get the Oriented Bounding Box (OBB) points of a layer by its name
-   * @param layerName - The name of the layer
-   * @returns An array of 8 numbers representing 4 points (x,y) of the OBB in clockwise order starting from top-left
-   *          [x0, y0, x1, y1, x2, y2, x3, y3]
-   *
-   * @example
-   * ```typescript
-   * // Draw a polygon around the layer 'Layer 1'
-   * dotLottie.addEventListener('render', () => {
-   *   const obbPoints = dotLottie.getLayerBoundingBox('Layer 1');
-   *
-   *   if (obbPoints) {
-   *     context.beginPath();
-   *     context.moveTo(obbPoints[0], obbPoints[1]); // First point
-   *     context.lineTo(obbPoints[2], obbPoints[3]); // Second point
-   *     context.lineTo(obbPoints[4], obbPoints[5]); // Third point
-   *     context.lineTo(obbPoints[6], obbPoints[7]); // Fourth point
-   *     context.closePath();
-   *     context.stroke();
-   *   }
-   * });
-   * ```
+   * Gets the Oriented Bounding Box (OBB) points of a layer by its name.
+   * Returns 8 numbers representing 4 corner points (x,y) in clockwise order from top-left: [x0, y0, x1, y1, x2, y2, x3, y3].
+   * @param layerName - Name of the layer to get bounds for
+   * @returns Array of 8 numbers representing the bounding box corners, or undefined if layer not found
    */
   public getLayerBoundingBox(layerName: string): number[] | undefined {
     const bounds = this._dotLottieCore?.getLayerBounds(layerName);
@@ -1376,6 +1641,13 @@ export class DotLottie {
     return points;
   }
 
+  /**
+   * Converts theme data into Lottie slot format for dynamic content replacement.
+   * Utility function for transforming theme definitions into slot-compatible data structures.
+   * @param theme - Theme data as a JSON string
+   * @param slots - Slot definitions as a JSON string
+   * @returns Transformed slots data as a JSON string
+   */
   public static transformThemeToLottieSlots(theme: string, slots: string): string {
     return DotLottie._wasmModule?.transformThemeToLottieSlots(theme, slots) ?? '';
   }
@@ -1464,9 +1736,10 @@ export class DotLottie {
 
   /**
    * @experimental
-   * Load a state machine by ID
-   * @param stateMachineId - The ID of the state machine to load
-   * @returns true if the state machine was loaded successfully
+   * Loads a state machine by its ID from the dotLottie manifest.
+   * State machines enable interactive, event-driven animation behaviors.
+   * @param stateMachineId - The ID of the state machine to load (must exist in manifest)
+   * @returns True if the state machine was loaded successfully, false otherwise
    */
   public stateMachineLoad(stateMachineId: string): boolean {
     if (!this._dotLottieCore || !DotLottie._wasmModule) return false;

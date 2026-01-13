@@ -57,6 +57,11 @@ export interface DotLottieInstanceState {
   useFrameInterpolation: boolean;
 }
 
+/**
+ * Worker-based DotLottie player that offloads animation processing to a Web Worker thread.
+ * Use this for better performance when rendering multiple animations or to keep the main thread responsive.
+ * All methods are async (return Promises) due to worker communication. Requires HTMLCanvasElement or OffscreenCanvas.
+ */
 export class DotLottieWorker {
   private static readonly _workerManager = new WorkerManager();
 
@@ -117,6 +122,12 @@ export class DotLottieWorker {
 
   private _pendingConfig: Config | null = null;
 
+  /**
+   * Creates a worker-based DotLottie player instance that runs in a separate thread.
+   * Use workerId to share a worker across multiple animations for better resource management.
+   * @param config - Configuration with optional workerId to share worker threads
+   * @throws Error if canvas is not HTMLCanvasElement or OffscreenCanvas
+   */
   public constructor(config: Config & { workerId?: string }) {
     if (config.canvas) {
       const isHTMLCanvas = typeof HTMLCanvasElement !== 'undefined' && config.canvas instanceof HTMLCanvasElement;
@@ -451,6 +462,14 @@ export class DotLottieWorker {
     return this._canvas;
   }
 
+  /**
+   * Sets the canvas element for rendering in the worker thread.
+   * Cannot change canvas after worker instance is created with a different canvas.
+   * @param canvas - HTMLCanvasElement or OffscreenCanvas to render to
+   * @returns Promise that resolves when canvas has been set
+   * @throws Error if canvas is not HTMLCanvasElement or OffscreenCanvas
+   * @throws Error if trying to change canvas after instance is already created
+   */
   public async setCanvas(canvas: HTMLCanvasElement | OffscreenCanvas): Promise<void> {
     const isHTMLCanvas = typeof HTMLCanvasElement !== 'undefined' && canvas instanceof HTMLCanvasElement;
     const isOffscreenCanvas = typeof OffscreenCanvas !== 'undefined' && canvas instanceof OffscreenCanvas;
@@ -513,13 +532,18 @@ export class DotLottieWorker {
     return this._dotLottieInstanceState.layout;
   }
 
+  /**
+   * Starts or resumes animation playback in the worker thread.
+   * Updates the internal playback state (e.g., isPlaying) to reflect that playback has started.
+   * @returns Promise that resolves when playback has started and state has been updated
+   */
   public async play(): Promise<void> {
     if (!this._created) return;
 
     await this._sendMessage('play', { instanceId: this._id });
     await this._updateDotLottieInstanceState();
 
-    /* 
+    /*
       Check if the canvas is offscreen and freezing is enabled
       If freezeOnOffscreen is true and the canvas is currently outside the viewport,
       we immediately freeze the animation to avoid unnecessary rendering and performance overhead.
@@ -534,6 +558,11 @@ export class DotLottieWorker {
     }
   }
 
+  /**
+   * Pauses animation playback in the worker thread.
+   * Awaits worker response before resolving. Updates isPaused state to true.
+   * @returns Promise that resolves when playback has paused
+   */
   public async pause(): Promise<void> {
     if (!this._created) return;
 
@@ -541,6 +570,11 @@ export class DotLottieWorker {
     await this._updateDotLottieInstanceState();
   }
 
+  /**
+   * Stops animation playback and resets to start frame in the worker thread.
+   * Awaits worker response before resolving. Updates isStopped state to true.
+   * @returns Promise that resolves when playback has stopped
+   */
   public async stop(): Promise<void> {
     if (!this._created) return;
 
@@ -548,6 +582,12 @@ export class DotLottieWorker {
     await this._updateDotLottieInstanceState();
   }
 
+  /**
+   * Changes the animation playback speed in the worker thread.
+   * Awaits worker response before resolving.
+   * @param speed - Playback speed multiplier (e.g., 2 for 2x speed, 0.5 for half speed)
+   * @returns Promise that resolves when speed has been updated
+   */
   public async setSpeed(speed: number): Promise<void> {
     if (!this._created) return;
 
@@ -637,6 +677,12 @@ export class DotLottieWorker {
     return result;
   }
 
+  /**
+   * Dynamically loads a new animation in the worker thread, replacing the current one.
+   * Awaits worker response before resolving. Stops current playback and cleans up resources.
+   * @param config - Configuration for the new animation (all Config properties except canvas)
+   * @returns Promise that resolves when animation has been loaded
+   */
   public async load(config: Omit<Config, 'canvas'>): Promise<void> {
     if (!this._created) {
       if (this._pendingConfig) {
@@ -667,6 +713,11 @@ export class DotLottieWorker {
     await this._updateDotLottieInstanceState();
   }
 
+  /**
+   * Recalculates and updates canvas dimensions in the worker thread.
+   * Awaits worker response before resolving. Call when canvas container size changes.
+   * @returns Promise that resolves when resize has completed
+   */
   public async resize(): Promise<void> {
     if (!this._created || !this._canvas) return;
 
@@ -679,6 +730,11 @@ export class DotLottieWorker {
     await this._updateDotLottieInstanceState();
   }
 
+  /**
+   * Cleans up and destroys the player instance in the worker thread, releasing resources.
+   * Awaits worker response before resolving. Stops playback and removes event listeners.
+   * @returns Promise that resolves when cleanup has completed
+   */
   public async destroy(): Promise<void> {
     if (!this._created) return;
 
