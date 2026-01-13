@@ -1,9 +1,20 @@
 import { DEFAULT_DPR_FACTOR, IS_BROWSER, LOTTIE_JSON_MANDATORY_FIELDS, ZIP_SIGNATURE } from './constants';
 
+/**
+ * Validates if a string is a valid hex color in #RRGGBB or #RRGGBBAA format.
+ * @param color - Color string to validate
+ * @returns True if valid hex color format, false otherwise
+ */
 export function isHexColor(color: string): boolean {
   return /^#([\da-f]{6}|[\da-f]{8})$/iu.test(color);
 }
 
+/**
+ * Converts a hex color string to an RGBA integer for WASM consumption.
+ * Adds full opacity (alpha = 255, 0xFF in hex) if alpha channel is not specified.
+ * @param colorHex - Hex color string (e.g., '#FFFFFF' or '#FFFFFFFF')
+ * @returns RGBA value as a 32-bit integer, or 0 if invalid hex color
+ */
 export function hexStringToRGBAInt(colorHex: string): number {
   if (!isHexColor(colorHex)) {
     return 0;
@@ -17,6 +28,12 @@ export function hexStringToRGBAInt(colorHex: string): number {
   return parseInt(hex, 16);
 }
 
+/**
+ * Detects if file data is a .lottie file by checking for ZIP signature.
+ * dotLottie files are ZIP archives containing Lottie JSON and metadata.
+ * @param fileData - Raw file data as ArrayBuffer
+ * @returns True if data starts with ZIP signature, false otherwise
+ */
 export function isDotLottie(fileData: ArrayBuffer): boolean {
   if (fileData.byteLength < 4) {
     return false;
@@ -40,6 +57,12 @@ export function isLottieJSON(json: Record<string, unknown>): boolean {
   return LOTTIE_JSON_MANDATORY_FIELDS.every((field) => Object.prototype.hasOwnProperty.call(json, field));
 }
 
+/**
+ * Detects if data is a valid Lottie animation by checking for required JSON fields.
+ * Accepts either a JSON string or a parsed object.
+ * @param fileData - Lottie data as JSON string or parsed object
+ * @returns True if data contains required Lottie fields, false otherwise
+ */
 export function isLottie(fileData: string | Record<string, unknown>): boolean {
   if (typeof fileData === 'string') {
     try {
@@ -52,12 +75,23 @@ export function isLottie(fileData: string | Record<string, unknown>): boolean {
   }
 }
 
+/**
+ * Calculates the default device pixel ratio with a scaling factor.
+ * Applies a factor to balance quality and performance on high-DPI displays.
+ * @returns Adjusted device pixel ratio value
+ */
 export function getDefaultDPR(): number {
   const dpr = IS_BROWSER ? window.devicePixelRatio : 1;
 
   return 1 + (dpr - 1) * DEFAULT_DPR_FACTOR;
 }
 
+/**
+ * Checks if an HTML element is currently visible within the browser viewport.
+ * Used to determine when to freeze/unfreeze rendering for performance optimization.
+ * @param element - HTMLElement to check visibility for
+ * @returns True if element is at least partially visible in viewport, false otherwise
+ */
 export function isElementInViewport(element: HTMLElement): boolean {
   const rect = element.getBoundingClientRect();
   const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
