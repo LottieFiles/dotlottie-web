@@ -706,6 +706,13 @@ export class DotLottieWorker {
     await this._updateDotLottieInstanceState();
   }
 
+  /**
+   * Sets the number of additional times to replay the animation after the first play in the worker thread.
+   * Requires loop to be true. A value of 0 means infinite replays; a positive value n means
+   * the animation plays a total of n + 1 times (initial play + n replays).
+   * @param loopCount - Number of additional replays (0 = infinite, 1 = plays twice, 2 = plays three times, etc.)
+   * @returns Promise that resolves when loopCount has been updated
+   */
   public async setLoopCount(loopCount: number): Promise<void> {
     if (!this._created) return;
 

@@ -1049,9 +1049,10 @@ export class DotLottie {
   }
 
   /**
-   * Sets the number of times to loop the animation.
-   * Requires loop to be true. Use 0 for infinite loops, positive values for specific counts.
-   * @param loopCount - Number of loops (0 = infinite)
+   * Sets the number of additional times to replay the animation after the first play.
+   * Requires loop to be true. A value of 0 means infinite replays; a positive value n means
+   * the animation plays a total of n + 1 times (initial play + n replays).
+   * @param loopCount - Number of additional replays (0 = infinite, 1 = plays twice, 2 = plays three times, etc.)
    */
   public setLoopCount(loopCount: number): void {
     if (this._dotLottieCore === null) return;
