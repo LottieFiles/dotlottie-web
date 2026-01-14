@@ -229,7 +229,7 @@ export interface OpenUrlPolicy {
 
 export interface Marker {
   duration: number;
-  name: EmbindString;
+  name: string;
   time: number;
 }
 
