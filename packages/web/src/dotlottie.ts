@@ -1,3 +1,4 @@
+/* eslint-disable id-length */
 /* eslint-disable no-warning-comments */
 import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER, BYTES_PER_PIXEL } from './constants';
@@ -28,6 +29,12 @@ import type {
   StateMachineConfig,
   Transform,
   RenderSurface,
+  ColorSlotValue,
+  ScalarSlotValue,
+  VectorSlotValue,
+  GradientSlotValue,
+  TextSlotValue,
+  SlotType,
 } from './types';
 import {
   getDefaultDPR,
@@ -1458,18 +1465,341 @@ export class DotLottie {
   }
 
   /**
-   * Sets slot values for parameterized animations with named slots.
-   * Slots allow runtime customization of text, images, or colors in the animation.
-   * @param slots - Slot values as a JSON string mapping slot names to values
+   * Sets multiple slot values at once for parameterized animations.
+   * Slots allow runtime customization of colors, text, images, or other properties.
+   * @param slots - Object mapping slot IDs to their values
    */
-  public setSlots(slots: string): void {
+  public setSlots(slots: Record<string, unknown>): void {
     if (this._dotLottieCore === null) return;
 
-    if (this._dotLottieCore.setSlots(slots)) {
+    if (this._dotLottieCore.setSlots(JSON.stringify(slots))) {
       this._dotLottieCore.render();
       this._draw();
     }
   }
+
+  // #region Typed Slot APIs
+
+  /**
+   * Check if value is an array of keyframes (has objects with 't' and 's' properties)
+   */
+  private _isKeyframeArray(value: unknown): boolean {
+    return (
+      Array.isArray(value) &&
+      value.length > 0 &&
+      typeof value[0] === 'object' &&
+      value[0] !== null &&
+      't' in value[0] &&
+      's' in value[0]
+    );
+  }
+
+  /**
+   * Get the current value (k) from a slot's animated property structure
+   * @returns The slot's k value, or undefined if not found
+   */
+  private _getSlotValue(slotId: string): unknown {
+    const slot = this.getSlot(slotId);
+
+    if (slot && typeof slot === 'object' && 'p' in slot) {
+      const p = (slot as Record<string, unknown>)['p'];
+
+      if (p && typeof p === 'object' && 'k' in p) {
+        return (p as Record<string, unknown>)['k'];
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Get all slot IDs in the animation
+   * @returns Array of slot ID strings
+   */
+  public getSlotIds(): string[] {
+    if (!this._dotLottieCore) return [];
+
+    const idsVector = this._dotLottieCore.getSlotIds();
+    const ids: string[] = [];
+
+    for (let i = 0; i < idsVector.size(); i += 1) {
+      ids.push(idsVector.get(i) as string);
+    }
+
+    return ids;
+  }
+
+  /**
+   * Get the type of a slot
+   * @param slotId - The slot ID to query
+   * @returns The slot type ('color', 'gradient', 'text', 'scalar', 'vector', 'position', 'image') or undefined
+   */
+  public getSlotType(slotId: string): SlotType | undefined {
+    if (!this._dotLottieCore) return undefined;
+
+    const type = this._dotLottieCore.getSlotType(slotId);
+
+    if (!type) return undefined;
+
+    return type as SlotType;
+  }
+
+  /**
+   * Get the current value of a slot
+   * @param slotId - The slot ID to query
+   * @returns The parsed slot value or undefined if not found
+   */
+  public getSlot(slotId: string): unknown {
+    if (!this._dotLottieCore) return undefined;
+
+    const slotStr = this._dotLottieCore.getSlotStr(slotId);
+
+    if (!slotStr) return undefined;
+
+    try {
+      return JSON.parse(slotStr);
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
+   * Get all slots as an object with slot IDs as keys
+   * @returns Object containing all slots, or empty object if not loaded
+   * @example
+   * const slots = dotLottie.getSlots();
+   */
+  public getSlots(): Record<string, unknown> {
+    if (!this._dotLottieCore) return {};
+
+    try {
+      return JSON.parse(this._dotLottieCore.getSlotsStr());
+    } catch {
+      return {};
+    }
+  }
+
+  /**
+   * Set a color slot value
+   * @param slotId - The slot ID to set
+   * @param value - Static color [r, g, b, a] or array of keyframes
+   * @returns true if successful
+   * @example
+   * // Static red color
+   * dotLottie.setColorSlot('myColor', [1, 0, 0, 1]);
+   * // Animated color (red to blue)
+   * dotLottie.setColorSlot('myColor', [\{ t: 0, s: [1, 0, 0, 1] \}, \{ t: 60, s: [0, 0, 1, 1] \}]);
+   */
+  public setColorSlot(slotId: string, value: ColorSlotValue): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    const isAnimated = this._isKeyframeArray(value);
+    const slotJson = JSON.stringify({ a: isAnimated ? 1 : 0, k: value });
+
+    const result = this._dotLottieCore.setSlotStr(slotId, slotJson);
+
+    if (result) {
+      this._dotLottieCore.render();
+      this._draw();
+
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Set a scalar slot value (single number like rotation, opacity)
+   * @param slotId - The slot ID to set
+   * @param value - Static number or array of keyframes
+   * @returns true if successful
+   * @example
+   * // Static rotation
+   * dotLottie.setScalarSlot('rotation', 45);
+   * // Animated rotation
+   * dotLottie.setScalarSlot('rotation', [\{ t: 0, s: 0 \}, \{ t: 60, s: 360 \}]);
+   */
+  public setScalarSlot(slotId: string, value: ScalarSlotValue): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    const isAnimated = typeof value !== 'number';
+    const slotJson = JSON.stringify({ a: isAnimated ? 1 : 0, k: value });
+
+    const result = this._dotLottieCore.setSlotStr(slotId, slotJson);
+
+    if (result) {
+      this._dotLottieCore.render();
+      this._draw();
+
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Set a vector slot value (2D or 3D point for position, scale, etc.)
+   * Handles both "vector" and "position" slot types
+   * @param slotId - The slot ID to set
+   * @param value - Static vector [x, y] or array of keyframes
+   * @returns true if successful
+   * @example
+   * // Static scale
+   * dotLottie.setVectorSlot('scale', [150, 150]);
+   * // Animated position
+   * dotLottie.setVectorSlot('position', [\{ t: 0, s: [0, 0] \}, \{ t: 60, s: [100, 200] \}]);
+   */
+  public setVectorSlot(slotId: string, value: VectorSlotValue): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    const isAnimated = this._isKeyframeArray(value);
+    const slotJson = JSON.stringify({ a: isAnimated ? 1 : 0, k: value });
+
+    const result = this._dotLottieCore.setSlotStr(slotId, slotJson);
+
+    if (result) {
+      this._dotLottieCore.render();
+      this._draw();
+
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Set a gradient slot value
+   * @param slotId - The slot ID to set
+   * @param value - Static gradient [offset, r, g, b, ...] or array of keyframes
+   * @returns true if successful
+   * @example
+   * // Static red to blue gradient
+   * dotLottie.setGradientSlot('myGradient', [0, 1, 0, 0, 1, 0, 0, 1]);
+   * // Animated gradient
+   * dotLottie.setGradientSlot('myGradient', [\{ t: 0, s: [0, 1, 0, 0, 1, 0, 0, 1] \}]);
+   */
+  public setGradientSlot(slotId: string, value: GradientSlotValue): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    const isAnimated = this._isKeyframeArray(value);
+    const slotJson = JSON.stringify({ a: isAnimated ? 1 : 0, k: value });
+
+    if (this._dotLottieCore.setSlotStr(slotId, slotJson)) {
+      this._dotLottieCore.render();
+      this._draw();
+
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Set a text slot value (always static - text documents don't support animation)
+   * Supports partial updates - only provided properties will be changed, others inherit from existing value
+   * @param slotId - The slot ID to set
+   * @param value - Text document properties (partial allowed)
+   * @returns true if successful
+   * @example
+   * // Set all properties
+   * dotLottie.setTextSlot('title', \{ t: 'Hello World', s: 24, fc: [0, 0, 0, 1] \});
+   * // Partial update - only change text, keep existing font size, color, etc.
+   * dotLottie.setTextSlot('title', \{ t: 'New Text' \});
+   */
+  public setTextSlot(slotId: string, value: TextSlotValue): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    // Get existing value and merge for partial updates
+    const existingValue = this._getSlotValue(slotId);
+    let mergedValue = value;
+
+    if (existingValue && typeof existingValue === 'object' && !Array.isArray(existingValue)) {
+      mergedValue = { ...(existingValue as Record<string, unknown>), ...value };
+    }
+
+    const slotJson = JSON.stringify({ a: 0, k: mergedValue });
+
+    if (this._dotLottieCore.setSlotStr(slotId, slotJson)) {
+      this._dotLottieCore.render();
+      this._draw();
+
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Reset a slot to its original value
+   * @param slotId - The slot ID to reset
+   * @returns true if successful
+   */
+  public resetSlot(slotId: string): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    if (this._dotLottieCore.resetSlot(slotId)) {
+      this._dotLottieCore.render();
+      this._draw();
+
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Clear a slot's custom value
+   * @param slotId - The slot ID to clear
+   * @returns true if successful
+   */
+  public clearSlot(slotId: string): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    if (this._dotLottieCore.clearSlot(slotId)) {
+      this._dotLottieCore.render();
+      this._draw();
+
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Reset all slots to their original values
+   * @returns true if successful
+   */
+  public resetSlots(): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    if (this._dotLottieCore.resetSlots()) {
+      this._dotLottieCore.render();
+      this._draw();
+
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Clear all slot custom values
+   * @returns true if successful
+   */
+  public clearSlots(): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    if (this._dotLottieCore.clearSlots()) {
+      this._dotLottieCore.render();
+      this._draw();
+
+      return true;
+    }
+
+    return false;
+  }
+
+  // #endregion
 
   /**
    * Updates the layout configuration for positioning and scaling the animation.
