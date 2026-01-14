@@ -240,3 +240,116 @@ export interface Manifest {
   /** dotLottie specification version */
   version?: string;
 }
+
+/**
+ * Bezier easing handle for keyframe interpolation
+ */
+export interface BezierHandle {
+  x: number[];
+  y: number[];
+}
+
+/**
+ * Keyframe in Lottie native format
+ * The value type (Color, Vector, number, etc.)
+ */
+export interface Keyframe<T> {
+  /** Hold keyframe - no interpolation to next keyframe */
+  h?: 0 | 1;
+  /** Incoming bezier handle (optional, for easing) */
+  i?: BezierHandle;
+  /** Outgoing bezier handle (optional, for easing) */
+  o?: BezierHandle;
+  /** Start value at this keyframe */
+  s: T;
+  /** Time (frame number) */
+  t: number;
+}
+
+/**
+ * Color as RGB or RGBA array with values normalized to [0, 1]
+ * @example [1, 0, 0] // red
+ * @example [1, 0, 0, 0.5] // red with 50% opacity
+ */
+export type Color = [number, number, number] | [number, number, number, number];
+
+/**
+ * Color slot value - static color or array of keyframes
+ * @example Static: [1, 0, 0, 1] // red
+ * @example Animated: [\{ t: 0, s: [1, 0, 0, 1] \}, \{ t: 60, s: [0, 0, 1, 1] \}]
+ */
+export type ColorSlotValue = Color | Array<Keyframe<Color>>;
+
+/**
+ * Scalar slot value - static number or array of keyframes (rotation, opacity, etc.)
+ * @example Static: 45
+ * @example Animated: [\{ t: 0, s: 0 \}, \{ t: 60, s: 360 \}]
+ */
+export type ScalarSlotValue = number | Array<Keyframe<number>>;
+
+/**
+ * Vector as 2D or 3D point
+ * @example [100, 100] // 2D vector
+ * @example [100, 100, 0] // 3D vector
+ */
+export type Vector = [number, number] | [number, number, number];
+
+/**
+ * Vector slot value - static vector or array of keyframes
+ * Used for both "vector" and "position" slot types
+ * @example Static: [100, 100]
+ * @example Animated: [\{ t: 0, s: [0, 0] \}, \{ t: 60, s: [100, 100] \}]
+ */
+export type VectorSlotValue = Vector | Array<Keyframe<Vector>>;
+
+/**
+ * Gradient as raw Lottie flat array format
+ * Color stops: [offset, r, g, b, offset, r, g, b, ...]
+ * With opacity: [...color stops, offset, opacity, offset, opacity, ...]
+ * All values are in [0, 1] range
+ * @example [0, 1, 0, 0, 1, 0, 0, 1] // red to blue gradient
+ */
+export type Gradient = number[];
+
+/**
+ * Gradient slot value - static gradient or array of keyframes
+ * @example Static: [0, 1, 0, 0, 1, 0, 0, 1]
+ * @example Animated: [\{ t: 0, s: [0, 1, 0, 0, 1, 0, 0, 1] \}]
+ */
+export type GradientSlotValue = Gradient | Array<Keyframe<Gradient>>;
+
+/**
+ * Text document properties
+ * @see https://lottiefiles.github.io/lottie-docs/text/#text-document
+ */
+export interface TextDocument {
+  /** Font family */
+  f?: string;
+  /** Fill color [r, g, b] or [r, g, b, a] in [0, 1] range */
+  fc?: Color;
+  /** Justify: 0=left, 1=right, 2=center */
+  j?: 0 | 1 | 2;
+  /** Line height */
+  lh?: number;
+  /** Font size */
+  s?: number;
+  /** Stroke color [r, g, b] or [r, g, b, a] in [0, 1] range */
+  sc?: Color;
+  /** Stroke width */
+  sw?: number;
+  /** Text content (newlines encoded with carriage return) */
+  t?: string;
+  /** Tracking (letter spacing) */
+  tr?: number;
+}
+
+/**
+ * Text slot value - always static (text documents don't support animation)
+ * @example \{ t: 'Hello', s: 24, fc: [0,0,0,1] \}
+ */
+export type TextSlotValue = TextDocument;
+
+/**
+ * Slot type string as returned by the core
+ */
+export type SlotType = 'color' | 'gradient' | 'image' | 'text' | 'scalar' | 'vector';
