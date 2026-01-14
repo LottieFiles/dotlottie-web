@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.61.0
+
+### Minor Changes
+
+- 8fc283f: feat: slots api
+
 ## 0.60.0
 
 ### Minor Changes
