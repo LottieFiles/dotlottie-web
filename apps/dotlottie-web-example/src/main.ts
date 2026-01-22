@@ -1,9 +1,9 @@
 /* eslint-disable no-secrets/no-secrets */
 
 import './styles.css';
-import type { Fit, Mode } from '@lottiefiles/dotlottie-web';
+import type { Fit, Mode } from '@lottiefiles/dotlottie-web/webgpu';
 // import { DotLottieWorker as DotLottie } from '@lottiefiles/dotlottie-web';
-import { DotLottie } from '@lottiefiles/dotlottie-web';
+import { DotLottie } from '@lottiefiles/dotlottie-web/webgpu';
 
 import wasmUrl from '../../../packages/web/dist/dotlottie-player.wasm?url';
 
@@ -450,17 +450,17 @@ fetch(
         themeSelect.appendChild(option);
       }
 
-      const markers = dotLottie.markers();
+      // const markers = dotLottie.markers();
 
-      for (const marker of markers) {
-        const option = document.createElement('option');
+      // for (const marker of markers) {
+      //   const option = document.createElement('option');
 
-        option.value = marker.name;
+      //   option.value = marker.name;
 
-        option.textContent = marker.name;
+      //   option.textContent = marker.name;
 
-        markerSelect.appendChild(option);
-      }
+      //   markerSelect.appendChild(option);
+      // }
 
       activeAnimationSpan.textContent = dotLottie.activeAnimationId ?? 'None';
 

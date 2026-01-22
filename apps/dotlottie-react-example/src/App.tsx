@@ -3,17 +3,18 @@
 import { DotLottieReact, DotLottie, setWasmUrl } from '@lottiefiles/dotlottie-react/webgpu';
 
 import React, { useState } from 'react';
+import { FPSCounter } from './FPSCounter';
 
 // setWasmUrl(new URL('../../../packages/web/src/software/wasm/dotlottie-player.wasm', import.meta.url).href);
 // setWasmUrl(new URL('../../../packages/web/src/webgl/wasm/dotlottie-player.wasm', import.meta.url).href);
 setWasmUrl(new URL('../../../packages/web/src/webgpu/wasm/dotlottie-player.wasm', import.meta.url).href);
 
 const animations = [
-  'https://lottie.host/e641272e-039b-4612-96de-138acfbede6e/bc0sW78EeR.lottie',
-  './markers_example.json',
+  // 'https://lottie.host/e641272e-039b-4612-96de-138acfbede6e/bc0sW78EeR.lottie',
+  // './markers_example.json',
   'https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie',
-  'https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json',
-  './dragon.json',
+  // 'https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json',
+  // './dragon.json',
 ];
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
     }
 
     dotLottie?.addEventListener('play', console.log);
+    dotLottie?.addEventListener('error', console.log);
     dotLottie?.addEventListener('freeze', console.log);
     dotLottie?.addEventListener('unfreeze', console.log);
     dotLottie?.addEventListener('pause', console.log);
@@ -67,6 +69,7 @@ function App() {
 
   return (
     <div>
+      <FPSCounter />
       <div
         style={{
           marginBottom: '2000px',
@@ -87,6 +90,8 @@ function App() {
         style={{
           margin: '2px',
           border: '1px solid white',
+          width: '500px',
+          height: '500px',
         }}
         animationId={currentAnimationId}
       />

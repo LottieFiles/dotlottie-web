@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 import type {
   DotLottiePlayer,
   MainModule,
@@ -113,6 +114,12 @@ export class DotLottieCommon {
 
   private readonly _renderer: string;
 
+  private _selector: string = '';
+
+  private _swBuffer: Uint8Array | null = null;
+
+  private _swBufferPtr: number | null = null;
+
   public constructor(config: Config, wasmLoader: WasmLoaderType, renderer: string = 'sw') {
     this._canvas = config.canvas;
     this._wasmLoader = wasmLoader;
@@ -132,52 +139,47 @@ export class DotLottieCommon {
       .then((module) => {
         this._wasmModule = module;
 
-        let engine = null;
+        // let engine = null;
 
-        if (this._renderer === 'wg') {
-          engine = module.TvgEngine.TvgEngineWg;
-        } else if (this._renderer === 'gl') {
-          engine = module.TvgEngine.TvgEngineGl;
-        } else {
-          engine = module.TvgEngine.TvgEngineSw;
-        }
-
-        let selector = '';
+        // if (this._renderer === 'wg') {
+        //   engine = module.TvgEngine.TvgEngineWg;
+        // } else if (this._renderer === 'gl') {
+        //   engine = module.TvgEngine.TvgEngineGl;
+        // } else {
+        //   engine = module.TvgEngine.TvgEngineSw;
+        // }
 
         if (isHTMLCanvasElement(this._canvas)) {
           if (this._canvas.id) {
-            selector = `#${this._canvas.id}`;
+            this._selector = `#${this._canvas.id}`;
           } else if (this._renderer !== 'sw') {
             if (!this._canvas.getAttribute('data-dl-id')) {
               this._canvas.setAttribute('data-dl-id', `${canvasId}`);
               canvasId += 1;
             }
-            selector = `[data-dl-id="${this._canvas.getAttribute('data-dl-id')}"]`;
+            this._selector = `[data-dl-id="${this._canvas.getAttribute('data-dl-id')}"]`;
           }
         }
 
-        this._dotLottieCore = new module.DotLottiePlayer(
-          {
-            ...module.createDefaultConfig(),
-            themeId: config.themeId ?? '',
-            autoplay: config.autoplay ?? false,
-            loopAnimation: config.loop ?? false,
-            mode: createCoreMode(config.mode ?? 'forward', module),
-            segment: createCoreSegment(config.segment ?? [], module),
-            speed: config.speed ?? 1,
-            useFrameInterpolation: config.useFrameInterpolation ?? true,
-            marker: config.marker ?? '',
-            layout: config.layout
-              ? {
-                  align: createCoreAlign(config.layout.align, module),
-                  fit: createCoreFit(config.layout.fit, module),
-                }
-              : module.createDefaultLayout(),
-          },
-          engine,
-          0,
-          selector,
-        );
+        this._dotLottieCore = new module.DotLottiePlayer({
+          ...module.createDefaultConfig(),
+          themeId: config.themeId ?? '',
+          autoplay: config.autoplay ?? false,
+          loopAnimation: config.loop ?? false,
+          mode: createCoreMode(config.mode ?? 'forward', module),
+          segment: createCoreSegment(config.segment ?? [], module),
+          speed: config.speed ?? 1,
+          useFrameInterpolation: config.useFrameInterpolation ?? true,
+          marker: config.marker ?? '',
+          layout: config.layout
+            ? {
+                align: createCoreAlign(config.layout.align, module),
+                fit: createCoreFit(config.layout.fit, module),
+              }
+            : module.createDefaultLayout(),
+        });
+
+        // Note: Render target setup happens after animation load, not here
 
         this._eventManager.dispatch({ type: 'ready' });
 
@@ -215,6 +217,235 @@ export class DotLottieCommon {
     this._eventManager.dispatch({ type: 'loadError', error: new Error(message) });
   }
 
+  private async _setupRenderTarget(module: MainModule, selector: string): Promise<void> {
+    if (!this._dotLottieCore) return;
+
+    const width = this._canvas.width;
+    const height = this._canvas.height;
+    const colorSpace = module.ColorSpace.ABGR8888S;
+
+    console.log(
+      `Setting up render target for ${this._renderer} renderer, canvas: ${width}x${height}, selector: ${selector}`,
+    );
+
+    if (this._renderer === 'sw') {
+      // Software renderer: allocate our own buffer and pass pointer to setSwTarget
+      console.log('Software renderer: Setting up buffer target');
+      try {
+        const bufferSize = width * height * 4;
+
+        // Allocate buffer in WASM heap
+        const malloc = (module as unknown)._malloc as ((size: number) => number) | undefined;
+
+        if (!malloc) {
+          console.error('_malloc not found in WASM module');
+
+          return;
+        }
+
+        // Free old buffer if it exists
+        if (this._swBufferPtr !== null) {
+          const free = (module as unknown)._free as ((ptr: number) => void) | undefined;
+
+          if (free) {
+            free(this._swBufferPtr);
+          }
+        }
+
+        // Allocate new buffer
+        this._swBufferPtr = malloc(bufferSize);
+        console.log(`Allocated buffer: ${bufferSize} bytes at pointer ${this._swBufferPtr}`);
+
+        // Create a Uint8Array view of the WASM heap memory for reading pixels
+        this._swBuffer = new Uint8Array((module as unknown).HEAPU8.buffer, this._swBufferPtr, bufferSize);
+
+        // setSwTarget expects: buffer (*mut u32), stride (u32 count), width, height
+        // stride is the number of u32 values per row (typically same as width)
+        const stride = width;
+        const bufferPtr = BigInt(this._swBufferPtr);
+
+        console.log(
+          `Calling setSwTarget with: bufferPtr=${bufferPtr}, stride=${stride}, width=${width}, height=${height}, colorSpace=${colorSpace.value}`,
+        );
+        const result = this._dotLottieCore.setSwTarget(bufferPtr, stride, width, height, colorSpace);
+
+        console.log(`setSwTarget result: ${result}`);
+
+        if (!result) {
+          console.error('setSwTarget returned false - buffer setup failed');
+        }
+      } catch (error) {
+        console.error('Failed to set software render target:', error);
+      }
+    } else if (this._renderer === 'gl') {
+      // WebGL renderer: let Emscripten create the context
+      if (!selector) {
+        console.error('No selector provided for WebGL renderer');
+
+        return;
+      }
+
+      if (!isHTMLCanvasElement(this._canvas)) {
+        console.error('WebGL requires an HTMLCanvasElement');
+
+        return;
+      }
+
+      console.log('WebGL: Creating Emscripten WebGL context for selector:', selector);
+      console.log(
+        'Canvas element:',
+        this._canvas,
+        'ID:',
+        this._canvas.id,
+        'data-dl-id:',
+        this._canvas.getAttribute('data-dl-id'),
+      );
+
+      try {
+        // Let Emscripten create the WebGL context - don't create it ourselves first
+        const contextHandle = (module as unknown).webgl_context_create(selector);
+
+        console.log(`WebGL context handle from Emscripten: ${contextHandle}, type: ${typeof contextHandle}`);
+
+        // Emscripten WebGL context handles start at 1 (0 means error)
+        if (contextHandle && contextHandle > 0) {
+          console.log('Valid context handle received, making it current...');
+
+          // IMPORTANT: Make the context current before using it
+          const makeCurrentResult = (module as unknown).webgl_context_make_current?.(contextHandle);
+
+          console.log(`webgl_context_make_current result: ${makeCurrentResult}`);
+
+          if (makeCurrentResult !== 0) {
+            console.error('Failed to make WebGL context current');
+
+            return;
+          }
+
+          console.log('Calling setGlTarget');
+          const fbo = 0;
+          // Rust signature: tvg_glcanvas_set_target(canvas, context, id, w, h, cs)
+          // TypeScript: setGlTarget(context, id, w, h, cs)
+          const result = this._dotLottieCore.setGlTarget(BigInt(contextHandle), fbo, width, height, colorSpace);
+
+          console.log(`setGlTarget result: ${result}`);
+
+          if (result) {
+            console.log('✓ Successfully set WebGL target');
+          } else {
+            console.error('setGlTarget returned false');
+          }
+        } else {
+          console.error('Invalid WebGL context handle from Emscripten:', contextHandle);
+          console.log('Checking if canvas is in DOM:', document.contains(this._canvas));
+          console.log('Trying to query canvas with selector:', document.querySelector(selector));
+        }
+      } catch (error) {
+        console.error('Error setting up WebGL target:', error);
+      }
+    } else if (this._renderer === 'wg') {
+      // WebGPU renderer: create context and get handles
+      if (!selector) {
+        console.error('No selector provided for WebGPU renderer');
+
+        return;
+      }
+
+      if (!isHTMLCanvasElement(this._canvas)) {
+        console.error('WebGPU requires an HTMLCanvasElement');
+
+        return;
+      }
+
+      console.log('WebGPU: Setting up with Dawn - selector:', selector);
+
+      try {
+        // Poll for adapter and device initialization
+        const maxAttempts = 100;
+        let attempts = 0;
+
+        console.log('Initializing WebGPU (this may take a moment)...');
+
+        while (attempts < maxAttempts) {
+          const adapterStatus = (module as unknown).webgpu_request_adapter?.();
+          const deviceStatus = (module as unknown).webgpu_request_device?.();
+
+          // Check for failure
+          if (adapterStatus === 1 || deviceStatus === 1) {
+            console.error('WebGPU initialization failed');
+
+            return;
+          }
+
+          // Check if both are ready (status 0 = success)
+          if (adapterStatus === 0 && deviceStatus === 0) {
+            console.log(`✓ WebGPU initialized after ${attempts} attempts`);
+            break;
+          }
+
+          // Still in progress (status 2), wait a bit and retry
+          await new Promise((resolve) => setTimeout(resolve, 10));
+          attempts++;
+        }
+
+        if (attempts >= maxAttempts) {
+          console.error('WebGPU initialization timeout');
+
+          return;
+        }
+
+        // Get handles
+        const adapterHandle = (module as unknown).webgpu_get_adapter?.();
+        const deviceHandle = (module as unknown).webgpu_get_device?.();
+        const instanceHandle = (module as unknown).webgpu_get_instance?.();
+        const surfaceHandle = (module as unknown).webgpu_get_surface?.(selector);
+
+        console.log('WebGPU handles from WASM:');
+        console.log('  Adapter:', adapterHandle, '(type:', typeof adapterHandle, ')');
+        console.log('  Device:', deviceHandle, '(type:', typeof deviceHandle, ')');
+        console.log('  Instance:', instanceHandle, '(type:', typeof instanceHandle, ')');
+        console.log('  Surface:', surfaceHandle, '(type:', typeof surfaceHandle, ')');
+
+        // Verify we have valid handles
+        if (!adapterHandle || !deviceHandle || !instanceHandle || !surfaceHandle) {
+          console.error('Failed to get valid WebGPU handles');
+
+          return;
+        }
+
+        // Convert to BigInt pointers
+        const devicePtr = BigInt(deviceHandle);
+        const instancePtr = BigInt(instanceHandle);
+        const surfacePtr = BigInt(surfaceHandle);
+        const targetType = 0;
+
+        console.log(
+          `Calling setWgTarget - device=${devicePtr}, instance=${instancePtr}, surface=${surfacePtr}, type=${targetType}`,
+        );
+
+        const result = this._dotLottieCore.setWgTarget(
+          devicePtr,
+          instancePtr,
+          surfacePtr,
+          width,
+          height,
+          colorSpace,
+          targetType,
+        );
+
+        console.log(`setWgTarget result: ${result}`);
+
+        if (result) {
+          console.log('✓ Successfully set WebGPU target');
+        } else {
+          console.error('setWgTarget failed');
+        }
+      } catch (error) {
+        console.error('Error setting up WebGPU target:', error);
+      }
+    }
+  }
+
   private async _fetchData(src: string): Promise<string | ArrayBuffer> {
     const response = await fetch(src);
 
@@ -232,15 +463,44 @@ export class DotLottieCommon {
     return new TextDecoder().decode(data);
   }
 
-  private _loadFromData(data: Data): void {
-    if (this._dotLottieCore === null) return;
+  private async _loadFromData(data: Data): Promise<void> {
+    if (this._dotLottieCore === null || this._wasmModule === null) return;
+
+    // Ensure canvas has proper dimensions before loading
+    if (IS_BROWSER && isHTMLCanvasElement(this._canvas)) {
+      const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
+      const { height: clientHeight, width: clientWidth } = this._canvas.getBoundingClientRect();
+
+      console.log('Canvas client dimensions:', clientWidth, 'x', clientHeight);
+
+      if (clientHeight !== 0 && clientWidth !== 0) {
+        this._canvas.width = clientWidth * dpr;
+        this._canvas.height = clientHeight * dpr;
+      }
+    }
 
     const width = this._canvas.width;
     const height = this._canvas.height;
 
+    console.log(`_loadFromData called - renderer: ${this._renderer}, canvas: ${width}x${height}`);
+
+    // Set up render target BEFORE loading animation data
+    // This allocates buffers for software renderer or sets up WebGL/WebGPU contexts
+    console.log('Setting up render target before loading animation data');
+    try {
+      await this._setupRenderTarget(this._wasmModule, this._selector);
+      console.log('✓ Render target setup completed');
+    } catch (error) {
+      console.error('Failed to setup render target:', error);
+      this._dispatchError(`Failed to setup ${this._renderer} render target: ${error}`);
+
+      return;
+    }
+
     let loaded = false;
 
     if (typeof data === 'string') {
+      console.log('Data type: string, length:', data.length);
       if (!isLottie(data)) {
         this._dispatchError(
           'Invalid Lottie JSON string: The provided string does not conform to the Lottie JSON format.',
@@ -248,8 +508,11 @@ export class DotLottieCommon {
 
         return;
       }
+      console.log('Calling loadAnimationData with string data, width:', width, 'height:', height);
       loaded = this._dotLottieCore.loadAnimationData(data, width, height);
+      console.log('loadAnimationData returned:', loaded);
     } else if (data instanceof ArrayBuffer) {
+      console.log('Data type: ArrayBuffer, byteLength:', data.byteLength);
       if (!isDotLottie(data)) {
         this._dispatchError(
           'Invalid dotLottie ArrayBuffer: The provided ArrayBuffer does not conform to the dotLottie format.',
@@ -257,8 +520,35 @@ export class DotLottieCommon {
 
         return;
       }
-      loaded = this._dotLottieCore.loadDotLottieData(data, width, height);
+      console.log('dotLottie file detected, converting to VectorChar');
+      // Convert ArrayBuffer to VectorChar
+      const vectorChar = new this._wasmModule.VectorChar();
+      const uint8Array = new Uint8Array(data);
+
+      for (let i = 0; i < uint8Array.length; i++) {
+        vectorChar.push_back(uint8Array[i] as number);
+      }
+
+      // Try with dimensions first
+      console.log(
+        'Calling loadDotLottieData with VectorChar, size:',
+        vectorChar.size(),
+        'width:',
+        width,
+        'height:',
+        height,
+      );
+      loaded = this._dotLottieCore.loadDotLottieData(vectorChar, width, height);
+      console.log('loadDotLottieData returned:', loaded);
+
+      // If that fails, try with 0,0 dimensions (let animation define its own size)
+      if (!loaded) {
+        console.log('Trying loadDotLottieData with 0x0 dimensions');
+        loaded = this._dotLottieCore.loadDotLottieData(vectorChar, 0, 0);
+        console.log('loadDotLottieData with 0x0 returned:', loaded);
+      }
     } else if (typeof data === 'object') {
+      console.log('Data type: object');
       if (!isLottie(data as Record<string, unknown>)) {
         this._dispatchError(
           'Invalid Lottie JSON object: The provided object does not conform to the Lottie JSON format.',
@@ -266,18 +556,24 @@ export class DotLottieCommon {
 
         return;
       }
-      loaded = this._dotLottieCore.loadAnimationData(JSON.stringify(data), width, height);
+      const jsonStr = JSON.stringify(data);
+
+      console.log('Calling loadAnimationData with JSON object (stringified), length:', jsonStr.length);
+      loaded = this._dotLottieCore.loadAnimationData(jsonStr, width, height);
+      console.log('loadAnimationData returned:', loaded);
     } else {
       this._dispatchError(
-        `Unsupported data type for animation data. Expected: 
+        `Unsupported data type for animation data. Expected:
           - string (Lottie JSON),
           - ArrayBuffer (dotLottie),
-          - object (Lottie JSON). 
+          - object (Lottie JSON).
           Received: ${typeof data}`,
       );
 
       return;
     }
+
+    console.log(`loadAnimationData final result: ${loaded}`);
 
     if (loaded) {
       this._eventManager.dispatch({ type: 'load' });
@@ -319,7 +615,7 @@ export class DotLottieCommon {
 
   private _loadFromSrc(src: string): void {
     this._fetchData(src)
-      .then((data) => this._loadFromData(data))
+      .then(async (data) => this._loadFromData(data))
       .catch((error) => this._dispatchError(`Failed to load animation data from URL: ${src}. ${error}`));
   }
 
@@ -528,6 +824,8 @@ export class DotLottieCommon {
 
     const rendered = this._dotLottieCore.render();
 
+    console.log(`Render called (${this._renderer}): ${rendered}`);
+
     if (this._renderer === 'wg' || this._renderer === 'gl') {
       if (rendered) {
         this._eventManager.dispatch({
@@ -545,14 +843,17 @@ export class DotLottieCommon {
         | null;
     }
 
-    if (rendered && this._context) {
-      const buffer = this._dotLottieCore.buffer() as Uint8Array;
-      const clampedBuffer = new Uint8ClampedArray(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+    if (rendered && this._context && this._swBuffer) {
+      const clampedBuffer = new Uint8ClampedArray(
+        this._swBuffer.buffer,
+        this._swBuffer.byteOffset,
+        this._swBuffer.byteLength,
+      );
 
       let imageData: ImageData | null = null;
 
-      /* 
-        In Node.js, the ImageData constructor is not available. 
+      /*
+        In Node.js, the ImageData constructor is not available.
         You can use createImageData function in the canvas context to create ImageData object.
       */
       if (typeof ImageData === 'undefined') {
@@ -728,6 +1029,27 @@ export class DotLottieCommon {
       CanvasResizeObserver.unobserve(this._canvas);
     }
 
+    // Free software renderer buffer if allocated
+    if (this._swBufferPtr !== null && this._wasmModule) {
+      const free = (this._wasmModule as unknown)._free as ((ptr: number) => void) | undefined;
+
+      if (free) {
+        free(this._swBufferPtr);
+      }
+      this._swBufferPtr = null;
+      this._swBuffer = null;
+    }
+
+    // Cleanup WebGPU resources if using WebGPU renderer
+    if (this._renderer === 'wg' && this._wasmModule) {
+      console.log('Cleaning up WebGPU resources');
+      const cleanup = (this._wasmModule as unknown).webgpu_cleanup as (() => void) | undefined;
+
+      if (cleanup) {
+        cleanup();
+      }
+    }
+
     this._dotLottieCore?.delete();
     this._dotLottieCore = null;
     this._context = null;
@@ -762,7 +1084,7 @@ export class DotLottieCommon {
   }
 
   public resize(): void {
-    if (!this._dotLottieCore || !this.isLoaded) return;
+    if (!this._dotLottieCore || !this.isLoaded || !this._wasmModule) return;
 
     if (IS_BROWSER && isHTMLCanvasElement(this._canvas)) {
       const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
@@ -774,6 +1096,9 @@ export class DotLottieCommon {
         this._canvas.height = clientHeight * dpr;
       }
     }
+
+    // Update render target before resize to reallocate buffers/contexts with new dimensions
+    // this._setupRenderTarget(this._wasmModule, this._selector);
 
     const ok = this._dotLottieCore.resize(this._canvas.width, this._canvas.height);
 
@@ -938,21 +1263,22 @@ export class DotLottieCommon {
   }
 
   public loadStateMachine(stateMachineId: string): boolean {
-    return this._dotLottieCore?.loadStateMachine(stateMachineId) ?? false;
+    return this._dotLottieCore?.stateMachineLoad(stateMachineId) ?? false;
   }
 
   public startStateMachine(): boolean {
-    const started = this._dotLottieCore?.startStateMachine() ?? false;
+    // const started = this._dotLottieCore?.stateMachineStart() ?? false;
 
-    if (started) {
-      this._setupStateMachineListeners();
-    }
+    // if (started) {
+    //   this._setupStateMachineListeners();
+    // }
 
-    return started;
+    // return started;
+    return false;
   }
 
   public stopStateMachine(): boolean {
-    const stopped = this._dotLottieCore?.stopStateMachine() ?? false;
+    const stopped = this._dotLottieCore?.stateMachineStop() ?? false;
 
     if (stopped) {
       this._cleanupStateMachineListeners();
@@ -1010,24 +1336,24 @@ export class DotLottieCommon {
     this.postPointerExitEvent(x, y);
   }
 
-  public postPointerUpEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.postPointerUpEvent(x, y);
+  public postPointerUpEvent(x: number, y: number): void | undefined {
+    return this._dotLottieCore?.stateMachinePostPointerUpEvent(x, y);
   }
 
-  public postPointerDownEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.postPointerDownEvent(x, y);
+  public postPointerDownEvent(x: number, y: number): void | undefined {
+    return this._dotLottieCore?.stateMachinePostPointerDownEvent(x, y);
   }
 
-  public postPointerMoveEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.postPointerMoveEvent(x, y);
+  public postPointerMoveEvent(x: number, y: number): void | undefined {
+    return this._dotLottieCore?.stateMachinePostPointerMoveEvent(x, y);
   }
 
-  public postPointerEnterEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.postPointerEnterEvent(x, y);
+  public postPointerEnterEvent(x: number, y: number): void | undefined {
+    return this._dotLottieCore?.stateMachinePostPointerEnterEvent(x, y);
   }
 
-  public postPointerExitEvent(x: number, y: number): number | undefined {
-    return this._dotLottieCore?.postPointerExitEvent(x, y);
+  public postPointerExitEvent(x: number, y: number): void | undefined {
+    return this._dotLottieCore?.stateMachinePostPointerExitEvent(x, y);
   }
 
   public getStateMachineListeners(): string[] {
@@ -1081,7 +1407,7 @@ export class DotLottieCommon {
   }
 
   public loadStateMachineData(stateMachineData: string): boolean {
-    return this._dotLottieCore?.loadStateMachineData(stateMachineData) ?? false;
+    return this._dotLottieCore?.stateMachineLoadData(stateMachineData) ?? false;
   }
 
   public animationSize(): { height: number; width: number } {
@@ -1095,15 +1421,15 @@ export class DotLottieCommon {
   }
 
   public setStateMachineBooleanContext(name: string, value: boolean): boolean {
-    return this._dotLottieCore?.setStateMachineBooleanContext(name, value) ?? false;
+    return this._dotLottieCore?.stateMachineSetBooleanInput(name, value) ?? false;
   }
 
   public setStateMachineNumericContext(name: string, value: number): boolean {
-    return this._dotLottieCore?.setStateMachineNumericContext(name, value) ?? false;
+    return this._dotLottieCore?.stateMachineSetNumericInput(name, value) ?? false;
   }
 
   public setStateMachineStringContext(name: string, value: string): boolean {
-    return this._dotLottieCore?.setStateMachineStringContext(name, value) ?? false;
+    return this._dotLottieCore?.stateMachineSetStringInput(name, value) ?? false;
   }
 
   /**

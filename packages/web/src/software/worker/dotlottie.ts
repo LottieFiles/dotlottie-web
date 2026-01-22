@@ -252,7 +252,6 @@ export class DotLottieWorker {
         instanceId: this._id,
         config: {
           ...config,
-          // @ts-ignore
           canvas: offscreen,
         },
         ...getCanvasSize(this._canvas, config.renderConfig?.devicePixelRatio || getDefaultDPR()),
