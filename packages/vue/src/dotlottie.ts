@@ -197,7 +197,7 @@ export const DotLottieVue = defineComponent({
       () => themeId?.value,
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
-          dotLottie.setTheme(newVal);
+          dotLottie.setThemeData(newVal);
         }
       },
     );
