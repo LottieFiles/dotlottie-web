@@ -245,8 +245,8 @@ export interface Manifest {
  * Bezier easing handle for keyframe interpolation
  */
 export interface BezierHandle {
-  x: number[];
-  y: number[];
+  x: number | number[];
+  y: number | number[];
 }
 
 /**
@@ -353,3 +353,285 @@ export type TextSlotValue = TextDocument;
  * Slot type string as returned by the core
  */
 export type SlotType = 'color' | 'gradient' | 'image' | 'text' | 'scalar' | 'vector';
+
+// =============================================================================
+// THEME TYPES (dotLottie v2.0 Specification)
+// =============================================================================
+
+/**
+ * Base properties shared by all theme keyframes.
+ */
+export interface ThemeBaseKeyframe {
+  /** Timeline position in animation frames */
+  frame: number;
+  /** Incoming Bézier handle for easing into this keyframe */
+  inTangent?: BezierHandle;
+  /** Outgoing Bézier handle for easing out of this keyframe */
+  outTangent?: BezierHandle;
+  /** When true, holds value without interpolation until next keyframe */
+  hold?: boolean;
+}
+
+/**
+ * Color keyframe for animated color transitions.
+ */
+export interface ThemeColorKeyframe extends ThemeBaseKeyframe {
+  /** Color value as normalized RGB or RGBA (0-1 range) */
+  value: Color;
+}
+
+/**
+ * Scalar keyframe for animated numeric properties.
+ */
+export interface ThemeScalarKeyframe extends ThemeBaseKeyframe {
+  /** Numeric value at this keyframe */
+  value: number;
+}
+
+/**
+ * Position keyframe for animated position properties.
+ */
+export interface ThemePositionKeyframe extends ThemeBaseKeyframe {
+  /** Position as 2D or 3D coordinates */
+  value: Vector;
+  /** Incoming tangent for spatial interpolation (curved paths) */
+  valueInTangent?: number[];
+  /** Outgoing tangent for spatial interpolation (curved paths) */
+  valueOutTangent?: number[];
+}
+
+/**
+ * Vector keyframe for animated vector properties (scale, size, etc.).
+ */
+export interface ThemeVectorKeyframe extends ThemeBaseKeyframe {
+  /** Vector value as [x, y] or [x, y, z] */
+  value: Vector;
+}
+
+/**
+ * Gradient color stop definition.
+ */
+export interface ThemeGradientStop {
+  /** Color as RGB or RGBA (0-1 range) */
+  color: Color;
+  /** Position along gradient line (0-1) */
+  offset: number;
+}
+
+/**
+ * Gradient keyframe for animated gradient transitions.
+ */
+export interface ThemeGradientKeyframe extends ThemeBaseKeyframe {
+  /** Array of gradient stops at this keyframe */
+  value: ThemeGradientStop[];
+}
+
+/**
+ * Text justification options.
+ */
+export type ThemeTextJustify =
+  | 'Left'
+  | 'Right'
+  | 'Center'
+  | 'JustifyLastLeft'
+  | 'JustifyLastRight'
+  | 'JustifyLastCenter'
+  | 'JustifyLastFull';
+
+/**
+ * Text capitalization styles.
+ */
+export type ThemeTextCaps = 'Regular' | 'AllCaps' | 'SmallCaps';
+
+/**
+ * Text document properties for theme text rules.
+ * Uses descriptive property names as per dotLottie v2.0 spec.
+ * @see https://dotlottie.io/spec/2.0/#text-document
+ */
+export interface ThemeTextDocument {
+  /** Text content to display */
+  text?: string;
+  /** Font family name */
+  fontName?: string;
+  /** Font size in points */
+  fontSize?: number;
+  /** Fill color as RGB or RGBA (0-1 range) */
+  fillColor?: Color;
+  /** Stroke color as RGB or RGBA (0-1 range) */
+  strokeColor?: Color;
+  /** Stroke width in pixels */
+  strokeWidth?: number;
+  /** When true, stroke renders over fill */
+  strokeOverFill?: boolean;
+  /** Line height spacing multiplier */
+  lineHeight?: number;
+  /** Letter spacing in 1/1000 em units */
+  tracking?: number;
+  /** Text alignment and justification */
+  justify?: ThemeTextJustify;
+  /** Text capitalization style */
+  textCaps?: ThemeTextCaps;
+  /** Vertical baseline offset in pixels */
+  baselineShift?: number;
+  /** Text wrap bounding box [width, height] */
+  wrapSize?: [number, number];
+  /** Text wrap box position [x, y] */
+  wrapPosition?: [number, number];
+}
+
+/**
+ * Text keyframe for animated text document properties.
+ */
+export interface ThemeTextKeyframe {
+  /** Timeline position in animation frames */
+  frame: number;
+  /** Text document configuration at this keyframe */
+  value: ThemeTextDocument;
+}
+
+/**
+ * Image value for theme image rules.
+ */
+export interface ThemeImageValue {
+  /** Reference to image in dotLottie package (i/ folder) */
+  id?: string;
+  /** Display width in pixels */
+  width?: number;
+  /** Display height in pixels */
+  height?: number;
+  /** External URL or data URI (fallback if id not found) */
+  url?: string;
+}
+
+/**
+ * Base properties shared by all theme rules.
+ */
+export interface ThemeBaseRule {
+  /** Slot ID in the Lottie animation (case-sensitive) */
+  id: string;
+  /** Limit rule to specific animations (omit to apply to all) */
+  animations?: string[];
+  /** Lottie expression for dynamic values */
+  expression?: string;
+}
+
+/**
+ * Color rule for overriding color properties (fill, stroke, text color).
+ */
+export interface ThemeColorRule extends ThemeBaseRule {
+  type: 'Color';
+  /** Static color value (RGB or RGBA, 0-1 range) */
+  value?: Color;
+  /** Animated color keyframes */
+  keyframes?: ThemeColorKeyframe[];
+}
+
+/**
+ * Scalar rule for overriding numeric properties (opacity, stroke width, rotation).
+ */
+export interface ThemeScalarRule extends ThemeBaseRule {
+  type: 'Scalar';
+  /** Static numeric value */
+  value?: number;
+  /** Animated scalar keyframes */
+  keyframes?: ThemeScalarKeyframe[];
+}
+
+/**
+ * Position rule for overriding position properties.
+ */
+export interface ThemePositionRule extends ThemeBaseRule {
+  type: 'Position';
+  /** Static position (2D or 3D coordinates) */
+  value?: Vector;
+  /** Animated position keyframes */
+  keyframes?: ThemePositionKeyframe[];
+}
+
+/**
+ * Vector rule for overriding vector properties (scale, size).
+ */
+export interface ThemeVectorRule extends ThemeBaseRule {
+  type: 'Vector';
+  /** Static vector value */
+  value?: Vector;
+  /** Animated vector keyframes */
+  keyframes?: ThemeVectorKeyframe[];
+}
+
+/**
+ * Gradient rule for overriding gradient properties.
+ */
+export interface ThemeGradientRule extends ThemeBaseRule {
+  type: 'Gradient';
+  /** Static gradient (array of color stops) */
+  value?: ThemeGradientStop[];
+  /** Animated gradient keyframes */
+  keyframes?: ThemeGradientKeyframe[];
+}
+
+/**
+ * Image rule for overriding image assets.
+ */
+export interface ThemeImageRule extends ThemeBaseRule {
+  type: 'Image';
+  /** Image replacement configuration (required for Image rules) */
+  value: ThemeImageValue;
+}
+
+/**
+ * Text rule for overriding text document properties.
+ */
+export interface ThemeTextRule extends ThemeBaseRule {
+  type: 'Text';
+  /** Static text document configuration */
+  value?: ThemeTextDocument;
+  /** Animated text keyframes */
+  keyframes?: ThemeTextKeyframe[];
+}
+
+/**
+ * Union of all theme rule types.
+ */
+export type ThemeRule =
+  | ThemeColorRule
+  | ThemeScalarRule
+  | ThemePositionRule
+  | ThemeVectorRule
+  | ThemeGradientRule
+  | ThemeImageRule
+  | ThemeTextRule;
+
+/**
+ * Theme definition for customizing Lottie animation properties.
+ * Themes override animated properties mapped to Lottie Slots.
+ * @see https://dotlottie.io/spec/2.0/#themes
+ *
+ * @example
+ * ```typescript
+ * const theme: Theme = {
+ *   rules: [
+ *     {
+ *       id: 'background_color',
+ *       type: 'Color',
+ *       value: [0.2, 0.4, 0.8] // Blue
+ *     },
+ *     {
+ *       id: 'title_text',
+ *       type: 'Text',
+ *       value: {
+ *         text: 'Hello World',
+ *         fontSize: 48,
+ *         fillColor: [1, 1, 1]
+ *       }
+ *     }
+ *   ]
+ * };
+ *
+ * dotLottie.setThemeData(theme);
+ * ```
+ */
+export interface Theme {
+  /** Array of rules defining property overrides */
+  rules: ThemeRule[];
+}
