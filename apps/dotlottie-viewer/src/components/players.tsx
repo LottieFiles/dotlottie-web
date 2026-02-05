@@ -28,9 +28,21 @@ import LoadTime from './load-time';
 
 setDotLottieWasmUrl(dotLottieWasmUrl);
 
-export default function Players() {
+interface PlayersProps {
+  onDotLottieChange?: (dotLottie: DotLottie | null) => void;
+}
+
+export default function Players({ onDotLottieChange }: PlayersProps) {
   const lottieWebRef = useRef<DotLottieCommonPlayer | null>(null);
-  const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
+  const [dotLottie, setDotLottieState] = useState<DotLottie | null>(null);
+
+  const setDotLottie = useCallback(
+    (instance: DotLottie | null) => {
+      setDotLottieState(instance);
+      onDotLottieChange?.(instance);
+    },
+    [onDotLottieChange],
+  );
   const src = useAppSelector((state) => state.viewer.src);
   const backgroundColor = useAppSelector((state) => state.viewer.backgroundColor);
   const speed = useAppSelector((state) => state.viewer.speed);
@@ -127,11 +139,11 @@ export default function Players() {
 
   return (
     <>
-      <div className="h-full flex-grow flex justify-between items-center flex-col gap-4">
+      <div className="flex flex-col items-center justify-between flex-grow h-full gap-4">
         <div className="flex justify-center h-full">
           <div className="flex flex-col dotlottie-player">
             <LoadTime version={dotLottieWebPkg.version} className="mb-4" title="dotLottie Web" />
-            <div className="flex justify-center items-center p-4 flex-grow">
+            <div className="flex items-center justify-center flex-grow p-4">
               <div style={{ width: '350px', height: '350px' }}>
                 <DotLottieReact
                   backgroundColor={backgroundColor}
@@ -156,7 +168,7 @@ export default function Players() {
           {isJson ? (
             <div className="flex flex-col lottie-web">
               <LoadTime version="v5.12.2" className="mb-4" title="Lottie Web" />
-              <div className="flex justify-center items-center p-4 flex-grow">
+              <div className="flex items-center justify-center flex-grow p-4">
                 <div style={{ width: '350px', height: '350px' }}>
                   <DotLottiePlayer
                     lottieRef={(ref) => {
@@ -274,13 +286,13 @@ export default function Players() {
             )}
           />
 
-          <span className="p-2 text-center flex items-center justify-center bg-white rounded-lg text-sm">
-            <span className="w-min text-right pr-1 bg-transparent flex relative">
+          <span className="flex items-center justify-center p-2 text-sm text-center bg-white rounded-lg">
+            <span className="relative flex pr-1 text-right bg-transparent w-min">
               <span className="invisible">{totalFrames.toFixed(2)}</span>
               <span className="absolute self-center">{currentFrame.toFixed(2)}</span>
             </span>
             <span className="text-xs text-secondary">of</span>
-            <span className="w-max pl-1 bg-transparent">{totalFrames}</span>
+            <span className="pl-1 bg-transparent w-max">{totalFrames}</span>
           </span>
           <button className="cursor-pointer" onClick={() => dispatch(setLoop(!loop))}>
             <ImLoop className={`${!loop ? 'text-gray-500' : ''}`} />

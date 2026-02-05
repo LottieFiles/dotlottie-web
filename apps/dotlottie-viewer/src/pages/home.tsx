@@ -1,7 +1,7 @@
 import { DotLottie } from '@lottiefiles/dotlottie-react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setSrc, setUserSrc } from '../store/viewer-slice';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import Dropzone, { type FileError, type FileRejection, ErrorCode } from 'react-dropzone';
 import Controls from '../components/controls';
 import Players from '../components/players';
@@ -13,10 +13,18 @@ export const Home = (): JSX.Element => {
   const dispatch = useAppDispatch();
 
   const newPlayerRef = useRef<DotLottie | null>(null);
+  const [dotLottieInstance, setDotLottieInstance] = useState<DotLottie | null>(null);
+
+  const handleDotLottieChange = useCallback((instance: DotLottie | null) => {
+    setDotLottieInstance(instance);
+    newPlayerRef.current = instance;
+  }, []);
 
   useEffect(() => {
     if (theme) {
       newPlayerRef.current?.setTheme(theme);
+    } else {
+      newPlayerRef.current?.setTheme('');
     }
   }, [theme, newPlayerRef]);
 
@@ -56,21 +64,21 @@ export const Home = (): JSX.Element => {
       <Dropzone noClick onDrop={onDrop} onDropRejected={onDropRejected}>
         {(state): JSX.Element => {
           return (
-            <div className="flex gap-4 p-4 h-screen" {...state.getRootProps()}>
+            <div className="flex h-screen gap-4 p-4" {...state.getRootProps()}>
               <input {...state.getInputProps()} />
               {state.isDragActive ? (
-                <div className="fixed inset-0 z-10 bg-black bg-opacity-60 flex justify-center items-center text-white bold">
+                <div className="fixed inset-0 z-10 flex items-center justify-center text-white bg-black bg-opacity-60 bold">
                   <div>Drop it like it's hot!</div>
                 </div>
               ) : null}
-              <div className="bg-subtle border border-subtle rounded-lg max-w-80">
-                <SidePanel />
+              <div className="border rounded-lg bg-subtle border-subtle max-w-80">
+                <SidePanel dotLottie={dotLottieInstance} />
               </div>
-              <div className="flex flex-col gap-4 flex-grow">
+              <div className="flex flex-col flex-grow gap-4">
                 <TopBar />
-                <div className="flex-1 flex p-4 gap-4 bg-subtle rounded-lg">
+                <div className="flex flex-1 gap-4 p-4 rounded-lg bg-subtle">
                   <div className="flex-1">
-                    <Players />
+                    <Players onDotLottieChange={handleDotLottieChange} />
                   </div>
                   <div className="w-80">
                     <Controls />
