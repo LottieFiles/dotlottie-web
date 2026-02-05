@@ -1,5 +1,15 @@
 # @lottiefiles/dotlottie-vue
 
+## 0.10.14
+
+### Patch Changes
+
+- 18b64ad: fix(vue): remove canvas event listeners on unmount to prevent leaks
+- bc12cc8: fix(vue): apply `themeData` using `setThemeData` instead of `setTheme`
+- Updated dependencies [de6f1e2]
+- Updated dependencies [7ab00db]
+  - @lottiefiles/dotlottie-web@0.62.0
+
 ## 0.10.13
 
 ### Patch Changes
