@@ -35,6 +35,7 @@ import type {
   GradientSlotValue,
   TextSlotValue,
   SlotType,
+  Theme,
 } from './types';
 import {
   getDefaultDPR,
@@ -1446,15 +1447,46 @@ export class DotLottie {
   }
 
   /**
-   * Applies a custom theme from raw theme data instead of manifest theme ID.
+   * Applies a custom theme from theme data instead of manifest theme ID.
    * Useful for dynamically generated or user-created themes not in the manifest.
-   * @param themeData - Theme data as a JSON string
+   * 
+   * @param themeData - Theme data as a JSON string or a structured Theme object
    * @returns True if theme loaded successfully, false otherwise
+   * 
+   * @example
+   * ```typescript
+   * // Using a string (existing behavior)
+   * dotLottie.setThemeData('{"rules":[{"id":"bg","type":"Color","value":[1,0,0]}]}');
+   * 
+   * // Using a Theme object (new behavior)
+   * dotLottie.setThemeData({
+   *   rules: [
+   *     {
+   *       id: 'background_color',
+   *       type: 'Color',
+   *       value: [0.2, 0.4, 0.8]
+   *     },
+   *     {
+   *       id: 'title',
+   *       type: 'Text',
+   *       value: {
+   *         text: 'Hello World',
+   *         fontSize: 48,
+   *         fillColor: [1, 1, 1]
+   *       }
+   *     }
+   *   ]
+   * });
+   * ```
    */
-  public setThemeData(themeData: string): boolean {
+  public setThemeData(themeData: Theme | string): boolean {
     if (this._dotLottieCore === null) return false;
 
-    const themeLoaded = this._dotLottieCore.setThemeData(themeData);
+    const themeDataString = typeof themeData === 'string' 
+      ? themeData 
+      : JSON.stringify(themeData);
+
+    const themeLoaded = this._dotLottieCore.setThemeData(themeDataString);
 
     if (themeLoaded) {
       this._dotLottieCore.render();
