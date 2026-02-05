@@ -364,12 +364,12 @@ export type SlotType = 'color' | 'gradient' | 'image' | 'text' | 'scalar' | 'vec
 export interface ThemeBaseKeyframe {
   /** Timeline position in animation frames */
   frame: number;
+  /** When true, holds value without interpolation until next keyframe */
+  hold?: boolean;
   /** Incoming Bézier handle for easing into this keyframe */
   inTangent?: BezierHandle;
   /** Outgoing Bézier handle for easing out of this keyframe */
   outTangent?: BezierHandle;
-  /** When true, holds value without interpolation until next keyframe */
-  hold?: boolean;
 }
 
 /**
@@ -449,34 +449,34 @@ export type ThemeTextCaps = 'Regular' | 'AllCaps' | 'SmallCaps';
  * @see https://dotlottie.io/spec/2.0/#text-document
  */
 export interface ThemeTextDocument {
-  /** Text content to display */
-  text?: string;
+  /** Vertical baseline offset in pixels */
+  baselineShift?: number;
+  /** Fill color as RGB or RGBA (0-1 range) */
+  fillColor?: Color;
   /** Font family name */
   fontName?: string;
   /** Font size in points */
   fontSize?: number;
-  /** Fill color as RGB or RGBA (0-1 range) */
-  fillColor?: Color;
-  /** Stroke color as RGB or RGBA (0-1 range) */
-  strokeColor?: Color;
-  /** Stroke width in pixels */
-  strokeWidth?: number;
-  /** When true, stroke renders over fill */
-  strokeOverFill?: boolean;
-  /** Line height spacing multiplier */
-  lineHeight?: number;
-  /** Letter spacing in 1/1000 em units */
-  tracking?: number;
   /** Text alignment and justification */
   justify?: ThemeTextJustify;
+  /** Line height spacing multiplier */
+  lineHeight?: number;
+  /** Stroke color as RGB or RGBA (0-1 range) */
+  strokeColor?: Color;
+  /** When true, stroke renders over fill */
+  strokeOverFill?: boolean;
+  /** Stroke width in pixels */
+  strokeWidth?: number;
+  /** Text content to display */
+  text?: string;
   /** Text capitalization style */
   textCaps?: ThemeTextCaps;
-  /** Vertical baseline offset in pixels */
-  baselineShift?: number;
-  /** Text wrap bounding box [width, height] */
-  wrapSize?: [number, number];
+  /** Letter spacing in 1/1000 em units */
+  tracking?: number;
   /** Text wrap box position [x, y] */
   wrapPosition?: [number, number];
+  /** Text wrap bounding box [width, height] */
+  wrapSize?: [number, number];
 }
 
 /**
@@ -493,81 +493,81 @@ export interface ThemeTextKeyframe {
  * Image value for theme image rules.
  */
 export interface ThemeImageValue {
-  /** Reference to image in dotLottie package (i/ folder) */
-  id?: string;
-  /** Display width in pixels */
-  width?: number;
   /** Display height in pixels */
   height?: number;
+  /** Reference to image in dotLottie package (i/ folder) */
+  id?: string;
   /** External URL or data URI (fallback if id not found) */
   url?: string;
+  /** Display width in pixels */
+  width?: number;
 }
 
 /**
  * Base properties shared by all theme rules.
  */
 export interface ThemeBaseRule {
-  /** Slot ID in the Lottie animation (case-sensitive) */
-  id: string;
   /** Limit rule to specific animations (omit to apply to all) */
   animations?: string[];
   /** Lottie expression for dynamic values */
   expression?: string;
+  /** Slot ID in the Lottie animation (case-sensitive) */
+  id: string;
 }
 
 /**
  * Color rule for overriding color properties (fill, stroke, text color).
  */
 export interface ThemeColorRule extends ThemeBaseRule {
+  /** Animated color keyframes */
+  keyframes?: ThemeColorKeyframe[];
   type: 'Color';
   /** Static color value (RGB or RGBA, 0-1 range) */
   value?: Color;
-  /** Animated color keyframes */
-  keyframes?: ThemeColorKeyframe[];
 }
 
 /**
  * Scalar rule for overriding numeric properties (opacity, stroke width, rotation).
  */
 export interface ThemeScalarRule extends ThemeBaseRule {
+  /** Animated scalar keyframes */
+  keyframes?: ThemeScalarKeyframe[];
   type: 'Scalar';
   /** Static numeric value */
   value?: number;
-  /** Animated scalar keyframes */
-  keyframes?: ThemeScalarKeyframe[];
 }
 
 /**
  * Position rule for overriding position properties.
  */
 export interface ThemePositionRule extends ThemeBaseRule {
+  /** Animated position keyframes */
+  keyframes?: ThemePositionKeyframe[];
   type: 'Position';
   /** Static position (2D or 3D coordinates) */
   value?: Vector;
-  /** Animated position keyframes */
-  keyframes?: ThemePositionKeyframe[];
 }
 
 /**
  * Vector rule for overriding vector properties (scale, size).
  */
 export interface ThemeVectorRule extends ThemeBaseRule {
+  /** Animated vector keyframes */
+  keyframes?: ThemeVectorKeyframe[];
   type: 'Vector';
   /** Static vector value */
   value?: Vector;
-  /** Animated vector keyframes */
-  keyframes?: ThemeVectorKeyframe[];
 }
 
 /**
  * Gradient rule for overriding gradient properties.
  */
 export interface ThemeGradientRule extends ThemeBaseRule {
+  /** Animated gradient keyframes */
+  keyframes?: ThemeGradientKeyframe[];
   type: 'Gradient';
   /** Static gradient (array of color stops) */
   value?: ThemeGradientStop[];
-  /** Animated gradient keyframes */
-  keyframes?: ThemeGradientKeyframe[];
 }
 
 /**
@@ -583,11 +583,11 @@ export interface ThemeImageRule extends ThemeBaseRule {
  * Text rule for overriding text document properties.
  */
 export interface ThemeTextRule extends ThemeBaseRule {
+  /** Animated text keyframes */
+  keyframes?: ThemeTextKeyframe[];
   type: 'Text';
   /** Static text document configuration */
   value?: ThemeTextDocument;
-  /** Animated text keyframes */
-  keyframes?: ThemeTextKeyframe[];
 }
 
 /**

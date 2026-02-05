@@ -1,4 +1,3 @@
-/* eslint-disable id-length */
 /* eslint-disable no-warning-comments */
 import { AnimationFrameManager } from './animation-frame-manager';
 import { IS_BROWSER, BYTES_PER_PIXEL } from './constants';
@@ -1449,15 +1448,15 @@ export class DotLottie {
   /**
    * Applies a custom theme from theme data instead of manifest theme ID.
    * Useful for dynamically generated or user-created themes not in the manifest.
-   * 
+   *
    * @param themeData - Theme data as a JSON string or a structured Theme object
    * @returns True if theme loaded successfully, false otherwise
-   * 
+   *
    * @example
    * ```typescript
    * // Using a string (existing behavior)
    * dotLottie.setThemeData('{"rules":[{"id":"bg","type":"Color","value":[1,0,0]}]}');
-   * 
+   *
    * // Using a Theme object (new behavior)
    * dotLottie.setThemeData({
    *   rules: [
@@ -1482,9 +1481,7 @@ export class DotLottie {
   public setThemeData(themeData: Theme | string): boolean {
     if (this._dotLottieCore === null) return false;
 
-    const themeDataString = typeof themeData === 'string' 
-      ? themeData 
-      : JSON.stringify(themeData);
+    const themeDataString = typeof themeData === 'string' ? themeData : JSON.stringify(themeData);
 
     const themeLoaded = this._dotLottieCore.setThemeData(themeDataString);
 
@@ -1524,24 +1521,6 @@ export class DotLottie {
       't' in value[0] &&
       's' in value[0]
     );
-  }
-
-  /**
-   * Get the current value (k) from a slot's animated property structure
-   * @returns The slot's k value, or undefined if not found
-   */
-  private _getSlotValue(slotId: string): unknown {
-    const slot = this.getSlot(slotId);
-
-    if (slot && typeof slot === 'object' && 'p' in slot) {
-      const p = (slot as Record<string, unknown>)['p'];
-
-      if (p && typeof p === 'object' && 'k' in p) {
-        return (p as Record<string, unknown>)['k'];
-      }
-    }
-
-    return undefined;
   }
 
   /**
@@ -1741,15 +1720,25 @@ export class DotLottie {
   public setTextSlot(slotId: string, value: TextSlotValue): boolean {
     if (this._dotLottieCore === null) return false;
 
-    // Get existing value and merge for partial updates
-    const existingValue = this._getSlotValue(slotId);
-    let mergedValue = value;
+    const existingValue = JSON.parse(this._dotLottieCore.getSlotStr(slotId));
 
-    if (existingValue && typeof existingValue === 'object' && !Array.isArray(existingValue)) {
-      mergedValue = { ...(existingValue as Record<string, unknown>), ...value };
+    let mergedTextDoc = value;
+
+    if (existingValue && 'k' in existingValue && Array.isArray(existingValue['k'])) {
+      const keyframe0 = existingValue['k'][0] as Record<string, unknown>;
+
+      if ('s' in keyframe0 && typeof keyframe0['s'] === 'object') {
+        mergedTextDoc = {
+          ...keyframe0['s'],
+          ...value,
+        };
+      }
     }
 
-    const slotJson = JSON.stringify({ a: 0, k: mergedValue });
+    const slotJson = JSON.stringify({
+      a: 0,
+      k: [{ t: 0, s: mergedTextDoc }],
+    });
 
     if (this._dotLottieCore.setSlotStr(slotId, slotJson)) {
       this._dotLottieCore.render();
