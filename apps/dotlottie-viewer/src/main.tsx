@@ -5,6 +5,8 @@ import store from './store';
 import { Home } from './pages/home';
 import { List } from './pages/list';
 import { Perf } from './pages/perf';
+import { Playground } from './pages/playground';
+import { Embed } from './pages/embed';
 import { Route, BrowserRouter, Routes } from 'react-router-dom';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -15,6 +17,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Route path="/" element={<Home />} />
         <Route path="/list" element={<List />} />
         <Route path="/perf-test" element={<Perf />} />
+        <Route path="/playground" element={<Playground />} />
+        <Route path="/embed" element={<Embed />} />
       </Routes>
     </BrowserRouter>
   </Provider>,

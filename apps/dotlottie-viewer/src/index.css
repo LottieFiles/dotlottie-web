@@ -8,6 +8,15 @@
   src: url(/fonts/Type-Tones\ -\ Arboria-Bold.woff);
 }
 
+/* CSS variables for iframe/embed theming */
+:root {
+  --preview-bg: #f5f5f5;
+}
+
+.dark {
+  --preview-bg: #1e1e1e;
+}
+
 html {
   font-family: Karla, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

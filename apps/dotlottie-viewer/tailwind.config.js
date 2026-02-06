@@ -1,10 +1,17 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
         lottie: '#019D91',
+        // Dark mode colors (VS Code inspired)
+        'dark-bg': '#1e1e1e',
+        'dark-surface': '#252526',
+        'dark-border': '#3c3c3c',
+        'dark-text': '#cccccc',
+        'dark-text-muted': '#858585',
       },
       textColor: {
         primary: '#20272C',
