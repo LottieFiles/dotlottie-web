@@ -10,7 +10,7 @@ interface BaseSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> 
 
 const BaseSelect: React.FC<BaseSelectProps> = ({ className = '', items, placeholder, emptyMessage, ...props }) => {
   // Combine the default classes with any classes passed via props
-  const combinedClassName = `border rounded-lg font-bold border-subtle bg-subtle px-2 py-1 h-9 ${className}`;
+  const combinedClassName = `border rounded-lg font-bold border-subtle dark:border-dark-border bg-subtle dark:bg-dark-surface text-primary dark:text-dark-text px-2 py-1 h-9 ${className}`;
 
   const [allItems, setAllItems] = useState(() => {
     if (placeholder) {

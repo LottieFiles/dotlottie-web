@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setSrc, setUserSrc } from '../store/viewer-slice';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Dropzone, { type FileError, type FileRejection, ErrorCode } from 'react-dropzone';
+import { Link } from 'react-router-dom';
 import Controls from '../components/controls';
 import Players from '../components/players';
 import SidePanel from '../components/side-panel';
@@ -75,7 +76,26 @@ export const Home = (): JSX.Element => {
                 <SidePanel dotLottie={dotLottieInstance} />
               </div>
               <div className="flex flex-col flex-grow gap-4">
-                <TopBar />
+                <div className="flex items-center gap-2">
+                  <TopBar className="flex-grow" />
+                  <Link
+                    to="/playground"
+                    className="p-2 bg-subtle hover:bg-hover rounded-lg font-bold whitespace-nowrap"
+                  >
+                    Playground
+                  </Link>
+                  <Link to="/perf-test" className="p-2 bg-subtle hover:bg-hover rounded-lg font-bold whitespace-nowrap">
+                    Performance
+                  </Link>
+                  <a
+                    href="https://developers.lottiefiles.com/docs/dotlottie-player/dotlottie-web/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 bg-subtle hover:bg-hover rounded-lg font-bold whitespace-nowrap"
+                  >
+                    Docs
+                  </a>
+                </div>
                 <div className="flex flex-1 gap-4 p-4 rounded-lg bg-subtle">
                   <div className="flex-1">
                     <Players onDotLottieChange={handleDotLottieChange} />

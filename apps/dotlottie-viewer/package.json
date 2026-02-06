@@ -10,6 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@codemirror/lang-javascript": "^6.2.4",
+    "@codemirror/state": "^6.5.4",
+    "@codemirror/theme-one-dark": "^6.1.3",
+    "@codemirror/view": "^6.39.12",
     "@dotlottie/react-player": "^1.6.19",
     "@heroicons/react": "^2.1.5",
     "@lottiefiles/dotlottie-react": "workspace:*",
@@ -17,9 +21,12 @@
     "@lottiefiles/react-lottie-player": "^3.5.4",
     "@reduxjs/toolkit": "^2.2.3",
     "@tanstack/react-virtual": "^3.10.8",
+    "@uiw/codemirror-theme-github": "^4.25.4",
     "autoprefixer": "^10.4.19",
     "canvaskit-wasm": "^0.39.1",
+    "codemirror": "^6.0.2",
     "lottie-web": "^5.12.2",
+    "lz-string": "^1.5.0",
     "postcss": "8.4.32",
     "react": "^19.2.3",
     "react-device-detect": "^2.2.3",
@@ -34,6 +41,7 @@
     "uuid": "^10.0.0"
   },
   "devDependencies": {
+    "@types/lz-string": "^1.5.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@types/uuid": "^10.0.0",

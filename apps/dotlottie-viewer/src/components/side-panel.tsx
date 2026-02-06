@@ -15,15 +15,6 @@ export default function SidePanel({ dotLottie }: SidePanelProps) {
       </a>
       <div className="flex flex-col flex-grow gap-4 overflow-auto">
         <SlotController dotLottie={dotLottie ?? null} />
-        <h1 className="text-3xl font-bold text-primary">Unleash the power of animations using dotLottie</h1>
-        <p className="text-secondary">Create captivating product experiences with dotLottie animations.</p>
-
-        <a
-          href="https://developers.lottiefiles.com/docs/dotlottie-player/dotlottie-web/"
-          className="p-4 font-bold text-white rounded-lg bg-lottie hover:bg-lottie/90 w-fit"
-        >
-          Get Started
-        </a>
         <AnimationList />
       </div>
     </section>
