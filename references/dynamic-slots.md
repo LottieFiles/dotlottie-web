@@ -199,13 +199,14 @@ import type { DotLottie } from '@lottiefiles/dotlottie-web';
 
 function BrandedAnimation({ primaryColor, userName }) {
   const dotLottieRef = useRef<DotLottie | null>(null);
+  const [isLoaded, setIsLoaded] = useState<Boolean>(false);
 
   useEffect(() => {
-    if (dotLottieRef.current) {
+    if (dotLottieRef.current && isLoaded) {
       dotLottieRef.current.setColorSlot('brand-color', primaryColor);
       dotLottieRef.current.setTextSlot('greeting', { t: `Welcome, ${userName}!` });
     }
-  }, [primaryColor, userName]);
+  }, [primaryColor, userName, isLoaded]);
 
   return (
     <DotLottieReact
@@ -214,8 +215,8 @@ function BrandedAnimation({ primaryColor, userName }) {
       loop
       dotLottieRefCallback={(dotLottie) => {
         dotLottieRef.current = dotLottie;
+        dotLottie.addEventListener("load", () => setIsLoaded(true));
       }}
     />
   );
 }
-```
