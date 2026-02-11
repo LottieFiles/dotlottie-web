@@ -1,6 +1,6 @@
 # Dynamic Slot Overriding
 
-Slots enable runtime customization of animated properties. Use the typed slot APIs for type-safe property overriding.
+Slots enable runtime customization of Lottie animated properties. Use the typed slot APIs for type-safe property overriding.
 
 ## Discovering Available Slots
 
