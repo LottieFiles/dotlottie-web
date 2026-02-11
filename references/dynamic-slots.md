@@ -57,7 +57,7 @@ dotLottie.setScalarSlot('rotation', [
 
 ### Vector Slots
 
-Override position, scale, or any 2D/3D point property.
+Override position, scale, or any 2D point property.
 
 ```typescript
 // Static 2D vector
