@@ -51,7 +51,7 @@
     "syncpack": "9.8.6",
     "turbo": "2.0.4",
     "typescript": "5.0.4",
-    "zx": "7.0.7"
+    "zx": "8.8.5"
   },
   "packageManager": "pnpm@9.4.0"
 }
