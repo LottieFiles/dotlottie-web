@@ -1,20 +1,20 @@
 import { type Config, DotLottie } from '@lottiefiles/dotlottie-web';
 import {
-  type VNode,
-  h,
-  ref,
-  onMounted,
-  type Ref,
-  watch,
-  type SetupContext,
-  onBeforeUnmount,
-  defineComponent,
-  toRefs,
-  type PropType,
   computed,
+  defineComponent,
+  h,
+  onBeforeUnmount,
+  onMounted,
+  type PropType,
+  type Ref,
+  ref,
+  type SetupContext,
+  toRefs,
+  type VNode,
+  watch,
 } from 'vue';
 
-export { type DotLottie };
+export type { DotLottie };
 
 export interface DotLottieVueProps extends Omit<Config, 'canvas'> {
   playOnHover?: boolean;
@@ -175,12 +175,7 @@ export const DotLottieVue = defineComponent({
     watch(
       () => animationId?.value,
       (newVal) => {
-        if (
-          dotLottie &&
-          dotLottie.isLoaded &&
-          typeof newVal !== 'undefined' &&
-          newVal !== dotLottie.activeAnimationId
-        ) {
+        if (dotLottie?.isLoaded && typeof newVal !== 'undefined' && newVal !== dotLottie.activeAnimationId) {
           dotLottie.loadAnimation(newVal);
         }
       },
@@ -270,7 +265,7 @@ export const DotLottieVue = defineComponent({
     watch(
       () => stateMachineId?.value,
       (newVal) => {
-        if (dotLottie && dotLottie.isLoaded) {
+        if (dotLottie?.isLoaded) {
           if (typeof newVal === 'string' && newVal) {
             const smLoaded = dotLottie.stateMachineLoad(newVal);
 

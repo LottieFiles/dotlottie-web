@@ -1,5 +1,5 @@
-import { useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { useRef } from 'react';
 import { useDotLottiePool } from '../../hooks/useDotLottiePool';
 import { VirtualAnimationItem } from './VirtualAnimationItem';
 

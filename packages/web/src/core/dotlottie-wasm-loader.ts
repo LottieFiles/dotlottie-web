@@ -9,7 +9,8 @@ export class DotLottieWasmLoader {
   private static _ModulePromise: Promise<MainModule> | null = null;
 
   // URL for the WASM file, constructed using package information
-  private static _wasmURL = `https://cdn.jsdelivr.net/npm/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/dotlottie-player.wasm`;
+  private static _wasmURL =
+    `https://cdn.jsdelivr.net/npm/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/dotlottie-player.wasm`;
 
   private constructor() {
     throw new Error('RendererLoader is a static class and cannot be instantiated.');
@@ -27,24 +28,28 @@ export class DotLottieWasmLoader {
    * @returns Promise<Module> - A promise that resolves to the loaded module.
    */
   private static async _loadWithBackup(): Promise<MainModule> {
-    if (!this._ModulePromise) {
-      this._ModulePromise = this._tryLoad(this._wasmURL).catch(async (initialError): Promise<MainModule> => {
-        const backupUrl = `https://unpkg.com/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/dotlottie-player.wasm`;
+    if (!DotLottieWasmLoader._ModulePromise) {
+      DotLottieWasmLoader._ModulePromise = DotLottieWasmLoader._tryLoad(DotLottieWasmLoader._wasmURL).catch(
+        async (initialError): Promise<MainModule> => {
+          const backupUrl = `https://unpkg.com/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/dotlottie-player.wasm`;
 
-        console.warn(`Primary WASM load failed from ${this._wasmURL}. Error: ${(initialError as Error).message}`);
-        console.warn(`Attempting to load WASM from backup URL: ${backupUrl}`);
+          console.warn(
+            `Primary WASM load failed from ${DotLottieWasmLoader._wasmURL}. Error: ${(initialError as Error).message}`,
+          );
+          console.warn(`Attempting to load WASM from backup URL: ${backupUrl}`);
 
-        try {
-          return await this._tryLoad(backupUrl);
-        } catch (backupError) {
-          console.error(`Primary WASM URL failed: ${(initialError as Error).message}`);
-          console.error(`Backup WASM URL failed: ${(backupError as Error).message}`);
-          throw new Error('WASM loading failed from all sources.');
-        }
-      });
+          try {
+            return await DotLottieWasmLoader._tryLoad(backupUrl);
+          } catch (backupError) {
+            console.error(`Primary WASM URL failed: ${(initialError as Error).message}`);
+            console.error(`Backup WASM URL failed: ${(backupError as Error).message}`);
+            throw new Error('WASM loading failed from all sources.');
+          }
+        },
+      );
     }
 
-    return this._ModulePromise;
+    return DotLottieWasmLoader._ModulePromise;
   }
 
   /**
@@ -53,7 +58,7 @@ export class DotLottieWasmLoader {
    * @returns Promise<Module> - A promise that resolves to the loaded module.
    */
   public static async load(): Promise<MainModule> {
-    return this._loadWithBackup();
+    return DotLottieWasmLoader._loadWithBackup();
   }
 
   /**
@@ -62,10 +67,10 @@ export class DotLottieWasmLoader {
    * @param string -  The new URL for the WASM file.
    */
   public static setWasmUrl(url: string): void {
-    if (url === this._wasmURL) return;
+    if (url === DotLottieWasmLoader._wasmURL) return;
 
-    this._wasmURL = url;
+    DotLottieWasmLoader._wasmURL = url;
     // Invalidate current module promise
-    this._ModulePromise = null;
+    DotLottieWasmLoader._ModulePromise = null;
   }
 }

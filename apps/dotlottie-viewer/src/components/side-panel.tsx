@@ -1,4 +1,4 @@
-import { DotLottie } from '@lottiefiles/dotlottie-react';
+import type { DotLottie } from '@lottiefiles/dotlottie-react';
 import logo from '../assets/brand-logo.svg';
 import AnimationList from './animation-list';
 import SlotController from './slot-controller';

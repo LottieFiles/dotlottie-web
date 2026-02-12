@@ -1,5 +1,5 @@
 // import { DotLottieReact, DotLottie, setWasmUrl } from '@lottiefiles/dotlottie-react';
-import { DotLottieWorkerReact, DotLottieWorker, setWasmUrl } from '@lottiefiles/dotlottie-react';
+import { type DotLottieWorker, DotLottieWorkerReact, setWasmUrl } from '@lottiefiles/dotlottie-react';
 import React, { useState } from 'react';
 
 const animations = [

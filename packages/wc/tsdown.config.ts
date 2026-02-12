@@ -1,18 +1,13 @@
-const { defineConfig } = require('tsup');
+import { defineConfig } from 'tsdown';
 
-const pkg = require('./package.json');
+import pkg from './package.json';
 
-module.exports = defineConfig({
-  bundle: true,
-  metafile: false,
-  splitting: true,
-  treeshake: true,
-  clean: true,
+export default defineConfig({
+  entry: ['./src/*.ts'],
+  format: ['esm'],
   dts: true,
   minify: true,
   sourcemap: true,
-  entry: ['./src/*.ts'],
-  format: ['esm'],
   platform: 'browser',
   target: ['es2020'],
   tsconfig: 'tsconfig.build.json',

@@ -1,6 +1,6 @@
 import { IS_BROWSER } from '../constants';
 import type { Marker } from '../core/dotlottie-player.types';
-import type { EventType, EventListener, FrameEvent, StateMachineInternalMessage } from '../event-manager';
+import type { EventListener, EventType, FrameEvent, StateMachineInternalMessage } from '../event-manager';
 import { EventManager } from '../event-manager';
 import { OffscreenObserver } from '../offscreen-observer';
 import { CanvasResizeObserver } from '../resize-observer';
@@ -385,8 +385,7 @@ export class DotLottieWorker {
         instanceId: this._id,
         config: {
           ...config,
-          // @ts-ignore
-          canvas: offscreen,
+          canvas: offscreen as unknown as HTMLCanvasElement,
         },
         ...getCanvasSize(this._canvas, config.renderConfig?.devicePixelRatio || getDefaultDPR()),
       },

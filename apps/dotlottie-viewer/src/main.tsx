@@ -1,13 +1,13 @@
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { Provider } from 'react-redux';
-import store from './store';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Embed } from './pages/embed';
 import { Home } from './pages/home';
 import { List } from './pages/list';
 import { Perf } from './pages/perf';
 import { Playground } from './pages/playground';
-import { Embed } from './pages/embed';
-import { Route, BrowserRouter, Routes } from 'react-router-dom';
+import store from './store';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   // <React.StrictMode>

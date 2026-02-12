@@ -2,7 +2,7 @@
 'use client';
 
 import type { Config, DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-web';
-import { useEffect, useCallback, useRef, type ComponentProps, type RefCallback, type JSX } from 'react';
+import { type ComponentProps, type JSX, type RefCallback, useCallback, useEffect, useRef } from 'react';
 
 export type BaseDotLottieProps<T extends DotLottie | DotLottieWorker> = Omit<Config, 'canvas'> &
   ComponentProps<'canvas'> & {

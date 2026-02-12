@@ -1,79 +1,70 @@
 {
-	"name": "@lottiefiles/dotlottie-svelte",
-	"version": "0.8.15",
-	"type": "module",
-	"description": "Svelte component wrapper around the dotlottie-web library to render Lottie and dotLottie animations",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/LottieFiles/dotlottie-web.git",
-		"directory": "packages/svelte"
-	},
-	"homepage": "https://github.com/LottieFiles/dotlottie-web#readme",
-	"bugs": "https://github.com/LottieFiles/dotlottie-web/issues",
-	"author": "LottieFiles",
-	"contributors": [
-		"Abdelrahman Ashraf <a.theashraf@gmail.com>"
-	],
-	"maintainers": [
-		"Abdelrahman Ashraf <a.theashraf@gmail.com>"
-	],
-	"svelte": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"svelte": "./dist/index.js",
-			"import": "./dist/index.js",
-			"default": "./dist/index.js"
-		}
-	},
-	"files": [
-		"dist"
-	],
-	"license": "MIT",
-	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build && npm run package",
-		"preview": "vite preview",
-		"package": "svelte-kit sync && svelte-package && publint",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write .",
-		"stats:eslint": "cross-env TIMING=1 eslint .",
-		"stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
-		"type-check": "tsc --noEmit"
-	},
-	"peerDependencies": {
-		"svelte": "^4.0.0 || ^5.0.0"
-	},
-	"dependencies": {
-		"@lottiefiles/dotlottie-web": "workspace:*"
-	},
-	"devDependencies": {
-		"@sveltejs/adapter-auto": "^3.0.0",
-		"@sveltejs/kit": "^2.0.0",
-		"@sveltejs/package": "^2.0.0",
-		"@sveltejs/vite-plugin-svelte": "^4.0.0",
-		"@types/eslint": "8.56.0",
-		"@typescript-eslint/eslint-plugin": "^6.0.0",
-		"@typescript-eslint/parser": "^6.0.0",
-		"eslint": "^8.56.0",
-		"eslint-config-prettier": "^9.1.0",
-		"eslint-plugin-svelte": "^2.36.0-next.4",
-		"prettier": "^3.0.0",
-		"prettier-plugin-svelte": "^3.1.2",
-		"publint": "^0.1.9",
-		"svelte": "^5.0.0",
-		"svelte-check": "^3.6.0",
-		"tslib": "^2.4.1",
-		"typescript": "^5.0.3",
-		"vite": "^5.0.13",
-		"vitest": "^1.2.2"
-	},
-	"sideEffects": false,
-	"publishConfig": {
-		"access": "public",
-		"provenance": true
-	}
+  "name": "@lottiefiles/dotlottie-svelte",
+  "version": "0.8.14",
+  "type": "module",
+  "description": "Svelte component wrapper around the dotlottie-web library to render Lottie and dotLottie animations",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LottieFiles/dotlottie-web.git",
+    "directory": "packages/svelte"
+  },
+  "homepage": "https://github.com/LottieFiles/dotlottie-web#readme",
+  "bugs": "https://github.com/LottieFiles/dotlottie-web/issues",
+  "author": "LottieFiles",
+  "contributors": [
+    "Abdelrahman Ashraf <a.theashraf@gmail.com>"
+  ],
+  "maintainers": [
+    "Abdelrahman Ashraf <a.theashraf@gmail.com>"
+  ],
+  "svelte": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build && npm run package",
+    "preview": "vite preview",
+    "package": "svelte-kit sync && svelte-package && publint",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "svelte": "^4.0.0 || ^5.0.0"
+  },
+  "dependencies": {
+    "@lottiefiles/dotlottie-web": "workspace:*"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "^3.0.0",
+    "@sveltejs/kit": "^2.0.0",
+    "@sveltejs/package": "^2.0.0",
+    "@sveltejs/vite-plugin-svelte": "^4.0.0",
+    "publint": "^0.1.9",
+    "svelte": "^5.0.0",
+    "svelte-check": "^3.6.0",
+    "tslib": "^2.4.1",
+    "typescript": "5.9.3",
+    "vite": "^5.0.13",
+    "vitest": "^4.0.18"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }

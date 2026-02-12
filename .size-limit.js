@@ -1,4 +1,4 @@
-module.exports = [
+export default [
   {
     name: '@lottiefiles/dotlottie-web',
     path: 'packages/web/dist/index.js',

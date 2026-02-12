@@ -1,6 +1,6 @@
+import { DotLottieWorkerReact } from '@lottiefiles/dotlottie-react';
 import { useAppDispatch } from '../store/hooks';
 import { setSrc } from '../store/viewer-slice';
-import { DotLottieWorkerReact } from '@lottiefiles/dotlottie-react';
 
 interface ListItemProps {
   name: string;

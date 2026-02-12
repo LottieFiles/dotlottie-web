@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface UseDotLottiePoolReturn {
   registerCanvas: (index: number, canvas: HTMLCanvasElement | null, animationUrl: string) => void;

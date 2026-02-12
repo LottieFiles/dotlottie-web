@@ -1,10 +1,10 @@
 // Import example code as raw strings using Vite's ?raw suffix
 import basicCode from './playground-examples/basic.js?raw';
-import playbackControlsCode from './playground-examples/playback-controls.js?raw';
-import eventListenersCode from './playground-examples/event-listeners.js?raw';
-import playSegmentCode from './playground-examples/play-segment.js?raw';
 import dynamicLoadingCode from './playground-examples/dynamic-loading.js?raw';
+import eventListenersCode from './playground-examples/event-listeners.js?raw';
 import interactiveHoverCode from './playground-examples/interactive-hover.js?raw';
+import playSegmentCode from './playground-examples/play-segment.js?raw';
+import playbackControlsCode from './playground-examples/playback-controls.js?raw';
 
 export interface PlaygroundExample {
   id: string;
