@@ -78,6 +78,17 @@
       }
     },
     {
+      "includes": ["**/*.vue"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["**/*.md"],
       "formatter": {
         "enabled": false

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'tsdown';
 
 import pkg from './package.json';
-import { pluginInlineWorker } from './rolldown-plugins/plugin-inline-worker';
+import { pluginInlineWorker } from './rolldown-plugins/plugin-inline-worker.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
