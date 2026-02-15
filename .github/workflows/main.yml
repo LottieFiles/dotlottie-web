@@ -35,7 +35,7 @@ jobs:
         run: pnpm type-check
 
       - name: 🕵️ Lint + Format
-        run: biome check .
+        run: pnpm exec biome check .
 
       - name: 🛡️ Test (Node)
         run: pnpm test:node
