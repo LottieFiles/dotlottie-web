@@ -231,9 +231,7 @@ export type Event =
   | StateMachineInputFiredEvent
   | StateMachineInternalMessage;
 
-export interface EventListener<T extends EventType> {
-  (event: EventByType<T>): void;
-}
+export type EventListener<T extends EventType> = (event: EventByType<T>) => void;
 
 /**
  * Manages registration and dispatching of event listeners.

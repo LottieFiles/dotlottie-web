@@ -1,77 +1,77 @@
 <script lang="ts">
-	import { DotLottieSvelte, setWasmUrl } from '../lib/index.js';
-	import type { DotLottie } from '../lib/index.js';
-	import wasmUrl from "../../../web/src/core/dotlottie-player.wasm?url";
+import wasmUrl from '../../../web/src/core/dotlottie-player.wasm?url';
+import type { DotLottie } from '../lib/index.js';
+import { DotLottieSvelte, setWasmUrl } from '../lib/index.js';
 
-	setWasmUrl(wasmUrl);
+setWasmUrl(wasmUrl);
 
-	let dotLottie: DotLottie | undefined;
-	let isLoaded = false;
-	let isPlaying = false;
-	let isPaused = false;
-	let isStopped = false;
-	let isFrozen = false;
-	let loop = true;
-	let backgroundColor = "#00000000";
-	let speed = 1;
-	let hasMultipleAnimations = false;
-	let src = "https://lottie.host/b06d1336-2c08-4156-aa6f-96f08ff511e0/4itF1pXb1i.lottie";
-	let activeAnimationIdx = 0;
-	let animations: string[] = [];
-	let themes: string[] = [];
-	let activeAnimationId = "";
-	let activeThemeId = "";
+let dotLottie: DotLottie | undefined;
+let isLoaded = false;
+let isPlaying = false;
+let isPaused = false;
+let isStopped = false;
+let isFrozen = false;
+let loop = true;
+let backgroundColor = '#00000000';
+let speed = 1;
+let hasMultipleAnimations = false;
+let src = 'https://lottie.host/b06d1336-2c08-4156-aa6f-96f08ff511e0/4itF1pXb1i.lottie';
+let activeAnimationIdx = 0;
+let animations: string[] = [];
+let themes: string[] = [];
+let activeAnimationId = '';
+let activeThemeId = '';
 
-	function dotLottieRefCallback(ref: DotLottie) {
-		dotLottie = ref;
-	}
+function dotLottieRefCallback(ref: DotLottie) {
+  dotLottie = ref;
+}
 
-	const next = () => {
-		const animations = dotLottie?.manifest?.animations;
-		if (animations?.length) {
-			activeAnimationIdx = (activeAnimationIdx + 1) % animations.length;
-			const animationId = animations[activeAnimationIdx]?.id || "";
-			if (animationId) dotLottie?.loadAnimation(animationId);
-		}
-	};
+const next = () => {
+  const animations = dotLottie?.manifest?.animations;
+  if (animations?.length) {
+    activeAnimationIdx = (activeAnimationIdx + 1) % animations.length;
+    const animationId = animations[activeAnimationIdx]?.id || '';
+    if (animationId) dotLottie?.loadAnimation(animationId);
+  }
+};
 
-	$: {
-		if (dotLottie) {
-			dotLottie.addEventListener('load', () => {
-				isLoaded = true;
+$: {
+  if (dotLottie) {
+    dotLottie.addEventListener('load', () => {
+      isLoaded = true;
 
-				hasMultipleAnimations = (dotLottie?.manifest?.animations?.length ?? 0) > 1;
-        animations = dotLottie?.manifest?.animations?.map((animation) => animation.id) ?? [];
-        themes = dotLottie?.manifest?.themes?.map((theme) => theme.id) ?? [];
-			});
-			dotLottie.addEventListener('play', () => {
-				isPlaying = true;
-				isPaused = false;
-				isStopped = false;
-			});
-			dotLottie.addEventListener('pause', () => {
-				isPlaying = false;
-				isPaused = true;
-				isStopped = false;
-			});
-			dotLottie.addEventListener('complete', () => {
-				isPlaying = false;
-				isPaused = false;
-				isStopped = true;
-			});
-			dotLottie.addEventListener("stop", () => {
-				isPlaying = false;
-				isPaused = false;
-				isStopped = true;
-			});
-			dotLottie.addEventListener('freeze', () => {
-				isFrozen = true;
-			});
-			dotLottie.addEventListener('unfreeze', () => {
-				isFrozen = false;
-			});
-		}
-	}
+      hasMultipleAnimations = (dotLottie?.manifest?.animations?.length ?? 0) > 1;
+      animations = dotLottie?.manifest?.animations?.map((animation) => animation.id) ?? [];
+      themes = dotLottie?.manifest?.themes?.map((theme) => theme.id) ?? [];
+    });
+    dotLottie.addEventListener('play', () => {
+      isPlaying = true;
+      isPaused = false;
+      isStopped = false;
+    });
+    dotLottie.addEventListener('pause', () => {
+      isPlaying = false;
+      isPaused = true;
+      isStopped = false;
+    });
+    dotLottie.addEventListener('complete', () => {
+      isPlaying = false;
+      isPaused = false;
+      isStopped = true;
+    });
+    dotLottie.addEventListener('stop', () => {
+      isPlaying = false;
+      isPaused = false;
+      isStopped = true;
+    });
+    dotLottie.addEventListener('freeze', () => {
+      isFrozen = true;
+    });
+    dotLottie.addEventListener('unfreeze', () => {
+      isFrozen = false;
+    });
+  }
+}
 </script>
 <DotLottieSvelte
 	{dotLottieRefCallback}

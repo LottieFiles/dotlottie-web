@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
-import { VirtualizedAnimationList } from '../components/virtualized/VirtualizedAnimationList';
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import dotLottieWasmUrl from '../../../../packages/web/src/core/dotlottie-player.wasm?url';
+import { VirtualizedAnimationList } from '../components/virtualized/VirtualizedAnimationList';
 
 DotLottie.setWasmUrl(dotLottieWasmUrl);
 

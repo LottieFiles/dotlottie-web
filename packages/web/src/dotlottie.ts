@@ -1,16 +1,16 @@
 /* eslint-disable no-warning-comments */
 import { AnimationFrameManager } from './animation-frame-manager';
-import { IS_BROWSER, BYTES_PER_PIXEL } from './constants';
+import { BYTES_PER_PIXEL, IS_BROWSER } from './constants';
 import type {
+  Fit as CoreFit,
+  Mode as CoreMode,
   DotLottiePlayer,
   MainModule,
-  Mode as CoreMode,
-  VectorFloat,
   Marker,
-  Fit as CoreFit,
   Observer,
-  StateMachineObserver,
   StateMachineInternalObserver,
+  StateMachineObserver,
+  VectorFloat,
 } from './core';
 import { DotLottieWasmLoader } from './core';
 import type { EventListener, EventType } from './event-manager';
@@ -18,23 +18,23 @@ import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
 import { CanvasResizeObserver } from './resize-observer';
 import type {
-  Mode,
-  Fit,
+  ColorSlotValue,
   Config,
+  Data,
+  Fit,
+  GradientSlotValue,
   Layout,
   Manifest,
+  Mode,
   RenderConfig,
-  Data,
-  StateMachineConfig,
-  Transform,
   RenderSurface,
-  ColorSlotValue,
   ScalarSlotValue,
-  VectorSlotValue,
-  GradientSlotValue,
-  TextSlotValue,
   SlotType,
+  StateMachineConfig,
+  TextSlotValue,
   Theme,
+  Transform,
+  VectorSlotValue,
 } from './types';
 import {
   getDefaultDPR,
@@ -1724,12 +1724,12 @@ export class DotLottie {
 
     let mergedTextDoc = value;
 
-    if (existingValue && 'k' in existingValue && Array.isArray(existingValue['k'])) {
-      const keyframe0 = existingValue['k'][0] as Record<string, unknown>;
+    if (existingValue && 'k' in existingValue && Array.isArray(existingValue.k)) {
+      const keyframe0 = existingValue.k[0] as Record<string, unknown>;
 
       if ('s' in keyframe0 && typeof keyframe0['s'] === 'object') {
         mergedTextDoc = {
-          ...keyframe0['s'],
+          ...(keyframe0['s'] as Record<string, unknown>),
           ...value,
         };
       }

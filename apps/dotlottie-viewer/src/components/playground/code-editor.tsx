@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react';
-import { EditorView, basicSetup } from 'codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
-import { githubLight } from '@uiw/codemirror-theme-github';
 import { keymap } from '@codemirror/view';
+import { githubLight } from '@uiw/codemirror-theme-github';
+import { basicSetup, EditorView } from 'codemirror';
+import { useEffect, useRef } from 'react';
 
-import { useTheme, type ResolvedTheme } from '../../context/theme-context';
+import { type ResolvedTheme, useTheme } from '../../context/theme-context';
 
 interface CodeEditorProps {
   value: string;
@@ -64,7 +64,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ value, onChange, onRun }
     };
     // Recreate editor when theme changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resolvedTheme]);
+  }, [resolvedTheme, onChange, onRun, value]);
 
   // Update onRun callback without recreating editor
   const onRunRef = useRef(onRun);

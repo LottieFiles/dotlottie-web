@@ -16,7 +16,7 @@ declare namespace RuntimeExports {
   let HEAP64: unknown;
   let HEAPU64: unknown;
 }
-interface WasmModule {}
+type WasmModule = {};
 
 type EmbindString = ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string;
 export interface ClassHandle {

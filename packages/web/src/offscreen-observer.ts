@@ -8,11 +8,11 @@ export class OffscreenObserver {
   private static readonly _observedCanvases = new Map<HTMLCanvasElement, DotLottie | DotLottieWorker>();
 
   private static _initializeObserver(): void {
-    if (this._observer) return;
+    if (OffscreenObserver._observer) return;
 
     const intersectionObserverCallback = (entries: IntersectionObserverEntry[]): void => {
       entries.forEach((entry) => {
-        const instance = this._observedCanvases.get(entry.target as HTMLCanvasElement);
+        const instance = OffscreenObserver._observedCanvases.get(entry.target as HTMLCanvasElement);
 
         if (instance) {
           if (entry.isIntersecting) {
@@ -24,27 +24,27 @@ export class OffscreenObserver {
       });
     };
 
-    this._observer = new IntersectionObserver(intersectionObserverCallback, {
+    OffscreenObserver._observer = new IntersectionObserver(intersectionObserverCallback, {
       threshold: 0,
     });
   }
 
   public static observe(canvas: HTMLCanvasElement, dotLottieInstance: DotLottie | DotLottieWorker): void {
-    this._initializeObserver();
+    OffscreenObserver._initializeObserver();
 
-    if (this._observedCanvases.has(canvas)) return;
+    if (OffscreenObserver._observedCanvases.has(canvas)) return;
 
-    this._observedCanvases.set(canvas, dotLottieInstance);
-    this._observer?.observe(canvas);
+    OffscreenObserver._observedCanvases.set(canvas, dotLottieInstance);
+    OffscreenObserver._observer?.observe(canvas);
   }
 
   public static unobserve(canvas: HTMLCanvasElement): void {
-    this._observer?.unobserve(canvas);
-    this._observedCanvases.delete(canvas);
+    OffscreenObserver._observer?.unobserve(canvas);
+    OffscreenObserver._observedCanvases.delete(canvas);
 
-    if (this._observedCanvases.size === 0) {
-      this._observer?.disconnect();
-      this._observer = null;
+    if (OffscreenObserver._observedCanvases.size === 0) {
+      OffscreenObserver._observer?.disconnect();
+      OffscreenObserver._observer = null;
     }
   }
 }

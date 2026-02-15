@@ -220,3 +220,4 @@ function BrandedAnimation({ primaryColor, userName }) {
     />
   );
 }
+```

@@ -1,4 +1,4 @@
-import { Range, getTrackBackground } from 'react-range';
+import { getTrackBackground, Range } from 'react-range';
 
 interface StepSelect {
   className?: string;

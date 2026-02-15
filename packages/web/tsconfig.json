@@ -3,5 +3,7 @@
   "extends": "../../tsconfig.dev.json",
 
   // Compiler options
-  "compilerOptions": {}
+  "compilerOptions": {},
+
+  "exclude": ["tsdown.config.ts", "rolldown-plugins"]
 }

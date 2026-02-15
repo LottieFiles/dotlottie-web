@@ -2,7 +2,7 @@
 'use client';
 
 import type { Config, DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-web';
-import { useEffect, useCallback, useRef, type ComponentProps, type RefCallback, type JSX } from 'react';
+import { type ComponentProps, type JSX, type RefCallback, useCallback, useEffect, useRef } from 'react';
 
 export type BaseDotLottieProps<T extends DotLottie | DotLottieWorker> = Omit<Config, 'canvas'> &
   ComponentProps<'canvas'> & {
@@ -102,6 +102,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   dotLottieRefCallbackRef.current = dotLottieRefCallback;
   configRef.current = config;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: DotLottie instance must only be created once per canvas mount
   const setCanvasRef = useCallback((canvas: HTMLCanvasElement | null) => {
     canvasRef.current = canvas;
 
@@ -169,6 +170,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     dotLottieRef.current?.setBackgroundColor(backgroundColor ?? '');
   }, [backgroundColor]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional deep comparison via JSON.stringify
   useEffect(() => {
     dotLottieRef.current?.setRenderConfig(renderConfig ?? {});
   }, [JSON.stringify(renderConfig)]);
@@ -212,9 +214,10 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     dotLottieRef.current?.setThemeData(themeData ?? '');
   }, [themeData]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: granular property deps avoid unnecessary setLayout calls when layout object reference changes
   useEffect(() => {
     dotLottieRef.current?.setLayout(layout ?? {});
-  }, [layout?.fit, layout?.align && layout.align[0], layout?.align && layout.align[1]]);
+  }, [layout?.fit, layout?.align?.[0], layout?.align?.[1]]);
 
   useEffect(() => {
     if (dotLottieRef.current?.isLoaded) {

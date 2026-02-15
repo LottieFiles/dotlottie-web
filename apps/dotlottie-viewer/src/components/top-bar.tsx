@@ -1,8 +1,7 @@
 import { useRef } from 'react';
+import Dropzone, { ErrorCode, type FileError, type FileRejection } from 'react-dropzone';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { resetUserConfig, setSrc, setUserSrc } from '../store/viewer-slice';
-
-import Dropzone, { type FileError, type FileRejection, ErrorCode } from 'react-dropzone';
 
 interface TopBarProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;

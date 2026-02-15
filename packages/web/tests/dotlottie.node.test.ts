@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { expect, test, vi, beforeAll } from 'vitest';
+import { beforeAll, expect, test, vi } from 'vitest';
 
 import { DotLottie } from '../src';
 

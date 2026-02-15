@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Ref, onMounted, ref } from 'vue';
-import { type DotLottieVueInstance, DotLottieVue, setWasmUrl } from '@lottiefiles/dotlottie-vue';
+import { DotLottieVue, type DotLottieVueInstance, setWasmUrl } from '@lottiefiles/dotlottie-vue';
+import { onMounted, type Ref, ref } from 'vue';
 import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
 
 setWasmUrl(wasmUrl);

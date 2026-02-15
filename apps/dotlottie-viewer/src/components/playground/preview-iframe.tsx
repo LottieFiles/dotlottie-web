@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { useTheme, type ResolvedTheme } from '../../context/theme-context';
+import { type ResolvedTheme, useTheme } from '../../context/theme-context';
 
 interface PreviewIframeProps {
   code: string;
@@ -121,7 +121,7 @@ export const PreviewIframe: React.FC<PreviewIframeProps> = ({ code, onError, onC
       return;
     }
     setKey((prev) => prev + 1);
-  }, [code, resolvedTheme]);
+  }, []);
 
   return (
     <iframe

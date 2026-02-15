@@ -16,14 +16,14 @@ jobs:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
 
-      - name: ⎔ Setup pnpm@v9
+      - name: ⎔ Setup pnpm@v10
         uses: pnpm/action-setup@v4
 
-      - name: ⎔ Setup Node@v20
+      - name: ⎔ Setup Node@v22
         uses: actions/setup-node@v4
         with:
           cache: pnpm
-          node-version: 20
+          node-version: 22
 
       - name: 📥 Download deps
         run: pnpm install
@@ -34,11 +34,8 @@ jobs:
       - name: 🔍 Verify types
         run: pnpm type-check
 
-      - name: 🕵️ Lint
-        run: pnpm lint:prod
-
-      - name: 💅 Verify format (`pnpm format` committed?)
-        run: pnpm format
+      - name: 🕵️ Lint + Format
+        run: pnpm exec biome check .
 
       - name: 🛡️ Test (Node)
         run: pnpm test:node
@@ -111,14 +108,14 @@ jobs:
           # check out all commits and tags so changeset can skip duplicate tags
           fetch-depth: 0
 
-      - name: ⎔ Setup pnpm@v9
+      - name: ⎔ Setup pnpm@v10
         uses: pnpm/action-setup@v4
 
-      - name: ⎔ Setup Node@v20
+      - name: ⎔ Setup Node@v22
         uses: actions/setup-node@v4
         with:
           cache: pnpm
-          node-version: 20
+          node-version: 22
           registry-url: https://registry.npmjs.org
 
       - name: 📥 Install dependencies
@@ -161,14 +158,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: ⎔ Setup pnpm@v9
+      - name: ⎔ Setup pnpm@v10
         uses: pnpm/action-setup@v4
 
-      - name: ⎔ Setup Node@v20
+      - name: ⎔ Setup Node@v22
         uses: actions/setup-node@v4
         with:
           cache: pnpm
-          node-version: 20
+          node-version: 22
           registry-url: https://npm.pkg.github.com/
 
       - name: 📥 Install dependencies
@@ -239,14 +236,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: ⎔ Setup pnpm@v9
+      - name: ⎔ Setup pnpm@v10
         uses: pnpm/action-setup@v4
 
-      - name: ⎔ Setup Node@v20
+      - name: ⎔ Setup Node@v22
         uses: actions/setup-node@v4
         with:
           cache: pnpm
-          node-version: 20
+          node-version: 22
           registry-url: https://npm.pkg.github.com/
 
       - name: 📥 Install dependencies

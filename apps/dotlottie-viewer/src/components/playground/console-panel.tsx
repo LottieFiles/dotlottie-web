@@ -45,7 +45,7 @@ export const ConsolePanel: React.FC<ConsolePanelProps> = ({ messages, onClear, i
     if (shouldAutoScroll.current && listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, []);
 
   return (
     <div className="border-t border-subtle dark:border-dark-border flex flex-col bg-white dark:bg-dark-bg">

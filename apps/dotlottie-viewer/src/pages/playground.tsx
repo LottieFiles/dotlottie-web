@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import brandLogo from '../assets/brand-logo.svg';
 import { CodeEditor } from '../components/playground/code-editor';
-import { ConsolePanel, type ConsoleMessage } from '../components/playground/console-panel';
-import { PreviewIframe } from '../components/playground/preview-iframe';
+import { type ConsoleMessage, ConsolePanel } from '../components/playground/console-panel';
 import { ErrorDisplay } from '../components/playground/error-display';
 import { ExampleSelector } from '../components/playground/example-selector';
+import { PreviewIframe } from '../components/playground/preview-iframe';
 import { ResizableSplit } from '../components/playground/resizable-split';
+import { type Theme, ThemeProvider, useTheme } from '../context/theme-context';
 import { defaultExample, type PlaygroundExample } from '../data/playground-examples';
-import { getCodeFromUrl, getPlaygroundUrl, getEmbedHtml } from '../utils/url-compression';
-import { ThemeProvider, useTheme, type Theme } from '../context/theme-context';
-import brandLogo from '../assets/brand-logo.svg';
+import { getCodeFromUrl, getEmbedHtml, getPlaygroundUrl } from '../utils/url-compression';
 
 // Theme toggle icons
 const SunIcon = (): JSX.Element => (
@@ -127,7 +127,7 @@ function PlaygroundContent(): JSX.Element {
       runCode(codeFromUrl);
       setSelectedExampleId(''); // Clear selection since it's custom code
     }
-  }, []);
+  }, [runCode]);
 
   // Auto-run with debounce when code changes
   const debounceRef = useRef<number | null>(null);
@@ -144,7 +144,7 @@ function PlaygroundContent(): JSX.Element {
         clearTimeout(debounceRef.current);
       }
     };
-  }, [editorCode]);
+  }, [editorCode, runCode]);
 
   const handleRun = useCallback(() => {
     runCode(editorCode);

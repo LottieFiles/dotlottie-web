@@ -1,15 +1,18 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { DotLottiePlayer, DotLottieCommonPlayer } from '@dotlottie/react-player';
+import { type DotLottieCommonPlayer, DotLottiePlayer } from '@dotlottie/react-player';
 import {
+  type DotLottie,
   DotLottieReact,
+  type RenderEvent,
   setWasmUrl as setDotLottieWasmUrl,
-  DotLottie,
-  RenderEvent,
 } from '@lottiefiles/dotlottie-react';
 import dotLottieWebPkg from '@lottiefiles/dotlottie-react/node_modules/@lottiefiles/dotlottie-web/package.json';
-import { Range, getTrackBackground } from 'react-range';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { FaPause, FaPlay } from 'react-icons/fa';
+import { GiNextButton, GiPreviousButton } from 'react-icons/gi';
+import { ImLoop } from 'react-icons/im';
+import { getTrackBackground, Range } from 'react-range';
 import dotLottieWasmUrl from '../../../../packages/web/src/core/dotlottie-player.wasm?url';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   setActiveAnimationId,
   setAnimations,
@@ -21,9 +24,6 @@ import {
   setThemes,
   setTotalFrames,
 } from '../store/viewer-slice';
-import { FaPlay, FaPause } from 'react-icons/fa';
-import { ImLoop } from 'react-icons/im';
-import { GiNextButton, GiPreviousButton } from 'react-icons/gi';
 import LoadTime from './load-time';
 
 setDotLottieWasmUrl(dotLottieWasmUrl);
@@ -80,7 +80,7 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
     ({ currentFrame }: RenderEvent) => {
       dispatch(setCurrentFrame(currentFrame));
     },
-    [dispatch, dotLottie],
+    [dispatch],
   );
 
   const onPlay = useCallback(() => {
@@ -138,167 +138,165 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
   }, [dotLottie, dispatch]);
 
   return (
-    <>
-      <div className="flex flex-col items-center justify-between flex-grow h-full gap-4">
-        <div className="flex justify-center h-full">
-          <div className="flex flex-col dotlottie-player">
-            <LoadTime version={dotLottieWebPkg.version} className="mb-4" title="dotLottie Web" />
+    <div className="flex flex-col items-center justify-between flex-grow h-full gap-4">
+      <div className="flex justify-center h-full">
+        <div className="flex flex-col dotlottie-player">
+          <LoadTime version={dotLottieWebPkg.version} className="mb-4" title="dotLottie Web" />
+          <div className="flex items-center justify-center flex-grow p-4">
+            <div style={{ width: '350px', height: '350px' }}>
+              <DotLottieReact
+                backgroundColor={backgroundColor}
+                width={350}
+                height={350}
+                autoplay={autoplay}
+                useFrameInterpolation={useFrameInterpolation}
+                loop={loop}
+                mode={mode}
+                speed={speed}
+                themeId={activeThemeId}
+                animationId={activeAnimationId}
+                stateMachineId={activeStateMachineId}
+                segment={segment as [number, number]}
+                marker={activeMarker}
+                dotLottieRefCallback={setDotLottie}
+                src={src}
+              />
+            </div>
+          </div>
+        </div>
+        {isJson ? (
+          <div className="flex flex-col lottie-web">
+            <LoadTime version="v5.12.2" className="mb-4" title="Lottie Web" />
             <div className="flex items-center justify-center flex-grow p-4">
               <div style={{ width: '350px', height: '350px' }}>
-                <DotLottieReact
-                  backgroundColor={backgroundColor}
-                  width={350}
-                  height={350}
+                <DotLottiePlayer
+                  lottieRef={(ref) => {
+                    lottieWebRef.current = ref;
+                  }}
+                  background={backgroundColor}
                   autoplay={autoplay}
-                  useFrameInterpolation={useFrameInterpolation}
                   loop={loop}
-                  mode={mode}
                   speed={speed}
-                  themeId={activeThemeId}
-                  animationId={activeAnimationId}
-                  stateMachineId={activeStateMachineId}
-                  segment={segment as [number, number]}
-                  marker={activeMarker}
-                  dotLottieRefCallback={setDotLottie}
                   src={src}
                 />
               </div>
             </div>
           </div>
-          {isJson ? (
-            <div className="flex flex-col lottie-web">
-              <LoadTime version="v5.12.2" className="mb-4" title="Lottie Web" />
-              <div className="flex items-center justify-center flex-grow p-4">
-                <div style={{ width: '350px', height: '350px' }}>
-                  <DotLottiePlayer
-                    lottieRef={(ref) => {
-                      lottieWebRef.current = ref;
-                    }}
-                    background={backgroundColor}
-                    autoplay={autoplay}
-                    loop={loop}
-                    speed={speed}
-                    src={src}
-                  />
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </div>
-        <div className="flex items-center gap-4 w-full max-w-[720px]">
-          {animations.length > 1 ? (
-            <button
-              onClick={() => {
-                const next = getPrevious();
-                if (next) {
-                  dispatch(setActiveAnimationId(next));
-                }
-              }}
-            >
-              <GiPreviousButton />
-            </button>
-          ) : null}
-          {currentState !== 'playing' ? (
-            <button
-              onClick={() => {
-                dotLottie?.play();
-                lottieWebRef.current?.play();
-              }}
-            >
-              <FaPlay />
-            </button>
-          ) : (
-            <button
-              onClick={() => {
+        ) : null}
+      </div>
+      <div className="flex items-center gap-4 w-full max-w-[720px]">
+        {animations.length > 1 ? (
+          <button
+            onClick={() => {
+              const next = getPrevious();
+              if (next) {
+                dispatch(setActiveAnimationId(next));
+              }
+            }}
+          >
+            <GiPreviousButton />
+          </button>
+        ) : null}
+        {currentState !== 'playing' ? (
+          <button
+            onClick={() => {
+              dotLottie?.play();
+              lottieWebRef.current?.play();
+            }}
+          >
+            <FaPlay />
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              dotLottie?.pause();
+              lottieWebRef.current?.pause();
+            }}
+          >
+            <FaPause />
+          </button>
+        )}
+        {animations.length > 1 ? (
+          <button
+            onClick={() => {
+              const next = getNext();
+              if (next) {
+                dispatch(setActiveAnimationId(next));
+              }
+            }}
+          >
+            <GiNextButton />
+          </button>
+        ) : null}
+        <Range
+          min={0}
+          max={totalFrames || 1}
+          values={[currentFrame]}
+          onChange={(values) => {
+            dotLottie?.setFrame(values[0]);
+            lottieWebRef.current?.seek(values[0]);
+          }}
+          renderTrack={({ props, children }) => (
+            <div
+              onMouseDown={(event) => {
                 dotLottie?.pause();
                 lottieWebRef.current?.pause();
+
+                props.onMouseDown(event);
+              }}
+              onTouchStart={(event) => {
+                dotLottie?.pause();
+                lottieWebRef.current?.pause();
+
+                props.onTouchStart(event);
+              }}
+              className="flex-grow w-full flex h-[20px]"
+              style={{
+                ...props.style,
               }}
             >
-              <FaPause />
-            </button>
-          )}
-          {animations.length > 1 ? (
-            <button
-              onClick={() => {
-                const next = getNext();
-                if (next) {
-                  dispatch(setActiveAnimationId(next));
-                }
-              }}
-            >
-              <GiNextButton />
-            </button>
-          ) : null}
-          <Range
-            min={0}
-            max={totalFrames || 1}
-            values={[currentFrame]}
-            onChange={(values) => {
-              dotLottie?.setFrame(values[0]);
-              lottieWebRef.current?.seek(values[0]);
-            }}
-            renderTrack={({ props, children }) => (
               <div
-                onMouseDown={(event) => {
-                  dotLottie?.pause();
-                  lottieWebRef.current?.pause();
-
-                  props.onMouseDown(event);
-                }}
-                onTouchStart={(event) => {
-                  dotLottie?.pause();
-                  lottieWebRef.current?.pause();
-
-                  props.onTouchStart(event);
-                }}
-                className="flex-grow w-full flex h-[20px]"
+                ref={props.ref}
+                className="self-center w-full h-[6px] bg-strong rounded-lg"
                 style={{
-                  ...props.style,
+                  background: getTrackBackground({
+                    values: [currentFrame],
+                    colors: ['#80cec8', '#ccc'],
+                    min: 0,
+                    max: totalFrames,
+                  }),
                 }}
               >
-                <div
-                  ref={props.ref}
-                  className="self-center w-full h-[6px] bg-strong rounded-lg"
-                  style={{
-                    background: getTrackBackground({
-                      values: [currentFrame],
-                      colors: ['#80cec8', '#ccc'],
-                      min: 0,
-                      max: totalFrames,
-                    }),
-                  }}
-                >
-                  {children}
-                </div>
+                {children}
               </div>
-            )}
-            renderThumb={({ props }) => (
-              <div
-                {...props}
-                style={{
-                  ...props.style,
-                  height: '20px',
-                  width: '20px',
-                  backgroundColor: '#019D91',
-                  borderRadius: '50%',
-                }}
-              />
-            )}
-          />
+            </div>
+          )}
+          renderThumb={({ props }) => (
+            <div
+              {...props}
+              style={{
+                ...props.style,
+                height: '20px',
+                width: '20px',
+                backgroundColor: '#019D91',
+                borderRadius: '50%',
+              }}
+            />
+          )}
+        />
 
-          <span className="flex items-center justify-center p-2 text-sm text-center bg-white rounded-lg">
-            <span className="relative flex pr-1 text-right bg-transparent w-min">
-              <span className="invisible">{totalFrames.toFixed(2)}</span>
-              <span className="absolute self-center">{currentFrame.toFixed(2)}</span>
-            </span>
-            <span className="text-xs text-secondary">of</span>
-            <span className="pl-1 bg-transparent w-max">{totalFrames}</span>
+        <span className="flex items-center justify-center p-2 text-sm text-center bg-white rounded-lg">
+          <span className="relative flex pr-1 text-right bg-transparent w-min">
+            <span className="invisible">{totalFrames.toFixed(2)}</span>
+            <span className="absolute self-center">{currentFrame.toFixed(2)}</span>
           </span>
-          <button className="cursor-pointer" onClick={() => dispatch(setLoop(!loop))}>
-            <ImLoop className={`${!loop ? 'text-gray-500' : ''}`} />
-          </button>
-        </div>
+          <span className="text-xs text-secondary">of</span>
+          <span className="pl-1 bg-transparent w-max">{totalFrames}</span>
+        </span>
+        <button className="cursor-pointer" onClick={() => dispatch(setLoop(!loop))}>
+          <ImLoop className={`${!loop ? 'text-gray-500' : ''}`} />
+        </button>
       </div>
-    </>
+    </div>
   );
 }

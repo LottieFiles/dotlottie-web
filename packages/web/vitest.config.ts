@@ -1,3 +1,4 @@
+import { playwright } from '@vitest/browser-playwright';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -5,11 +6,10 @@ export default defineConfig({
     include: ['tests/**/*.{test,spec}.ts', '!tests/**/*.node.{test,spec}.ts'],
     browser: {
       enabled: true,
-      name: 'chromium',
-      provider: 'playwright',
+      provider: playwright(),
+      instances: [{ browser: 'chromium' }],
       screenshotFailures: false,
     },
-    retry: 1,
     coverage: {
       provider: 'istanbul',
       include: ['src/**/*.ts'],
@@ -23,7 +23,6 @@ export default defineConfig({
       },
     },
     testTimeout: 10000,
-    cache: false,
     setupFiles: ['./tests/setup.ts'],
   },
 });

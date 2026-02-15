@@ -1,13 +1,13 @@
-import { DotLottie } from '@lottiefiles/dotlottie-react';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { setSrc, setUserSrc } from '../store/viewer-slice';
-import { useEffect, useRef, useState, useCallback } from 'react';
-import Dropzone, { type FileError, type FileRejection, ErrorCode } from 'react-dropzone';
+import type { DotLottie } from '@lottiefiles/dotlottie-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import Dropzone, { ErrorCode, type FileError, type FileRejection } from 'react-dropzone';
 import { Link } from 'react-router-dom';
 import Controls from '../components/controls';
 import Players from '../components/players';
 import SidePanel from '../components/side-panel';
 import TopBar from '../components/top-bar';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { setSrc, setUserSrc } from '../store/viewer-slice';
 
 export const Home = (): JSX.Element => {
   const theme = useAppSelector((state) => state.viewer.theme);
@@ -27,7 +27,7 @@ export const Home = (): JSX.Element => {
     } else {
       newPlayerRef.current?.setTheme('');
     }
-  }, [theme, newPlayerRef]);
+  }, [theme]);
 
   function onDrop(acceptedFiles: File[]) {
     const file = acceptedFiles[0];
@@ -61,54 +61,49 @@ export const Home = (): JSX.Element => {
   }
 
   return (
-    <>
-      <Dropzone noClick onDrop={onDrop} onDropRejected={onDropRejected}>
-        {(state): JSX.Element => {
-          return (
-            <div className="flex h-screen gap-4 p-4" {...state.getRootProps()}>
-              <input {...state.getInputProps()} />
-              {state.isDragActive ? (
-                <div className="fixed inset-0 z-10 flex items-center justify-center text-white bg-black bg-opacity-60 bold">
-                  <div>Drop it like it's hot!</div>
-                </div>
-              ) : null}
-              <div className="border rounded-lg bg-subtle border-subtle max-w-80">
-                <SidePanel dotLottie={dotLottieInstance} />
+    <Dropzone noClick onDrop={onDrop} onDropRejected={onDropRejected}>
+      {(state): JSX.Element => {
+        return (
+          <div className="flex h-screen gap-4 p-4" {...state.getRootProps()}>
+            <input {...state.getInputProps()} />
+            {state.isDragActive ? (
+              <div className="fixed inset-0 z-10 flex items-center justify-center text-white bg-black bg-opacity-60 bold">
+                <div>Drop it like it's hot!</div>
               </div>
-              <div className="flex flex-col flex-grow gap-4">
-                <div className="flex items-center gap-2">
-                  <TopBar className="flex-grow" />
-                  <Link
-                    to="/playground"
-                    className="p-2 bg-subtle hover:bg-hover rounded-lg font-bold whitespace-nowrap"
-                  >
-                    Playground
-                  </Link>
-                  <Link to="/perf-test" className="p-2 bg-subtle hover:bg-hover rounded-lg font-bold whitespace-nowrap">
-                    Performance
-                  </Link>
-                  <a
-                    href="https://developers.lottiefiles.com/docs/dotlottie-player/dotlottie-web/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 bg-subtle hover:bg-hover rounded-lg font-bold whitespace-nowrap"
-                  >
-                    Docs
-                  </a>
+            ) : null}
+            <div className="border rounded-lg bg-subtle border-subtle max-w-80">
+              <SidePanel dotLottie={dotLottieInstance} />
+            </div>
+            <div className="flex flex-col flex-grow gap-4">
+              <div className="flex items-center gap-2">
+                <TopBar className="flex-grow" />
+                <Link to="/playground" className="p-2 bg-subtle hover:bg-hover rounded-lg font-bold whitespace-nowrap">
+                  Playground
+                </Link>
+                <Link to="/perf-test" className="p-2 bg-subtle hover:bg-hover rounded-lg font-bold whitespace-nowrap">
+                  Performance
+                </Link>
+                <a
+                  href="https://developers.lottiefiles.com/docs/dotlottie-player/dotlottie-web/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 bg-subtle hover:bg-hover rounded-lg font-bold whitespace-nowrap"
+                >
+                  Docs
+                </a>
+              </div>
+              <div className="flex flex-1 gap-4 p-4 rounded-lg bg-subtle">
+                <div className="flex-1">
+                  <Players onDotLottieChange={handleDotLottieChange} />
                 </div>
-                <div className="flex flex-1 gap-4 p-4 rounded-lg bg-subtle">
-                  <div className="flex-1">
-                    <Players onDotLottieChange={handleDotLottieChange} />
-                  </div>
-                  <div className="w-80">
-                    <Controls />
-                  </div>
+                <div className="w-80">
+                  <Controls />
                 </div>
               </div>
             </div>
-          );
-        }}
-      </Dropzone>
-    </>
+          </div>
+        );
+      }}
+    </Dropzone>
   );
 };

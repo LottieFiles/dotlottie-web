@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { ChevronUpDownIcon } from '@heroicons/react/20/solid';
-import { DotLottieWorkerReact, DotLottieReact, setWasmUrl as setDotLottieWasmUrl } from '@lottiefiles/dotlottie-react';
+import { DotLottieReact, DotLottieWorkerReact, setWasmUrl as setDotLottieWasmUrl } from '@lottiefiles/dotlottie-react';
 import { Player as LottieWeb } from '@lottiefiles/react-lottie-player';
-import { isMobile } from 'react-device-detect';
-import { setCanvasKit, Skottie as SkottiePlayer } from '../components/skottie';
-import skottieWasmUrl from '../../node_modules/canvaskit-wasm/bin/full/canvaskit.wasm?url';
 import InitCanvasKit from 'canvaskit-wasm/bin/full/canvaskit';
+import { useCallback, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import { Link } from 'react-router-dom';
 import dotLottieWasmUrl from '../../../../packages/web/src/core/dotlottie-player.wasm?url';
+import skottieWasmUrl from '../../node_modules/canvaskit-wasm/bin/full/canvaskit.wasm?url';
+import { Skottie as SkottiePlayer, setCanvasKit } from '../components/skottie';
 
 setDotLottieWasmUrl(window.location.origin + dotLottieWasmUrl);
 
@@ -138,60 +138,38 @@ export const Perf = (): JSX.Element => {
   const [text, setText] = useState('');
   const [useFrameInterpolation, setUseFrameInterpolation] = useState(true);
 
-  useEffect(() => {
+  const setQueryStringParameter = (name: string, value: string) => {
     const params = new URLSearchParams(window.location.search);
-    const playerParam = params.get('player');
-    const countParam = params.get('count');
-    const seed = params.get('seed');
-    const frameInterpolation = params.get('frame-interpolation');
-
-    setUseFrameInterpolation(frameInterpolation === null || frameInterpolation === 'true');
-
-    const selectedCount = countOptions.find((c) => c.name === countParam) || countOptions[1];
-    const selectedPlayer = playerOptions.find((p) => p.name === playerParam) || playerOptions[0];
-
-    setCount(selectedCount);
-    setPlayer(selectedPlayer);
-
-    const load = async () => {
-      if (selectedPlayer.id === 3) await loadCanvasKit();
-
-      if (seed) {
-        loadSeed(seed);
-        return;
-      }
-
-      loadAnimationByCount(parseInt(selectedCount.name));
-    };
-
-    setTimeout(() => {
-      load();
-    }, 500);
-  }, []);
+    params.set(name, value);
+    window.history.replaceState({}, '', decodeURIComponent(`${window.location.pathname}?${params}`));
+  };
 
   const loadCanvasKit = useCallback(async () => {
     const canvasKit = await InitCanvasKit({ locateFile: () => skottieWasmUrl });
     setCanvasKit(canvasKit);
   }, []);
 
-  const loadAnimationByCount = useCallback(async (count: number) => {
-    const newAnimationList = Array.from({ length: count }, () => {
-      const animation = animations[Math.floor(Math.random() * animations.length)];
-      return {
-        name: animation.split('/').pop()?.split('.')[0] || 'Unknown',
-        lottieURL: `${urlPrefix}${animation}`,
-        location: `Type: ${animation.split('/').pop()?.split('.')[1] || 'Unknown'}`,
-      };
-    });
-
-    setAnimationList(newAnimationList);
-    saveCurrentSeed(newAnimationList);
-  }, []);
-
-  const saveCurrentSeed = useCallback((animationList: any[]) => {
-    const seed = btoa(animationList.map((v) => v.name).join(','));
+  const saveCurrentSeed = useCallback((seedAnimationList: any[]) => {
+    const seed = btoa(seedAnimationList.map((v: any) => v.name).join(','));
     setQueryStringParameter('seed', seed);
   }, []);
+
+  const loadAnimationByCount = useCallback(
+    async (count: number) => {
+      const newAnimationList = Array.from({ length: count }, () => {
+        const animation = animations[Math.floor(Math.random() * animations.length)];
+        return {
+          name: animation.split('/').pop()?.split('.')[0] || 'Unknown',
+          lottieURL: `${urlPrefix}${animation}`,
+          location: `Type: ${animation.split('/').pop()?.split('.')[1] || 'Unknown'}`,
+        };
+      });
+
+      setAnimationList(newAnimationList);
+      saveCurrentSeed(newAnimationList);
+    },
+    [saveCurrentSeed],
+  );
 
   const loadSeed = useCallback((seed: string) => {
     const nameList = atob(seed).split(',');
@@ -229,11 +207,36 @@ export const Perf = (): JSX.Element => {
     }, 150);
   }, [text, animationList]);
 
-  const setQueryStringParameter = (name: string, value: string) => {
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    params.set(name, value);
-    window.history.replaceState({}, '', decodeURIComponent(`${window.location.pathname}?${params}`));
-  };
+    const playerParam = params.get('player');
+    const countParam = params.get('count');
+    const seed = params.get('seed');
+    const frameInterpolation = params.get('frame-interpolation');
+
+    setUseFrameInterpolation(frameInterpolation === null || frameInterpolation === 'true');
+
+    const selectedCount = countOptions.find((c) => c.name === countParam) || countOptions[1];
+    const selectedPlayer = playerOptions.find((p) => p.name === playerParam) || playerOptions[0];
+
+    setCount(selectedCount);
+    setPlayer(selectedPlayer);
+
+    const load = async () => {
+      if (selectedPlayer.id === 3) await loadCanvasKit();
+
+      if (seed) {
+        loadSeed(seed);
+        return;
+      }
+
+      loadAnimationByCount(parseInt(selectedCount.name, 10));
+    };
+
+    setTimeout(() => {
+      load();
+    }, 500);
+  }, [loadAnimationByCount, loadCanvasKit, loadSeed]);
 
   const updatePlayerAndRefresh = (playerOption: { id: number; name: string }) => {
     setPlayer(playerOption);

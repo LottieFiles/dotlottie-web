@@ -11,20 +11,20 @@ import type {
   ReadyEvent,
   RenderErrorEvent,
   RenderEvent,
-  StopEvent,
-  UnfreezeEvent,
-  StateMachineStartEvent,
-  StateMachineStopEvent,
-  StateMachineTransitionEvent,
-  StateMachineStateEnteredEvent,
-  StateMachineStateExitEvent,
+  StateMachineBooleanInputValueChangeEvent,
   StateMachineCustomEvent,
   StateMachineErrorEvent,
-  StateMachineBooleanInputValueChangeEvent,
-  StateMachineNumericInputValueChangeEvent,
-  StateMachineStringInputValueChangeEvent,
   StateMachineInputFiredEvent,
   StateMachineInternalMessage,
+  StateMachineNumericInputValueChangeEvent,
+  StateMachineStartEvent,
+  StateMachineStateEnteredEvent,
+  StateMachineStateExitEvent,
+  StateMachineStopEvent,
+  StateMachineStringInputValueChangeEvent,
+  StateMachineTransitionEvent,
+  StopEvent,
+  UnfreezeEvent,
 } from '../event-manager';
 import type { Config, Layout, Mode, RenderConfig, StateMachineConfig, Transform } from '../types';
 
@@ -276,14 +276,14 @@ export interface MethodResultMap {
   create: {
     instanceId: string;
   };
-  destroy: void;
-  freeze: void;
+  destroy: undefined;
+  freeze: undefined;
   getDotLottieInstanceState: {
     state: DotLottieInstanceState;
   };
   getTransform: Transform | undefined;
-  load: void;
-  loadAnimation: void;
+  load: undefined;
+  loadAnimation: undefined;
   onComplete: {
     event: CompleteEvent;
     instanceId: string;
@@ -388,27 +388,27 @@ export interface MethodResultMap {
     event: UnfreezeEvent;
     instanceId: string;
   };
-  pause: void;
-  play: void;
+  pause: undefined;
+  play: undefined;
   registerFont: boolean;
-  resize: void;
-  setBackgroundColor: void;
-  setFrame: void;
-  setLayout: void;
-  setLoop: void;
-  setLoopCount: void;
-  setMarker: void;
-  setMode: void;
-  setRenderConfig: void;
-  setSegment: void;
-  setSpeed: void;
+  resize: undefined;
+  setBackgroundColor: undefined;
+  setFrame: undefined;
+  setLayout: undefined;
+  setLoop: undefined;
+  setLoopCount: undefined;
+  setMarker: undefined;
+  setMode: undefined;
+  setRenderConfig: undefined;
+  setSegment: undefined;
+  setSpeed: undefined;
   setTheme: boolean;
   setThemeData: boolean;
   setTransform: boolean;
-  setUseFrameInterpolation: void;
+  setUseFrameInterpolation: undefined;
   setViewport: boolean;
-  setWasmUrl: void;
-  stateMachineFireEvent: void;
+  setWasmUrl: undefined;
+  stateMachineFireEvent: undefined;
   stateMachineGet: string;
   stateMachineGetActiveId: string;
   stateMachineGetBooleanInput: boolean | undefined;
@@ -421,22 +421,22 @@ export interface MethodResultMap {
   stateMachineLoad: boolean;
   stateMachineLoadData: boolean;
   stateMachineOverrideState: boolean;
-  stateMachinePostClickEvent: void;
-  stateMachinePostPointerDownEvent: void;
-  stateMachinePostPointerEnterEvent: void;
-  stateMachinePostPointerExitEvent: void;
-  stateMachinePostPointerMoveEvent: void;
-  stateMachinePostPointerUpEvent: void;
+  stateMachinePostClickEvent: undefined;
+  stateMachinePostPointerDownEvent: undefined;
+  stateMachinePostPointerEnterEvent: undefined;
+  stateMachinePostPointerExitEvent: undefined;
+  stateMachinePostPointerMoveEvent: undefined;
+  stateMachinePostPointerUpEvent: undefined;
   stateMachineSetBooleanInput: boolean;
-  stateMachineSetConfig: void;
+  stateMachineSetConfig: undefined;
   stateMachineSetNumericInput: boolean;
   stateMachineSetStringInput: boolean;
   stateMachineStart: boolean;
   stateMachineStop: boolean;
-  stop: void;
+  stop: undefined;
   tween: boolean;
   tweenToMarker: boolean;
-  unfreeze: void;
+  unfreeze: undefined;
 }
 
 export interface RpcResponse<U extends keyof MethodResultMap> {

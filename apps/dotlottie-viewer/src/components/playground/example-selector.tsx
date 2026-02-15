@@ -1,4 +1,4 @@
-import { playgroundExamples, type PlaygroundExample } from '../../data/playground-examples';
+import { type PlaygroundExample, playgroundExamples } from '../../data/playground-examples';
 import BaseSelect from '../form/base-select';
 
 interface ExampleSelectorProps {

@@ -139,7 +139,7 @@ export const Embed = (): JSX.Element => {
   // Force iframe reload when code changes
   useEffect(() => {
     setKey((prev) => prev + 1);
-  }, [code]);
+  }, []);
 
   const bgClass = theme === 'dark' ? 'bg-dark-bg' : 'bg-[#f5f5f5]';
   const linkBgClass =

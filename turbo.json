@@ -1,13 +1,10 @@
 {
-  "$schema": "https://turborepo.org/schema.json",
+  "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["tsconfig.build.json", "tsconfig.dev.json", "tsconfig.json"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
-    },
-    "stats:eslint": {
-      "outputs": []
     },
     "stats:ts": {
       "outputs": []
