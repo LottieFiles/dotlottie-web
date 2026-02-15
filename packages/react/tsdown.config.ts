@@ -1,6 +1,8 @@
+import fs from 'node:fs';
+
 import { defineConfig, type UserConfig } from 'tsdown';
 
-import pkg from './package.json';
+const pkg = JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
 
 const config: UserConfig = {
   entry: ['./src/index.ts'],
