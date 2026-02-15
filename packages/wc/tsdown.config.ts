@@ -15,4 +15,7 @@ export default defineConfig({
   tsconfig: 'tsconfig.build.json',
   // To ensure the ESM bundle is self-contained and usable via CDN
   noExternal: Object.keys(pkg.dependencies),
+  // rolldown-plugin-dts strips the `type` modifier from `import type { Config }`,
+  // causing rolldown to warn that Config is not a value export. It's a false positive.
+  checks: { importIsUndefined: false },
 });
