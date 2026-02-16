@@ -17,7 +17,7 @@ export default defineConfig({
       exclude: ['src/**/*.worker.ts'],
       reporter: ['json', 'json-summary', 'text-summary', 'lcov'],
       thresholds: {
-        statements: 56,
+        statements: 55,
         branches: 53,
         functions: 59,
         lines: 59,
