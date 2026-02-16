@@ -3,7 +3,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    include: ['tests/**/*.{test,spec}.ts', '!tests/**/*.node.{test,spec}.ts'],
+    include: ['tests/**/*.{test,spec}.ts'],
+    exclude: ['tests/**/*.node.{test,spec}.ts'],
     browser: {
       enabled: true,
       provider: playwright(),
