@@ -86,6 +86,7 @@ jobs:
         continue-on-error: true
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          build_script: build:packages
 
   npm-release:
     name: npm-release

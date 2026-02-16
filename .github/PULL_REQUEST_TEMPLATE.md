@@ -1,21 +1,25 @@
 ## Description
 
-<!--
-Please include a summary of what you want to achieve in this pull request.
+<!-- Summarize your changes. If this fixes an issue, include "Fixes #<issue>" below. -->
 
-If this fixes an existing issue, please include the issue number.
--->
+## Package(s) affected
+
+- [ ] `@lottiefiles/dotlottie-web` (core)
+- [ ] `@lottiefiles/dotlottie-react`
+- [ ] `@lottiefiles/dotlottie-vue`
+- [ ] `@lottiefiles/dotlottie-svelte`
+- [ ] `@lottiefiles/dotlottie-solid`
+- [ ] `@lottiefiles/dotlottie-wc`
 
 ## Type of change
 
-<!--
-Remember to indicate the affected package(s), as well as the type of change for each package.
--->
-
-- [ ] <!--Package Name--> Patch: Bug (non-breaking change which fixes an issue)
-- [ ] <!--Package Name--> Minor: New feature (non-breaking change which adds functionality)
-- [ ] <!--Package Name--> Major: Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] Bug fix (non-breaking)
+- [ ] New feature (non-breaking)
+- [ ] Breaking change
+- [ ] Chore (build, CI, docs, refactor)
 
 ## Checklist
 
-- [ ] This is something we need to do.
+- [ ] Changes have been tested locally
+- [ ] Tests have been added or updated
+- [ ] Changeset has been added (if applicable)

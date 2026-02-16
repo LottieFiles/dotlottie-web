@@ -1,18 +1,44 @@
 ---
 name: '🐛 Bug Report'
-about: Something isn't working
+about: Report a bug in dotlottie-web or one of its framework packages
+labels: 'bug'
 ---
 
-## Overview
+## Package
 
-...
+<!-- Which package(s) are affected? -->
 
-## Consuming repo
+- [ ] `@lottiefiles/dotlottie-web` (core)
+- [ ] `@lottiefiles/dotlottie-react`
+- [ ] `@lottiefiles/dotlottie-vue`
+- [ ] `@lottiefiles/dotlottie-svelte`
+- [ ] `@lottiefiles/dotlottie-solid`
+- [ ] `@lottiefiles/dotlottie-wc`
 
-> What repo were you working in when this issue occurred?
+## Description
 
-...
+<!-- A clear description of the bug. -->
 
-## Labels
+## Steps to reproduce
 
-- [ ] Add the `Type: Bug` label to this issue.
+1.
+2.
+3.
+
+## Expected behavior
+
+<!-- What did you expect to happen? -->
+
+## Actual behavior
+
+<!-- What happened instead? -->
+
+## Animation file
+
+<!-- If possible, attach the .lottie or .json animation file that triggers the bug. -->
+
+## Environment
+
+- Package version:
+- Browser:
+- OS:

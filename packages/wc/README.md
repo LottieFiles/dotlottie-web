@@ -80,7 +80,7 @@ You can also use the component directly via a npm CDN:
 
 ### Attributes
 
-The `dotlottie-wc` component accepts all configuration attributes of [`DotLottie`](../web/README.md#apis) from `@lottiefiles/dotlottie-web`, allowing you to customize your animation as required.
+The `dotlottie-wc` component accepts all configuration attributes of [`DotLottie`](../web/README.md#documentation) from `@lottiefiles/dotlottie-web`, allowing you to customize your animation as required.
 
 | Attribute         | Type                  | Description                                                                                      |
 | ----------------- | --------------------- | ------------------------------------------------------------------------------------------------ |
@@ -106,9 +106,9 @@ The `renderConfig` object accepts the following properties:
 
 The `dotlottie-wc` exposes the following properties:
 
-| Property name | Type        | Description                                                                                                                                                |
-| ------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dotLottie`   | `DotLottie` | The dotLottie instance from [`DotLottie`](../web/README.md#apis)  , allowing you to call methods and listen to events for more control over the animation. |
+| Property name | Type        | Description                                                                                                                                                         |
+| ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dotLottie`   | `DotLottie` | The dotLottie instance from [`DotLottie`](../web/README.md#documentation)  , allowing you to call methods and listen to events for more control over the animation. |
 
 ## Development
 

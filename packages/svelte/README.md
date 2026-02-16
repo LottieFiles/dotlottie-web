@@ -61,20 +61,20 @@ import { DotLottieSvelte } from '@lottiefiles/dotlottie-svelte';
 
 ### Props
 
-| Property name           | Type                                                    | Required | Default   | Description                                                                                                                                                                                                                                        |   |
-| ----------------------- | ------------------------------------------------------- | :------: | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | - |
-| `autoplay`              | boolean                                                 |          | false     | Auto-starts the animation on load.                                                                                                                                                                                                                 |   |
-| `loop`                  | boolean                                                 |          | false     | Determines if the animation should loop.                                                                                                                                                                                                           |   |
-| `src`                   | string                                                  |          | undefined | URL to the animation data (`.json` or `.lottie`).                                                                                                                                                                                                  |   |
-| `speed`                 | number                                                  |          | 1         | Animation playback speed. 1 is regular speed.                                                                                                                                                                                                      |   |
-| `data`                  | string \| ArrayBuffer                                   |          | undefined | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations.                                                                                                                                                |   |
-| `mode`                  | string                                                  |          | "forward" | Animation play mode. Accepts "forward", "reverse", "bounce", "reverse-bounce".                                                                                                                                                                     |   |
-| `backgroundColor`       | string                                                  |          | undefined | Background color of the canvas. Accepts 6-digit or 8-digit hex color string (e.g., "#000000", "#000000FF"),                                                                                                                                        |   |
-| `segment`               | \[number, number]                                       |          | undefined | Animation segment. Accepts an array of two numbers, where the first number is the start frame and the second number is the end frame.                                                                                                              |   |
-| `renderConfig`          | RenderConfig                                            |          | undefined | Configuration for rendering the animation.                                                                                                                                                                                                         |   |
-| `dotLottieRefCallback`  | (dotLottie: [DotLottie](../web/README.md#apis)) => void |          | undefined | Callback function that receives a reference to the [`dotLottie`](../web/README.md) web player instance once instantiated.                                                                                                                          |   |
-| `useFrameInterpolation` | boolean                                                 |          | true      | Determines if the animation should update on subframes. If set to false, the original AE frame rate will be maintained. If set to true, it will refresh at each requestAnimationFrame, including intermediate values. The default setting is true. |   |
-| `autoResizeCanvas`      | boolean                                                 |          | true      | Determines if the canvas should resize automatically to its container                                                                                                                                                                              |   |
+| Property name           | Type                                                             | Required | Default   | Description                                                                                                                                                                                                                                        |   |
+| ----------------------- | ---------------------------------------------------------------- | :------: | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | - |
+| `autoplay`              | boolean                                                          |          | false     | Auto-starts the animation on load.                                                                                                                                                                                                                 |   |
+| `loop`                  | boolean                                                          |          | false     | Determines if the animation should loop.                                                                                                                                                                                                           |   |
+| `src`                   | string                                                           |          | undefined | URL to the animation data (`.json` or `.lottie`).                                                                                                                                                                                                  |   |
+| `speed`                 | number                                                           |          | 1         | Animation playback speed. 1 is regular speed.                                                                                                                                                                                                      |   |
+| `data`                  | string \| ArrayBuffer                                            |          | undefined | Animation data provided either as a Lottie JSON string or as an ArrayBuffer for .lottie animations.                                                                                                                                                |   |
+| `mode`                  | string                                                           |          | "forward" | Animation play mode. Accepts "forward", "reverse", "bounce", "reverse-bounce".                                                                                                                                                                     |   |
+| `backgroundColor`       | string                                                           |          | undefined | Background color of the canvas. Accepts 6-digit or 8-digit hex color string (e.g., "#000000", "#000000FF"),                                                                                                                                        |   |
+| `segment`               | \[number, number]                                                |          | undefined | Animation segment. Accepts an array of two numbers, where the first number is the start frame and the second number is the end frame.                                                                                                              |   |
+| `renderConfig`          | RenderConfig                                                     |          | undefined | Configuration for rendering the animation.                                                                                                                                                                                                         |   |
+| `dotLottieRefCallback`  | (dotLottie: [DotLottie](../web/README.md#documentation)) => void |          | undefined | Callback function that receives a reference to the [`dotLottie`](../web/README.md) web player instance once instantiated.                                                                                                                          |   |
+| `useFrameInterpolation` | boolean                                                          |          | true      | Determines if the animation should update on subframes. If set to false, the original AE frame rate will be maintained. If set to true, it will refresh at each requestAnimationFrame, including intermediate values. The default setting is true. |   |
+| `autoResizeCanvas`      | boolean                                                          |          | true      | Determines if the canvas should resize automatically to its container                                                                                                                                                                              |   |
 
 #### RenderConfig
 
@@ -86,7 +86,7 @@ The `renderConfig` object accepts the following properties:
 
 ## Custom Playback Controls
 
-`DotLottieSvelte` component makes it easy to build custom playback controls for the animation. It exposes a `dotLottieRefCallback` prop that can be used to get a reference to the [`dotLottie`](../web/README.md#apis) web player instance. This instance can be used to control the playback of the animation using the methods exposed by the [`dotLottie`](../web/README.md#methods) web player instance.
+`DotLottieSvelte` component makes it easy to build custom playback controls for the animation. It exposes a `dotLottieRefCallback` prop that can be used to get a reference to the [`dotLottie`](../web/README.md#documentation) web player instance. This instance can be used to control the playback of the animation using the methods exposed by the [`dotLottie`](../web/README.md#documentation) web player instance.
 
 Here is an example:
 
@@ -122,11 +122,11 @@ Here is an example:
 <button on:click={stop}>Stop</button>
 ```
 
-You can find the list of methods that can be used to control the playback of the animation [here](../web/README.md#methods).
+You can find the list of methods that can be used to control the playback of the animation [here](../web/README.md#documentation).
 
 ## Listening to Events
 
-`DotLottieSvelte` component can receive a `dotLottieRefCallback` prop that can be used to get a reference to the [`dotLottie`](../web/README.md#apis) web player instance. This reference can be used to listen to player events emitted by the [`dotLottie`](../web/README.md#events) web instance.
+`DotLottieSvelte` component can receive a `dotLottieRefCallback` prop that can be used to get a reference to the [`dotLottie`](../web/README.md#documentation) web player instance. This reference can be used to listen to player events emitted by the [`dotLottie`](../web/README.md#documentation) web instance.
 
 Here is an example:
 
@@ -185,7 +185,7 @@ Here is an example:
 />
 ```
 
-[dotLottie](../web/README.md#apis) instance exposes multiple events that can be listened to. You can find the list of events [here](../web/README.md#events).
+[dotLottie](../web/README.md#documentation) instance exposes multiple events that can be listened to. You can find the list of events [here](../web/README.md#documentation).
 
 ## Development
 

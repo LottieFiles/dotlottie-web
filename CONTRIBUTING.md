@@ -1,66 +1,104 @@
 # Contributing
 
-Thank you for your interest in contributing to the dotlottie-web monorepo! This document provides guidelines for contributing to help maintain our standards for code quality and to manage releases effectively.
-
-## Table of Contents
-
-* [Introduction](#introduction)
-* [Prerequisites](#prerequisites)
-* [Code Contributions](#code-contributions)
-* [Versioning Policy](#versioning-policy)
-* [Using Changesets](#using-changesets)
-  * [Steps to Add a Changeset](#steps-to-add-a-changeset)
-* [Pull Requests](#pull-requests)
-
-## Introduction
-
-We're thrilled that you're interested in contributing to our project. Your work helps us build a better product and community.
+Thank you for your interest in contributing to the dotlottie-web monorepo! This guide will help you get set up and contribute effectively.
 
 ## Prerequisites
 
-Before you contribute, please ensure you are familiar with:
+* [Node.js](https://nodejs.org/) (v22+)
+* [pnpm](https://pnpm.io/) (v10+)
 
-* JavaScript and Node.js programming.
-* Our coding standards and practices.
-* The project's architecture and existing codebase.
+## Getting Started
 
-## Code Contributions
+```bash
+# Clone the repository
+git clone https://github.com/LottieFiles/dotlottie-web.git
+cd dotlottie-web
 
-Your code contributions are essential to the project. Please adhere to the following guidelines:
+# Install dependencies
+pnpm install
 
-* Adhere to the existing coding standards.
-* Ensure your code passes lint checks.
-* Write tests to cover new functionalities.
-* Update documentation to reflect your changes.
+# Build all packages
+pnpm run build
+```
 
-## Versioning Policy
+## Project Structure
 
-We follow [Semantic Versioning (SemVer)](https://semver.org/):
+This is a monorepo with the following packages:
 
-* **Major Version X (x.y.z | x > 0)**: Incompatible API changes.
-* **Minor Version Y (x.y.z | y > 0)**: Add functionality in a backward-compatible manner.
-* **Patch Version Z (x.y.z | z > 0)**: Backward-compatible bug fixes.
+| Package                         | Path               | Description                         |
+| ------------------------------- | ------------------ | ----------------------------------- |
+| `@lottiefiles/dotlottie-web`    | `packages/web/`    | Core player library (canvas + WASM) |
+| `@lottiefiles/dotlottie-react`  | `packages/react/`  | React wrapper                       |
+| `@lottiefiles/dotlottie-vue`    | `packages/vue/`    | Vue wrapper                         |
+| `@lottiefiles/dotlottie-svelte` | `packages/svelte/` | Svelte wrapper                      |
+| `@lottiefiles/dotlottie-solid`  | `packages/solid/`  | Solid wrapper                       |
+| `@lottiefiles/dotlottie-wc`     | `packages/wc/`     | Web Component wrapper               |
 
-Please consider the versioning policy when preparing your changes and specify the intended version change in your pull request.
+## Development Workflow
 
-## Using Changesets
+```bash
+# Start dev mode (all packages)
+pnpm run dev
 
-Changesets help us manage the changelog and versions:
+# Run tests
+pnpm run test
 
-### Steps to Add a Changeset
+# Lint
+pnpm run lint
 
-1. Run `pnpm changelog`.
-2. Select a version bump.
-3. Document your changes in the created `.md` file.
-4. Commit and push your changes and changeset.
-5. Create a pull request against the `main` branch.
+# Format
+pnpm run format
+
+# Type-check
+pnpm run type-check
+```
+
+To work on a specific package, run commands from within its directory:
+
+```bash
+cd packages/web
+pnpm run build
+pnpm run test
+```
+
+## Making Changes
+
+1. Create a branch from `main`.
+2. Make your changes.
+3. Ensure linting and tests pass: `pnpm run lint && pnpm run test`.
+4. Add a changeset (see below).
+5. Open a pull request against `main`.
+
+## Changesets
+
+We use [Changesets](https://github.com/changesets/changesets) to manage versioning and changelogs. Every user-facing change needs a changeset.
+
+```bash
+# Add a changeset
+pnpm changelog
+
+# Follow the prompts to:
+# 1. Select the affected package(s)
+# 2. Choose a version bump (patch / minor / major)
+# 3. Write a short summary of the change
+```
+
+The generated `.md` file in `.changeset/` should be committed with your PR.
+
+## Versioning
+
+We follow [Semantic Versioning](https://semver.org/):
+
+* **Patch** — backward-compatible bug fixes
+* **Minor** — new functionality, backward-compatible
+* **Major** — breaking API changes
 
 ## Pull Requests
 
-Ensure your pull request:
+Your PR should:
 
-* Clearly describes the changes and motivation.
-* Links to related issues.
-* Passes all CI checks.
-
-Our team will review your contribution and guide you through the process.
+* Clearly describe the changes and motivation.
+* Link to related issues (use `Fixes #123`).
+* Include tests for new or changed functionality.
+* Include a changeset if the change is user-facing.
+* Pass all CI checks.
