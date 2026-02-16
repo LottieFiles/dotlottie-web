@@ -1151,12 +1151,12 @@ function executeCommand<T extends keyof MethodParamsMap>(
 ): MethodResultMap[T] | Promise<MethodResultMap[T]> {
   const method = rpcRequest.method;
 
-  if (typeof commands[method] === 'function') {
+  if (Object.hasOwn(commands, method) && typeof commands[method] === 'function') {
     return commands[method](rpcRequest as RpcRequest<typeof method>) as
       | MethodResultMap[T]
       | Promise<MethodResultMap[T]>;
   } else {
-    throw new Error(`Method ${method} is not implemented in commands.`);
+    throw new Error(`Method ${String(method)} is not implemented in commands.`);
   }
 }
 
