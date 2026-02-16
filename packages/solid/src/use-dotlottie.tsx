@@ -1,6 +1,6 @@
 import { type Config, DotLottie } from '@lottiefiles/dotlottie-web';
 import type { Accessor, ComponentProps, JSX } from 'solid-js';
-import { on, createEffect, createSignal, onCleanup } from 'solid-js';
+import { createEffect, createSignal, on, onCleanup } from 'solid-js';
 
 interface DotLottieComponentProps {
   setCanvasRef: (el: HTMLCanvasElement) => void;

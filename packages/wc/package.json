@@ -35,10 +35,9 @@
     "web-component"
   ],
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "lint": "eslint --fix .",
-    "stats:eslint": "cross-env TIMING=1 eslint .",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "lint": "biome check --write .",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
     "test": "vitest run --browser.headless",
     "test:coverage": "vitest run --browser.headless --coverage",
@@ -50,13 +49,12 @@
     "lit": "^3.2.1"
   },
   "devDependencies": {
-    "@vitest/browser": "2.1.0-beta.5",
-    "@vitest/coverage-istanbul": "2.1.0-beta.5",
-    "cross-env": "7.0.3",
-    "playwright": "^1.52.0",
-    "tsup": "^8.3.5",
-    "typescript": "5.0.4",
-    "vitest": "2.1.0-beta.5"
+    "@vitest/browser": "^4.0.18",
+    "@vitest/browser-playwright": "^4.0.18",
+    "@vitest/coverage-istanbul": "^4.0.18",
+    "tsdown": "^0.20.3",
+    "typescript": "5.9.3",
+    "vitest": "^4.0.18"
   },
   "publishConfig": {
     "access": "public",

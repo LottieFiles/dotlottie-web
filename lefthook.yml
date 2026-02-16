@@ -1,0 +1,16 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: biome
+      glob: "*.{js,jsx,ts,tsx,json,css}"
+      run: npx biome check --staged --no-errors-on-unmatched {staged_files}
+
+    - name: remark
+      glob: "*.md"
+      exclude: ".github/**"
+      run: npx remark {staged_files} --output --ignore-path .remarkignore --silently-ignore
+
+commit-msg:
+  jobs:
+    - name: commitlint
+      run: npx commitlint --edit {1}

@@ -32,10 +32,9 @@
     "vue"
   ],
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "lint": "eslint --fix .",
-    "stats:eslint": "cross-env TIMING=1 eslint .",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "lint": "biome check --write .",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
     "type-check": "tsc --noEmit"
   },
@@ -48,9 +47,8 @@
   "devDependencies": {
     "@vue/runtime-dom": "^3.4.6",
     "@vue/tsconfig": "^0.5.1",
-    "cross-env": "7.0.3",
-    "tsup": "8.0.1",
-    "typescript": "5.0.4"
+    "tsdown": "^0.20.3",
+    "typescript": "5.9.3"
   },
   "publishConfig": {
     "access": "public",

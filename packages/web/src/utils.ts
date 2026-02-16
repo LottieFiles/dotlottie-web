@@ -54,7 +54,7 @@ export function isDotLottie(fileData: ArrayBuffer): boolean {
  * Returns whether the given object looks like a valid Lottie JSON structure.
  */
 export function isLottieJSON(json: Record<string, unknown>): boolean {
-  return LOTTIE_JSON_MANDATORY_FIELDS.every((field) => Object.prototype.hasOwnProperty.call(json, field));
+  return LOTTIE_JSON_MANDATORY_FIELDS.every((field) => Object.hasOwn(json, field));
 }
 
 /**

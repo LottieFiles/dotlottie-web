@@ -8,31 +8,31 @@ import type {
   FrameEvent,
   FreezeEvent,
   LoadErrorEvent,
-  RenderErrorEvent,
   LoadEvent,
   LoopEvent,
   PauseEvent,
   PlayEvent,
   ReadyEvent,
+  RenderErrorEvent,
   RenderEvent,
-  StopEvent,
-  UnfreezeEvent,
-  StateMachineStartEvent,
-  StateMachineStopEvent,
-  StateMachineTransitionEvent,
-  StateMachineStateEnteredEvent,
-  StateMachineStateExitEvent,
+  StateMachineBooleanInputValueChangeEvent,
   StateMachineCustomEvent,
   StateMachineErrorEvent,
-  StateMachineBooleanInputValueChangeEvent,
-  StateMachineNumericInputValueChangeEvent,
-  StateMachineStringInputValueChangeEvent,
   StateMachineInputFiredEvent,
   StateMachineInternalMessage,
+  StateMachineNumericInputValueChangeEvent,
+  StateMachineStartEvent,
+  StateMachineStateEnteredEvent,
+  StateMachineStateExitEvent,
+  StateMachineStopEvent,
+  StateMachineStringInputValueChangeEvent,
+  StateMachineTransitionEvent,
+  StopEvent,
+  UnfreezeEvent,
 } from '../event-manager';
 
 import type { DotLottieInstanceState } from './dotlottie';
-import type { MethodParamsMap, RpcRequest, MethodResultMap, RpcResponse } from './types';
+import type { MethodParamsMap, MethodResultMap, RpcRequest, RpcResponse } from './types';
 
 const instancesMap = new Map<string, DotLottie>();
 
@@ -390,7 +390,8 @@ const eventHandlerMap: Record<EventType, (instanceId: string) => (event: Event) 
 };
 
 const commands: {
-  [K in keyof MethodParamsMap]: (request: RpcRequest<K>) => MethodResultMap[K] | Promise<MethodResultMap[K]>;
+  // biome-ignore lint/suspicious/noConfusingVoidType: void is correct here — command handlers with no return value
+  [K in keyof MethodParamsMap]: (request: RpcRequest<K>) => MethodResultMap[K] | Promise<MethodResultMap[K]> | void;
 } = {
   setTransform(request) {
     const instanceId = request.params.instanceId;
@@ -1150,10 +1151,12 @@ function executeCommand<T extends keyof MethodParamsMap>(
 ): MethodResultMap[T] | Promise<MethodResultMap[T]> {
   const method = rpcRequest.method;
 
-  if (typeof commands[method] === 'function') {
-    return commands[method](rpcRequest as RpcRequest<typeof method>);
+  if (Object.hasOwn(commands, method) && typeof commands[method] === 'function') {
+    return commands[method](rpcRequest as RpcRequest<typeof method>) as
+      | MethodResultMap[T]
+      | Promise<MethodResultMap[T]>;
   } else {
-    throw new Error(`Method ${method} is not implemented in commands.`);
+    throw new Error(`Method ${String(method)} is not implemented in commands.`);
   }
 }
 

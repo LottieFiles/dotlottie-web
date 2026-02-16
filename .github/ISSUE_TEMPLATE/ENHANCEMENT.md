@@ -1,18 +1,28 @@
 ---
 name: '📈 Enhancement'
-about: Enhancement to our codebase that isn't a adding or changing a feature
+about: Suggest an improvement to existing functionality
+labels: 'enhancement'
 ---
 
-## Overview
+## Package
 
-...
+<!-- Which package(s) does this apply to? -->
+
+- [ ] `@lottiefiles/dotlottie-web` (core)
+- [ ] `@lottiefiles/dotlottie-react`
+- [ ] `@lottiefiles/dotlottie-vue`
+- [ ] `@lottiefiles/dotlottie-svelte`
+- [ ] `@lottiefiles/dotlottie-solid`
+- [ ] `@lottiefiles/dotlottie-wc`
+
+## Description
+
+<!-- What would you like to improve? -->
 
 ## Motivation
 
-> What inspired this enhancement? What makes you think this should be included?
+<!-- Why is this enhancement needed? What problem does it solve? -->
 
-...
+## Proposed solution
 
-## Labels
-
-- [ ] Add the `Type: Enhancement` label to this issue.
+<!-- If you have a specific approach in mind, describe it here. -->

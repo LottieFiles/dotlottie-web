@@ -107,19 +107,20 @@
 
         <script type="module">
             import { DotLottie } from './dist/index.js';
+
             // import { DotLottieWorker as DotLottie } from './dist/index.js';
 
-            DotLottie.setWasmUrl(window.location.origin + '/src/core/dotlottie-player.wasm');
+            DotLottie.setWasmUrl(`${window.location.origin}/src/core/dotlottie-player.wasm`);
 
             const dotLottieInstances = {
                 toggle: new DotLottie({
                     canvas: document.getElementById('canvas-toggle'),
-                    src: window.location.origin + '/tests/__fixtures__/sm/toggle.lottie',
+                    src: `../../fixtures/sm/toggle.lottie`,
                     stateMachineId: 'toggle',
                 }),
                 hover: new DotLottie({
                     canvas: document.getElementById('canvas-hover'),
-                    src: window.location.origin + '/tests/__fixtures__/sm/hover.lottie',
+                    src: `../../fixtures/sm/hover.lottie`,
                     stateMachineId: 'hover',
                     layout: {
                         fit: 'none',
@@ -127,12 +128,12 @@
                 }),
                 starRating: new DotLottie({
                     canvas: document.getElementById('canvas-star-rating'),
-                    src: window.location.origin + '/tests/__fixtures__/sm/star-rating.lottie',
+                    src: `../../fixtures/sm/star-rating.lottie`,
                     stateMachineId: 'star-rating',
                 }),
                 smileySlider: new DotLottie({
                     canvas: document.getElementById('canvas-smiley-slider'),
-                    src: window.location.origin + '/tests/__fixtures__/sm/smiley_slider.lottie',
+                    src: `../../fixtures/sm/smiley_slider.lottie`,
                     stateMachineId: 'interactive_slider',
                 }),
                 themeSwitching: new DotLottie({
@@ -159,7 +160,7 @@
                 }),
                 openUrl: new DotLottie({
                     canvas: document.getElementById('canvas-open-url'),
-                    src: window.location.origin + '/tests/__fixtures__/sm/star-rating.lottie',
+                    src: `../../fixtures/sm/star-rating.lottie`,
                     stateMachineConfig: {
                         openUrlPolicy: {
                             requireUserInteraction: false,
@@ -218,7 +219,7 @@
             }
 
             dotLottieInstances.themeSwitching.addEventListener('load', async () => {
-                const themeMachineData = await loadStateMachineData('./tests/__fixtures__/sm/theme-machine.json');
+                const themeMachineData = await loadStateMachineData('../../fixtures/sm/theme-machine.json');
                 if (themeMachineData) {
                     dotLottieInstances.themeSwitching.stateMachineLoadData(themeMachineData);
                     dotLottieInstances.themeSwitching.stateMachineStart();
@@ -226,7 +227,7 @@
             });
 
             dotLottieInstances.clickInteraction.addEventListener('load', async () => {
-                const clickMachineData = await loadStateMachineData('./tests/__fixtures__/sm/click-machine.json');
+                const clickMachineData = await loadStateMachineData('../../fixtures/sm/click-machine.json');
                 if (clickMachineData) {
                     dotLottieInstances.clickInteraction.stateMachineLoadData(clickMachineData);
                     dotLottieInstances.clickInteraction.stateMachineStart();
@@ -235,7 +236,7 @@
 
             // Special handling for cursor controlled example
             dotLottieInstances.cursorControlled.addEventListener('load', async () => {
-                const cursorMachineData = await loadStateMachineData('./tests/__fixtures__/sm/cursor-machine.json');
+                const cursorMachineData = await loadStateMachineData('../../fixtures/sm/cursor-machine.json');
                 if (cursorMachineData) {
                     console.log({
                         cursorMachineData: JSON.parse(cursorMachineData),
@@ -263,7 +264,7 @@
             });
 
             dotLottieInstances.scrollControlled.addEventListener('load', async () => {
-                const scrollMachineData = await loadStateMachineData('./tests/__fixtures__/sm/scroll-machine.json');
+                const scrollMachineData = await loadStateMachineData('../../fixtures/sm/scroll-machine.json');
                 if (scrollMachineData) {
                     dotLottieInstances.scrollControlled.stateMachineLoadData(scrollMachineData);
                     dotLottieInstances.scrollControlled.stateMachineStart();
@@ -301,7 +302,7 @@
             });
 
             dotLottieInstances.holdInteraction.addEventListener('load', async () => {
-                const holdMachineData = await loadStateMachineData('./tests/__fixtures__/sm/hold-machine.json');
+                const holdMachineData = await loadStateMachineData('../../fixtures/sm/hold-machine.json');
                 if (holdMachineData) {
                     dotLottieInstances.holdInteraction.stateMachineLoadData(holdMachineData);
                     dotLottieInstances.holdInteraction.stateMachineStart();
@@ -309,7 +310,7 @@
             });
 
             dotLottieInstances.openUrl.addEventListener('load', async () => {
-                const openUrlMachineData = await loadStateMachineData('./tests/__fixtures__/sm/open-url-machine.json');
+                const openUrlMachineData = await loadStateMachineData('../../fixtures/sm/open-url-machine.json');
                 if (openUrlMachineData) {
                     dotLottieInstances.openUrl.stateMachineLoadData(openUrlMachineData);
                     dotLottieInstances.openUrl.stateMachineStart();

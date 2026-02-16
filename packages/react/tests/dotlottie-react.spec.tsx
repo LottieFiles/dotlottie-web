@@ -1,6 +1,6 @@
 import { DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-web';
 import { userEvent } from '@testing-library/user-event';
-import React from 'react';
+import type React from 'react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import type { ComponentRenderOptions, RenderResult } from 'vitest-browser-react';
 import { cleanup, render as vitestRender } from 'vitest-browser-react';
@@ -8,17 +8,17 @@ import { cleanup, render as vitestRender } from 'vitest-browser-react';
 import { DotLottieReact, DotLottieWorkerReact } from '../src';
 
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
-const dotLottieSrc = new URL('./__fixtures__/test.lottie', import.meta.url).href;
+const dotLottieSrc = new URL('../../../fixtures/test.lottie', import.meta.url).href;
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
-const lottieSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
+const lottieSrc = new URL('../../../fixtures/test.json', import.meta.url).href;
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
-const smSrc = new URL('./__fixtures__/sm.lottie', import.meta.url).href;
+const smSrc = new URL('../../../fixtures/sm.lottie', import.meta.url).href;
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
-const render = (ui: React.ReactNode, options?: ComponentRenderOptions): RenderResult =>
+const render = (ui: React.ReactNode, options?: ComponentRenderOptions): Promise<RenderResult> =>
   vitestRender(ui, { wrapper: Wrapper, ...options });
 
 describe.each([
@@ -35,7 +35,7 @@ describe.each([
     const onComplete = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { container, unmount } = render(
+    const { container, unmount } = await render(
       <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
     );
 
@@ -75,7 +75,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = await render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -122,7 +124,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = await render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -169,7 +173,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = await render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -216,7 +222,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = await render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -270,7 +278,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = await render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -311,7 +321,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = await render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -350,7 +362,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = await render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -390,7 +404,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = await render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -432,7 +448,7 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const screen = render(
+    const screen = await render(
       <Component
         data-testid="dotLottie-canvas"
         src={dotLottieSrc}
@@ -453,7 +469,7 @@ describe.each([
     const play = vi.spyOn(dotLottie, 'play');
     const pause = vi.spyOn(dotLottie, 'pause');
 
-    let canvasElement = screen.getByTestId('dotLottie-canvas').element();
+    let canvasElement = screen.container.querySelector('[data-testid="dotLottie-canvas"]') as HTMLElement;
 
     await user.hover(canvasElement);
 
@@ -480,7 +496,7 @@ describe.each([
       />,
     );
 
-    canvasElement = screen.getByTestId('dotLottie-canvas').element();
+    canvasElement = screen.container.querySelector('[data-testid="dotLottie-canvas"]') as HTMLElement;
 
     let mouseEnterCount = 0;
     let mouseLeaveCount = 0;
@@ -515,7 +531,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = await render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -558,7 +576,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = await render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -616,7 +636,7 @@ describe.each([
     let response = await fetch(lottieSrc);
     const animationData = await response.json();
 
-    const { rerender } = render(
+    const { rerender } = await render(
       <Component data={animationData} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
     );
 
@@ -657,7 +677,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = await render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -691,7 +713,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = await render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -735,7 +759,9 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = await render(
+      <Component src={dotLottieSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />,
+    );
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -774,7 +800,7 @@ describe.each([
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={smSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = await render(<Component src={smSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
@@ -811,7 +837,7 @@ describe.each([
   test('calls stateMachineSetConfig when stateMachineConfig prop changes', async () => {
     const dotLottieRefCallback = vi.fn();
 
-    const { rerender } = render(<Component src={smSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
+    const { rerender } = await render(<Component src={smSrc} autoplay dotLottieRefCallback={dotLottieRefCallback} />);
 
     await vi.waitFor(() => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);

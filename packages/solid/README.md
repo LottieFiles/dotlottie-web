@@ -89,7 +89,7 @@ The `renderConfig` object accepts the following properties:
 
 ## Custom Playback Controls
 
-`DotLottieSolid` component makes it easy to build custom playback controls for the animation. It exposes a `dotLottieRefCallback` prop that can be used to get a reference to the [`dotLottie`](../web/README.md#apis) web player instance. This instance can be used to control the playback of the animation using the methods exposed by the [`dotLottie`](../web/README.md#methods) web player instance.
+`DotLottieSolid` component makes it easy to build custom playback controls for the animation. It exposes a `dotLottieRefCallback` prop that can be used to get a reference to the [`dotLottie`](../web/README.md#documentation) web player instance. This instance can be used to control the playback of the animation using the methods exposed by the [`dotLottie`](../web/README.md#documentation) web player instance.
 
 Here is an example:
 
@@ -141,11 +141,11 @@ const App = () => {
 };
 ```
 
-You can find the list of methods that can be used to control the playback of the animation [here](../web/README.md#methods).
+You can find the list of methods that can be used to control the playback of the animation [here](../web/README.md#documentation).
 
 ## Listening to Events
 
-`DotLottieSolid` component can receive a `dotLottieRefCallback` prop that can be used to get a reference to the [`dotLottie`](../web/README.md#apis) web player instance. This reference can be used to listen to player events emitted by the [`dotLottie`](../web/README.md#events) web instance.
+`DotLottieSolid` component can receive a `dotLottieRefCallback` prop that can be used to get a reference to the [`dotLottie`](../web/README.md#documentation) web player instance. This reference can be used to listen to player events emitted by the [`dotLottie`](../web/README.md#documentation) web instance.
 
 Here is an example:
 
@@ -205,7 +205,7 @@ const App = () => {
 };
 ```
 
-[dotLottie](../web/README.md#apis) instance exposes multiple events that can be listened to. You can find the list of events [here](../web/README.md#events).
+[dotLottie](../web/README.md#documentation) instance exposes multiple events that can be listened to. You can find the list of events [here](../web/README.md#documentation).
 
 ## Development
 

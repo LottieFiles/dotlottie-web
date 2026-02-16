@@ -1,4 +1,4 @@
-import { $, chalk, globby, fs } from 'zx';
+import { $, chalk, fs, globby } from 'zx';
 
 // Files to remove
 const files = [

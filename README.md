@@ -9,7 +9,10 @@
 
 <h1 align="center">dotLottie Web</h1>
 
-Streamline your web animations with LottieFiles' official players for dotLottie and Lottie animations. Designed for quick integration, these packages help developers swiftly bring animated visuals into web projects with minimal effort.
+<p align="center">
+  Official LottieFiles players for running <a href="https://dotlottie.io/">.lottie</a> and Lottie animations on the web.<br />
+  A core canvas/WASM renderer with framework wrappers for React, Vue, Svelte, Solid, and Web Components.
+</p>
 
 <div align="center">
   <img src="./assets/1.gif" alt="dotLottie web sample 1" />
@@ -21,162 +24,123 @@ Streamline your web animations with LottieFiles' official players for dotLottie 
   <img src="./assets/4.gif" alt="dotLottie web sample 4" />
 </div>
 
-# What is dotLottie?
+# Packages
 
-dotLottie is an open-source file format that aggregates one or more Lottie files and their associated resources into a single file. They are ZIP archives compressed with the Deflate compression method and carry the file extension of ".lottie".
+| Package                                                        | Description                                                            |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **[@lottiefiles/dotlottie-web](packages/web/README.md)**       | Core player — canvas rendering with WASM, works in browser and Node.js |
+| **[@lottiefiles/dotlottie-react](packages/react/README.md)**   | React component                                                        |
+| **[@lottiefiles/dotlottie-vue](packages/vue/README.md)**       | Vue component                                                          |
+| **[@lottiefiles/dotlottie-svelte](packages/svelte/README.md)** | Svelte component                                                       |
+| **[@lottiefiles/dotlottie-solid](packages/solid/README.md)**   | Solid component                                                        |
+| **[@lottiefiles/dotlottie-wc](packages/wc/README.md)**         | Web Component                                                          |
 
-[Learn more about dotLottie](https://dotlottie.io/).
+Each package README has full API documentation and usage examples.
 
-## Contents
+## Quick Start
 
-* [Packages](#packages)
-* [Getting Started](#getting-started)
-  * [Prerequisites](#prerequisites)
-  * [Setup](#setup)
-* [Live Examples](#live-examples)
-* [Local Examples](#local-examples)
-* [Development](#development)
-  * [Building Packages](#building-packages)
-  * [Running Locally](#running-locally)
-  * [Scripts](#scripts)
-* [Contributing](#contributing)
-* [License](#license)
+Install the core package or a framework wrapper:
 
-### Packages
+```bash
+# Core
+npm install @lottiefiles/dotlottie-web
 
-The monorepo contains the following package:
+# React
+npm install @lottiefiles/dotlottie-react
 
-| Package                                                        | Description                                                                                                                                                             |
-| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **[@lottiefiles/dotlottie-web](packages/web/README.md)**       | A JavaScript library for rendering Lottie and dotLottie animations in the browser or Node.js.                                                                           |
-| **[@lottiefiles/dotlottie-react](packages/react/README.md)**   | A React component wrapper for `dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.  |
-| **[@lottiefiles/dotlottie-wc](packages/wc/README.md)**         | A Web Component wrapper for `dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.    |
-| **[@lottiefiles/dotlottie-vue](packages/vue/README.md)**       | A Vue component wrapper for `dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them.    |
-| **[@lottiefiles/dotlottie-svelte](packages/svelte/README.md)** | A Svelte component wrapper for `dotlottie-web` that provides a declarative API for rendering Lottie and dotLottie animations and UI controls for interacting with them. |
+# Vue
+npm install @lottiefiles/dotlottie-vue
 
-> Note: Each package has its own README.md with detailed documentation on usage and APIs.
+# Svelte
+npm install @lottiefiles/dotlottie-svelte
 
-### Getting Started
+# Solid
+npm install @lottiefiles/dotlottie-solid
 
-To contribute to this monorepo or use its packages in your project, follow these setup steps:
+# Web Component
+npm install @lottiefiles/dotlottie-wc
+```
 
-#### Prerequisites
+```js
+import { DotLottie } from '@lottiefiles/dotlottie-web';
 
-Ensure you have the following installed:
+const dotLottie = new DotLottie({
+  canvas: document.getElementById('canvas'),
+  src: 'https://your-animation-url.lottie',
+  autoplay: true,
+  loop: true,
+});
+```
 
-* Node.js version 18 or greater
-* `pnpm` version 8
+## Live Examples
 
-#### Setup
+**[@lottiefiles/dotlottie-web](packages/web/README.md)**
+ [Getting Started](https://codepen.io/lottiefiles/pen/JjzJZmL)
+· [Playback Controls](https://codepen.io/lottiefiles/pen/dyrRKwg)
+· [Dynamic Loading](https://codepen.io/lottiefiles/pen/JjzJZgB)
+· [Multi Animations](https://codepen.io/lottiefiles/pen/wvOxdRa)
+· [Advanced Layout](https://codepen.io/lottiefiles/pen/LYvZveR)
+· [Named Markers](https://codepen.io/lottiefiles/pen/RwOROKp)
+· [Theming](https://codepen.io/lottiefiles/pen/BaEzEeq)
 
-Clone the monorepo:
+**[@lottiefiles/dotlottie-react](packages/react/README.md)**
+ [Getting Started](https://codepen.io/lottiefiles/pen/vYPJpBN)
+· [Custom Controls](https://codepen.io/lottiefiles/pen/WNmEdxd)
+
+**[@lottiefiles/dotlottie-vue](packages/vue/README.md)**
+ [Getting Started](https://codepen.io/lottiefiles/pen/yLwgeoJ)
+
+## Viewer
+
+The [dotLottie Viewer](https://lottiefiles.github.io/dotlottie-web/) is a hosted tool for testing and debugging animations:
+
+| Page            | Description                                                        |
+| --------------- | ------------------------------------------------------------------ |
+| **Home**        | Drop a `.lottie` or `.json` file to preview playback and rendering |
+| **Playground**  | Experiment with player configuration and animation controls        |
+| **Performance** | Benchmark rendering performance across animations                  |
+
+Source: [`apps/viewer/`](apps/viewer/)
+
+## Local Examples
+
+Example apps in [`examples/`](examples/):
+
+| Example                        | Package                                  |
+| ------------------------------ | ---------------------------------------- |
+| [web](examples/web/)           | `@lottiefiles/dotlottie-web`             |
+| [web-node](examples/web-node/) | `@lottiefiles/dotlottie-web` (Node.js)   |
+| [react](examples/react/)       | `@lottiefiles/dotlottie-react`           |
+| [vue](examples/vue/)           | `@lottiefiles/dotlottie-vue`             |
+| [solid](examples/solid/)       | `@lottiefiles/dotlottie-solid`           |
+| [wc](examples/wc/)             | `@lottiefiles/dotlottie-wc`              |
+| [next](examples/next/)         | `@lottiefiles/dotlottie-react` (Next.js) |
+
+```bash
+pnpm install && pnpm run build
+cd examples/web
+pnpm run dev
+```
+
+## Development
+
+**Prerequisites:** Node.js 22+, pnpm 10+
 
 ```bash
 git clone https://github.com/LottieFiles/dotlottie-web.git
 cd dotlottie-web
-```
-
-Install dependencies:
-
-```bash
 pnpm install
+pnpm run build    # Build all packages
+pnpm run dev      # Watch mode
+pnpm run test     # Run tests
+pnpm run lint     # Lint
+pnpm run format   # Format
 ```
 
-### Live Examples
+## Contributing
 
-* `@lottiefiles/dotlottie-web`
-  * <a href="https://codepen.io/lottiefiles/pen/JjzJZmL" target="_blank">Getting Started</a>
-  * <a href="https://codepen.io/lottiefiles/pen/dyrRKwg" target="_blank">Controlling Animation Playback</a>
-  * <a href="https://codepen.io/lottiefiles/pen/JjzJZgB" target="_blank">Dynamic Animation Loading</a>
-  * <a href="https://codepen.io/lottiefiles/pen/wvOxdRa" target="_blank">Multi Animations .lottie file</a>
-  * <a href="https://codepen.io/lottiefiles/pen/LYvZveR" target="_blank">Advanced Animation Layout</a>
-  * <a href="https://codepen.io/lottiefiles/pen/RwOROKp" target="_blank">Named Markers</a>
-  * <a href="https://codepen.io/lottiefiles/pen/BaEzEeq" target="_blank">dotLottie theming</a>
+See [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md).
 
-* `@lottiefiles/dotlottie-react`
-  * <a href="https://codepen.io/lottiefiles/pen/vYPJpBN" target="_blank">Getting Started</a>
-  * <a href="https://codepen.io/lottiefiles/pen/WNmEdxd" target="_blank">Custom Playback Controls</a>
-
-* `@lottiefiles/dotlottie-vue`
-  * <a href="https://codepen.io/lottiefiles/pen/yLwgeoJ" target="_blank">Getting Started</a>
-
-### Local Examples
-
-Discover how to implement and utilize the dotlottie-web packages with our example applications. These examples serve as a practical guide to help you understand how to integrate Lottie and dotLottie animations into your web projects.
-
-Available examples:
-
-* [dotlottie-web-example](apps/dotlottie-web-example/src/main.ts): A basic typescript example app of how to use `@lottiefiles/dotlottie-web` to render a Lottie or dotLottie animation in the browser.
-* [dotlottie-web-node-example](apps/dotlottie-web-node-example/index.ts): This example demonstrates how to use the `@lottiefiles/dotlottie-web` in a Node.js environment. It showcases controlling animation playback, rendering frame by frame, and converting a dotLottie animation into a GIF file. for more information, see the [README](apps/dotlottie-web-node-example/README.md).
-
-#### Running Examples
-
-* Clone the repository:
-
-```bash
-git clone https://github.com/LottieFiles/dotlottie-web.git
-cd dotlottie-web
-```
-
-* Install dependencies:
-
-```bash
-pnpm install
-```
-
-* Build the packages:
-
-```bash
-pnpm run build
-```
-
-* Run the app:
-
-```bash
-# Change directory to the example app folder
-cd apps/dotlottie-web-example 
-pnpm run dev
-```
-
-Feel free to modify and play around with the code to see how changes affect the animations.
-
-### Development
-
-#### Building Packages
-
-To build all packages within the monorepo:
-
-```bash
-pnpm run build
-```
-
-#### Running Locally
-
-To start a local development environment for all packages:
-
-```bash
-pnpm run dev
-```
-
-#### Scripts
-
-Here's a brief explanation of the scripts available in the root package.json:
-
-* `build`: Builds all packages using turbo.
-* `changelog`: Adds a changeset to generate changelog and version updates.
-* `clean`: Cleans up the repository by removing development artifacts.
-* `dev`: Runs all packages in development/watch mode.
-* `format`: Formats the codebase using Prettier and Remark.
-* `lint`: Lints the codebase using ESLint.
-* `test`: Runs tests across all packages.
-* `type-check`: Checks for TypeScript type errors.
-
-For a full list of available scripts, see the `scripts` section in `package.json`.
-
-### Contributing
-
-We welcome contributions to any of the packages in this monorepo. Please read our [Contributing Guidelines](CONTRIBUTING.md) and our [Code of Conduct](CODE_OF_CONDUCT.md) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes to the project.
-
-### License
+## License
 
 [MIT](LICENSE) © [LottieFiles](https://www.lottiefiles.com)

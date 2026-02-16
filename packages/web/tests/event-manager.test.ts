@@ -1,21 +1,20 @@
-import { describe, test, expect, vi } from 'vitest';
-
-import { EventManager } from '../src/event-manager';
+import { describe, expect, test, vi } from 'vitest';
 import type {
   FrameEvent,
   LoadErrorEvent,
   LoopEvent,
-  StateMachineTransitionEvent,
+  RenderErrorEvent,
   StateMachineBooleanInputValueChangeEvent,
   StateMachineInternalMessage,
-  RenderErrorEvent,
+  StateMachineTransitionEvent,
 } from '../src/event-manager';
+import { EventManager } from '../src/event-manager';
 
 describe('EventManager', () => {
   test('initializes with an empty event listeners map', () => {
     const eventManager = new EventManager();
 
-    expect(eventManager['_eventListeners'].size).toBe(0);
+    expect((eventManager as any)._eventListeners.size).toBe(0);
   });
 
   test('adds a new event listener', () => {
@@ -23,8 +22,8 @@ describe('EventManager', () => {
     const listener = vi.fn();
 
     eventManager.addEventListener('play', listener);
-    expect(eventManager['_eventListeners'].has('play')).toBe(true);
-    expect(eventManager['_eventListeners'].get('play')?.size).toBe(1);
+    expect((eventManager as any)._eventListeners.has('play')).toBe(true);
+    expect((eventManager as any)._eventListeners.get('play')?.size).toBe(1);
   });
 
   test('adds multiple listeners for the same event', () => {
@@ -34,7 +33,7 @@ describe('EventManager', () => {
 
     eventManager.addEventListener('play', listener1);
     eventManager.addEventListener('play', listener2);
-    expect(eventManager['_eventListeners'].get('play')?.size).toBe(2);
+    expect((eventManager as any)._eventListeners.get('play')?.size).toBe(2);
   });
 
   test('removes a specific event listener', () => {
@@ -46,7 +45,7 @@ describe('EventManager', () => {
 
     eventManager.removeEventListener('play', listener);
 
-    expect(eventManager['_eventListeners'].has('play')).toBe(false);
+    expect((eventManager as any)._eventListeners.has('play')).toBe(false);
   });
 
   test('dispatches an event to the appropriate listeners', () => {
@@ -71,7 +70,7 @@ describe('EventManager', () => {
 
     eventManager.removeAllEventListeners();
 
-    expect(eventManager['_eventListeners'].size).toBe(0);
+    expect((eventManager as any)._eventListeners.size).toBe(0);
   });
 
   test('removes all listeners for an event type when no specific listener is provided', () => {
@@ -82,11 +81,11 @@ describe('EventManager', () => {
     manager.addEventListener('play', listener1);
     manager.addEventListener('play', listener2);
 
-    expect(manager['_eventListeners'].get('play')?.size).toBe(2);
+    expect((manager as any)._eventListeners.get('play')?.size).toBe(2);
 
     manager.removeEventListener('play');
 
-    expect(manager['_eventListeners'].has('play')).toBe(false);
+    expect((manager as any)._eventListeners.has('play')).toBe(false);
   });
 
   test('does nothing when attempting to remove a non-existent event listener', () => {
@@ -99,7 +98,7 @@ describe('EventManager', () => {
       manager.removeEventListener('play', nonExistentListener);
     }).not.toThrow();
 
-    expect(manager['_eventListeners'].has('play')).toBe(false);
+    expect((manager as any)._eventListeners.has('play')).toBe(false);
   });
 
   test('does nothing when attempting to add a listener that already exists', () => {
@@ -110,7 +109,7 @@ describe('EventManager', () => {
     manager.addEventListener('play', listener);
     manager.addEventListener('play', listener);
 
-    expect(manager['_eventListeners'].get('play')?.size).toBe(1);
+    expect((manager as any)._eventListeners.get('play')?.size).toBe(1);
   });
 
   describe('Event Data Propagation', () => {
@@ -328,8 +327,8 @@ describe('EventManager', () => {
 
       manager.removeEventListener('play');
 
-      expect(manager['_eventListeners'].has('play')).toBe(false);
-      expect(manager['_eventListeners'].has('stop')).toBe(true);
+      expect((manager as any)._eventListeners.has('play')).toBe(false);
+      expect((manager as any)._eventListeners.has('stop')).toBe(true);
 
       manager.dispatch({ type: 'stop' });
       expect(stopListener).toHaveBeenCalledTimes(1);
@@ -404,7 +403,7 @@ describe('EventManager', () => {
 
       expect(() => manager.removeEventListener('play', listener2)).not.toThrow();
 
-      expect(manager['_eventListeners'].get('play')?.size).toBe(1);
+      expect((manager as any)._eventListeners.get('play')?.size).toBe(1);
     });
 
     test('handles complex event objects correctly', () => {
@@ -438,15 +437,15 @@ describe('EventManager', () => {
       manager.addEventListener('play', listener1);
       manager.addEventListener('play', listener2);
 
-      expect(manager['_eventListeners'].has('play')).toBe(true);
-      expect(manager['_eventListeners'].get('play')?.size).toBe(2);
+      expect((manager as any)._eventListeners.has('play')).toBe(true);
+      expect((manager as any)._eventListeners.get('play')?.size).toBe(2);
 
       manager.removeEventListener('play', listener1);
-      expect(manager['_eventListeners'].has('play')).toBe(true);
-      expect(manager['_eventListeners'].get('play')?.size).toBe(1);
+      expect((manager as any)._eventListeners.has('play')).toBe(true);
+      expect((manager as any)._eventListeners.get('play')?.size).toBe(1);
 
       manager.removeEventListener('play', listener2);
-      expect(manager['_eventListeners'].has('play')).toBe(false);
+      expect((manager as any)._eventListeners.has('play')).toBe(false);
     });
 
     test('removeAllEventListeners clears all event types and listeners', () => {
@@ -459,11 +458,11 @@ describe('EventManager', () => {
       manager.addEventListener('stop', stopListener);
       manager.addEventListener('frame', frameListener);
 
-      expect(manager['_eventListeners'].size).toBe(3);
+      expect((manager as any)._eventListeners.size).toBe(3);
 
       manager.removeAllEventListeners();
 
-      expect(manager['_eventListeners'].size).toBe(0);
+      expect((manager as any)._eventListeners.size).toBe(0);
 
       manager.dispatch({ type: 'play' });
       manager.dispatch({ type: 'stop' });

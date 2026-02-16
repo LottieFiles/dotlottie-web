@@ -1,6 +1,6 @@
 import type { Config, DotLottie, DotLottieWorker, Mode } from '@lottiefiles/dotlottie-web';
 import type { TemplateResult } from 'lit';
-import { LitElement, html, css } from 'lit';
+import { css, html, LitElement } from 'lit';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { property, state } from 'lit/decorators.js';
 
@@ -67,10 +67,6 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
       height: 100%;
     }
   `;
-
-  public constructor() {
-    super();
-  }
 
   private _init(): void {
     const canvas = document.createElement('canvas');

@@ -1,5 +1,5 @@
 import type { Config, DotLottie } from '@lottiefiles/dotlottie-web';
-import { type ComponentProps, type JSX, createEffect, splitProps } from 'solid-js';
+import { type ComponentProps, createEffect, type JSX, splitProps } from 'solid-js';
 
 import { useDotLottie } from './use-dotlottie';
 
