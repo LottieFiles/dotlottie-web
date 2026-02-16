@@ -1,5 +1,16 @@
 # @lottiefiles/dotlottie-vue
 
+## 0.11.0
+### Minor Changes
+
+- 786ac3f: chore: migrate tooling to Biome, update Node/pnpm versions, and cleanup fixtures
+
+### Patch Changes
+
+- Updated dependencies [786ac3f]
+- Updated dependencies [fe95559]
+  - @lottiefiles/dotlottie-web@0.64.0
+
 ## 0.10.15
 
 ### Patch Changes
