@@ -1,1 +1,1 @@
-dlplayer-version=0.1.54-e1cda0c
+dlplayer-version=0.1.54-5b9fefe
