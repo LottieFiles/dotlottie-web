@@ -112,6 +112,9 @@ jobs:
       # Required for creating a release PR
       pull-requests: write
 
+      # Required to trigger workflow_dispatch for changeset PR validation
+      actions: write
+
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
@@ -159,7 +162,7 @@ jobs:
 
   gpr-release:
     name: gpr-release
-    needs: validate
+    needs: [validate, npm-release]
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'LottieFiles/dotlottie-web' && github.event_name == 'push' }}
 
