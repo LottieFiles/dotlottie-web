@@ -252,7 +252,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🏗 Build
-        run: pnpm build
+        run: pnpm build --filter='viewer...'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -261,4 +261,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./apps/dotlottie-viewer/dist
+          publish_dir: ./apps/viewer/dist

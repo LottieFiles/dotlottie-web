@@ -12,7 +12,7 @@
       "!**/dotlottie-player.js",
       "!**/dotlottie-player.types.ts",
       "!**/profiler.js",
-      "!**/public/lottie"
+      "!fixtures"
     ]
   },
   "formatter": {
@@ -105,7 +105,7 @@
       }
     },
     {
-      "includes": ["apps/**"],
+      "includes": ["apps/**", "examples/**"],
       "linter": {
         "rules": {
           "a11y": {

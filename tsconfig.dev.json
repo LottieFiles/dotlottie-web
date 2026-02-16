@@ -15,7 +15,7 @@
     "**/node_modules",
 
     // Exclude non-code test resources
-    "**/__fixtures__",
+    "fixtures",
     "**/__snapshots__",
     "**/coverage",
 

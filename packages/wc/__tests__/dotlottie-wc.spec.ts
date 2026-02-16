@@ -5,9 +5,9 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { type DotLottieWorkerWC, setWasmUrl } from '../src';
 import type { DotLottieWC } from '../src/dotlottie-wc';
 
-const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
-const lottieSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
-const smSrc = new URL('./__fixtures__/sm.lottie', import.meta.url).href;
+const src = new URL('../../../fixtures/test.lottie', import.meta.url).href;
+const lottieSrc = new URL('../../../fixtures/test.json', import.meta.url).href;
+const smSrc = new URL('../../../fixtures/sm.lottie', import.meta.url).href;
 
 setWasmUrl(new URL('../../web/src/core/dotlottie-player.wasm', import.meta.url).href);
 

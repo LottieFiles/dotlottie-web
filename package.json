@@ -3,6 +3,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "build:packages": "turbo run build --filter='./packages/*'",
+    "build:apps": "turbo run build --filter='./apps/*'",
+    "build:examples": "turbo run build --filter='./examples/*'",
     "build": "turbo run build",
     "changelog": "changeset add",
     "changelog:check": "changeset status --since=main",
@@ -19,7 +22,7 @@
     "preinstall": "npx only-allow pnpm",
     "prepare": "lefthook install",
     "release": "pnpm release:version && pnpm release:publish",
-    "release:publish": "pnpm clean && pnpm build && changeset publish",
+    "release:publish": "pnpm clean && turbo run build --filter='./packages/*' && changeset publish",
     "release:version": "changeset version",
     "size": "size-limit",
     "stats:ts": "turbo run stats:ts",

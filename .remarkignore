@@ -15,7 +15,7 @@ node_modules/
 .yarn/
 
 # Testing
-__fixtures__
+fixtures
 __snapshots__
 coverage/
 reports

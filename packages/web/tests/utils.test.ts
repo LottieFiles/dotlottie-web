@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-
+import lottieUrl from '../../../fixtures/test.json?url';
+import dotLottieUrl from '../../../fixtures/test.lottie?url';
 import {
   getDefaultDPR,
   getPointerPosition,
@@ -9,9 +10,6 @@ import {
   isHexColor,
   isLottie,
 } from '../src/utils';
-
-import lottieUrl from './__fixtures__/test.json?url';
-import dotLottieUrl from './__fixtures__/test.lottie?url';
 
 describe('isHexColor', () => {
   test.each([

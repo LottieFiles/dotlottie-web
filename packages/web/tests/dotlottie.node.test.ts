@@ -13,7 +13,7 @@ beforeAll(() => {
 });
 
 test('should render correctly in node', async () => {
-  const lottieData = fs.readFileSync(path.resolve(__dirname, './__fixtures__/test.json')).toString();
+  const lottieData = fs.readFileSync(path.resolve(__dirname, '../../../fixtures/test.json')).toString();
   const onReady = vi.fn();
   const onLoad = vi.fn();
   const onFrame = vi.fn();

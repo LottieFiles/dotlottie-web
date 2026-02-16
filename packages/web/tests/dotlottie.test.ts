@@ -12,11 +12,11 @@ import { getDefaultDPR } from '../src/utils';
 import { addWasmCSPPolicy, createCanvas, sleep } from './test-utils';
 
 const wasmUrl = new URL('../src/core/dotlottie-player.wasm', import.meta.url).href;
-const jsonSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
-const src = new URL('./__fixtures__/test.lottie', import.meta.url).href;
-const smSrc = new URL('./__fixtures__/sm/all-inputs.json', import.meta.url).href;
-const textAnimSrc = new URL('./__fixtures__/text.json', import.meta.url).href;
-const impactFontUrl = new URL('./__fixtures__/fonts/Impact.ttf', import.meta.url).href;
+const jsonSrc = new URL('../../../fixtures/test.json', import.meta.url).href;
+const src = new URL('../../../fixtures/test.lottie', import.meta.url).href;
+const smSrc = new URL('../../../fixtures/sm/all-inputs.json', import.meta.url).href;
+const textAnimSrc = new URL('../../../fixtures/text.json', import.meta.url).href;
+const impactFontUrl = new URL('../../../fixtures/fonts/Impact.ttf', import.meta.url).href;
 
 DotLottieClass.setWasmUrl(wasmUrl);
 DotLottieWorkerClass.setWasmUrl(wasmUrl);

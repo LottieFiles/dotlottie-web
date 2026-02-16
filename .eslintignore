@@ -19,7 +19,7 @@ node_modules/
 # Testing
 coverage/
 __snapshots__
-__fixtures__
+fixtures
 
 # Temporary or local data
 temp/

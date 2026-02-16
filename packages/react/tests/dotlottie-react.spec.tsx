@@ -8,11 +8,11 @@ import { cleanup, render as vitestRender } from 'vitest-browser-react';
 import { DotLottieReact, DotLottieWorkerReact } from '../src';
 
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
-const dotLottieSrc = new URL('./__fixtures__/test.lottie', import.meta.url).href;
+const dotLottieSrc = new URL('../../../fixtures/test.lottie', import.meta.url).href;
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
-const lottieSrc = new URL('./__fixtures__/test.json', import.meta.url).href;
+const lottieSrc = new URL('../../../fixtures/test.json', import.meta.url).href;
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
-const smSrc = new URL('./__fixtures__/sm.lottie', import.meta.url).href;
+const smSrc = new URL('../../../fixtures/sm.lottie', import.meta.url).href;
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
