@@ -28,8 +28,12 @@ jobs:
       - name: 📥 Download deps
         run: pnpm install
 
-      - name: 🏗 Build
-        run: pnpm build
+      - name: 🏗 Build packages
+        run: pnpm build:packages
+
+      - name: 🏗 Build apps & examples
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: pnpm build:apps && pnpm build:examples
 
       - name: 🔍 Verify types
         run: pnpm type-check
