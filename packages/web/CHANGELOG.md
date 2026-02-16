@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.64.0
+### Minor Changes
+
+- 786ac3f: chore: migrate tooling to Biome, update Node/pnpm versions, and cleanup fixtures
+- fe95559: chore: update wasm bindings of dotLottie-rs@v0.1.54-5b9fefe
+
 ## 0.63.0
 
 ### Minor Changes
