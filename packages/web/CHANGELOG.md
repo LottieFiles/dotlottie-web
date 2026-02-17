@@ -1,5 +1,10 @@
 # @lottiefiles/dotlottie-web
 
+## 0.64.1
+### Patch Changes
+
+- c015630: Fixes build time variable injection for package name and version.
+
 ## 0.64.0
 ### Minor Changes
 
