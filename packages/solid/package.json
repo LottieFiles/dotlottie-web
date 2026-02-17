@@ -44,7 +44,7 @@
     "@lottiefiles/dotlottie-web": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^22.7.6",
+    "@types/node": "^25.2.3",
     "solid-js": "^1.9.10",
     "tsdown": "^0.20.3",
     "typescript": "5.9.3",
