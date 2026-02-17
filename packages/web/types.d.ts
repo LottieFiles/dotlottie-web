@@ -19,3 +19,6 @@ declare module '*?worker&inline' {
   }
   export default InlineWorker;
 }
+
+declare var __PACKAGE_NAME__: string;
+declare var __PACKAGE_VERSION__: string;
