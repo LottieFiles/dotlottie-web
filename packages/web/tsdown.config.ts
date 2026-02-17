@@ -22,7 +22,7 @@ export default defineConfig({
     __PACKAGE_VERSION__: JSON.stringify(pkg.version),
     __PACKAGE_NAME__: JSON.stringify(pkg.name),
   },
-  plugins: [pluginInlineWorker()],
+  plugins: [pluginInlineWorker(pkg)],
   onSuccess: async () => {
     const src = path.resolve(__dirname, 'src/core/dotlottie-player.wasm');
     const dest = path.resolve(__dirname, 'dist/dotlottie-player.wasm');

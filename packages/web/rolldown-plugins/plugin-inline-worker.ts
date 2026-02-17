@@ -11,7 +11,7 @@ interface RolldownPlugin {
   load?: (id: string) => Promise<{ code: string; moduleSideEffects: boolean } | null> | null;
 }
 
-export function pluginInlineWorker(): RolldownPlugin {
+export function pluginInlineWorker(pkg: { name: string; version: string }): RolldownPlugin {
   return {
     name: 'inline-worker',
 
@@ -43,6 +43,10 @@ export function pluginInlineWorker(): RolldownPlugin {
             minify: true,
             target: ['es2020'],
             outdir: '.tmp',
+            define: {
+              __PACKAGE_NAME__: JSON.stringify(pkg.name),
+              __PACKAGE_VERSION__: JSON.stringify(pkg.version),
+            },
           });
 
           if (outputFiles.length !== 1) {
