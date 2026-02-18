@@ -1,5 +1,10 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.9.2
+### Patch Changes
+
+- 465a20b: fix: bundle lit sub-path exports to eliminate bare module specifiers in dist output
+
 ## 0.9.1
 ### Patch Changes
 
