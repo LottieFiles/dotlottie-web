@@ -1,0 +1,247 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup pnpm@v10
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node@v22
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 22
+
+      - name: 📥 Install dependencies
+        run: pnpm install
+
+      - name: 🏗 Build packages
+        run: pnpm build:packages
+
+      - name: 📦 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            packages/*/dist
+            packages/svelte/.svelte-kit
+          retention-days: 1
+          include-hidden-files: true
+
+  lint:
+    name: Lint & Format
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup pnpm@v10
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node@v22
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 22
+
+      - name: 📥 Install dependencies
+        run: pnpm install
+
+      - name: 📦 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: packages
+
+      - name: 🕵️ Lint + Format
+        run: pnpm exec biome check .
+
+  type-check:
+    name: Type Check
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup pnpm@v10
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node@v22
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 22
+
+      - name: 📥 Install dependencies
+        run: pnpm install
+
+      - name: 📦 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: packages
+
+      - name: 🔍 Verify types
+        run: pnpm type-check
+
+  test-node:
+    name: Test (Node)
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup pnpm@v10
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node@v22
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 22
+
+      - name: 📥 Install dependencies
+        run: pnpm install
+
+      - name: 📦 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: packages
+
+      - name: 🛡️ Test (Node)
+        run: pnpm test:node
+        working-directory: packages/web
+
+  test-browser:
+    name: Test (Browser)
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup pnpm@v10
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node@v22
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 22
+
+      - name: 📥 Install dependencies
+        run: pnpm install
+
+      - name: 📦 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: packages
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: 🛡️ Test (Browser with coverage)
+        run: pnpm test:coverage
+
+      - name: 📏 Report coverage (web)
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: packages/web
+          name: '@lottiefiles/dotlottie-web'
+
+      - name: 📏 Report coverage (react)
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: packages/react
+          name: '@lottiefiles/dotlottie-react'
+
+      - name: 📏 Report coverage (wc)
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: packages/wc
+          name: '@lottiefiles/dotlottie-wc'
+
+  bundle-size:
+    name: Bundle Size
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup pnpm@v10
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node@v22
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 22
+
+      - name: 📥 Install dependencies
+        run: pnpm install
+
+      - name: 📏 Report bundle size
+        uses: andresz1/size-limit-action@v1
+        continue-on-error: true
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          build_script: build:packages

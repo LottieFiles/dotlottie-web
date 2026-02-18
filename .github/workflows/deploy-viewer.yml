@@ -1,0 +1,51 @@
+name: Deploy Viewer
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/viewer/**'
+      - 'packages/web/**'
+
+concurrency:
+  group: deploy-viewer
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    if: github.repository == 'LottieFiles/dotlottie-web'
+
+    permissions:
+      contents: write
+      pages: write
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup pnpm@v10
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node@v22
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 22
+
+      - name: 📥 Install dependencies
+        run: pnpm install
+
+      - name: 🏗 Build
+        run: pnpm build --filter='viewer...'
+
+      - name: 🌐 Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./apps/viewer/dist

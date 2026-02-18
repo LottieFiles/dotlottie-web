@@ -1,0 +1,203 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup pnpm@v10
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node@v22
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 22
+
+      - name: 📥 Install dependencies
+        run: pnpm install
+
+      - name: 🏗 Build packages
+        run: pnpm build:packages
+
+      - name: 🏗 Build apps & examples
+        run: pnpm build:apps && pnpm build:examples
+
+      - name: 🔍 Verify types
+        run: pnpm type-check
+
+      - name: 🕵️ Lint + Format
+        run: pnpm exec biome check .
+
+      - name: 🛡️ Test (Node)
+        run: pnpm test:node
+        working-directory: packages/web
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: 🛡️ Test (Browser)
+        run: pnpm test
+
+  npm-release:
+    name: NPM Release
+    needs: validate
+    runs-on: ubuntu-latest
+    if: github.repository == 'LottieFiles/dotlottie-web'
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+      publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
+      hasChangesets: ${{ steps.changesets.outputs.hasChangesets }}
+
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+      pull-requests: write
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ⎔ Setup pnpm@v10
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node@v22
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: 📥 Install dependencies
+        run: pnpm install
+
+      - name: ⬆️ Update npm for OIDC trusted publishing
+        run: npm install -g npm@latest
+
+      - name: 🚀 Release to NPM
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          commit: 'chore: update versions'
+          title: 'chore: update versions'
+          publish: pnpm release:publish
+          version: pnpm release:version
+          createGithubReleases: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  gpr-release:
+    name: GPR Release
+    needs: npm-release
+    runs-on: ubuntu-latest
+    if: needs.npm-release.outputs.published == 'true'
+
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ⎔ Setup pnpm@v10
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node@v22
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 22
+          registry-url: https://npm.pkg.github.com/
+
+      - name: 📥 Install dependencies
+        run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏗 Build packages
+        run: pnpm build:packages
+
+      - name: 🚀 Publish to GitHub Packages
+        run: pnpm changeset publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  jsr-release:
+    name: JSR Release
+    needs: [npm-release, gpr-release]
+    runs-on: ubuntu-latest
+    if: needs.npm-release.outputs.published == 'true'
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ⎔ Setup pnpm@v10
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node@v22
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: 📥 Install dependencies
+        run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+
+      # related issue https://github.com/denoland/deno/issues/26152
+      - name: ⎔ Setup .npmrc (NPM) in web package
+        run: |
+          echo "@lottiefiles:registry=https://registry.npmjs.org/" >> ./packages/web/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPMJS_TOKEN }}" >> ./packages/web/.npmrc
+
+      - name: 🔄 Sync version to jsr.json
+        run: |
+          VERSION=$(jq -r '.version' ./packages/web/package.json)
+          jq '.version = $newVersion' --arg newVersion "$VERSION" ./packages/web/jsr.json > temp.json
+          mv temp.json ./packages/web/jsr.json
+
+      - name: 🚀 Release to JSR
+        run: npx jsr publish --allow-dirty
+        working-directory: packages/web
