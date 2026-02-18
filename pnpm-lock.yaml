@@ -29,6 +29,9 @@ importers:
       '@size-limit/preset-big-lib':
         specifier: ^11.1.6
         version: 11.2.0(size-limit@11.2.0)
+      '@vitest/coverage-istanbul':
+        specifier: ^4.0.18
+        version: 4.0.18(vitest@4.0.18)
       lefthook:
         specifier: ^2.1.0
         version: 2.1.0

@@ -39,6 +39,7 @@
     "@lottiefiles/remark-preset": "1.0.0",
     "@lottiefiles/tsconfig": "2.0.0",
     "@size-limit/preset-big-lib": "^11.1.6",
+    "@vitest/coverage-istanbul": "^4.0.18",
     "lefthook": "^2.1.0",
     "npm-check-updates": "19.3.2",
     "playwright": "^1.52.0",

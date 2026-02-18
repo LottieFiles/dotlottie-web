@@ -11,6 +11,9 @@ export default defineConfig({
     },
   },
   test: {
+    coverage: {
+      provider: 'istanbul',
+    },
     projects: [
       'packages/web/vitest.config.ts',
       'packages/web/vitest.config.node.ts',

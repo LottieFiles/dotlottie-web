@@ -15,5 +15,8 @@ export default defineConfig({
   test: {
     name: 'web-node',
     include: ['tests/**/*.node.{test,spec}.ts'],
+    coverage: {
+      provider: 'istanbul',
+    },
   },
 });
