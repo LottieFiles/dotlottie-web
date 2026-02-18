@@ -48,8 +48,8 @@
     "svelte-loader": "^3.2.3",
     "syncpack": "13.0.4",
     "turbo": "2.8.7",
-    "vitest": "^4.0.18",
     "typescript": "5.9.3",
+    "vitest": "^4.0.18",
     "zx": "8.8.5"
   },
   "pnpm": {

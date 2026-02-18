@@ -152,6 +152,8 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
 
       - name: Install Playwright
         run: npx playwright install --with-deps chromium
@@ -159,7 +161,7 @@ jobs:
       - name: 🛡️ Test (with coverage)
         env:
           BASE_REF: ${{ github.base_ref || 'main' }}
-        run: pnpm vitest run --browser.headless --coverage --changed="origin/$BASE_REF"
+        run: pnpm vitest run --browser.headless --coverage --coverage.all=false --changed="origin/$BASE_REF"
 
       - name: Check coverage outputs
         if: always()

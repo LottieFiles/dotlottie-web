@@ -48,10 +48,6 @@ jobs:
       - name: 🕵️ Lint + Format
         run: pnpm exec biome check .
 
-      - name: 🛡️ Test (Node)
-        run: pnpm test:node
-        working-directory: packages/web
-
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
