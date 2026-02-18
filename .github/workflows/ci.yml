@@ -145,8 +145,9 @@ jobs:
           path: packages
 
       - name: 🛡️ Test (Node)
-        run: pnpm test:node
-        working-directory: packages/web
+        env:
+          BASE_REF: ${{ github.base_ref || 'main' }}
+        run: pnpm vitest run --project=web-node --changed="origin/$BASE_REF"
 
   test-browser:
     name: Test (Browser)
@@ -189,10 +190,20 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: 🛡️ Test (Browser with coverage)
-        run: pnpm test:coverage
+        env:
+          BASE_REF: ${{ github.base_ref || 'main' }}
+        run: pnpm vitest run --browser.headless --coverage --changed="origin/$BASE_REF"
+
+      - name: Check coverage outputs
+        if: always()
+        id: coverage-check
+        run: |
+          echo "web=$(test -f packages/web/coverage/coverage-summary.json && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "react=$(test -f packages/react/coverage/coverage-summary.json && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "wc=$(test -f packages/wc/coverage/coverage-summary.json && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
       - name: 📏 Report coverage (web)
-        if: always()
+        if: always() && steps.coverage-check.outputs.web == 'true'
         uses: davelosert/vitest-coverage-report-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -200,7 +211,7 @@ jobs:
           name: '@lottiefiles/dotlottie-web'
 
       - name: 📏 Report coverage (react)
-        if: always()
+        if: always() && steps.coverage-check.outputs.react == 'true'
         uses: davelosert/vitest-coverage-report-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -208,7 +219,7 @@ jobs:
           name: '@lottiefiles/dotlottie-react'
 
       - name: 📏 Report coverage (wc)
-        if: always()
+        if: always() && steps.coverage-check.outputs.wc == 'true'
         uses: davelosert/vitest-coverage-report-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -13,6 +13,7 @@ export default defineConfig({
     __PACKAGE_VERSION__: JSON.stringify(pkg.version),
   },
   test: {
+    name: 'web',
     include: ['tests/**/*.{test,spec}.ts'],
     exclude: ['tests/**/*.node.{test,spec}.ts'],
     browser: {

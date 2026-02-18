@@ -26,8 +26,9 @@
     "release:version": "changeset version",
     "size": "size-limit",
     "stats:ts": "turbo run stats:ts",
-    "test": "turbo run test",
-    "test:coverage": "turbo run test:coverage",
+    "test": "vitest run --browser.headless",
+    "test:coverage": "vitest run --browser.headless --coverage",
+    "test:changed": "vitest run --browser.headless --changed",
     "type-check": "turbo run type-check"
   },
   "devDependencies": {
@@ -46,6 +47,7 @@
     "svelte-loader": "^3.2.3",
     "syncpack": "13.0.4",
     "turbo": "2.8.7",
+    "vitest": "^4.0.18",
     "typescript": "5.9.3",
     "zx": "8.8.5"
   },
