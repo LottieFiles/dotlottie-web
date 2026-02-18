@@ -114,45 +114,8 @@ jobs:
       - name: 🔍 Verify types
         run: pnpm type-check
 
-  test-node:
-    name: Test (Node)
-    needs: build
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: ⎔ Setup pnpm@v10
-        uses: pnpm/action-setup@v4
-
-      - name: ⎔ Setup Node@v22
-        uses: actions/setup-node@v4
-        with:
-          cache: pnpm
-          node-version: 22
-
-      - name: 📥 Install dependencies
-        run: pnpm install
-
-      - name: 📦 Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-          path: packages
-
-      - name: 🛡️ Test (Node)
-        env:
-          BASE_REF: ${{ github.base_ref || 'main' }}
-        run: pnpm vitest run --project=web-node --changed="origin/$BASE_REF"
-
-  test-browser:
-    name: Test (Browser)
+  test:
+    name: Test
     needs: build
     runs-on: ubuntu-latest
 
@@ -193,7 +156,7 @@ jobs:
       - name: Install Playwright
         run: npx playwright install --with-deps chromium
 
-      - name: 🛡️ Test (Browser with coverage)
+      - name: 🛡️ Test (with coverage)
         env:
           BASE_REF: ${{ github.base_ref || 'main' }}
         run: pnpm vitest run --browser.headless --coverage --changed="origin/$BASE_REF"
