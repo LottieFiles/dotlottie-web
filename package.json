@@ -26,8 +26,9 @@
     "release:version": "changeset version",
     "size": "size-limit",
     "stats:ts": "turbo run stats:ts",
-    "test": "turbo run test",
-    "test:coverage": "turbo run test:coverage",
+    "test": "vitest run --browser.headless",
+    "test:coverage": "vitest run --browser.headless --coverage",
+    "test:changed": "vitest run --browser.headless --changed",
     "type-check": "turbo run type-check"
   },
   "devDependencies": {
@@ -38,6 +39,7 @@
     "@lottiefiles/remark-preset": "1.0.0",
     "@lottiefiles/tsconfig": "2.0.0",
     "@size-limit/preset-big-lib": "^11.1.6",
+    "@vitest/coverage-istanbul": "^4.0.18",
     "lefthook": "^2.1.0",
     "npm-check-updates": "19.3.2",
     "playwright": "^1.52.0",
@@ -47,6 +49,7 @@
     "syncpack": "13.0.4",
     "turbo": "2.8.7",
     "typescript": "5.9.3",
+    "vitest": "^4.0.18",
     "zx": "8.8.5"
   },
   "pnpm": {

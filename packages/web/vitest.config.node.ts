@@ -13,6 +13,10 @@ export default defineConfig({
     __PACKAGE_VERSION__: JSON.stringify(pkg.version),
   },
   test: {
+    name: 'web-node',
     include: ['tests/**/*.node.{test,spec}.ts'],
+    coverage: {
+      provider: 'istanbul',
+    },
   },
 });

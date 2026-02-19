@@ -5,6 +5,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   plugins: [react()],
   test: {
+    name: 'react',
     browser: {
       enabled: true,
       provider: playwright(),
