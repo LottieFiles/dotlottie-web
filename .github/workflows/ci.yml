@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: ⎔ Setup pnpm@v10
         uses: pnpm/action-setup@v4
@@ -58,7 +58,7 @@ jobs:
 
     steps:
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: ⎔ Setup pnpm@v10
         uses: pnpm/action-setup@v4
@@ -91,7 +91,7 @@ jobs:
 
     steps:
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: ⎔ Setup pnpm@v10
         uses: pnpm/action-setup@v4
@@ -125,7 +125,7 @@ jobs:
 
     steps:
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -205,7 +205,7 @@ jobs:
 
     steps:
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: ⎔ Setup pnpm@v10
         uses: pnpm/action-setup@v4
