@@ -73,20 +73,31 @@ dotLottie.setVectorSlot('position', [
 
 ### Gradient Slots
 
-Override gradient fills and strokes. Format: `[offset, r, g, b, offset, r, g, b, ...]`
+Override gradient fills and strokes.
+Color stops (4 floats each): `[offset, r, g, b, ...]`
+Opacity stops (2 floats each, appended after color stops): `[..., offset, alpha, ...]`
+The `colorStopCount` parameter is required to distinguish color data from opacity data.
 
 ```typescript
-// Static gradient (red to blue)
+// Static gradient (red to blue, 2 color stops, no opacity)
 dotLottie.setGradientSlot('bg-gradient', [
   0, 1, 0, 0,  // Red at position 0
   1, 0, 0, 1,  // Blue at position 1
-]);
+], 2);
+
+// Static gradient with opacity (2 color stops + 2 opacity stops)
+dotLottie.setGradientSlot('bg-gradient', [
+  0, 1, 0, 0,  // Red at position 0
+  1, 0, 0, 1,  // Blue at position 1
+  0, 0.8,      // 80% opacity at position 0
+  1, 1,         // 100% opacity at position 1
+], 2);
 
 // Animated gradient
 dotLottie.setGradientSlot('bg-gradient', [
   { t: 0, s: [0, 1, 0, 0, 1, 0, 0, 1] },
   { t: 60, s: [0, 0, 1, 0, 1, 1, 0, 0] },
-]);
+], 2);
 ```
 
 ### Text Slots
