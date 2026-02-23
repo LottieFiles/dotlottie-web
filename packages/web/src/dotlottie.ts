@@ -1609,14 +1609,10 @@ export class DotLottie {
 
     const result = this._dotLottieCore.setSlotStr(slotId, slotJson);
 
-    if (result) {
-      this._dotLottieCore.render();
-      this._draw();
+    this._dotLottieCore.render();
+    this._draw();
 
-      return true;
-    }
-
-    return false;
+    return result;
   }
 
   /**
@@ -1638,14 +1634,10 @@ export class DotLottie {
 
     const result = this._dotLottieCore.setSlotStr(slotId, slotJson);
 
-    if (result) {
-      this._dotLottieCore.render();
-      this._draw();
+    this._dotLottieCore.render();
+    this._draw();
 
-      return true;
-    }
-
-    return false;
+    return result;
   }
 
   /**
@@ -1668,41 +1660,48 @@ export class DotLottie {
 
     const result = this._dotLottieCore.setSlotStr(slotId, slotJson);
 
-    if (result) {
-      this._dotLottieCore.render();
-      this._draw();
+    this._dotLottieCore.render();
+    this._draw();
 
-      return true;
-    }
-
-    return false;
+    return result;
   }
 
   /**
    * Set a gradient slot value
    * @param slotId - The slot ID to set
-   * @param value - Static gradient [offset, r, g, b, ...] or array of keyframes
+   * @param value - Static gradient or array of keyframes.
+   * Color stops: [offset, r, g, b, ...] (4 floats per stop).
+   * With opacity stops appended: [...color stops, offset, alpha, ...] (2 floats per opacity stop).
+   * @param colorStopCount - Number of color stops (required to distinguish color data from opacity data)
    * @returns true if successful
    * @example
-   * // Static red to blue gradient
-   * dotLottie.setGradientSlot('myGradient', [0, 1, 0, 0, 1, 0, 0, 1]);
+   * // Static red to blue gradient (2 color stops, no opacity)
+   * dotLottie.setGradientSlot('myGradient', [0, 1, 0, 0, 1, 0, 0, 1], 2);
+   * // Static gradient with opacity stops (2 color stops + 2 opacity stops)
+   * dotLottie.setGradientSlot('myGradient', [
+   *   0, 1, 0, 0,  // color stop 1: red at position 0
+   *   1, 0, 0, 1,  // color stop 2: blue at position 1
+   *   0, 0.8,      // opacity stop 1: 80% at position 0
+   *   1, 1,         // opacity stop 2: 100% at position 1
+   * ], 2);
    * // Animated gradient
-   * dotLottie.setGradientSlot('myGradient', [\{ t: 0, s: [0, 1, 0, 0, 1, 0, 0, 1] \}]);
+   * dotLottie.setGradientSlot('myGradient', [
+   *   \{ t: 0, s: [0, 1, 0, 0, 1, 0, 0, 1] \},
+   *   \{ t: 60, s: [0, 0, 1, 0, 1, 1, 0, 0] \},
+   * ], 2);
    */
-  public setGradientSlot(slotId: string, value: GradientSlotValue): boolean {
+  public setGradientSlot(slotId: string, value: GradientSlotValue, colorStopCount: number): boolean {
     if (this._dotLottieCore === null) return false;
 
     const isAnimated = this._isKeyframeArray(value);
-    const slotJson = JSON.stringify({ a: isAnimated ? 1 : 0, k: value });
+    const slotJson = JSON.stringify({ k: { a: isAnimated ? 1 : 0, k: value }, p: colorStopCount });
 
-    if (this._dotLottieCore.setSlotStr(slotId, slotJson)) {
-      this._dotLottieCore.render();
-      this._draw();
+    const result = this._dotLottieCore.setSlotStr(slotId, slotJson);
 
-      return true;
-    }
+    this._dotLottieCore.render();
+    this._draw();
 
-    return false;
+    return result;
   }
 
   /**
@@ -1740,14 +1739,12 @@ export class DotLottie {
       k: [{ t: 0, s: mergedTextDoc }],
     });
 
-    if (this._dotLottieCore.setSlotStr(slotId, slotJson)) {
-      this._dotLottieCore.render();
-      this._draw();
+    const result = this._dotLottieCore.setSlotStr(slotId, slotJson);
 
-      return true;
-    }
+    this._dotLottieCore.render();
+    this._draw();
 
-    return false;
+    return result;
   }
 
   /**
@@ -1758,14 +1755,12 @@ export class DotLottie {
   public resetSlot(slotId: string): boolean {
     if (this._dotLottieCore === null) return false;
 
-    if (this._dotLottieCore.resetSlot(slotId)) {
-      this._dotLottieCore.render();
-      this._draw();
+    const result = this._dotLottieCore.resetSlot(slotId);
 
-      return true;
-    }
+    this._dotLottieCore.render();
+    this._draw();
 
-    return false;
+    return result;
   }
 
   /**
@@ -1776,14 +1771,12 @@ export class DotLottie {
   public clearSlot(slotId: string): boolean {
     if (this._dotLottieCore === null) return false;
 
-    if (this._dotLottieCore.clearSlot(slotId)) {
-      this._dotLottieCore.render();
-      this._draw();
+    const result = this._dotLottieCore.clearSlot(slotId);
 
-      return true;
-    }
+    this._dotLottieCore.render();
+    this._draw();
 
-    return false;
+    return result;
   }
 
   /**
@@ -1793,14 +1786,12 @@ export class DotLottie {
   public resetSlots(): boolean {
     if (this._dotLottieCore === null) return false;
 
-    if (this._dotLottieCore.resetSlots()) {
-      this._dotLottieCore.render();
-      this._draw();
+    const result = this._dotLottieCore.resetSlots();
 
-      return true;
-    }
+    this._dotLottieCore.render();
+    this._draw();
 
-    return false;
+    return result;
   }
 
   /**
@@ -1810,14 +1801,12 @@ export class DotLottie {
   public clearSlots(): boolean {
     if (this._dotLottieCore === null) return false;
 
-    if (this._dotLottieCore.clearSlots()) {
-      this._dotLottieCore.render();
-      this._draw();
+    const result = this._dotLottieCore.clearSlots();
 
-      return true;
-    }
+    this._dotLottieCore.render();
+    this._draw();
 
-    return false;
+    return result;
   }
 
   // #endregion

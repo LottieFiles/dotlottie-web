@@ -303,17 +303,20 @@ export type Vector = [number, number] | [number, number, number];
 export type VectorSlotValue = Vector | Array<Keyframe<Vector>>;
 
 /**
- * Gradient as raw Lottie flat array format
- * Color stops: [offset, r, g, b, offset, r, g, b, ...]
- * With opacity: [...color stops, offset, opacity, offset, opacity, ...]
- * All values are in [0, 1] range
- * @example [0, 1, 0, 0, 1, 0, 0, 1] // red to blue gradient
+ * Gradient as raw Lottie flat array format.
+ * Color stops (4 floats each): [offset, r, g, b, offset, r, g, b, ...]
+ * Opacity stops (2 floats each, appended after color stops): [...color stops, offset, alpha, offset, alpha, ...]
+ * All values are in [0, 1] range.
+ * Expected array size: 4 * colorStopCount + 2 * opacityStopCount
+ * @example Without opacity: [0, 1, 0, 0, 1, 0, 0, 1] // red to blue gradient (2 color stops)
+ * @example With opacity: [0, 1, 0, 0, 1, 0, 0, 1, 0, 0.8, 1, 1] // red to blue, 80% -> 100% opacity
  */
 export type Gradient = number[];
 
 /**
  * Gradient slot value - static gradient or array of keyframes
- * @example Static: [0, 1, 0, 0, 1, 0, 0, 1]
+ * @example Static without opacity: [0, 1, 0, 0, 1, 0, 0, 1]
+ * @example Static with opacity: [0, 1, 0, 0, 1, 0, 0, 1, 0, 0.8, 1, 1]
  * @example Animated: [\{ t: 0, s: [0, 1, 0, 0, 1, 0, 0, 1] \}]
  */
 export type GradientSlotValue = Gradient | Array<Keyframe<Gradient>>;

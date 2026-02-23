@@ -139,8 +139,8 @@ function GradientSlotInput({ slotId, dotLottie }: { slotId: string; dotLottie: D
     };
     const [r1, g1, b1] = hexToRgb(start);
     const [r2, g2, b2] = hexToRgb(end);
-    // Format: [offset, r, g, b, offset, r, g, b]
-    dotLottie.setGradientSlot(slotId, [0, r1, g1, b1, 1, r2, g2, b2]);
+    // Format: [color stops..., opacity stops...] with 2 color stops + 2 opacity stops
+    dotLottie.setGradientSlot(slotId, [0, r1, g1, b1, 1, r2, g2, b2, 0, 1, 1, 1], 2);
   };
 
   return (
