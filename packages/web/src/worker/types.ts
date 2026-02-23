@@ -26,7 +26,20 @@ import type {
   StopEvent,
   UnfreezeEvent,
 } from '../event-manager';
-import type { Config, Layout, Mode, RenderConfig, StateMachineConfig, Transform } from '../types';
+import type {
+  ColorSlotValue,
+  Config,
+  GradientSlotValue,
+  Layout,
+  Mode,
+  RenderConfig,
+  ScalarSlotValue,
+  SlotType,
+  StateMachineConfig,
+  TextSlotValue,
+  Transform,
+  VectorSlotValue,
+} from '../types';
 
 import type { DotLottieInstanceState } from './dotlottie';
 
@@ -77,6 +90,64 @@ export interface MethodParamsMap {
   };
   setBackgroundColor: {
     backgroundColor: string;
+    instanceId: string;
+  };
+  setSlots: {
+    instanceId: string;
+    slots: Record<string, unknown>;
+  };
+  getSlotIds: {
+    instanceId: string;
+  };
+  getSlotType: {
+    instanceId: string;
+    slotId: string;
+  };
+  getSlot: {
+    instanceId: string;
+    slotId: string;
+  };
+  getSlots: {
+    instanceId: string;
+  };
+  setColorSlot: {
+    instanceId: string;
+    slotId: string;
+    value: ColorSlotValue;
+  };
+  setScalarSlot: {
+    instanceId: string;
+    slotId: string;
+    value: ScalarSlotValue;
+  };
+  setVectorSlot: {
+    instanceId: string;
+    slotId: string;
+    value: VectorSlotValue;
+  };
+  setGradientSlot: {
+    colorStopCount: number;
+    instanceId: string;
+    slotId: string;
+    value: GradientSlotValue;
+  };
+  setTextSlot: {
+    instanceId: string;
+    slotId: string;
+    value: TextSlotValue;
+  };
+  resetSlot: {
+    instanceId: string;
+    slotId: string;
+  };
+  clearSlot: {
+    instanceId: string;
+    slotId: string;
+  };
+  resetSlots: {
+    instanceId: string;
+  };
+  clearSlots: {
     instanceId: string;
   };
   setFrame: {
@@ -393,6 +464,20 @@ export interface MethodResultMap {
   registerFont: boolean;
   resize: undefined;
   setBackgroundColor: undefined;
+  setSlots: undefined;
+  getSlotIds: string[];
+  getSlotType: SlotType | undefined;
+  getSlot: unknown;
+  getSlots: Record<string, unknown>;
+  setColorSlot: boolean;
+  setScalarSlot: boolean;
+  setVectorSlot: boolean;
+  setGradientSlot: boolean;
+  setTextSlot: boolean;
+  resetSlot: boolean;
+  clearSlot: boolean;
+  resetSlots: boolean;
+  clearSlots: boolean;
   setFrame: undefined;
   setLayout: undefined;
   setLoop: undefined;
