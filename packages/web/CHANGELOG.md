@@ -1,5 +1,10 @@
 # @lottiefiles/dotlottie-web
 
+## 0.64.2
+### Patch Changes
+
+- ced9855: Add required `colorStopCount` parameter to `setGradientSlot()` to distinguish color stops from opacity stops in gradient data. Refactor all slot methods to always re-render after slot operations.
+
 ## 0.64.1
 ### Patch Changes
 
