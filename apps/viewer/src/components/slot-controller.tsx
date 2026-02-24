@@ -1,5 +1,6 @@
 import type { DotLottie } from '@lottiefiles/dotlottie-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { FaAlignCenter, FaAlignLeft, FaAlignRight } from 'react-icons/fa';
 import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import InputLabel from './form/input-label';
 
@@ -187,31 +188,94 @@ function GradientSlotInput({ slotId, dotLottie }: { slotId: string; dotLottie: D
   );
 }
 
-// Text slot input component (content only)
+// Text alignment button group component
+function TextAlignmentInput({ value, onChange }: { value: 0 | 1 | 2; onChange: (justify: 0 | 1 | 2) => void }) {
+  const options: Array<{ value: 0 | 1 | 2; icon: React.ReactNode; label: string }> = [
+    { value: 0, icon: <FaAlignLeft size={10} />, label: 'Left' },
+    { value: 2, icon: <FaAlignCenter size={10} />, label: 'Center' },
+    { value: 1, icon: <FaAlignRight size={10} />, label: 'Right' },
+  ];
+
+  return (
+    <div className="flex overflow-hidden border rounded-lg shrink-0 border-subtle">
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          title={opt.label}
+          className={`flex items-center justify-center w-7 h-7 transition-colors ${
+            value === opt.value ? 'bg-lottie text-white' : 'bg-subtle hover:bg-subtle/60 text-secondary'
+          }`}
+          onClick={() => onChange(opt.value)}
+        >
+          {opt.icon}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// Text slot input component with alignment and font size controls
 function TextSlotInput({ slotId, dotLottie }: { slotId: string; dotLottie: DotLottie }) {
   const [text, setText] = useState('');
+  const [fontSize, setFontSize] = useState<number | undefined>(undefined);
+  const [justify, setJustify] = useState<0 | 1 | 2>(0);
 
   useEffect(() => {
-    const slotValue = dotLottie.getSlot(slotId) as { k?: Array<{ s?: { t?: string } }> } | undefined;
-    if (slotValue?.k?.[0]?.s?.t) {
-      setText(slotValue.k[0].s.t);
+    const slotValue = dotLottie.getSlot(slotId) as
+      | { k?: Array<{ s?: { t?: string; s?: number; j?: 0 | 1 | 2 } }> }
+      | undefined;
+    const textDoc = slotValue?.k?.[0]?.s;
+    if (textDoc) {
+      if (textDoc.t) setText(textDoc.t);
+      if (textDoc.s !== undefined) setFontSize(textDoc.s);
+      if (textDoc.j !== undefined) setJustify(textDoc.j);
     }
   }, [dotLottie, slotId]);
 
-  const handleChange = (newText: string) => {
+  const handleTextChange = (newText: string) => {
     setText(newText);
     dotLottie.setTextSlot(slotId, { t: newText });
   };
 
+  const handleFontSizeChange = (newSize: number) => {
+    setFontSize(newSize);
+    dotLottie.setTextSlot(slotId, { s: newSize });
+  };
+
+  const handleJustifyChange = (newJustify: 0 | 1 | 2) => {
+    setJustify(newJustify);
+    dotLottie.setTextSlot(slotId, { j: newJustify });
+  };
+
   return (
     <InputLabel lablel={slotId}>
-      <input
-        type="text"
-        className="w-full p-2 text-sm border rounded-lg border-subtle bg-subtle h-9"
-        value={text}
-        onChange={(e) => handleChange(e.target.value)}
-        placeholder="Enter text..."
-      />
+      <div className="flex flex-col gap-2">
+        <input
+          type="text"
+          className="w-full p-2 text-sm border rounded-lg border-subtle bg-subtle h-9"
+          value={text}
+          onChange={(e) => handleTextChange(e.target.value)}
+          placeholder="Enter text..."
+        />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1 min-w-0">
+            <span className="text-xs shrink-0 text-secondary">Size</span>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              className="w-16 p-1 text-sm border rounded-lg border-subtle bg-subtle h-7"
+              value={fontSize ?? ''}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && val > 0) handleFontSizeChange(val);
+              }}
+              placeholder="px"
+            />
+          </div>
+          <TextAlignmentInput value={justify} onChange={handleJustifyChange} />
+        </div>
+      </div>
     </InputLabel>
   );
 }
