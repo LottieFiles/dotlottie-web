@@ -1,5 +1,16 @@
 # @lottiefiles/dotlottie-web
 
+## 0.65.0
+### Minor Changes
+
+- 1797c60: feat: added `DotLottieWorker` slots apis
+
+### Patch Changes
+
+- 1797c60: chore: update dotlottie-rs wasm bindings to v0.1.54-495df0e
+  
+  * Fixes default font reloading after the ThorVG engine is terminated and reinitialized.
+
 ## 0.64.2
 ### Patch Changes
 
