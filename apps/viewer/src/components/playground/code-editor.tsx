@@ -23,6 +23,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ value, onChange, onRun }
   const isExternalChange = useRef(false);
   const { resolvedTheme } = useTheme();
 
+  // Use refs for callbacks to avoid recreating the editor on every keystroke
+  const onRunRef = useRef(onRun);
+  onRunRef.current = onRun;
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -30,7 +36,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ value, onChange, onRun }
       {
         key: 'Mod-Enter',
         run: () => {
-          onRun?.();
+          onRunRef.current?.();
           return true;
         },
       },
@@ -45,7 +51,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ value, onChange, onRun }
         runKeymap,
         EditorView.updateListener.of((update) => {
           if (update.docChanged && !isExternalChange.current) {
-            onChange(update.state.doc.toString());
+            onChangeRef.current(update.state.doc.toString());
           }
         }),
         EditorView.theme({
@@ -62,13 +68,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ value, onChange, onRun }
       editor.destroy();
       editorRef.current = null;
     };
-    // Recreate editor when theme changes
+    // Only recreate editor when theme changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resolvedTheme, onChange, onRun, value]);
-
-  // Update onRun callback without recreating editor
-  const onRunRef = useRef(onRun);
-  onRunRef.current = onRun;
+  }, [resolvedTheme]);
 
   // Sync external value changes to editor
   useEffect(() => {

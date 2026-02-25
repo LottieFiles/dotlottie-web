@@ -4,7 +4,21 @@ import type { EventListener, EventType, FrameEvent, StateMachineInternalMessage 
 import { EventManager } from '../event-manager';
 import { OffscreenObserver } from '../offscreen-observer';
 import { CanvasResizeObserver } from '../resize-observer';
-import type { Config, Layout, Manifest, Mode, RenderConfig, StateMachineConfig, Transform } from '../types';
+import type {
+  ColorSlotValue,
+  Config,
+  GradientSlotValue,
+  Layout,
+  Manifest,
+  Mode,
+  RenderConfig,
+  ScalarSlotValue,
+  SlotType,
+  StateMachineConfig,
+  TextSlotValue,
+  Transform,
+  VectorSlotValue,
+} from '../types';
 import { getDefaultDPR, getPointerPosition, handleOpenUrl, isElementInViewport } from '../utils';
 
 import type { MethodParamsMap, MethodResultMap, RpcRequest, RpcResponse } from './types';
@@ -793,6 +807,94 @@ export class DotLottieWorker {
     await this._sendMessage('setLayout', { instanceId: this._id, layout });
     await this._updateDotLottieInstanceState();
   }
+
+  // #region Slots API
+
+  public async setSlots(slots: Record<string, unknown>): Promise<void> {
+    if (!this._created) return;
+
+    await this._sendMessage('setSlots', { instanceId: this._id, slots });
+  }
+
+  public async getSlotIds(): Promise<string[]> {
+    if (!this._created) return [];
+
+    return this._sendMessage('getSlotIds', { instanceId: this._id });
+  }
+
+  public async getSlotType(slotId: string): Promise<SlotType | undefined> {
+    if (!this._created) return undefined;
+
+    return this._sendMessage('getSlotType', { instanceId: this._id, slotId });
+  }
+
+  public async getSlot(slotId: string): Promise<unknown> {
+    if (!this._created) return undefined;
+
+    return this._sendMessage('getSlot', { instanceId: this._id, slotId });
+  }
+
+  public async getSlots(): Promise<Record<string, unknown>> {
+    if (!this._created) return {};
+
+    return this._sendMessage('getSlots', { instanceId: this._id });
+  }
+
+  public async setColorSlot(slotId: string, value: ColorSlotValue): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('setColorSlot', { instanceId: this._id, slotId, value });
+  }
+
+  public async setScalarSlot(slotId: string, value: ScalarSlotValue): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('setScalarSlot', { instanceId: this._id, slotId, value });
+  }
+
+  public async setVectorSlot(slotId: string, value: VectorSlotValue): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('setVectorSlot', { instanceId: this._id, slotId, value });
+  }
+
+  public async setGradientSlot(slotId: string, value: GradientSlotValue, colorStopCount: number): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('setGradientSlot', { instanceId: this._id, slotId, value, colorStopCount });
+  }
+
+  public async setTextSlot(slotId: string, value: TextSlotValue): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('setTextSlot', { instanceId: this._id, slotId, value });
+  }
+
+  public async resetSlot(slotId: string): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('resetSlot', { instanceId: this._id, slotId });
+  }
+
+  public async clearSlot(slotId: string): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('clearSlot', { instanceId: this._id, slotId });
+  }
+
+  public async resetSlots(): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('resetSlots', { instanceId: this._id });
+  }
+
+  public async clearSlots(): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('clearSlots', { instanceId: this._id });
+  }
+
+  // #endregion
 
   private async _updateDotLottieInstanceState(): Promise<void> {
     if (!this._created) return;

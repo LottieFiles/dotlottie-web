@@ -954,6 +954,160 @@ const commands: {
 
     instance.setBackgroundColor(backgroundColor);
   },
+  setSlots: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.setSlots(request.params.slots);
+  },
+  getSlotIds: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.getSlotIds();
+  },
+  getSlotType: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.getSlotType(request.params.slotId);
+  },
+  getSlot: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.getSlot(request.params.slotId);
+  },
+  getSlots: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.getSlots();
+  },
+  setColorSlot: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.setColorSlot(request.params.slotId, request.params.value);
+  },
+  setScalarSlot: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.setScalarSlot(request.params.slotId, request.params.value);
+  },
+  setVectorSlot: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.setVectorSlot(request.params.slotId, request.params.value);
+  },
+  setGradientSlot: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.setGradientSlot(request.params.slotId, request.params.value, request.params.colorStopCount);
+  },
+  setTextSlot: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.setTextSlot(request.params.slotId, request.params.value);
+  },
+  resetSlot: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.resetSlot(request.params.slotId);
+  },
+  clearSlot: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.clearSlot(request.params.slotId);
+  },
+  resetSlots: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.resetSlots();
+  },
+  clearSlots: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.clearSlots();
+  },
   setFrame: (request) => {
     const instanceId = request.params.instanceId;
     const frame = request.params.frame;
