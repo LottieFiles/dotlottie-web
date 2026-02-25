@@ -1,5 +1,10 @@
 # @lottiefiles/dotlottie-svelte
 
+## 0.9.3
+### Patch Changes
+
+- 11f0ef8: Fix broken props by reverting `export const` back to `export let` in Svelte component
+
 ## 0.9.2
 ### Patch Changes
 
