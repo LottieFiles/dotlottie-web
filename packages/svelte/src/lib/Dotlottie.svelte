@@ -6,27 +6,27 @@ export function setWasmUrl(url: string): void {
   DotLottie.setWasmUrl(url);
 }
 
-export const autoplay: Config['autoplay'] = false;
-export const backgroundColor: Config['backgroundColor'] = undefined;
-export const data: Config['data'] = undefined;
-export const loop: Config['loop'] = false;
-export const mode: Config['mode'] = 'forward';
-export const renderConfig: Config['renderConfig'] = undefined;
-export const segment: Config['segment'] = undefined;
-export const speed: Config['speed'] = 1;
-export const src: Config['src'] = undefined;
-export const useFrameInterpolation: Config['useFrameInterpolation'] = true;
-export const marker: Config['marker'] = undefined;
-export const layout: Config['layout'] = undefined;
-export const animationId: Config['animationId'] = '';
-export const themeId: Config['themeId'] = '';
-export const stateMachineId: Config['stateMachineId'] = undefined;
-export const stateMachineConfig: Config['stateMachineConfig'] = undefined;
+export let autoplay: Config['autoplay'] = false;
+export let backgroundColor: Config['backgroundColor'] = undefined;
+export let data: Config['data'] = undefined;
+export let loop: Config['loop'] = false;
+export let mode: Config['mode'] = 'forward';
+export let renderConfig: Config['renderConfig'] = undefined;
+export let segment: Config['segment'] = undefined;
+export let speed: Config['speed'] = 1;
+export let src: Config['src'] = undefined;
+export let useFrameInterpolation: Config['useFrameInterpolation'] = true;
+export let marker: Config['marker'] = undefined;
+export let layout: Config['layout'] = undefined;
+export let animationId: Config['animationId'] = '';
+export let themeId: Config['themeId'] = '';
+export let stateMachineId: Config['stateMachineId'] = undefined;
+export let stateMachineConfig: Config['stateMachineConfig'] = undefined;
 
-export const playOnHover: boolean = false;
-export const themeData: string = '';
+export let playOnHover: boolean = false;
+export let themeData: string = '';
 
-export const dotLottieRefCallback: (dotLottie: DotLottie) => void = () => {};
+export let dotLottieRefCallback: (dotLottie: DotLottie) => void = () => {};
 
 const hoverHandler = (event: MouseEvent) => {
   if (!playOnHover || !dotLottie.isLoaded) return;
