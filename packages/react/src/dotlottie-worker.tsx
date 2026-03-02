@@ -2,7 +2,7 @@
 
 import type { Config } from '@lottiefiles/dotlottie-web';
 import { DotLottieWorker } from '@lottiefiles/dotlottie-web';
-import type { JSX } from 'react';
+import type { ReactNode } from 'react';
 import type { BaseDotLottieProps } from './base-dotlottie-react';
 import { BaseDotLottieReact } from './base-dotlottie-react';
 
@@ -10,6 +10,6 @@ export type DotLottieWorkerReactProps = Omit<BaseDotLottieProps<DotLottieWorker>
 
 const createDotLottieWorker = (config: Config & { workerId?: string }): DotLottieWorker => new DotLottieWorker(config);
 
-export const DotLottieWorkerReact = (props: DotLottieWorkerReactProps): JSX.Element => {
+export const DotLottieWorkerReact = (props: DotLottieWorkerReactProps): ReactNode => {
   return <BaseDotLottieReact {...props} createDotLottie={createDotLottieWorker} />;
 };
