@@ -41,26 +41,34 @@
     "lint": "biome check .",
     "format": "biome check --write .",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
+    "test": "vitest run --browser.headless",
+    "test:coverage": "vitest run --browser.headless --coverage",
+    "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "svelte": "^4.0.0 || ^5.0.0"
+    "svelte": "^5.0.0"
   },
   "dependencies": {
     "@lottiefiles/dotlottie-web": "workspace:*"
   },
   "devDependencies": {
-    "@sveltejs/adapter-auto": "^3.0.0",
-    "@sveltejs/kit": "^2.0.0",
-    "@sveltejs/package": "^2.0.0",
-    "@sveltejs/vite-plugin-svelte": "^4.0.0",
-    "publint": "^0.1.9",
-    "svelte": "^5.0.0",
-    "svelte-check": "^3.6.0",
+    "@sveltejs/adapter-auto": "^7.0.1",
+    "@sveltejs/kit": "^2.53.4",
+    "@sveltejs/package": "^2.5.7",
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@testing-library/user-event": "^14.5.2",
+    "@vitest/browser": "^4.0.18",
+    "@vitest/browser-playwright": "^4.0.18",
+    "@vitest/coverage-istanbul": "^4.0.18",
+    "publint": "^0.3.17",
+    "svelte": "^5.53.6",
+    "svelte-check": "^4.4.4",
     "tslib": "^2.4.1",
     "typescript": "5.9.3",
-    "vite": "^5.0.13",
-    "vitest": "^4.0.18"
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18",
+    "vitest-browser-svelte": "^2.0.2"
   },
   "sideEffects": false,
   "publishConfig": {
