@@ -2,7 +2,7 @@
 'use client';
 
 import type { Config, DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-web';
-import { type ComponentProps, type JSX, type RefCallback, useCallback, useEffect, useRef } from 'react';
+import { type ComponentProps, type ReactNode, type RefCallback, useCallback, useEffect, useRef } from 'react';
 
 export type BaseDotLottieProps<T extends DotLottie | DotLottieWorker> = Omit<Config, 'canvas'> &
   ComponentProps<'canvas'> & {
@@ -71,7 +71,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   ...props
 }: BaseDotLottieProps<T> & {
   createDotLottie: (config: T extends DotLottieWorker ? Config & { workerId?: string } : Config) => T;
-}): JSX.Element => {
+}): ReactNode => {
   const dotLottieRef = useRef<T | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dotLottieRefCallbackRef = useRef<RefCallback<T | null> | undefined>(dotLottieRefCallback);
