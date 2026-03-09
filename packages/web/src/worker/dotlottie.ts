@@ -1,5 +1,4 @@
 import { IS_BROWSER } from '../constants';
-import type { Marker } from '../core/dotlottie-player.types';
 import type { EventListener, EventType, FrameEvent, StateMachineInternalMessage } from '../event-manager';
 import { EventManager } from '../event-manager';
 import { OffscreenObserver } from '../offscreen-observer';
@@ -10,6 +9,7 @@ import type {
   GradientSlotValue,
   Layout,
   Manifest,
+  Marker,
   Mode,
   RenderConfig,
   ScalarSlotValue,
@@ -112,7 +112,7 @@ export class DotLottieWorker {
     activeAnimationId: '',
     activeThemeId: '',
     layout: undefined,
-    marker: undefined,
+    marker: '',
     isReady: false,
     manifest: null,
   };

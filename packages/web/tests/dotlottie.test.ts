@@ -6,7 +6,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi 
 import type { Config, Layout, Mode } from '../src';
 import { DotLottie as DotLottieClass, DotLottieWorker as DotLottieWorkerClass } from '../src';
 import { BYTES_PER_PIXEL } from '../src/constants';
-import type { DotLottiePlayer } from '../src/core';
+import type { DotLottiePlayerWasm as DotLottiePlayer } from '../src/core';
 import { getDefaultDPR } from '../src/utils';
 
 import { addWasmCSPPolicy, createCanvas, sleep } from './test-utils';
@@ -648,9 +648,9 @@ describe.each([
 
     vi.spyOn(dotLottieCore, 'render').mockReturnValue(true);
 
-    const wrongSizeBuffer = new ArrayBuffer(10);
+    const wrongSizeBuffer = new Uint8Array(10);
 
-    vi.spyOn(dotLottieCore, 'buffer').mockReturnValue(wrongSizeBuffer);
+    vi.spyOn(dotLottieCore, 'get_pixel_buffer').mockReturnValue(wrongSizeBuffer);
 
     onRender.mockClear();
 
@@ -728,13 +728,13 @@ describe.each([
 
       const dotLottieCore = (dotLottie as DotLottieClass as any)._dotLottieCore as DotLottiePlayer;
 
-      const originalBuffer = dotLottieCore.buffer.bind(dotLottieCore);
+      const originalBuffer = dotLottieCore.get_pixel_buffer.bind(dotLottieCore);
 
       const initialWidth = canvas.width;
       const initialHeight = canvas.height;
       const initialBufferSize = initialWidth * initialHeight * BYTES_PER_PIXEL;
 
-      const oldBuffer = new ArrayBuffer(initialBufferSize);
+      const oldBuffer = new Uint8Array(initialBufferSize);
 
       let resizeCallCount = 0;
 
@@ -746,7 +746,7 @@ describe.each([
 
       let drawCallCount = 0;
 
-      vi.spyOn(dotLottieCore, 'buffer').mockImplementation(() => {
+      vi.spyOn(dotLottieCore, 'get_pixel_buffer').mockImplementation(() => {
         drawCallCount += 1;
         if (resizeCallCount > 0 && drawCallCount < 10) {
           return oldBuffer;
@@ -1033,10 +1033,10 @@ describe.each([
 
       expect(onLoadError).toHaveBeenCalledWith({
         type: 'loadError',
-        error: new Error(`Unsupported data type for animation data. Expected: 
+        error: new Error(`Unsupported data type for animation data. Expected:
           - string (Lottie JSON),
           - ArrayBuffer (dotLottie),
-          - object (Lottie JSON). 
+          - object (Lottie JSON).
           Received: number`),
       });
     });
@@ -1895,7 +1895,7 @@ describe.each([
         src: jsonSrc,
       });
 
-      expect(dotLottie.marker).toBeUndefined();
+      expect(dotLottie.marker).toBe('');
 
       dotLottie.addEventListener('load', onLoad);
 
