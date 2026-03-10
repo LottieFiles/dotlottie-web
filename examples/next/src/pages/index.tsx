@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 const src = 'https://lottie.host/e641272e-039b-4612-96de-138acfbede6e/bc0sW78EeR.lottie';
 
-export default function Home(): JSX.Element {
+export default function Home() {
   const [dotLottie, setDotLottie] = useState<DotLottie | DotLottieWorker | null>(null);
   const [showDotLottie, setShowDotLottie] = useState(false);
 

@@ -1,18 +1,8 @@
 /* eslint-disable no-warning-comments */
 import { AnimationFrameManager } from './animation-frame-manager';
 import { BYTES_PER_PIXEL, IS_BROWSER } from './constants';
-import type {
-  Fit as CoreFit,
-  Mode as CoreMode,
-  DotLottiePlayer,
-  MainModule,
-  Marker,
-  Observer,
-  StateMachineInternalObserver,
-  StateMachineObserver,
-  VectorFloat,
-} from './core';
 import { DotLottieWasmLoader } from './core';
+import { Mode as CoreMode, DotLottiePlayerWasm, register_font } from './core/dotlottie-player';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
@@ -25,6 +15,7 @@ import type {
   GradientSlotValue,
   Layout,
   Manifest,
+  Marker,
   Mode,
   RenderConfig,
   RenderSurface,
@@ -45,65 +36,66 @@ import {
   isElementInViewport,
   isLottie,
 } from './utils';
-import { toVectorChar } from './utils/vector-char';
 
-const createCoreMode = (mode: Mode, module: MainModule): CoreMode => {
-  if (mode === 'reverse') {
-    return module.Mode.Reverse;
-  } else if (mode === 'bounce') {
-    return module.Mode.Bounce;
-  } else if (mode === 'reverse-bounce') {
-    return module.Mode.ReverseBounce;
-  } else {
-    return module.Mode.Forward;
+// ── Mode conversion helpers ──────────────────────────────────────────────────
+
+const modeToCore = (mode: Mode): CoreMode => {
+  switch (mode) {
+    case 'reverse':
+      return CoreMode.Reverse;
+
+    case 'bounce':
+      return CoreMode.Bounce;
+
+    case 'reverse-bounce':
+      return CoreMode.ReverseBounce;
+
+    default:
+      return CoreMode.Forward;
   }
 };
 
-const createCoreFit = (fit: Fit, module: MainModule): CoreFit => {
-  if (fit === 'contain') {
-    return module.Fit.Contain;
-  } else if (fit === 'cover') {
-    return module.Fit.Cover;
-  } else if (fit === 'fill') {
-    return module.Fit.Fill;
-  } else if (fit === 'fit-height') {
-    return module.Fit.FitHeight;
-  } else if (fit === 'fit-width') {
-    return module.Fit.FitWidth;
-  } else {
-    return module.Fit.None;
+const coreToMode = (mode: CoreMode): Mode => {
+  switch (mode) {
+    case CoreMode.Reverse:
+      return 'reverse';
+
+    case CoreMode.Bounce:
+      return 'bounce';
+
+    case CoreMode.ReverseBounce:
+      return 'reverse-bounce';
+
+    default:
+      return 'forward';
   }
 };
 
-const createCoreAlign = (align: [number, number], module: MainModule): VectorFloat => {
-  const coreAlign = new module.VectorFloat();
+// ── Fit string helpers ───────────────────────────────────────────────────────
 
-  coreAlign.push_back(align[0]);
-  coreAlign.push_back(align[1]);
+const fitToString = (fit: string): Fit => {
+  switch (fit) {
+    case 'contain':
+      return 'contain';
 
-  return coreAlign;
-};
+    case 'cover':
+      return 'cover';
 
-const createCoreSegment = (segment: number[], module: MainModule): VectorFloat => {
-  const coresegment = new module.VectorFloat();
+    case 'fill':
+      return 'fill';
 
-  if (segment.length !== 2) return coresegment;
+    case 'fit-height':
+      return 'fit-height';
 
-  coresegment.push_back(segment[0] as number);
-  coresegment.push_back(segment[1] as number);
+    case 'fit-width':
+      return 'fit-width';
 
-  return coresegment;
-};
+    case 'none':
+      return 'none';
 
-const createCoreLayout = (layout: Layout | undefined, module: MainModule): { align: VectorFloat; fit: CoreFit } => {
-  if (!layout) {
-    return module.createDefaultLayout();
+    default:
+      return 'contain';
   }
-
-  return {
-    align: createCoreAlign(layout.align ?? [0.5, 0.5], module),
-    fit: createCoreFit(layout.fit ?? 'contain', module),
-  };
 };
 
 export class DotLottie {
@@ -119,21 +111,13 @@ export class DotLottie {
 
   private readonly _frameManager: AnimationFrameManager;
 
-  private _dotLottieCore: DotLottiePlayer | null = null;
+  private _dotLottieCore: DotLottiePlayerWasm | null = null;
 
   private _stateMachineId: string = '';
 
   private _stateMachineConfig: StateMachineConfig | null = null;
 
   private _isStateMachineRunning: boolean = false;
-
-  private _stateMachineObserverHandle: StateMachineObserver | null = null;
-
-  private _stateMachineInternalMessageObserver: StateMachineInternalObserver | null = null;
-
-  private _dotLottieObserverHandle: Observer | null = null;
-
-  private static _wasmModule: MainModule | null = null;
 
   private _renderConfig: RenderConfig = {};
 
@@ -158,6 +142,8 @@ export class DotLottie {
 
   private _lastExpectedBufferSize = 0;
 
+  private _marker: string = '';
+
   /**
    * Creates a new DotLottie player instance for rendering Lottie animations.
    * Initializes the WASM module, event system, and loads animation if src or data is provided in config.
@@ -176,100 +162,32 @@ export class DotLottie {
     };
 
     DotLottieWasmLoader.load()
-      .then((module) => {
-        DotLottie._wasmModule = module;
+      .then(() => {
+        // After init(), classes are imported directly — no module reference needed
+        this._dotLottieCore = new DotLottiePlayerWasm();
 
-        const callbackObserver = new module.CallbackObserver();
-
-        callbackObserver.setOnLoad(() => {
-          setTimeout(() => {
-            this._eventManager.dispatch({
-              type: 'load',
-            });
-          }, 0);
-        });
-        callbackObserver.setOnLoadError(() => {
-          setTimeout(() => {
-            this._eventManager.dispatch({
-              type: 'loadError',
-              error: new Error('failed to load'),
-            });
-          }, 0);
-        });
-        callbackObserver.setOnPlay(() => {
-          setTimeout(() => {
-            this._eventManager.dispatch({
-              type: 'play',
-            });
-          }, 0);
-        });
-        callbackObserver.setOnPause(() => {
-          setTimeout(() => {
-            this._eventManager.dispatch({
-              type: 'pause',
-            });
-          }, 0);
-        });
-        callbackObserver.setOnStop(() => {
-          setTimeout(() => {
-            this._eventManager.dispatch({
-              type: 'stop',
-            });
-          }, 0);
-        });
-        callbackObserver.setOnLoop((loopCount: number) => {
-          setTimeout(() => {
-            this._eventManager.dispatch({
-              type: 'loop',
-              loopCount,
-            });
-          }, 0);
-        });
-        callbackObserver.setOnComplete(() => {
-          setTimeout(() => {
-            this._eventManager.dispatch({
-              type: 'complete',
-            });
-          }, 0);
-        });
-        callbackObserver.setOnFrame((currentFrame: number) => {
-          setTimeout(() => {
-            this._eventManager.dispatch({
-              type: 'frame',
-              currentFrame,
-            });
-          }, 0);
-        });
-        callbackObserver.setOnRender((currentFrame: number) => {
-          setTimeout(() => {
-            this._eventManager.dispatch({
-              type: 'render',
-              currentFrame,
-            });
-          }, 0);
-        });
-
-        this._dotLottieCore = new module.DotLottiePlayer({
-          animationId: config.animationId ?? '',
-          themeId: config.themeId ?? '',
-          // FIXME: state machine id is not useful, since the load and start of state machine require to be controlled by the framework
-          stateMachineId: '',
-          autoplay: config.autoplay ?? false,
-          backgroundColor: 0,
-          loopAnimation: config.loop ?? false,
-          loopCount: config.loopCount ?? 0,
-          mode: createCoreMode(config.mode ?? 'forward', module),
-          segment: createCoreSegment(config.segment ?? [], module),
-          speed: config.speed ?? 1,
-          useFrameInterpolation: config.useFrameInterpolation ?? true,
-          marker: config.marker ?? '',
-          layout: createCoreLayout(config.layout, module),
-        });
+        // Apply config via individual setters
+        this._dotLottieCore.set_autoplay(config.autoplay ?? false);
+        this._dotLottieCore.set_loop(config.loop ?? false);
+        this._dotLottieCore.set_loop_count(config.loopCount ?? 0);
+        this._dotLottieCore.set_mode(modeToCore(config.mode ?? 'forward'));
+        this._dotLottieCore.set_speed(config.speed ?? 1);
+        this._dotLottieCore.set_use_frame_interpolation(config.useFrameInterpolation ?? true);
+        if (config.segment && config.segment.length === 2) {
+          this._dotLottieCore.set_segment(config.segment[0] as number, config.segment[1] as number);
+        }
+        this._marker = config.marker ?? '';
+        if (this._marker) {
+          this._dotLottieCore.set_marker(this._marker);
+        }
+        this._dotLottieCore.set_layout(
+          config.layout?.fit ?? 'contain',
+          config.layout?.align?.[0] ?? 0.5,
+          config.layout?.align?.[1] ?? 0.5,
+        );
 
         this._stateMachineId = config.stateMachineId ?? '';
         this._stateMachineConfig = config.stateMachineConfig ?? null;
-
-        this._dotLottieObserverHandle = this._dotLottieCore.subscribe(callbackObserver);
 
         this._eventManager.dispatch({ type: 'ready' });
 
@@ -299,6 +217,176 @@ export class DotLottie {
       });
   }
 
+  // ── Event draining ─────────────────────────────────────────────────────
+
+  private _drainPlayerEvents(): void {
+    if (!this._dotLottieCore) return;
+
+    let evt: unknown;
+
+    while ((evt = this._dotLottieCore.poll_event()) !== null && evt !== undefined) {
+      const event = evt as { type: string; frameNo?: number; loopCount?: number };
+
+      switch (event.type) {
+        case 'Load':
+          setTimeout(() => this._eventManager.dispatch({ type: 'load' }), 0);
+          break;
+
+        case 'LoadError':
+          setTimeout(() => this._eventManager.dispatch({ type: 'loadError', error: new Error('failed to load') }), 0);
+          break;
+
+        case 'Play':
+          setTimeout(() => this._eventManager.dispatch({ type: 'play' }), 0);
+          break;
+
+        case 'Pause':
+          setTimeout(() => this._eventManager.dispatch({ type: 'pause' }), 0);
+          break;
+
+        case 'Stop':
+          setTimeout(() => this._eventManager.dispatch({ type: 'stop' }), 0);
+          break;
+
+        case 'Frame':
+          setTimeout(() => this._eventManager.dispatch({ type: 'frame', currentFrame: event.frameNo ?? 0 }), 0);
+          break;
+
+        case 'Render':
+          setTimeout(() => this._eventManager.dispatch({ type: 'render', currentFrame: event.frameNo ?? 0 }), 0);
+          break;
+
+        case 'Loop':
+          setTimeout(() => this._eventManager.dispatch({ type: 'loop', loopCount: event.loopCount ?? 0 }), 0);
+          break;
+
+        case 'Complete':
+          setTimeout(() => this._eventManager.dispatch({ type: 'complete' }), 0);
+          break;
+
+        default:
+          break;
+      }
+    }
+  }
+
+  private _drainSmEvents(): void {
+    if (!this._dotLottieCore) return;
+
+    // Drain state machine events
+    let evt: unknown;
+
+    while ((evt = this._dotLottieCore.sm_poll_event()) !== null && evt !== undefined) {
+      const event = evt as {
+        type: string;
+        previousState?: string;
+        newState?: string;
+        state?: string;
+        message?: string;
+        name?: string;
+        oldValue?: unknown;
+        newValue?: unknown;
+      };
+
+      switch (event.type) {
+        case 'Start':
+          setTimeout(() => {
+            this._isStateMachineRunning = true;
+            this._eventManager.dispatch({ type: 'stateMachineStart' });
+            this._startAnimationLoop();
+          }, 0);
+          break;
+
+        case 'Stop':
+          setTimeout(() => {
+            this._isStateMachineRunning = false;
+            this._eventManager.dispatch({ type: 'stateMachineStop' });
+            if (!this._dotLottieCore?.is_playing()) {
+              this._stopAnimationLoop();
+            }
+          }, 0);
+          break;
+
+        case 'CustomEvent':
+          this._eventManager.dispatch({ type: 'stateMachineCustomEvent', eventName: event.message ?? '' });
+          break;
+
+        case 'BooleanInputChange':
+          this._eventManager.dispatch({
+            type: 'stateMachineBooleanInputValueChange',
+            inputName: event.name ?? '',
+            newValue: event.newValue as boolean,
+            oldValue: event.oldValue as boolean,
+          });
+          break;
+
+        case 'NumericInputChange':
+          this._eventManager.dispatch({
+            type: 'stateMachineNumericInputValueChange',
+            inputName: event.name ?? '',
+            newValue: event.newValue as number,
+            oldValue: event.oldValue as number,
+          });
+          break;
+
+        case 'StringInputChange':
+          this._eventManager.dispatch({
+            type: 'stateMachineStringInputValueChange',
+            inputName: event.name ?? '',
+            newValue: event.newValue as string,
+            oldValue: event.oldValue as string,
+          });
+          break;
+
+        case 'InputFired':
+          this._eventManager.dispatch({ type: 'stateMachineInputFired', inputName: event.name ?? '' });
+          break;
+
+        case 'Transition':
+          this._eventManager.dispatch({
+            type: 'stateMachineTransition',
+            fromState: event.previousState ?? '',
+            toState: event.newState ?? '',
+          });
+          break;
+
+        case 'StateEntered':
+          this._eventManager.dispatch({ type: 'stateMachineStateEntered', state: event.state ?? '' });
+          break;
+
+        case 'StateExit':
+          this._eventManager.dispatch({ type: 'stateMachineStateExit', state: event.state ?? '' });
+          break;
+
+        case 'Error':
+          this._eventManager.dispatch({ type: 'stateMachineError', error: event.message ?? '' });
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    // Drain internal events
+    let internal: unknown;
+
+    while ((internal = this._dotLottieCore.sm_poll_internal_event()) !== null && internal !== undefined) {
+      const internalEvt = internal as { type: string; message?: string };
+
+      if (internalEvt.type === 'Message') {
+        const message = internalEvt.message ?? '';
+
+        if (IS_BROWSER && message.startsWith('OpenUrl: ')) {
+          handleOpenUrl(message);
+        } else {
+          this._eventManager.dispatch({ type: 'stateMachineInternalMessage', message });
+        }
+      }
+    }
+  }
+
+  // ── Private methods ────────────────────────────────────────────────────
+
   private _dispatchError(message: string): void {
     console.error(message);
     this._eventManager.dispatch({ type: 'loadError', error: new Error(message) });
@@ -322,7 +410,7 @@ export class DotLottie {
   }
 
   private _loadFromData(data: Data): void {
-    if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
+    if (this._dotLottieCore === null) return;
 
     if (!this._canvas) {
       console.warn('[dotlottie-web] Cannot load animation without canvas. Call setCanvas() first.');
@@ -343,7 +431,7 @@ export class DotLottie {
 
         return;
       }
-      loaded = this._dotLottieCore.loadAnimationData(data, width, height);
+      loaded = this._dotLottieCore.load_animation(data, width, height);
     } else if (data instanceof ArrayBuffer) {
       if (!isDotLottie(data)) {
         this._dispatchError(
@@ -352,7 +440,7 @@ export class DotLottie {
 
         return;
       }
-      loaded = this._dotLottieCore.loadDotLottieData(toVectorChar(DotLottie._wasmModule, data), width, height);
+      loaded = this._dotLottieCore.load_dotlottie_data(new Uint8Array(data), width, height);
     } else if (typeof data === 'object') {
       if (!isLottie(data as Record<string, unknown>)) {
         this._dispatchError(
@@ -361,13 +449,13 @@ export class DotLottie {
 
         return;
       }
-      loaded = this._dotLottieCore.loadAnimationData(JSON.stringify(data), width, height);
+      loaded = this._dotLottieCore.load_animation(JSON.stringify(data), width, height);
     } else {
       this._dispatchError(
-        `Unsupported data type for animation data. Expected: 
+        `Unsupported data type for animation data. Expected:
           - string (Lottie JSON),
           - ArrayBuffer (dotLottie),
-          - object (Lottie JSON). 
+          - object (Lottie JSON).
           Received: ${typeof data}`,
       );
 
@@ -376,11 +464,19 @@ export class DotLottie {
 
     if (loaded) {
       if (this._renderConfig.quality !== undefined) {
-        this._dotLottieCore.setQuality(this._renderConfig.quality);
+        this._dotLottieCore.set_quality(this._renderConfig.quality);
       }
 
       if (IS_BROWSER) {
         this.resize();
+      }
+
+      // Drain any events produced by loading (Load/LoadError)
+      this._drainPlayerEvents();
+
+      // Re-apply marker after load since markers are only available after animation data is parsed
+      if (this._marker) {
+        this._dotLottieCore.set_marker(this._marker);
       }
 
       setTimeout(() => {
@@ -392,6 +488,7 @@ export class DotLottie {
       }, 0);
 
       this._dotLottieCore.render();
+      this._drainPlayerEvents();
 
       this._draw();
 
@@ -405,7 +502,7 @@ export class DotLottie {
             this._startAnimationLoop();
           }
         }
-      } else if (this._dotLottieCore.isPlaying()) {
+      } else if (this._dotLottieCore.is_playing()) {
         this._startAnimationLoop();
       }
 
@@ -423,6 +520,9 @@ export class DotLottie {
           CanvasResizeObserver.observe(this._canvas, this);
         }
       }
+    } else {
+      // Drain any LoadError events the core may have queued
+      this._drainPlayerEvents();
     }
   }
 
@@ -439,7 +539,7 @@ export class DotLottie {
   public get buffer(): Uint8Array | null {
     if (!this._dotLottieCore) return null;
 
-    return this._dotLottieCore.buffer() as Uint8Array;
+    return this._dotLottieCore.get_pixel_buffer();
   }
 
   /**
@@ -447,7 +547,7 @@ export class DotLottie {
    * Returns undefined if no specific animation is active or for single-animation files.
    */
   public get activeAnimationId(): string | undefined {
-    return this._dotLottieCore?.activeAnimationId();
+    return this._dotLottieCore?.animation_id() ?? undefined;
   }
 
   /**
@@ -455,7 +555,7 @@ export class DotLottie {
    * Returns undefined if no theme is active. Themes modify colors and visual properties.
    */
   public get activeThemeId(): string | undefined {
-    return this._dotLottieCore?.activeThemeId();
+    return this._dotLottieCore?.theme_id() ?? undefined;
   }
 
   /**
@@ -463,39 +563,12 @@ export class DotLottie {
    * Includes fit mode (contain, cover, fill, etc.) and alignment [x, y] values (0-1 range).
    */
   public get layout(): Layout | undefined {
-    const layout = this._dotLottieCore?.config().layout;
+    if (!this._dotLottieCore) return undefined;
 
-    if (layout) {
-      return {
-        align: [layout.align.get(0) as number, layout.align.get(1) as number],
-        fit: ((): Fit => {
-          switch (layout.fit) {
-            case DotLottie._wasmModule?.Fit.Contain:
-              return 'contain';
-
-            case DotLottie._wasmModule?.Fit.Cover:
-              return 'cover';
-
-            case DotLottie._wasmModule?.Fit.Fill:
-              return 'fill';
-
-            case DotLottie._wasmModule?.Fit.FitHeight:
-              return 'fit-height';
-
-            case DotLottie._wasmModule?.Fit.FitWidth:
-              return 'fit-width';
-
-            case DotLottie._wasmModule?.Fit.None:
-              return 'none';
-
-            default:
-              return 'contain';
-          }
-        })(),
-      };
-    }
-
-    return undefined;
+    return {
+      align: [this._dotLottieCore.layout_align_x(), this._dotLottieCore.layout_align_y()],
+      fit: fitToString(this._dotLottieCore.layout_fit()),
+    };
   }
 
   /**
@@ -503,9 +576,7 @@ export class DotLottie {
    * Returns undefined if no marker is active. Use setMarker() to activate a named segment.
    */
   public get marker(): string | undefined {
-    const marker = this._dotLottieCore?.config().marker as string | undefined;
-
-    return marker;
+    return this._dotLottieCore?.current_marker() ?? '';
   }
 
   /**
@@ -514,7 +585,7 @@ export class DotLottie {
    */
   public get manifest(): Manifest | null {
     try {
-      const manifest = this._dotLottieCore?.manifestString();
+      const manifest = this._dotLottieCore?.manifest_string();
 
       if (this._dotLottieCore === null || !manifest) return null;
 
@@ -541,13 +612,9 @@ export class DotLottie {
    * If no segment is set, returns undefined and the full animation plays.
    */
   public get segment(): [number, number] | undefined {
-    const segment = this._dotLottieCore?.config().segment;
+    if (!this._dotLottieCore || !this._dotLottieCore.has_segment()) return undefined;
 
-    if (segment && segment.size() === 2) {
-      return [segment.get(0) as number, segment.get(1) as number];
-    }
-
-    return undefined;
+    return [this._dotLottieCore.segment_start(), this._dotLottieCore.segment_end()];
   }
 
   /**
@@ -555,7 +622,7 @@ export class DotLottie {
    * Returns true if the animation is set to loop continuously.
    */
   public get loop(): boolean {
-    return this._dotLottieCore?.config().loopAnimation ?? false;
+    return this._dotLottieCore?.loop_animation() ?? false;
   }
 
   /**
@@ -563,17 +630,9 @@ export class DotLottie {
    * Determines playback direction: 'forward', 'reverse', 'bounce' (forward then reverse), or 'reverse-bounce'.
    */
   public get mode(): Mode {
-    const mode = this._dotLottieCore?.config().mode;
+    if (!this._dotLottieCore) return 'forward';
 
-    if (mode === DotLottie._wasmModule?.Mode.Reverse) {
-      return 'reverse';
-    } else if (mode === DotLottie._wasmModule?.Mode.Bounce) {
-      return 'bounce';
-    } else if (mode === DotLottie._wasmModule?.Mode.ReverseBounce) {
-      return 'reverse-bounce';
-    } else {
-      return 'forward';
-    }
+    return coreToMode(this._dotLottieCore.mode());
   }
 
   /**
@@ -605,7 +664,7 @@ export class DotLottie {
    * Returns true if the animation is configured to start playing automatically when loaded.
    */
   public get autoplay(): boolean {
-    return this._dotLottieCore?.config().autoplay ?? false;
+    return this._dotLottieCore?.autoplay() ?? false;
   }
 
   /**
@@ -613,7 +672,7 @@ export class DotLottie {
    * Returns true if frame interpolation is enabled for smoother animation playback.
    */
   public get useFrameInterpolation(): boolean {
-    return this._dotLottieCore?.config().useFrameInterpolation ?? false;
+    return this._dotLottieCore?.use_frame_interpolation() ?? false;
   }
 
   /**
@@ -621,7 +680,7 @@ export class DotLottie {
    * Returns the speed multiplier (1 = normal speed, 2 = double speed, 0.5 = half speed).
    */
   public get speed(): number {
-    return this._dotLottieCore?.config().speed ?? 0;
+    return this._dotLottieCore?.speed() ?? 0;
   }
 
   /**
@@ -637,7 +696,7 @@ export class DotLottie {
    * Check this before calling play() or other playback methods to ensure the animation is ready.
    */
   public get isLoaded(): boolean {
-    return this._dotLottieCore?.isLoaded() ?? false;
+    return this._dotLottieCore?.is_loaded() ?? false;
   }
 
   /**
@@ -645,7 +704,7 @@ export class DotLottie {
    * True when animation is actively playing, false when paused, stopped, or not started.
    */
   public get isPlaying(): boolean {
-    return this._dotLottieCore?.isPlaying() ?? false;
+    return this._dotLottieCore?.is_playing() ?? false;
   }
 
   /**
@@ -653,7 +712,7 @@ export class DotLottie {
    * True when pause() has been called and animation is not playing or stopped.
    */
   public get isPaused(): boolean {
-    return this._dotLottieCore?.isPaused() ?? false;
+    return this._dotLottieCore?.is_paused() ?? false;
   }
 
   /**
@@ -661,7 +720,7 @@ export class DotLottie {
    * True when stop() has been called or animation hasn't started yet.
    */
   public get isStopped(): boolean {
-    return this._dotLottieCore?.isStopped() ?? false;
+    return this._dotLottieCore?.is_stopped() ?? false;
   }
 
   /**
@@ -671,7 +730,7 @@ export class DotLottie {
   public get currentFrame(): number {
     if (!this._dotLottieCore) return 0;
 
-    return Math.round(this._dotLottieCore.currentFrame() * 100) / 100;
+    return Math.round(this._dotLottieCore.current_frame() * 100) / 100;
   }
 
   /**
@@ -679,7 +738,7 @@ export class DotLottie {
    * Increments each time the animation completes one full cycle.
    */
   public get loopCount(): number {
-    return this._dotLottieCore?.loopCount() ?? 0;
+    return this._dotLottieCore?.current_loop_count() ?? 0;
   }
 
   /**
@@ -687,7 +746,7 @@ export class DotLottie {
    * Use with currentFrame to calculate playback progress as a percentage.
    */
   public get totalFrames(): number {
-    return this._dotLottieCore?.totalFrames() ?? 0;
+    return this._dotLottieCore?.total_frames() ?? 0;
   }
 
   /**
@@ -703,7 +762,7 @@ export class DotLottie {
    * If no segment is set, returns the full animation duration.
    */
   public get segmentDuration(): number {
-    return this._dotLottieCore?.segmentDuration() ?? 0;
+    return this._dotLottieCore?.segment_duration() ?? 0;
   }
 
   /**
@@ -720,7 +779,7 @@ export class DotLottie {
    * @param config - Configuration for the new animation (all Config properties except canvas)
    */
   public load(config: Omit<Config, 'canvas'>): void {
-    if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
+    if (this._dotLottieCore === null) return;
 
     this._stopAnimationLoop();
 
@@ -728,21 +787,29 @@ export class DotLottie {
 
     this._isFrozen = false;
 
-    this._dotLottieCore.setConfig({
-      animationId: config.animationId ?? '',
-      themeId: config.themeId ?? '',
-      stateMachineId: '',
-      autoplay: config.autoplay ?? false,
-      backgroundColor: 0,
-      loopAnimation: config.loop ?? false,
-      loopCount: config.loopCount ?? 0,
-      mode: createCoreMode(config.mode ?? 'forward', DotLottie._wasmModule),
-      segment: createCoreSegment(config.segment ?? [], DotLottie._wasmModule),
-      speed: config.speed ?? 1,
-      useFrameInterpolation: config.useFrameInterpolation ?? true,
-      marker: config.marker ?? '',
-      layout: createCoreLayout(config.layout, DotLottie._wasmModule),
-    });
+    // Apply config via individual setters
+    this._dotLottieCore.set_autoplay(config.autoplay ?? false);
+    this._dotLottieCore.set_loop(config.loop ?? false);
+    this._dotLottieCore.set_loop_count(config.loopCount ?? 0);
+    this._dotLottieCore.set_mode(modeToCore(config.mode ?? 'forward'));
+    this._dotLottieCore.set_speed(config.speed ?? 1);
+    this._dotLottieCore.set_use_frame_interpolation(config.useFrameInterpolation ?? true);
+    if (config.segment && config.segment.length === 2) {
+      this._dotLottieCore.set_segment(config.segment[0] as number, config.segment[1] as number);
+    } else {
+      this._dotLottieCore.clear_segment();
+    }
+    this._marker = config.marker ?? '';
+    if (this._marker) {
+      this._dotLottieCore.set_marker(this._marker);
+    } else {
+      this._dotLottieCore.clear_marker();
+    }
+    this._dotLottieCore.set_layout(
+      config.layout?.fit ?? 'contain',
+      config.layout?.align?.[0] ?? 0.5,
+      config.layout?.align?.[1] ?? 0.5,
+    );
 
     if (config.data) {
       if (this._canvas) {
@@ -780,11 +847,11 @@ export class DotLottie {
 
     // Only process visual output if we have a canvas with a valid context
     if (this._context) {
-      const buffer = this._dotLottieCore.buffer() as ArrayBuffer;
+      const buffer = this._dotLottieCore.get_pixel_buffer();
 
       const expectedLength = this._canvas.width * this._canvas.height * BYTES_PER_PIXEL;
 
-      /* 
+      /*
         frame buffer size mismatch can occur temporarily during resize operations when the WASM buffer allocation hasn't completed yet
       */
       if (buffer.byteLength !== expectedLength) {
@@ -812,10 +879,11 @@ export class DotLottie {
 
       let imageData = null;
 
-      const clampedBuffer = new Uint8ClampedArray(buffer, 0, buffer.byteLength);
+      // get_pixel_buffer() returns a Uint8Array view into WASM memory
+      const clampedBuffer = new Uint8ClampedArray(buffer.buffer as ArrayBuffer, buffer.byteOffset, buffer.byteLength);
 
-      /* 
-        In Node.js, the ImageData constructor is not available. 
+      /*
+        In Node.js, the ImageData constructor is not available.
         You can use createImageData function in the canvas context to create ImageData object.
       */
       if (typeof ImageData === 'undefined') {
@@ -883,7 +951,7 @@ export class DotLottie {
       this._animationFrameId === null &&
       this._dotLottieCore &&
       !this._isFrozen &&
-      (this._dotLottieCore.isPlaying() || this._isStateMachineRunning)
+      (this._dotLottieCore.is_playing() || this._isStateMachineRunning)
     ) {
       this._animationFrameId = this._frameManager.requestAnimationFrame(this._animationLoop.bind(this));
     }
@@ -897,14 +965,20 @@ export class DotLottie {
     }
 
     // Continue the loop if either the animation is playing OR the state machine is running
-    if (!this._dotLottieCore.isPlaying() && !this._isStateMachineRunning) {
+    if (!this._dotLottieCore.is_playing() && !this._isStateMachineRunning) {
       this._stopAnimationLoop();
 
       return;
     }
 
     try {
-      const advanced = this._dotLottieCore.tick();
+      const advanced = this._isStateMachineRunning ? this._dotLottieCore.sm_tick() : this._dotLottieCore.tick();
+
+      if (this._isStateMachineRunning) {
+        this._drainSmEvents();
+      } else {
+        this._drainPlayerEvents();
+      }
 
       if (advanced) {
         this._draw();
@@ -934,13 +1008,15 @@ export class DotLottie {
 
     const playing = this._dotLottieCore.play();
 
+    this._drainPlayerEvents();
+
     // Always unfreeze and start animation loop if core is playing, regardless of play() return value
-    if (playing || this._dotLottieCore.isPlaying()) {
+    if (playing || this._dotLottieCore.is_playing()) {
       this._isFrozen = false;
       this._startAnimationLoop();
     }
 
-    /* 
+    /*
       Check if the canvas is offscreen and freezing is enabled
       If freezeOnOffscreen is true and the canvas is currently outside the viewport,
       we immediately freeze the animation to avoid unnecessary rendering and performance overhead.
@@ -965,6 +1041,8 @@ export class DotLottie {
 
     this._dotLottieCore.pause();
 
+    this._drainPlayerEvents();
+
     this._stopAnimationLoop();
   }
 
@@ -976,6 +1054,8 @@ export class DotLottie {
     if (this._dotLottieCore === null) return;
 
     const ok = this._dotLottieCore.stop();
+
+    this._drainPlayerEvents();
 
     this._stopAnimationLoop();
 
@@ -1001,6 +1081,8 @@ export class DotLottie {
     if (frameUpdated) {
       const rendered = this._dotLottieCore.render();
 
+      this._drainPlayerEvents();
+
       if (rendered) {
         this._draw();
       }
@@ -1015,10 +1097,7 @@ export class DotLottie {
   public setSpeed(speed: number): void {
     if (this._dotLottieCore === null) return;
 
-    this._dotLottieCore.setConfig({
-      ...this._dotLottieCore.config(),
-      speed,
-    });
+    this._dotLottieCore.set_speed(speed);
   }
 
   /**
@@ -1032,10 +1111,7 @@ export class DotLottie {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       this._canvas.style.backgroundColor = color;
     } else {
-      this._dotLottieCore.setConfig({
-        ...this._dotLottieCore.config(),
-        backgroundColor: hexStringToRGBAInt(color),
-      });
+      this._dotLottieCore.set_background_color(hexStringToRGBAInt(color));
     }
 
     this._backgroundColor = color;
@@ -1049,10 +1125,7 @@ export class DotLottie {
   public setLoop(loop: boolean): void {
     if (this._dotLottieCore === null) return;
 
-    this._dotLottieCore.setConfig({
-      ...this._dotLottieCore.config(),
-      loopAnimation: loop,
-    });
+    this._dotLottieCore.set_loop(loop);
   }
 
   /**
@@ -1064,10 +1137,7 @@ export class DotLottie {
   public setLoopCount(loopCount: number): void {
     if (this._dotLottieCore === null) return;
 
-    this._dotLottieCore.setConfig({
-      ...this._dotLottieCore.config(),
-      loopCount,
-    });
+    this._dotLottieCore.set_loop_count(loopCount);
   }
 
   /**
@@ -1078,10 +1148,7 @@ export class DotLottie {
   public setUseFrameInterpolation(useFrameInterpolation: boolean): void {
     if (this._dotLottieCore === null) return;
 
-    this._dotLottieCore.setConfig({
-      ...this._dotLottieCore.config(),
-      useFrameInterpolation,
-    });
+    this._dotLottieCore.set_use_frame_interpolation(useFrameInterpolation);
   }
 
   /**
@@ -1116,25 +1183,7 @@ export class DotLottie {
 
     this._cleanupCanvas();
 
-    if (this._stateMachineObserverHandle) {
-      this._dotLottieCore?.stateMachineUnsubscribe(this._stateMachineObserverHandle);
-      this._stateMachineObserverHandle.delete();
-      this._stateMachineObserverHandle = null;
-    }
-
-    if (this._stateMachineInternalMessageObserver) {
-      this._dotLottieCore?.stateMachineInternalUnsubscribe(this._stateMachineInternalMessageObserver);
-      this._stateMachineInternalMessageObserver.delete();
-      this._stateMachineInternalMessageObserver = null;
-    }
-
-    if (this._dotLottieObserverHandle) {
-      this._dotLottieCore?.unsubscribe(this._dotLottieObserverHandle);
-      this._dotLottieObserverHandle.delete();
-      this._dotLottieObserverHandle = null;
-    }
-
-    this._dotLottieCore?.delete();
+    this._dotLottieCore?.free();
     this._dotLottieCore = null;
     this._context = null;
 
@@ -1237,15 +1286,9 @@ export class DotLottie {
    * @returns True if transformation was applied successfully, false otherwise
    */
   public setTransform(transform: Transform): boolean {
-    if (!this._dotLottieCore || !DotLottie._wasmModule) return false;
+    if (!this._dotLottieCore) return false;
 
-    const transformVector = new DotLottie._wasmModule.VectorFloat();
-
-    for (const val of transform) {
-      transformVector.push_back(val);
-    }
-
-    const ok = this._dotLottieCore.setTransform(transformVector);
+    const ok = this._dotLottieCore.set_transform(new Float32Array(transform));
 
     if (ok && this._dotLottieCore.render()) {
       this._draw();
@@ -1262,15 +1305,9 @@ export class DotLottie {
   public getTransform(): Transform | undefined {
     if (!this._dotLottieCore) return undefined;
 
-    const transform: Transform = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const arr = this._dotLottieCore.get_transform();
 
-    const transformVector = this._dotLottieCore.getTransform();
-
-    for (let i = 0; i < transformVector.size(); i += 1) {
-      transform[i] = transformVector.get(i) as number;
-    }
-
-    return transform;
+    return Array.from(arr) as Transform;
   }
 
   /**
@@ -1280,12 +1317,9 @@ export class DotLottie {
    * @param endFrame - Ending frame number (inclusive)
    */
   public setSegment(startFrame: number, endFrame: number): void {
-    if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
+    if (this._dotLottieCore === null) return;
 
-    this._dotLottieCore.setConfig({
-      ...this._dotLottieCore.config(),
-      segment: createCoreSegment([startFrame, endFrame], DotLottie._wasmModule),
-    });
+    this._dotLottieCore.set_segment(startFrame, endFrame);
   }
 
   /**
@@ -1294,12 +1328,9 @@ export class DotLottie {
    * @param mode - Playback mode: 'forward', 'reverse', 'bounce', or 'reverse-bounce'
    */
   public setMode(mode: Mode): void {
-    if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
+    if (this._dotLottieCore === null) return;
 
-    this._dotLottieCore.setConfig({
-      ...this._dotLottieCore.config(),
-      mode: createCoreMode(mode, DotLottie._wasmModule),
-    });
+    this._dotLottieCore.set_mode(modeToCore(mode));
   }
 
   /**
@@ -1320,7 +1351,7 @@ export class DotLottie {
     };
 
     if (quality !== undefined && this._dotLottieCore) {
-      this._dotLottieCore.setQuality(quality);
+      this._dotLottieCore.set_quality(quality);
     }
 
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
@@ -1354,16 +1385,21 @@ export class DotLottie {
    * @param animationId - ID of the animation to load (must exist in the manifest)
    */
   public loadAnimation(animationId: string): void {
-    if (this._dotLottieCore === null || this._dotLottieCore.activeAnimationId() === animationId || !this._canvas)
-      return;
+    if (this._dotLottieCore === null || this._dotLottieCore.animation_id() === animationId || !this._canvas) return;
 
-    const loaded = this._dotLottieCore.loadAnimation(animationId, this._canvas.width, this._canvas.height);
+    const loaded = this._dotLottieCore.load_animation_from_id(animationId, this._canvas.width, this._canvas.height);
 
     if (loaded) {
       if (this._renderConfig.quality !== undefined) {
-        this._dotLottieCore.setQuality(this._renderConfig.quality);
+        this._dotLottieCore.set_quality(this._renderConfig.quality);
       }
       this.resize();
+      this._drainPlayerEvents();
+
+      this._dotLottieCore.render();
+      this._draw();
+    } else {
+      this._dispatchError(`Failed to load animation with id: ${animationId}`);
     }
   }
 
@@ -1375,10 +1411,8 @@ export class DotLottie {
   public setMarker(marker: string): void {
     if (this._dotLottieCore === null) return;
 
-    this._dotLottieCore.setConfig({
-      ...this._dotLottieCore.config(),
-      marker,
-    });
+    this._marker = marker;
+    this._dotLottieCore.set_marker(marker);
   }
 
   /**
@@ -1389,20 +1423,8 @@ export class DotLottie {
   public markers(): Marker[] {
     const markers = this._dotLottieCore?.markers();
 
-    if (markers) {
-      const result: Marker[] = [];
-
-      for (let i = 0; i < markers.size(); i += 1) {
-        const marker = markers.get(i) as Marker;
-
-        result.push({
-          name: marker.name,
-          time: marker.time,
-          duration: marker.duration,
-        });
-      }
-
-      return result;
+    if (markers && Array.isArray(markers)) {
+      return markers as Marker[];
     }
 
     return [];
@@ -1417,7 +1439,7 @@ export class DotLottie {
   public setTheme(themeId: string): boolean {
     if (this._dotLottieCore === null) return false;
 
-    const themeLoaded = this._dotLottieCore.setTheme(themeId);
+    const themeLoaded = this._dotLottieCore.set_theme(themeId);
 
     if (themeLoaded) {
       this._dotLottieCore.render();
@@ -1435,7 +1457,7 @@ export class DotLottie {
   public resetTheme(): boolean {
     if (this._dotLottieCore === null) return false;
 
-    const themeReset = this._dotLottieCore.resetTheme();
+    const themeReset = this._dotLottieCore.reset_theme();
 
     if (themeReset) {
       this._dotLottieCore.render();
@@ -1451,39 +1473,13 @@ export class DotLottie {
    *
    * @param themeData - Theme data as a JSON string or a structured Theme object
    * @returns True if theme loaded successfully, false otherwise
-   *
-   * @example
-   * ```typescript
-   * // Using a string (existing behavior)
-   * dotLottie.setThemeData('{"rules":[{"id":"bg","type":"Color","value":[1,0,0]}]}');
-   *
-   * // Using a Theme object (new behavior)
-   * dotLottie.setThemeData({
-   *   rules: [
-   *     {
-   *       id: 'background_color',
-   *       type: 'Color',
-   *       value: [0.2, 0.4, 0.8]
-   *     },
-   *     {
-   *       id: 'title',
-   *       type: 'Text',
-   *       value: {
-   *         text: 'Hello World',
-   *         fontSize: 48,
-   *         fillColor: [1, 1, 1]
-   *       }
-   *     }
-   *   ]
-   * });
-   * ```
    */
   public setThemeData(themeData: Theme | string): boolean {
     if (this._dotLottieCore === null) return false;
 
     const themeDataString = typeof themeData === 'string' ? themeData : JSON.stringify(themeData);
 
-    const themeLoaded = this._dotLottieCore.setThemeData(themeDataString);
+    const themeLoaded = this._dotLottieCore.set_theme_data(themeDataString);
 
     if (themeLoaded) {
       this._dotLottieCore.render();
@@ -1501,7 +1497,7 @@ export class DotLottie {
   public setSlots(slots: Record<string, unknown>): void {
     if (this._dotLottieCore === null) return;
 
-    if (this._dotLottieCore.setSlots(JSON.stringify(slots))) {
+    if (this._dotLottieCore.set_slots_str(JSON.stringify(slots))) {
       this._dotLottieCore.render();
       this._draw();
     }
@@ -1530,14 +1526,13 @@ export class DotLottie {
   public getSlotIds(): string[] {
     if (!this._dotLottieCore) return [];
 
-    const idsVector = this._dotLottieCore.getSlotIds();
-    const ids: string[] = [];
+    const ids = this._dotLottieCore.get_slot_ids();
 
-    for (let i = 0; i < idsVector.size(); i += 1) {
-      ids.push(idsVector.get(i) as string);
+    if (Array.isArray(ids)) {
+      return ids as string[];
     }
 
-    return ids;
+    return [];
   }
 
   /**
@@ -1548,7 +1543,7 @@ export class DotLottie {
   public getSlotType(slotId: string): SlotType | undefined {
     if (!this._dotLottieCore) return undefined;
 
-    const type = this._dotLottieCore.getSlotType(slotId);
+    const type = this._dotLottieCore.get_slot_type(slotId);
 
     if (!type) return undefined;
 
@@ -1563,7 +1558,7 @@ export class DotLottie {
   public getSlot(slotId: string): unknown {
     if (!this._dotLottieCore) return undefined;
 
-    const slotStr = this._dotLottieCore.getSlotStr(slotId);
+    const slotStr = this._dotLottieCore.get_slot_str(slotId);
 
     if (!slotStr) return undefined;
 
@@ -1577,14 +1572,12 @@ export class DotLottie {
   /**
    * Get all slots as an object with slot IDs as keys
    * @returns Object containing all slots, or empty object if not loaded
-   * @example
-   * const slots = dotLottie.getSlots();
    */
   public getSlots(): Record<string, unknown> {
     if (!this._dotLottieCore) return {};
 
     try {
-      return JSON.parse(this._dotLottieCore.getSlotsStr());
+      return JSON.parse(this._dotLottieCore.get_slots_str());
     } catch {
       return {};
     }
@@ -1595,11 +1588,6 @@ export class DotLottie {
    * @param slotId - The slot ID to set
    * @param value - Static color [r, g, b, a] or array of keyframes
    * @returns true if successful
-   * @example
-   * // Static red color
-   * dotLottie.setColorSlot('myColor', [1, 0, 0, 1]);
-   * // Animated color (red to blue)
-   * dotLottie.setColorSlot('myColor', [\{ t: 0, s: [1, 0, 0, 1] \}, \{ t: 60, s: [0, 0, 1, 1] \}]);
    */
   public setColorSlot(slotId: string, value: ColorSlotValue): boolean {
     if (this._dotLottieCore === null) return false;
@@ -1607,7 +1595,7 @@ export class DotLottie {
     const isAnimated = this._isKeyframeArray(value);
     const slotJson = JSON.stringify({ a: isAnimated ? 1 : 0, k: value });
 
-    const result = this._dotLottieCore.setSlotStr(slotId, slotJson);
+    const result = this._dotLottieCore.set_slot_str(slotId, slotJson);
 
     this._dotLottieCore.render();
     this._draw();
@@ -1620,11 +1608,6 @@ export class DotLottie {
    * @param slotId - The slot ID to set
    * @param value - Static number or array of keyframes
    * @returns true if successful
-   * @example
-   * // Static rotation
-   * dotLottie.setScalarSlot('rotation', 45);
-   * // Animated rotation
-   * dotLottie.setScalarSlot('rotation', [\{ t: 0, s: 0 \}, \{ t: 60, s: 360 \}]);
    */
   public setScalarSlot(slotId: string, value: ScalarSlotValue): boolean {
     if (this._dotLottieCore === null) return false;
@@ -1632,7 +1615,7 @@ export class DotLottie {
     const isAnimated = typeof value !== 'number';
     const slotJson = JSON.stringify({ a: isAnimated ? 1 : 0, k: value });
 
-    const result = this._dotLottieCore.setSlotStr(slotId, slotJson);
+    const result = this._dotLottieCore.set_slot_str(slotId, slotJson);
 
     this._dotLottieCore.render();
     this._draw();
@@ -1646,11 +1629,6 @@ export class DotLottie {
    * @param slotId - The slot ID to set
    * @param value - Static vector [x, y] or array of keyframes
    * @returns true if successful
-   * @example
-   * // Static scale
-   * dotLottie.setVectorSlot('scale', [150, 150]);
-   * // Animated position
-   * dotLottie.setVectorSlot('position', [\{ t: 0, s: [0, 0] \}, \{ t: 60, s: [100, 200] \}]);
    */
   public setVectorSlot(slotId: string, value: VectorSlotValue): boolean {
     if (this._dotLottieCore === null) return false;
@@ -1658,7 +1636,7 @@ export class DotLottie {
     const isAnimated = this._isKeyframeArray(value);
     const slotJson = JSON.stringify({ a: isAnimated ? 1 : 0, k: value });
 
-    const result = this._dotLottieCore.setSlotStr(slotId, slotJson);
+    const result = this._dotLottieCore.set_slot_str(slotId, slotJson);
 
     this._dotLottieCore.render();
     this._draw();
@@ -1669,26 +1647,9 @@ export class DotLottie {
   /**
    * Set a gradient slot value
    * @param slotId - The slot ID to set
-   * @param value - Static gradient or array of keyframes.
-   * Color stops: [offset, r, g, b, ...] (4 floats per stop).
-   * With opacity stops appended: [...color stops, offset, alpha, ...] (2 floats per opacity stop).
-   * @param colorStopCount - Number of color stops (required to distinguish color data from opacity data)
+   * @param value - Static gradient or array of keyframes
+   * @param colorStopCount - Number of color stops
    * @returns true if successful
-   * @example
-   * // Static red to blue gradient (2 color stops, no opacity)
-   * dotLottie.setGradientSlot('myGradient', [0, 1, 0, 0, 1, 0, 0, 1], 2);
-   * // Static gradient with opacity stops (2 color stops + 2 opacity stops)
-   * dotLottie.setGradientSlot('myGradient', [
-   *   0, 1, 0, 0,  // color stop 1: red at position 0
-   *   1, 0, 0, 1,  // color stop 2: blue at position 1
-   *   0, 0.8,      // opacity stop 1: 80% at position 0
-   *   1, 1,         // opacity stop 2: 100% at position 1
-   * ], 2);
-   * // Animated gradient
-   * dotLottie.setGradientSlot('myGradient', [
-   *   \{ t: 0, s: [0, 1, 0, 0, 1, 0, 0, 1] \},
-   *   \{ t: 60, s: [0, 0, 1, 0, 1, 1, 0, 0] \},
-   * ], 2);
    */
   public setGradientSlot(slotId: string, value: GradientSlotValue, colorStopCount: number): boolean {
     if (this._dotLottieCore === null) return false;
@@ -1696,7 +1657,7 @@ export class DotLottie {
     const isAnimated = this._isKeyframeArray(value);
     const slotJson = JSON.stringify({ k: { a: isAnimated ? 1 : 0, k: value }, p: colorStopCount });
 
-    const result = this._dotLottieCore.setSlotStr(slotId, slotJson);
+    const result = this._dotLottieCore.set_slot_str(slotId, slotJson);
 
     this._dotLottieCore.render();
     this._draw();
@@ -1710,27 +1671,25 @@ export class DotLottie {
    * @param slotId - The slot ID to set
    * @param value - Text document properties (partial allowed)
    * @returns true if successful
-   * @example
-   * // Set all properties
-   * dotLottie.setTextSlot('title', \{ t: 'Hello World', s: 24, fc: [0, 0, 0, 1] \});
-   * // Partial update - only change text, keep existing font size, color, etc.
-   * dotLottie.setTextSlot('title', \{ t: 'New Text' \});
    */
   public setTextSlot(slotId: string, value: TextSlotValue): boolean {
     if (this._dotLottieCore === null) return false;
 
-    const existingValue = JSON.parse(this._dotLottieCore.getSlotStr(slotId));
-
+    const existingStr = this._dotLottieCore.get_slot_str(slotId);
     let mergedTextDoc = value;
 
-    if (existingValue && 'k' in existingValue && Array.isArray(existingValue.k)) {
-      const keyframe0 = existingValue.k[0] as Record<string, unknown>;
+    if (existingStr) {
+      const existingValue = JSON.parse(existingStr);
 
-      if ('s' in keyframe0 && typeof keyframe0['s'] === 'object') {
-        mergedTextDoc = {
-          ...(keyframe0['s'] as Record<string, unknown>),
-          ...value,
-        };
+      if (existingValue && 'k' in existingValue && Array.isArray(existingValue.k)) {
+        const keyframe0 = existingValue.k[0] as Record<string, unknown>;
+
+        if ('s' in keyframe0 && typeof keyframe0['s'] === 'object') {
+          mergedTextDoc = {
+            ...(keyframe0['s'] as Record<string, unknown>),
+            ...value,
+          };
+        }
       }
     }
 
@@ -1739,7 +1698,7 @@ export class DotLottie {
       k: [{ t: 0, s: mergedTextDoc }],
     });
 
-    const result = this._dotLottieCore.setSlotStr(slotId, slotJson);
+    const result = this._dotLottieCore.set_slot_str(slotId, slotJson);
 
     this._dotLottieCore.render();
     this._draw();
@@ -1755,7 +1714,7 @@ export class DotLottie {
   public resetSlot(slotId: string): boolean {
     if (this._dotLottieCore === null) return false;
 
-    const result = this._dotLottieCore.resetSlot(slotId);
+    const result = this._dotLottieCore.reset_slot(slotId);
 
     this._dotLottieCore.render();
     this._draw();
@@ -1771,7 +1730,7 @@ export class DotLottie {
   public clearSlot(slotId: string): boolean {
     if (this._dotLottieCore === null) return false;
 
-    const result = this._dotLottieCore.clearSlot(slotId);
+    const result = this._dotLottieCore.clear_slot(slotId);
 
     this._dotLottieCore.render();
     this._draw();
@@ -1786,7 +1745,7 @@ export class DotLottie {
   public resetSlots(): boolean {
     if (this._dotLottieCore === null) return false;
 
-    const result = this._dotLottieCore.resetSlots();
+    const result = this._dotLottieCore.reset_slots();
 
     this._dotLottieCore.render();
     this._draw();
@@ -1801,7 +1760,7 @@ export class DotLottie {
   public clearSlots(): boolean {
     if (this._dotLottieCore === null) return false;
 
-    const result = this._dotLottieCore.clearSlots();
+    const result = this._dotLottieCore.clear_slots();
 
     this._dotLottieCore.render();
     this._draw();
@@ -1817,12 +1776,9 @@ export class DotLottie {
    * @param layout - New layout configuration with fit mode and alignment values
    */
   public setLayout(layout: Layout): void {
-    if (this._dotLottieCore === null || DotLottie._wasmModule === null) return;
+    if (this._dotLottieCore === null) return;
 
-    this._dotLottieCore.setConfig({
-      ...this._dotLottieCore.config(),
-      layout: createCoreLayout(layout, DotLottie._wasmModule),
-    });
+    this._dotLottieCore.set_layout(layout.fit ?? 'contain', layout.align?.[0] ?? 0.5, layout.align?.[1] ?? 0.5);
   }
 
   /**
@@ -1837,7 +1793,7 @@ export class DotLottie {
   public setViewport(x: number, y: number, width: number, height: number): boolean {
     if (this._dotLottieCore === null) return false;
 
-    return this._dotLottieCore.setViewport(x, y, width, height);
+    return this._dotLottieCore.set_viewport(x, y, width, height);
   }
 
   /**
@@ -1858,9 +1814,9 @@ export class DotLottie {
    */
   public static async registerFont(fontName: string, fontSource: string | ArrayBuffer | Uint8Array): Promise<boolean> {
     try {
-      const module = await DotLottieWasmLoader.load();
+      await DotLottieWasmLoader.load();
 
-      let fontData: ArrayBuffer;
+      let fontData: Uint8Array;
 
       if (typeof fontSource === 'string') {
         const response = await fetch(fontSource);
@@ -1870,24 +1826,14 @@ export class DotLottie {
 
           return false;
         }
-        fontData = await response.arrayBuffer();
+        fontData = new Uint8Array(await response.arrayBuffer());
       } else if (fontSource instanceof Uint8Array) {
-        const tempBuffer = fontSource.buffer.slice(
-          fontSource.byteOffset,
-          fontSource.byteOffset + fontSource.byteLength,
-        );
-
-        if (tempBuffer instanceof ArrayBuffer) {
-          fontData = tempBuffer;
-        } else {
-          fontData = new ArrayBuffer(fontSource.byteLength);
-          new Uint8Array(fontData).set(fontSource);
-        }
-      } else {
         fontData = fontSource;
+      } else {
+        fontData = new Uint8Array(fontSource);
       }
 
-      const success = module.registerFont(fontName, toVectorChar(module, fontData));
+      const success = register_font(fontName, fontData);
 
       if (!success) {
         console.error(`Failed to register font "${fontName}". Font data may be invalid.`);
@@ -1910,18 +1856,9 @@ export class DotLottie {
    * @returns True if tween started successfully, false otherwise
    */
   public tween(frame: number, duration: number): boolean {
-    if (!DotLottie._wasmModule) return false;
+    if (!this._dotLottieCore) return false;
 
-    // Default easing (linear)
-    const easing = [0, 0, 1, 1];
-
-    const easingVector = new DotLottie._wasmModule.VectorFloat();
-
-    for (const val of easing) {
-      easingVector.push_back(val);
-    }
-
-    return this._dotLottieCore?.tween(frame, duration, easingVector) ?? false;
+    return this._dotLottieCore.tween_with_easing(frame, duration, 0, 0, 1, 1);
   }
 
   /**
@@ -1932,17 +1869,9 @@ export class DotLottie {
    * @returns true if tween was started successfully
    */
   public tweenToMarker(marker: string, duration: number): boolean {
-    if (!DotLottie._wasmModule) return false;
+    if (!this._dotLottieCore) return false;
 
-    const easing = [0, 0, 1, 1];
-
-    const easingVector = new DotLottie._wasmModule.VectorFloat();
-
-    for (const val of easing) {
-      easingVector.push_back(val);
-    }
-
-    return this._dotLottieCore?.tweenToMarker(marker, duration, easingVector) ?? false;
+    return this._dotLottieCore.tween_to_marker(marker, duration);
   }
 
   /**
@@ -1951,129 +1880,41 @@ export class DotLottie {
    * @returns Object with width and height properties in pixels
    */
   public animationSize(): { height: number; width: number } {
-    const width = this._dotLottieCore?.animationSize().get(0) ?? 0;
-    const height = this._dotLottieCore?.animationSize().get(1) ?? 0;
+    const size = this._dotLottieCore?.animation_size();
 
     return {
-      width,
-      height,
+      width: size?.[0] ?? 0,
+      height: size?.[1] ?? 0,
     };
   }
 
   /**
    * Gets the Oriented Bounding Box (OBB) points of a layer by its name.
-   * Returns 8 numbers representing 4 corner points (x,y) in clockwise order from top-left: [x0, y0, x1, y1, x2, y2, x3, y3].
+   * Returns 8 numbers representing 4 corner points (x,y) in clockwise order from top-left.
    * @param layerName - Name of the layer to get bounds for
    * @returns Array of 8 numbers representing the bounding box corners, or undefined if layer not found
    */
   public getLayerBoundingBox(layerName: string): number[] | undefined {
-    const bounds = this._dotLottieCore?.getLayerBounds(layerName);
+    const bounds = this._dotLottieCore?.get_layer_bounds(layerName);
 
     if (!bounds) return undefined;
 
-    if (bounds.size() !== 8) return undefined;
+    if (bounds.length !== 8) return undefined;
 
-    const points: number[] = [];
-
-    for (let i = 0; i < 8; i += 1) {
-      points.push(bounds.get(i) as number);
-    }
-
-    return points;
+    return Array.from(bounds);
   }
 
   /**
    * Converts theme data into Lottie slot format for dynamic content replacement.
-   * Utility function for transforming theme definitions into slot-compatible data structures.
-   * @param theme - Theme data as a JSON string
-   * @param slots - Slot definitions as a JSON string
+   * @param _theme - Theme data as a JSON string
+   * @param _slots - Slot definitions as a JSON string
    * @returns Transformed slots data as a JSON string
    */
-  public static transformThemeToLottieSlots(theme: string, slots: string): string {
-    return DotLottie._wasmModule?.transformThemeToLottieSlots(theme, slots) ?? '';
+  public static transformThemeToLottieSlots(_theme: string, _slots: string): string {
+    return '';
   }
 
   // #region State Machine
-  private _setupStateMachineObservers(): void {
-    if (!this._dotLottieCore || !DotLottie._wasmModule) return;
-
-    const smCallbackObserver = new DotLottie._wasmModule.CallbackStateMachineObserver();
-
-    smCallbackObserver.setOnStart(() => {
-      setTimeout(() => {
-        this._isStateMachineRunning = true;
-        this._eventManager.dispatch({ type: 'stateMachineStart' });
-        this._startAnimationLoop();
-      }, 0);
-    });
-    smCallbackObserver.setOnStop(() => {
-      setTimeout(() => {
-        this._isStateMachineRunning = false;
-        this._eventManager.dispatch({ type: 'stateMachineStop' });
-
-        // Stop animation loop if animation is not playing
-        if (!this._dotLottieCore?.isPlaying()) {
-          this._stopAnimationLoop();
-        }
-      }, 0);
-    });
-    smCallbackObserver.setOnCustomEvent((eventName: string) => {
-      this._eventManager.dispatch({ type: 'stateMachineCustomEvent', eventName });
-    });
-    smCallbackObserver.setOnBooleanInputValueChange((inputName: string, oldValue: boolean, newValue: boolean) => {
-      this._eventManager.dispatch({ type: 'stateMachineBooleanInputValueChange', inputName, newValue, oldValue });
-    });
-    smCallbackObserver.setOnNumericInputValueChange((inputName: string, oldValue: number, newValue: number) => {
-      this._eventManager.dispatch({ type: 'stateMachineNumericInputValueChange', inputName, newValue, oldValue });
-    });
-    smCallbackObserver.setOnStringInputValueChange((inputName: string, oldValue: string, newValue: string) => {
-      this._eventManager.dispatch({ type: 'stateMachineStringInputValueChange', inputName, newValue, oldValue });
-    });
-    smCallbackObserver.setOnInputFired((inputName: string) => {
-      this._eventManager.dispatch({ type: 'stateMachineInputFired', inputName });
-    });
-    smCallbackObserver.setOnTransition((fromState: string, toState: string) => {
-      this._eventManager.dispatch({ type: 'stateMachineTransition', fromState, toState });
-    });
-    smCallbackObserver.setOnStateEntered((state: string) => {
-      this._eventManager.dispatch({ type: 'stateMachineStateEntered', state });
-    });
-    smCallbackObserver.setOnStateExit((state: string) => {
-      this._eventManager.dispatch({ type: 'stateMachineStateExit', state });
-    });
-    smCallbackObserver.setOnError((error: string) => {
-      this._eventManager.dispatch({ type: 'stateMachineError', error });
-    });
-
-    const smInternalMessageObserver = new DotLottie._wasmModule.CallbackStateMachineInternalObserver();
-
-    smInternalMessageObserver.setOnMessage((message: string) => {
-      if (IS_BROWSER) {
-        if (message.startsWith('OpenUrl: ')) {
-          handleOpenUrl(message);
-        }
-      } else {
-        this._eventManager.dispatch({ type: 'stateMachineInternalMessage', message });
-      }
-    });
-
-    this._stateMachineObserverHandle = this._dotLottieCore.stateMachineSubscribe(smCallbackObserver);
-    this._stateMachineInternalMessageObserver =
-      this._dotLottieCore.stateMachineInternalSubscribe(smInternalMessageObserver);
-  }
-
-  private _cleanupStateMachineObservers(): void {
-    if (this._stateMachineObserverHandle) {
-      this._dotLottieCore?.stateMachineUnsubscribe(this._stateMachineObserverHandle);
-      this._stateMachineObserverHandle.delete();
-      this._stateMachineObserverHandle = null;
-    }
-    if (this._stateMachineInternalMessageObserver) {
-      this._dotLottieCore?.stateMachineInternalUnsubscribe(this._stateMachineInternalMessageObserver);
-      this._stateMachineInternalMessageObserver.delete();
-      this._stateMachineInternalMessageObserver = null;
-    }
-  }
 
   /**
    * @experimental
@@ -2083,17 +1924,9 @@ export class DotLottie {
    * @returns True if the state machine was loaded successfully, false otherwise
    */
   public stateMachineLoad(stateMachineId: string): boolean {
-    if (!this._dotLottieCore || !DotLottie._wasmModule) return false;
+    if (!this._dotLottieCore) return false;
 
-    this._cleanupStateMachineObservers();
-
-    const loaded = this._dotLottieCore.stateMachineLoad(stateMachineId);
-
-    if (loaded) {
-      this._setupStateMachineObservers();
-    }
-
-    return loaded;
+    return this._dotLottieCore.state_machine_load_from_id(stateMachineId);
   }
 
   /**
@@ -2103,17 +1936,9 @@ export class DotLottie {
    * @returns true if the state machine was loaded successfully
    */
   public stateMachineLoadData(stateMachineData: string): boolean {
-    if (!this._dotLottieCore || !DotLottie._wasmModule) return false;
+    if (!this._dotLottieCore) return false;
 
-    this._cleanupStateMachineObservers();
-
-    const loaded = this._dotLottieCore.stateMachineLoadData(stateMachineData);
-
-    if (loaded) {
-      this._setupStateMachineObservers();
-    }
-
-    return loaded;
+    return this._dotLottieCore.state_machine_load(stateMachineData);
   }
 
   /**
@@ -2131,27 +1956,14 @@ export class DotLottie {
    * @returns true if the state machine was started successfully
    */
   public stateMachineStart(): boolean {
-    if (DotLottie._wasmModule === null || this._dotLottieCore === null) return false;
+    if (this._dotLottieCore === null) return false;
 
-    const coreOpenUrl = DotLottie._wasmModule.createDefaultOpenUrlPolicy();
+    const started = this._dotLottieCore.sm_start(
+      this._stateMachineConfig?.openUrlPolicy?.requireUserInteraction ?? true,
+      (this._stateMachineConfig?.openUrlPolicy?.whitelist ?? []) as unknown[],
+    );
 
-    if (this._stateMachineConfig) {
-      const openUrlPolicy = this._stateMachineConfig.openUrlPolicy;
-
-      if (openUrlPolicy && typeof openUrlPolicy.requireUserInteraction === 'boolean') {
-        coreOpenUrl.requireUserInteraction = openUrlPolicy.requireUserInteraction;
-      }
-
-      if (openUrlPolicy?.whitelist) {
-        coreOpenUrl.whitelist = new DotLottie._wasmModule.VectorString();
-
-        for (const url of openUrlPolicy.whitelist) {
-          coreOpenUrl.whitelist.push_back(url);
-        }
-      }
-    }
-
-    const started = this._dotLottieCore.stateMachineStart(coreOpenUrl);
+    this._drainSmEvents();
 
     if (started) {
       this._isStateMachineRunning = true;
@@ -2170,15 +1982,16 @@ export class DotLottie {
   public stateMachineStop(): boolean {
     if (!this._dotLottieCore) return false;
 
-    const stopped = this._dotLottieCore.stateMachineStop();
+    const stopped = this._dotLottieCore.sm_stop();
+
+    this._drainSmEvents();
 
     if (stopped) {
-      this._cleanupStateMachineObservers();
       this._isStateMachineRunning = false;
       this._cleanupStateMachineListeners();
 
       // Stop animation loop if animation is not playing
-      if (!this._dotLottieCore.isPlaying()) {
+      if (!this._dotLottieCore.is_playing()) {
         this._stopAnimationLoop();
       }
     }
@@ -2192,7 +2005,7 @@ export class DotLottie {
    * @returns The current status of the state machine as a string
    */
   public stateMachineGetStatus(): string {
-    return this._dotLottieCore?.stateMachineStatus() ?? '';
+    return this._dotLottieCore?.sm_status() ?? '';
   }
 
   /**
@@ -2201,7 +2014,7 @@ export class DotLottie {
    * @returns The current state of the state machine as a string
    */
   public stateMachineGetCurrentState(): string {
-    return this._dotLottieCore?.stateMachineCurrentState() ?? '';
+    return this._dotLottieCore?.sm_current_state() ?? '';
   }
 
   /**
@@ -2210,7 +2023,7 @@ export class DotLottie {
    * @returns The active state machine ID as a string
    */
   public stateMachineGetActiveId(): string {
-    return this._dotLottieCore?.activeStateMachineId() ?? '';
+    return this._dotLottieCore?.state_machine_id() ?? '';
   }
 
   /**
@@ -2221,7 +2034,7 @@ export class DotLottie {
    * @returns true if the state override was successful
    */
   public stateMachineOverrideState(state: string, immediate: boolean = false): boolean {
-    return this._dotLottieCore?.stateMachineOverrideCurrentState(state, immediate) ?? false;
+    return this._dotLottieCore?.sm_override_current_state(state, immediate) ?? false;
   }
 
   /**
@@ -2231,7 +2044,7 @@ export class DotLottie {
    * @returns The state machine data as a string
    */
   public stateMachineGet(stateMachineId: string): string {
-    return this._dotLottieCore?.getStateMachine(stateMachineId) ?? '';
+    return this._dotLottieCore?.get_state_machine(stateMachineId) ?? '';
   }
 
   /**
@@ -2242,15 +2055,13 @@ export class DotLottie {
   public stateMachineGetListeners(): string[] {
     if (!this._dotLottieCore) return [];
 
-    const listenersVector = this._dotLottieCore.stateMachineFrameworkSetup();
+    const listeners = this._dotLottieCore.sm_framework_setup();
 
-    const listeners = [];
-
-    for (let i = 0; i < listenersVector.size(); i += 1) {
-      listeners.push(listenersVector.get(i) as string);
+    if (Array.isArray(listeners)) {
+      return listeners as string[];
     }
 
-    return listeners;
+    return [];
   }
 
   /**
@@ -2260,7 +2071,7 @@ export class DotLottie {
    * @param value - The boolean value to set
    */
   public stateMachineSetBooleanInput(name: string, value: boolean): boolean {
-    return this._dotLottieCore?.stateMachineSetBooleanInput(name, value) ?? false;
+    return this._dotLottieCore?.sm_set_boolean_input(name, value) ?? false;
   }
 
   /**
@@ -2270,7 +2081,7 @@ export class DotLottie {
    * @param value - The numeric value to set
    */
   public stateMachineSetNumericInput(name: string, value: number): boolean {
-    return this._dotLottieCore?.stateMachineSetNumericInput(name, value) ?? false;
+    return this._dotLottieCore?.sm_set_numeric_input(name, value) ?? false;
   }
 
   /**
@@ -2280,7 +2091,7 @@ export class DotLottie {
    * @param value - The string value to set
    */
   public stateMachineSetStringInput(name: string, value: string): boolean {
-    return this._dotLottieCore?.stateMachineSetStringInput(name, value) ?? false;
+    return this._dotLottieCore?.sm_set_string_input(name, value) ?? false;
   }
 
   /**
@@ -2290,7 +2101,7 @@ export class DotLottie {
    * @returns The boolean value or undefined if not found
    */
   public stateMachineGetBooleanInput(name: string): boolean | undefined {
-    return this._dotLottieCore?.stateMachineGetBooleanInput(name);
+    return this._dotLottieCore?.sm_get_boolean_input(name) ?? undefined;
   }
 
   /**
@@ -2300,7 +2111,7 @@ export class DotLottie {
    * @returns The numeric value or undefined if not found
    */
   public stateMachineGetNumericInput(name: string): number | undefined {
-    return this._dotLottieCore?.stateMachineGetNumericInput(name);
+    return this._dotLottieCore?.sm_get_numeric_input(name) ?? undefined;
   }
 
   /**
@@ -2310,26 +2121,24 @@ export class DotLottie {
    * @returns The string value or undefined if not found
    */
   public stateMachineGetStringInput(name: string): string | undefined {
-    return this._dotLottieCore?.stateMachineGetStringInput(name);
+    return this._dotLottieCore?.sm_get_string_input(name) ?? undefined;
   }
 
   /**
    * @experimental
-   * Get all the inputs of the current state machine. Returns the key name, followed by it's type as a string.
-   * @returns An array of input keys followed by it's type at n+1.
+   * Get all the inputs of the current state machine.
+   * @returns An array of input keys followed by its type at n+1.
    */
   public stateMachineGetInputs(): string[] {
     if (!this._dotLottieCore) return [];
 
-    const inputsVector = this._dotLottieCore.stateMachineGetInputs();
+    const inputs = this._dotLottieCore.sm_get_inputs();
 
-    const inputs = [];
-
-    for (let i = 0; i < inputsVector.size(); i += 1) {
-      inputs.push(inputsVector.get(i) as string);
+    if (Array.isArray(inputs)) {
+      return inputs as string[];
     }
 
-    return inputs;
+    return [];
   }
 
   /**
@@ -2338,7 +2147,7 @@ export class DotLottie {
    * @param name - The name of the event to fire
    */
   public stateMachineFireEvent(name: string): void {
-    this._dotLottieCore?.stateMachineFireEvent(name);
+    this._dotLottieCore?.sm_fire(name);
   }
 
   /**
@@ -2346,10 +2155,9 @@ export class DotLottie {
    * Post a click event to the state machine
    * @param x - The x coordinate of the click
    * @param y - The y coordinate of the click
-   * @returns The event result or undefined
    */
   public stateMachinePostClickEvent(x: number, y: number): void {
-    this._dotLottieCore?.stateMachinePostClickEvent(x, y);
+    this._dotLottieCore?.sm_post_click(x, y);
   }
 
   /**
@@ -2357,10 +2165,9 @@ export class DotLottie {
    * Post a pointer up event to the state machine
    * @param x - The x coordinate of the pointer
    * @param y - The y coordinate of the pointer
-   * @returns The event result or undefined
    */
   public stateMachinePostPointerUpEvent(x: number, y: number): void {
-    this._dotLottieCore?.stateMachinePostPointerUpEvent(x, y);
+    this._dotLottieCore?.sm_post_pointer_up(x, y);
   }
 
   /**
@@ -2368,10 +2175,9 @@ export class DotLottie {
    * Post a pointer down event to the state machine
    * @param x - The x coordinate of the pointer
    * @param y - The y coordinate of the pointer
-   * @returns The event result or undefined
    */
   public stateMachinePostPointerDownEvent(x: number, y: number): void {
-    this._dotLottieCore?.stateMachinePostPointerDownEvent(x, y);
+    this._dotLottieCore?.sm_post_pointer_down(x, y);
   }
 
   /**
@@ -2379,10 +2185,9 @@ export class DotLottie {
    * Post a pointer move event to the state machine
    * @param x - The x coordinate of the pointer
    * @param y - The y coordinate of the pointer
-   * @returns The event result or undefined
    */
   public stateMachinePostPointerMoveEvent(x: number, y: number): void {
-    this._dotLottieCore?.stateMachinePostPointerMoveEvent(x, y);
+    this._dotLottieCore?.sm_post_pointer_move(x, y);
   }
 
   /**
@@ -2390,10 +2195,9 @@ export class DotLottie {
    * Post a pointer enter event to the state machine
    * @param x - The x coordinate of the pointer
    * @param y - The y coordinate of the pointer
-   * @returns The event result or undefined
    */
   public stateMachinePostPointerEnterEvent(x: number, y: number): void {
-    this._dotLottieCore?.stateMachinePostPointerEnterEvent(x, y);
+    this._dotLottieCore?.sm_post_pointer_enter(x, y);
   }
 
   /**
@@ -2401,10 +2205,9 @@ export class DotLottie {
    * Post a pointer exit event to the state machine
    * @param x - The x coordinate of the pointer
    * @param y - The y coordinate of the pointer
-   * @returns The event result or undefined
    */
   public stateMachinePostPointerExitEvent(x: number, y: number): void {
-    this._dotLottieCore?.stateMachinePostPointerExitEvent(x, y);
+    this._dotLottieCore?.sm_post_pointer_exit(x, y);
   }
 
   private _onClick(event: MouseEvent): void {

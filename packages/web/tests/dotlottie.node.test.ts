@@ -47,20 +47,32 @@ test('should render correctly in node', async () => {
 
   const frameCount = dotLottie.totalFrames;
 
-  for (let i = 0; i < frameCount; i += 1) {
+  // Frame 0 is already rendered during load — verify its buffer snapshot
+  await expect(dotLottie.buffer?.toString()).toMatchFileSnapshot(`./__snapshots__/frame-buffer-0.txt`, `frame 0`);
+
+  // Allow load-phase setTimeout dispatches (frame/render for frame 0) to fire
+  await new Promise((resolve) => setTimeout(resolve, 50));
+
+  // Clear mocks to discard load-phase frame/render events for frame 0
+  onFrame.mockClear();
+  onRender.mockClear();
+
+  // Start from frame 1: setFrame(0) is a no-op after load since ThorVG
+  // already rendered frame 0 during the load pipeline.
+  for (let i = 1; i < frameCount; i += 1) {
     dotLottie.setFrame(i);
     await expect(dotLottie.buffer?.toString()).toMatchFileSnapshot(
       `./__snapshots__/frame-buffer-${i}.txt`,
       `frame ${i}`,
     );
     await vi.waitFor(() => {
-      expect(onFrame).toHaveBeenNthCalledWith(i + 1, {
+      expect(onFrame).toHaveBeenNthCalledWith(i, {
         type: 'frame',
         currentFrame: i,
       });
     });
     await vi.waitFor(() => {
-      expect(onRender).toHaveBeenNthCalledWith(i + 1, {
+      expect(onRender).toHaveBeenNthCalledWith(i, {
         type: 'render',
         currentFrame: i,
       });
