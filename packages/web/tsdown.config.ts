@@ -10,7 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf-8'));
 
 export default defineConfig({
-  entry: ['./src/index.ts'],
+  entry: ['./src/index.ts', './src/webgl/index.ts', './src/webgpu/index.ts'],
   format: ['esm', 'cjs'],
   dts: true,
   minify: true,
@@ -24,9 +24,28 @@ export default defineConfig({
   },
   plugins: [pluginInlineWorker(pkg)],
   onSuccess: async () => {
-    const src = path.resolve(__dirname, 'src/core/dotlottie-player.wasm');
-    const dest = path.resolve(__dirname, 'dist/dotlottie-player.wasm');
+    // Copy software WASM
+    await fs.promises.copyFile(
+      path.resolve(__dirname, 'src/core/dotlottie-player.wasm'),
+      path.resolve(__dirname, 'dist/dotlottie-player.wasm'),
+    );
 
-    await fs.promises.copyFile(src, dest);
+    // Copy WebGL WASM
+    const webglDir = path.resolve(__dirname, 'dist/webgl');
+
+    await fs.promises.mkdir(webglDir, { recursive: true });
+    await fs.promises.copyFile(
+      path.resolve(__dirname, 'src/webgl/dotlottie-player.wasm'),
+      path.resolve(webglDir, 'dotlottie-player.wasm'),
+    );
+
+    // Copy WebGPU WASM
+    const webgpuDir = path.resolve(__dirname, 'dist/webgpu');
+
+    await fs.promises.mkdir(webgpuDir, { recursive: true });
+    await fs.promises.copyFile(
+      path.resolve(__dirname, 'src/webgpu/dotlottie-player.wasm'),
+      path.resolve(webgpuDir, 'dotlottie-player.wasm'),
+    );
   },
 });

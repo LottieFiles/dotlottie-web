@@ -2,6 +2,8 @@ import { createSlice } from '@reduxjs/toolkit';
 
 export const PlayerStates = ['idle', 'loading', 'playing', 'paused', 'stopped'] as const;
 
+export type Renderer = 'software' | 'webgl' | 'webgpu';
+
 interface AnimationSlice {
   src: string;
   isJson: boolean;
@@ -30,6 +32,8 @@ interface AnimationSlice {
   activeMarker: string;
   stateMachines: { id: string }[];
   activeStateMachineId: string;
+  renderer: Renderer;
+  showLottieWeb: boolean;
 }
 
 export const DEFAULT_SRC = 'https://lottie.host/779299c1-d174-4359-a66b-6253897b33e7/yRJTT0fCfq.lottie';
@@ -62,6 +66,8 @@ const initialState: AnimationSlice = {
   activeMarker: '',
   stateMachines: [],
   activeStateMachineId: '',
+  renderer: 'software',
+  showLottieWeb: false,
 };
 
 export const animationSlice = createSlice({
@@ -168,6 +174,12 @@ export const animationSlice = createSlice({
     setActiveStateMachineId: (state, action) => {
       state.activeStateMachineId = action.payload;
     },
+    setRenderer: (state, action) => {
+      state.renderer = action.payload;
+    },
+    setShowLottieWeb: (state, action) => {
+      state.showLottieWeb = action.payload;
+    },
   },
 });
 
@@ -199,6 +211,8 @@ export const {
   setActiveMarker,
   setStateMachines,
   setActiveStateMachineId,
+  setRenderer,
+  setShowLottieWeb,
 } = animationSlice.actions;
 
 export default animationSlice.reducer;

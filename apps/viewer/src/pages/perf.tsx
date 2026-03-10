@@ -2,10 +2,12 @@ import { ChevronUpDownIcon } from '@heroicons/react/20/solid';
 import { DotLottieReact, DotLottieWorkerReact, setWasmUrl as setDotLottieWasmUrl } from '@lottiefiles/dotlottie-react';
 import { Player as LottieWeb } from '@lottiefiles/react-lottie-player';
 import InitCanvasKit from 'canvaskit-wasm/bin/full/canvaskit';
-import { type JSX, useCallback, useEffect, useState } from 'react';
+import { type JSX, useCallback, useEffect, useRef, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { Link } from 'react-router-dom';
 import dotLottieWasmUrl from '../../../../packages/web/src/core/dotlottie-player.wasm?url';
+import webglWasmUrl from '../../../../packages/web/src/webgl/dotlottie-player.wasm?url';
+import webgpuWasmUrl from '../../../../packages/web/src/webgpu/dotlottie-player.wasm?url';
 import skottieWasmUrl from '../../node_modules/canvaskit-wasm/bin/full/canvaskit.wasm?url';
 import { Skottie as SkottiePlayer, setCanvasKit } from '../components/skottie';
 
@@ -125,10 +127,58 @@ const countOptions = [
 
 const playerOptions = [
   { id: 0, name: 'dotlottie-web' },
+  { id: 4, name: 'dotlottie-web/webgl' },
+  { id: 5, name: 'dotlottie-web/webgpu' },
   { id: 1, name: 'dotlottie-web/worker' },
   { id: 2, name: 'lottie-web' },
   { id: 3, name: 'skia/skottie' },
 ];
+
+interface PerfGPUPlayerProps {
+  renderer: 'webgl' | 'webgpu';
+  src: string;
+  width: number;
+  height: number;
+}
+
+function PerfGPUPlayer({ renderer, src, width, height }: PerfGPUPlayerProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    let destroyed = false;
+    let instance: { destroy(): void } | null = null;
+
+    (async () => {
+      try {
+        if (renderer === 'webgl') {
+          const { DotLottie } = await import('@lottiefiles/dotlottie-web/webgl');
+          DotLottie.setWasmUrl(webglWasmUrl);
+          if (!destroyed) instance = new DotLottie({ canvas, src, autoplay: true, loop: true });
+        } else {
+          const { DotLottie } = await import('@lottiefiles/dotlottie-web/webgpu');
+          DotLottie.setWasmUrl(webgpuWasmUrl);
+          if (!destroyed) instance = new DotLottie({ canvas, src, autoplay: true, loop: true });
+        }
+      } catch (err) {
+        console.error(`[PerfGPUPlayer] ${renderer} init failed:`, err);
+      }
+    })();
+
+    return () => {
+      destroyed = true;
+      try {
+        instance?.destroy();
+      } catch {
+        /* ignore GPU cleanup errors */
+      }
+    };
+  }, [renderer, src]);
+
+  return <canvas ref={canvasRef} width={width} height={height} style={{ width, height }} />;
+}
 
 export const Perf = (): JSX.Element => {
   const size = isMobile ? { width: 150, height: 150 } : { width: 180, height: 180 };
@@ -271,7 +321,7 @@ export const Perf = (): JSX.Element => {
               Set
             </button>
             <div className="flex mt-6 gap-x-4">
-              {(player.id === 0 || player.id === 1) && (
+              {(player.id === 0 || player.id === 1 || player.id === 4 || player.id === 5) && (
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -327,6 +377,12 @@ export const Perf = (): JSX.Element => {
               )}
               {player.id === 2 && <LottieWeb src={anim.lottieURL} style={size} loop autoplay />}
               {player.id === 3 && <SkottiePlayer lottieURL={anim.lottieURL} width={size.width} height={size.height} />}
+              {player.id === 4 && (
+                <PerfGPUPlayer renderer="webgl" src={anim.lottieURL} width={size.width} height={size.height} />
+              )}
+              {player.id === 5 && (
+                <PerfGPUPlayer renderer="webgpu" src={anim.lottieURL} width={size.width} height={size.height} />
+              )}
               <h3 className="mt-6 text-lg font-semibold text-white">{anim.name}</h3>
               <p className="text-sm text-gray-500">{anim.location}</p>
             </li>
