@@ -18,6 +18,7 @@ export function createWasmLoader(initFn: WasmInitFn, primaryUrl: string, backupU
             } catch (backupError) {
               console.error(`Primary WASM URL failed: ${(initialError as Error).message}`);
               console.error(`Backup WASM URL failed: ${(backupError as Error).message}`);
+              initPromise = null;
               throw new Error('WASM loading failed from all sources.');
             }
           });

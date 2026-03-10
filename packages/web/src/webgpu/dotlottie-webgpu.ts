@@ -123,7 +123,7 @@ export class DotLottieWebGPU extends DotLottie {
         alphaMode: 'premultiplied',
       });
 
-      if (this._dotLottieCore) {
+      if (this._dotLottieCore && this.isLoaded) {
         const resized = this._dotLottieCore.resize(canvas.width, canvas.height);
 
         if (resized) {
