@@ -1,8 +1,7 @@
 /* eslint-disable no-warning-comments */
 import { AnimationFrameManager } from './animation-frame-manager';
-import { BYTES_PER_PIXEL, IS_BROWSER } from './constants';
-import { DotLottieWasmLoader } from './core';
-import { Mode as CoreMode, DotLottiePlayerWasm, register_font } from './core/dotlottie-player';
+import { BYTES_PER_PIXEL, IS_BROWSER, PACKAGE_NAME, PACKAGE_VERSION } from './constants';
+import init, { Mode as CoreMode, DotLottiePlayerWasm, register_font } from './core/dotlottie-player';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
@@ -36,6 +35,13 @@ import {
   isElementInViewport,
   isLottie,
 } from './utils';
+import { createWasmLoader } from './wasm-loader';
+
+const dotLottieWasmLoader = createWasmLoader(
+  init,
+  `https://cdn.jsdelivr.net/npm/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/dotlottie-player.wasm`,
+  `https://unpkg.com/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/dotlottie-player.wasm`,
+);
 
 // ── Mode conversion helpers ──────────────────────────────────────────────────
 
@@ -99,11 +105,11 @@ const fitToString = (fit: string): Fit => {
 };
 
 export class DotLottie {
-  private _canvas: HTMLCanvasElement | OffscreenCanvas | RenderSurface | null = null;
+  protected _canvas: HTMLCanvasElement | OffscreenCanvas | RenderSurface | null = null;
 
   private _pendingLoad: { data?: Data; src?: string } | null = null;
 
-  private _context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
+  protected _context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
 
   private readonly _eventManager: EventManager;
 
@@ -111,7 +117,7 @@ export class DotLottie {
 
   private readonly _frameManager: AnimationFrameManager;
 
-  private _dotLottieCore: DotLottiePlayerWasm | null = null;
+  protected _dotLottieCore: DotLottiePlayerWasm | null = null;
 
   private _stateMachineId: string = '';
 
@@ -119,7 +125,7 @@ export class DotLottie {
 
   private _isStateMachineRunning: boolean = false;
 
-  private _renderConfig: RenderConfig = {};
+  protected _renderConfig: RenderConfig = {};
 
   private _isFrozen: boolean = false;
 
@@ -161,10 +167,9 @@ export class DotLottie {
       freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
     };
 
-    DotLottieWasmLoader.load()
+    this._initWasm()
       .then(() => {
-        // After init(), classes are imported directly — no module reference needed
-        this._dotLottieCore = new DotLottiePlayerWasm();
+        this._dotLottieCore = this._createCore();
 
         // Apply config via individual setters
         this._dotLottieCore.set_autoplay(config.autoplay ?? false);
@@ -189,6 +194,8 @@ export class DotLottie {
         this._stateMachineId = config.stateMachineId ?? '';
         this._stateMachineConfig = config.stateMachineConfig ?? null;
 
+        this._onCoreCreated();
+
         this._eventManager.dispatch({ type: 'ready' });
 
         if (config.data) {
@@ -210,11 +217,26 @@ export class DotLottie {
         }
       })
       .catch((error) => {
+        console.error('[dotlottie-web] Initialization failed:', error);
         this._eventManager.dispatch({
           type: 'loadError',
           error: new Error(`Failed to load wasm module: ${error}`),
         });
       });
+  }
+
+  // ── Override hooks for subclasses ─────────────────────────────────────
+
+  protected async _initWasm(): Promise<void> {
+    return dotLottieWasmLoader.load();
+  }
+
+  protected _createCore(): DotLottiePlayerWasm {
+    return new DotLottiePlayerWasm();
+  }
+
+  protected _onCoreCreated(): void {
+    // No-op for software renderer. GPU renderers override to set GL/GPU context.
   }
 
   // ── Event draining ─────────────────────────────────────────────────────
@@ -828,7 +850,7 @@ export class DotLottie {
     this.setBackgroundColor(config.backgroundColor ?? '');
   }
 
-  private _draw(): void {
+  protected _draw(): void {
     if (this._dotLottieCore === null || this._canvas === null) return;
 
     // Only try to get context if canvas has getContext method and no context exists yet
@@ -906,7 +928,7 @@ export class DotLottie {
   }
 
   private _initializeCanvas(): void {
-    this._context = null;
+    this._setupRendererOnCanvas();
 
     if (this._canvas && IS_BROWSER && this._canvas instanceof HTMLCanvasElement && this.isLoaded) {
       if (this._renderConfig.freezeOnOffscreen) {
@@ -934,6 +956,10 @@ export class DotLottie {
         this._draw();
       }
     }
+  }
+
+  protected _setupRendererOnCanvas(): void {
+    this._context = null;
   }
 
   private _stopAnimationLoop(): void {
@@ -1802,7 +1828,7 @@ export class DotLottie {
    * @param url - URL pointing to the dotlottie WASM file
    */
   public static setWasmUrl(url: string): void {
-    DotLottieWasmLoader.setWasmUrl(url);
+    dotLottieWasmLoader.setWasmUrl(url);
   }
 
   /**
@@ -1814,7 +1840,7 @@ export class DotLottie {
    */
   public static async registerFont(fontName: string, fontSource: string | ArrayBuffer | Uint8Array): Promise<boolean> {
     try {
-      await DotLottieWasmLoader.load();
+      await dotLottieWasmLoader.load();
 
       let fontData: Uint8Array;
 

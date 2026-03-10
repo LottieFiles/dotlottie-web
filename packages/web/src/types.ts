@@ -185,6 +185,15 @@ export interface Config {
   useFrameInterpolation?: boolean;
 }
 
+export interface WebGLConfig extends Omit<Config, 'canvas'> {
+  canvas: HTMLCanvasElement;
+}
+
+export interface WebGPUConfig extends Omit<Config, 'canvas'> {
+  canvas: HTMLCanvasElement;
+  device?: GPUDevice;
+}
+
 export interface StateMachineConfig {
   /**
    * Controls whether and which URLs can be opened by a state machine.

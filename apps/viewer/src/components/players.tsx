@@ -24,6 +24,7 @@ import {
   setThemes,
   setTotalFrames,
 } from '../store/viewer-slice';
+import DotLottieGPUPlayer from './dotlottie-gpu-player';
 import LoadTime from './load-time';
 
 setDotLottieWasmUrl(dotLottieWasmUrl);
@@ -60,6 +61,8 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
   const useFrameInterpolation = useAppSelector((state) => state.viewer.useFrameInterpolation);
   const activeMarker = useAppSelector((state) => state.viewer.activeMarker);
   const activeStateMachineId = useAppSelector((state) => state.viewer.activeStateMachineId);
+  const renderer = useAppSelector((state) => state.viewer.renderer);
+  const showLottieWeb = useAppSelector((state) => state.viewer.showLottieWeb);
   const dispatch = useAppDispatch();
 
   const onLoad = useCallback(() => {
@@ -144,27 +147,47 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
           <LoadTime version={dotLottieWebPkg.version} className="mb-4" title="dotLottie Web" />
           <div className="flex items-center justify-center flex-grow p-4">
             <div style={{ width: '350px', height: '350px' }}>
-              <DotLottieReact
-                backgroundColor={backgroundColor}
-                width={350}
-                height={350}
-                autoplay={autoplay}
-                useFrameInterpolation={useFrameInterpolation}
-                loop={loop}
-                mode={mode}
-                speed={speed}
-                themeId={activeThemeId}
-                animationId={activeAnimationId}
-                stateMachineId={activeStateMachineId}
-                segment={segment as [number, number]}
-                marker={activeMarker}
-                dotLottieRefCallback={setDotLottie}
-                src={src}
-              />
+              {renderer === 'software' ? (
+                <DotLottieReact
+                  backgroundColor={backgroundColor}
+                  width={350}
+                  height={350}
+                  autoplay={autoplay}
+                  useFrameInterpolation={useFrameInterpolation}
+                  loop={loop}
+                  mode={mode}
+                  speed={speed}
+                  themeId={activeThemeId}
+                  animationId={activeAnimationId}
+                  stateMachineId={activeStateMachineId}
+                  segment={segment as [number, number]}
+                  marker={activeMarker}
+                  dotLottieRefCallback={setDotLottie}
+                  src={src}
+                />
+              ) : (
+                <DotLottieGPUPlayer
+                  key={renderer}
+                  renderer={renderer}
+                  src={src}
+                  autoplay={autoplay}
+                  loop={loop}
+                  speed={speed}
+                  mode={mode}
+                  backgroundColor={backgroundColor}
+                  useFrameInterpolation={useFrameInterpolation}
+                  animationId={activeAnimationId}
+                  themeId={activeThemeId}
+                  marker={activeMarker}
+                  segment={segment}
+                  stateMachineId={activeStateMachineId}
+                  dotLottieRefCallback={setDotLottie}
+                />
+              )}
             </div>
           </div>
         </div>
-        {isJson ? (
+        {isJson && showLottieWeb ? (
           <div className="flex flex-col lottie-web">
             <LoadTime version="v5.12.2" className="mb-4" title="Lottie Web" />
             <div className="flex items-center justify-center flex-grow p-4">
@@ -271,11 +294,12 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
               </div>
             </div>
           )}
-          renderThumb={({ props }) => (
+          renderThumb={({ props: { key, ...thumbProps } }) => (
             <div
-              {...props}
+              key={key}
+              {...thumbProps}
               style={{
-                ...props.style,
+                ...thumbProps.style,
                 height: '20px',
                 width: '20px',
                 backgroundColor: '#019D91',

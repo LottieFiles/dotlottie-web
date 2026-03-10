@@ -6,8 +6,10 @@ import {
   setActiveThemeId,
   setBackgroundColor,
   setMdode,
+  setRenderer,
   setSegment,
   setSegmentInput,
+  setShowLottieWeb,
   setSpeed,
   setUseFrameInterpolation,
 } from '../store/viewer-slice';
@@ -29,12 +31,40 @@ export default function Controls() {
   const markers = useAppSelector((state) => state.viewer.markers);
   const stateMachines = useAppSelector((state) => state.viewer.stateMachines);
   const activeStateMachineId = useAppSelector((state) => state.viewer.activeStateMachineId);
+  const renderer = useAppSelector((state) => state.viewer.renderer);
+  const isJson = useAppSelector((state) => state.viewer.isJson);
+  const showLottieWeb = useAppSelector((state) => state.viewer.showLottieWeb);
 
   const dispatch = useAppDispatch();
 
   return (
     <div className="flex border p-4 bg-white rounded-lg h-full">
       <div className="flex flex-col items-center gap-4 w-full">
+        {isJson && (
+          <InputLabel lablel="Lottie Web v5.12.2">
+            <Switch
+              onChange={(value) => dispatch(setShowLottieWeb(value === 'true'))}
+              items={[
+                { label: 'Show', value: 'true' },
+                { label: 'Hide', value: 'false' },
+              ]}
+              value={String(showLottieWeb)}
+            />
+          </InputLabel>
+        )}
+        <InputLabel lablel="Renderer">
+          <Switch
+            onChange={(value) => {
+              dispatch(setRenderer(value));
+            }}
+            items={[
+              { label: 'Software', value: 'software' },
+              { label: 'WebGL', value: 'webgl' },
+              { label: 'WebGPU', value: 'webgpu' },
+            ]}
+            value={renderer}
+          />
+        </InputLabel>
         <InputLabel lablel="backgroundColor">
           <BaseInput
             // defaultValue={backgroundColor}

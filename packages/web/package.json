@@ -18,6 +18,41 @@
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./webgl": {
+      "import": {
+        "types": "./dist/webgl/index.d.ts",
+        "default": "./dist/webgl/index.js"
+      },
+      "require": {
+        "types": "./dist/webgl/index.d.cts",
+        "default": "./dist/webgl/index.cjs"
+      }
+    },
+    "./webgpu": {
+      "import": {
+        "types": "./dist/webgpu/index.d.ts",
+        "default": "./dist/webgpu/index.js"
+      },
+      "require": {
+        "types": "./dist/webgpu/index.d.cts",
+        "default": "./dist/webgpu/index.cjs"
+      }
+    },
+    "./dotlottie-player.wasm": "./dist/dotlottie-player.wasm",
+    "./webgl/dotlottie-player.wasm": "./dist/webgl/dotlottie-player.wasm",
+    "./webgpu/dotlottie-player.wasm": "./dist/webgpu/dotlottie-player.wasm"
+  },
   "files": [
     "dist"
   ],
@@ -47,6 +82,7 @@
     "@vitest/browser": "^4.0.18",
     "@vitest/browser-playwright": "^4.0.18",
     "@vitest/coverage-istanbul": "^4.0.18",
+    "@webgpu/types": "^0.1.69",
     "esbuild": "^0.23.0",
     "tsdown": "^0.20.3",
     "typescript": "5.9.3",
