@@ -110,7 +110,7 @@
 
             // import { DotLottieWorker as DotLottie } from './dist/index.js';
 
-            DotLottie.setWasmUrl(`${window.location.origin}/src/core/dotlottie-player.wasm`);
+            DotLottie.setWasmUrl(new URL('./src/core/dotlottie-player.wasm', import.meta.url).href);
 
             const dotLottieInstances = {
                 toggle: new DotLottie({
