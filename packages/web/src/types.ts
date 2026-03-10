@@ -6,6 +6,15 @@
 export type Transform = [number, number, number, number, number, number, number, number, number];
 
 /**
+ * Animation marker representing a named section within a Lottie animation.
+ */
+export interface Marker {
+  name: string;
+  time: number;
+  duration: number;
+}
+
+/**
  * Configuration for canvas rendering behavior.
  * Controls how the animation is rendered and when rendering is optimized.
  */

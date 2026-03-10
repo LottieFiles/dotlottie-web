@@ -268,7 +268,7 @@ function TextSlotInput({ slotId, dotLottie }: { slotId: string; dotLottie: DotLo
               value={fontSize ?? ''}
               onChange={(e) => {
                 const val = parseFloat(e.target.value);
-                if (!isNaN(val) && val > 0) handleFontSizeChange(val);
+                if (!Number.isNaN(val) && val > 0) handleFontSizeChange(val);
               }}
               placeholder="px"
             />
