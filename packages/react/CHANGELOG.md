@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-react
 
+## 0.18.4
+### Patch Changes
+
+- 0c0380d: fix: Adjust return type for React 19
+- Updated dependencies [3a1736d]
+- Updated dependencies [a7455a9]
+  - @lottiefiles/dotlottie-web@0.66.0
+
 ## 0.18.3
 ### Patch Changes
 
