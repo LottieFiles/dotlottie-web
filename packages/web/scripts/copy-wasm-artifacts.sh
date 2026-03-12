@@ -45,9 +45,9 @@ echo "Copying WASM artifacts from: $RELEASE"
 echo "Destination:                 $WEB_SRC"
 echo ""
 
-copy_variant "$RELEASE/wasm-bindgen-sw"    "$WEB_SRC/core"   "software"
-copy_variant "$RELEASE/wasm-bindgen-webgl" "$WEB_SRC/webgl"  "webgl"
-copy_variant "$RELEASE/wasm-bindgen-webgpu" "$WEB_SRC/webgpu" "webgpu"
+copy_variant "$RELEASE/wasm"    "$WEB_SRC/core"   "software"
+copy_variant "$RELEASE/wasm-webgl" "$WEB_SRC/webgl"  "webgl"
+copy_variant "$RELEASE/wasm-webgpu" "$WEB_SRC/webgpu" "webgpu"
 
 echo ""
 echo "Done. Rebuild with: pnpm run build"
