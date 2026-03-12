@@ -1,5 +1,15 @@
 # @lottiefiles/dotlottie-web
 
+## 0.66.1
+### Patch Changes
+
+- 901172a: chore: upgrade dotlottie-rs WASM to version 0.1.54-75ea13a
+  
+  This includes the following changes:
+  
+  * fix: missing webp loader
+  * fix: replace the fallback font subset to fix number glyph glitches
+
 ## 0.66.0
 ### Minor Changes
 
