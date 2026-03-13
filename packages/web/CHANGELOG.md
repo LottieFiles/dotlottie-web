@@ -1,5 +1,10 @@
 # @lottiefiles/dotlottie-web
 
+## 0.66.2
+### Patch Changes
+
+- 95ceb90: Fix self-contained bundle generation with separate build configs
+
 ## 0.66.1
 ### Patch Changes
 
