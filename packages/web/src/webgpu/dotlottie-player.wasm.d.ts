@@ -2,11 +2,11 @@
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
 export const modff: (a: number, b: number) => number;
+export const malloc: (a: number) => number;
+export const free: (a: number) => void;
 export const realloc: (a: number, b: number) => number;
 export const calloc: (a: number, b: number) => number;
-export const _Znam: (a: number) => number;
 export const _ZdaPvm: (a: number, b: number) => void;
-export const _ZdaPv: (a: number) => void;
 export const atoi: (a: number) => number;
 export const __cxa_pure_virtual: () => void;
 export const __cxa_atexit: (a: number, b: number, c: number) => number;
@@ -52,14 +52,7 @@ export const wgpuQueueSubmit: (a: number, b: number, c: number) => void;
 export const wgpuQueueWriteBuffer: (a: number, b: number, c: bigint, d: number, e: number) => void;
 export const wgpuQueueWriteTexture: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
 export const wgpuRenderPassEncoderDraw: (a: number, b: number, c: number, d: number, e: number) => void;
-export const wgpuRenderPassEncoderDrawIndexed: (
-  a: number,
-  b: number,
-  c: number,
-  d: number,
-  e: number,
-  f: number,
-) => void;
+export const wgpuRenderPassEncoderDrawIndexed: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
 export const wgpuRenderPassEncoderEnd: (a: number) => void;
 export const wgpuRenderPassEncoderSetBindGroup: (a: number, b: number, c: number, d: number, e: number) => void;
 export const wgpuRenderPassEncoderSetIndexBuffer: (a: number, b: number, c: number, d: bigint, e: bigint) => void;
@@ -81,13 +74,7 @@ export const dotlottieplayerwasm_set_webgpu_device: (a: number, b: any) => void;
 export const dotlottieplayerwasm_set_webgpu_surface: (a: number, b: any) => void;
 export const dotlottieplayerwasm_load_animation: (a: number, b: number, c: number, d: number, e: number) => number;
 export const dotlottieplayerwasm_load_dotlottie_data: (a: number, b: number, c: number, d: number, e: number) => number;
-export const dotlottieplayerwasm_load_animation_from_id: (
-  a: number,
-  b: number,
-  c: number,
-  d: number,
-  e: number,
-) => number;
+export const dotlottieplayerwasm_load_animation_from_id: (a: number, b: number, c: number, d: number, e: number) => number;
 export const dotlottieplayerwasm_tick: (a: number) => number;
 export const dotlottieplayerwasm_render: (a: number) => number;
 export const dotlottieplayerwasm_clear: (a: number) => void;
@@ -139,14 +126,7 @@ export const dotlottieplayerwasm_layout_fit: (a: number) => [number, number];
 export const dotlottieplayerwasm_layout_align_x: (a: number) => number;
 export const dotlottieplayerwasm_layout_align_y: (a: number) => number;
 export const dotlottieplayerwasm_set_viewport: (a: number, b: number, c: number, d: number, e: number) => number;
-export const dotlottieplayerwasm_set_color_slot: (
-  a: number,
-  b: number,
-  c: number,
-  d: number,
-  e: number,
-  f: number,
-) => number;
+export const dotlottieplayerwasm_set_color_slot: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
 export const dotlottieplayerwasm_set_scalar_slot: (a: number, b: number, c: number, d: number) => number;
 export const dotlottieplayerwasm_set_text_slot: (a: number, b: number, c: number, d: number, e: number) => number;
 export const dotlottieplayerwasm_set_vector_slot: (a: number, b: number, c: number, d: number, e: number) => number;
@@ -166,15 +146,7 @@ export const dotlottieplayerwasm_get_layer_bounds: (a: number, b: number, c: num
 export const dotlottieplayerwasm_get_transform: (a: number) => any;
 export const dotlottieplayerwasm_set_transform: (a: number, b: number, c: number) => number;
 export const dotlottieplayerwasm_tween: (a: number, b: number, c: number) => number;
-export const dotlottieplayerwasm_tween_with_easing: (
-  a: number,
-  b: number,
-  c: number,
-  d: number,
-  e: number,
-  f: number,
-  g: number,
-) => number;
+export const dotlottieplayerwasm_tween_with_easing: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => number;
 export const dotlottieplayerwasm_tween_stop: (a: number) => number;
 export const dotlottieplayerwasm_tween_update: (a: number, b: number) => number;
 export const dotlottieplayerwasm_tween_to_marker: (a: number, b: number, c: number, d: number) => number;
@@ -223,7 +195,6 @@ export const dotlottieplayerwasm_sm_post_pointer_exit: (a: number, b: number, c:
 export const dotlottieplayerwasm_sm_poll_internal_event: (a: number) => any;
 export const dotlottieplayerwasm_sm_tick: (a: number) => number;
 export const register_font: (a: number, b: number, c: number, d: number) => number;
-export const free: (a: number) => void;
 export const wgpuBindGroupRelease: (a: number) => void;
 export const wgpuBindGroupLayoutRelease: (a: number) => void;
 export const wgpuBufferRelease: (a: number) => void;
@@ -239,7 +210,6 @@ export const wgpuSamplerRelease: (a: number) => void;
 export const wgpuShaderModuleRelease: (a: number) => void;
 export const wgpuTextureRelease: (a: number) => void;
 export const wgpuTextureViewRelease: (a: number) => void;
-export const malloc: (a: number) => number;
 export const _ZdlPvm: (a: number, b: number) => void;
 export const __wbindgen_exn_store_command_export: (a: number) => void;
 export const __externref_table_alloc_command_export: () => number;
