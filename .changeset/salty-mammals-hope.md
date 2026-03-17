@@ -2,5 +2,5 @@
 "@lottiefiles/dotlottie-web": patch
 ---
 
-updated thorvg to v1.0.2
+chore: updated dotLottie-rs v0.1.55 WASM bindings
   

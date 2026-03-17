@@ -35,7 +35,17 @@ export const glRenderbufferStorageMultisample: (a: number, b: number, c: number,
 export const glFramebufferRenderbuffer: (a: number, b: number, c: number, d: number) => void;
 export const glGenTextures: (a: number, b: number) => void;
 export const glBindTexture: (a: number, b: number) => void;
-export const glTexImage2D: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => void;
+export const glTexImage2D: (
+  a: number,
+  b: number,
+  c: number,
+  d: number,
+  e: number,
+  f: number,
+  g: number,
+  h: number,
+  i: number,
+) => void;
 export const glTexParameteri: (a: number, b: number, c: number) => void;
 export const glFramebufferTexture2D: (a: number, b: number, c: number, d: number, e: number) => void;
 export const glBufferData: (a: number, b: number, c: number, d: number) => void;
@@ -78,7 +88,18 @@ export const glClearStencil: (a: number) => void;
 export const glClearDepthf: (a: number) => void;
 export const glDepthMask: (a: number) => void;
 export const glClear: (a: number) => void;
-export const glBlitFramebuffer: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => void;
+export const glBlitFramebuffer: (
+  a: number,
+  b: number,
+  c: number,
+  d: number,
+  e: number,
+  f: number,
+  g: number,
+  h: number,
+  i: number,
+  j: number,
+) => void;
 export const glBlendFunc: (a: number, b: number) => void;
 export const glBlendEquation: (a: number) => void;
 export const glCullFace: (a: number) => void;
@@ -100,7 +121,13 @@ export const dotlottieplayerwasm_new: () => number;
 export const dotlottieplayerwasm_set_webgl_context: (a: number, b: any) => void;
 export const dotlottieplayerwasm_load_animation: (a: number, b: number, c: number, d: number, e: number) => number;
 export const dotlottieplayerwasm_load_dotlottie_data: (a: number, b: number, c: number, d: number, e: number) => number;
-export const dotlottieplayerwasm_load_animation_from_id: (a: number, b: number, c: number, d: number, e: number) => number;
+export const dotlottieplayerwasm_load_animation_from_id: (
+  a: number,
+  b: number,
+  c: number,
+  d: number,
+  e: number,
+) => number;
 export const dotlottieplayerwasm_tick: (a: number) => number;
 export const dotlottieplayerwasm_render: (a: number) => number;
 export const dotlottieplayerwasm_clear: (a: number) => void;
@@ -152,7 +179,14 @@ export const dotlottieplayerwasm_layout_fit: (a: number) => [number, number];
 export const dotlottieplayerwasm_layout_align_x: (a: number) => number;
 export const dotlottieplayerwasm_layout_align_y: (a: number) => number;
 export const dotlottieplayerwasm_set_viewport: (a: number, b: number, c: number, d: number, e: number) => number;
-export const dotlottieplayerwasm_set_color_slot: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
+export const dotlottieplayerwasm_set_color_slot: (
+  a: number,
+  b: number,
+  c: number,
+  d: number,
+  e: number,
+  f: number,
+) => number;
 export const dotlottieplayerwasm_set_scalar_slot: (a: number, b: number, c: number, d: number) => number;
 export const dotlottieplayerwasm_set_text_slot: (a: number, b: number, c: number, d: number, e: number) => number;
 export const dotlottieplayerwasm_set_vector_slot: (a: number, b: number, c: number, d: number, e: number) => number;
@@ -172,7 +206,15 @@ export const dotlottieplayerwasm_get_layer_bounds: (a: number, b: number, c: num
 export const dotlottieplayerwasm_get_transform: (a: number) => any;
 export const dotlottieplayerwasm_set_transform: (a: number, b: number, c: number) => number;
 export const dotlottieplayerwasm_tween: (a: number, b: number, c: number) => number;
-export const dotlottieplayerwasm_tween_with_easing: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => number;
+export const dotlottieplayerwasm_tween_with_easing: (
+  a: number,
+  b: number,
+  c: number,
+  d: number,
+  e: number,
+  f: number,
+  g: number,
+) => number;
 export const dotlottieplayerwasm_tween_stop: (a: number) => number;
 export const dotlottieplayerwasm_tween_update: (a: number, b: number) => number;
 export const dotlottieplayerwasm_tween_to_marker: (a: number, b: number, c: number, d: number) => number;

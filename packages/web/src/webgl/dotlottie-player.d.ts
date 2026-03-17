@@ -171,7 +171,14 @@ export class DotLottiePlayerWasm {
   /**
    * Tween with a cubic-bezier easing (`e0..e3`).
    */
-  tween_with_easing(to: number, duration: number | null | undefined, e0: number, e1: number, e2: number, e3: number): boolean;
+  tween_with_easing(
+    to: number,
+    duration: number | null | undefined,
+    e0: number,
+    e1: number,
+    e2: number,
+    e3: number,
+  ): boolean;
   tween_stop(): boolean;
   tween_update(progress?: number | null): boolean;
   tween_to_marker(marker: string, duration?: number | null): boolean;
@@ -329,7 +336,17 @@ export interface InitOutput {
   readonly glFramebufferRenderbuffer: (a: number, b: number, c: number, d: number) => void;
   readonly glGenTextures: (a: number, b: number) => void;
   readonly glBindTexture: (a: number, b: number) => void;
-  readonly glTexImage2D: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => void;
+  readonly glTexImage2D: (
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+    e: number,
+    f: number,
+    g: number,
+    h: number,
+    i: number,
+  ) => void;
   readonly glTexParameteri: (a: number, b: number, c: number) => void;
   readonly glFramebufferTexture2D: (a: number, b: number, c: number, d: number, e: number) => void;
   readonly glBufferData: (a: number, b: number, c: number, d: number) => void;
@@ -372,7 +389,18 @@ export interface InitOutput {
   readonly glClearDepthf: (a: number) => void;
   readonly glDepthMask: (a: number) => void;
   readonly glClear: (a: number) => void;
-  readonly glBlitFramebuffer: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => void;
+  readonly glBlitFramebuffer: (
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+    e: number,
+    f: number,
+    g: number,
+    h: number,
+    i: number,
+    j: number,
+  ) => void;
   readonly glBlendFunc: (a: number, b: number) => void;
   readonly glBlendEquation: (a: number) => void;
   readonly glCullFace: (a: number) => void;
@@ -394,7 +422,13 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_set_webgl_context: (a: number, b: any) => void;
   readonly dotlottieplayerwasm_load_animation: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly dotlottieplayerwasm_load_dotlottie_data: (a: number, b: number, c: number, d: number, e: number) => number;
-  readonly dotlottieplayerwasm_load_animation_from_id: (a: number, b: number, c: number, d: number, e: number) => number;
+  readonly dotlottieplayerwasm_load_animation_from_id: (
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+    e: number,
+  ) => number;
   readonly dotlottieplayerwasm_tick: (a: number) => number;
   readonly dotlottieplayerwasm_render: (a: number) => number;
   readonly dotlottieplayerwasm_clear: (a: number) => void;
@@ -446,7 +480,14 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_layout_align_x: (a: number) => number;
   readonly dotlottieplayerwasm_layout_align_y: (a: number) => number;
   readonly dotlottieplayerwasm_set_viewport: (a: number, b: number, c: number, d: number, e: number) => number;
-  readonly dotlottieplayerwasm_set_color_slot: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
+  readonly dotlottieplayerwasm_set_color_slot: (
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+    e: number,
+    f: number,
+  ) => number;
   readonly dotlottieplayerwasm_set_scalar_slot: (a: number, b: number, c: number, d: number) => number;
   readonly dotlottieplayerwasm_set_text_slot: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly dotlottieplayerwasm_set_vector_slot: (a: number, b: number, c: number, d: number, e: number) => number;
@@ -466,7 +507,15 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_get_transform: (a: number) => any;
   readonly dotlottieplayerwasm_set_transform: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_tween: (a: number, b: number, c: number) => number;
-  readonly dotlottieplayerwasm_tween_with_easing: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => number;
+  readonly dotlottieplayerwasm_tween_with_easing: (
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+    e: number,
+    f: number,
+    g: number,
+  ) => number;
   readonly dotlottieplayerwasm_tween_stop: (a: number) => number;
   readonly dotlottieplayerwasm_tween_update: (a: number, b: number) => number;
   readonly dotlottieplayerwasm_tween_to_marker: (a: number, b: number, c: number, d: number) => number;
@@ -527,21 +576,23 @@ export interface InitOutput {
 
 export type SyncInitInput = BufferSource | WebAssembly.Module;
 /**
-* Instantiates the given `module`, which can either be bytes or
-* a precompiled `WebAssembly.Module`.
-*
-* @param {{ module: SyncInitInput }} module - Passing `SyncInitInput` directly is deprecated.
-*
-* @returns {InitOutput}
-*/
+ * Instantiates the given `module`, which can either be bytes or
+ * a precompiled `WebAssembly.Module`.
+ *
+ * @param {{ module: SyncInitInput }} module - Passing `SyncInitInput` directly is deprecated.
+ *
+ * @returns {InitOutput}
+ */
 export function initSync(module: { module: SyncInitInput } | SyncInitInput): InitOutput;
 
 /**
-* If `module_or_path` is {RequestInfo} or {URL}, makes a request and
-* for everything else, calls `WebAssembly.instantiate` directly.
-*
-* @param {{ module_or_path: InitInput | Promise<InitInput> }} module_or_path - Passing `InitInput` directly is deprecated.
-*
-* @returns {Promise<InitOutput>}
-*/
-export default function __wbg_init (module_or_path?: { module_or_path: InitInput | Promise<InitInput> } | InitInput | Promise<InitInput>): Promise<InitOutput>;
+ * If `module_or_path` is {RequestInfo} or {URL}, makes a request and
+ * for everything else, calls `WebAssembly.instantiate` directly.
+ *
+ * @param {{ module_or_path: InitInput | Promise<InitInput> }} module_or_path - Passing `InitInput` directly is deprecated.
+ *
+ * @returns {Promise<InitOutput>}
+ */
+export default function __wbg_init(
+  module_or_path?: { module_or_path: InitInput | Promise<InitInput> } | InitInput | Promise<InitInput>,
+): Promise<InitOutput>;
