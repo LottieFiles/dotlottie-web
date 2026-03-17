@@ -2,11 +2,11 @@
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
 export const modff: (a: number, b: number) => number;
+export const malloc: (a: number) => number;
+export const free: (a: number) => void;
 export const realloc: (a: number, b: number) => number;
 export const calloc: (a: number, b: number) => number;
-export const _Znam: (a: number) => number;
 export const _ZdaPvm: (a: number, b: number) => void;
-export const _ZdaPv: (a: number) => void;
 export const atoi: (a: number) => number;
 export const __cxa_pure_virtual: () => void;
 export const __cxa_atexit: (a: number, b: number, c: number) => number;
@@ -74,6 +74,7 @@ export const glGetUniformBlockIndex: (a: number, b: number) => number;
 export const glUniform1iv: (a: number, b: number, c: number) => void;
 export const glEnableVertexAttribArray: (a: number) => void;
 export const glDisableVertexAttribArray: (a: number) => void;
+export const glVertexAttrib4f: (a: number, b: number, c: number, d: number, e: number) => void;
 export const glVertexAttribPointer: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
 export const glActiveTexture: (a: number) => void;
 export const glUniformBlockBinding: (a: number, b: number, c: number) => void;
@@ -262,8 +263,6 @@ export const dotlottieplayerwasm_sm_post_pointer_exit: (a: number, b: number, c:
 export const dotlottieplayerwasm_sm_poll_internal_event: (a: number) => any;
 export const dotlottieplayerwasm_sm_tick: (a: number) => number;
 export const register_font: (a: number, b: number, c: number, d: number) => number;
-export const free: (a: number) => void;
-export const malloc: (a: number) => number;
 export const _ZdlPvm: (a: number, b: number) => void;
 export const __externref_table_alloc_command_export: () => number;
 export const __wbindgen_export_1: WebAssembly.Table;
