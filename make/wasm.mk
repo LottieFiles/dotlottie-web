@@ -27,7 +27,7 @@ WEB_SRC_WEBGPU := packages/web/src/webgpu
 
 WASM_BINDGEN_TARGET := wasm32-unknown-unknown
 
-WASM_FEATURES_COMMON ?= tvg,tvg-sw,wasm,dotlottie,wasm-bindgen-api
+WASM_FEATURES_COMMON ?= tvg,tvg-sw,tvg-png,tvg-jpg,tvg-webp,tvg-ttf,dotlottie,theming,state-machines,wasm,wasm-bindgen-api
 WASM_FEATURES_SW     ?= $(WASM_FEATURES_COMMON)
 WASM_FEATURES_WEBGL  ?= $(WASM_FEATURES_COMMON),tvg-gl,webgl
 WASM_FEATURES_WEBGPU ?= $(WASM_FEATURES_COMMON),tvg-wg,webgpu
