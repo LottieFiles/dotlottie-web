@@ -1699,6 +1699,9 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_useProgram_9b2660f7bb210471 = function(arg0, arg1) {
         arg0.useProgram(arg1);
     };
+    imports.wbg.__wbg_vertexAttrib4f_2a47cb701d647eeb = function(arg0, arg1, arg2, arg3, arg4, arg5) {
+        arg0.vertexAttrib4f(arg1 >>> 0, arg2, arg3, arg4, arg5);
+    };
     imports.wbg.__wbg_vertexAttribPointer_550dc34903e3d1ea = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6) {
         arg0.vertexAttribPointer(arg1 >>> 0, arg2, arg3 >>> 0, arg4 !== 0, arg5, arg6);
     };
