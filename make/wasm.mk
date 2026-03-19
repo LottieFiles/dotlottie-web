@@ -7,6 +7,7 @@
 #
 # Usage:
 #   make setup       — install Rust target + wasm-pack
+#   make build       — run pnpm build
 #   make wasm        — software-renderer build  → packages/web/src/core/
 #   make wasm-webgl  — WebGL2 build             → packages/web/src/webgl/
 #   make wasm-webgpu — WebGPU build             → packages/web/src/webgpu/
@@ -66,6 +67,8 @@ help:
 	@printf "  make wasm-webgl    — WebGL2 build\n"
 	@printf "  make wasm-webgpu   — WebGPU build\n"
 	@printf "  make wasm-all      — all three variants\n\n"
+	@printf "$(BOLD)Build$(RESET)\n"
+	@printf "  make build         — run pnpm build\n\n"
 	@printf "$(BOLD)Setup$(RESET)\n"
 	@printf "  make setup         — install Rust target + wasm-pack\n\n"
 	@printf "$(BOLD)Clean$(RESET)\n"

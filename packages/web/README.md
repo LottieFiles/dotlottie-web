@@ -95,6 +95,8 @@ By default, `@lottiefiles/dotlottie-web` ships with pre-built WASM binaries — 
 
 - [Rust](https://rustup.rs/)
 - [wasm-pack](https://rustwasm.github.io/wasm-pack/)
+- `make` (GNU Make or equivalent). On Windows, you can use environments like WSL, MSYS2, or a similar POSIX-compatible shell that provides `make`.
+- A C/LLVM toolchain with `clang`/`clang++` available on your `PATH` (the WASM build uses `clang` as configured in `make/wasm.mk`). On macOS, you can use Xcode command-line tools or install LLVM via Homebrew.
 
 
 The Rust source is provided via the `deps/dotlottie-rs` git submodule. Make sure submodules are initialized before building:
