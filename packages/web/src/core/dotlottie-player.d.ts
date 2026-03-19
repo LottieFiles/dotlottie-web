@@ -305,11 +305,11 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly modff: (a: number, b: number) => number;
+  readonly malloc: (a: number) => number;
+  readonly free: (a: number) => void;
   readonly realloc: (a: number, b: number) => number;
   readonly calloc: (a: number, b: number) => number;
-  readonly _Znam: (a: number) => number;
   readonly _ZdaPvm: (a: number, b: number) => void;
-  readonly _ZdaPv: (a: number) => void;
   readonly atoi: (a: number) => number;
   readonly __cxa_pure_virtual: () => void;
   readonly __cxa_atexit: (a: number, b: number, c: number) => number;
@@ -474,8 +474,6 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_sm_poll_internal_event: (a: number) => any;
   readonly dotlottieplayerwasm_sm_tick: (a: number) => number;
   readonly register_font: (a: number, b: number, c: number, d: number) => number;
-  readonly free: (a: number) => void;
-  readonly malloc: (a: number) => number;
   readonly _ZdlPvm: (a: number, b: number) => void;
   readonly __wbindgen_exn_store_command_export: (a: number) => void;
   readonly __externref_table_alloc_command_export: () => number;
