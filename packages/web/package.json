@@ -76,12 +76,12 @@
     "test:node": "vitest run --config ./vitest.config.node.ts",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit",
-    "wasm:setup": "make -C ../.. setup",
-    "wasm:build": "make -C ../.. wasm",
-    "wasm:build-webgl": "make -C ../.. wasm-webgl",
-    "wasm:build-webgpu": "make -C ../.. wasm-webgpu",
-    "wasm:build-all": "make -C ../.. wasm-all",
-    "wasm:clean": "make -C ../.. clean"
+    "wasm:setup": "make setup",
+    "wasm:build": "make wasm",
+    "wasm:build-webgl": "make wasm-webgl",
+    "wasm:build-webgpu": "make wasm-webgpu",
+    "wasm:build-all": "make wasm-all",
+    "wasm:clean": "make clean"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

@@ -8,9 +8,9 @@
 # Usage:
 #   make setup       — install Rust target + wasm-pack
 #   make build       — run pnpm build
-#   make wasm        — software-renderer build  → packages/web/src/core/
-#   make wasm-webgl  — WebGL2 build             → packages/web/src/webgl/
-#   make wasm-webgpu — WebGPU build             → packages/web/src/webgpu/
+#   make wasm        — software-renderer build  → src/core/
+#   make wasm-webgl  — WebGL2 build             → src/webgl/
+#   make wasm-webgpu — WebGPU build             → src/webgpu/
 #   make wasm-all    — all three variants
 #   make clean       — remove build artefacts
 #
@@ -18,17 +18,17 @@
 #   make wasm WASM_FEATURES_SW="tvg,tvg-sw,dotlottie,wasm,wasm-bindgen-api"
 # ============================================================================
 
-DOTLOTTIE_RS_DIR  ?= deps/dotlottie-rs
+DOTLOTTIE_RS_DIR  ?= dotlottie-rs
 DOTLOTTIE_RS_CRATE := $(DOTLOTTIE_RS_DIR)/dotlottie-rs
 WASM_OUT_BASE     := $(DOTLOTTIE_RS_DIR)/release
 
-WEB_SRC_CORE   := packages/web/src/core
-WEB_SRC_WEBGL  := packages/web/src/webgl
-WEB_SRC_WEBGPU := packages/web/src/webgpu
+WEB_SRC_CORE   := src/core
+WEB_SRC_WEBGL  := src/webgl
+WEB_SRC_WEBGPU := src/webgpu
 
 WASM_BINDGEN_TARGET := wasm32-unknown-unknown
 
-WASM_FEATURES_COMMON ?= tvg,tvg-sw,tvg-png,tvg-jpg,tvg-webp,tvg-ttf,dotlottie,theming,state-machines,wasm,wasm-bindgen-api
+WASM_FEATURES_COMMON ?= tvg,tvg-sw,tvg-ttf,wasm,wasm-bindgen-api
 WASM_FEATURES_SW     ?= $(WASM_FEATURES_COMMON)
 WASM_FEATURES_WEBGL  ?= $(WASM_FEATURES_COMMON),tvg-gl,webgl
 WASM_FEATURES_WEBGPU ?= $(WASM_FEATURES_COMMON),tvg-wg,webgpu
