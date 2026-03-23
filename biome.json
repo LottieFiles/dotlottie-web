@@ -12,7 +12,8 @@
       "!**/dotlottie-player.js",
       "!**/dotlottie-player.types.ts",
       "!**/profiler.js",
-      "!fixtures"
+      "!fixtures",
+      "!**/dotlottie-rs"
     ]
   },
   "formatter": {

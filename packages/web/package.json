@@ -75,7 +75,13 @@
     "test:coverage": "vitest run --browser.headless --coverage",
     "test:node": "vitest run --config ./vitest.config.node.ts",
     "test:watch": "vitest",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "wasm:setup": "make setup",
+    "wasm:build": "make wasm",
+    "wasm:build-webgl": "make wasm-webgl",
+    "wasm:build-webgpu": "make wasm-webgpu",
+    "wasm:build-all": "make wasm-all",
+    "wasm:clean": "make clean"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
