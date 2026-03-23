@@ -23,3 +23,6 @@ reports
 # Temporary or local data
 temp/
 tmp/
+
+
+dotlottie-rs

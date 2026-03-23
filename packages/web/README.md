@@ -18,7 +18,6 @@
 * [Supported Platforms](#supported-platforms)
   * [Browser Requirements](#browser-requirements)
 * [Live Examples](#live-examples)
-* [Custom Builds](#custom-builds)
 * [Contributing](#contributing)
 * [Issues](#issues)
 
