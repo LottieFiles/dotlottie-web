@@ -4,7 +4,7 @@ import { createWasmLoader } from '../src/wasm-loader';
 const PRIMARY = 'https://primary.example.com/player.wasm';
 const BACKUP = 'https://backup.example.com/player.wasm';
 
-type WasmInitFn = (options: { module_or_path: string }) => Promise<unknown>;
+type WasmInitFn = Parameters<typeof createWasmLoader>[0];
 
 describe('createWasmLoader', () => {
   let initFn: Mock<WasmInitFn>;
