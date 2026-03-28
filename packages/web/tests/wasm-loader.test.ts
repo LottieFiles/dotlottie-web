@@ -4,7 +4,7 @@ import { createWasmLoader } from '../src/wasm-loader';
 const PRIMARY = 'https://primary.example.com/player.wasm';
 const BACKUP = 'https://backup.example.com/player.wasm';
 
-type WasmInitFn = (url: string) => Promise<unknown>;
+type WasmInitFn = (options: { module_or_path: string }) => Promise<unknown>;
 
 describe('createWasmLoader', () => {
   let initFn: Mock<WasmInitFn>;
@@ -24,7 +24,7 @@ describe('createWasmLoader', () => {
     const loader = createWasmLoader(initFn, PRIMARY, BACKUP);
     await expect(loader.load()).resolves.toBeUndefined();
     expect(initFn).toHaveBeenCalledTimes(1);
-    expect(initFn).toHaveBeenCalledWith(PRIMARY);
+    expect(initFn).toHaveBeenCalledWith({ module_or_path: PRIMARY });
   });
 
   it('deduplicates concurrent load() calls', async () => {
@@ -40,8 +40,8 @@ describe('createWasmLoader', () => {
     const loader = createWasmLoader(initFn, PRIMARY, BACKUP);
     await expect(loader.load()).resolves.toBeUndefined();
     expect(initFn).toHaveBeenCalledTimes(2);
-    expect(initFn).toHaveBeenNthCalledWith(1, PRIMARY);
-    expect(initFn).toHaveBeenNthCalledWith(2, BACKUP);
+    expect(initFn).toHaveBeenNthCalledWith(1, { module_or_path: PRIMARY });
+    expect(initFn).toHaveBeenNthCalledWith(2, { module_or_path: BACKUP });
     expect(console.warn).toHaveBeenCalled();
   });
 
@@ -71,7 +71,7 @@ describe('createWasmLoader', () => {
     loader.setWasmUrl(NEW_URL);
     await loader.load();
     expect(initFn).toHaveBeenCalledTimes(2);
-    expect(initFn).toHaveBeenNthCalledWith(2, NEW_URL);
+    expect(initFn).toHaveBeenNthCalledWith(2, { module_or_path: NEW_URL });
   });
 
   it('setWasmUrl() with the same URL is a no-op', async () => {
