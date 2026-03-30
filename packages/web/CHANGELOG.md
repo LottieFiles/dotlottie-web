@@ -1,5 +1,14 @@
 # @lottiefiles/dotlottie-web
 
+## 0.68.0
+### Minor Changes
+
+- cd4365c: feat: update dotlottie-rs WASM bindings to v0.1.56
+
+### Patch Changes
+
+- e7c1c70: Pass `{ module_or_path: url }` to wasm-bindgen `init()` instead of a raw string to fix deprecation warning
+
 ## 0.67.0
 ### Minor Changes
 
