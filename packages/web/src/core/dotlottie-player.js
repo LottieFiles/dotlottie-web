@@ -1,9 +1,26 @@
-
 let wasm;
+
+const cachedTextDecoder = (typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8', { ignoreBOM: true, fatal: true }) : { decode: () => { throw Error('TextDecoder not available') } } );
+
+if (typeof TextDecoder !== 'undefined') { cachedTextDecoder.decode(); };
+
+let cachedUint8ArrayMemory0 = null;
+
+function getUint8ArrayMemory0() {
+    if (cachedUint8ArrayMemory0 === null || cachedUint8ArrayMemory0.byteLength === 0) {
+        cachedUint8ArrayMemory0 = new Uint8Array(wasm.memory.buffer);
+    }
+    return cachedUint8ArrayMemory0;
+}
+
+function getStringFromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
+}
 
 function addToExternrefTable0(obj) {
     const idx = wasm.__externref_table_alloc_command_export();
-    wasm.__wbindgen_export_2.set(idx, obj);
+    wasm.__wbindgen_export_3.set(idx, obj);
     return idx;
 }
 
@@ -17,15 +34,6 @@ function handleError(f, args) {
 }
 
 let WASM_VECTOR_LEN = 0;
-
-let cachedUint8ArrayMemory0 = null;
-
-function getUint8ArrayMemory0() {
-    if (cachedUint8ArrayMemory0 === null || cachedUint8ArrayMemory0.byteLength === 0) {
-        cachedUint8ArrayMemory0 = new Uint8Array(wasm.memory.buffer);
-    }
-    return cachedUint8ArrayMemory0;
-}
 
 const cachedTextEncoder = (typeof TextEncoder !== 'undefined' ? new TextEncoder('utf-8') : { encode: () => { throw Error('TextEncoder not available') } } );
 
@@ -81,10 +89,6 @@ function passStringToWasm0(arg, malloc, realloc) {
     return ptr;
 }
 
-function isLikeNone(x) {
-    return x === undefined || x === null;
-}
-
 let cachedDataViewMemory0 = null;
 
 function getDataViewMemory0() {
@@ -94,20 +98,8 @@ function getDataViewMemory0() {
     return cachedDataViewMemory0;
 }
 
-const cachedTextDecoder = (typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8', { ignoreBOM: true, fatal: true }) : { decode: () => { throw Error('TextDecoder not available') } } );
-
-if (typeof TextDecoder !== 'undefined') { cachedTextDecoder.decode(); };
-
-function getStringFromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
-}
-
-function passArray8ToWasm0(arg, malloc) {
-    const ptr = malloc(arg.length * 1, 1) >>> 0;
-    getUint8ArrayMemory0().set(arg, ptr / 1);
-    WASM_VECTOR_LEN = arg.length;
-    return ptr;
+function isLikeNone(x) {
+    return x === undefined || x === null;
 }
 
 let cachedFloat32ArrayMemory0 = null;
@@ -122,6 +114,13 @@ function getFloat32ArrayMemory0() {
 function passArrayF32ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 4, 4) >>> 0;
     getFloat32ArrayMemory0().set(arg, ptr / 4);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
+
+function passArray8ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 1, 1) >>> 0;
+    getUint8ArrayMemory0().set(arg, ptr / 1);
     WASM_VECTOR_LEN = arg.length;
     return ptr;
 }
@@ -178,114 +177,14 @@ export class DotLottiePlayerWasm {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_dotlottieplayerwasm_free(ptr, 0);
     }
-    constructor() {
-        const ret = wasm.dotlottieplayerwasm_new();
-        this.__wbg_ptr = ret >>> 0;
-        DotLottiePlayerWasmFinalization.register(this, this.__wbg_ptr, this);
-        return this;
-    }
     /**
-     * Load a Lottie JSON animation.  Sets up the rendering target automatically.
-     * @param {string} data
-     * @param {number} width
-     * @param {number} height
-     * @returns {boolean}
-     */
-    load_animation(data, width, height) {
-        const ptr0 = passStringToWasm0(data, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_load_animation(this.__wbg_ptr, ptr0, len0, width, height);
-        return ret !== 0;
-    }
-    /**
-     * Load a .lottie archive from raw bytes.
-     * @param {Uint8Array} data
-     * @param {number} width
-     * @param {number} height
-     * @returns {boolean}
-     */
-    load_dotlottie_data(data, width, height) {
-        const ptr0 = passArray8ToWasm0(data, wasm.__wbindgen_malloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_load_dotlottie_data(this.__wbg_ptr, ptr0, len0, width, height);
-        return ret !== 0;
-    }
-    /**
-     * Load an animation from an already-loaded .lottie archive by its ID.
      * @param {string} id
-     * @param {number} width
-     * @param {number} height
      * @returns {boolean}
      */
-    load_animation_from_id(id, width, height) {
+    clear_slot(id) {
         const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_load_animation_from_id(this.__wbg_ptr, ptr0, len0, width, height);
-        return ret !== 0;
-    }
-    /**
-     * Advance time and render.  Call once per `requestAnimationFrame`.
-     * @returns {boolean}
-     */
-    tick() {
-        const ret = wasm.dotlottieplayerwasm_tick(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * Render the current frame without advancing time.
-     * @returns {boolean}
-     */
-    render() {
-        const ret = wasm.dotlottieplayerwasm_render(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * Clear the canvas to the background colour.
-     */
-    clear() {
-        wasm.dotlottieplayerwasm_clear(this.__wbg_ptr);
-    }
-    /**
-     * Resize the canvas.  For the SW renderer this also resizes the pixel buffer.
-     * @param {number} width
-     * @param {number} height
-     * @returns {boolean}
-     */
-    resize(width, height) {
-        const ret = wasm.dotlottieplayerwasm_resize(this.__wbg_ptr, width, height);
-        return ret !== 0;
-    }
-    /**
-     * Zero-copy `Uint8Array` view into WASM linear memory.
-     *
-     * **Use the returned array immediately.**  Do not store the reference across
-     * any call that may reallocate the buffer (e.g. `resize` / `load_animation`
-     * with different dimensions).
-     * @returns {Uint8Array}
-     */
-    get_pixel_buffer() {
-        const ret = wasm.dotlottieplayerwasm_get_pixel_buffer(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @returns {boolean}
-     */
-    play() {
-        const ret = wasm.dotlottieplayerwasm_play(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    pause() {
-        const ret = wasm.dotlottieplayerwasm_pause(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    stop() {
-        const ret = wasm.dotlottieplayerwasm_stop(this.__wbg_ptr);
+        const ret = wasm.dotlottieplayerwasm_clear_slot(this.__wbg_ptr, ptr0, len0);
         return ret !== 0;
     }
     /**
@@ -298,282 +197,8 @@ export class DotLottiePlayerWasm {
     /**
      * @returns {boolean}
      */
-    is_paused() {
-        const ret = wasm.dotlottieplayerwasm_is_paused(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
     is_stopped() {
         const ret = wasm.dotlottieplayerwasm_is_stopped(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    is_loaded() {
-        const ret = wasm.dotlottieplayerwasm_is_loaded(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    is_complete() {
-        const ret = wasm.dotlottieplayerwasm_is_complete(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    is_tweening() {
-        const ret = wasm.dotlottieplayerwasm_is_tweening(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {number}
-     */
-    current_frame() {
-        const ret = wasm.dotlottieplayerwasm_current_frame(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @returns {number}
-     */
-    total_frames() {
-        const ret = wasm.dotlottieplayerwasm_total_frames(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @returns {number}
-     */
-    request_frame() {
-        const ret = wasm.dotlottieplayerwasm_request_frame(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {number} no
-     * @returns {boolean}
-     */
-    set_frame(no) {
-        const ret = wasm.dotlottieplayerwasm_set_frame(this.__wbg_ptr, no);
-        return ret !== 0;
-    }
-    /**
-     * @param {number} no
-     * @returns {boolean}
-     */
-    seek(no) {
-        const ret = wasm.dotlottieplayerwasm_seek(this.__wbg_ptr, no);
-        return ret !== 0;
-    }
-    /**
-     * @returns {number}
-     */
-    duration() {
-        const ret = wasm.dotlottieplayerwasm_duration(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @returns {number}
-     */
-    segment_duration() {
-        const ret = wasm.dotlottieplayerwasm_segment_duration(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @returns {number}
-     */
-    current_loop_count() {
-        const ret = wasm.dotlottieplayerwasm_current_loop_count(this.__wbg_ptr);
-        return ret >>> 0;
-    }
-    reset_current_loop_count() {
-        wasm.dotlottieplayerwasm_reset_current_loop_count(this.__wbg_ptr);
-    }
-    /**
-     * @returns {number}
-     */
-    width() {
-        const ret = wasm.dotlottieplayerwasm_width(this.__wbg_ptr);
-        return ret >>> 0;
-    }
-    /**
-     * @returns {number}
-     */
-    height() {
-        const ret = wasm.dotlottieplayerwasm_height(this.__wbg_ptr);
-        return ret >>> 0;
-    }
-    /**
-     * `[width, height]` of the animation in its native coordinate space.
-     * @returns {Float32Array}
-     */
-    animation_size() {
-        const ret = wasm.dotlottieplayerwasm_animation_size(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @returns {Mode}
-     */
-    mode() {
-        const ret = wasm.dotlottieplayerwasm_mode(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {Mode} mode
-     */
-    set_mode(mode) {
-        wasm.dotlottieplayerwasm_set_mode(this.__wbg_ptr, mode);
-    }
-    /**
-     * @returns {number}
-     */
-    speed() {
-        const ret = wasm.dotlottieplayerwasm_speed(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {number} speed
-     */
-    set_speed(speed) {
-        wasm.dotlottieplayerwasm_set_speed(this.__wbg_ptr, speed);
-    }
-    /**
-     * @returns {boolean}
-     */
-    loop_animation() {
-        const ret = wasm.dotlottieplayerwasm_loop_animation(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @param {boolean} v
-     */
-    set_loop(v) {
-        wasm.dotlottieplayerwasm_set_loop(this.__wbg_ptr, v);
-    }
-    /**
-     * @returns {number}
-     */
-    loop_count() {
-        const ret = wasm.dotlottieplayerwasm_loop_count(this.__wbg_ptr);
-        return ret >>> 0;
-    }
-    /**
-     * @param {number} n
-     */
-    set_loop_count(n) {
-        wasm.dotlottieplayerwasm_set_loop_count(this.__wbg_ptr, n);
-    }
-    /**
-     * @returns {boolean}
-     */
-    autoplay() {
-        const ret = wasm.dotlottieplayerwasm_autoplay(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @param {boolean} v
-     */
-    set_autoplay(v) {
-        wasm.dotlottieplayerwasm_set_autoplay(this.__wbg_ptr, v);
-    }
-    /**
-     * @returns {boolean}
-     */
-    use_frame_interpolation() {
-        const ret = wasm.dotlottieplayerwasm_use_frame_interpolation(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @param {boolean} v
-     */
-    set_use_frame_interpolation(v) {
-        wasm.dotlottieplayerwasm_set_use_frame_interpolation(this.__wbg_ptr, v);
-    }
-    /**
-     * @returns {number}
-     */
-    background_color() {
-        const ret = wasm.dotlottieplayerwasm_background_color(this.__wbg_ptr);
-        return ret >>> 0;
-    }
-    /**
-     * Set background colour (`0xAARRGGBB`).
-     * @param {number} color
-     * @returns {boolean}
-     */
-    set_background_color(color) {
-        const ret = wasm.dotlottieplayerwasm_set_background_color(this.__wbg_ptr, color);
-        return ret !== 0;
-    }
-    /**
-     * Clear the background colour (transparent).
-     * @returns {boolean}
-     */
-    clear_background_color() {
-        const ret = wasm.dotlottieplayerwasm_clear_background_color(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @param {number} quality
-     * @returns {boolean}
-     */
-    set_quality(quality) {
-        const ret = wasm.dotlottieplayerwasm_set_quality(this.__wbg_ptr, quality);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    has_segment() {
-        const ret = wasm.dotlottieplayerwasm_has_segment(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {number}
-     */
-    segment_start() {
-        const ret = wasm.dotlottieplayerwasm_segment_start(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @returns {number}
-     */
-    segment_end() {
-        const ret = wasm.dotlottieplayerwasm_segment_end(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {number} start
-     * @param {number} end
-     * @returns {boolean}
-     */
-    set_segment(start, end) {
-        const ret = wasm.dotlottieplayerwasm_set_segment(this.__wbg_ptr, start, end);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    clear_segment() {
-        const ret = wasm.dotlottieplayerwasm_clear_segment(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * Set the layout.
-     *
-     * `fit` is one of `"contain"`, `"fill"`, `"cover"`, `"fit-width"`,
-     * `"fit-height"`, `"none"`.  `align_x` / `align_y` are in [0, 1].
-     * @param {string} fit
-     * @param {number} align_x
-     * @param {number} align_y
-     * @returns {boolean}
-     */
-    set_layout(fit, align_x, align_y) {
-        const ptr0 = passStringToWasm0(fit, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_set_layout(this.__wbg_ptr, ptr0, len0, align_x, align_y);
         return ret !== 0;
     }
     /**
@@ -594,88 +219,60 @@ export class DotLottiePlayerWasm {
     /**
      * @returns {number}
      */
-    layout_align_x() {
-        const ret = wasm.dotlottieplayerwasm_layout_align_x(this.__wbg_ptr);
+    loop_count() {
+        const ret = wasm.dotlottieplayerwasm_loop_count(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * Poll the next player event.  Returns `null` if the queue is empty,
+     * otherwise a plain JS object with a `type` string field and optional
+     * payload fields (`frameNo`, `loopCount`).
+     * @returns {any}
+     */
+    poll_event() {
+        const ret = wasm.dotlottieplayerwasm_poll_event(this.__wbg_ptr);
         return ret;
     }
     /**
-     * @returns {number}
-     */
-    layout_align_y() {
-        const ret = wasm.dotlottieplayerwasm_layout_align_y(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     * @param {number} w
-     * @param {number} h
+     * Reset a slot to its default value from the animation.
+     * @param {string} id
      * @returns {boolean}
      */
-    set_viewport(x, y, w, h) {
-        const ret = wasm.dotlottieplayerwasm_set_viewport(this.__wbg_ptr, x, y, w, h);
+    reset_slot(id) {
+        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_reset_slot(this.__wbg_ptr, ptr0, len0);
         return ret !== 0;
     }
     /**
-     * Set a color slot (`r`, `g`, `b` in [0, 1]).
-     * @param {string} id
-     * @param {number} r
-     * @param {number} g
-     * @param {number} b
+     * Set the layout.
+     *
+     * `fit` is one of `"contain"`, `"fill"`, `"cover"`, `"fit-width"`,
+     * `"fit-height"`, `"none"`.  `align_x` / `align_y` are in [0, 1].
+     * @param {string} fit
+     * @param {number} align_x
+     * @param {number} align_y
      * @returns {boolean}
      */
-    set_color_slot(id, r, g, b) {
-        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+    set_layout(fit, align_x, align_y) {
+        const ptr0 = passStringToWasm0(fit, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_set_color_slot(this.__wbg_ptr, ptr0, len0, r, g, b);
+        const ret = wasm.dotlottieplayerwasm_set_layout(this.__wbg_ptr, ptr0, len0, align_x, align_y);
         return ret !== 0;
     }
     /**
-     * @param {string} id
-     * @param {number} value
-     * @returns {boolean}
+     * @param {string} name
      */
-    set_scalar_slot(id, value) {
-        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+    set_marker(name) {
+        const ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_set_scalar_slot(this.__wbg_ptr, ptr0, len0, value);
-        return ret !== 0;
+        wasm.dotlottieplayerwasm_set_marker(this.__wbg_ptr, ptr0, len0);
     }
     /**
-     * @param {string} id
-     * @param {string} text
      * @returns {boolean}
      */
-    set_text_slot(id, text) {
-        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passStringToWasm0(text, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len1 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_set_text_slot(this.__wbg_ptr, ptr0, len0, ptr1, len1);
-        return ret !== 0;
-    }
-    /**
-     * @param {string} id
-     * @param {number} x
-     * @param {number} y
-     * @returns {boolean}
-     */
-    set_vector_slot(id, x, y) {
-        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_set_vector_slot(this.__wbg_ptr, ptr0, len0, x, y);
-        return ret !== 0;
-    }
-    /**
-     * @param {string} id
-     * @param {number} x
-     * @param {number} y
-     * @returns {boolean}
-     */
-    set_position_slot(id, x, y) {
-        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_set_position_slot(this.__wbg_ptr, ptr0, len0, x, y);
+    tween_stop() {
+        const ret = wasm.dotlottieplayerwasm_tween_stop(this.__wbg_ptr);
         return ret !== 0;
     }
     /**
@@ -686,25 +283,130 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
-     * @param {string} id
      * @returns {boolean}
      */
-    clear_slot(id) {
-        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_clear_slot(this.__wbg_ptr, ptr0, len0);
+    has_segment() {
+        const ret = wasm.dotlottieplayerwasm_has_segment(this.__wbg_ptr);
         return ret !== 0;
     }
     /**
-     * Set multiple slots at once from a JSON string.
-     * @param {string} json
      * @returns {boolean}
      */
-    set_slots_str(json) {
-        const ptr0 = passStringToWasm0(json, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_set_slots_str(this.__wbg_ptr, ptr0, len0);
+    is_complete() {
+        const ret = wasm.dotlottieplayerwasm_is_complete(this.__wbg_ptr);
         return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    is_tweening() {
+        const ret = wasm.dotlottieplayerwasm_is_tweening(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * Reset all slots to their default values from the animation.
+     * @returns {boolean}
+     */
+    reset_slots() {
+        const ret = wasm.dotlottieplayerwasm_reset_slots(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    reset_theme() {
+        const ret = wasm.dotlottieplayerwasm_reset_theme(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
+    segment_end() {
+        const ret = wasm.dotlottieplayerwasm_segment_end(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {number} quality
+     * @returns {boolean}
+     */
+    set_quality(quality) {
+        const ret = wasm.dotlottieplayerwasm_set_quality(this.__wbg_ptr, quality);
+        return ret !== 0;
+    }
+    /**
+     * @param {number} start
+     * @param {number} end
+     * @returns {boolean}
+     */
+    set_segment(start, end) {
+        const ret = wasm.dotlottieplayerwasm_set_segment(this.__wbg_ptr, start, end);
+        return ret !== 0;
+    }
+    /**
+     * @param {string} name
+     * @returns {boolean}
+     */
+    static unload_font(name) {
+        const ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_unload_font(ptr0, len0);
+        return ret !== 0;
+    }
+    /**
+     * @returns {string | undefined}
+     */
+    animation_id() {
+        const ret = wasm.dotlottieplayerwasm_animation_id(this.__wbg_ptr);
+        let v1;
+        if (ret[0] !== 0) {
+            v1 = getStringFromWasm0(ret[0], ret[1]).slice();
+            wasm.__wbindgen_free_command_export(ret[0], ret[1] * 1, 1);
+        }
+        return v1;
+    }
+    clear_marker() {
+        wasm.dotlottieplayerwasm_clear_marker(this.__wbg_ptr);
+    }
+    emit_on_loop() {
+        wasm.dotlottieplayerwasm_emit_on_loop(this.__wbg_ptr);
+    }
+    /**
+     * Get all slot IDs as a JS array.
+     * @returns {any}
+     */
+    get_slot_ids() {
+        const ret = wasm.dotlottieplayerwasm_get_slot_ids(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Get the JSON value of a single slot by ID, or `undefined` if not found.
+     * @param {string} id
+     * @returns {string | undefined}
+     */
+    get_slot_str(id) {
+        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_get_slot_str(this.__wbg_ptr, ptr0, len0);
+        let v2;
+        if (ret[0] !== 0) {
+            v2 = getStringFromWasm0(ret[0], ret[1]).slice();
+            wasm.__wbindgen_free_command_export(ret[0], ret[1] * 1, 1);
+        }
+        return v2;
+    }
+    /**
+     * Returns an array of marker name strings.
+     * @returns {any}
+     */
+    marker_names() {
+        const ret = wasm.dotlottieplayerwasm_marker_names(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {boolean} v
+     */
+    set_autoplay(v) {
+        wasm.dotlottieplayerwasm_set_autoplay(this.__wbg_ptr, v);
     }
     /**
      * Set a single slot by ID from a JSON value string.
@@ -721,14 +423,54 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
-     * Get the JSON value of a single slot by ID, or `undefined` if not found.
+     * @param {number} x
+     * @param {number} y
+     * @param {number} w
+     * @param {number} h
+     * @returns {boolean}
+     */
+    set_viewport(x, y, w, h) {
+        const ret = wasm.dotlottieplayerwasm_set_viewport(this.__wbg_ptr, x, y, w, h);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
+    total_frames() {
+        const ret = wasm.dotlottieplayerwasm_total_frames(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {number | null} [progress]
+     * @returns {boolean}
+     */
+    tween_update(progress) {
+        const ret = wasm.dotlottieplayerwasm_tween_update(this.__wbg_ptr, isLikeNone(progress) ? 0x100000001 : Math.fround(progress));
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    clear_segment() {
+        const ret = wasm.dotlottieplayerwasm_clear_segment(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
+    current_frame() {
+        const ret = wasm.dotlottieplayerwasm_current_frame(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Get the type string of a slot, or `undefined` if not found.
      * @param {string} id
      * @returns {string | undefined}
      */
-    get_slot_str(id) {
+    get_slot_type(id) {
         const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_get_slot_str(this.__wbg_ptr, ptr0, len0);
+        const ret = wasm.dotlottieplayerwasm_get_slot_type(this.__wbg_ptr, ptr0, len0);
         let v2;
         if (ret[0] !== 0) {
             v2 = getStringFromWasm0(ret[0], ret[1]).slice();
@@ -753,78 +495,50 @@ export class DotLottiePlayerWasm {
         }
     }
     /**
-     * Get all slot IDs as a JS array.
-     * @returns {any}
-     */
-    get_slot_ids() {
-        const ret = wasm.dotlottieplayerwasm_get_slot_ids(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * Get the type string of a slot, or `undefined` if not found.
-     * @param {string} id
-     * @returns {string | undefined}
-     */
-    get_slot_type(id) {
-        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_get_slot_type(this.__wbg_ptr, ptr0, len0);
-        let v2;
-        if (ret[0] !== 0) {
-            v2 = getStringFromWasm0(ret[0], ret[1]).slice();
-            wasm.__wbindgen_free_command_export(ret[0], ret[1] * 1, 1);
-        }
-        return v2;
-    }
-    /**
-     * Reset a slot to its default value from the animation.
-     * @param {string} id
-     * @returns {boolean}
-     */
-    reset_slot(id) {
-        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_reset_slot(this.__wbg_ptr, ptr0, len0);
-        return ret !== 0;
-    }
-    /**
-     * Reset all slots to their default values from the animation.
-     * @returns {boolean}
-     */
-    reset_slots() {
-        const ret = wasm.dotlottieplayerwasm_reset_slots(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     * @param {string} layer_name
-     * @returns {boolean}
-     */
-    intersect(x, y, layer_name) {
-        const ptr0 = passStringToWasm0(layer_name, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_intersect(this.__wbg_ptr, x, y, ptr0, len0);
-        return ret !== 0;
-    }
-    /**
-     * Returns `[x, y, width, height]` of the layer's bounding box.
-     * @param {string} layer_name
-     * @returns {Float32Array}
-     */
-    get_layer_bounds(layer_name) {
-        const ptr0 = passStringToWasm0(layer_name, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_get_layer_bounds(this.__wbg_ptr, ptr0, len0);
-        return ret;
-    }
-    /**
      * Returns the current affine transform as a flat `Float32Array`.
      * @returns {Float32Array}
      */
     get_transform() {
         const ret = wasm.dotlottieplayerwasm_get_transform(this.__wbg_ptr);
         return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    request_frame() {
+        const ret = wasm.dotlottieplayerwasm_request_frame(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    segment_start() {
+        const ret = wasm.dotlottieplayerwasm_segment_start(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Set multiple slots at once from a JSON string.
+     * @param {string} json
+     * @returns {boolean}
+     */
+    set_slots_str(json) {
+        const ptr0 = passStringToWasm0(json, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_set_slots_str(this.__wbg_ptr, ptr0, len0);
+        return ret !== 0;
+    }
+    /**
+     * @param {string} id
+     * @param {string} text
+     * @returns {boolean}
+     */
+    set_text_slot(id, text) {
+        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(text, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_set_text_slot(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+        return ret !== 0;
     }
     /**
      * @param {Float32Array} data
@@ -837,69 +551,35 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
-     * Tween to `to` frame.  `duration` in seconds; pass `undefined` for default.
-     * @param {number} to
-     * @param {number | null} [duration]
-     * @returns {boolean}
-     */
-    tween(to, duration) {
-        const ret = wasm.dotlottieplayerwasm_tween(this.__wbg_ptr, to, isLikeNone(duration) ? 0x100000001 : Math.fround(duration));
-        return ret !== 0;
-    }
-    /**
-     * Tween with a cubic-bezier easing (`e0..e3`).
-     * @param {number} to
-     * @param {number | null | undefined} duration
-     * @param {number} e0
-     * @param {number} e1
-     * @param {number} e2
-     * @param {number} e3
-     * @returns {boolean}
-     */
-    tween_with_easing(to, duration, e0, e1, e2, e3) {
-        const ret = wasm.dotlottieplayerwasm_tween_with_easing(this.__wbg_ptr, to, isLikeNone(duration) ? 0x100000001 : Math.fround(duration), e0, e1, e2, e3);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    tween_stop() {
-        const ret = wasm.dotlottieplayerwasm_tween_stop(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @param {number | null} [progress]
-     * @returns {boolean}
-     */
-    tween_update(progress) {
-        const ret = wasm.dotlottieplayerwasm_tween_update(this.__wbg_ptr, isLikeNone(progress) ? 0x100000001 : Math.fround(progress));
-        return ret !== 0;
-    }
-    /**
-     * @param {string} marker
-     * @param {number | null} [duration]
-     * @returns {boolean}
-     */
-    tween_to_marker(marker, duration) {
-        const ptr0 = passStringToWasm0(marker, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_tween_to_marker(this.__wbg_ptr, ptr0, len0, isLikeNone(duration) ? 0x100000001 : Math.fround(duration));
-        return ret !== 0;
-    }
-    /**
-     * Returns an array of `{ name, time, duration }` objects.
+     * Returns all state machine inputs as a JS array of strings.
      * @returns {any}
      */
-    markers() {
-        const ret = wasm.dotlottieplayerwasm_markers(this.__wbg_ptr);
+    sm_get_inputs() {
+        const ret = wasm.dotlottieplayerwasm_sm_get_inputs(this.__wbg_ptr);
         return ret;
     }
     /**
-     * Returns an array of marker name strings.
+     * Poll the next state machine event.  Returns `null` if the queue is empty,
+     * otherwise a JS object with a `type` field and optional payload.
      * @returns {any}
      */
-    marker_names() {
-        const ret = wasm.dotlottieplayerwasm_marker_names(this.__wbg_ptr);
+    sm_poll_event() {
+        const ret = wasm.dotlottieplayerwasm_sm_poll_event(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    sm_post_click(x, y) {
+        wasm.dotlottieplayerwasm_sm_post_click(this.__wbg_ptr, x, y);
+    }
+    /**
+     * `[width, height]` of the animation in its native coordinate space.
+     * @returns {Float32Array}
+     */
+    animation_size() {
+        const ret = wasm.dotlottieplayerwasm_animation_size(this.__wbg_ptr);
         return ret;
     }
     /**
@@ -916,68 +596,58 @@ export class DotLottiePlayerWasm {
         return v1;
     }
     /**
-     * @param {string} name
+     * @returns {number}
      */
-    set_marker(name) {
-        const ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        wasm.dotlottieplayerwasm_set_marker(this.__wbg_ptr, ptr0, len0);
-    }
-    clear_marker() {
-        wasm.dotlottieplayerwasm_clear_marker(this.__wbg_ptr);
-    }
-    /**
-     * Poll the next player event.  Returns `null` if the queue is empty,
-     * otherwise a plain JS object with a `type` string field and optional
-     * payload fields (`frameNo`, `loopCount`).
-     * @returns {any}
-     */
-    poll_event() {
-        const ret = wasm.dotlottieplayerwasm_poll_event(this.__wbg_ptr);
+    layout_align_x() {
+        const ret = wasm.dotlottieplayerwasm_layout_align_x(this.__wbg_ptr);
         return ret;
     }
-    emit_on_loop() {
-        wasm.dotlottieplayerwasm_emit_on_loop(this.__wbg_ptr);
+    /**
+     * @returns {number}
+     */
+    layout_align_y() {
+        const ret = wasm.dotlottieplayerwasm_layout_align_y(this.__wbg_ptr);
+        return ret;
     }
     /**
-     * @param {string} name
-     * @param {Uint8Array} data
+     * Load a Lottie JSON animation.  Sets up the rendering target automatically.
+     * @param {string} data
+     * @param {number} width
+     * @param {number} height
      * @returns {boolean}
      */
-    load_font(name, data) {
-        const ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+    load_animation(data, width, height) {
+        const ptr0 = passStringToWasm0(data, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
         const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passArray8ToWasm0(data, wasm.__wbindgen_malloc_command_export);
-        const len1 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_load_font(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+        const ret = wasm.dotlottieplayerwasm_load_animation(this.__wbg_ptr, ptr0, len0, width, height);
         return ret !== 0;
     }
     /**
-     * @param {string} name
      * @returns {boolean}
      */
-    static unload_font(name) {
-        const ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_unload_font(ptr0, len0);
+    loop_animation() {
+        const ret = wasm.dotlottieplayerwasm_loop_animation(this.__wbg_ptr);
         return ret !== 0;
     }
     /**
+     * Set a color slot (`r`, `g`, `b` in [0, 1]).
      * @param {string} id
+     * @param {number} r
+     * @param {number} g
+     * @param {number} b
      * @returns {boolean}
      */
-    set_theme(id) {
+    set_color_slot(id, r, g, b) {
         const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_set_theme(this.__wbg_ptr, ptr0, len0);
+        const ret = wasm.dotlottieplayerwasm_set_color_slot(this.__wbg_ptr, ptr0, len0, r, g, b);
         return ret !== 0;
     }
     /**
-     * @returns {boolean}
+     * @param {number} n
      */
-    reset_theme() {
-        const ret = wasm.dotlottieplayerwasm_reset_theme(this.__wbg_ptr);
-        return ret !== 0;
+    set_loop_count(n) {
+        wasm.dotlottieplayerwasm_set_loop_count(this.__wbg_ptr, n);
     }
     /**
      * @param {string} data
@@ -990,28 +660,12 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
-     * @returns {string | undefined}
+     * @param {string} key
      */
-    theme_id() {
-        const ret = wasm.dotlottieplayerwasm_theme_id(this.__wbg_ptr);
-        let v1;
-        if (ret[0] !== 0) {
-            v1 = getStringFromWasm0(ret[0], ret[1]).slice();
-            wasm.__wbindgen_free_command_export(ret[0], ret[1] * 1, 1);
-        }
-        return v1;
-    }
-    /**
-     * @returns {string | undefined}
-     */
-    animation_id() {
-        const ret = wasm.dotlottieplayerwasm_animation_id(this.__wbg_ptr);
-        let v1;
-        if (ret[0] !== 0) {
-            v1 = getStringFromWasm0(ret[0], ret[1]).slice();
-            wasm.__wbindgen_free_command_export(ret[0], ret[1] * 1, 1);
-        }
-        return v1;
+    sm_reset_input(key) {
+        const ptr0 = passStringToWasm0(key, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.dotlottieplayerwasm_sm_reset_input(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * Returns the animation manifest as a JSON string, or empty string if unavailable.
@@ -1030,6 +684,106 @@ export class DotLottiePlayerWasm {
         }
     }
     /**
+     * @param {string} id
+     * @param {number} value
+     * @returns {boolean}
+     */
+    set_scalar_slot(id, value) {
+        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_set_scalar_slot(this.__wbg_ptr, ptr0, len0, value);
+        return ret !== 0;
+    }
+    /**
+     * @param {string} id
+     * @param {number} x
+     * @param {number} y
+     * @returns {boolean}
+     */
+    set_vector_slot(id, x, y) {
+        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_set_vector_slot(this.__wbg_ptr, ptr0, len0, x, y);
+        return ret !== 0;
+    }
+    /**
+     * @param {string} marker
+     * @param {number | null} [duration]
+     * @returns {boolean}
+     */
+    tween_to_marker(marker, duration) {
+        const ptr0 = passStringToWasm0(marker, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_tween_to_marker(this.__wbg_ptr, ptr0, len0, isLikeNone(duration) ? 0x100000001 : Math.fround(duration));
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
+    background_color() {
+        const ret = wasm.dotlottieplayerwasm_background_color(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * Returns `[x, y, width, height]` of the layer's bounding box.
+     * @param {string} layer_name
+     * @returns {Float32Array}
+     */
+    get_layer_bounds(layer_name) {
+        const ptr0 = passStringToWasm0(layer_name, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_get_layer_bounds(this.__wbg_ptr, ptr0, len0);
+        return ret;
+    }
+    /**
+     * Zero-copy `Uint8Array` view into WASM linear memory.
+     *
+     * **Use the returned array immediately.**  Do not store the reference across
+     * any call that may reallocate the buffer (e.g. `resize` / `load_animation`
+     * with different dimensions).
+     * @returns {Uint8Array}
+     */
+    get_pixel_buffer() {
+        const ret = wasm.dotlottieplayerwasm_get_pixel_buffer(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    segment_duration() {
+        const ret = wasm.dotlottieplayerwasm_segment_duration(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Get the name of the current state.
+     * @returns {string}
+     */
+    sm_current_state() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.dotlottieplayerwasm_sm_current_state(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free_command_export(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+     * Returns the ID of the currently active state machine, or `undefined`.
+     * @returns {string | undefined}
+     */
+    state_machine_id() {
+        const ret = wasm.dotlottieplayerwasm_state_machine_id(this.__wbg_ptr);
+        let v1;
+        if (ret[0] !== 0) {
+            v1 = getStringFromWasm0(ret[0], ret[1]).slice();
+            wasm.__wbindgen_free_command_export(ret[0], ret[1] * 1, 1);
+        }
+        return v1;
+    }
+    /**
      * Returns the raw JSON definition of a state machine by ID, or `undefined`.
      * @param {string} id
      * @returns {string | undefined}
@@ -1046,17 +800,52 @@ export class DotLottiePlayerWasm {
         return v2;
     }
     /**
-     * Returns the ID of the currently active state machine, or `undefined`.
-     * @returns {string | undefined}
+     * @param {string} id
+     * @param {number} x
+     * @param {number} y
+     * @returns {boolean}
      */
-    state_machine_id() {
-        const ret = wasm.dotlottieplayerwasm_state_machine_id(this.__wbg_ptr);
-        let v1;
-        if (ret[0] !== 0) {
-            v1 = getStringFromWasm0(ret[0], ret[1]).slice();
-            wasm.__wbindgen_free_command_export(ret[0], ret[1] * 1, 1);
-        }
-        return v1;
+    set_position_slot(id, x, y) {
+        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_set_position_slot(this.__wbg_ptr, ptr0, len0, x, y);
+        return ret !== 0;
+    }
+    /**
+     * Tween with a cubic-bezier easing (`e0..e3`).
+     * @param {number} to
+     * @param {number | null | undefined} duration
+     * @param {number} e0
+     * @param {number} e1
+     * @param {number} e2
+     * @param {number} e3
+     * @returns {boolean}
+     */
+    tween_with_easing(to, duration, e0, e1, e2, e3) {
+        const ret = wasm.dotlottieplayerwasm_tween_with_easing(this.__wbg_ptr, to, isLikeNone(duration) ? 0x100000001 : Math.fround(duration), e0, e1, e2, e3);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
+    current_loop_count() {
+        const ret = wasm.dotlottieplayerwasm_current_loop_count(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * Returns the framework setup listeners as a JS array of strings.
+     * @returns {any}
+     */
+    sm_framework_setup() {
+        const ret = wasm.dotlottieplayerwasm_sm_framework_setup(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    sm_post_pointer_up(x, y) {
+        wasm.dotlottieplayerwasm_sm_post_pointer_up(this.__wbg_ptr, x, y);
     }
     /**
      * Load a state machine from a JSON definition string.  Returns `true` on
@@ -1072,65 +861,16 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
-     * Load a state machine from a .lottie archive by state-machine ID.
-     * @param {string} id
+     * Load a .lottie archive from raw bytes.
+     * @param {Uint8Array} data
+     * @param {number} width
+     * @param {number} height
      * @returns {boolean}
      */
-    state_machine_load_from_id(id) {
-        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+    load_dotlottie_data(data, width, height) {
+        const ptr0 = passArray8ToWasm0(data, wasm.__wbindgen_malloc_command_export);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_state_machine_load_from_id(this.__wbg_ptr, ptr0, len0);
-        return ret !== 0;
-    }
-    /**
-     * Unload the active state machine.
-     */
-    state_machine_unload() {
-        wasm.dotlottieplayerwasm_state_machine_unload(this.__wbg_ptr);
-    }
-    /**
-     * Fire a named event into the state machine.
-     * @param {string} event
-     * @returns {boolean}
-     */
-    sm_fire(event) {
-        const ptr0 = passStringToWasm0(event, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_sm_fire(this.__wbg_ptr, ptr0, len0);
-        return ret !== 0;
-    }
-    /**
-     * @param {string} key
-     * @param {number} value
-     * @returns {boolean}
-     */
-    sm_set_numeric_input(key, value) {
-        const ptr0 = passStringToWasm0(key, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_sm_set_numeric_input(this.__wbg_ptr, ptr0, len0, value);
-        return ret !== 0;
-    }
-    /**
-     * @param {string} key
-     * @returns {number | undefined}
-     */
-    sm_get_numeric_input(key) {
-        const ptr0 = passStringToWasm0(key, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_sm_get_numeric_input(this.__wbg_ptr, ptr0, len0);
-        return ret === 0x100000001 ? undefined : ret;
-    }
-    /**
-     * @param {string} key
-     * @param {string} value
-     * @returns {boolean}
-     */
-    sm_set_string_input(key, value) {
-        const ptr0 = passStringToWasm0(key, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passStringToWasm0(value, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len1 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_sm_set_string_input(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+        const ret = wasm.dotlottieplayerwasm_load_dotlottie_data(this.__wbg_ptr, ptr0, len0, width, height);
         return ret !== 0;
     }
     /**
@@ -1150,13 +890,24 @@ export class DotLottiePlayerWasm {
     }
     /**
      * @param {string} key
-     * @param {boolean} value
+     * @param {string} value
      * @returns {boolean}
      */
-    sm_set_boolean_input(key, value) {
+    sm_set_string_input(key, value) {
         const ptr0 = passStringToWasm0(key, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_sm_set_boolean_input(this.__wbg_ptr, ptr0, len0, value);
+        const ptr1 = passStringToWasm0(value, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_sm_set_string_input(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+        return ret !== 0;
+    }
+    /**
+     * Set background colour (`0xAARRGGBB`).
+     * @param {number} color
+     * @returns {boolean}
+     */
+    set_background_color(color) {
+        const ret = wasm.dotlottieplayerwasm_set_background_color(this.__wbg_ptr, color);
         return ret !== 0;
     }
     /**
@@ -1171,20 +922,305 @@ export class DotLottiePlayerWasm {
     }
     /**
      * @param {string} key
+     * @returns {number | undefined}
      */
-    sm_reset_input(key) {
+    sm_get_numeric_input(key) {
         const ptr0 = passStringToWasm0(key, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
         const len0 = WASM_VECTOR_LEN;
-        wasm.dotlottieplayerwasm_sm_reset_input(this.__wbg_ptr, ptr0, len0);
+        const ret = wasm.dotlottieplayerwasm_sm_get_numeric_input(this.__wbg_ptr, ptr0, len0);
+        return ret === 0x100000001 ? undefined : ret;
     }
     /**
-     * Poll the next state machine event.  Returns `null` if the queue is empty,
-     * otherwise a JS object with a `type` field and optional payload.
+     * @param {number} x
+     * @param {number} y
+     */
+    sm_post_pointer_down(x, y) {
+        wasm.dotlottieplayerwasm_sm_post_pointer_down(this.__wbg_ptr, x, y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    sm_post_pointer_exit(x, y) {
+        wasm.dotlottieplayerwasm_sm_post_pointer_exit(this.__wbg_ptr, x, y);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    sm_post_pointer_move(x, y) {
+        wasm.dotlottieplayerwasm_sm_post_pointer_move(this.__wbg_ptr, x, y);
+    }
+    /**
+     * @param {string} key
+     * @param {boolean} value
+     * @returns {boolean}
+     */
+    sm_set_boolean_input(key, value) {
+        const ptr0 = passStringToWasm0(key, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_sm_set_boolean_input(this.__wbg_ptr, ptr0, len0, value);
+        return ret !== 0;
+    }
+    /**
+     * @param {string} key
+     * @param {number} value
+     * @returns {boolean}
+     */
+    sm_set_numeric_input(key, value) {
+        const ptr0 = passStringToWasm0(key, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_sm_set_numeric_input(this.__wbg_ptr, ptr0, len0, value);
+        return ret !== 0;
+    }
+    /**
+     * Unload the active state machine.
+     */
+    state_machine_unload() {
+        wasm.dotlottieplayerwasm_state_machine_unload(this.__wbg_ptr);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    sm_post_pointer_enter(x, y) {
+        wasm.dotlottieplayerwasm_sm_post_pointer_enter(this.__wbg_ptr, x, y);
+    }
+    /**
+     * Clear the background colour (transparent).
+     * @returns {boolean}
+     */
+    clear_background_color() {
+        const ret = wasm.dotlottieplayerwasm_clear_background_color(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * Load an animation from an already-loaded .lottie archive by its ID.
+     * @param {string} id
+     * @param {number} width
+     * @param {number} height
+     * @returns {boolean}
+     */
+    load_animation_from_id(id, width, height) {
+        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_load_animation_from_id(this.__wbg_ptr, ptr0, len0, width, height);
+        return ret !== 0;
+    }
+    /**
+     * Poll the next state machine internal event.  Returns `null` if the
+     * queue is empty, otherwise a JS object `{ type: "Message", message }`.
      * @returns {any}
      */
-    sm_poll_event() {
-        const ret = wasm.dotlottieplayerwasm_sm_poll_event(this.__wbg_ptr);
+    sm_poll_internal_event() {
+        const ret = wasm.dotlottieplayerwasm_sm_poll_internal_event(this.__wbg_ptr);
         return ret;
+    }
+    /**
+     * @returns {boolean}
+     */
+    use_frame_interpolation() {
+        const ret = wasm.dotlottieplayerwasm_use_frame_interpolation(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    reset_current_loop_count() {
+        wasm.dotlottieplayerwasm_reset_current_loop_count(this.__wbg_ptr);
+    }
+    /**
+     * Override the current state.
+     * @param {string} state
+     * @param {boolean} immediate
+     * @returns {boolean}
+     */
+    sm_override_current_state(state, immediate) {
+        const ptr0 = passStringToWasm0(state, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_sm_override_current_state(this.__wbg_ptr, ptr0, len0, immediate);
+        return ret !== 0;
+    }
+    /**
+     * Load a state machine from a .lottie archive by state-machine ID.
+     * @param {string} id
+     * @returns {boolean}
+     */
+    state_machine_load_from_id(id) {
+        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_state_machine_load_from_id(this.__wbg_ptr, ptr0, len0);
+        return ret !== 0;
+    }
+    /**
+     * @param {boolean} v
+     */
+    set_use_frame_interpolation(v) {
+        wasm.dotlottieplayerwasm_set_use_frame_interpolation(this.__wbg_ptr, v);
+    }
+    constructor() {
+        const ret = wasm.dotlottieplayerwasm_new();
+        this.__wbg_ptr = ret >>> 0;
+        DotLottiePlayerWasmFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * @returns {Mode}
+     */
+    mode() {
+        const ret = wasm.dotlottieplayerwasm_mode(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {boolean}
+     */
+    play() {
+        const ret = wasm.dotlottieplayerwasm_play(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @param {number} no
+     * @returns {boolean}
+     */
+    seek(no) {
+        const ret = wasm.dotlottieplayerwasm_seek(this.__wbg_ptr, no);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    stop() {
+        const ret = wasm.dotlottieplayerwasm_stop(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * Advance time and render.  Call once per `requestAnimationFrame`.
+     * @returns {boolean}
+     */
+    tick() {
+        const ret = wasm.dotlottieplayerwasm_tick(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * Clear the canvas to the background colour.
+     */
+    clear() {
+        wasm.dotlottieplayerwasm_clear(this.__wbg_ptr);
+    }
+    /**
+     * @returns {boolean}
+     */
+    pause() {
+        const ret = wasm.dotlottieplayerwasm_pause(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
+    speed() {
+        const ret = wasm.dotlottieplayerwasm_speed(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Tween to `to` frame.  `duration` in seconds; pass `undefined` for default.
+     * @param {number} to
+     * @param {number | null} [duration]
+     * @returns {boolean}
+     */
+    tween(to, duration) {
+        const ret = wasm.dotlottieplayerwasm_tween(this.__wbg_ptr, to, isLikeNone(duration) ? 0x100000001 : Math.fround(duration));
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
+    width() {
+        const ret = wasm.dotlottieplayerwasm_width(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * @returns {number}
+     */
+    height() {
+        const ret = wasm.dotlottieplayerwasm_height(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * Render the current frame without advancing time.
+     * @returns {boolean}
+     */
+    render() {
+        const ret = wasm.dotlottieplayerwasm_render(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * Resize the canvas.  For the SW renderer this also resizes the pixel buffer.
+     * @param {number} width
+     * @param {number} height
+     * @returns {boolean}
+     */
+    resize(width, height) {
+        const ret = wasm.dotlottieplayerwasm_resize(this.__wbg_ptr, width, height);
+        return ret !== 0;
+    }
+    /**
+     * Returns an array of `{ name, time, duration }` objects.
+     * @returns {any}
+     */
+    markers() {
+        const ret = wasm.dotlottieplayerwasm_markers(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Fire a named event into the state machine.
+     * @param {string} event
+     * @returns {boolean}
+     */
+    sm_fire(event) {
+        const ptr0 = passStringToWasm0(event, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_sm_fire(this.__wbg_ptr, ptr0, len0);
+        return ret !== 0;
+    }
+    /**
+     * Stop the state machine.
+     * @returns {boolean}
+     */
+    sm_stop() {
+        const ret = wasm.dotlottieplayerwasm_sm_stop(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * Advance the state machine by one tick.  Returns `false` if no state machine
+     * is loaded, otherwise `true` (even if the machine is stopped or errored).
+     * @returns {boolean}
+     */
+    sm_tick() {
+        const ret = wasm.dotlottieplayerwasm_sm_tick(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    autoplay() {
+        const ret = wasm.dotlottieplayerwasm_autoplay(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
+    duration() {
+        const ret = wasm.dotlottieplayerwasm_duration(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {boolean} v
+     */
+    set_loop(v) {
+        wasm.dotlottieplayerwasm_set_loop(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {Mode} mode
+     */
+    set_mode(mode) {
+        wasm.dotlottieplayerwasm_set_mode(this.__wbg_ptr, mode);
     }
     /**
      * Start the state machine with an open-URL policy.
@@ -1199,11 +1235,78 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
-     * Stop the state machine.
+     * @returns {string | undefined}
+     */
+    theme_id() {
+        const ret = wasm.dotlottieplayerwasm_theme_id(this.__wbg_ptr);
+        let v1;
+        if (ret[0] !== 0) {
+            v1 = getStringFromWasm0(ret[0], ret[1]).slice();
+            wasm.__wbindgen_free_command_export(ret[0], ret[1] * 1, 1);
+        }
+        return v1;
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {string} layer_name
      * @returns {boolean}
      */
-    sm_stop() {
-        const ret = wasm.dotlottieplayerwasm_sm_stop(this.__wbg_ptr);
+    intersect(x, y, layer_name) {
+        const ptr0 = passStringToWasm0(layer_name, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_intersect(this.__wbg_ptr, x, y, ptr0, len0);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    is_loaded() {
+        const ret = wasm.dotlottieplayerwasm_is_loaded(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    is_paused() {
+        const ret = wasm.dotlottieplayerwasm_is_paused(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @param {string} name
+     * @param {Uint8Array} data
+     * @returns {boolean}
+     */
+    load_font(name, data) {
+        const ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArray8ToWasm0(data, wasm.__wbindgen_malloc_command_export);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_load_font(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+        return ret !== 0;
+    }
+    /**
+     * @param {number} no
+     * @returns {boolean}
+     */
+    set_frame(no) {
+        const ret = wasm.dotlottieplayerwasm_set_frame(this.__wbg_ptr, no);
+        return ret !== 0;
+    }
+    /**
+     * @param {number} speed
+     */
+    set_speed(speed) {
+        wasm.dotlottieplayerwasm_set_speed(this.__wbg_ptr, speed);
+    }
+    /**
+     * @param {string} id
+     * @returns {boolean}
+     */
+    set_theme(id) {
+        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_set_theme(this.__wbg_ptr, ptr0, len0);
         return ret !== 0;
     }
     /**
@@ -1221,110 +1324,6 @@ export class DotLottiePlayerWasm {
         } finally {
             wasm.__wbindgen_free_command_export(deferred1_0, deferred1_1, 1);
         }
-    }
-    /**
-     * Get the name of the current state.
-     * @returns {string}
-     */
-    sm_current_state() {
-        let deferred1_0;
-        let deferred1_1;
-        try {
-            const ret = wasm.dotlottieplayerwasm_sm_current_state(this.__wbg_ptr);
-            deferred1_0 = ret[0];
-            deferred1_1 = ret[1];
-            return getStringFromWasm0(ret[0], ret[1]);
-        } finally {
-            wasm.__wbindgen_free_command_export(deferred1_0, deferred1_1, 1);
-        }
-    }
-    /**
-     * Override the current state.
-     * @param {string} state
-     * @param {boolean} immediate
-     * @returns {boolean}
-     */
-    sm_override_current_state(state, immediate) {
-        const ptr0 = passStringToWasm0(state, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_sm_override_current_state(this.__wbg_ptr, ptr0, len0, immediate);
-        return ret !== 0;
-    }
-    /**
-     * Returns the framework setup listeners as a JS array of strings.
-     * @returns {any}
-     */
-    sm_framework_setup() {
-        const ret = wasm.dotlottieplayerwasm_sm_framework_setup(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * Returns all state machine inputs as a JS array of strings.
-     * @returns {any}
-     */
-    sm_get_inputs() {
-        const ret = wasm.dotlottieplayerwasm_sm_get_inputs(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    sm_post_click(x, y) {
-        wasm.dotlottieplayerwasm_sm_post_click(this.__wbg_ptr, x, y);
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    sm_post_pointer_down(x, y) {
-        wasm.dotlottieplayerwasm_sm_post_pointer_down(this.__wbg_ptr, x, y);
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    sm_post_pointer_up(x, y) {
-        wasm.dotlottieplayerwasm_sm_post_pointer_up(this.__wbg_ptr, x, y);
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    sm_post_pointer_move(x, y) {
-        wasm.dotlottieplayerwasm_sm_post_pointer_move(this.__wbg_ptr, x, y);
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    sm_post_pointer_enter(x, y) {
-        wasm.dotlottieplayerwasm_sm_post_pointer_enter(this.__wbg_ptr, x, y);
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    sm_post_pointer_exit(x, y) {
-        wasm.dotlottieplayerwasm_sm_post_pointer_exit(this.__wbg_ptr, x, y);
-    }
-    /**
-     * Poll the next state machine internal event.  Returns `null` if the
-     * queue is empty, otherwise a JS object `{ type: "Message", message }`.
-     * @returns {any}
-     */
-    sm_poll_internal_event() {
-        const ret = wasm.dotlottieplayerwasm_sm_poll_internal_event(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * Advance the state machine by one tick.  Returns `false` if no state machine
-     * is loaded, otherwise `true` (even if the machine is stopped or errored).
-     * @returns {boolean}
-     */
-    sm_tick() {
-        const ret = wasm.dotlottieplayerwasm_sm_tick(this.__wbg_ptr);
-        return ret !== 0;
     }
 }
 
@@ -1366,12 +1365,27 @@ function __wbg_get_imports() {
         const ret = arg0.buffer;
         return ret;
     };
+    imports.wbg.__wbg_error_7534b8e9a36f1ab4 = function(arg0, arg1) {
+        let deferred0_0;
+        let deferred0_1;
+        try {
+            deferred0_0 = arg0;
+            deferred0_1 = arg1;
+            console.error(getStringFromWasm0(arg0, arg1));
+        } finally {
+            wasm.__wbindgen_free_command_export(deferred0_0, deferred0_1, 1);
+        }
+    };
     imports.wbg.__wbg_new_405e22f390576ce2 = function() {
         const ret = new Object();
         return ret;
     };
     imports.wbg.__wbg_new_78feb108b6472713 = function() {
         const ret = new Array();
+        return ret;
+    };
+    imports.wbg.__wbg_new_8a6f238a6ece86ea = function() {
+        const ret = new Error();
         return ret;
     };
     imports.wbg.__wbg_newwithbyteoffsetandlength_d97e637ebe145a9a = function(arg0, arg1, arg2) {
@@ -1397,8 +1411,15 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_setindex_4e73afdcd9bb95cd = function(arg0, arg1, arg2) {
         arg0[arg1 >>> 0] = arg2;
     };
+    imports.wbg.__wbg_stack_0ed75d68575b0f3c = function(arg0, arg1) {
+        const ret = arg1.stack;
+        const ptr1 = passStringToWasm0(ret, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len1 = WASM_VECTOR_LEN;
+        getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
+        getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
+    };
     imports.wbg.__wbindgen_init_externref_table = function() {
-        const table = wasm.__wbindgen_export_2;
+        const table = wasm.__wbindgen_export_3;
         const offset = table.grow(4);
         table.set(0, undefined);
         table.set(offset + 0, undefined);
