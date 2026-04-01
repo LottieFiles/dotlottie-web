@@ -4,7 +4,7 @@
 
 **Dependency Updates:**
 
-* **Bumped `dotlottie-rs` WASM bindings to v0.1.56 (commit `afbf24b6`):** This update integrates core underlying fixes for the state machine.
+* **Bumped `dotlottie-rs` WASM bindings to v0.1.56 (commit `4922138`):** This update integrates core underlying fixes for the state machine.
 
 **State Machine fixes:**
 
