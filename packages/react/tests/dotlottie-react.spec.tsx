@@ -572,6 +572,58 @@ describe.each([
     });
   });
 
+  test('does not call dotLottie.loadAnimation on rerender with same animationId', async () => {
+    const onLoad = vi.fn();
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = await render(
+      <Component src={smSrc} autoplay animationId="Animation_1" dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    dotLottie?.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const loadAnimation = vi.spyOn(dotLottie, 'loadAnimation');
+
+    // rerender with same animationId - simulates StrictMode double render
+    rerender(<Component src={smSrc} autoplay animationId="Animation_1" dotLottieRefCallback={dotLottieRefCallback} />);
+
+    // give it time to potentially fire
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(loadAnimation).not.toHaveBeenCalled();
+  });
+
+  test('does not call dotLottie.loadAnimation when not yet loaded', async () => {
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = await render(
+      <Component src={smSrc} autoplay animationId="Animation_1" dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    const loadAnimation = vi.spyOn(dotLottie, 'loadAnimation');
+
+    rerender(<Component src={smSrc} autoplay animationId="Animation_2" dotLottieRefCallback={dotLottieRefCallback} />);
+
+    // isLoaded is false, so loadAnimation should not be called
+    expect(loadAnimation).not.toHaveBeenCalled();
+  });
+
   test('calls dotLottie.setRenderConfig when renderConfig prop changes', async () => {
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();

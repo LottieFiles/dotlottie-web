@@ -198,7 +198,9 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   }, [props.marker]);
 
   useEffect(() => {
-    dotLottieRef.current?.loadAnimation(animationId ?? '');
+    if (dotLottieRef.current?.isLoaded && dotLottieRef.current.activeAnimationId !== animationId) {
+      dotLottieRef.current.loadAnimation(animationId ?? '');
+    }
   }, [animationId]);
 
   useEffect(() => {
