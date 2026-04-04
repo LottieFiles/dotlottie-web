@@ -5,7 +5,6 @@ import {
   type RenderEvent,
   setWasmUrl as setDotLottieWasmUrl,
 } from '@lottiefiles/dotlottie-react';
-import dotLottieWebPkg from '@lottiefiles/dotlottie-react/node_modules/@lottiefiles/dotlottie-web/package.json';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FaPause, FaPlay } from 'react-icons/fa';
 import { GiNextButton, GiPreviousButton } from 'react-icons/gi';
@@ -24,6 +23,7 @@ import {
   setThemes,
   setTotalFrames,
 } from '../store/viewer-slice';
+import DotLottieCDNPlayer from './dotlottie-cdn-player';
 import DotLottieGPUPlayer from './dotlottie-gpu-player';
 import LoadTime from './load-time';
 
@@ -63,7 +63,11 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
   const activeStateMachineId = useAppSelector((state) => state.viewer.activeStateMachineId);
   const renderer = useAppSelector((state) => state.viewer.renderer);
   const showLottieWeb = useAppSelector((state) => state.viewer.showLottieWeb);
+  const version = useAppSelector((state) => state.viewer.version);
+  const availableVersions = useAppSelector((state) => state.viewer.availableVersions);
   const dispatch = useAppDispatch();
+
+  const coreVersion = availableVersions.find((v) => v.reactVersion === version)?.coreVersion;
 
   const onLoad = useCallback(() => {
     dispatch(setTotalFrames(dotLottie?.totalFrames));
@@ -144,10 +148,32 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
     <div className="flex flex-col items-center justify-between flex-grow h-full gap-4">
       <div className="flex justify-center h-full">
         <div className="flex flex-col dotlottie-player">
-          <LoadTime version={dotLottieWebPkg.version} className="mb-4" title="dotLottie Web" />
+          <LoadTime
+            version={version === 'local' ? 'dev' : (coreVersion ?? version)}
+            className="mb-4"
+            title="dotLottie Web"
+          />
           <div className="flex items-center justify-center flex-grow p-4">
             <div style={{ width: '350px', height: '350px' }}>
-              {renderer === 'software' ? (
+              {version !== 'local' ? (
+                <DotLottieCDNPlayer
+                  key={version}
+                  version={coreVersion ?? version}
+                  src={src}
+                  autoplay={autoplay}
+                  loop={loop}
+                  speed={speed}
+                  mode={mode}
+                  backgroundColor={backgroundColor}
+                  useFrameInterpolation={useFrameInterpolation}
+                  animationId={activeAnimationId}
+                  themeId={activeThemeId}
+                  marker={activeMarker}
+                  segment={segment}
+                  stateMachineId={activeStateMachineId}
+                  dotLottieRefCallback={setDotLottie}
+                />
+              ) : renderer === 'software' ? (
                 <DotLottieReact
                   backgroundColor={backgroundColor}
                   width={350}
