@@ -360,13 +360,6 @@ export class DotLottiePlayerWasm {
     /**
      * @returns {boolean}
      */
-    tween_stop() {
-        const ret = wasm.dotlottieplayerwasm_tween_stop(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
     clear_slots() {
         const ret = wasm.dotlottieplayerwasm_clear_slots(this.__wbg_ptr);
         return ret !== 0;
@@ -528,14 +521,6 @@ export class DotLottiePlayerWasm {
     total_frames() {
         const ret = wasm.dotlottieplayerwasm_total_frames(this.__wbg_ptr);
         return ret;
-    }
-    /**
-     * @param {number | null} [progress]
-     * @returns {boolean}
-     */
-    tween_update(progress) {
-        const ret = wasm.dotlottieplayerwasm_tween_update(this.__wbg_ptr, isLikeNone(progress) ? 0x100000001 : Math.fround(progress));
-        return ret !== 0;
     }
     /**
      * @returns {boolean}
@@ -796,17 +781,6 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
-     * @param {string} marker
-     * @param {number | null} [duration]
-     * @returns {boolean}
-     */
-    tween_to_marker(marker, duration) {
-        const ptr0 = passStringToWasm0(marker, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_tween_to_marker(this.__wbg_ptr, ptr0, len0, isLikeNone(duration) ? 0x100000001 : Math.fround(duration));
-        return ret !== 0;
-    }
-    /**
      * @returns {number}
      */
     background_color() {
@@ -896,20 +870,6 @@ export class DotLottiePlayerWasm {
      */
     set_webgl_context(ctx) {
         wasm.dotlottieplayerwasm_set_webgl_context(this.__wbg_ptr, ctx);
-    }
-    /**
-     * Tween with a cubic-bezier easing (`e0..e3`).
-     * @param {number} to
-     * @param {number | null | undefined} duration
-     * @param {number} e0
-     * @param {number} e1
-     * @param {number} e2
-     * @param {number} e3
-     * @returns {boolean}
-     */
-    tween_with_easing(to, duration, e0, e1, e2, e3) {
-        const ret = wasm.dotlottieplayerwasm_tween_with_easing(this.__wbg_ptr, to, isLikeNone(duration) ? 0x100000001 : Math.fround(duration), e0, e1, e2, e3);
-        return ret !== 0;
     }
     /**
      * @returns {number}
@@ -1203,16 +1163,6 @@ export class DotLottiePlayerWasm {
     speed() {
         const ret = wasm.dotlottieplayerwasm_speed(this.__wbg_ptr);
         return ret;
-    }
-    /**
-     * Tween to `to` frame.  `duration` in seconds; pass `undefined` for default.
-     * @param {number} to
-     * @param {number | null} [duration]
-     * @returns {boolean}
-     */
-    tween(to, duration) {
-        const ret = wasm.dotlottieplayerwasm_tween(this.__wbg_ptr, to, isLikeNone(duration) ? 0x100000001 : Math.fround(duration));
-        return ret !== 0;
     }
     /**
      * @returns {number}
