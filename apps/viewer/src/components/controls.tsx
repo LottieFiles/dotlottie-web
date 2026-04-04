@@ -22,8 +22,6 @@ import InputLabel from './form/input-label';
 import StepSelect from './form/step-select';
 import Switch from './form/switch';
 
-const VERSIONS_TO_SHOW = 4;
-
 export default function Controls() {
   const speed = useAppSelector((state) => state.viewer.speed);
   const animations = useAppSelector((state) => state.viewer.animations);
@@ -50,9 +48,8 @@ export default function Controls() {
     fetch('https://registry.npmjs.org/@lottiefiles/dotlottie-react')
       .then((res) => res.json())
       .then((data) => {
-        const allVersions = Object.keys(data.versions);
-        const recent = allVersions.slice(-VERSIONS_TO_SHOW).reverse();
-        const versionPairs = recent.map((v) => ({
+        const allVersions = Object.keys(data.versions).reverse();
+        const versionPairs = allVersions.map((v) => ({
           reactVersion: v,
           coreVersion: data.versions[v]?.dependencies?.['@lottiefiles/dotlottie-web'] ?? v,
         }));
