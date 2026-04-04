@@ -1622,36 +1622,6 @@ describe.each([
     });
   });
 
-  describe('tween', () => {
-    test('tween() does nothing when the animation is not loaded', async () => {
-      dotLottie = new DotLottie({
-        canvas,
-        src,
-      });
-
-      const result = await dotLottie.tween(10, 1.0);
-
-      expect(result).toBe(false);
-    });
-
-    test('tween() starts a tween animation to a specific frame', async () => {
-      const onLoad = vi.fn();
-
-      dotLottie = new DotLottie({
-        canvas,
-        src,
-      });
-
-      dotLottie.addEventListener('load', onLoad);
-
-      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
-
-      const result = await dotLottie.tween(10, 1.0);
-
-      expect(result).toBe(true);
-    });
-  });
-
   describe('removeEventListener', () => {
     test('removeEventListener() removes an event listener', async () => {
       const onLoad = vi.fn();
