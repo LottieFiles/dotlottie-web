@@ -47,16 +47,20 @@ export default function Controls() {
   useEffect(() => {
     if (availableVersions.length > 0) return;
 
-    fetch('https://registry.npmjs.org/@lottiefiles/dotlottie-web')
+    fetch('https://registry.npmjs.org/@lottiefiles/dotlottie-react')
       .then((res) => res.json())
       .then((data) => {
         const allVersions = Object.keys(data.versions);
         const recent = allVersions.slice(-VERSIONS_TO_SHOW).reverse();
+        const versionPairs = recent.map((v) => ({
+          reactVersion: v,
+          coreVersion: data.versions[v]?.dependencies?.['@lottiefiles/dotlottie-web'] ?? v,
+        }));
 
-        dispatch(setAvailableVersions(recent));
+        dispatch(setAvailableVersions(versionPairs));
       })
       .catch((err) => {
-        console.error('Failed to fetch dotlottie-web versions:', err);
+        console.error('Failed to fetch dotlottie-react versions:', err);
       });
   }, [availableVersions.length, dispatch]);
 
@@ -70,7 +74,13 @@ export default function Controls() {
               dispatch(setVersion(event.target.value));
             }}
             value={version}
-            items={[{ value: 'local', label: '(dev)' }, ...availableVersions.map((v) => ({ value: v, label: v }))]}
+            items={[
+              { value: 'local', label: '(dev)' },
+              ...availableVersions.map((v, i) => ({
+                value: v.reactVersion,
+                label: i === 0 ? `${v.coreVersion} (latest)` : v.coreVersion,
+              })),
+            ]}
           />
         </InputLabel>
         {isJson && (

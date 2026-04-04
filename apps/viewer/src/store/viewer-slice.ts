@@ -35,7 +35,7 @@ interface AnimationSlice {
   renderer: Renderer;
   showLottieWeb: boolean;
   version: string;
-  availableVersions: string[];
+  availableVersions: { reactVersion: string; coreVersion: string }[];
 }
 
 export const DEFAULT_SRC = 'https://lottie.host/779299c1-d174-4359-a66b-6253897b33e7/yRJTT0fCfq.lottie';

@@ -18,16 +18,21 @@ interface DotLottieCDNPlayerProps {
   dotLottieRefCallback: (instance: DotLottie | null) => void;
 }
 
+// Cache imported modules by version to avoid re-fetching
+const moduleCache = new Map<string, { DotLottie: typeof DotLottie }>();
+
 async function createCDNDotLottieInstance(
   version: string,
   config: Omit<DotLottieCDNPlayerProps, 'version' | 'dotLottieRefCallback'> & { canvas: HTMLCanvasElement },
 ): Promise<DotLottie> {
-  const module = await import(/* @vite-ignore */ `https://esm.sh/@lottiefiles/dotlottie-web@${version}`);
-  const CDNDotLottie = module.DotLottie;
+  const cached = moduleCache.get(version);
+  const mod = cached ?? (await import(/* @vite-ignore */ `https://esm.sh/@lottiefiles/dotlottie-web@${version}`));
 
-  CDNDotLottie.setWasmUrl(`https://unpkg.com/@lottiefiles/dotlottie-web@${version}/dist/dotlottie-player.wasm`);
+  if (!cached) {
+    moduleCache.set(version, mod);
+  }
 
-  return new CDNDotLottie({
+  return new mod.DotLottie({
     canvas: config.canvas,
     src: config.src,
     autoplay: config.autoplay,
@@ -96,7 +101,6 @@ export default function DotLottieCDNPlayer({
         stateMachineId,
       });
 
-      // Guard against stale init (version changed while awaiting)
       if (versionRef.current !== version) {
         instance.destroy();
 
@@ -129,7 +133,6 @@ export default function DotLottieCDNPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initPlayer]);
 
-  // Sync props to existing instance
   useEffect(() => {
     instanceRef.current?.setSpeed(speed);
   }, [speed]);

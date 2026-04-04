@@ -5,7 +5,6 @@ import {
   type RenderEvent,
   setWasmUrl as setDotLottieWasmUrl,
 } from '@lottiefiles/dotlottie-react';
-import dotLottieWebPkg from '@lottiefiles/dotlottie-react/node_modules/@lottiefiles/dotlottie-web/package.json';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FaPause, FaPlay } from 'react-icons/fa';
 import { GiNextButton, GiPreviousButton } from 'react-icons/gi';
@@ -65,7 +64,10 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
   const renderer = useAppSelector((state) => state.viewer.renderer);
   const showLottieWeb = useAppSelector((state) => state.viewer.showLottieWeb);
   const version = useAppSelector((state) => state.viewer.version);
+  const availableVersions = useAppSelector((state) => state.viewer.availableVersions);
   const dispatch = useAppDispatch();
+
+  const coreVersion = availableVersions.find((v) => v.reactVersion === version)?.coreVersion;
 
   const onLoad = useCallback(() => {
     dispatch(setTotalFrames(dotLottie?.totalFrames));
@@ -147,7 +149,7 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
       <div className="flex justify-center h-full">
         <div className="flex flex-col dotlottie-player">
           <LoadTime
-            version={version === 'local' ? dotLottieWebPkg.version : version}
+            version={version === 'local' ? 'dev' : (coreVersion ?? version)}
             className="mb-4"
             title="dotLottie Web"
           />
@@ -156,7 +158,7 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
               {version !== 'local' ? (
                 <DotLottieCDNPlayer
                   key={version}
-                  version={version}
+                  version={coreVersion ?? version}
                   src={src}
                   autoplay={autoplay}
                   loop={loop}
