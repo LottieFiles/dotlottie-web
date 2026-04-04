@@ -34,6 +34,8 @@ interface AnimationSlice {
   activeStateMachineId: string;
   renderer: Renderer;
   showLottieWeb: boolean;
+  version: string;
+  availableVersions: string[];
 }
 
 export const DEFAULT_SRC = 'https://lottie.host/779299c1-d174-4359-a66b-6253897b33e7/yRJTT0fCfq.lottie';
@@ -68,6 +70,8 @@ const initialState: AnimationSlice = {
   activeStateMachineId: '',
   renderer: 'software',
   showLottieWeb: false,
+  version: 'local',
+  availableVersions: [],
 };
 
 export const animationSlice = createSlice({
@@ -180,6 +184,12 @@ export const animationSlice = createSlice({
     setShowLottieWeb: (state, action) => {
       state.showLottieWeb = action.payload;
     },
+    setVersion: (state, action) => {
+      state.version = action.payload;
+    },
+    setAvailableVersions: (state, action) => {
+      state.availableVersions = action.payload;
+    },
   },
 });
 
@@ -213,6 +223,8 @@ export const {
   setActiveStateMachineId,
   setRenderer,
   setShowLottieWeb,
+  setVersion,
+  setAvailableVersions,
 } = animationSlice.actions;
 
 export default animationSlice.reducer;
