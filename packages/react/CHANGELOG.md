@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-react
 
+## 0.18.10
+### Patch Changes
+
+- d899344: Fixed `loadAnimation` called multiple times for the same `animationId` during rerender
+- Updated dependencies [dbac41d]
+- Updated dependencies [dbac41d]
+  - @lottiefiles/dotlottie-web@0.70.0
+
 ## 0.18.9
 ### Patch Changes
 
