@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.70.0
+### Minor Changes
+
+- dbac41d: chore: upgrade dotlottie-rs v0.1.56-f01de8a WASM bindings
+- dbac41d: chore: remove unstable tween api
+
 ## 0.69.0
 ### Minor Changes
 
