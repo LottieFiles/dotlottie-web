@@ -1874,33 +1874,6 @@ export class DotLottie {
   }
 
   /**
-   * @experimental
-   * Animates smoothly to a specific frame over a duration using linear easing.
-   * Creates a tween animation transitioning from the current frame to the target frame.
-   * @param frame - Target frame number to tween to
-   * @param duration - Duration of the tween animation in seconds
-   * @returns True if tween started successfully, false otherwise
-   */
-  public tween(frame: number, duration: number): boolean {
-    if (!this._dotLottieCore) return false;
-
-    return this._dotLottieCore.tween_with_easing(frame, duration, 0, 0, 1, 1);
-  }
-
-  /**
-   * @experimental
-   * Start a tween animation to a specific marker
-   * @param marker - The marker name to tween to
-   * @param duration - Duration of the tween animation in seconds
-   * @returns true if tween was started successfully
-   */
-  public tweenToMarker(marker: string, duration: number): boolean {
-    if (!this._dotLottieCore) return false;
-
-    return this._dotLottieCore.tween_to_marker(marker, duration);
-  }
-
-  /**
    * Gets the original dimensions of the animation as defined in the source file.
    * Returns width and height in pixels representing the animation's intrinsic size.
    * @returns Object with width and height properties in pixels

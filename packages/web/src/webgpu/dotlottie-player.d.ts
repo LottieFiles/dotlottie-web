@@ -38,7 +38,6 @@ export class DotLottiePlayerWasm {
    */
   set_layout(fit: string, align_x: number, align_y: number): boolean;
   set_marker(name: string): void;
-  tween_stop(): boolean;
   clear_slots(): boolean;
   has_segment(): boolean;
   is_complete(): boolean;
@@ -74,7 +73,6 @@ export class DotLottiePlayerWasm {
   set_slot_str(id: string, json: string): boolean;
   set_viewport(x: number, y: number, w: number, h: number): boolean;
   total_frames(): number;
-  tween_update(progress?: number | null): boolean;
   clear_segment(): boolean;
   current_frame(): number;
   /**
@@ -135,7 +133,6 @@ export class DotLottiePlayerWasm {
   manifest_string(): string;
   set_scalar_slot(id: string, value: number): boolean;
   set_vector_slot(id: string, x: number, y: number): boolean;
-  tween_to_marker(marker: string, duration?: number | null): boolean;
   background_color(): number;
   /**
    * Returns `[x, y, width, height]` of the layer's bounding box.
@@ -159,17 +156,6 @@ export class DotLottiePlayerWasm {
    * Store the WebGPU device.  Call before `set_webgpu_surface` and `load_animation`.
    */
   set_webgpu_device(device: GPUDevice): void;
-  /**
-   * Tween with a cubic-bezier easing (`e0..e3`).
-   */
-  tween_with_easing(
-    to: number,
-    duration: number | null | undefined,
-    e0: number,
-    e1: number,
-    e2: number,
-    e3: number,
-  ): boolean;
   current_loop_count(): number;
   /**
    * Store the WebGPU canvas context (surface).  Call before `load_animation`.
@@ -247,10 +233,6 @@ export class DotLottiePlayerWasm {
   clear(): void;
   pause(): boolean;
   speed(): number;
-  /**
-   * Tween to `to` frame.  `duration` in seconds; pass `undefined` for default.
-   */
-  tween(to: number, duration?: number | null): boolean;
   width(): number;
   height(): number;
   /**
@@ -449,19 +431,6 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_theme_id: (a: number) => [number, number];
   readonly dotlottieplayerwasm_tick: (a: number) => number;
   readonly dotlottieplayerwasm_total_frames: (a: number) => number;
-  readonly dotlottieplayerwasm_tween: (a: number, b: number, c: number) => number;
-  readonly dotlottieplayerwasm_tween_stop: (a: number) => number;
-  readonly dotlottieplayerwasm_tween_to_marker: (a: number, b: number, c: number, d: number) => number;
-  readonly dotlottieplayerwasm_tween_update: (a: number, b: number) => number;
-  readonly dotlottieplayerwasm_tween_with_easing: (
-    a: number,
-    b: number,
-    c: number,
-    d: number,
-    e: number,
-    f: number,
-    g: number,
-  ) => number;
   readonly dotlottieplayerwasm_unload_font: (a: number, b: number) => number;
   readonly dotlottieplayerwasm_use_frame_interpolation: (a: number) => number;
   readonly dotlottieplayerwasm_width: (a: number) => number;

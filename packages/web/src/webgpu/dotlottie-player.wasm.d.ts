@@ -146,19 +146,6 @@ export const dotlottieplayerwasm_stop: (a: number) => number;
 export const dotlottieplayerwasm_theme_id: (a: number) => [number, number];
 export const dotlottieplayerwasm_tick: (a: number) => number;
 export const dotlottieplayerwasm_total_frames: (a: number) => number;
-export const dotlottieplayerwasm_tween: (a: number, b: number, c: number) => number;
-export const dotlottieplayerwasm_tween_stop: (a: number) => number;
-export const dotlottieplayerwasm_tween_to_marker: (a: number, b: number, c: number, d: number) => number;
-export const dotlottieplayerwasm_tween_update: (a: number, b: number) => number;
-export const dotlottieplayerwasm_tween_with_easing: (
-  a: number,
-  b: number,
-  c: number,
-  d: number,
-  e: number,
-  f: number,
-  g: number,
-) => number;
 export const dotlottieplayerwasm_unload_font: (a: number, b: number) => number;
 export const dotlottieplayerwasm_use_frame_interpolation: (a: number) => number;
 export const dotlottieplayerwasm_width: (a: number) => number;
