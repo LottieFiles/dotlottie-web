@@ -33,11 +33,11 @@ jobs:
       - name: ⎔ Setup pnpm@v10
         uses: pnpm/action-setup@v4
 
-      - name: ⎔ Setup Node@v22
-        uses: actions/setup-node@v4
+      - name: ⎔ Setup Node@lts
+        uses: actions/setup-node@v6
         with:
           cache: pnpm
-          node-version: 22
+          node-version: lts/*
 
       - name: 📥 Install dependencies
         run: pnpm install
