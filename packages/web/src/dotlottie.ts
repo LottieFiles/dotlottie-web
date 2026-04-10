@@ -855,7 +855,9 @@ export class DotLottie {
       }
     }
 
-    this.setBackgroundColor(config.backgroundColor ?? '');
+    if (config.backgroundColor) {
+      this.setBackgroundColor(config.backgroundColor);
+    }
   }
 
   protected _draw(): void {
