@@ -70,5 +70,5 @@ WASM_FEATURES_WEBGPU ?= $(WASM_FEATURES_COMMON),tvg-wg,webgpu
 Or override on the command line without editing the file:
 
 ```sh
-make wasm WASM_FEATURES_SW="tvg,tvg-sw,dotlottie,wasm,wasm-bindgen-api"
+make wasm WASM_FEATURES_SW="tvg,tvg-sw,dotlottie,wasm-bindgen-api"
 ```

@@ -124,7 +124,7 @@ export class DotLottieWebGPU extends DotLottie {
       });
 
       if (this._dotLottieCore && this.isLoaded) {
-        const resized = this._dotLottieCore.resize(canvas.width, canvas.height);
+        const resized = this._setupTarget(canvas.width, canvas.height);
 
         if (resized) {
           this._dotLottieCore.render();
@@ -135,6 +135,12 @@ export class DotLottieWebGPU extends DotLottie {
     }
 
     super.resize();
+  }
+
+  protected override _setupTarget(width: number, height: number): boolean {
+    if (!this._dotLottieCore) return false;
+
+    return (this._dotLottieCore as unknown as DotLottiePlayerWasm).setup_wg_target(width, height);
   }
 
   protected override _draw(): void {

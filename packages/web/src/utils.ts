@@ -29,6 +29,28 @@ export function hexStringToRGBAInt(colorHex: string): number {
 }
 
 /**
+ * Converts a hex color string to RGBA float components in [0, 1].
+ * @param colorHex - Hex color string (e.g., '#FFFFFF' or '#RRGGBBAA')
+ * @returns Tuple of [r, g, b, a] as floats in [0, 1], or [0, 0, 0, 0] if invalid
+ */
+export function hexStringToRGBAFloats(colorHex: string): [number, number, number, number] {
+  if (!isHexColor(colorHex)) {
+    return [0, 0, 0, 0];
+  }
+
+  let hex = colorHex.replace('#', '');
+
+  hex = hex.length === 6 ? `${hex}ff` : hex;
+
+  const r = parseInt(hex.slice(0, 2), 16) / 255;
+  const g = parseInt(hex.slice(2, 4), 16) / 255;
+  const b = parseInt(hex.slice(4, 6), 16) / 255;
+  const a = parseInt(hex.slice(6, 8), 16) / 255;
+
+  return [r, g, b, a];
+}
+
+/**
  * Detects if file data is a .lottie file by checking for ZIP signature.
  * dotLottie files are ZIP archives containing Lottie JSON and metadata.
  * @param fileData - Raw file data as ArrayBuffer

@@ -446,6 +446,42 @@ export class DotLottiePlayerWasm {
         }
         return v1;
     }
+    /**
+     * Returns the current global audio volume multiplier.
+     * @returns {number}
+     */
+    audio_volume() {
+        const ret = wasm.dotlottieplayerwasm_audio_volume(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    background_a() {
+        const ret = wasm.dotlottieplayerwasm_background_a(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    background_b() {
+        const ret = wasm.dotlottieplayerwasm_background_b(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    background_g() {
+        const ret = wasm.dotlottieplayerwasm_background_g(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    background_r() {
+        const ret = wasm.dotlottieplayerwasm_background_r(this.__wbg_ptr);
+        return ret;
+    }
     clear_marker() {
         wasm.dotlottieplayerwasm_clear_marker(this.__wbg_ptr);
     }
@@ -684,16 +720,16 @@ export class DotLottiePlayerWasm {
         return ret;
     }
     /**
-     * Load a Lottie JSON animation.  Sets up the rendering target automatically.
+     * Load a Lottie JSON animation.
+     *
+     * `setup_target` must have been called first.
      * @param {string} data
-     * @param {number} width
-     * @param {number} height
      * @returns {boolean}
      */
-    load_animation(data, width, height) {
+    load_animation(data) {
         const ptr0 = passStringToWasm0(data, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_load_animation(this.__wbg_ptr, ptr0, len0, width, height);
+        const ret = wasm.dotlottieplayerwasm_load_animation(this.__wbg_ptr, ptr0, len0);
         return ret !== 0;
     }
     /**
@@ -701,6 +737,18 @@ export class DotLottiePlayerWasm {
      */
     loop_animation() {
         const ret = wasm.dotlottieplayerwasm_loop_animation(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * Set background colour. Pass `(0, 0, 0, 0)` to clear.
+     * @param {number} r
+     * @param {number} g
+     * @param {number} b
+     * @param {number} a
+     * @returns {boolean}
+     */
+    set_background(r, g, b, a) {
+        const ret = wasm.dotlottieplayerwasm_set_background(this.__wbg_ptr, r, g, b, a);
         return ret !== 0;
     }
     /**
@@ -781,11 +829,14 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
-     * @returns {number}
+     * Set up (or resize) the OpenGL rendering target.
+     * @param {number} width
+     * @param {number} height
+     * @returns {boolean}
      */
-    background_color() {
-        const ret = wasm.dotlottieplayerwasm_background_color(this.__wbg_ptr);
-        return ret >>> 0;
+    setup_gl_target(width, height) {
+        const ret = wasm.dotlottieplayerwasm_setup_gl_target(this.__wbg_ptr, width, height);
+        return ret !== 0;
     }
     /**
      * Returns `[x, y, width, height]` of the layer's bounding box.
@@ -804,6 +855,13 @@ export class DotLottiePlayerWasm {
     segment_duration() {
         const ret = wasm.dotlottieplayerwasm_segment_duration(this.__wbg_ptr);
         return ret;
+    }
+    /**
+     * Set the global audio volume multiplier (clamped to [0.0, 1.0]).
+     * @param {number} volume
+     */
+    set_audio_volume(volume) {
+        wasm.dotlottieplayerwasm_set_audio_volume(this.__wbg_ptr, volume);
     }
     /**
      * Get the name of the current state.
@@ -908,15 +966,15 @@ export class DotLottiePlayerWasm {
     }
     /**
      * Load a .lottie archive from raw bytes.
+     *
+     * `setup_target` must have been called first.
      * @param {Uint8Array} data
-     * @param {number} width
-     * @param {number} height
      * @returns {boolean}
      */
-    load_dotlottie_data(data, width, height) {
+    load_dotlottie_data(data) {
         const ptr0 = passArray8ToWasm0(data, wasm.__wbindgen_malloc_command_export);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_load_dotlottie_data(this.__wbg_ptr, ptr0, len0, width, height);
+        const ret = wasm.dotlottieplayerwasm_load_dotlottie_data(this.__wbg_ptr, ptr0, len0);
         return ret !== 0;
     }
     /**
@@ -945,15 +1003,6 @@ export class DotLottiePlayerWasm {
         const ptr1 = passStringToWasm0(value, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
         const len1 = WASM_VECTOR_LEN;
         const ret = wasm.dotlottieplayerwasm_sm_set_string_input(this.__wbg_ptr, ptr0, len0, ptr1, len1);
-        return ret !== 0;
-    }
-    /**
-     * Set background colour (`0xAARRGGBB`).
-     * @param {number} color
-     * @returns {boolean}
-     */
-    set_background_color(color) {
-        const ret = wasm.dotlottieplayerwasm_set_background_color(this.__wbg_ptr, color);
         return ret !== 0;
     }
     /**
@@ -1033,24 +1082,16 @@ export class DotLottiePlayerWasm {
         wasm.dotlottieplayerwasm_sm_post_pointer_enter(this.__wbg_ptr, x, y);
     }
     /**
-     * Clear the background colour (transparent).
-     * @returns {boolean}
-     */
-    clear_background_color() {
-        const ret = wasm.dotlottieplayerwasm_clear_background_color(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
      * Load an animation from an already-loaded .lottie archive by its ID.
+     *
+     * `setup_target` must have been called first.
      * @param {string} id
-     * @param {number} width
-     * @param {number} height
      * @returns {boolean}
      */
-    load_animation_from_id(id, width, height) {
+    load_animation_from_id(id) {
         const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_load_animation_from_id(this.__wbg_ptr, ptr0, len0, width, height);
+        const ret = wasm.dotlottieplayerwasm_load_animation_from_id(this.__wbg_ptr, ptr0, len0);
         return ret !== 0;
     }
     /**
@@ -1184,16 +1225,6 @@ export class DotLottiePlayerWasm {
      */
     render() {
         const ret = wasm.dotlottieplayerwasm_render(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * Resize the canvas.  For the SW renderer this also resizes the pixel buffer.
-     * @param {number} width
-     * @param {number} height
-     * @returns {boolean}
-     */
-    resize(width, height) {
-        const ret = wasm.dotlottieplayerwasm_resize(this.__wbg_ptr, width, height);
         return ret !== 0;
     }
     /**

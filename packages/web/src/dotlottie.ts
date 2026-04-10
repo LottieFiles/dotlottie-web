@@ -30,7 +30,7 @@ import {
   getDefaultDPR,
   getPointerPosition,
   handleOpenUrl,
-  hexStringToRGBAInt,
+  hexStringToRGBAFloats,
   isDotLottie,
   isElementInViewport,
   isLottie,
@@ -239,6 +239,12 @@ export class DotLottie {
     // No-op for software renderer. GPU renderers override to set GL/GPU context.
   }
 
+  protected _setupTarget(width: number, height: number): boolean {
+    if (!this._dotLottieCore) return false;
+
+    return this._dotLottieCore.setup_sw_target(width, height);
+  }
+
   // ── Event draining ─────────────────────────────────────────────────────
 
   private _drainPlayerEvents(): void {
@@ -443,6 +449,8 @@ export class DotLottie {
     const width = this._canvas.width;
     const height = this._canvas.height;
 
+    this._setupTarget(width, height);
+
     let loaded = false;
 
     if (typeof data === 'string') {
@@ -453,7 +461,7 @@ export class DotLottie {
 
         return;
       }
-      loaded = this._dotLottieCore.load_animation(data, width, height);
+      loaded = this._dotLottieCore.load_animation(data);
     } else if (data instanceof ArrayBuffer) {
       if (!isDotLottie(data)) {
         this._dispatchError(
@@ -462,7 +470,7 @@ export class DotLottie {
 
         return;
       }
-      loaded = this._dotLottieCore.load_dotlottie_data(new Uint8Array(data), width, height);
+      loaded = this._dotLottieCore.load_dotlottie_data(new Uint8Array(data));
     } else if (typeof data === 'object') {
       if (!isLottie(data as Record<string, unknown>)) {
         this._dispatchError(
@@ -471,7 +479,7 @@ export class DotLottie {
 
         return;
       }
-      loaded = this._dotLottieCore.load_animation(JSON.stringify(data), width, height);
+      loaded = this._dotLottieCore.load_animation(JSON.stringify(data));
     } else {
       this._dispatchError(
         `Unsupported data type for animation data. Expected:
@@ -949,7 +957,7 @@ export class DotLottie {
     }
 
     if (this._canvas && this._dotLottieCore && this.isLoaded) {
-      const resized = this._dotLottieCore.resize(this._canvas.width, this._canvas.height);
+      const resized = this._setupTarget(this._canvas.width, this._canvas.height);
 
       if (resized) {
         this._dotLottieCore.render();
@@ -1137,7 +1145,9 @@ export class DotLottie {
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
       this._canvas.style.backgroundColor = color;
     } else {
-      this._dotLottieCore.set_background_color(hexStringToRGBAInt(color));
+      const [r, g, b, a] = hexStringToRGBAFloats(color);
+
+      this._dotLottieCore.set_background(r, g, b, a);
     }
 
     this._backgroundColor = color;
@@ -1267,7 +1277,7 @@ export class DotLottie {
       }
     }
 
-    const resized = this._dotLottieCore.resize(this._canvas.width, this._canvas.height);
+    const resized = this._setupTarget(this._canvas.width, this._canvas.height);
 
     if (resized) {
       this._dotLottieCore.render();
@@ -1413,7 +1423,8 @@ export class DotLottie {
   public loadAnimation(animationId: string): void {
     if (this._dotLottieCore === null || this._dotLottieCore.animation_id() === animationId || !this._canvas) return;
 
-    const loaded = this._dotLottieCore.load_animation_from_id(animationId, this._canvas.width, this._canvas.height);
+    this._setupTarget(this._canvas.width, this._canvas.height);
+    const loaded = this._dotLottieCore.load_animation_from_id(animationId);
 
     if (loaded) {
       if (this._renderConfig.quality !== undefined) {

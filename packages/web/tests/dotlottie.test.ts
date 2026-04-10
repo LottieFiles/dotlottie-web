@@ -738,7 +738,7 @@ describe.each([
 
       let resizeCallCount = 0;
 
-      vi.spyOn(dotLottieCore, 'resize').mockImplementation(() => {
+      vi.spyOn(dotLottieCore, 'setup_sw_target').mockImplementation(() => {
         resizeCallCount += 1;
 
         return true;
