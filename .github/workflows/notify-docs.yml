@@ -1,0 +1,63 @@
+name: Notify Docs of PR
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [main]
+
+jobs:
+  detect-packages:
+    runs-on: ubuntu-latest
+    if: >
+      !contains(github.event.pull_request.title, '[ci skip]') &&
+      !contains(github.event.pull_request.title, '[docs skip]')
+    outputs:
+      packages: ${{ steps.detect.outputs.packages }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed packages
+        id: detect
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          # Get unique package dirs that changed (e.g., packages/react, packages/vue)
+          CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
+            | grep '^packages/' \
+            | cut -d'/' -f1-2 \
+            | sort -u \
+            | jq -R -s -c 'split("\n") | map(select(length > 0))')
+
+          echo "packages=$CHANGED" >> "$GITHUB_OUTPUT"
+          echo "Changed packages: $CHANGED"
+
+  notify-docs:
+    needs: detect-packages
+    if: needs.detect-packages.outputs.packages != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: ${{ fromJson(needs.detect-packages.outputs.packages) }}
+    steps:
+      - name: Dispatch to docs-content
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.DOCS_CONTENT_SYNC_TOKEN }}
+          repository: LottieFiles/docs-content
+          event-type: docs-eval
+          client-payload: |
+            {
+              "source_repo": "${{ github.repository }}",
+              "source_package": "${{ matrix.package }}",
+              "pr_number": ${{ github.event.pull_request.number }},
+              "pr_title": "${{ github.event.pull_request.title }}",
+              "pr_body": "${{ github.event.pull_request.body }}",
+              "pr_branch": "${{ github.event.pull_request.head.ref }}",
+              "pr_url": "${{ github.event.pull_request.html_url }}",
+              "diff_url": "${{ github.event.pull_request.diff_url }}",
+              "sender": "${{ github.actor }}"
+            }
