@@ -78,7 +78,7 @@
     "react": "^19",
     "react-dom": "^19",
     "tsdown": "^0.20.3",
-    "typescript": "5.9.3",
+    "typescript": "6.0.2",
     "vitest": "^4.0.18",
     "vitest-browser-react": "^2.0.5"
   },
