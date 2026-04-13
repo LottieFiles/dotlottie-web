@@ -18,10 +18,13 @@ export const bsearch: (a: number, b: number, c: number, d: number, e: number) =>
 export const calloc: (a: number, b: number) => number;
 export const dotlottieplayerwasm_animation_id: (a: number) => [number, number];
 export const dotlottieplayerwasm_animation_size: (a: number) => any;
+export const dotlottieplayerwasm_audio_volume: (a: number) => number;
 export const dotlottieplayerwasm_autoplay: (a: number) => number;
-export const dotlottieplayerwasm_background_color: (a: number) => number;
+export const dotlottieplayerwasm_background_a: (a: number) => number;
+export const dotlottieplayerwasm_background_b: (a: number) => number;
+export const dotlottieplayerwasm_background_g: (a: number) => number;
+export const dotlottieplayerwasm_background_r: (a: number) => number;
 export const dotlottieplayerwasm_clear: (a: number) => void;
-export const dotlottieplayerwasm_clear_background_color: (a: number) => number;
 export const dotlottieplayerwasm_clear_marker: (a: number) => void;
 export const dotlottieplayerwasm_clear_segment: (a: number) => number;
 export const dotlottieplayerwasm_clear_slot: (a: number, b: number, c: number) => number;
@@ -51,15 +54,9 @@ export const dotlottieplayerwasm_is_tweening: (a: number) => number;
 export const dotlottieplayerwasm_layout_align_x: (a: number) => number;
 export const dotlottieplayerwasm_layout_align_y: (a: number) => number;
 export const dotlottieplayerwasm_layout_fit: (a: number) => [number, number];
-export const dotlottieplayerwasm_load_animation: (a: number, b: number, c: number, d: number, e: number) => number;
-export const dotlottieplayerwasm_load_animation_from_id: (
-  a: number,
-  b: number,
-  c: number,
-  d: number,
-  e: number,
-) => number;
-export const dotlottieplayerwasm_load_dotlottie_data: (a: number, b: number, c: number, d: number, e: number) => number;
+export const dotlottieplayerwasm_load_animation: (a: number, b: number, c: number) => number;
+export const dotlottieplayerwasm_load_animation_from_id: (a: number, b: number, c: number) => number;
+export const dotlottieplayerwasm_load_dotlottie_data: (a: number, b: number, c: number) => number;
 export const dotlottieplayerwasm_load_font: (a: number, b: number, c: number, d: number, e: number) => number;
 export const dotlottieplayerwasm_loop_animation: (a: number) => number;
 export const dotlottieplayerwasm_loop_count: (a: number) => number;
@@ -77,13 +74,13 @@ export const dotlottieplayerwasm_reset_current_loop_count: (a: number) => void;
 export const dotlottieplayerwasm_reset_slot: (a: number, b: number, c: number) => number;
 export const dotlottieplayerwasm_reset_slots: (a: number) => number;
 export const dotlottieplayerwasm_reset_theme: (a: number) => number;
-export const dotlottieplayerwasm_resize: (a: number, b: number, c: number) => number;
 export const dotlottieplayerwasm_seek: (a: number, b: number) => number;
 export const dotlottieplayerwasm_segment_duration: (a: number) => number;
 export const dotlottieplayerwasm_segment_end: (a: number) => number;
 export const dotlottieplayerwasm_segment_start: (a: number) => number;
+export const dotlottieplayerwasm_set_audio_volume: (a: number, b: number) => void;
 export const dotlottieplayerwasm_set_autoplay: (a: number, b: number) => void;
-export const dotlottieplayerwasm_set_background_color: (a: number, b: number) => number;
+export const dotlottieplayerwasm_set_background: (a: number, b: number, c: number, d: number, e: number) => number;
 export const dotlottieplayerwasm_set_color_slot: (
   a: number,
   b: number,
@@ -112,6 +109,7 @@ export const dotlottieplayerwasm_set_transform: (a: number, b: number, c: number
 export const dotlottieplayerwasm_set_use_frame_interpolation: (a: number, b: number) => void;
 export const dotlottieplayerwasm_set_vector_slot: (a: number, b: number, c: number, d: number, e: number) => number;
 export const dotlottieplayerwasm_set_viewport: (a: number, b: number, c: number, d: number, e: number) => number;
+export const dotlottieplayerwasm_setup_sw_target: (a: number, b: number, c: number) => number;
 export const dotlottieplayerwasm_sm_current_state: (a: number) => [number, number];
 export const dotlottieplayerwasm_sm_fire: (a: number, b: number, c: number) => number;
 export const dotlottieplayerwasm_sm_framework_setup: (a: number) => any;

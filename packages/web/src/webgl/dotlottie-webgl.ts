@@ -53,6 +53,12 @@ export class DotLottieWebGL extends DotLottie {
     (this._dotLottieCore as unknown as DotLottiePlayerWasm).set_webgl_context(gl);
   }
 
+  protected override _setupTarget(width: number, height: number): boolean {
+    if (!this._dotLottieCore) return false;
+
+    return (this._dotLottieCore as unknown as DotLottiePlayerWasm).setup_gl_target(width, height);
+  }
+
   protected override _draw(): void {
     // No-op: tick() renders directly to the GL framebuffer
   }

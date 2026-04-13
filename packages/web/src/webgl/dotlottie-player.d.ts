@@ -52,6 +52,14 @@ export class DotLottiePlayerWasm {
   set_segment(start: number, end: number): boolean;
   static unload_font(name: string): boolean;
   animation_id(): string | undefined;
+  /**
+   * Returns the current global audio volume multiplier.
+   */
+  audio_volume(): number;
+  background_a(): number;
+  background_b(): number;
+  background_g(): number;
+  background_r(): number;
   clear_marker(): void;
   emit_on_loop(): void;
   /**
@@ -116,10 +124,16 @@ export class DotLottiePlayerWasm {
   layout_align_x(): number;
   layout_align_y(): number;
   /**
-   * Load a Lottie JSON animation.  Sets up the rendering target automatically.
+   * Load a Lottie JSON animation.
+   *
+   * `setup_target` must have been called first.
    */
-  load_animation(data: string, width: number, height: number): boolean;
+  load_animation(data: string): boolean;
   loop_animation(): boolean;
+  /**
+   * Set background colour. Pass `(0, 0, 0, 0)` to clear.
+   */
+  set_background(r: number, g: number, b: number, a: number): boolean;
   /**
    * Set a color slot (`r`, `g`, `b` in [0, 1]).
    */
@@ -133,12 +147,19 @@ export class DotLottiePlayerWasm {
   manifest_string(): string;
   set_scalar_slot(id: string, value: number): boolean;
   set_vector_slot(id: string, x: number, y: number): boolean;
-  background_color(): number;
+  /**
+   * Set up (or resize) the OpenGL rendering target.
+   */
+  setup_gl_target(width: number, height: number): boolean;
   /**
    * Returns `[x, y, width, height]` of the layer's bounding box.
    */
   get_layer_bounds(layer_name: string): Float32Array;
   segment_duration(): number;
+  /**
+   * Set the global audio volume multiplier (clamped to [0.0, 1.0]).
+   */
+  set_audio_volume(volume: number): void;
   /**
    * Get the name of the current state.
    */
@@ -172,14 +193,12 @@ export class DotLottiePlayerWasm {
   state_machine_load(definition: string): boolean;
   /**
    * Load a .lottie archive from raw bytes.
+   *
+   * `setup_target` must have been called first.
    */
-  load_dotlottie_data(data: Uint8Array, width: number, height: number): boolean;
+  load_dotlottie_data(data: Uint8Array): boolean;
   sm_get_string_input(key: string): string | undefined;
   sm_set_string_input(key: string, value: string): boolean;
-  /**
-   * Set background colour (`0xAARRGGBB`).
-   */
-  set_background_color(color: number): boolean;
   sm_get_boolean_input(key: string): boolean | undefined;
   sm_get_numeric_input(key: string): number | undefined;
   sm_post_pointer_down(x: number, y: number): void;
@@ -193,13 +212,11 @@ export class DotLottiePlayerWasm {
   state_machine_unload(): void;
   sm_post_pointer_enter(x: number, y: number): void;
   /**
-   * Clear the background colour (transparent).
-   */
-  clear_background_color(): boolean;
-  /**
    * Load an animation from an already-loaded .lottie archive by its ID.
+   *
+   * `setup_target` must have been called first.
    */
-  load_animation_from_id(id: string, width: number, height: number): boolean;
+  load_animation_from_id(id: string): boolean;
   /**
    * Poll the next state machine internal event.  Returns `null` if the
    * queue is empty, otherwise a JS object `{ type: "Message", message }`.
@@ -237,10 +254,6 @@ export class DotLottiePlayerWasm {
    * Render the current frame without advancing time.
    */
   render(): boolean;
-  /**
-   * Resize the canvas.  For the SW renderer this also resizes the pixel buffer.
-   */
-  resize(width: number, height: number): boolean;
   /**
    * Returns an array of `{ name, time, duration }` objects.
    */
@@ -301,10 +314,13 @@ export interface InitOutput {
   readonly calloc: (a: number, b: number) => number;
   readonly dotlottieplayerwasm_animation_id: (a: number) => [number, number];
   readonly dotlottieplayerwasm_animation_size: (a: number) => any;
+  readonly dotlottieplayerwasm_audio_volume: (a: number) => number;
   readonly dotlottieplayerwasm_autoplay: (a: number) => number;
-  readonly dotlottieplayerwasm_background_color: (a: number) => number;
+  readonly dotlottieplayerwasm_background_a: (a: number) => number;
+  readonly dotlottieplayerwasm_background_b: (a: number) => number;
+  readonly dotlottieplayerwasm_background_g: (a: number) => number;
+  readonly dotlottieplayerwasm_background_r: (a: number) => number;
   readonly dotlottieplayerwasm_clear: (a: number) => void;
-  readonly dotlottieplayerwasm_clear_background_color: (a: number) => number;
   readonly dotlottieplayerwasm_clear_marker: (a: number) => void;
   readonly dotlottieplayerwasm_clear_segment: (a: number) => number;
   readonly dotlottieplayerwasm_clear_slot: (a: number, b: number, c: number) => number;
@@ -333,15 +349,9 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_layout_align_x: (a: number) => number;
   readonly dotlottieplayerwasm_layout_align_y: (a: number) => number;
   readonly dotlottieplayerwasm_layout_fit: (a: number) => [number, number];
-  readonly dotlottieplayerwasm_load_animation: (a: number, b: number, c: number, d: number, e: number) => number;
-  readonly dotlottieplayerwasm_load_animation_from_id: (
-    a: number,
-    b: number,
-    c: number,
-    d: number,
-    e: number,
-  ) => number;
-  readonly dotlottieplayerwasm_load_dotlottie_data: (a: number, b: number, c: number, d: number, e: number) => number;
+  readonly dotlottieplayerwasm_load_animation: (a: number, b: number, c: number) => number;
+  readonly dotlottieplayerwasm_load_animation_from_id: (a: number, b: number, c: number) => number;
+  readonly dotlottieplayerwasm_load_dotlottie_data: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_load_font: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly dotlottieplayerwasm_loop_animation: (a: number) => number;
   readonly dotlottieplayerwasm_loop_count: (a: number) => number;
@@ -359,13 +369,13 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_reset_slot: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_reset_slots: (a: number) => number;
   readonly dotlottieplayerwasm_reset_theme: (a: number) => number;
-  readonly dotlottieplayerwasm_resize: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_seek: (a: number, b: number) => number;
   readonly dotlottieplayerwasm_segment_duration: (a: number) => number;
   readonly dotlottieplayerwasm_segment_end: (a: number) => number;
   readonly dotlottieplayerwasm_segment_start: (a: number) => number;
+  readonly dotlottieplayerwasm_set_audio_volume: (a: number, b: number) => void;
   readonly dotlottieplayerwasm_set_autoplay: (a: number, b: number) => void;
-  readonly dotlottieplayerwasm_set_background_color: (a: number, b: number) => number;
+  readonly dotlottieplayerwasm_set_background: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly dotlottieplayerwasm_set_color_slot: (
     a: number,
     b: number,
@@ -395,6 +405,7 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_set_vector_slot: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly dotlottieplayerwasm_set_viewport: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly dotlottieplayerwasm_set_webgl_context: (a: number, b: any) => void;
+  readonly dotlottieplayerwasm_setup_gl_target: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_sm_current_state: (a: number) => [number, number];
   readonly dotlottieplayerwasm_sm_fire: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_sm_framework_setup: (a: number) => any;
