@@ -1,5 +1,18 @@
 # @lottiefiles/dotlottie-react
 
+## 0.19.0
+### Minor Changes
+
+- c745745: Add WebGL and WebGPU renderer support via subpath exports
+  
+  * `@lottiefiles/dotlottie-react/webgl` — WebGL renderer component
+  * `@lottiefiles/dotlottie-react/webgpu` — WebGPU renderer component (with optional `device` prop)
+
+### Patch Changes
+
+- Updated dependencies [4e36cb7]
+  - @lottiefiles/dotlottie-web@0.71.0
+
 ## 0.18.10
 ### Patch Changes
 
