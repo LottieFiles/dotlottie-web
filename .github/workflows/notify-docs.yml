@@ -4,6 +4,8 @@ on:
   release:
     types: [published]
 
+permissions: {}
+
 jobs:
   resolve-package:
     runs-on: ubuntu-latest
