@@ -1,47 +1,46 @@
-name: Notify Docs of PR
+name: Notify Docs of Release
 
 on:
-  pull_request:
-    types: [opened, synchronize]
-    branches: [main]
+  release:
+    types: [published]
 
 jobs:
-  detect-packages:
+  resolve-package:
     runs-on: ubuntu-latest
-    if: >
-      !contains(github.event.pull_request.title, '[ci skip]') &&
-      !contains(github.event.pull_request.title, '[docs skip]')
     outputs:
-      packages: ${{ steps.detect.outputs.packages }}
+      package_dir: ${{ steps.resolve.outputs.package_dir }}
+      should_dispatch: ${{ steps.resolve.outputs.should_dispatch }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Detect changed packages
-        id: detect
+      - name: Resolve package from tag
+        id: resolve
         run: |
-          BASE_SHA="${{ github.event.pull_request.base.sha }}"
-          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          TAG="${{ github.event.release.tag_name }}"
 
-          # Get unique package dirs that changed (e.g., packages/react, packages/vue)
-          CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
-            | grep '^packages/' \
-            | cut -d'/' -f1-2 \
-            | sort -u \
-            | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          # Tag format: @lottiefiles/dotlottie-{name}@{version}
+          # Extract the package short name (react, vue, svelte, solid, web, wc)
+          PACKAGE_NAME=$(echo "$TAG" | sed -n 's|^@lottiefiles/dotlottie-\(.*\)@.*|\1|p')
 
-          echo "packages=$CHANGED" >> "$GITHUB_OUTPUT"
-          echo "Changed packages: $CHANGED"
+          if [ -z "$PACKAGE_NAME" ]; then
+            echo "Tag '$TAG' does not match expected format @lottiefiles/dotlottie-{name}@{version}"
+            echo "should_dispatch=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Map short name to package directory
+          case "$PACKAGE_NAME" in
+            web) PKG_DIR="packages/web" ;;
+            wc)  PKG_DIR="packages/wc" ;;
+            *)   PKG_DIR="packages/${PACKAGE_NAME}" ;;
+          esac
+
+          echo "package_dir=$PKG_DIR" >> "$GITHUB_OUTPUT"
+          echo "should_dispatch=true" >> "$GITHUB_OUTPUT"
+          echo "Resolved tag '$TAG' to package dir: $PKG_DIR"
 
   notify-docs:
-    needs: detect-packages
-    if: needs.detect-packages.outputs.packages != '[]'
+    needs: resolve-package
+    if: needs.resolve-package.outputs.should_dispatch == 'true'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        package: ${{ fromJson(needs.detect-packages.outputs.packages) }}
     steps:
       - name: Dispatch to docs-content
         uses: peter-evans/repository-dispatch@v3
@@ -52,12 +51,10 @@ jobs:
           client-payload: |
             {
               "source_repo": "${{ github.repository }}",
-              "source_package": "${{ matrix.package }}",
-              "pr_number": ${{ github.event.pull_request.number }},
-              "pr_title": "${{ github.event.pull_request.title }}",
-              "pr_body": "${{ github.event.pull_request.body }}",
-              "pr_branch": "${{ github.event.pull_request.head.ref }}",
-              "pr_url": "${{ github.event.pull_request.html_url }}",
-              "diff_url": "${{ github.event.pull_request.diff_url }}",
+              "source_package": "${{ needs.resolve-package.outputs.package_dir }}",
+              "release_tag": "${{ github.event.release.tag_name }}",
+              "release_name": "${{ github.event.release.name }}",
+              "release_body": "${{ github.event.release.body }}",
+              "release_url": "${{ github.event.release.html_url }}",
               "sender": "${{ github.actor }}"
             }
