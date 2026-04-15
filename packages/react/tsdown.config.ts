@@ -25,4 +25,30 @@ export default defineConfig([
     noExternal: Object.keys(pkg.dependencies),
     outDir: 'dist/browser',
   },
+  // WebGL
+  {
+    ...config,
+    entry: { 'webgl/index': './src/webgl/index.tsx' },
+  },
+  // WebGL CDN build
+  {
+    ...config,
+    entry: { 'webgl/index': './src/webgl/index.tsx' },
+    dts: false,
+    noExternal: Object.keys(pkg.dependencies),
+    outDir: 'dist/browser',
+  },
+  // WebGPU
+  {
+    ...config,
+    entry: { 'webgpu/index': './src/webgpu/index.tsx' },
+  },
+  // WebGPU CDN build
+  {
+    ...config,
+    entry: { 'webgpu/index': './src/webgpu/index.tsx' },
+    dts: false,
+    noExternal: Object.keys(pkg.dependencies),
+    outDir: 'dist/browser',
+  },
 ]);

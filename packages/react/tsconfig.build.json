@@ -12,7 +12,11 @@
 
     "jsx": "react-jsx",
 
-    "exactOptionalPropertyTypes": false
+    "exactOptionalPropertyTypes": false,
+
+    "moduleResolution": "bundler",
+
+    "types": ["@webgpu/types"]
   },
 
   // Files included in compilation
