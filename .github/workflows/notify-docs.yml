@@ -49,7 +49,7 @@ jobs:
         with:
           token: ${{ secrets.DOCS_CONTENT_SYNC_TOKEN }}
           repository: LottieFiles/docs-content
-          event-type: docs-eval
+          event-type: dotlottie-docs-eval
           client-payload: |
             {
               "source_repo": "${{ github.repository }}",
