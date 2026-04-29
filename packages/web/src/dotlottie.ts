@@ -1221,9 +1221,18 @@ export class DotLottie {
 
     this._cleanupCanvas();
 
-    this._dotLottieCore?.free();
+    const core = this._dotLottieCore;
+
     this._dotLottieCore = null;
     this._context = null;
+
+    if (core) {
+      try {
+        core.free();
+      } catch (err) {
+        console.warn('[dotlottie-web] Error freeing wasm core during destroy:', err);
+      }
+    }
 
     this._eventManager.dispatch({
       type: 'destroy',
