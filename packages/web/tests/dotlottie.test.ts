@@ -587,6 +587,31 @@ describe.each([
       expect(onPlay).toHaveBeenCalledTimes(1);
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
+
+    (isWorker ? test.skip : test)('destroy() is idempotent when free() throws', async () => {
+      const onReady = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+      });
+
+      dotLottie.addEventListener('ready', onReady);
+
+      await vi.waitFor(() => expect(onReady).toHaveBeenCalledTimes(1));
+
+      const dotLottieCore = (dotLottie as DotLottieClass as any)._dotLottieCore as DotLottiePlayer;
+      const freeSpy = vi.spyOn(dotLottieCore, 'free').mockImplementation(() => {
+        throw new Error('null pointer passed to rust');
+      });
+
+      expect(() => dotLottie.destroy()).not.toThrow();
+      expect(freeSpy).toHaveBeenCalledTimes(1);
+
+      expect(() => dotLottie.destroy()).not.toThrow();
+      expect(freeSpy).toHaveBeenCalledTimes(1);
+      expect((dotLottie as DotLottieClass as any)._dotLottieCore).toBeNull();
+    });
   });
 
   (isWorker ? test.skip : test)('trigger renderError event when failed to render', async () => {
