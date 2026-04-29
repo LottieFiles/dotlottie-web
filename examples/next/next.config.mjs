@@ -15,6 +15,11 @@ const nextConfig = {
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
     };
 
+    config.module.rules.push({
+      resourceQuery: /url/,
+      type: 'asset/resource',
+    });
+
     return config;
   },
 };
