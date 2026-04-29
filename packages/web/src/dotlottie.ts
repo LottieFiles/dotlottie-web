@@ -117,6 +117,8 @@ export class DotLottie {
 
   private readonly _frameManager: AnimationFrameManager;
 
+  private readonly _boundAnimationLoop: (time: number) => void;
+
   protected _dotLottieCore: DotLottiePlayerWasm | null = null;
 
   private _stateMachineId: string = '';
@@ -150,6 +152,12 @@ export class DotLottie {
 
   private _lastExpectedBufferSize = 0;
 
+  private _cachedImageData: ImageData | null = null;
+
+  private _cachedImageDataBuffer: ArrayBufferLike | null = null;
+
+  private _cachedImageDataByteOffset = 0;
+
   private _marker: string = '';
 
   private _segment: [number, number] | null = null;
@@ -164,6 +172,7 @@ export class DotLottie {
 
     this._eventManager = new EventManager();
     this._frameManager = new AnimationFrameManager();
+    this._boundAnimationLoop = this._animationLoop.bind(this);
     this._renderConfig = {
       ...config.renderConfig,
       devicePixelRatio: config.renderConfig?.devicePixelRatio || getDefaultDPR(),
@@ -262,43 +271,43 @@ export class DotLottie {
 
       switch (event.type) {
         case 'Load':
-          setTimeout(() => this._eventManager.dispatch({ type: 'load' }), 0);
+          queueMicrotask(() => this._eventManager.dispatch({ type: 'load' }));
           break;
 
         case 'LoadError':
-          setTimeout(() => this._eventManager.dispatch({ type: 'loadError', error: new Error('failed to load') }), 0);
+          queueMicrotask(() => this._eventManager.dispatch({ type: 'loadError', error: new Error('failed to load') }));
           break;
 
         case 'Play':
-          setTimeout(() => this._eventManager.dispatch({ type: 'play' }), 0);
+          queueMicrotask(() => this._eventManager.dispatch({ type: 'play' }));
           break;
 
         case 'Pause':
-          setTimeout(() => this._eventManager.dispatch({ type: 'pause' }), 0);
+          queueMicrotask(() => this._eventManager.dispatch({ type: 'pause' }));
           break;
 
         case 'Stop':
-          setTimeout(() => this._eventManager.dispatch({ type: 'stop' }), 0);
+          queueMicrotask(() => this._eventManager.dispatch({ type: 'stop' }));
           break;
 
         case 'Frame':
           if (!skipFrame) {
-            setTimeout(() => this._eventManager.dispatch({ type: 'frame', currentFrame: event.frameNo ?? 0 }), 0);
+            queueMicrotask(() => this._eventManager.dispatch({ type: 'frame', currentFrame: event.frameNo ?? 0 }));
           }
           break;
 
         case 'Render':
           if (!skipFrame) {
-            setTimeout(() => this._eventManager.dispatch({ type: 'render', currentFrame: event.frameNo ?? 0 }), 0);
+            queueMicrotask(() => this._eventManager.dispatch({ type: 'render', currentFrame: event.frameNo ?? 0 }));
           }
           break;
 
         case 'Loop':
-          setTimeout(() => this._eventManager.dispatch({ type: 'loop', loopCount: event.loopCount ?? 0 }), 0);
+          queueMicrotask(() => this._eventManager.dispatch({ type: 'loop', loopCount: event.loopCount ?? 0 }));
           break;
 
         case 'Complete':
-          setTimeout(() => this._eventManager.dispatch({ type: 'complete' }), 0);
+          queueMicrotask(() => this._eventManager.dispatch({ type: 'complete' }));
           break;
 
         default:
@@ -327,21 +336,21 @@ export class DotLottie {
 
       switch (event.type) {
         case 'Start':
-          setTimeout(() => {
+          queueMicrotask(() => {
             this._isStateMachineRunning = true;
             this._eventManager.dispatch({ type: 'stateMachineStart' });
             this._startAnimationLoop();
-          }, 0);
+          });
           break;
 
         case 'Stop':
-          setTimeout(() => {
+          queueMicrotask(() => {
             this._isStateMachineRunning = false;
             this._eventManager.dispatch({ type: 'stateMachineStop' });
             if (!this._dotLottieCore?.is_playing()) {
               this._stopAnimationLoop();
             }
-          }, 0);
+          });
           break;
 
         case 'CustomEvent':
@@ -892,56 +901,79 @@ export class DotLottie {
         | null;
     }
 
-    // Only process visual output if we have a canvas with a valid context
-    if (this._context) {
-      const buffer = this._dotLottieCore.get_pixel_buffer();
+    if (!this._context) return;
 
-      const expectedLength = this._canvas.width * this._canvas.height * BYTES_PER_PIXEL;
+    const buffer = this._dotLottieCore.get_pixel_buffer();
 
-      /*
-        frame buffer size mismatch can occur temporarily during resize operations when the WASM buffer allocation hasn't completed yet
-      */
-      if (buffer.byteLength !== expectedLength) {
-        if (this._lastExpectedBufferSize === expectedLength) {
-          this._bufferMismatchCount += 1;
-        } else {
-          this._bufferMismatchCount = 1;
-          this._lastExpectedBufferSize = expectedLength;
-        }
+    const width = this._canvas.width;
+    const height = this._canvas.height;
+    const expectedLength = width * height * BYTES_PER_PIXEL;
 
-        if (this._bufferMismatchCount === 10) {
-          console.warn(
-            `[dotlottie-web] Persistent buffer size mismatch detected. ` +
-              `Expected ${expectedLength} bytes for canvas ${this._canvas.width}x${this._canvas.height}, ` +
-              `but got ${buffer.byteLength} bytes. ` +
-              `This may indicate a WASM memory allocation issue or invalid canvas dimensions.`,
-          );
-        }
-
-        return;
+    /*
+      frame buffer size mismatch can occur temporarily during resize operations when the WASM buffer allocation hasn't completed yet
+    */
+    if (buffer.byteLength !== expectedLength) {
+      if (this._lastExpectedBufferSize === expectedLength) {
+        this._bufferMismatchCount += 1;
+      } else {
+        this._bufferMismatchCount = 1;
+        this._lastExpectedBufferSize = expectedLength;
       }
 
-      this._bufferMismatchCount = 0;
-      this._lastExpectedBufferSize = expectedLength;
+      if (this._bufferMismatchCount === 10) {
+        console.warn(
+          `[dotlottie-web] Persistent buffer size mismatch detected. ` +
+            `Expected ${expectedLength} bytes for canvas ${width}x${height}, ` +
+            `but got ${buffer.byteLength} bytes. ` +
+            `This may indicate a WASM memory allocation issue or invalid canvas dimensions.`,
+        );
+      }
 
-      let imageData = null;
+      return;
+    }
 
-      // get_pixel_buffer() returns a Uint8Array view into WASM memory
-      const clampedBuffer = new Uint8ClampedArray(buffer.buffer as ArrayBuffer, buffer.byteOffset, buffer.byteLength);
+    this._bufferMismatchCount = 0;
+    this._lastExpectedBufferSize = expectedLength;
 
+    /*
+      Reuse the cached ImageData when canvas dimensions and the underlying WASM
+      ArrayBuffer haven't changed. WASM linear-memory growth detaches the old
+      ArrayBuffer, which makes the cached view's byteLength drop to 0; we detect
+      that here and rebuild.
+    */
+    const cached = this._cachedImageData;
+    const cacheValid =
+      cached !== null &&
+      cached.width === width &&
+      cached.height === height &&
+      cached.data.byteLength === expectedLength &&
+      this._cachedImageDataBuffer === buffer.buffer &&
+      this._cachedImageDataByteOffset === buffer.byteOffset;
+
+    if (!cacheValid) {
       /*
-        In Node.js, the ImageData constructor is not available.
-        You can use createImageData function in the canvas context to create ImageData object.
+        In Node.js, the ImageData constructor is not available globally.
+        createImageData allocates its own backing buffer that's separate from
+        WASM memory, so the Node path has to copy pixels every frame below.
       */
       if (typeof ImageData === 'undefined') {
-        imageData = this._context.createImageData(this._canvas.width, this._canvas.height);
-        imageData.data.set(clampedBuffer);
+        this._cachedImageData = this._context.createImageData(width, height);
       } else {
-        imageData = new ImageData(clampedBuffer, this._canvas.width, this._canvas.height);
-      }
+        const clampedBuffer = new Uint8ClampedArray(buffer.buffer as ArrayBuffer, buffer.byteOffset, buffer.byteLength);
 
-      this._context.putImageData(imageData, 0, 0);
+        this._cachedImageData = new ImageData(clampedBuffer, width, height);
+      }
+      this._cachedImageDataBuffer = buffer.buffer;
+      this._cachedImageDataByteOffset = buffer.byteOffset;
     }
+
+    if (typeof ImageData === 'undefined') {
+      const clampedBuffer = new Uint8ClampedArray(buffer.buffer as ArrayBuffer, buffer.byteOffset, buffer.byteLength);
+
+      (this._cachedImageData as ImageData).data.set(clampedBuffer);
+    }
+
+    this._context.putImageData(this._cachedImageData as ImageData, 0, 0);
   }
 
   private _cleanupCanvas(): void {
@@ -1005,7 +1037,7 @@ export class DotLottie {
       !this._isFrozen &&
       (this._dotLottieCore.is_playing() || this._isStateMachineRunning)
     ) {
-      this._animationFrameId = this._frameManager.requestAnimationFrame(this._animationLoop.bind(this));
+      this._animationFrameId = this._frameManager.requestAnimationFrame(this._boundAnimationLoop);
     }
   }
 
@@ -1040,7 +1072,7 @@ export class DotLottie {
         this._draw();
       }
 
-      this._animationFrameId = this._frameManager.requestAnimationFrame(this._animationLoop.bind(this));
+      this._animationFrameId = this._frameManager.requestAnimationFrame(this._boundAnimationLoop);
     } catch (error) {
       console.error('Error in animation frame:', error);
 

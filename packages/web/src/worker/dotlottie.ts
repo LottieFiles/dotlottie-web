@@ -182,8 +182,11 @@ export class DotLottieWorker {
       this._pendingConfig = null;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this._worker.addEventListener('message', this._handleWorkerEvent.bind(this));
+    DotLottieWorker._workerManager.registerEventHandler(
+      this._id,
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      this._handleWorkerEvent.bind(this),
+    );
   }
 
   private async _handleWorkerEvent(event: MessageEvent): Promise<void> {
@@ -765,6 +768,7 @@ export class DotLottieWorker {
 
     this._cleanupStateMachineListeners();
 
+    DotLottieWorker._workerManager.unregisterEventHandler(this._id);
     DotLottieWorker._workerManager.unassignAnimationFromWorker(this._id);
     this._eventManager.removeAllEventListeners();
 
@@ -961,25 +965,20 @@ export class DotLottieWorker {
       params,
     };
 
-    this._worker.postMessage(rpcRequest, transfer || []);
-
     return new Promise((resolve, reject) => {
-      const onMessage = (event: MessageEvent): void => {
+      DotLottieWorker._workerManager.registerRpcReplyHandler(rpcRequest.id, (event: MessageEvent) => {
+        DotLottieWorker._workerManager.unregisterRpcReplyHandler(rpcRequest.id);
+
         const rpcResponse: RpcResponse<T> = event.data;
 
-        // Check if the response corresponds to the request
-        if (rpcResponse.id === rpcRequest.id) {
-          this._worker.removeEventListener('message', onMessage);
-
-          if (rpcResponse.error) {
-            reject(new Error(`Failed to execute method ${method}: ${rpcResponse.error}`));
-          } else {
-            resolve(rpcResponse.result);
-          }
+        if (rpcResponse.error) {
+          reject(new Error(`Failed to execute method ${method}: ${rpcResponse.error}`));
+        } else {
+          resolve(rpcResponse.result);
         }
-      };
+      });
 
-      this._worker.addEventListener('message', onMessage);
+      this._worker.postMessage(rpcRequest, transfer || []);
     });
   }
 
