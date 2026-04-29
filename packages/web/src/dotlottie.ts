@@ -271,11 +271,11 @@ export class DotLottie {
 
       switch (event.type) {
         case 'Load':
-          queueMicrotask(() => this._eventManager.dispatch({ type: 'load' }));
+          setTimeout(() => this._eventManager.dispatch({ type: 'load' }), 0);
           break;
 
         case 'LoadError':
-          queueMicrotask(() => this._eventManager.dispatch({ type: 'loadError', error: new Error('failed to load') }));
+          setTimeout(() => this._eventManager.dispatch({ type: 'loadError', error: new Error('failed to load') }), 0);
           break;
 
         case 'Play':
