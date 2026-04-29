@@ -358,7 +358,7 @@ describe.each([
     expect(dotLottie?.marker).toBe('');
   });
 
-  test.todo('calls dotLottie.setSegment & dotLottie.resetSegment when segment prop changes', async () => {
+  test('calls dotLottie.setSegment & dotLottie.resetSegment when segment prop changes', async () => {
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
@@ -381,7 +381,7 @@ describe.each([
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
 
-    expect(dotLottie?.segment).toBeUndefined();
+    expect(dotLottie?.segment).toEqual([0, dotLottie.totalFrames - 1]);
 
     rerender(<Component src={dotLottieSrc} autoplay segment={[0, 10]} dotLottieRefCallback={dotLottieRefCallback} />);
 
@@ -397,7 +397,7 @@ describe.each([
       expect(resetSegment).toHaveBeenCalledTimes(1);
     });
 
-    expect(dotLottie?.segment).toBeUndefined();
+    expect(dotLottie?.segment).toEqual([0, dotLottie.totalFrames - 1]);
   });
 
   test.todo('calls dotLottie.setTheme & dotLottie.resetTheme when themeId prop changes', async () => {

@@ -65,7 +65,6 @@ export interface DotLottieInstanceState {
   mode: Mode;
   renderConfig: RenderConfig;
   segment: [number, number] | undefined;
-  segmentDuration: number;
   speed: number;
   totalFrames: number;
   useFrameInterpolation: boolean;
@@ -97,7 +96,6 @@ export class DotLottieWorker {
     loop: false,
     mode: 'forward',
     segment: [0, 0],
-    segmentDuration: 0,
     speed: 1,
     totalFrames: 0,
     isLoaded: false,
@@ -443,10 +441,6 @@ export class DotLottieWorker {
     return this._dotLottieInstanceState.isFrozen;
   }
 
-  public get segmentDuration(): number {
-    return this._dotLottieInstanceState.segmentDuration;
-  }
-
   public get totalFrames(): number {
     return this._dotLottieInstanceState.totalFrames;
   }
@@ -626,6 +620,13 @@ export class DotLottieWorker {
     if (!this._created) return;
 
     await this._sendMessage('setSegment', { instanceId: this._id, segment: [start, end] });
+    await this._updateDotLottieInstanceState();
+  }
+
+  public async resetSegment(): Promise<void> {
+    if (!this._created) return;
+
+    await this._sendMessage('resetSegment', { instanceId: this._id });
     await this._updateDotLottieInstanceState();
   }
 

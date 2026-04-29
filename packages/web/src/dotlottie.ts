@@ -131,6 +131,8 @@ export class DotLottie {
 
   private _backgroundColor: string | null = null;
 
+  private _lastFrameTime: number | null = null;
+
   // Bound event listeners for state machine
   private _boundOnClick: ((event: MouseEvent) => void) | null = null;
 
@@ -149,6 +151,8 @@ export class DotLottie {
   private _lastExpectedBufferSize = 0;
 
   private _marker: string = '';
+
+  private _segment: [number, number] | null = null;
 
   /**
    * Creates a new DotLottie player instance for rendering Lottie animations.
@@ -179,7 +183,8 @@ export class DotLottie {
         this._dotLottieCore.set_speed(config.speed ?? 1);
         this._dotLottieCore.set_use_frame_interpolation(config.useFrameInterpolation ?? true);
         if (config.segment && config.segment.length === 2) {
-          this._dotLottieCore.set_segment(config.segment[0] as number, config.segment[1] as number);
+          this._segment = [config.segment[0] as number, config.segment[1] as number];
+          this._dotLottieCore.set_segment(this._segment[0], this._segment[1]);
         }
         this._marker = config.marker ?? '';
         if (this._marker) {
@@ -247,7 +252,7 @@ export class DotLottie {
 
   // ── Event draining ─────────────────────────────────────────────────────
 
-  private _drainPlayerEvents(): void {
+  private _drainPlayerEvents({ skipFrame = false }: { skipFrame?: boolean } = {}): void {
     if (!this._dotLottieCore) return;
 
     let evt: unknown;
@@ -277,11 +282,15 @@ export class DotLottie {
           break;
 
         case 'Frame':
-          setTimeout(() => this._eventManager.dispatch({ type: 'frame', currentFrame: event.frameNo ?? 0 }), 0);
+          if (!skipFrame) {
+            setTimeout(() => this._eventManager.dispatch({ type: 'frame', currentFrame: event.frameNo ?? 0 }), 0);
+          }
           break;
 
         case 'Render':
-          setTimeout(() => this._eventManager.dispatch({ type: 'render', currentFrame: event.frameNo ?? 0 }), 0);
+          if (!skipFrame) {
+            setTimeout(() => this._eventManager.dispatch({ type: 'render', currentFrame: event.frameNo ?? 0 }), 0);
+          }
           break;
 
         case 'Loop':
@@ -501,12 +510,23 @@ export class DotLottie {
         this.resize();
       }
 
-      // Drain any events produced by loading (Load/LoadError)
-      this._drainPlayerEvents();
+      // Drain any events produced by loading (Load/LoadError).
+      // Skip stale Frame/Render events when marker or segment needs re-application since the
+      // frame position from load_animation won't reflect those constraints.
+      this._drainPlayerEvents({ skipFrame: !!this._marker || !!this._segment });
 
-      // Re-apply marker after load since markers are only available after animation data is parsed
+      // Re-apply marker and segment after load since they are reset by load_animation
       if (this._marker) {
         this._dotLottieCore.set_marker(this._marker);
+      }
+      if (this._segment) {
+        this._dotLottieCore.set_segment(this._segment[0], this._segment[1]);
+        // Seek to the segment's logical start frame based on mode so that the first
+        // emitted frame event reflects the segment, not the loaded animation's frame 0.
+        const mode = coreToMode(this._dotLottieCore.mode());
+        const startFrame = mode === 'reverse' || mode === 'reverse-bounce' ? this._segment[1] : this._segment[0];
+
+        this._dotLottieCore.set_frame(startFrame);
       }
 
       setTimeout(() => {
@@ -639,10 +659,11 @@ export class DotLottie {
 
   /**
    * Gets the currently active playback segment as [startFrame, endFrame].
-   * If no segment is set, returns undefined and the full animation plays.
+   * Returns the effective segment from the WASM core. When no custom segment is set,
+   * returns [0, totalFrames - 1] (full animation range). Returns undefined only when the core is not loaded.
    */
   public get segment(): [number, number] | undefined {
-    if (!this._dotLottieCore || !this._dotLottieCore.has_segment()) return undefined;
+    if (!this._dotLottieCore) return undefined;
 
     return [this._dotLottieCore.segment_start(), this._dotLottieCore.segment_end()];
   }
@@ -784,15 +805,7 @@ export class DotLottie {
    * Represents the time to play from the first frame to the last at normal speed (speed = 1).
    */
   public get duration(): number {
-    return this._dotLottieCore?.duration() ?? 0;
-  }
-
-  /**
-   * Gets the duration of the currently active segment in seconds.
-   * If no segment is set, returns the full animation duration.
-   */
-  public get segmentDuration(): number {
-    return this._dotLottieCore?.segment_duration() ?? 0;
+    return (this._dotLottieCore?.duration() ?? 0) / 1000;
   }
 
   /**
@@ -825,8 +838,10 @@ export class DotLottie {
     this._dotLottieCore.set_speed(config.speed ?? 1);
     this._dotLottieCore.set_use_frame_interpolation(config.useFrameInterpolation ?? true);
     if (config.segment && config.segment.length === 2) {
-      this._dotLottieCore.set_segment(config.segment[0] as number, config.segment[1] as number);
+      this._segment = [config.segment[0] as number, config.segment[1] as number];
+      this._dotLottieCore.set_segment(this._segment[0], this._segment[1]);
     } else {
+      this._segment = null;
       this._dotLottieCore.clear_segment();
     }
     this._marker = config.marker ?? '';
@@ -977,6 +992,7 @@ export class DotLottie {
       this._frameManager.cancelAnimationFrame(this._animationFrameId);
       this._animationFrameId = null;
     }
+    this._lastFrameTime = null;
   }
 
   private _startAnimationLoop(): void {
@@ -993,7 +1009,7 @@ export class DotLottie {
     }
   }
 
-  private _animationLoop(): void {
+  private _animationLoop(time: number): void {
     if (this._dotLottieCore === null) {
       this._stopAnimationLoop();
 
@@ -1008,7 +1024,11 @@ export class DotLottie {
     }
 
     try {
-      const advanced = this._isStateMachineRunning ? this._dotLottieCore.sm_tick() : this._dotLottieCore.tick();
+      const dt = this._lastFrameTime !== null ? time - this._lastFrameTime : 0;
+
+      this._lastFrameTime = time;
+
+      const advanced = this._isStateMachineRunning ? this._dotLottieCore.sm_tick(dt) : this._dotLottieCore.tick(dt);
 
       if (this._isStateMachineRunning) {
         this._drainSmEvents();
@@ -1112,7 +1132,7 @@ export class DotLottie {
   public setFrame(frame: number): void {
     if (this._dotLottieCore === null) return;
 
-    const frameUpdated = this._dotLottieCore.seek(frame);
+    const frameUpdated = this._dotLottieCore.set_frame(frame);
 
     if (frameUpdated) {
       const rendered = this._dotLottieCore.render();
@@ -1366,7 +1386,18 @@ export class DotLottie {
   public setSegment(startFrame: number, endFrame: number): void {
     if (this._dotLottieCore === null) return;
 
+    this._segment = [startFrame, endFrame];
     this._dotLottieCore.set_segment(startFrame, endFrame);
+  }
+
+  /**
+   * Clears the user-defined segment, restoring playback to the full animation range [0, totalFrames - 1].
+   */
+  public resetSegment(): void {
+    if (this._dotLottieCore === null) return;
+
+    this._segment = null;
+    this._dotLottieCore.clear_segment();
   }
 
   /**
@@ -1459,8 +1490,18 @@ export class DotLottie {
   public setMarker(marker: string): void {
     if (this._dotLottieCore === null) return;
 
-    this._marker = marker;
-    this._dotLottieCore.set_marker(marker);
+    const validMarkers = this.markers();
+    const exists = validMarkers.some((m) => m.name === marker);
+
+    if (exists) {
+      this._marker = marker;
+      this._dotLottieCore.set_marker(marker);
+    } else {
+      this._marker = '';
+      this._segment = null;
+      this._dotLottieCore.clear_marker();
+      this._dotLottieCore.clear_segment();
+    }
   }
 
   /**
@@ -1907,32 +1948,6 @@ export class DotLottie {
       width: size?.[0] ?? 0,
       height: size?.[1] ?? 0,
     };
-  }
-
-  /**
-   * Gets the Oriented Bounding Box (OBB) points of a layer by its name.
-   * Returns 8 numbers representing 4 corner points (x,y) in clockwise order from top-left.
-   * @param layerName - Name of the layer to get bounds for
-   * @returns Array of 8 numbers representing the bounding box corners, or undefined if layer not found
-   */
-  public getLayerBoundingBox(layerName: string): number[] | undefined {
-    const bounds = this._dotLottieCore?.get_layer_bounds(layerName);
-
-    if (!bounds) return undefined;
-
-    if (bounds.length !== 8) return undefined;
-
-    return Array.from(bounds);
-  }
-
-  /**
-   * Converts theme data into Lottie slot format for dynamic content replacement.
-   * @param _theme - Theme data as a JSON string
-   * @param _slots - Slot definitions as a JSON string
-   * @returns Transformed slots data as a JSON string
-   */
-  public static transformThemeToLottieSlots(_theme: string, _slots: string): string {
-    return '';
   }
 
   // #region State Machine

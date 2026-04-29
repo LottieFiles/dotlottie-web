@@ -182,6 +182,9 @@ export interface MethodParamsMap {
     instanceId: string;
     segment: [number, number];
   };
+  resetSegment: {
+    instanceId: string;
+  };
   setSpeed: {
     instanceId: string;
     speed: number;
@@ -476,6 +479,7 @@ export interface MethodResultMap {
   setMode: undefined;
   setRenderConfig: undefined;
   setSegment: undefined;
+  resetSegment: undefined;
   setSpeed: undefined;
   setTheme: boolean;
   setThemeData: boolean;

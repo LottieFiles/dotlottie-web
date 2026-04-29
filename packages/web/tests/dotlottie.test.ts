@@ -237,8 +237,10 @@ describe.each([
           expect(onLoad).toHaveBeenCalledTimes(1);
         });
 
-        const expectedDuration =
-          ((config.mode?.includes('bounce') ? 2 : 1) * dotLottie.segmentDuration * 1000) / dotLottie.speed;
+        const segmentFrames = (dotLottie.segment?.[1] ?? dotLottie.totalFrames) - (dotLottie.segment?.[0] ?? 0);
+        const segmentDuration =
+          dotLottie.totalFrames > 0 ? dotLottie.duration * (segmentFrames / dotLottie.totalFrames) : 0;
+        const expectedDuration = ((config.mode?.includes('bounce') ? 2 : 1) * segmentDuration * 1000) / dotLottie.speed;
 
         const expectedEndFrame =
           config.mode === 'reverse' || config.mode === 'reverse-bounce'
