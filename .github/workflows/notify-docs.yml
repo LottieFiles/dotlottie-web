@@ -55,8 +55,8 @@ jobs:
               "source_repo": "${{ github.repository }}",
               "source_package": "${{ needs.resolve-package.outputs.package_dir }}",
               "release_tag": "${{ github.event.release.tag_name }}",
-              "release_name": "${{ github.event.release.name }}",
-              "release_body": "${{ github.event.release.body }}",
+              "release_name": ${{ toJSON(github.event.release.name) }},
+              "release_body": ${{ toJSON(github.event.release.body) }},
               "release_url": "${{ github.event.release.html_url }}",
               "sender": "${{ github.actor }}"
             }
