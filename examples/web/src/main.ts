@@ -5,7 +5,7 @@ import type { Fit, Mode } from '@lottiefiles/dotlottie-web';
 // import { DotLottieWorker as DotLottie } from '@lottiefiles/dotlottie-web';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 
-import wasmUrl from '../../../packages/web/dist/dotlottie-player.wasm?url';
+import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
 
 const app = document.getElementById('app') as HTMLDivElement;
 
@@ -145,7 +145,7 @@ app.innerHTML = `
 /**
  * This is only required for testing the local version of the renderer
  */
-DotLottie.setWasmUrl(`${baseUrl}${wasmUrl}`);
+DotLottie.setWasmUrl(wasmUrl);
 
 /**
  * Load all canvas elements with data-src attribute
