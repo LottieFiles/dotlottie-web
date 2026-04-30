@@ -84,12 +84,12 @@
     "wasm:clean": "make clean"
   },
   "devDependencies": {
-    "@types/node": "^22.15.0",
+    "@types/node": "^25.6.0",
     "@vitest/browser": "^4.0.18",
     "@vitest/browser-playwright": "^4.0.18",
     "@vitest/coverage-istanbul": "^4.0.18",
     "@webgpu/types": "^0.1.69",
-    "esbuild": "^0.23.0",
+    "esbuild": "^0.28.0",
     "tsdown": "^0.20.3",
     "typescript": "6.0.3",
     "vitest": "^4.0.18"
