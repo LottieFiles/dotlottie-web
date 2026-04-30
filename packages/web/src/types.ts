@@ -6,6 +6,15 @@
 export type Transform = [number, number, number, number, number, number, number, number, number];
 
 /**
+ * Animation marker representing a named section within a Lottie animation.
+ */
+export interface Marker {
+  name: string;
+  time: number;
+  duration: number;
+}
+
+/**
  * Configuration for canvas rendering behavior.
  * Controls how the animation is rendered and when rendering is optimized.
  */
@@ -174,6 +183,15 @@ export interface Config {
    * Set to true (default) for smoother animation, false for exact frame-by-frame playback.
    */
   useFrameInterpolation?: boolean;
+}
+
+export interface WebGLConfig extends Omit<Config, 'canvas'> {
+  canvas: HTMLCanvasElement;
+}
+
+export interface WebGPUConfig extends Omit<Config, 'canvas'> {
+  canvas: HTMLCanvasElement;
+  device?: GPUDevice;
 }
 
 export interface StateMachineConfig {

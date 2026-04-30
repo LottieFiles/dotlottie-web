@@ -2,15 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { defineConfig } from 'tsdown';
+import { defineConfig, type UserConfig } from 'tsdown';
 
 import { pluginInlineWorker } from './rolldown-plugins/plugin-inline-worker.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf-8'));
 
-export default defineConfig({
-  entry: ['./src/index.ts'],
+const sharedConfig: UserConfig = {
   format: ['esm', 'cjs'],
   dts: true,
   minify: true,
@@ -23,10 +22,46 @@ export default defineConfig({
     __PACKAGE_NAME__: JSON.stringify(pkg.name),
   },
   plugins: [pluginInlineWorker(pkg)],
-  onSuccess: async () => {
-    const src = path.resolve(__dirname, 'src/core/dotlottie-player.wasm');
-    const dest = path.resolve(__dirname, 'dist/dotlottie-player.wasm');
+};
 
-    await fs.promises.copyFile(src, dest);
-  },
-});
+export default [
+  defineConfig({
+    ...sharedConfig,
+    entry: { index: './src/index.ts' },
+    onSuccess: async () => {
+      const dir = path.resolve(__dirname, 'dist');
+
+      await fs.promises.mkdir(dir, { recursive: true });
+      await fs.promises.copyFile(
+        path.resolve(__dirname, 'src/core/dotlottie-player.wasm'),
+        path.resolve(dir, 'dotlottie-player.wasm'),
+      );
+    },
+  }),
+  defineConfig({
+    ...sharedConfig,
+    entry: { 'webgl/index': './src/webgl/index.ts' },
+    onSuccess: async () => {
+      const dir = path.resolve(__dirname, 'dist/webgl');
+
+      await fs.promises.mkdir(dir, { recursive: true });
+      await fs.promises.copyFile(
+        path.resolve(__dirname, 'src/webgl/dotlottie-player.wasm'),
+        path.resolve(dir, 'dotlottie-player.wasm'),
+      );
+    },
+  }),
+  defineConfig({
+    ...sharedConfig,
+    entry: { 'webgpu/index': './src/webgpu/index.ts' },
+    onSuccess: async () => {
+      const dir = path.resolve(__dirname, 'dist/webgpu');
+
+      await fs.promises.mkdir(dir, { recursive: true });
+      await fs.promises.copyFile(
+        path.resolve(__dirname, 'src/webgpu/dotlottie-player.wasm'),
+        path.resolve(dir, 'dotlottie-player.wasm'),
+      );
+    },
+  }),
+];

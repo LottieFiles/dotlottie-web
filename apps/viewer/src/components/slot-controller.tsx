@@ -268,7 +268,7 @@ function TextSlotInput({ slotId, dotLottie }: { slotId: string; dotLottie: DotLo
               value={fontSize ?? ''}
               onChange={(e) => {
                 const val = parseFloat(e.target.value);
-                if (!isNaN(val) && val > 0) handleFontSizeChange(val);
+                if (!Number.isNaN(val) && val > 0) handleFontSizeChange(val);
               }}
               placeholder="px"
             />
@@ -366,36 +366,29 @@ export default function SlotController({ dotLottie }: SlotControllerProps) {
 
     try {
       const slotIds = dotLottie.getSlotIds();
-      console.log('[SlotController] Found slot IDs:', slotIds);
       const slotInfos: SlotInfo[] = slotIds.map((id) => ({
         id,
         type: dotLottie.getSlotType(id) || 'unknown',
       }));
-      console.log('[SlotController] Slot infos:', slotInfos);
       setSlots(slotInfos);
-    } catch (error) {
-      console.error('[SlotController] Error loading slots:', error);
+    } catch {
+      // ignore
     }
   }, [dotLottie]);
 
   useEffect(() => {
     if (!dotLottie) {
-      console.log('[SlotController] No dotLottie instance');
       return;
     }
 
-    console.log('[SlotController] dotLottie instance received, isLoaded:', dotLottie.isLoaded);
-
     // Load slots when animation loads
     const onLoad = () => {
-      console.log('[SlotController] Animation loaded event fired');
       loadSlots();
     };
     dotLottie.addEventListener('load', onLoad);
 
     // Also load immediately if already loaded
     if (dotLottie.isLoaded) {
-      console.log('[SlotController] Animation already loaded, loading slots immediately');
       loadSlots();
     }
 

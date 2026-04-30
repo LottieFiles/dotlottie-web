@@ -5,7 +5,6 @@ import {
   type RenderEvent,
   setWasmUrl as setDotLottieWasmUrl,
 } from '@lottiefiles/dotlottie-react';
-import dotLottieWebPkg from '@lottiefiles/dotlottie-react/node_modules/@lottiefiles/dotlottie-web/package.json';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FaPause, FaPlay } from 'react-icons/fa';
 import { GiNextButton, GiPreviousButton } from 'react-icons/gi';
@@ -24,6 +23,8 @@ import {
   setThemes,
   setTotalFrames,
 } from '../store/viewer-slice';
+import DotLottieCDNPlayer from './dotlottie-cdn-player';
+import DotLottieGPUPlayer from './dotlottie-gpu-player';
 import LoadTime from './load-time';
 
 setDotLottieWasmUrl(dotLottieWasmUrl);
@@ -60,7 +61,13 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
   const useFrameInterpolation = useAppSelector((state) => state.viewer.useFrameInterpolation);
   const activeMarker = useAppSelector((state) => state.viewer.activeMarker);
   const activeStateMachineId = useAppSelector((state) => state.viewer.activeStateMachineId);
+  const renderer = useAppSelector((state) => state.viewer.renderer);
+  const showLottieWeb = useAppSelector((state) => state.viewer.showLottieWeb);
+  const version = useAppSelector((state) => state.viewer.version);
+  const availableVersions = useAppSelector((state) => state.viewer.availableVersions);
   const dispatch = useAppDispatch();
+
+  const coreVersion = availableVersions.find((v) => v.reactVersion === version)?.coreVersion;
 
   const onLoad = useCallback(() => {
     dispatch(setTotalFrames(dotLottie?.totalFrames));
@@ -141,30 +148,72 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
     <div className="flex flex-col items-center justify-between flex-grow h-full gap-4">
       <div className="flex justify-center h-full">
         <div className="flex flex-col dotlottie-player">
-          <LoadTime version={dotLottieWebPkg.version} className="mb-4" title="dotLottie Web" />
+          <LoadTime
+            version={version === 'local' ? 'dev' : (coreVersion ?? version)}
+            className="mb-4"
+            title="dotLottie Web"
+          />
           <div className="flex items-center justify-center flex-grow p-4">
             <div style={{ width: '350px', height: '350px' }}>
-              <DotLottieReact
-                backgroundColor={backgroundColor}
-                width={350}
-                height={350}
-                autoplay={autoplay}
-                useFrameInterpolation={useFrameInterpolation}
-                loop={loop}
-                mode={mode}
-                speed={speed}
-                themeId={activeThemeId}
-                animationId={activeAnimationId}
-                stateMachineId={activeStateMachineId}
-                segment={segment as [number, number]}
-                marker={activeMarker}
-                dotLottieRefCallback={setDotLottie}
-                src={src}
-              />
+              {version !== 'local' ? (
+                <DotLottieCDNPlayer
+                  key={version}
+                  version={coreVersion ?? version}
+                  src={src}
+                  autoplay={autoplay}
+                  loop={loop}
+                  speed={speed}
+                  mode={mode}
+                  backgroundColor={backgroundColor}
+                  useFrameInterpolation={useFrameInterpolation}
+                  animationId={activeAnimationId}
+                  themeId={activeThemeId}
+                  marker={activeMarker}
+                  segment={segment}
+                  stateMachineId={activeStateMachineId}
+                  dotLottieRefCallback={setDotLottie}
+                />
+              ) : renderer === 'software' ? (
+                <DotLottieReact
+                  backgroundColor={backgroundColor}
+                  width={350}
+                  height={350}
+                  autoplay={autoplay}
+                  useFrameInterpolation={useFrameInterpolation}
+                  loop={loop}
+                  mode={mode}
+                  speed={speed}
+                  themeId={activeThemeId}
+                  animationId={activeAnimationId}
+                  stateMachineId={activeStateMachineId}
+                  segment={segment as [number, number]}
+                  marker={activeMarker}
+                  dotLottieRefCallback={setDotLottie}
+                  src={src}
+                />
+              ) : (
+                <DotLottieGPUPlayer
+                  key={renderer}
+                  renderer={renderer}
+                  src={src}
+                  autoplay={autoplay}
+                  loop={loop}
+                  speed={speed}
+                  mode={mode}
+                  backgroundColor={backgroundColor}
+                  useFrameInterpolation={useFrameInterpolation}
+                  animationId={activeAnimationId}
+                  themeId={activeThemeId}
+                  marker={activeMarker}
+                  segment={segment}
+                  stateMachineId={activeStateMachineId}
+                  dotLottieRefCallback={setDotLottie}
+                />
+              )}
             </div>
           </div>
         </div>
-        {isJson ? (
+        {isJson && showLottieWeb ? (
           <div className="flex flex-col lottie-web">
             <LoadTime version="v5.12.2" className="mb-4" title="Lottie Web" />
             <div className="flex items-center justify-center flex-grow p-4">
@@ -271,11 +320,12 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
               </div>
             </div>
           )}
-          renderThumb={({ props }) => (
+          renderThumb={({ props: { key, ...thumbProps } }) => (
             <div
-              {...props}
+              key={key}
+              {...thumbProps}
               style={{
-                ...props.style,
+                ...thumbProps.style,
                 height: '20px',
                 width: '20px',
                 backgroundColor: '#019D91',

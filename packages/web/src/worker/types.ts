@@ -182,6 +182,9 @@ export interface MethodParamsMap {
     instanceId: string;
     segment: [number, number];
   };
+  resetSegment: {
+    instanceId: string;
+  };
   setSpeed: {
     instanceId: string;
     speed: number;
@@ -317,16 +320,6 @@ export interface MethodParamsMap {
   };
   stop: {
     instanceId: string;
-  };
-  tween: {
-    duration: number;
-    frame: number;
-    instanceId: string;
-  };
-  tweenToMarker: {
-    duration: number;
-    instanceId: string;
-    marker: string;
   };
   unfreeze: {
     instanceId: string;
@@ -486,6 +479,7 @@ export interface MethodResultMap {
   setMode: undefined;
   setRenderConfig: undefined;
   setSegment: undefined;
+  resetSegment: undefined;
   setSpeed: undefined;
   setTheme: boolean;
   setThemeData: boolean;
@@ -519,8 +513,6 @@ export interface MethodResultMap {
   stateMachineStart: boolean;
   stateMachineStop: boolean;
   stop: undefined;
-  tween: boolean;
-  tweenToMarker: boolean;
   unfreeze: undefined;
 }
 

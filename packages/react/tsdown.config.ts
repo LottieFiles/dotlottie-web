@@ -13,8 +13,10 @@ const config: UserConfig = {
   platform: 'browser',
   target: ['es2020'],
   tsconfig: 'tsconfig.build.json',
-  external: ['react'],
+  deps: { neverBundle: ['react'] },
 };
+
+const cdnDeps = { neverBundle: ['react'], alwaysBundle: Object.keys(pkg.dependencies) };
 
 export default defineConfig([
   config,
@@ -22,7 +24,33 @@ export default defineConfig([
   {
     ...config,
     dts: false,
-    noExternal: Object.keys(pkg.dependencies),
+    deps: cdnDeps,
+    outDir: 'dist/browser',
+  },
+  // WebGL
+  {
+    ...config,
+    entry: { 'webgl/index': './src/webgl/index.tsx' },
+  },
+  // WebGL CDN build
+  {
+    ...config,
+    entry: { 'webgl/index': './src/webgl/index.tsx' },
+    dts: false,
+    deps: cdnDeps,
+    outDir: 'dist/browser',
+  },
+  // WebGPU
+  {
+    ...config,
+    entry: { 'webgpu/index': './src/webgpu/index.tsx' },
+  },
+  // WebGPU CDN build
+  {
+    ...config,
+    entry: { 'webgpu/index': './src/webgpu/index.tsx' },
+    dts: false,
+    deps: cdnDeps,
     outDir: 'dist/browser',
   },
 ]);

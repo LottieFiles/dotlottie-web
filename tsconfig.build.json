@@ -7,7 +7,11 @@
     "target": "ESNext",
 
     // Target module system
-    "module": "ESNext"
+    "module": "ESNext",
+
+    // Silence TS 6.0 deprecation errors inherited from @lottiefiles/tsconfig
+    // (downlevelIteration, moduleResolution=node10).
+    "ignoreDeprecations": "6.0"
   },
 
   "exclude": [

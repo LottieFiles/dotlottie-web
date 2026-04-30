@@ -7,7 +7,7 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   tsconfig: 'tsconfig.build.json',
-  external: ['solid-js'],
+  deps: { neverBundle: ['solid-js'] },
   fixedExtension: false,
   plugins: [solid()],
 });

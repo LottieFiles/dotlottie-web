@@ -1,204 +1,117 @@
-// import { DotLottieReact, DotLottie, setWasmUrl } from '@lottiefiles/dotlottie-react';
-import { type DotLottieWorker, DotLottieWorkerReact, setWasmUrl } from '@lottiefiles/dotlottie-react';
-import React, { useState } from 'react';
+import type { DotLottie } from '@lottiefiles/dotlottie-react';
+import { lazy, Suspense, useEffect, useState } from 'react';
+
+type Renderer = 'canvas' | 'webgl' | 'webgpu';
+
+import dotLottieCanvasWasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
+import dotLottieWebGLWasmUrl from '../../../packages/web/src/webgl/dotlottie-player.wasm?url';
+import dotLottieWebGPUWasmUrl from '../../../packages/web/src/webgpu/dotlottie-player.wasm?url';
+
+const DotLottieCanvas = lazy(() =>
+  import('@lottiefiles/dotlottie-react').then((m) => {
+    m.setWasmUrl(dotLottieCanvasWasmUrl);
+    return { default: m.DotLottieReact };
+  }),
+);
+const DotLottieWebGL = lazy(() =>
+  import('@lottiefiles/dotlottie-react/webgl').then((m) => {
+    m.setWasmUrl(dotLottieWebGLWasmUrl);
+    return { default: m.DotLottieReact };
+  }),
+);
+const DotLottieWebGPU = lazy(() =>
+  import('@lottiefiles/dotlottie-react/webgpu').then((m) => {
+    m.setWasmUrl(dotLottieWebGPUWasmUrl);
+    return { default: m.DotLottieReact };
+  }),
+);
+
+const rendererComponent = {
+  canvas: DotLottieCanvas,
+  webgl: DotLottieWebGL,
+  webgpu: DotLottieWebGPU,
+} as const;
 
 const animations = [
-  // 'https://lottie.host/68f06eea-5f90-4e58-b51e-3abe1fbd74b8/llUlrzgWDQ.lottie',
   'https://lottie.host/e641272e-039b-4612-96de-138acfbede6e/bc0sW78EeR.lottie',
-  './markers_example.json',
   'https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie',
   'https://lottie.host/647eb023-6040-4b60-a275-e2546994dd7f/zDCfp5lhLe.json',
-  './dragon.json',
 ];
 
-setWasmUrl(new URL('../../../packages/web/src/core/dotlottie-player.wasm', import.meta.url).href);
-
 function App() {
-  const [dotLottie, setDotLottie] = useState<DotLottieWorker | null>(null);
+  const [dotLottie, setDotLottie] = useState<DotLottie | null>(null);
+  const [renderer, setRenderer] = useState<Renderer>('canvas');
   const [loop, setLoop] = useState(true);
   const [speed, setSpeed] = useState(1);
   const [currentFrame, setCurrentFrame] = useState(0);
   const [srcIdx, setSrcIdx] = useState(0);
-  const [useFrameInterpolation, setUseFrameInterpolation] = useState(false);
-  const [playOnHover, setPlayOnHover] = useState(false);
-  const [autoResizeCanvas, setAutoResizeCanvas] = useState(true);
-  const [marker, setMarker] = useState('');
-  const [allMarkers, setAllMarkers] = useState<string[]>([]);
-  const [animationsIds, setAnimationsIds] = useState<string[]>([]);
-  const [currentAnimationId, setCurrentAnimationId] = useState<string>('');
-  const [isMounted, setIsMounted] = useState(false);
+  const [autoplay, setAutoplay] = useState(true);
 
-  React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  React.useEffect(() => {
-    function updateCurrentFrame(event: { currentFrame: number }) {
-      // console.log('currentFrame', event.currentFrame);
+  useEffect(() => {
+    function onFrame(event: { currentFrame: number }) {
       setCurrentFrame(event.currentFrame);
     }
 
-    function onLoad() {
-      if (dotLottie) {
-        setAllMarkers(dotLottie.markers().map((marker) => marker.name));
-        setAnimationsIds(dotLottie.manifest?.animations.map((animation) => animation.id) || []);
-        setCurrentAnimationId(dotLottie.activeAnimationId || '');
-      }
-    }
-
-    dotLottie?.addEventListener('play', console.log);
-    dotLottie?.addEventListener('freeze', console.log);
-    dotLottie?.addEventListener('unfreeze', console.log);
-    dotLottie?.addEventListener('pause', console.log);
-    dotLottie?.addEventListener('stop', console.log);
-    dotLottie?.addEventListener('load', onLoad);
-    dotLottie?.addEventListener('frame', updateCurrentFrame);
+    dotLottie?.addEventListener('frame', onFrame);
 
     return () => {
-      dotLottie?.removeEventListener('play', console.log);
-      dotLottie?.removeEventListener('freeze', console.log);
-      dotLottie?.removeEventListener('unfreeze', console.log);
-      dotLottie?.addEventListener('pause', console.log);
-      dotLottie?.addEventListener('stop', console.log);
-      dotLottie?.removeEventListener('load', onLoad);
-      dotLottie?.removeEventListener('frame', updateCurrentFrame);
+      dotLottie?.removeEventListener('frame', onFrame);
     };
   }, [dotLottie]);
 
   const progress = dotLottie?.isLoaded ? (currentFrame / dotLottie.totalFrames) * 100 : 0;
+  const Component = rendererComponent[renderer];
 
   return (
-    <div>
-      <div
-        style={{
-          marginBottom: '2000px',
-        }}
-      ></div>
-      {isMounted && (
-        <DotLottieWorkerReact
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>
+      <h2 style={{ marginBottom: '1rem' }}>dotlottie-react example</h2>
+
+      {/* Renderer selector */}
+      <fieldset style={{ marginBottom: '1rem', padding: '0.75rem', border: '1px solid #444', borderRadius: 8 }}>
+        <legend>Renderer</legend>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          {(['canvas', 'webgl', 'webgpu'] as const).map((r) => (
+            <label key={r} style={{ cursor: 'pointer' }}>
+              <input type="radio" name="renderer" value={r} checked={renderer === r} onChange={() => setRenderer(r)} />{' '}
+              {r === 'canvas' ? 'Canvas 2D' : r.toUpperCase()}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      {/* Animation */}
+      <Suspense
+        fallback={<div style={{ height: 400, display: 'grid', placeItems: 'center' }}>Loading renderer...</div>}
+      >
+        <Component
+          key={renderer}
           dotLottieRefCallback={setDotLottie}
-          useFrameInterpolation={useFrameInterpolation}
           src={animations[srcIdx]}
-          autoplay
+          autoplay={autoplay}
           loop={loop}
           speed={speed}
-          playOnHover={playOnHover}
-          renderConfig={{
-            autoResize: autoResizeCanvas,
-          }}
-          marker={marker}
-          style={{
-            margin: '2px',
-            border: '1px solid white',
-          }}
-          animationId={currentAnimationId}
+          renderConfig={{ autoResize: true }}
+          style={{ height: 400, border: '1px solid #333', borderRadius: 8 }}
         />
-      )}
-      <input type="range" min="0" max="100" defaultValue="0" value={progress} />
-      <label>
-        Marker:
-        <select
-          value={marker}
-          onChange={(event) => {
-            setMarker(event.target.value);
-          }}
-        >
-          <option value="">Select a marker</option>
-          {allMarkers.map((markerName) => (
-            <option key={markerName} id={markerName} value={markerName}>
-              {markerName}
-            </option>
-          ))}
-        </select>
-      </label>
-      <button
-        onClick={() => {
-          dotLottie?.play();
-        }}
-      >
-        Play
-      </button>
-      <button
-        onClick={() => {
-          dotLottie?.pause();
-        }}
-      >
-        Pause
-      </button>
-      <button
-        onClick={() => {
-          dotLottie?.stop();
-        }}
-      >
-        Stop
-      </button>
-      <button
-        onClick={() => {
-          setLoop(!loop);
-        }}
-      >
-        {loop ? 'Looping' : 'Not looping'}
-      </button>
-      <button
-        onClick={() => {
-          setSpeed(speed + 0.1);
-        }}
-      >
-        + Speed
-      </button>
-      <button
-        onClick={() => {
-          setSpeed(speed - 0.1);
-        }}
-      >
-        - Speed
-      </button>
-      <button
-        onClick={() => {
-          const totalAnimations = animations.length;
+      </Suspense>
 
-          const nextSrcIdx = (srcIdx + 1) % totalAnimations;
+      {/* Progress */}
+      <input type="range" min={0} max={100} value={progress} readOnly style={{ width: '100%', marginTop: '0.5rem' }} />
 
-          setSrcIdx(nextSrcIdx);
-        }}
-      >
-        Change src
-      </button>
-      <button
-        onClick={() => {
-          setUseFrameInterpolation(!useFrameInterpolation);
-        }}
-      >
-        {useFrameInterpolation ? 'Using frame interpolation' : 'Not using frame interpolation'}
-      </button>
-      <button
-        onClick={() => {
-          setPlayOnHover(!playOnHover);
-        }}
-      >
-        {playOnHover ? 'Play on hover' : 'Not play on hover'}
-      </button>
-      <input
-        type="checkbox"
-        checked={autoResizeCanvas}
-        onChange={() => {
-          setAutoResizeCanvas(!autoResizeCanvas);
-        }}
-      />
-      Auto resize canvas
-      <div>
-        <label>
-          Animation ID:
-          <select value={currentAnimationId || ''} onChange={(event) => setCurrentAnimationId(event.target.value)}>
-            <option value="">Select an animation</option>
-            {animationsIds.map((animationId) => (
-              <option key={animationId} value={animationId}>
-                {animationId}
-              </option>
-            ))}
-          </select>
-        </label>
+      {/* Controls */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1rem' }}>
+        <button onClick={() => dotLottie?.play()}>Play</button>
+        <button onClick={() => dotLottie?.pause()}>Pause</button>
+        <button onClick={() => dotLottie?.stop()}>Stop</button>
+        <button onClick={() => setLoop((l) => !l)}>{loop ? 'Loop: ON' : 'Loop: OFF'}</button>
+        <button onClick={() => setAutoplay((a) => !a)}>{autoplay ? 'Autoplay: ON' : 'Autoplay: OFF'}</button>
+        <button onClick={() => setSpeed((s) => Math.round((s + 0.5) * 10) / 10)}>Speed +</button>
+        <button onClick={() => setSpeed((s) => Math.max(0.5, Math.round((s - 0.5) * 10) / 10))}>Speed -</button>
+        <button onClick={() => setSrcIdx((i) => (i + 1) % animations.length)}>Next animation</button>
       </div>
+      <p style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#888' }}>
+        Speed: {speed}x &middot; Frame: {Math.round(currentFrame)} &middot; Renderer: {renderer}
+      </p>
     </div>
   );
 }

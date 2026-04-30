@@ -1,5 +1,65 @@
 # @lottiefiles/dotlottie-react
 
+## 0.19.0
+### Minor Changes
+
+- c745745: Add WebGL and WebGPU renderer support via subpath exports
+  
+  * `@lottiefiles/dotlottie-react/webgl` — WebGL renderer component
+  * `@lottiefiles/dotlottie-react/webgpu` — WebGPU renderer component (with optional `device` prop)
+
+### Patch Changes
+
+- Updated dependencies [4e36cb7]
+  - @lottiefiles/dotlottie-web@0.71.0
+
+## 0.18.10
+### Patch Changes
+
+- d899344: Fixed `loadAnimation` called multiple times for the same `animationId` during rerender
+- Updated dependencies [dbac41d]
+- Updated dependencies [dbac41d]
+  - @lottiefiles/dotlottie-web@0.70.0
+
+## 0.18.9
+### Patch Changes
+
+- Updated dependencies [47d5995]
+  - @lottiefiles/dotlottie-web@0.69.0
+
+## 0.18.8
+### Patch Changes
+
+- Updated dependencies [e7c1c70]
+- Updated dependencies [cd4365c]
+  - @lottiefiles/dotlottie-web@0.68.0
+
+## 0.18.7
+### Patch Changes
+
+- Updated dependencies [01d79c4]
+  - @lottiefiles/dotlottie-web@0.67.0
+
+## 0.18.6
+### Patch Changes
+
+- Updated dependencies [95ceb90]
+  - @lottiefiles/dotlottie-web@0.66.2
+
+## 0.18.5
+### Patch Changes
+
+- Updated dependencies [901172a]
+  - @lottiefiles/dotlottie-web@0.66.1
+
+## 0.18.4
+### Patch Changes
+
+- 0c0380d: fix: Adjust return type for React 19
+- Updated dependencies [3a1736d]
+- Updated dependencies [a7455a9]
+  - @lottiefiles/dotlottie-web@0.66.0
+
 ## 0.18.3
 ### Patch Changes
 

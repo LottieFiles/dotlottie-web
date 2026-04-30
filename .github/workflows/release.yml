@@ -25,13 +25,13 @@ jobs:
         uses: actions/checkout@v6
 
       - name: ⎔ Setup pnpm@v10
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
-      - name: ⎔ Setup Node@v22
-        uses: actions/setup-node@v4
+      - name: ⎔ Setup Node@lts
+        uses: actions/setup-node@v6
         with:
           cache: pnpm
-          node-version: 22
+          node-version: lts/*
 
       - name: 📥 Install dependencies
         run: pnpm install
@@ -83,20 +83,17 @@ jobs:
           fetch-depth: 0
 
       - name: ⎔ Setup pnpm@v10
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
-      - name: ⎔ Setup Node@v22
-        uses: actions/setup-node@v4
+      - name: ⎔ Setup Node@lts
+        uses: actions/setup-node@v6
         with:
           cache: pnpm
-          node-version: 22
+          node-version: lts/*
           registry-url: https://registry.npmjs.org
 
       - name: 📥 Install dependencies
         run: pnpm install
-
-      - name: ⬆️ Update npm for OIDC trusted publishing
-        run: npm install -g npm@latest
 
       - name: 🚀 Release to NPM
         id: changesets
@@ -128,13 +125,13 @@ jobs:
           fetch-depth: 0
 
       - name: ⎔ Setup pnpm@v10
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
-      - name: ⎔ Setup Node@v22
-        uses: actions/setup-node@v4
+      - name: ⎔ Setup Node@lts
+        uses: actions/setup-node@v6
         with:
           cache: pnpm
-          node-version: 22
+          node-version: lts/*
           registry-url: https://npm.pkg.github.com/
 
       - name: 📥 Install dependencies
@@ -168,13 +165,13 @@ jobs:
           fetch-depth: 0
 
       - name: ⎔ Setup pnpm@v10
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
-      - name: ⎔ Setup Node@v22
-        uses: actions/setup-node@v4
+      - name: ⎔ Setup Node@lts
+        uses: actions/setup-node@v6
         with:
           cache: pnpm
-          node-version: 22
+          node-version: lts/*
           registry-url: https://registry.npmjs.org
 
       - name: 📥 Install dependencies

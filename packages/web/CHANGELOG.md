@@ -1,5 +1,81 @@
 # @lottiefiles/dotlottie-web
 
+## 0.71.0
+### Minor Changes
+
+- 4e36cb7: Upgrade dotlottie-rs WASM bindings to v0.1.57
+
+## 0.70.0
+### Minor Changes
+
+- dbac41d: chore: upgrade dotlottie-rs v0.1.56-f01de8a WASM bindings
+- dbac41d: chore: remove unstable tween api
+
+## 0.69.0
+### Minor Changes
+
+- 47d5995: **Dependency Updates:**
+  
+  * **Bumped `dotlottie-rs` WASM bindings to v0.1.56 (commit `4922138`):** This update integrates core underlying fixes for the state machine.
+  
+  **State Machine fixes:**
+  
+  * **Corrected state entry execution order:** Animations are now explicitly loaded before setting markers, playback modes, or autoplay. This ensures that markers resolve correctly against the newly loaded animation's data.
+  * **Fixed rendering failures during animation switches:** Cleared stale theme data when switching animations. Previously, `load_animation()` re-applied saved themes specific to the old animation. These stale slot values caused `flush_slots()` to fail, silently breaking `render()` and preventing the `OnComplete` event from firing.
+  * **Disabled tweened transitions across different animations:** Because tweening interpolates between markers within a single animation's timeline, cross-animation tweens caused visual glitches by tweening the old animation before abruptly switching. These now default to instant transitions.
+  * **Fixed `GlobalState` configuration:** Ignored the `animation` property on `GlobalState`.
+
+## 0.68.0
+### Minor Changes
+
+- cd4365c: feat: update dotlottie-rs WASM bindings to v0.1.56
+
+### Patch Changes
+
+- e7c1c70: Pass `{ module_or_path: url }` to wasm-bindgen `init()` instead of a raw string to fix deprecation warning
+
+## 0.67.0
+### Minor Changes
+
+- 01d79c4: chore: updated dotLottie-rs v0.1.55 WASM bindings
+
+## 0.66.2
+### Patch Changes
+
+- 95ceb90: Fix self-contained bundle generation with separate build configs
+
+## 0.66.1
+### Patch Changes
+
+- 901172a: chore: upgrade dotlottie-rs WASM to version 0.1.54-75ea13a
+  
+  This includes the following changes:
+  
+  * fix: missing webp loader
+  * fix: replace the fallback font subset to fix number glyph glitches
+
+## 0.66.0
+### Minor Changes
+
+- 3a1736d: Add WebGL and WebGPU rendering backends
+  
+  * Add `DotLottieWebGL` class for hardware-accelerated rendering via WebGL 2 (importable from `@lottiefiles/dotlottie-web/webgl`)
+  * Add `DotLottieWebGPU` class for hardware-accelerated rendering via WebGPU (importable from `@lottiefiles/dotlottie-web/webgpu`)
+  * Export WASM files as package subpaths (`./dotlottie-player.wasm`, `./webgl/dotlottie-player.wasm`, `./webgpu/dotlottie-player.wasm`) enabling `?url` imports in bundlers like Vite
+  * Refactor WASM loader into a shared `createWasmLoader` factory, eliminating duplicated fallback logic across renderers
+- a7455a9: Migrate WASM bindings from Emscripten/embind to wasm-bindgen
+  
+  * Replace Emscripten module factory with wasm-bindgen `init()` based loading
+  * Switch from observer callback pattern to poll-based event draining (`poll_event`, `sm_poll_event`)
+  * Remove Emscripten-specific abstractions (VectorChar, VectorFloat, MainModule)
+  * Use native `Uint8Array` for binary data instead of byte-by-byte VectorChar copying
+  * Update all WASM method calls from camelCase to snake\_case API surface
+  * Fix `loopCount` getter to return running loop count via `current_loop_count()`
+  * Fix `loadAnimation()` to drain events and dispatch errors correctly
+  * Fix marker timing: store intended marker and re-apply after animation data loads
+  * Fix `new URL()` fallback in wasm-bindgen output to prevent Webpack/Next.js build failures
+  * WASM binary reduced \~38% (2.1MB → 1.3MB)
+
 ## 0.65.0
 ### Minor Changes
 

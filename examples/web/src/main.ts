@@ -5,7 +5,7 @@ import type { Fit, Mode } from '@lottiefiles/dotlottie-web';
 // import { DotLottieWorker as DotLottie } from '@lottiefiles/dotlottie-web';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 
-import wasmUrl from '../../../packages/web/dist/dotlottie-player.wasm?url';
+import wasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
 
 const app = document.getElementById('app') as HTMLDivElement;
 
@@ -145,7 +145,7 @@ app.innerHTML = `
 /**
  * This is only required for testing the local version of the renderer
  */
-DotLottie.setWasmUrl(`${baseUrl}${wasmUrl}`);
+DotLottie.setWasmUrl(wasmUrl);
 
 /**
  * Load all canvas elements with data-src attribute
@@ -189,8 +189,6 @@ fetch(
 )
   .then(async (res) => res.json())
   .then((data): void => {
-    const allLayers: string[] = data.layers.map((layer: { nm: string }) => layer.nm);
-
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
     const dotLottie = new DotLottie({
@@ -206,32 +204,6 @@ fetch(
       backgroundColor: '#800080ff',
       themeId: 'animated_light',
       // useFrameInterpolation: false,
-    });
-
-    dotLottie.addEventListener('render', () => {
-      allLayers.forEach((layer) => {
-        const context = canvas.getContext('2d');
-
-        if (context) {
-          const obbPoints = dotLottie.getLayerBoundingBox(layer);
-
-          if (!obbPoints || obbPoints.length !== 8) return;
-
-          const [x0, y0, x1, y1, x2, y2, x3, y3] = obbPoints;
-
-          if (!x0 || !y0 || !x1 || !y1 || !x2 || !y2 || !x3 || !y3) return;
-
-          context.beginPath();
-          context.moveTo(x0, y0);
-          context.lineTo(x1, y1);
-          context.lineTo(x2, y2);
-          context.lineTo(x3, y3);
-          context.closePath();
-          context.lineWidth = 2;
-          context.strokeStyle = 'red';
-          context.stroke();
-        }
-      });
     });
 
     dotLottie.addEventListener('loadError', console.error);

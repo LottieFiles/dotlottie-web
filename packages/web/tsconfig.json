@@ -3,7 +3,9 @@
   "extends": "../../tsconfig.dev.json",
 
   // Compiler options
-  "compilerOptions": {},
+  "compilerOptions": {
+    "types": ["@webgpu/types"]
+  },
 
-  "exclude": ["tsdown.config.ts", "rolldown-plugins"]
+  "exclude": ["tsdown.config.ts", "rolldown-plugins", "dotlottie-rs"]
 }

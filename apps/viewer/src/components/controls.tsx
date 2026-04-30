@@ -1,15 +1,20 @@
+import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   setActiveAnimationId,
   setActiveMarker,
   setActiveStateMachineId,
   setActiveThemeId,
+  setAvailableVersions,
   setBackgroundColor,
   setMdode,
+  setRenderer,
   setSegment,
   setSegmentInput,
+  setShowLottieWeb,
   setSpeed,
   setUseFrameInterpolation,
+  setVersion,
 } from '../store/viewer-slice';
 import BaseInput from './form/base-input';
 import BaseSelect from './form/base-select';
@@ -29,12 +34,77 @@ export default function Controls() {
   const markers = useAppSelector((state) => state.viewer.markers);
   const stateMachines = useAppSelector((state) => state.viewer.stateMachines);
   const activeStateMachineId = useAppSelector((state) => state.viewer.activeStateMachineId);
+  const renderer = useAppSelector((state) => state.viewer.renderer);
+  const isJson = useAppSelector((state) => state.viewer.isJson);
+  const showLottieWeb = useAppSelector((state) => state.viewer.showLottieWeb);
+  const version = useAppSelector((state) => state.viewer.version);
+  const availableVersions = useAppSelector((state) => state.viewer.availableVersions);
 
   const dispatch = useAppDispatch();
 
+  useEffect(() => {
+    if (availableVersions.length > 0) return;
+
+    fetch('https://registry.npmjs.org/@lottiefiles/dotlottie-react')
+      .then((res) => res.json())
+      .then((data) => {
+        const allVersions = Object.keys(data.versions).reverse();
+        const versionPairs = allVersions.map((v) => ({
+          reactVersion: v,
+          coreVersion: data.versions[v]?.dependencies?.['@lottiefiles/dotlottie-web'] ?? v,
+        }));
+
+        dispatch(setAvailableVersions(versionPairs));
+      })
+      .catch((err) => {
+        console.error('Failed to fetch dotlottie-react versions:', err);
+      });
+  }, [availableVersions.length, dispatch]);
+
   return (
-    <div className="flex border p-4 bg-white rounded-lg h-full">
-      <div className="flex flex-col items-center gap-4 w-full">
+    <div className="flex h-full p-4 bg-white border rounded-lg">
+      <div className="flex flex-col items-center w-full gap-4">
+        <InputLabel lablel="Version">
+          <BaseSelect
+            className="w-full"
+            onChange={(event) => {
+              dispatch(setVersion(event.target.value));
+            }}
+            value={version}
+            items={[
+              { value: 'local', label: '(dev)' },
+              ...availableVersions.map((v, i) => ({
+                value: v.reactVersion,
+                label: i === 0 ? `${v.coreVersion} (latest)` : v.coreVersion,
+              })),
+            ]}
+          />
+        </InputLabel>
+        {isJson && (
+          <InputLabel lablel="Lottie Web v5.12.2">
+            <Switch
+              onChange={(value) => dispatch(setShowLottieWeb(value === 'true'))}
+              items={[
+                { label: 'Show', value: 'true' },
+                { label: 'Hide', value: 'false' },
+              ]}
+              value={String(showLottieWeb)}
+            />
+          </InputLabel>
+        )}
+        <InputLabel lablel="Renderer">
+          <Switch
+            onChange={(value) => {
+              dispatch(setRenderer(value));
+            }}
+            items={[
+              { label: 'Software', value: 'software' },
+              { label: 'WebGL', value: 'webgl' },
+              { label: 'WebGPU', value: 'webgpu' },
+            ]}
+            value={renderer}
+          />
+        </InputLabel>
         <InputLabel lablel="backgroundColor">
           <BaseInput
             // defaultValue={backgroundColor}
@@ -94,7 +164,7 @@ export default function Controls() {
               }}
             />
             <button
-              className="bg-subtle hover:bg-subtle/60 border border-subtle rounded-lg p-1 px-2 font-bold h-9"
+              className="p-1 px-2 font-bold border rounded-lg bg-subtle hover:bg-subtle/60 border-subtle h-9"
               onClick={() => {
                 dispatch(setSegment(segmentInput));
               }}

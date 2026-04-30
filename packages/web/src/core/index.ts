@@ -1,2 +1,2 @@
-export type * from './dotlottie-player.types';
-export * from './dotlottie-wasm-loader';
+export type { InitInput } from './dotlottie-player';
+export { DotLottiePlayerWasm, Mode } from './dotlottie-player';

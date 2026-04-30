@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-solid",
-  "version": "0.6.3",
+  "version": "0.6.11",
   "type": "module",
   "description": "Solid wrapper around the dotlottie-web library",
   "repository": {
@@ -44,10 +44,10 @@
     "@lottiefiles/dotlottie-web": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^22.7.6",
+    "@types/node": "^25.6.0",
     "solid-js": "^1.9.10",
-    "tsdown": "^0.20.3",
-    "typescript": "5.9.3",
+    "tsdown": "^0.21.10",
+    "typescript": "6.0.3",
     "unplugin-solid": "^1.0.0"
   },
   "publishConfig": {

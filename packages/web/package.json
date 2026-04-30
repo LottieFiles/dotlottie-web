@@ -1,6 +1,6 @@
 {
   "name": "@lottiefiles/dotlottie-web",
-  "version": "0.65.0",
+  "version": "0.71.0",
   "type": "module",
   "description": "Lottie and DotLottie player for the web",
   "repository": {
@@ -18,6 +18,41 @@
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./webgl": {
+      "import": {
+        "types": "./dist/webgl/index.d.ts",
+        "default": "./dist/webgl/index.js"
+      },
+      "require": {
+        "types": "./dist/webgl/index.d.cts",
+        "default": "./dist/webgl/index.cjs"
+      }
+    },
+    "./webgpu": {
+      "import": {
+        "types": "./dist/webgpu/index.d.ts",
+        "default": "./dist/webgpu/index.js"
+      },
+      "require": {
+        "types": "./dist/webgpu/index.d.cts",
+        "default": "./dist/webgpu/index.cjs"
+      }
+    },
+    "./dotlottie-player.wasm": "./dist/dotlottie-player.wasm",
+    "./webgl/dotlottie-player.wasm": "./dist/webgl/dotlottie-player.wasm",
+    "./webgpu/dotlottie-player.wasm": "./dist/webgpu/dotlottie-player.wasm"
+  },
   "files": [
     "dist"
   ],
@@ -40,16 +75,23 @@
     "test:coverage": "vitest run --browser.headless --coverage",
     "test:node": "vitest run --config ./vitest.config.node.ts",
     "test:watch": "vitest",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "wasm:setup": "make setup",
+    "wasm:build": "make wasm",
+    "wasm:build-webgl": "make wasm-webgl",
+    "wasm:build-webgpu": "make wasm-webgpu",
+    "wasm:build-all": "make wasm-all",
+    "wasm:clean": "make clean"
   },
   "devDependencies": {
-    "@types/node": "^22.15.0",
+    "@types/node": "^25.6.0",
     "@vitest/browser": "^4.0.18",
     "@vitest/browser-playwright": "^4.0.18",
     "@vitest/coverage-istanbul": "^4.0.18",
-    "esbuild": "^0.23.0",
-    "tsdown": "^0.20.3",
-    "typescript": "5.9.3",
+    "@webgpu/types": "^0.1.69",
+    "esbuild": "^0.28.0",
+    "tsdown": "^0.21.10",
+    "typescript": "6.0.3",
     "vitest": "^4.0.18"
   },
   "publishConfig": {

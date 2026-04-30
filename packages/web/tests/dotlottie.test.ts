@@ -6,7 +6,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi 
 import type { Config, Layout, Mode } from '../src';
 import { DotLottie as DotLottieClass, DotLottieWorker as DotLottieWorkerClass } from '../src';
 import { BYTES_PER_PIXEL } from '../src/constants';
-import type { DotLottiePlayer } from '../src/core';
+import type { DotLottiePlayerWasm as DotLottiePlayer } from '../src/core';
 import { getDefaultDPR } from '../src/utils';
 
 import { addWasmCSPPolicy, createCanvas, sleep } from './test-utils';
@@ -237,8 +237,10 @@ describe.each([
           expect(onLoad).toHaveBeenCalledTimes(1);
         });
 
-        const expectedDuration =
-          ((config.mode?.includes('bounce') ? 2 : 1) * dotLottie.segmentDuration * 1000) / dotLottie.speed;
+        const segmentFrames = (dotLottie.segment?.[1] ?? dotLottie.totalFrames) - (dotLottie.segment?.[0] ?? 0);
+        const segmentDuration =
+          dotLottie.totalFrames > 0 ? dotLottie.duration * (segmentFrames / dotLottie.totalFrames) : 0;
+        const expectedDuration = ((config.mode?.includes('bounce') ? 2 : 1) * segmentDuration * 1000) / dotLottie.speed;
 
         const expectedEndFrame =
           config.mode === 'reverse' || config.mode === 'reverse-bounce'
@@ -587,6 +589,31 @@ describe.each([
       expect(onPlay).toHaveBeenCalledTimes(1);
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
+
+    (isWorker ? test.skip : test)('destroy() is idempotent when free() throws', async () => {
+      const onReady = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+      });
+
+      dotLottie.addEventListener('ready', onReady);
+
+      await vi.waitFor(() => expect(onReady).toHaveBeenCalledTimes(1));
+
+      const dotLottieCore = (dotLottie as DotLottieClass as any)._dotLottieCore as DotLottiePlayer;
+      const freeSpy = vi.spyOn(dotLottieCore, 'free').mockImplementation(() => {
+        throw new Error('null pointer passed to rust');
+      });
+
+      expect(() => dotLottie.destroy()).not.toThrow();
+      expect(freeSpy).toHaveBeenCalledTimes(1);
+
+      expect(() => dotLottie.destroy()).not.toThrow();
+      expect(freeSpy).toHaveBeenCalledTimes(1);
+      expect((dotLottie as DotLottieClass as any)._dotLottieCore).toBeNull();
+    });
   });
 
   (isWorker ? test.skip : test)('trigger renderError event when failed to render', async () => {
@@ -648,9 +675,9 @@ describe.each([
 
     vi.spyOn(dotLottieCore, 'render').mockReturnValue(true);
 
-    const wrongSizeBuffer = new ArrayBuffer(10);
+    const wrongSizeBuffer = new Uint8Array(10);
 
-    vi.spyOn(dotLottieCore, 'buffer').mockReturnValue(wrongSizeBuffer);
+    vi.spyOn(dotLottieCore, 'get_pixel_buffer').mockReturnValue(wrongSizeBuffer);
 
     onRender.mockClear();
 
@@ -728,17 +755,17 @@ describe.each([
 
       const dotLottieCore = (dotLottie as DotLottieClass as any)._dotLottieCore as DotLottiePlayer;
 
-      const originalBuffer = dotLottieCore.buffer.bind(dotLottieCore);
+      const originalBuffer = dotLottieCore.get_pixel_buffer.bind(dotLottieCore);
 
       const initialWidth = canvas.width;
       const initialHeight = canvas.height;
       const initialBufferSize = initialWidth * initialHeight * BYTES_PER_PIXEL;
 
-      const oldBuffer = new ArrayBuffer(initialBufferSize);
+      const oldBuffer = new Uint8Array(initialBufferSize);
 
       let resizeCallCount = 0;
 
-      vi.spyOn(dotLottieCore, 'resize').mockImplementation(() => {
+      vi.spyOn(dotLottieCore, 'setup_sw_target').mockImplementation(() => {
         resizeCallCount += 1;
 
         return true;
@@ -746,7 +773,7 @@ describe.each([
 
       let drawCallCount = 0;
 
-      vi.spyOn(dotLottieCore, 'buffer').mockImplementation(() => {
+      vi.spyOn(dotLottieCore, 'get_pixel_buffer').mockImplementation(() => {
         drawCallCount += 1;
         if (resizeCallCount > 0 && drawCallCount < 10) {
           return oldBuffer;
@@ -1033,10 +1060,10 @@ describe.each([
 
       expect(onLoadError).toHaveBeenCalledWith({
         type: 'loadError',
-        error: new Error(`Unsupported data type for animation data. Expected: 
+        error: new Error(`Unsupported data type for animation data. Expected:
           - string (Lottie JSON),
           - ArrayBuffer (dotLottie),
-          - object (Lottie JSON). 
+          - object (Lottie JSON).
           Received: number`),
       });
     });
@@ -1622,66 +1649,6 @@ describe.each([
     });
   });
 
-  describe('tween', () => {
-    test('tween() does nothing when the animation is not loaded', async () => {
-      dotLottie = new DotLottie({
-        canvas,
-        src,
-      });
-
-      const result = await dotLottie.tween(10, 1.0);
-
-      expect(result).toBe(false);
-    });
-
-    test('tween() starts a tween animation to a specific frame', async () => {
-      const onLoad = vi.fn();
-
-      dotLottie = new DotLottie({
-        canvas,
-        src,
-      });
-
-      dotLottie.addEventListener('load', onLoad);
-
-      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
-
-      const result = await dotLottie.tween(10, 1.0);
-
-      expect(result).toBe(true);
-    });
-  });
-
-  describe('tweenToMarker', () => {
-    test('tweenToMarker() does nothing when the animation is not loaded', async () => {
-      dotLottie = new DotLottie({
-        canvas,
-        src,
-      });
-
-      const result = await dotLottie.tweenToMarker('test-marker', 1.0);
-
-      expect(result).toBe(false);
-    });
-
-    test('tweenToMarker() starts a tween animation to a specific marker', async () => {
-      const onLoad = vi.fn();
-
-      dotLottie = new DotLottie({
-        canvas,
-        src,
-      });
-
-      dotLottie.addEventListener('load', onLoad);
-
-      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
-
-      const result = await dotLottie.tweenToMarker('Marker_1', 1.0);
-
-      expect(result).toBe(true);
-    });
-  });
-
   describe('removeEventListener', () => {
     test('removeEventListener() removes an event listener', async () => {
       const onLoad = vi.fn();
@@ -1895,7 +1862,7 @@ describe.each([
         src: jsonSrc,
       });
 
-      expect(dotLottie.marker).toBeUndefined();
+      expect(dotLottie.marker).toBe('');
 
       dotLottie.addEventListener('load', onLoad);
 

@@ -161,8 +161,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     if (typeof segment?.[0] === 'number' && typeof segment[1] === 'number') {
       dotLottieRef.current?.setSegment(segment[0], segment[1]);
     } else {
-      // TODO: implement it for worker
-      // dotLottieRef.current?.resetSegment();
+      dotLottieRef.current?.resetSegment();
     }
   }, [segment]);
 
@@ -198,7 +197,9 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   }, [props.marker]);
 
   useEffect(() => {
-    dotLottieRef.current?.loadAnimation(animationId ?? '');
+    if (dotLottieRef.current?.isLoaded && dotLottieRef.current.activeAnimationId !== animationId) {
+      dotLottieRef.current.loadAnimation(animationId ?? '');
+    }
   }, [animationId]);
 
   useEffect(() => {

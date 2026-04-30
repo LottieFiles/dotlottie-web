@@ -447,7 +447,6 @@ const commands: {
       autoplay: instance.autoplay,
       segment: instance.segment,
       layout: instance.layout,
-      segmentDuration: instance.segmentDuration,
       isReady: instance.isReady,
       manifest: instance.manifest,
     };
@@ -1156,6 +1155,17 @@ const commands: {
 
     instance.setSegment(segment[0], segment[1]);
   },
+  resetSegment: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.resetSegment();
+  },
   setSpeed: (request) => {
     const instanceId = request.params.instanceId;
     const speed = request.params.speed;
@@ -1204,32 +1214,6 @@ const commands: {
     }
 
     instance.unfreeze();
-  },
-  tween: (request) => {
-    const instanceId = request.params.instanceId;
-    const frame = request.params.frame;
-    const duration = request.params.duration;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.tween(frame, duration);
-  },
-  tweenToMarker: (request) => {
-    const instanceId = request.params.instanceId;
-    const marker = request.params.marker;
-    const duration = request.params.duration;
-
-    const instance = instancesMap.get(instanceId);
-
-    if (!instance) {
-      throw new Error(`Instance with id ${instanceId} does not exist.`);
-    }
-
-    return instance.tweenToMarker(marker, duration);
   },
   setViewport(request) {
     const instanceId = request.params.instanceId;
