@@ -75,9 +75,13 @@ describe('DotLottieSvelte', () => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
     });
 
-    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
 
-    dotLottie?.addEventListener('load', onLoad);
+    const dotLottie = dotLottieRefCallback.mock.calls[0][0];
+
+    dotLottie.addEventListener('load', onLoad);
 
     await vi.waitFor(() => {
       expect(onLoad).toHaveBeenCalledTimes(1);
@@ -122,9 +126,13 @@ describe('DotLottieSvelte', () => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
     });
 
-    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
 
-    dotLottie?.addEventListener('load', onLoad);
+    const dotLottie = dotLottieRefCallback.mock.calls[0][0];
+
+    dotLottie.addEventListener('load', onLoad);
 
     await vi.waitFor(() => {
       expect(onLoad).toHaveBeenCalledTimes(1);
@@ -169,9 +177,13 @@ describe('DotLottieSvelte', () => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
     });
 
-    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
 
-    dotLottie?.addEventListener('load', onLoad);
+    const dotLottie = dotLottieRefCallback.mock.calls[0][0];
+
+    dotLottie.addEventListener('load', onLoad);
 
     await vi.waitFor(() => {
       expect(onLoad).toHaveBeenCalledTimes(1);
@@ -343,9 +355,13 @@ describe('DotLottieSvelte', () => {
       dotLottieRefCallback,
     });
 
-    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
 
-    dotLottie?.addEventListener('load', onLoad);
+    const dotLottie = dotLottieRefCallback.mock.calls[0][0];
+
+    dotLottie.addEventListener('load', onLoad);
 
     await vi.waitFor(() => {
       expect(onLoad).toHaveBeenCalledTimes(1);
@@ -416,9 +432,13 @@ describe('DotLottieSvelte', () => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
     });
 
-    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
 
-    dotLottie?.addEventListener('load', onLoad);
+    const dotLottie = dotLottieRefCallback.mock.calls[0][0];
+
+    dotLottie.addEventListener('load', onLoad);
 
     await vi.waitFor(() => {
       expect(onLoad).toHaveBeenCalledTimes(1);
@@ -447,9 +467,13 @@ describe('DotLottieSvelte', () => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
     });
 
-    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
 
-    dotLottie?.addEventListener('load', onLoad);
+    const dotLottie = dotLottieRefCallback.mock.calls[0][0];
+
+    dotLottie.addEventListener('load', onLoad);
 
     await vi.waitFor(() => {
       expect(onLoad).toHaveBeenCalledTimes(1);
@@ -495,9 +519,13 @@ describe('DotLottieSvelte', () => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
     });
 
-    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
 
-    dotLottie?.addEventListener('load', onLoad);
+    const dotLottie = dotLottieRefCallback.mock.calls[0][0];
+
+    dotLottie.addEventListener('load', onLoad);
 
     await vi.waitFor(() => {
       expect(onLoad).toHaveBeenCalledTimes(1);
@@ -538,9 +566,13 @@ describe('DotLottieSvelte', () => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
     });
 
-    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
 
-    dotLottie?.addEventListener('load', onLoad);
+    const dotLottie = dotLottieRefCallback.mock.calls[0][0];
+
+    dotLottie.addEventListener('load', onLoad);
 
     await vi.waitFor(() => {
       expect(onLoad).toHaveBeenCalledTimes(1);
@@ -578,9 +610,13 @@ describe('DotLottieSvelte', () => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
     });
 
-    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
 
-    dotLottie?.addEventListener('load', onLoad);
+    const dotLottie = dotLottieRefCallback.mock.calls[0][0];
+
+    dotLottie.addEventListener('load', onLoad);
 
     await vi.waitFor(() => {
       expect(onLoad).toHaveBeenCalledTimes(1);
@@ -620,9 +656,13 @@ describe('DotLottieSvelte', () => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
     });
 
-    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
 
-    dotLottie?.addEventListener('load', onLoad);
+    const dotLottie = dotLottieRefCallback.mock.calls[0][0];
+
+    dotLottie.addEventListener('load', onLoad);
 
     await vi.waitFor(() => {
       expect(onLoad).toHaveBeenCalledTimes(1);
@@ -651,9 +691,13 @@ describe('DotLottieSvelte', () => {
       expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
     });
 
-    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
 
-    dotLottie?.addEventListener('load', onLoad);
+    const dotLottie = dotLottieRefCallback.mock.calls[0][0];
+
+    dotLottie.addEventListener('load', onLoad);
 
     await vi.waitFor(() => {
       expect(onLoad).toHaveBeenCalledTimes(1);

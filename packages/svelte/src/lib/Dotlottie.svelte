@@ -87,10 +87,15 @@
 		};
 	});
 
-	// Hover handler — re-registers listeners whenever playOnHover or dotLottie changes
+	// Hover handler — re-registers listeners whenever playOnHover or dotLottie changes.
+	// Capture the canvas element locally so cleanup detaches listeners from the same
+	// node we attached to, even if `canvas` rebinds later.
 	$effect(() => {
 		const currentPlayOnHover = playOnHover;
 		const currentDotLottie = dotLottie;
+		const currentCanvas = canvas;
+
+		if (!currentCanvas) return;
 
 		const handlePlayOnHover = (event: MouseEvent): void => {
 			if (!currentPlayOnHover || !currentDotLottie?.isLoaded) return;
@@ -101,12 +106,12 @@
 			}
 		};
 
-		canvas?.addEventListener('mouseenter', handlePlayOnHover);
-		canvas?.addEventListener('mouseleave', handlePlayOnHover);
+		currentCanvas.addEventListener('mouseenter', handlePlayOnHover);
+		currentCanvas.addEventListener('mouseleave', handlePlayOnHover);
 
 		return () => {
-			canvas?.removeEventListener('mouseenter', handlePlayOnHover);
-			canvas?.removeEventListener('mouseleave', handlePlayOnHover);
+			currentCanvas.removeEventListener('mouseenter', handlePlayOnHover);
+			currentCanvas.removeEventListener('mouseleave', handlePlayOnHover);
 		};
 	});
 
