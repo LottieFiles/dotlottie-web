@@ -1,0 +1,14 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DotLottieSvelte > basic 1`] = `
+<div>
+  <div
+    class="svelte-1r5gmvu"
+  >
+    <canvas
+      class="svelte-1r5gmvu"
+    />
+  </div>
+  
+</div>
+`;
