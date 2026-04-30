@@ -47,7 +47,7 @@
   "devDependencies": {
     "@vue/runtime-dom": "^3.4.6",
     "@vue/tsconfig": "^0.9.1",
-    "tsdown": "^0.20.3",
+    "tsdown": "^0.21.10",
     "typescript": "6.0.3"
   },
   "publishConfig": {
