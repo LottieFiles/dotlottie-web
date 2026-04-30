@@ -189,8 +189,6 @@ fetch(
 )
   .then(async (res) => res.json())
   .then((data): void => {
-    const allLayers: string[] = data.layers.map((layer: { nm: string }) => layer.nm);
-
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
     const dotLottie = new DotLottie({
@@ -206,32 +204,6 @@ fetch(
       backgroundColor: '#800080ff',
       themeId: 'animated_light',
       // useFrameInterpolation: false,
-    });
-
-    dotLottie.addEventListener('render', () => {
-      allLayers.forEach((layer) => {
-        const context = canvas.getContext('2d');
-
-        if (context) {
-          const obbPoints = dotLottie.getLayerBoundingBox(layer);
-
-          if (!obbPoints || obbPoints.length !== 8) return;
-
-          const [x0, y0, x1, y1, x2, y2, x3, y3] = obbPoints;
-
-          if (!x0 || !y0 || !x1 || !y1 || !x2 || !y2 || !x3 || !y3) return;
-
-          context.beginPath();
-          context.moveTo(x0, y0);
-          context.lineTo(x1, y1);
-          context.lineTo(x2, y2);
-          context.lineTo(x3, y3);
-          context.closePath();
-          context.lineWidth = 2;
-          context.strokeStyle = 'red';
-          context.stroke();
-        }
-      });
     });
 
     dotLottie.addEventListener('loadError', console.error);

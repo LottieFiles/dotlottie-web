@@ -39,7 +39,6 @@ export class DotLottiePlayerWasm {
   set_layout(fit: string, align_x: number, align_y: number): boolean;
   set_marker(name: string): void;
   clear_slots(): boolean;
-  has_segment(): boolean;
   is_complete(): boolean;
   is_tweening(): boolean;
   /**
@@ -95,7 +94,6 @@ export class DotLottiePlayerWasm {
    * Returns the current affine transform as a flat `Float32Array`.
    */
   get_transform(): Float32Array;
-  request_frame(): number;
   segment_start(): number;
   /**
    * Set multiple slots at once from a JSON string.
@@ -151,11 +149,6 @@ export class DotLottiePlayerWasm {
    * Set up (or resize) the WebGPU rendering target.
    */
   setup_wg_target(width: number, height: number): boolean;
-  /**
-   * Returns `[x, y, width, height]` of the layer's bounding box.
-   */
-  get_layer_bounds(layer_name: string): Float32Array;
-  segment_duration(): number;
   /**
    * Set the global audio volume multiplier (clamped to [0.0, 1.0]).
    */
@@ -238,16 +231,12 @@ export class DotLottiePlayerWasm {
   constructor();
   mode(): Mode;
   play(): boolean;
-  seek(no: number): boolean;
   stop(): boolean;
   /**
-   * Advance time and render.  Call once per `requestAnimationFrame`.
+   * Advance the animation by `dt` milliseconds and render if the frame changed.
+   * Call once per `requestAnimationFrame`, passing the frame delta in milliseconds.
    */
-  tick(): boolean;
-  /**
-   * Clear the canvas to the background colour.
-   */
-  clear(): void;
+  tick(dt: number): boolean;
   pause(): boolean;
   speed(): number;
   width(): number;
@@ -257,7 +246,7 @@ export class DotLottiePlayerWasm {
    */
   render(): boolean;
   /**
-   * Returns an array of `{ name, time, duration }` objects.
+   * Returns an array of `{ name, start, end }` objects.
    */
   markers(): any;
   /**
@@ -269,10 +258,10 @@ export class DotLottiePlayerWasm {
    */
   sm_stop(): boolean;
   /**
-   * Advance the state machine by one tick.  Returns `false` if no state machine
-   * is loaded, otherwise `true` (even if the machine is stopped or errored).
+   * Advance the state machine by `dt` milliseconds and render if the frame changed.
+   * Returns `true` when a new frame was rendered, `false` otherwise.
    */
-  sm_tick(): boolean;
+  sm_tick(dt: number): boolean;
   autoplay(): boolean;
   duration(): number;
   set_loop(v: boolean): void;
@@ -282,7 +271,6 @@ export class DotLottiePlayerWasm {
    */
   sm_start(require_user_interaction: boolean, whitelist: any[]): boolean;
   theme_id(): string | undefined;
-  intersect(x: number, y: number, layer_name: string): boolean;
   is_loaded(): boolean;
   is_paused(): boolean;
   load_font(name: string, data: Uint8Array): boolean;
@@ -309,8 +297,11 @@ export interface InitOutput {
   readonly __wbg_dotlottieplayerwasm_free: (a: number, b: number) => void;
   readonly abort: () => void;
   readonly acosh: (a: number) => number;
+  readonly acoshf: (a: number) => number;
   readonly asinh: (a: number) => number;
+  readonly asinhf: (a: number) => number;
   readonly atanh: (a: number) => number;
+  readonly atanhf: (a: number) => number;
   readonly atoi: (a: number) => number;
   readonly bsearch: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly calloc: (a: number, b: number) => number;
@@ -322,7 +313,6 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_background_b: (a: number) => number;
   readonly dotlottieplayerwasm_background_g: (a: number) => number;
   readonly dotlottieplayerwasm_background_r: (a: number) => number;
-  readonly dotlottieplayerwasm_clear: (a: number) => void;
   readonly dotlottieplayerwasm_clear_marker: (a: number) => void;
   readonly dotlottieplayerwasm_clear_segment: (a: number) => number;
   readonly dotlottieplayerwasm_clear_slot: (a: number, b: number, c: number) => number;
@@ -332,16 +322,13 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_current_marker: (a: number) => [number, number];
   readonly dotlottieplayerwasm_duration: (a: number) => number;
   readonly dotlottieplayerwasm_emit_on_loop: (a: number) => void;
-  readonly dotlottieplayerwasm_get_layer_bounds: (a: number, b: number, c: number) => any;
   readonly dotlottieplayerwasm_get_slot_ids: (a: number) => any;
   readonly dotlottieplayerwasm_get_slot_str: (a: number, b: number, c: number) => [number, number];
   readonly dotlottieplayerwasm_get_slot_type: (a: number, b: number, c: number) => [number, number];
   readonly dotlottieplayerwasm_get_slots_str: (a: number) => [number, number];
   readonly dotlottieplayerwasm_get_state_machine: (a: number, b: number, c: number) => [number, number];
   readonly dotlottieplayerwasm_get_transform: (a: number) => any;
-  readonly dotlottieplayerwasm_has_segment: (a: number) => number;
   readonly dotlottieplayerwasm_height: (a: number) => number;
-  readonly dotlottieplayerwasm_intersect: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly dotlottieplayerwasm_is_complete: (a: number) => number;
   readonly dotlottieplayerwasm_is_loaded: (a: number) => number;
   readonly dotlottieplayerwasm_is_paused: (a: number) => number;
@@ -366,13 +353,10 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_play: (a: number) => number;
   readonly dotlottieplayerwasm_poll_event: (a: number) => any;
   readonly dotlottieplayerwasm_render: (a: number) => number;
-  readonly dotlottieplayerwasm_request_frame: (a: number) => number;
   readonly dotlottieplayerwasm_reset_current_loop_count: (a: number) => void;
   readonly dotlottieplayerwasm_reset_slot: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_reset_slots: (a: number) => number;
   readonly dotlottieplayerwasm_reset_theme: (a: number) => number;
-  readonly dotlottieplayerwasm_seek: (a: number, b: number) => number;
-  readonly dotlottieplayerwasm_segment_duration: (a: number) => number;
   readonly dotlottieplayerwasm_segment_end: (a: number) => number;
   readonly dotlottieplayerwasm_segment_start: (a: number) => number;
   readonly dotlottieplayerwasm_set_audio_volume: (a: number, b: number) => void;
@@ -432,7 +416,7 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_sm_start: (a: number, b: number, c: number, d: number) => number;
   readonly dotlottieplayerwasm_sm_status: (a: number) => [number, number];
   readonly dotlottieplayerwasm_sm_stop: (a: number) => number;
-  readonly dotlottieplayerwasm_sm_tick: (a: number) => number;
+  readonly dotlottieplayerwasm_sm_tick: (a: number, b: number) => number;
   readonly dotlottieplayerwasm_speed: (a: number) => number;
   readonly dotlottieplayerwasm_state_machine_id: (a: number) => [number, number];
   readonly dotlottieplayerwasm_state_machine_load: (a: number, b: number, c: number) => number;
@@ -440,7 +424,7 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_state_machine_unload: (a: number) => void;
   readonly dotlottieplayerwasm_stop: (a: number) => number;
   readonly dotlottieplayerwasm_theme_id: (a: number) => [number, number];
-  readonly dotlottieplayerwasm_tick: (a: number) => number;
+  readonly dotlottieplayerwasm_tick: (a: number, b: number) => number;
   readonly dotlottieplayerwasm_total_frames: (a: number) => number;
   readonly dotlottieplayerwasm_unload_font: (a: number, b: number) => number;
   readonly dotlottieplayerwasm_use_frame_interpolation: (a: number) => number;
@@ -526,6 +510,7 @@ export interface InitOutput {
   readonly wgpuShaderModuleRelease: (a: number) => void;
   readonly wgpuTextureRelease: (a: number) => void;
   readonly wgpuTextureViewRelease: (a: number) => void;
+  readonly __cxa_thread_atexit: (a: number, b: number, c: number) => number;
   readonly __wbindgen_exn_store_command_export: (a: number) => void;
   readonly __externref_table_alloc_command_export: () => number;
   readonly __wbindgen_export_2: WebAssembly.Table;

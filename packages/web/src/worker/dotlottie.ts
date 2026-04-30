@@ -65,7 +65,6 @@ export interface DotLottieInstanceState {
   mode: Mode;
   renderConfig: RenderConfig;
   segment: [number, number] | undefined;
-  segmentDuration: number;
   speed: number;
   totalFrames: number;
   useFrameInterpolation: boolean;
@@ -97,7 +96,6 @@ export class DotLottieWorker {
     loop: false,
     mode: 'forward',
     segment: [0, 0],
-    segmentDuration: 0,
     speed: 1,
     totalFrames: 0,
     isLoaded: false,
@@ -184,8 +182,11 @@ export class DotLottieWorker {
       this._pendingConfig = null;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this._worker.addEventListener('message', this._handleWorkerEvent.bind(this));
+    DotLottieWorker._workerManager.registerEventHandler(
+      this._id,
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      this._handleWorkerEvent.bind(this),
+    );
   }
 
   private async _handleWorkerEvent(event: MessageEvent): Promise<void> {
@@ -443,10 +444,6 @@ export class DotLottieWorker {
     return this._dotLottieInstanceState.isFrozen;
   }
 
-  public get segmentDuration(): number {
-    return this._dotLottieInstanceState.segmentDuration;
-  }
-
   public get totalFrames(): number {
     return this._dotLottieInstanceState.totalFrames;
   }
@@ -629,6 +626,13 @@ export class DotLottieWorker {
     await this._updateDotLottieInstanceState();
   }
 
+  public async resetSegment(): Promise<void> {
+    if (!this._created) return;
+
+    await this._sendMessage('resetSegment', { instanceId: this._id });
+    await this._updateDotLottieInstanceState();
+  }
+
   public async setRenderConfig(renderConfig: RenderConfig): Promise<void> {
     if (!this._created) return;
 
@@ -764,6 +768,7 @@ export class DotLottieWorker {
 
     this._cleanupStateMachineListeners();
 
+    DotLottieWorker._workerManager.unregisterEventHandler(this._id);
     DotLottieWorker._workerManager.unassignAnimationFromWorker(this._id);
     this._eventManager.removeAllEventListeners();
 
@@ -960,25 +965,20 @@ export class DotLottieWorker {
       params,
     };
 
-    this._worker.postMessage(rpcRequest, transfer || []);
-
     return new Promise((resolve, reject) => {
-      const onMessage = (event: MessageEvent): void => {
+      DotLottieWorker._workerManager.registerRpcReplyHandler(rpcRequest.id, (event: MessageEvent) => {
+        DotLottieWorker._workerManager.unregisterRpcReplyHandler(rpcRequest.id);
+
         const rpcResponse: RpcResponse<T> = event.data;
 
-        // Check if the response corresponds to the request
-        if (rpcResponse.id === rpcRequest.id) {
-          this._worker.removeEventListener('message', onMessage);
-
-          if (rpcResponse.error) {
-            reject(new Error(`Failed to execute method ${method}: ${rpcResponse.error}`));
-          } else {
-            resolve(rpcResponse.result);
-          }
+        if (rpcResponse.error) {
+          reject(new Error(`Failed to execute method ${method}: ${rpcResponse.error}`));
+        } else {
+          resolve(rpcResponse.result);
         }
-      };
+      });
 
-      this._worker.addEventListener('message', onMessage);
+      this._worker.postMessage(rpcRequest, transfer || []);
     });
   }
 

@@ -1,5 +1,4 @@
 import type { DotLottie, DotLottieReactProps } from '@lottiefiles/dotlottie-react';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import type { ComponentType } from 'react';
@@ -7,15 +6,43 @@ import { useEffect, useState } from 'react';
 
 type Renderer = 'canvas' | 'webgl' | 'webgpu';
 
-const DotLottieWebGL = dynamic(() => import('@lottiefiles/dotlottie-react/webgl').then((m) => m.DotLottieReact), {
-  ssr: false,
-});
-const DotLottieWebGPU = dynamic(() => import('@lottiefiles/dotlottie-react/webgpu').then((m) => m.DotLottieReact), {
-  ssr: false,
-});
+import dotLottieCanvasWasmUrl from '../../../../packages/web/src/core/dotlottie-player.wasm?url';
+import dotLottieWebGLWasmUrl from '../../../../packages/web/src/webgl/dotlottie-player.wasm?url';
+import dotLottieWebGPUWasmUrl from '../../../../packages/web/src/webgpu/dotlottie-player.wasm?url';
+
+const DotLottieCanvas = dynamic(
+  () =>
+    import('@lottiefiles/dotlottie-react').then((m) => {
+      m.setWasmUrl(dotLottieCanvasWasmUrl);
+      return { default: m.DotLottieReact };
+    }),
+  {
+    ssr: false,
+  },
+);
+const DotLottieWebGL = dynamic(
+  () =>
+    import('@lottiefiles/dotlottie-react/webgl').then((m) => {
+      m.setWasmUrl(dotLottieWebGLWasmUrl);
+      return { default: m.DotLottieReact };
+    }),
+  {
+    ssr: false,
+  },
+);
+const DotLottieWebGPU = dynamic(
+  () =>
+    import('@lottiefiles/dotlottie-react/webgpu').then((m) => {
+      m.setWasmUrl(dotLottieWebGPUWasmUrl);
+      return { default: m.DotLottieReact };
+    }),
+  {
+    ssr: false,
+  },
+);
 
 const rendererComponent: Record<Renderer, ComponentType<DotLottieReactProps>> = {
-  canvas: DotLottieReact,
+  canvas: DotLottieCanvas,
   webgl: DotLottieWebGL,
   webgpu: DotLottieWebGPU,
 };

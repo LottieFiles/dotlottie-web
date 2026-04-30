@@ -3,12 +3,27 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 
 type Renderer = 'canvas' | 'webgl' | 'webgpu';
 
-const DotLottieCanvas = lazy(() => import('@lottiefiles/dotlottie-react').then((m) => ({ default: m.DotLottieReact })));
+import dotLottieCanvasWasmUrl from '../../../packages/web/src/core/dotlottie-player.wasm?url';
+import dotLottieWebGLWasmUrl from '../../../packages/web/src/webgl/dotlottie-player.wasm?url';
+import dotLottieWebGPUWasmUrl from '../../../packages/web/src/webgpu/dotlottie-player.wasm?url';
+
+const DotLottieCanvas = lazy(() =>
+  import('@lottiefiles/dotlottie-react').then((m) => {
+    m.setWasmUrl(dotLottieCanvasWasmUrl);
+    return { default: m.DotLottieReact };
+  }),
+);
 const DotLottieWebGL = lazy(() =>
-  import('@lottiefiles/dotlottie-react/webgl').then((m) => ({ default: m.DotLottieReact })),
+  import('@lottiefiles/dotlottie-react/webgl').then((m) => {
+    m.setWasmUrl(dotLottieWebGLWasmUrl);
+    return { default: m.DotLottieReact };
+  }),
 );
 const DotLottieWebGPU = lazy(() =>
-  import('@lottiefiles/dotlottie-react/webgpu').then((m) => ({ default: m.DotLottieReact })),
+  import('@lottiefiles/dotlottie-react/webgpu').then((m) => {
+    m.setWasmUrl(dotLottieWebGPUWasmUrl);
+    return { default: m.DotLottieReact };
+  }),
 );
 
 const rendererComponent = {

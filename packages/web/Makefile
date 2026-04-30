@@ -1,12 +1,12 @@
 # ============================================================================
-# WASM Build System — wasm32-unknown-unknown + wasm-pack
+# WASM Build System — wasm32-unknown-unknown + wasm-bindgen
 # ============================================================================
 # Prerequisites:
 #   rustup target add wasm32-unknown-unknown
-#   cargo install wasm-pack  (or: make setup)
+#   cargo install wasm-bindgen-cli  (or: make setup)
 #
 # Usage:
-#   make setup       — install Rust target + wasm-pack
+#   make setup       — install Rust target + wasm-bindgen-cli
 #   make build       — run pnpm build
 #   make wasm        — software-renderer build  → src/core/
 #   make wasm-webgl  — WebGL2 build             → src/webgl/
@@ -15,7 +15,7 @@
 #   make clean       — remove build artefacts
 #
 # Feature flag overrides (pass on command line or edit defaults below):
-#   make wasm WASM_FEATURES_SW="tvg,tvg-sw,dotlottie,wasm-bindgen-api"
+#   make wasm WASM_FEATURES_SW="tvg,tvg-cpu,dotlottie,wasm-bindgen-api"
 # ============================================================================
 
 DOTLOTTIE_RS_DIR  ?= dotlottie-rs
@@ -26,9 +26,12 @@ WEB_SRC_CORE   := src/core
 WEB_SRC_WEBGL  := src/webgl
 WEB_SRC_WEBGPU := src/webgpu
 
-WASM_BINDGEN_TARGET := wasm32-unknown-unknown
+WASM_TARGET := wasm32-unknown-unknown
+WASM_MANIFEST := $(DOTLOTTIE_RS_CRATE)/Cargo.toml
+WASM_ARTIFACT := $(DOTLOTTIE_RS_CRATE)/target/$(WASM_TARGET)/release/dotlottie_rs.wasm
+WASM_LOCKFILE := $(DOTLOTTIE_RS_CRATE)/Cargo.lock
 
-WASM_FEATURES_COMMON ?= tvg,tvg-sw,tvg-png,tvg-jpg,tvg-webp,tvg-ttf,tvg-lottie-expressions,dotlottie,theming,state-machines,wasm-bindgen-api
+WASM_FEATURES_COMMON ?= tvg,tvg-cpu,tvg-png,tvg-jpg,tvg-webp,tvg-ttf,tvg-lottie-expressions,dotlottie,theming,state-machines,wasm-bindgen-api
 WASM_FEATURES_SW     ?= $(WASM_FEATURES_COMMON)
 WASM_FEATURES_WEBGL  ?= $(WASM_FEATURES_COMMON),tvg-gl,webgl
 WASM_FEATURES_WEBGPU ?= $(WASM_FEATURES_COMMON),tvg-wg,webgpu
@@ -57,6 +60,8 @@ GREEN  := \033[32m
 YELLOW := \033[33m
 RESET  := \033[0m
 
+comma := ,
+
 .PHONY: help setup wasm wasm-webgl wasm-webgpu wasm-all build clean
 
 help:
@@ -70,7 +75,7 @@ help:
 	@printf "$(BOLD)Build$(RESET)\n"
 	@printf "  make build         — run pnpm build\n\n"
 	@printf "$(BOLD)Setup$(RESET)\n"
-	@printf "  make setup         — install Rust target + wasm-pack\n\n"
+	@printf "  make setup         — install Rust target + wasm-bindgen-cli\n\n"
 	@printf "$(BOLD)Clean$(RESET)\n"
 	@printf "  make clean         — remove build artefacts\n\n"
 
@@ -84,67 +89,64 @@ define print_build_info
 	@printf "  $(BOLD)Output  :$(RESET) $(3)\n\n"
 endef
 
-# Install the wasm32-unknown-unknown Rust target and wasm-pack
+# Install the wasm32-unknown-unknown Rust target and wasm-bindgen-cli (version-matched)
 setup:
-	@rustup target add $(WASM_BINDGEN_TARGET)
-	@command -v wasm-pack >/dev/null 2>&1 || curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+	@rustup target add $(WASM_TARGET)
+	@if [ ! -f $(WASM_LOCKFILE) ]; then cargo generate-lockfile --manifest-path $(WASM_MANIFEST); fi
+	@cargo install wasm-bindgen-cli \
+		--version "$$(grep -A1 'name = "wasm-bindgen"' $(WASM_LOCKFILE) | grep version | head -1 | sed 's/.*"\(.*\)"/\1/')" \
+		--locked
 
-# Post-process wasm-bindgen output to fix two issues:
-# 1. wasm-bindgen >=0.2 generates `import * as __wbg_star0 from 'env'` unconditionally
-#    even when the wasm binary has no env imports.  Browsers reject the bare 'env'
-#    specifier, so strip the two dead lines.
-# 2. The default module path fallback `new URL('...wasm', import.meta.url)` causes
-#    Webpack/Next.js to try resolving the .wasm file at build time, breaking bundled
-#    consumers. Replace with a throw since DotLottieWasmLoader always provides a URL.
-define strip_env_import
+# Build a WASM variant using cargo rustc + wasm-bindgen + wasm-opt
+# $(1) = extra features (e.g. tvg-gl,webgl)
+# $(2) = extra RUSTFLAGS (e.g. --cfg=web_sys_unstable_apis)
+# $(3) = output directory (e.g. $(WASM_OUT_BASE)/wasm)
+# $(4) = web src directory (e.g. $(WEB_SRC_CORE))
+define wasm_build
+	@mkdir -p $(3)
+	CC=$(WASM_CC) CXX=$(WASM_CXX) RUSTFLAGS="$(2)" \
+		cargo rustc \
+			--manifest-path $(WASM_MANIFEST) \
+			--crate-type cdylib \
+			--target $(WASM_TARGET) \
+			--release \
+			--no-default-features \
+			--features $(WASM_FEATURES_COMMON)$(if $(1),$(comma)$(1))
+	wasm-bindgen $(WASM_ARTIFACT) \
+		--out-dir $(3) \
+		--target web \
+		--typescript
+	@if command -v wasm-opt >/dev/null 2>&1; then \
+		wasm-opt $(3)/dotlottie_rs_bg.wasm -o $(3)/dotlottie_rs_bg.wasm -O3; \
+	fi
+	@# Replace import.meta.url fallback — bundlers (webpack/Next.js) try to resolve
+	@# the .wasm path at build time.  DotLottieWasmLoader always provides a URL.
 	$(SED_I) \
-		-e '/^import \* as __wbg_star0 from .env.;/d' \
-		-e '/imports\[.env.\] = __wbg_star0;/d' \
-		-e "s|module_or_path = new URL('dotlottie_rs_bg.wasm', import.meta.url);|throw new Error('WASM module URL must be provided via DotLottieWasmLoader or setWasmUrl().');|" \
-		$(1)/dotlottie_rs.js
-endef
-
-# Copy wasm-pack output artifacts into a web src directory, renaming to dotlottie-player.*
-define copy_variant
-	mkdir -p $(2)
-	cp $(1)/dotlottie_rs_bg.wasm      $(2)/dotlottie-player.wasm
-	cp $(1)/dotlottie_rs.js           $(2)/dotlottie-player.js
-	cp $(1)/dotlottie_rs.d.ts         $(2)/dotlottie-player.d.ts
-	cp $(1)/dotlottie_rs_bg.wasm.d.ts $(2)/dotlottie-player.wasm.d.ts
+		"s|module_or_path = new URL('dotlottie_rs_bg.wasm', import.meta.url);|throw new Error('WASM module URL must be provided via DotLottieWasmLoader or setWasmUrl().');|" \
+		$(3)/dotlottie_rs.js
+	mkdir -p $(4)
+	cp $(3)/dotlottie_rs_bg.wasm      $(4)/dotlottie-player.wasm
+	cp $(3)/dotlottie_rs.js           $(4)/dotlottie-player.js
+	cp $(3)/dotlottie_rs.d.ts         $(4)/dotlottie-player.d.ts
+	cp $(3)/dotlottie_rs_bg.wasm.d.ts $(4)/dotlottie-player.wasm.d.ts
 endef
 
 # Software-renderer build — no graphics API required
 wasm:
 	$(call print_build_info,Software (core),$(WASM_FEATURES_SW),$(WEB_SRC_CORE))
-	CC=$(WASM_CC) CXX=$(WASM_CXX) \
-		wasm-pack build $(DOTLOTTIE_RS_CRATE) --target web \
-		--out-dir ../release/wasm \
-		--no-default-features --features $(WASM_FEATURES_SW)
-	$(call strip_env_import,$(WASM_OUT_BASE)/wasm)
-	$(call copy_variant,$(WASM_OUT_BASE)/wasm,$(WEB_SRC_CORE))
+	$(call wasm_build,,,$(WASM_OUT_BASE)/wasm,$(WEB_SRC_CORE))
 	@printf "$(BOLD)$(GREEN)✓ Done$(RESET) → $(WEB_SRC_CORE)\n\n"
 
 # WebGL2 build
 wasm-webgl:
 	$(call print_build_info,WebGL2,$(WASM_FEATURES_WEBGL),$(WEB_SRC_WEBGL))
-	CC=$(WASM_CC) CXX=$(WASM_CXX) \
-		wasm-pack build $(DOTLOTTIE_RS_CRATE) --target web \
-		--out-dir ../release/wasm-webgl \
-		--no-default-features --features $(WASM_FEATURES_WEBGL)
-	$(call strip_env_import,$(WASM_OUT_BASE)/wasm-webgl)
-	$(call copy_variant,$(WASM_OUT_BASE)/wasm-webgl,$(WEB_SRC_WEBGL))
+	$(call wasm_build,tvg-gl$(comma)webgl,,$(WASM_OUT_BASE)/wasm-webgl,$(WEB_SRC_WEBGL))
 	@printf "$(BOLD)$(GREEN)✓ Done$(RESET) → $(WEB_SRC_WEBGL)\n\n"
 
 # WebGPU build — requires web_sys_unstable_apis cfg for all Gpu* web-sys types
 wasm-webgpu:
 	$(call print_build_info,WebGPU,$(WASM_FEATURES_WEBGPU),$(WEB_SRC_WEBGPU))
-	CC=$(WASM_CC) CXX=$(WASM_CXX) \
-		RUSTFLAGS="--cfg=web_sys_unstable_apis" \
-		wasm-pack build $(DOTLOTTIE_RS_CRATE) --target web \
-		--out-dir ../release/wasm-webgpu \
-		--no-default-features --features $(WASM_FEATURES_WEBGPU)
-	$(call strip_env_import,$(WASM_OUT_BASE)/wasm-webgpu)
-	$(call copy_variant,$(WASM_OUT_BASE)/wasm-webgpu,$(WEB_SRC_WEBGPU))
+	$(call wasm_build,tvg-wg$(comma)webgpu,--cfg=web_sys_unstable_apis,$(WASM_OUT_BASE)/wasm-webgpu,$(WEB_SRC_WEBGPU))
 	@printf "$(BOLD)$(GREEN)✓ Done$(RESET) → $(WEB_SRC_WEBGPU)\n\n"
 
 # Build all three variants
@@ -155,5 +157,5 @@ build:
 
 # Remove wasm artefacts
 clean:
-	@cargo clean --manifest-path $(DOTLOTTIE_RS_CRATE)/Cargo.toml --target $(WASM_BINDGEN_TARGET)
+	@cargo clean --manifest-path $(WASM_MANIFEST) --target $(WASM_TARGET)
 	@rm -rf $(WASM_OUT_BASE)/wasm $(WASM_OUT_BASE)/wasm-webgl $(WASM_OUT_BASE)/wasm-webgpu

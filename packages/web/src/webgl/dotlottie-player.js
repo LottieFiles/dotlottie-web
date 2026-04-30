@@ -367,13 +367,6 @@ export class DotLottiePlayerWasm {
     /**
      * @returns {boolean}
      */
-    has_segment() {
-        const ret = wasm.dotlottieplayerwasm_has_segment(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
     is_complete() {
         const ret = wasm.dotlottieplayerwasm_is_complete(this.__wbg_ptr);
         return ret !== 0;
@@ -615,13 +608,6 @@ export class DotLottiePlayerWasm {
     /**
      * @returns {number}
      */
-    request_frame() {
-        const ret = wasm.dotlottieplayerwasm_request_frame(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-     * @returns {number}
-     */
     segment_start() {
         const ret = wasm.dotlottieplayerwasm_segment_start(this.__wbg_ptr);
         return ret;
@@ -837,24 +823,6 @@ export class DotLottiePlayerWasm {
     setup_gl_target(width, height) {
         const ret = wasm.dotlottieplayerwasm_setup_gl_target(this.__wbg_ptr, width, height);
         return ret !== 0;
-    }
-    /**
-     * Returns `[x, y, width, height]` of the layer's bounding box.
-     * @param {string} layer_name
-     * @returns {Float32Array}
-     */
-    get_layer_bounds(layer_name) {
-        const ptr0 = passStringToWasm0(layer_name, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_get_layer_bounds(this.__wbg_ptr, ptr0, len0);
-        return ret;
-    }
-    /**
-     * @returns {number}
-     */
-    segment_duration() {
-        const ret = wasm.dotlottieplayerwasm_segment_duration(this.__wbg_ptr);
-        return ret;
     }
     /**
      * Set the global audio volume multiplier (clamped to [0.0, 1.0]).
@@ -1163,14 +1131,6 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
-     * @param {number} no
-     * @returns {boolean}
-     */
-    seek(no) {
-        const ret = wasm.dotlottieplayerwasm_seek(this.__wbg_ptr, no);
-        return ret !== 0;
-    }
-    /**
      * @returns {boolean}
      */
     stop() {
@@ -1178,18 +1138,14 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
-     * Advance time and render.  Call once per `requestAnimationFrame`.
+     * Advance the animation by `dt` milliseconds and render if the frame changed.
+     * Call once per `requestAnimationFrame`, passing the frame delta in milliseconds.
+     * @param {number} dt
      * @returns {boolean}
      */
-    tick() {
-        const ret = wasm.dotlottieplayerwasm_tick(this.__wbg_ptr);
+    tick(dt) {
+        const ret = wasm.dotlottieplayerwasm_tick(this.__wbg_ptr, dt);
         return ret !== 0;
-    }
-    /**
-     * Clear the canvas to the background colour.
-     */
-    clear() {
-        wasm.dotlottieplayerwasm_clear(this.__wbg_ptr);
     }
     /**
      * @returns {boolean}
@@ -1228,7 +1184,7 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
-     * Returns an array of `{ name, time, duration }` objects.
+     * Returns an array of `{ name, start, end }` objects.
      * @returns {any}
      */
     markers() {
@@ -1255,12 +1211,13 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
-     * Advance the state machine by one tick.  Returns `false` if no state machine
-     * is loaded, otherwise `true` (even if the machine is stopped or errored).
+     * Advance the state machine by `dt` milliseconds and render if the frame changed.
+     * Returns `true` when a new frame was rendered, `false` otherwise.
+     * @param {number} dt
      * @returns {boolean}
      */
-    sm_tick() {
-        const ret = wasm.dotlottieplayerwasm_sm_tick(this.__wbg_ptr);
+    sm_tick(dt) {
+        const ret = wasm.dotlottieplayerwasm_sm_tick(this.__wbg_ptr, dt);
         return ret !== 0;
     }
     /**
@@ -1312,18 +1269,6 @@ export class DotLottiePlayerWasm {
             wasm.__wbindgen_free_command_export(ret[0], ret[1] * 1, 1);
         }
         return v1;
-    }
-    /**
-     * @param {number} x
-     * @param {number} y
-     * @param {string} layer_name
-     * @returns {boolean}
-     */
-    intersect(x, y, layer_name) {
-        const ptr0 = passStringToWasm0(layer_name, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
-        const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.dotlottieplayerwasm_intersect(this.__wbg_ptr, x, y, ptr0, len0);
-        return ret !== 0;
     }
     /**
      * @returns {boolean}
@@ -1632,10 +1577,6 @@ function __wbg_get_imports() {
     };
     imports.wbg.__wbg_newwithlength_5a5efe313cfd59f1 = function(arg0) {
         const ret = new Float32Array(arg0 >>> 0);
-        return ret;
-    };
-    imports.wbg.__wbg_now_807e54c39636c349 = function() {
-        const ret = Date.now();
         return ret;
     };
     imports.wbg.__wbg_push_737cfc8c1432c2c6 = function(arg0, arg1) {

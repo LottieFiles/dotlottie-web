@@ -5,7 +5,7 @@ By default, `@lottiefiles/dotlottie-web` ships with pre-built WASM binaries — 
 ### Prerequisites
 
 * [Rust](https://rustup.rs/)
-* [wasm-pack](https://rustwasm.github.io/wasm-pack/)
+* [wasm-bindgen-cli](https://rustwasm.github.io/wasm-bindgen/) (installed automatically via `make setup`)
 * `make` (GNU Make or equivalent). On Windows, you can use environments like WSL, MSYS2, or a similar POSIX-compatible shell that provides `make`.
 * A C/LLVM toolchain with `clang`/`clang++` available on your `PATH` (the WASM build uses `clang` as configured in `make/wasm.mk`). On macOS, you can use Xcode command-line tools or install LLVM via Homebrew.
 
@@ -21,7 +21,7 @@ Run the one-time setup from the repo root:
 make setup
 ```
 
-This installs the `wasm32-unknown-unknown` Rust target and `wasm-pack`.
+This installs the `wasm32-unknown-unknown` Rust target and `wasm-bindgen-cli` (version-matched to the `wasm-bindgen` crate in `Cargo.lock`).
 
 ### Building
 
@@ -61,7 +61,7 @@ Feature flags are defined as variables in `make/wasm.mk` at the repo root. Edit 
 
 ```makefile
 # make/wasm.mk
-WASM_FEATURES_COMMON ?= tvg,tvg-sw
+WASM_FEATURES_COMMON ?= tvg,tvg-cpu
 WASM_FEATURES_SW     ?= $(WASM_FEATURES_COMMON)
 WASM_FEATURES_WEBGL  ?= $(WASM_FEATURES_COMMON),tvg-gl,webgl
 WASM_FEATURES_WEBGPU ?= $(WASM_FEATURES_COMMON),tvg-wg,webgpu
@@ -70,5 +70,5 @@ WASM_FEATURES_WEBGPU ?= $(WASM_FEATURES_COMMON),tvg-wg,webgpu
 Or override on the command line without editing the file:
 
 ```sh
-make wasm WASM_FEATURES_SW="tvg,tvg-sw,dotlottie,wasm-bindgen-api"
+make wasm WASM_FEATURES_SW="tvg,tvg-cpu,dotlottie,wasm-bindgen-api"
 ```

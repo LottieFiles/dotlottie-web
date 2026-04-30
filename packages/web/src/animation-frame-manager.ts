@@ -28,7 +28,7 @@ class NodeAnimationFrameStrategy implements AnimationFrameStrategy {
     this._lastHandleId += 1;
 
     this._lastImmediate = setImmediate(() => {
-      callback(Date.now());
+      callback(performance.now());
     });
 
     return this._lastHandleId;

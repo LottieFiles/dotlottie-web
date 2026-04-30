@@ -282,6 +282,7 @@ describe.each([
     });
 
     const setSegment = vi.spyOn(dotLottie, 'setSegment');
+    const resetSegment = vi.spyOn(dotLottie, 'resetSegment');
 
     rerender({ src, segment: JSON.stringify([0, 20]) });
 
@@ -294,11 +295,10 @@ describe.each([
 
     rerender({ src });
 
-    expect(setSegment).toHaveBeenCalledTimes(2);
-    expect(setSegment).toHaveBeenCalledWith(0, dotLottie.totalFrames);
+    expect(resetSegment).toHaveBeenCalledTimes(1);
 
     await vi.waitFor(() => {
-      expect(dotLottie.segment).toEqual([0, dotLottie.totalFrames]);
+      expect(dotLottie.segment).toEqual([0, dotLottie.totalFrames - 1]);
     });
   });
 
