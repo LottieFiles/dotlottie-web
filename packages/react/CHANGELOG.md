@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-react
 
+## 0.19.1
+### Patch Changes
+
+- Updated dependencies [73046d6]
+- Updated dependencies [d4df529]
+  - @lottiefiles/dotlottie-web@0.72.0
+
 ## 0.19.0
 ### Minor Changes
 
