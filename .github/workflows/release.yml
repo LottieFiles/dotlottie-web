@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 concurrency:
   group: release
@@ -16,6 +17,7 @@ jobs:
   validate:
     name: Validate
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
 
     permissions:
       contents: read
@@ -111,7 +113,15 @@ jobs:
     name: GPR Release
     needs: npm-release
     runs-on: ubuntu-latest
-    if: needs.npm-release.outputs.published == 'true'
+    if: |
+      always() &&
+      github.repository == 'LottieFiles/dotlottie-web' &&
+      needs.npm-release.result != 'cancelled' &&
+      (
+        needs.npm-release.outputs.published == 'true' ||
+        needs.npm-release.result == 'failure' ||
+        github.event_name == 'workflow_dispatch'
+      )
 
     permissions:
       contents: read
