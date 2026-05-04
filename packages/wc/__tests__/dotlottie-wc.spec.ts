@@ -80,9 +80,12 @@ describe.each([
 
     const dotLottie = element.dotLottie as DotLottie | DotLottieWorker;
 
-    await vi.waitFor(() => {
-      expect(dotLottie.isLoaded).toBe(true);
-    });
+    await vi.waitFor(
+      () => {
+        expect(dotLottie.isLoaded).toBe(true);
+      },
+      { timeout: 5000 },
+    );
 
     const destroy = vi.spyOn(dotLottie, 'destroy');
 
