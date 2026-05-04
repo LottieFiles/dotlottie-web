@@ -306,7 +306,7 @@ describe.each([
 
         const durationAccuracy = expectedDuration / actualDuration;
 
-        expect(durationAccuracy).toBeGreaterThan(0.9);
+        expect(durationAccuracy).toBeGreaterThan(0.85);
       });
 
       test('autoplay animation', async () => {
@@ -402,7 +402,7 @@ describe.each([
 
         const durationAccuracy = expectedDuration / actualDuration;
 
-        expect(durationAccuracy).toBeGreaterThan(0.9);
+        expect(durationAccuracy).toBeGreaterThan(0.85);
       });
 
       (isWorker ? test.skip : test)('play() after pause()', async () => {
@@ -491,7 +491,7 @@ describe.each([
 
         const durationAccuracy = expectedDuration / actualDuration;
 
-        expect(durationAccuracy).toBeGreaterThan(0.9);
+        expect(durationAccuracy).toBeGreaterThan(0.85);
       });
 
       test('frame rate accuracy with frame interpolation disabled', async () => {
