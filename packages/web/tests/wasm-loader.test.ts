@@ -116,6 +116,7 @@ describe('createWasmLoader', () => {
 
     expect(initFn).toHaveBeenCalledTimes(2); // streaming primary + backup; buffer paths fail at fetch
     expect(fetchMock).toHaveBeenCalledTimes(2);
+    // 3 errors at the final-failure path: primary streaming + backup streaming + last buffered attempt
     expect(console.error).toHaveBeenCalledTimes(3);
     expect(console.error).toHaveBeenCalledWith(expect.stringContaining('init-fail'));
     expect(console.error).toHaveBeenCalledWith(expect.stringContaining('network-fail'));
