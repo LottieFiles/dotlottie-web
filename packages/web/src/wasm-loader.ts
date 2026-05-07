@@ -28,38 +28,42 @@ export function createWasmLoader(initFn: WasmInitFn, primaryUrl: string, backupU
   return {
     load(): Promise<void> {
       if (!initPromise) {
+        // Snapshot URLs so a concurrent setWasmUrl() can't shift them mid-attempt.
+        const primary = wasmUrl;
+        const backup = backupUrl;
+
         initPromise = (async () => {
           let primaryError: unknown;
           let backupError: unknown;
 
           try {
-            await initFromUrl(wasmUrl);
+            await initFromUrl(primary);
             return;
           } catch (err) {
             primaryError = err;
-            console.warn(`Primary WASM load failed from ${wasmUrl}: ${(err as Error).message}`);
-            console.warn(`Attempting to load WASM from backup URL: ${backupUrl}`);
+            console.warn(`Primary WASM load failed from ${primary}: ${(err as Error).message}`);
+            console.warn(`Attempting to load WASM from backup URL: ${backup}`);
           }
 
           try {
-            await initFromUrl(backupUrl);
+            await initFromUrl(backup);
             return;
           } catch (err) {
             backupError = err;
-            console.warn(`Backup WASM load failed from ${backupUrl}: ${(err as Error).message}`);
+            console.warn(`Backup WASM load failed from ${backup}: ${(err as Error).message}`);
           }
 
           console.warn('Retrying WASM load with buffered instantiation');
 
           try {
-            await initFromBytes(wasmUrl);
+            await initFromBytes(primary);
             return;
           } catch (err) {
-            console.warn(`Buffered WASM load from ${wasmUrl} failed: ${(err as Error).message}`);
+            console.warn(`Buffered WASM load from ${primary} failed: ${(err as Error).message}`);
           }
 
           try {
-            await initFromBytes(backupUrl);
+            await initFromBytes(backup);
             return;
           } catch (err) {
             console.error(`Primary WASM URL failed: ${(primaryError as Error).message}`);

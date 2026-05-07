@@ -136,6 +136,25 @@ describe('createWasmLoader', () => {
     expect(initFn).toHaveBeenCalledTimes(1); // streaming primary succeeds on retry
   });
 
+  it('snapshots URLs at load() start so mid-flight setWasmUrl does not redirect retries', async () => {
+    initFn.mockRejectedValueOnce(new Error('primary-stream'));
+    initFn.mockRejectedValueOnce(new Error('backup-stream'));
+    initFn.mockResolvedValueOnce(undefined);
+    fetchMock.mockResolvedValueOnce(okResponse());
+
+    const loader = createWasmLoader(initFn, PRIMARY, BACKUP);
+    const loadPromise = loader.load();
+
+    // Concurrent caller mutates the URL while the IIFE is suspended on its first await.
+    loader.setWasmUrl('https://changed.example.com/player.wasm');
+
+    await expect(loadPromise).resolves.toBeUndefined();
+
+    // Buffered fallback must use the URL captured at load() start, not the changed one.
+    expect(fetchMock).toHaveBeenCalledWith(PRIMARY);
+    expect(fetchMock).not.toHaveBeenCalledWith(expect.stringContaining('changed'));
+  });
+
   it('setWasmUrl() with a new URL resets the loader', async () => {
     initFn.mockResolvedValue(undefined);
     const loader = createWasmLoader(initFn, PRIMARY, BACKUP);
