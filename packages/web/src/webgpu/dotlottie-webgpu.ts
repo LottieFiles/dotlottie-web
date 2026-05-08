@@ -44,9 +44,15 @@ export class DotLottieWebGPU extends DotLottie {
 
       const device = await adapter.requestDevice();
 
-      // Listen for device loss to aid debugging
+      device.addEventListener('uncapturederror', (ev: Event) => {
+        const error = (ev as unknown as { error?: GPUError }).error;
+        console.error('[dotlottie-web] WebGPU uncaptured error:', error?.message ?? error);
+      });
+
       device.lost.then((info) => {
-        console.error(`[dotlottie-web] WebGPU device lost: ${info.reason} — ${info.message}`);
+        if (info.reason !== 'destroyed') {
+          console.error(`[dotlottie-web] WebGPU device lost: reason=${info.reason} msg=${info.message}`);
+        }
       });
 
       this._gpuDevice = device;
@@ -89,14 +95,6 @@ export class DotLottieWebGPU extends DotLottie {
       throw new Error('Failed to get WebGPU canvas context.');
     }
 
-    const format = navigator.gpu.getPreferredCanvasFormat();
-
-    gpuCtx.configure({
-      device: this._gpuDevice,
-      format,
-      alphaMode: 'premultiplied',
-    });
-
     this._gpuContext = gpuCtx;
 
     const core = this._dotLottieCore as unknown as DotLottiePlayerWasm;
@@ -106,7 +104,6 @@ export class DotLottieWebGPU extends DotLottie {
   }
 
   public override resize(): void {
-    // Reconfigure the GPU surface after canvas dimension change
     if (this._gpuContext && this._gpuDevice && this._canvas) {
       const canvas = this._canvas as HTMLCanvasElement;
       const dpr = this._renderConfig.devicePixelRatio || getDefaultDPR();
@@ -116,12 +113,6 @@ export class DotLottieWebGPU extends DotLottie {
         canvas.width = Math.round(cssW * dpr);
         canvas.height = Math.round(cssH * dpr);
       }
-
-      this._gpuContext.configure({
-        device: this._gpuDevice,
-        format: navigator.gpu.getPreferredCanvasFormat(),
-        alphaMode: 'premultiplied',
-      });
 
       if (this._dotLottieCore && this.isLoaded) {
         const resized = this._setupTarget(canvas.width, canvas.height);
