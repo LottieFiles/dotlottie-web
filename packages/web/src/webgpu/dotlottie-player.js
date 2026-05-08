@@ -238,6 +238,8 @@ const __wbindgen_enum_GpuBlendOperation = ["add", "subtract", "reverse-subtract"
 
 const __wbindgen_enum_GpuBufferBindingType = ["uniform", "storage", "read-only-storage"];
 
+const __wbindgen_enum_GpuCanvasAlphaMode = ["opaque", "premultiplied"];
+
 const __wbindgen_enum_GpuCompareFunction = ["never", "less", "equal", "less-equal", "greater", "not-equal", "greater-equal", "always"];
 
 const __wbindgen_enum_GpuCullMode = ["none", "front", "back"];
@@ -1615,6 +1617,9 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_setalpha_789b6ecd7c06e5f3 = function(arg0, arg1) {
         arg0.alpha = arg1;
     };
+    imports.wbg.__wbg_setalphamode_8b1f0eb9b989dae4 = function(arg0, arg1) {
+        arg0.alphaMode = __wbindgen_enum_GpuCanvasAlphaMode[arg1];
+    };
     imports.wbg.__wbg_setalphatocoverageenabled_8862a1b7a0f204c6 = function(arg0, arg1) {
         arg0.alphaToCoverageEnabled = arg1 !== 0;
     };
@@ -1750,6 +1755,9 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_setdepthwriteenabled_a97b018ec8906115 = function(arg0, arg1) {
         arg0.depthWriteEnabled = arg1 !== 0;
     };
+    imports.wbg.__wbg_setdevice_3d552cd495a322c2 = function(arg0, arg1) {
+        arg0.device = arg1;
+    };
     imports.wbg.__wbg_setdimension_2892b665919c0e54 = function(arg0, arg1) {
         arg0.dimension = __wbindgen_enum_GpuTextureViewDimension[arg1];
     };
@@ -1790,6 +1798,9 @@ function __wbg_get_imports() {
         arg0.format = __wbindgen_enum_GpuTextureFormat[arg1];
     };
     imports.wbg.__wbg_setformat_5106903c3bec7f29 = function(arg0, arg1) {
+        arg0.format = __wbindgen_enum_GpuTextureFormat[arg1];
+    };
+    imports.wbg.__wbg_setformat_6077b776453ad8d1 = function(arg0, arg1) {
         arg0.format = __wbindgen_enum_GpuTextureFormat[arg1];
     };
     imports.wbg.__wbg_setformat_984f8b09308d0584 = function(arg0, arg1) {
@@ -2011,6 +2022,9 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_setunclippeddepth_43cbbb9961b4b705 = function(arg0, arg1) {
         arg0.unclippedDepth = arg1 !== 0;
     };
+    imports.wbg.__wbg_setusage_191c3002e6efb81b = function(arg0, arg1) {
+        arg0.usage = arg1 >>> 0;
+    };
     imports.wbg.__wbg_setusage_7836ddf40e55971a = function(arg0, arg1) {
         arg0.usage = arg1 >>> 0;
     };
@@ -2036,6 +2050,9 @@ function __wbg_get_imports() {
         arg0.viewDimension = __wbindgen_enum_GpuTextureViewDimension[arg1];
     };
     imports.wbg.__wbg_setviewformats_6c89940ba38f64ff = function(arg0, arg1) {
+        arg0.viewFormats = arg1;
+    };
+    imports.wbg.__wbg_setviewformats_ff9ffe91ceca51c3 = function(arg0, arg1) {
         arg0.viewFormats = arg1;
     };
     imports.wbg.__wbg_setvisibility_1f6371439759b513 = function(arg0, arg1) {

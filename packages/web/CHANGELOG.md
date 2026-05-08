@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.72.1
+### Patch Changes
+
+- a354c24: Fix WebGPU rendering channel-swapped or black on platforms where the preferred canvas format isn't `bgra8unorm` (e.g. Android/Linux Chrome). The redundant JS-side `gpuCtx.configure()` calls were conflicting with ThorVG's `bgra8unorm` pipelines and have been removed; ThorVG now owns surface configuration via the `dotlottie-rs` bridge.
+- c0011a4: Fall back to buffered `WebAssembly.instantiate` when streaming instantiation fails on both CDN URLs. Some iOS WKWebView builds reject `WebAssembly.instantiateStreaming` for otherwise valid `Response` objects, which previously surfaced as `WASM loading failed from all sources.` and a blank canvas. The loader now retries by fetching the bytes itself and passing an `ArrayBuffer` to `init`, bypassing the streaming code path.
+
 ## 0.72.0
 ### Minor Changes
 
