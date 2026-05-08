@@ -3,60 +3,71 @@ name: Notify Docs of Release
 on:
   release:
     types: [published]
+  workflow_run:
+    workflows: ["Release"]
+    types: [completed]
+  workflow_dispatch:
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
-  resolve-package:
+  notify-docs:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    outputs:
-      package_dir: ${{ steps.resolve.outputs.package_dir }}
-      should_dispatch: ${{ steps.resolve.outputs.should_dispatch }}
     steps:
-      - name: Resolve package from tag
-        id: resolve
+      - name: Resolve release info
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_CONTENT_SYNC_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          REL_TAG: ${{ github.event.release.tag_name }}
+          REL_NAME: ${{ github.event.release.name }}
+          REL_BODY: ${{ github.event.release.body }}
+          REL_URL: ${{ github.event.release.html_url }}
         run: |
-          TAG="${{ github.event.release.tag_name }}"
+          if [ "$EVENT_NAME" = "release" ]; then
+            TAG="$REL_TAG"
+            NAME="$REL_NAME"
+            BODY="$REL_BODY"
+            URL="$REL_URL"
+          else
+            DATA=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName,name,body,url)
+            TAG=$(jq -r '.tagName' <<<"$DATA")
+            NAME=$(jq -r '.name' <<<"$DATA")
+            BODY=$(jq -r '.body' <<<"$DATA")
+            URL=$(jq -r '.url' <<<"$DATA")
+          fi
 
           # Tag format: @lottiefiles/dotlottie-{name}@{version}
-          # Extract the package short name (react, vue, svelte, solid, web, wc)
           PACKAGE_NAME=$(echo "$TAG" | sed -n 's|^@lottiefiles/dotlottie-\(.*\)@.*|\1|p')
-
           if [ -z "$PACKAGE_NAME" ]; then
             echo "Tag '$TAG' does not match expected format @lottiefiles/dotlottie-{name}@{version}"
-            echo "should_dispatch=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # Map short name to package directory
           case "$PACKAGE_NAME" in
             web) PKG_DIR="packages/web" ;;
             wc)  PKG_DIR="packages/wc" ;;
             *)   PKG_DIR="packages/${PACKAGE_NAME}" ;;
           esac
 
-          echo "package_dir=$PKG_DIR" >> "$GITHUB_OUTPUT"
-          echo "should_dispatch=true" >> "$GITHUB_OUTPUT"
-          echo "Resolved tag '$TAG' to package dir: $PKG_DIR"
+          jq -n \
+            --arg source_repo "$GITHUB_REPOSITORY" \
+            --arg source_package "$PKG_DIR" \
+            --arg release_tag "$TAG" \
+            --arg release_name "$NAME" \
+            --arg release_body "$BODY" \
+            --arg release_url "$URL" \
+            --arg sender "${{ github.actor }}" \
+            '{event_type: "dotlottie-docs-eval", client_payload: {source_repo: $source_repo, source_package: $source_package, release_tag: $release_tag, release_name: $release_name, release_body: $release_body, release_url: $release_url, sender: $sender}}' \
+            > payload.json
 
-  notify-docs:
-    needs: resolve-package
-    if: needs.resolve-package.outputs.should_dispatch == 'true'
-    runs-on: ubuntu-latest
-    steps:
+          echo "Dispatching for release: $TAG → $PKG_DIR"
+
       - name: Dispatch to docs-content
-        uses: peter-evans/repository-dispatch@v4
-        with:
-          token: ${{ secrets.DOCS_CONTENT_SYNC_TOKEN }}
-          repository: LottieFiles/docs-content
-          event-type: dotlottie-docs-eval
-          client-payload: |
-            {
-              "source_repo": "${{ github.repository }}",
-              "source_package": "${{ needs.resolve-package.outputs.package_dir }}",
-              "release_tag": "${{ github.event.release.tag_name }}",
-              "release_name": ${{ toJSON(github.event.release.name) }},
-              "release_body": ${{ toJSON(github.event.release.body) }},
-              "release_url": "${{ github.event.release.html_url }}",
-              "sender": "${{ github.actor }}"
-            }
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_CONTENT_SYNC_TOKEN }}
+        run: |
+          gh api --method POST \
+            "/repos/LottieFiles/docs-content/dispatches" \
+            --input payload.json
