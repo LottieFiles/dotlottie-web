@@ -116,6 +116,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Handoff for notify-docs.yml 
+      - name: 📝 Write published manifest
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
+        run: printf '%s' "$PUBLISHED_PACKAGES" > published.json
+
+      - name: 📤 Upload published manifest
+        if: steps.changesets.outputs.published == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: published-packages
+          path: published.json
+          if-no-files-found: error
+          retention-days: 7
+
   gpr-release:
     name: GPR Release
     needs: npm-release

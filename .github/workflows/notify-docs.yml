@@ -1,0 +1,99 @@
+name: Notify Docs of Release
+
+on:
+  release:
+    types: [published]
+  workflow_run:
+    workflows: ["Release"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  notify-docs:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download published manifest
+        if: github.event_name == 'workflow_run'
+        id: download
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: published-packages
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve tags to notify
+        id: tags
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          REL_TAG: ${{ github.event.release.tag_name }}
+          DOWNLOAD_OUTCOME: ${{ steps.download.outcome }}
+          REPO: ${{ github.repository }}
+        run: |
+          case "$EVENT_NAME" in
+            release)
+              TAGS=$(jq -nc --arg t "$REL_TAG" '[$t]')
+              ;;
+            workflow_dispatch)
+              LATEST=$(gh release view --repo "$REPO" --json tagName -q .tagName)
+              TAGS=$(jq -nc --arg t "$LATEST" '[$t]')
+              ;;
+            workflow_run)
+              if [ "$DOWNLOAD_OUTCOME" != "success" ] || [ ! -f published.json ]; then
+                echo "No published-packages artifact — Release run did not publish anything."
+                TAGS='[]'
+              else
+                TAGS=$(jq -c '[ .[] | "\(.name)@\(.version)" ]' published.json)
+              fi
+              ;;
+          esac
+          echo "Resolved tags: $TAGS"
+          echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch to docs-content
+        if: steps.tags.outputs.tags != '[]'
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_CONTENT_SYNC_TOKEN }}
+          REPO_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SENDER: ${{ github.actor }}
+          TAGS_JSON: ${{ steps.tags.outputs.tags }}
+        run: |
+          for TAG in $(jq -r '.[]' <<<"$TAGS_JSON"); do
+            PACKAGE_NAME=$(echo "$TAG" | sed -n 's|^@lottiefiles/dotlottie-\(.*\)@.*|\1|p')
+            if [ -z "$PACKAGE_NAME" ]; then
+              echo "Skipping '$TAG' — does not match @lottiefiles/dotlottie-{name}@{version}"
+              continue
+            fi
+
+            case "$PACKAGE_NAME" in
+              web) PKG_DIR="packages/web" ;;
+              wc)  PKG_DIR="packages/wc" ;;
+              *)   PKG_DIR="packages/${PACKAGE_NAME}" ;;
+            esac
+
+            DATA=$(GH_TOKEN="$REPO_TOKEN" gh release view "$TAG" --repo "$REPO" --json name,body,url)
+            NAME=$(jq -r '.name' <<<"$DATA")
+            BODY=$(jq -r '.body' <<<"$DATA")
+            URL=$(jq -r '.url' <<<"$DATA")
+
+            jq -n \
+              --arg source_repo "$REPO" \
+              --arg source_package "$PKG_DIR" \
+              --arg release_tag "$TAG" \
+              --arg release_name "$NAME" \
+              --arg release_body "$BODY" \
+              --arg release_url "$URL" \
+              --arg sender "$SENDER" \
+              '{event_type: "dotlottie-docs-eval", client_payload: {source_repo: $source_repo, source_package: $source_package, release_tag: $release_tag, release_name: $release_name, release_body: $release_body, release_url: $release_url, sender: $sender}}' \
+              > payload.json
+
+            echo "Dispatching for release: $TAG → $PKG_DIR"
+            gh api --method POST "/repos/LottieFiles/docs-content/dispatches" --input payload.json
+          done
