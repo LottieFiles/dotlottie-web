@@ -9,6 +9,7 @@ permissions: {}
 jobs:
   resolve-package:
     runs-on: ubuntu-latest
+    permissions: {}
     outputs:
       package_dir: ${{ steps.resolve.outputs.package_dir }}
       should_dispatch: ${{ steps.resolve.outputs.should_dispatch }}
@@ -43,6 +44,7 @@ jobs:
     needs: resolve-package
     if: needs.resolve-package.outputs.should_dispatch == 'true'
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - name: Dispatch to docs-content
         uses: peter-evans/repository-dispatch@v4

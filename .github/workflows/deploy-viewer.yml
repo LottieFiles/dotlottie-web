@@ -13,8 +13,7 @@ concurrency:
   group: deploy-viewer
   cancel-in-progress: true
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   deploy:
