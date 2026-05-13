@@ -40,7 +40,7 @@ jobs:
           node-version: lts/*
 
       - name: 📥 Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: 🏗 Build
         run: pnpm build --filter='viewer...'
