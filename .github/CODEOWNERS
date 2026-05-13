@@ -1,31 +1,14 @@
-# CODEOWNERS for LottieFiles/dotlottie-web
-# https://docs.github.com/en/repositories/managing-your-repositories-settings-and-customizations/customizing-your-repository/about-code-owners
-#
-# Rules are last-match-wins. The default rule below requires a review from
-# @LottieFiles/dotlottie on every PR. Explicit rules document intent for
-# security-sensitive paths and make it easy to retarget them to a dedicated
-# security team later if responsibilities are split.
-
-# Default — every PR requires team review
-*                                 @LottieFiles/dotlottie
-
-# CI / CD workflows and GitHub config
 /.github/                         @LottieFiles/dotlottie
-/.github/workflows/               @LottieFiles/dotlottie
-/.github/dependabot.yml           @LottieFiles/dotlottie
-/.github/CODEOWNERS               @LottieFiles/dotlottie
-
-# All YAML config files anywhere in the repo
-*.yml                             @LottieFiles/dotlottie
-*.yaml                            @LottieFiles/dotlottie
-
-# Dependency / supply-chain critical files
 /package.json                     @LottieFiles/dotlottie
 /pnpm-lock.yaml                   @LottieFiles/dotlottie
 /pnpm-workspace.yaml              @LottieFiles/dotlottie
-/.gitmodules                      @LottieFiles/dotlottie
 /.npmrc                           @LottieFiles/dotlottie
-**/.npmrc                         @LottieFiles/dotlottie
-
-# Build / release scripts
+/.gitmodules                      @LottieFiles/dotlottie
+/.changeset/                      @LottieFiles/dotlottie
+/turbo.json                       @LottieFiles/dotlottie
+/lefthook.yml                     @LottieFiles/dotlottie
+/commitlint.config.ts             @LottieFiles/dotlottie
 /scripts/                         @LottieFiles/dotlottie
+/packages/                        @theashraf
+/packages/**/package.json         @LottieFiles/dotlottie
+/packages/**/.npmrc               @LottieFiles/dotlottie
