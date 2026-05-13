@@ -58,7 +58,8 @@
       "lefthook",
       "playwright",
       "svelte-preprocess"
-    ]
+    ],
+    "trustPolicy": "no-downgrade"
   },
   "packageManager": "pnpm@10.29.3"
 }
