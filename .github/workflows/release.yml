@@ -115,7 +115,6 @@ jobs:
           createGithubReleases: true
         env:
           # App-backed token so the resulting `release: published` event
-          # fires downstream workflows (notify-docs.yml).
           GITHUB_TOKEN: ${{ secrets.DOCS_CONTENT_SYNC_TOKEN }}
 
   gpr-release:
