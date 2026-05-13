@@ -1,0 +1,14 @@
+/.github/                         @LottieFiles/dotlottie
+/package.json                     @LottieFiles/dotlottie
+/pnpm-lock.yaml                   @LottieFiles/dotlottie
+/pnpm-workspace.yaml              @LottieFiles/dotlottie
+/.npmrc                           @LottieFiles/dotlottie
+/.gitmodules                      @LottieFiles/dotlottie
+/.changeset/                      @LottieFiles/dotlottie
+/turbo.json                       @LottieFiles/dotlottie
+/lefthook.yml                     @LottieFiles/dotlottie
+/commitlint.config.ts             @LottieFiles/dotlottie
+/scripts/                         @LottieFiles/dotlottie
+/packages/                        @theashraf
+/packages/**/package.json         @LottieFiles/dotlottie
+/packages/**/.npmrc               @LottieFiles/dotlottie
