@@ -33,7 +33,7 @@ jobs:
           node-version: lts/*
 
       - name: 📥 Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: 🏗 Build packages
         run: pnpm build:packages
@@ -70,7 +70,7 @@ jobs:
           node-version: lts/*
 
       - name: 📥 Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: 📦 Download build artifacts
         uses: actions/download-artifact@v8
@@ -103,7 +103,7 @@ jobs:
           node-version: lts/*
 
       - name: 📥 Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: 📦 Download build artifacts
         uses: actions/download-artifact@v8
@@ -217,7 +217,7 @@ jobs:
           node-version: lts/*
 
       - name: 📥 Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: 📏 Report bundle size
         uses: andresz1/size-limit-action@v1
