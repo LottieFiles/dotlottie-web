@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: ⎔ Setup pnpm@v10
         uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
@@ -87,6 +89,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: ⎔ Setup pnpm@v10
         uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
@@ -142,6 +145,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: ⎔ Setup pnpm@v10
         uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
@@ -159,20 +163,18 @@ jobs:
       - name: 🏗 Build packages
         run: pnpm build:packages
 
-      - name: ⎔ Configure GPR registry for @lottiefiles scope
+      - name: 🚀 Publish to GitHub Packages
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          NPMRC=$(mktemp)
+          trap 'rm -f "$NPMRC"' EXIT
           {
             echo "@lottiefiles:registry=https://npm.pkg.github.com/"
-            echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}"
-          } >> .npmrc
-
-      - name: 🚀 Publish to GitHub Packages
-        run: pnpm changeset publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            echo '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}'
+          } > "$NPMRC"
+          NPM_CONFIG_USERCONFIG="$NPMRC" pnpm changeset publish
 
   jsr-release:
     name: JSR Release
@@ -194,6 +196,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: ⎔ Setup pnpm@v10
         uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
@@ -207,14 +210,6 @@ jobs:
 
       - name: 📥 Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
-
-      # related issue https://github.com/denoland/deno/issues/26152
-      - name: ⎔ Setup .npmrc (NPM) in web package
-        run: |
-          echo "@lottiefiles:registry=https://registry.npmjs.org/" >> ./packages/web/.npmrc
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPMJS_TOKEN }}" >> ./packages/web/.npmrc
 
       - name: 🔄 Sync version to jsr.json
         run: |
@@ -222,6 +217,16 @@ jobs:
           jq '.version = $newVersion' --arg newVersion "$VERSION" ./packages/web/jsr.json > temp.json
           mv temp.json ./packages/web/jsr.json
 
+      # related issue https://github.com/denoland/deno/issues/26152
       - name: 🚀 Release to JSR
-        run: npx jsr publish --allow-dirty
         working-directory: packages/web
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+        run: |
+          NPMRC=$(mktemp)
+          trap 'rm -f "$NPMRC"' EXIT
+          {
+            echo "@lottiefiles:registry=https://registry.npmjs.org/"
+            echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}'
+          } > "$NPMRC"
+          NPM_CONFIG_USERCONFIG="$NPMRC" npx jsr publish --allow-dirty
