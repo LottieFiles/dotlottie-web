@@ -196,18 +196,22 @@ jobs:
       - name: 📥 Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      # related issue https://github.com/denoland/deno/issues/26152
-      - name: ⎔ Setup .npmrc (NPM) in web package
-        run: |
-          echo "@lottiefiles:registry=https://registry.npmjs.org/" >> ./packages/web/.npmrc
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPMJS_TOKEN }}" >> ./packages/web/.npmrc
-
       - name: 🔄 Sync version to jsr.json
         run: |
           VERSION=$(jq -r '.version' ./packages/web/package.json)
           jq '.version = $newVersion' --arg newVersion "$VERSION" ./packages/web/jsr.json > temp.json
           mv temp.json ./packages/web/jsr.json
 
+      # related issue https://github.com/denoland/deno/issues/26152
       - name: 🚀 Release to JSR
-        run: npx jsr publish --allow-dirty
         working-directory: packages/web
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+        run: |
+          NPMRC=$(mktemp)
+          trap 'rm -f "$NPMRC"' EXIT
+          {
+            echo "@lottiefiles:registry=https://registry.npmjs.org/"
+            echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}'
+          } > "$NPMRC"
+          NPM_CONFIG_USERCONFIG="$NPMRC" npx jsr publish --allow-dirty
