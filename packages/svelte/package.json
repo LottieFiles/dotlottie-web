@@ -31,6 +31,10 @@
     "dist"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=18.17.0",
+    "npm": ">=9.5.0"
+  },
   "scripts": {
     "dev": "vite dev",
     "build": "vite build && npm run package",
