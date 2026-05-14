@@ -195,8 +195,6 @@ jobs:
 
       - name: 📥 Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
 
       # related issue https://github.com/denoland/deno/issues/26152
       - name: ⎔ Setup .npmrc (NPM) in web package
