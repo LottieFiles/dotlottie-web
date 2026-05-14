@@ -9,6 +9,7 @@ permissions: {}
 jobs:
   resolve-package:
     runs-on: ubuntu-latest
+    permissions: {}
     outputs:
       package_dir: ${{ steps.resolve.outputs.package_dir }}
       should_dispatch: ${{ steps.resolve.outputs.should_dispatch }}
@@ -43,9 +44,15 @@ jobs:
     needs: resolve-package
     if: needs.resolve-package.outputs.should_dispatch == 'true'
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
+      - name: 🛡 Harden Runner
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Dispatch to docs-content
-        uses: peter-evans/repository-dispatch@v4
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
           token: ${{ secrets.DOCS_CONTENT_SYNC_TOKEN }}
           repository: LottieFiles/docs-content
