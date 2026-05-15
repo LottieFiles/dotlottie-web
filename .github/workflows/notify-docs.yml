@@ -1,8 +1,10 @@
 name: Notify Docs of Release
 
+# Manual escape hatch only. The primary notify path lives in release.yml,
+# which dispatches inline after a successful npm publish. Use this to retry
+# a missed notification for the most recent release without re-running the
+# whole release pipeline.
 on:
-  release:
-    types: [published]
   workflow_dispatch:
 
 permissions:
@@ -11,35 +13,31 @@ permissions:
 jobs:
   notify-docs:
     runs-on: ubuntu-latest
+<<<<<<< HEAD
+=======
+    permissions:
+      contents: read
+>>>>>>> 1df4829 (fix: 🐛 workflow)
     steps:
-      - name: Resolve release info
+      - name: Resolve latest release
+        id: resolve
         env:
           GH_TOKEN: ${{ github.token }}
-          EVENT_NAME: ${{ github.event_name }}
-          REL_TAG: ${{ github.event.release.tag_name }}
-          REL_NAME: ${{ github.event.release.name }}
-          REL_BODY: ${{ github.event.release.body }}
-          REL_URL: ${{ github.event.release.html_url }}
+          SENDER: ${{ github.actor }}
         run: |
-          if [ "$EVENT_NAME" = "release" ]; then
-            TAG="$REL_TAG"
-            NAME="$REL_NAME"
-            BODY="$REL_BODY"
-            URL="$REL_URL"
-          else
-            DATA=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName,name,body,url)
-            TAG=$(jq -r '.tagName' <<<"$DATA")
-            NAME=$(jq -r '.name' <<<"$DATA")
-            BODY=$(jq -r '.body' <<<"$DATA")
-            URL=$(jq -r '.url' <<<"$DATA")
-          fi
+          DATA=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName,name,body,url)
+          TAG=$(jq -r '.tagName' <<<"$DATA")
+          NAME=$(jq -r '.name' <<<"$DATA")
+          BODY=$(jq -r '.body' <<<"$DATA")
+          URL=$(jq -r '.url' <<<"$DATA")
 
-          # Tag format: @lottiefiles/dotlottie-{name}@{version}
-          PACKAGE_NAME=$(echo "$TAG" | sed -n 's|^@lottiefiles/dotlottie-\(.*\)@.*|\1|p')
-          if [ -z "$PACKAGE_NAME" ]; then
-            echo "Tag '$TAG' does not match expected format @lottiefiles/dotlottie-{name}@{version}"
-            exit 0
+          # Allow-list: only known packages, semver-ish version.
+          TAG_RE='^@lottiefiles/dotlottie-(react|vue|svelte|solid|web|wc)@[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'
+          if [[ ! "$TAG" =~ $TAG_RE ]]; then
+            echo "Tag '$TAG' failed strict validation"
+            exit 1
           fi
+          PACKAGE_NAME="${BASH_REMATCH[1]}"
 
           case "$PACKAGE_NAME" in
             web) PKG_DIR="packages/web" ;;
@@ -54,7 +52,7 @@ jobs:
             --arg release_name "$NAME" \
             --arg release_body "$BODY" \
             --arg release_url "$URL" \
-            --arg sender "${{ github.actor }}" \
+            --arg sender "$SENDER" \
             '{event_type: "dotlottie-docs-eval", client_payload: {source_repo: $source_repo, source_package: $source_package, release_tag: $release_tag, release_name: $release_name, release_body: $release_body, release_url: $release_url, sender: $sender}}' \
             > payload.json
 
