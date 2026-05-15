@@ -1,9 +1,5 @@
-name: Notify Docs of Release
+name: Notify Docs of Release (Manual)
 
-# Manual escape hatch only. The primary notify path lives in release.yml,
-# which dispatches inline after a successful npm publish. Use this to retry
-# a missed notification for the most recent release without re-running the
-# whole release pipeline.
 on:
   workflow_dispatch:
 
