@@ -38,7 +38,12 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
   @property({ type: Object })
   public renderConfig: Config['renderConfig'];
 
-  @property({ type: Boolean })
+  @property({
+    type: Boolean,
+    converter: {
+      fromAttribute: (value: string | null) => value !== null && value !== 'false',
+    },
+  })
   public useFrameInterpolation: Config['useFrameInterpolation'];
 
   @property({ type: String })
