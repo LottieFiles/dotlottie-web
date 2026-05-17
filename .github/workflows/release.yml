@@ -116,6 +116,51 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: 📣 Notify docs-content
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_CONTENT_SYNC_TOKEN }}
+          REPO_TOKEN: ${{ github.token }}
+          PUBLISHED: ${{ steps.changesets.outputs.publishedPackages }}
+          SOURCE_REPO: ${{ github.repository }}
+          SENDER: ${{ github.actor }}
+        run: |
+          # Allow-list: only known packages, semver-ish version.
+          TAG_RE='^@lottiefiles/dotlottie-(react|vue|svelte|solid|web|wc)@[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'
+
+          echo "$PUBLISHED" | jq -c '.[]' | while read -r PKG; do
+            NAME=$(jq -r '.name' <<<"$PKG")
+            VERSION=$(jq -r '.version' <<<"$PKG")
+            TAG="${NAME}@${VERSION}"
+
+            if [[ ! "$TAG" =~ $TAG_RE ]]; then
+              echo "Skipping '$TAG' — failed strict validation"
+              continue
+            fi
+            SHORT="${BASH_REMATCH[1]}"
+
+            case "$SHORT" in
+              web) PKG_DIR="packages/web" ;;
+              wc)  PKG_DIR="packages/wc" ;;
+              *)   PKG_DIR="packages/${SHORT}" ;;
+            esac
+
+            REL=$(GH_TOKEN="$REPO_TOKEN" gh release view "$TAG" \
+                    --repo "$SOURCE_REPO" --json name,body,url)
+
+            jq -n \
+              --arg source_repo "$SOURCE_REPO" \
+              --arg source_package "$PKG_DIR" \
+              --arg release_tag "$TAG" \
+              --argjson rel "$REL" \
+              --arg sender "$SENDER" \
+              '{event_type:"dotlottie-docs-eval", client_payload:{source_repo:$source_repo, source_package:$source_package, release_tag:$release_tag, release_name:$rel.name, release_body:$rel.body, release_url:$rel.url, sender:$sender}}' \
+              > payload.json
+
+            echo "Dispatching for release: $TAG → $PKG_DIR"
+            gh api --method POST "/repos/LottieFiles/docs-content/dispatches" --input payload.json
+          done
+
   gpr-release:
     name: GPR Release
     needs: npm-release
