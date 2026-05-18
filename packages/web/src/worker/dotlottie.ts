@@ -687,7 +687,7 @@ export class DotLottieWorker {
   public async setTheme(themeId: string): Promise<boolean> {
     if (!this._created) return false;
 
-    const result = this._sendMessage('setTheme', { instanceId: this._id, themeId });
+    const result = await this._sendMessage('setTheme', { instanceId: this._id, themeId });
 
     await this._updateDotLottieInstanceState();
 

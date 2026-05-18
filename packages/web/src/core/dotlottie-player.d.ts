@@ -444,6 +444,7 @@ export interface InitOutput {
   readonly strcmp: (a: number, b: number) => number;
   readonly strcpy: (a: number, b: number) => number;
   readonly strdup: (a: number) => number;
+  readonly strncasecmp: (a: number, b: number, c: number) => number;
   readonly strncmp: (a: number, b: number, c: number) => number;
   readonly strstr: (a: number, b: number) => number;
   readonly strtol: (a: number, b: number, c: number) => number;
