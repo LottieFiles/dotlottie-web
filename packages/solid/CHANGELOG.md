@@ -1,5 +1,14 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.6.14
+### Patch Changes
+
+- 6d2fc23: Declare `engines: { node: ">=18.17.0", npm: ">=9.5.0" }` so downstream installs run on toolchains capable of verifying npm provenance attestations.
+- Updated dependencies [4c93b68]
+- Updated dependencies [4c93b68]
+- Updated dependencies [6d2fc23]
+  - @lottiefiles/dotlottie-web@0.73.0
+
 ## 0.6.13
 ### Patch Changes
 

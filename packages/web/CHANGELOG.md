@@ -1,5 +1,15 @@
 # @lottiefiles/dotlottie-web
 
+## 0.73.0
+### Minor Changes
+
+- 4c93b68: Update `dotlottie-rs` to bring in thorvg v1.0.5, which introduces the thorvg OTF loader.
+
+### Patch Changes
+
+- 4c93b68: Fix `DotLottieWorker.setTheme` to `await` the worker message before refreshing state.
+- 6d2fc23: Declare `engines: { node: ">=18.17.0", npm: ">=9.5.0" }` so downstream installs run on toolchains capable of verifying npm provenance attestations.
+
 ## 0.72.1
 ### Patch Changes
 
