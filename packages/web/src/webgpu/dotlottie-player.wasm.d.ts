@@ -159,6 +159,7 @@ export const strchr: (a: number, b: number) => number;
 export const strcmp: (a: number, b: number) => number;
 export const strcpy: (a: number, b: number) => number;
 export const strdup: (a: number) => number;
+export const strncasecmp: (a: number, b: number, c: number) => number;
 export const strncmp: (a: number, b: number, c: number) => number;
 export const strstr: (a: number, b: number) => number;
 export const strtol: (a: number, b: number, c: number) => number;
