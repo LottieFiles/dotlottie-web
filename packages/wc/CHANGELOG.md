@@ -1,5 +1,15 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.9.15
+### Patch Changes
+
+- 6d2fc23: Declare `engines: { node: ">=18.17.0", npm: ">=9.5.0" }` so downstream installs run on toolchains capable of verifying npm provenance attestations.
+- 3fc6d73: Fix `useframeinterpolation="false"` attribute being ignored on initial render. Lit's default `Boolean` converter treats any attribute presence as `true`, so the value `"false"` was coerced to `true` during construction; the runtime change path already parsed `"false"` correctly via `JSON.parse`. Both paths are now consistent.
+- Updated dependencies [4c93b68]
+- Updated dependencies [4c93b68]
+- Updated dependencies [6d2fc23]
+  - @lottiefiles/dotlottie-web@0.73.0
+
 ## 0.9.14
 ### Patch Changes
 
