@@ -1,36 +1,32 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
-    directory: "/packages/web"
+    directories:
+      - "/packages/web"
+      - "/packages/react"
+      - "/packages/vue"
+      - "/packages/svelte"
+      - "/packages/solid"
+      - "/packages/wc"
     schedule:
       interval: "weekly"
-
-  - package-ecosystem: "npm"
-    directory: "/packages/react"
-    schedule:
-      interval: "weekly"
-
-  - package-ecosystem: "npm"
-    directory: "/packages/vue"
-    schedule:
-      interval: "weekly"
-
-  - package-ecosystem: "npm"
-    directory: "/packages/svelte"
-    schedule:
-      interval: "weekly"
-
-  - package-ecosystem: "npm"
-    directory: "/packages/solid"
-    schedule:
-      interval: "weekly"
-
-  - package-ecosystem: "npm"
-    directory: "/packages/wc"
-    schedule:
-      interval: "weekly"
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+      prod-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
