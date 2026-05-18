@@ -75,6 +75,30 @@ describe.each([
     expect(element.dotLottie).toBeDefined();
   });
 
+  test('property getters reflect attribute values (issue #419)', () => {
+    const { element } = render(elementName, {
+      src,
+      loop: 'true',
+      autoplay: 'true',
+      speed: '2',
+      mode: 'bounce',
+      marker: 'Marker_1',
+      backgroundcolor: '#ff00ff',
+      segment: '[0, 20]',
+      themeid: 'dark',
+    });
+
+    expect(element.src).toBe(src);
+    expect(element.loop).toBe(true);
+    expect(element.autoplay).toBe(true);
+    expect(element.speed).toBe(2);
+    expect(element.mode).toBe('bounce');
+    expect(element.marker).toBe('Marker_1');
+    expect(element.backgroundColor).toBe('#ff00ff');
+    expect(element.segment).toEqual([0, 20]);
+    expect(element.themeId).toBe('dark');
+  });
+
   test('calls dotLottie.destroy on unmount', async () => {
     const { element, unmount } = render(elementName, { src });
 
@@ -211,6 +235,19 @@ describe.each([
     await vi.waitFor(() => {
       expect(dotLottie.loop).toBe(false);
     });
+  });
+
+  test('useframeinterpolation="false" attribute on initial render disables interpolation', async () => {
+    const { element } = render(elementName, { src, useframeinterpolation: 'false' });
+
+    const dotLottie = element.dotLottie as DotLottie | DotLottieWorker;
+
+    await vi.waitFor(() => {
+      expect(dotLottie.isLoaded).toBe(true);
+    });
+
+    expect(dotLottie.useFrameInterpolation).toBe(false);
+    expect(element.useFrameInterpolation).toBe(false);
   });
 
   test('calls dotLottie.setUseFrameInterpolation when useFrameInterpolation attribute changes', async () => {
