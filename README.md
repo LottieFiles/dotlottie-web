@@ -5,7 +5,11 @@
 ![GitHub](https://img.shields.io/github/license/LottieFiles/dotlottie-web)
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/23125742/201124166-c2a0bc2a-018b-463b-b291-944fb767b5c2.png" alt="dotLottie" />
+  <img
+    src="https://lottie.host/43f43646-b018-4d72-a96b-02a929cd9727/gARxdIetbE.svg"
+    alt="dotLottie Web"
+    width="550"
+  />
 </p>
 
 <h1 align="center">dotLottie Web</h1>
@@ -25,16 +29,6 @@
   <a href="https://developers.lottiefiles.com/docs/dotlottie-player/dotlottie-web/"><b>📚 Docs</b></a> ·
   <a href="https://github.com/LottieFiles/dotlottie-rs"><b>🦀 dotLottie-rs</b></a>
 </p>
-
-<div align="center">
-  <img src="./assets/1.gif" alt="dotLottie web sample 1" width="180" />
-
-  <img src="./assets/2.gif" alt="dotLottie web sample 2" width="180" />
-
-  <img src="./assets/3.gif" alt="dotLottie web sample 3" width="180" />
-
-  <img src="./assets/4.gif" alt="dotLottie web sample 4" width="180" />
-</div>
 
 # Why dotLottie Web
 
