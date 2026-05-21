@@ -1,5 +1,10 @@
 # @lottiefiles/dotlottie-web
 
+## 0.74.0
+### Minor Changes
+
+- 9d4e54a: feat(web): updated the dotlottie-rs WASM bindings to 372c366
+
 ## 0.73.0
 ### Minor Changes
 
