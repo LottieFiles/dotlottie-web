@@ -5,11 +5,7 @@
 ![GitHub](https://img.shields.io/github/license/LottieFiles/dotlottie-web)
 
 <p align="center">
-  <img
-    src="https://lottie.host/43f43646-b018-4d72-a96b-02a929cd9727/gARxdIetbE.svg"
-    alt="dotLottie Web"
-    width="550"
-  />
+  <img src="https://lottie.host/43f43646-b018-4d72-a96b-02a929cd9727/gARxdIetbE.svg" alt="dotLottie Web" width="550" />
 </p>
 
 <h1 align="center">dotLottie Web</h1>
