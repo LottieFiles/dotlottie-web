@@ -6,7 +6,7 @@
 ![NPM](https://img.shields.io/npm/l/@lottiefiles/dotlottie-react)
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/23125742/201124166-c2a0bc2a-018b-463b-b291-944fb767b5c2.png" />
+  <img src="https://lottie.host/43f43646-b018-4d72-a96b-02a929cd9727/gARxdIetbE.svg" alt="dotLottie Web" width="550" />
 </p>
 
 ## Contents
