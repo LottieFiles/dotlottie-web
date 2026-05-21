@@ -1,11 +1,6 @@
 ---
-"@lottiefiles/dotlottie-web": patch
-"@lottiefiles/dotlottie-react": patch
-"@lottiefiles/dotlottie-solid": patch
-"@lottiefiles/dotlottie-svelte": patch
-"@lottiefiles/dotlottie-vue": patch
-"@lottiefiles/dotlottie-wc": patch
+"@lottiefiles/dotlottie-web": minor
 ---
 
-feat(sm): added @elapedTime global input
+feat(web): updated the dotlottie-rs WASM bindings to 372c366
   
