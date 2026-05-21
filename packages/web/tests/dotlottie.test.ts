@@ -2466,6 +2466,8 @@ describe.each([
       const definedInputs = inputs as string[];
 
       const predefinedInputs: string[] = [
+        '@elapsedTime',
+        'Numeric',
         'a_exited',
         'Boolean',
         'Step',
