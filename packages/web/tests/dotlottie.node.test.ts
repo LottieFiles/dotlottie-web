@@ -81,3 +81,42 @@ test('should render correctly in node', async () => {
 
   dotLottie.destroy();
 });
+
+test('should draw to a non-browser canvas via getContext/putImageData', async () => {
+  const lottieData = fs.readFileSync(path.resolve(__dirname, '../../../fixtures/test.json')).toString();
+
+  const putImageData = vi.fn();
+  const createImageData = vi.fn((w: number, h: number) => ({
+    data: new Uint8ClampedArray(w * h * 4),
+    width: w,
+    height: h,
+  }));
+  const fakeContext = { createImageData, putImageData };
+  const getContext = vi.fn(() => fakeContext);
+
+  const onLoad = vi.fn();
+  const dotLottie = new DotLottie({
+    canvas: {
+      width: 48,
+      height: 48,
+      getContext,
+    } as never,
+    useFrameInterpolation: false,
+    data: lottieData,
+  });
+
+  dotLottie.addEventListener('load', onLoad);
+
+  await vi.waitFor(() => {
+    expect(onLoad).toHaveBeenCalledOnce();
+  });
+
+  expect(getContext).toHaveBeenCalledWith('2d');
+
+  // Frame 0 is rendered during load, so it must be drawn to the fake context.
+  await vi.waitFor(() => {
+    expect(putImageData).toHaveBeenCalled();
+  });
+
+  dotLottie.destroy();
+});

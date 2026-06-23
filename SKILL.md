@@ -253,6 +253,43 @@ const markers = dotLottie.markers();
 // Returns: [{ name: 'intro', time: 0, duration: 60 }, ...]
 ```
 
+## Rendering a Specific Frame to an Image
+
+Set `autoplay: false` so playback doesn't advance past your target, then call `setFrame()` after `load`. `setFrame()` renders synchronously, so the canvas and `dotLottie.buffer` (RGBA `Uint8Array`) hold that exact frame immediately after the call.
+
+### Browser
+
+```typescript
+const dotLottie = new DotLottie({ canvas, src: 'animation.lottie', autoplay: false });
+
+dotLottie.addEventListener('load', () => {
+  dotLottie.setFrame(42);                        // render frame 42
+  const dataUrl = canvas.toDataURL('image/png'); // or canvas.toBlob(cb, 'image/png')
+});
+```
+
+### Node.js (`@napi-rs/canvas`)
+
+```typescript
+import fs from 'node:fs';
+import { createCanvas } from '@napi-rs/canvas';
+
+const canvas = createCanvas(200, 200);
+const dotLottie = new DotLottie({
+  canvas: canvas as unknown as HTMLCanvasElement,
+  src: 'animation.lottie',
+  autoplay: false,
+});
+
+dotLottie.addEventListener('load', async () => {
+  dotLottie.setFrame(42);
+  fs.writeFileSync('frame-42.png', await canvas.encode('png'));
+  dotLottie.destroy();
+});
+```
+
+For custom encoding, read raw RGBA pixels directly from `dotLottie.buffer` (length = `width × height × 4`).
+
 ## Event Handling
 
 ```typescript
