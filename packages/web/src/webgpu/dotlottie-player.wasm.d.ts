@@ -126,6 +126,7 @@ export const dotlottieplayerwasm_sm_post_pointer_up: (a: number, b: number, c: n
 export const dotlottieplayerwasm_sm_reset_input: (a: number, b: number, c: number) => void;
 export const dotlottieplayerwasm_sm_set_boolean_input: (a: number, b: number, c: number, d: number) => number;
 export const dotlottieplayerwasm_sm_set_numeric_input: (a: number, b: number, c: number, d: number) => number;
+export const dotlottieplayerwasm_sm_set_seed: (a: number, b: bigint) => number;
 export const dotlottieplayerwasm_sm_set_string_input: (a: number, b: number, c: number, d: number, e: number) => number;
 export const dotlottieplayerwasm_sm_start: (a: number, b: number, c: number, d: number) => number;
 export const dotlottieplayerwasm_sm_status: (a: number) => [number, number];
