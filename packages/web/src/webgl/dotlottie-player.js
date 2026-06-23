@@ -418,6 +418,14 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
+     * @param {bigint} seed
+     * @returns {boolean}
+     */
+    sm_set_seed(seed) {
+        const ret = wasm.dotlottieplayerwasm_sm_set_seed(this.__wbg_ptr, seed);
+        return ret !== 0;
+    }
+    /**
      * @param {string} name
      * @returns {boolean}
      */
