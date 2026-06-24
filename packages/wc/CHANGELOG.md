@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.9.17
+### Patch Changes
+
+- 6252c99: Bundle sub-path dependency imports (e.g. `lit/decorators.js`) into the self-contained ESM build so the package works via CDN without an import map.
+- Updated dependencies [6252c99]
+- Updated dependencies [e322ffb]
+  - @lottiefiles/dotlottie-web@0.75.0
+
 ## 0.9.16
 ### Patch Changes
 
