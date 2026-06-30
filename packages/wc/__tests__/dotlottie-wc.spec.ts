@@ -237,6 +237,28 @@ describe.each([
     });
   });
 
+  test('calls dotLottie.setLoopCount when loopcount attribute changes', async () => {
+    const { element, rerender } = render(elementName, { src, loop: 'true' });
+
+    const dotLottie = element.dotLottie as DotLottie | DotLottieWorker;
+
+    await vi.waitFor(() => {
+      expect(dotLottie.isLoaded).toBe(true);
+    });
+
+    const setLoopCount = vi.spyOn(dotLottie, 'setLoopCount');
+
+    rerender({ src, loop: 'true', loopcount: '2' });
+
+    expect(setLoopCount).toHaveBeenCalledTimes(1);
+    expect(setLoopCount).toHaveBeenCalledWith(2);
+
+    rerender({ src, loop: 'true' });
+
+    expect(setLoopCount).toHaveBeenCalledTimes(2);
+    expect(setLoopCount).toHaveBeenCalledWith(0);
+  });
+
   test('useframeinterpolation="false" attribute on initial render disables interpolation', async () => {
     const { element } = render(elementName, { src, useframeinterpolation: 'false' });
 

@@ -108,6 +108,44 @@ describe('DotLottieSvelte', () => {
     });
   });
 
+  test('calls dotLottie.setLoopCount when loopCount prop changes', async () => {
+    const onLoad = vi.fn();
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = render(DotLottieSvelte, {
+      src: dotLottieSrc,
+      autoplay: true,
+      loop: true,
+      dotLottieRefCallback,
+    });
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0][0];
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const setLoopCount = vi.spyOn(dotLottie, 'setLoopCount');
+
+    rerender({ src: dotLottieSrc, autoplay: true, loop: true, loopCount: 2, dotLottieRefCallback });
+
+    await vi.waitFor(() => {
+      expect(setLoopCount).toHaveBeenCalledWith(2);
+    });
+
+    rerender({ src: dotLottieSrc, autoplay: true, loop: true, loopCount: 0, dotLottieRefCallback });
+
+    await vi.waitFor(() => {
+      expect(setLoopCount).toHaveBeenCalledWith(0);
+    });
+  });
+
   test('calls dotLottie.setSpeed when speed prop changes', async () => {
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();

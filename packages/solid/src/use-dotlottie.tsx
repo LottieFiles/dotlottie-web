@@ -136,6 +136,16 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
       dotLottieInstance.setLoop(config.loop);
     }
   });
+  // loopCount
+  createEffect(() => {
+    const dotLottieInstance = dotLottie();
+
+    if (!dotLottieInstance) return;
+
+    if (typeof config.loopCount === 'number' && dotLottieInstance.isLoaded) {
+      dotLottieInstance.setLoopCount(config.loopCount);
+    }
+  });
   // useFrameInterpolation
   createEffect(() => {
     const dotLottieInstance = dotLottie();
