@@ -167,7 +167,7 @@ jobs:
             playwright-${{ runner.os }}-
 
       - name: Install Playwright
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium chromium-headless-shell
 
       - name: 🛡️ Test (with coverage)
         env:
