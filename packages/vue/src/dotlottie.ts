@@ -32,6 +32,7 @@ export const DotLottieVue = defineComponent({
     backgroundColor: { type: String as PropType<DotLottieVueProps['backgroundColor']>, required: false },
     data: { type: [String, ArrayBuffer] as PropType<DotLottieVueProps['data']>, required: false },
     loop: { type: Boolean as PropType<DotLottieVueProps['loop']>, required: false },
+    loopCount: { type: Number as PropType<DotLottieVueProps['loopCount']>, required: false },
     mode: { type: String as PropType<DotLottieVueProps['mode']>, required: false },
     renderConfig: { type: Object as PropType<DotLottieVueProps['renderConfig']>, required: false },
     segment: {
@@ -58,6 +59,7 @@ export const DotLottieVue = defineComponent({
       data,
       layout,
       loop,
+      loopCount,
       marker,
       mode,
       playOnHover,
@@ -95,6 +97,7 @@ export const DotLottieVue = defineComponent({
         data: data?.value,
         layout: layout?.value,
         loop: loop?.value,
+        loopCount: loopCount?.value,
         marker: marker?.value,
         mode: mode?.value,
         autoplay: shouldAutoplay.value,
@@ -132,6 +135,14 @@ export const DotLottieVue = defineComponent({
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
           dotLottie.setLoop(newVal);
+        }
+      },
+    );
+    watch(
+      () => loopCount?.value,
+      (newVal) => {
+        if (dotLottie && typeof newVal !== 'undefined') {
+          dotLottie.setLoopCount(newVal);
         }
       },
     );

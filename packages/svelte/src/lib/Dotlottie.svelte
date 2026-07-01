@@ -7,6 +7,7 @@
 		backgroundColor?: Config['backgroundColor'];
 		data?: Config['data'];
 		loop?: Config['loop'];
+		loopCount?: Config['loopCount'];
 		mode?: Config['mode'];
 		renderConfig?: Config['renderConfig'];
 		segment?: Config['segment'];
@@ -29,6 +30,7 @@
 		backgroundColor = undefined,
 		data = undefined,
 		loop = false,
+		loopCount = 0,
 		mode = 'forward',
 		renderConfig = undefined,
 		segment = undefined,
@@ -64,6 +66,7 @@
 				src,
 				autoplay: autoplay && !playOnHover,
 				loop,
+				loopCount,
 				speed,
 				data,
 				renderConfig,
@@ -163,6 +166,13 @@
 	});
 
 	$effect(() => {
+		const currentLoopCount = loopCount;
+		if (dotLottie && typeof currentLoopCount === 'number') {
+			dotLottie.setLoopCount(currentLoopCount);
+		}
+	});
+
+	$effect(() => {
 		if (dotLottie) {
 			dotLottie.setBackgroundColor(backgroundColor || '');
 		}
@@ -189,6 +199,7 @@
 				...untrack(() => ({
 					autoplay,
 					loop,
+					loopCount,
 					speed,
 					data,
 					renderConfig,
@@ -221,6 +232,7 @@
 					src,
 					autoplay,
 					loop,
+					loopCount,
 					speed,
 					renderConfig,
 					segment,

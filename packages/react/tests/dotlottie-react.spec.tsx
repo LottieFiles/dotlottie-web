@@ -120,6 +120,45 @@ describe.each([
     });
   });
 
+  test('calls dotLottie.setLoopCount when loopCount prop changes', async () => {
+    const onLoad = vi.fn();
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = await render(
+      <Component src={dotLottieSrc} autoplay loop dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    dotLottie?.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    const setLoopCount = vi.spyOn(dotLottie, 'setLoopCount');
+
+    rerender(<Component src={dotLottieSrc} autoplay loop loopCount={2} dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(setLoopCount).toHaveBeenCalledTimes(1);
+    });
+
+    expect(setLoopCount).toHaveBeenCalledWith(2);
+
+    rerender(<Component src={dotLottieSrc} autoplay loop dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(setLoopCount).toHaveBeenCalledTimes(2);
+    });
+
+    expect(setLoopCount).toHaveBeenCalledWith(0);
+  });
+
   test('calls dotLottie.setSpeed when speed prop changes', async () => {
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
