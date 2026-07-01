@@ -162,9 +162,11 @@ jobs:
         uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
+          # Bump the `v2` prefix to bust caches poisoned by an earlier install
+          # command (e.g. one that fetched chromium but not chromium-headless-shell).
+          # No `restore-keys`: a partial/stale cache makes `playwright install`
+          # skip the download it needs, so a key miss must be a clean miss.
+          key: playwright-v2-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Install Playwright
         run: pnpm exec playwright install --with-deps chromium chromium-headless-shell
