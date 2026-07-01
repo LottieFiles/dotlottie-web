@@ -55,6 +55,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   dotLottieRefCallback,
   layout,
   loop,
+  loopCount,
   mode,
   playOnHover,
   renderConfig,
@@ -82,6 +83,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     speed,
     mode,
     loop,
+    loopCount,
     useFrameInterpolation,
     segment,
     backgroundColor,
@@ -152,6 +154,10 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   useEffect(() => {
     dotLottieRef.current?.setLoop(loop ?? false);
   }, [loop]);
+
+  useEffect(() => {
+    dotLottieRef.current?.setLoopCount(loopCount ?? 0);
+  }, [loopCount]);
 
   useEffect(() => {
     dotLottieRef.current?.setUseFrameInterpolation(useFrameInterpolation ?? true);

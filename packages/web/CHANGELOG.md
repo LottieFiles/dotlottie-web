@@ -1,5 +1,14 @@
 # @lottiefiles/dotlottie-web
 
+## 0.75.0
+### Minor Changes
+
+- e322ffb: Upgrade dotlottie-rs WASM bindings to v0.1.58
+
+### Patch Changes
+
+- 6252c99: Fix blank rendering on non-browser canvases (e.g. `@napi-rs/canvas` in Node).
+
 ## 0.74.0
 ### Minor Changes
 

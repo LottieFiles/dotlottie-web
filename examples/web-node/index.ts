@@ -38,7 +38,7 @@ const args: Args = {
   height: Number(rawArgs['height']) || 200,
   fps: Number(rawArgs['fps']) || 60,
   repeat: Number(rawArgs['repeat']) || 0,
-  input: rawArgs['input'] || 'https://lottie.host/195549aa-ad39-4c51-80ee-a8899c2264ee/cWdgpn8n7B.lottie',
+  input: rawArgs['input'] || 'https://lottie.host/0cbdb3ef-2fa5-4d1d-9e4e-f66c879e010d/D0bRr9d93F.lottie',
   speed: Number(rawArgs['speed']) || 1,
   quality: rawArgs['quality'] || 'mid',
 };

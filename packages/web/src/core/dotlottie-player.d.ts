@@ -49,6 +49,7 @@ export class DotLottiePlayerWasm {
   segment_end(): number;
   set_quality(quality: number): boolean;
   set_segment(start: number, end: number): boolean;
+  sm_set_seed(seed: bigint): boolean;
   static unload_font(name: string): boolean;
   animation_id(): string | undefined;
   /**
@@ -411,6 +412,7 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_sm_reset_input: (a: number, b: number, c: number) => void;
   readonly dotlottieplayerwasm_sm_set_boolean_input: (a: number, b: number, c: number, d: number) => number;
   readonly dotlottieplayerwasm_sm_set_numeric_input: (a: number, b: number, c: number, d: number) => number;
+  readonly dotlottieplayerwasm_sm_set_seed: (a: number, b: bigint) => number;
   readonly dotlottieplayerwasm_sm_set_string_input: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly dotlottieplayerwasm_sm_start: (a: number, b: number, c: number, d: number) => number;
   readonly dotlottieplayerwasm_sm_status: (a: number) => [number, number];

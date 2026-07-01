@@ -1,24 +1,35 @@
 import fs from 'node:fs';
 
-import { defineConfig } from 'tsdown';
+import { defineConfig, type UserConfig } from 'tsdown';
 
 const pkg = JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
 
-export default defineConfig({
+const config: UserConfig = {
   entry: ['./src/*.ts'],
   format: ['esm'],
-  dts: true,
   minify: true,
   sourcemap: true,
   platform: 'browser',
   target: ['es2020'],
   tsconfig: 'tsconfig.build.json',
-  // To ensure the ESM bundle is self-contained and usable via CDN
-  // Use regex patterns to also match sub-path exports (e.g. lit/decorators.js)
-  noExternal: Object.keys(pkg.dependencies).map(
-    (dep) => new RegExp(`^${dep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|/)`),
-  ),
-  // rolldown-plugin-dts emits false MISSING_EXPORT warnings for type-only imports (e.g. Config interface).
-  // tsdown defaults failOnWarn to true in CI, which would fail the build on these false positives.
-  failOnWarn: false,
-});
+};
+
+export default defineConfig([
+  // Self-contained JS bundle (usable via CDN); .d.ts is emitted by the config below.
+  {
+    ...config,
+    dts: false,
+    // Regex (not bare names) so sub-path exports like lit/decorators.js are bundled too.
+    deps: {
+      alwaysBundle: Object.keys(pkg.dependencies).map(
+        (dep) => new RegExp(`^${dep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|/)`),
+      ),
+    },
+  },
+  // Declarations only, deps kept external so the .d.ts references '@lottiefiles/dotlottie-web'
+  // instead of inlining its type-only `Config` export (rolldown-plugin-dts rejects as MISSING_EXPORT).
+  {
+    ...config,
+    dts: { emitDtsOnly: true },
+  },
+]);

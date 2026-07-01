@@ -17,6 +17,9 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
   @property({ type: Boolean })
   public loop: Config['loop'];
 
+  @property({ type: Number })
+  public loopCount: Config['loopCount'];
+
   @property({ type: Boolean })
   public autoplay: Config['autoplay'];
 
@@ -83,6 +86,7 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
       src: this.src,
       data: this.data,
       loop: this.loop,
+      loopCount: this.loopCount,
       autoplay: this.autoplay,
       speed: this.speed,
       segment: this.segment,
@@ -152,6 +156,10 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
       this.dotLottie.setLoop(Boolean(value));
     }
 
+    if (name === 'loopcount') {
+      this.dotLottie.setLoopCount(value ? Number(value) : 0);
+    }
+
     if (name === 'useframeinterpolation') {
       this.dotLottie.setUseFrameInterpolation(typeof value === 'string' ? JSON.parse(value) : true);
     }
@@ -181,6 +189,7 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
         src: value,
         data: this.data,
         loop: this.loop,
+        loopCount: this.loopCount,
         autoplay: this.autoplay,
         speed: this.speed,
         segment: this.segment,
@@ -200,6 +209,7 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
         src: this.src,
         data: value,
         loop: this.loop,
+        loopCount: this.loopCount,
         autoplay: this.autoplay,
         speed: this.speed,
         segment: this.segment,

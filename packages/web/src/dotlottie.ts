@@ -887,12 +887,15 @@ export class DotLottie {
   protected _draw(): void {
     if (this._dotLottieCore === null || this._canvas === null) return;
 
-    // Only try to get context if canvas has getContext method and no context exists yet
+    // Acquire the 2D context once, when the canvas exposes getContext. In non-browser
+    // environments (e.g. Node with @napi-rs/canvas) HTMLCanvasElement/OffscreenCanvas don't
+    // exist, so !IS_BROWSER falls back to duck-typing on getContext.
     if (
       !this._context &&
       'getContext' in this._canvas &&
       typeof this._canvas.getContext === 'function' &&
-      ((typeof HTMLCanvasElement !== 'undefined' && this._canvas instanceof HTMLCanvasElement) ||
+      (!IS_BROWSER ||
+        (typeof HTMLCanvasElement !== 'undefined' && this._canvas instanceof HTMLCanvasElement) ||
         (typeof OffscreenCanvas !== 'undefined' && this._canvas instanceof OffscreenCanvas))
     ) {
       this._context = this._canvas.getContext('2d') as
