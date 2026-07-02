@@ -351,8 +351,8 @@ function parseAnimations(
   const result: DotLottieAnimation[] = [];
   for (const entry of entries ?? []) {
     const id = entry.id;
-    const path = entry.path ?? `a/${id}.json`;
-    const resolved = findFilePath(files, path);
+    // `a/` is the dotLottie v2 layout, `animations/` the v1 layout.
+    const resolved = findFirstFilePath(files, [entry.path, `a/${id}.json`, `animations/${id}.json`]);
     if (!resolved) continue;
 
     const text = decodeText(files[resolved]!);
@@ -366,8 +366,8 @@ function parseThemes(files: Record<string, Uint8Array>, entries: DotLottieManife
   const result: DotLottieTheme[] = [];
   for (const entry of entries ?? []) {
     const id = entry.id;
-    const path = entry.path ?? `t/${id}.json`;
-    const resolved = findFilePath(files, path);
+    // `t/` is the dotLottie v2 layout, `themes/` the v1 layout.
+    const resolved = findFirstFilePath(files, [entry.path, `t/${id}.json`, `themes/${id}.json`]);
     if (!resolved) continue;
 
     const text = decodeText(files[resolved]!);
@@ -399,6 +399,18 @@ function findFilePath(files: Record<string, Uint8Array>, name: string): string |
     if (path.toLowerCase() === lower) {
       return path;
     }
+  }
+  return undefined;
+}
+
+function findFirstFilePath(
+  files: Record<string, Uint8Array>,
+  candidates: Array<string | undefined>,
+): string | undefined {
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    const resolved = findFilePath(files, candidate);
+    if (resolved) return resolved;
   }
   return undefined;
 }

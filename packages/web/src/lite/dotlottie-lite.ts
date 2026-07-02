@@ -27,7 +27,7 @@ import { getDefaultDPR, isDotLottie, isElementInViewport, isLottie } from '../ut
 import type { DotLottieAPI, DotLottieStatics } from './api';
 import type { Animation } from './model';
 import { registerPackagedFonts, resolvePackagedImageAssets, unregisterPackagedFonts } from './parser/assets';
-import type { ParsedDotLottie } from './parser/dotlottie';
+import type { DotLottieAnimation, ParsedDotLottie } from './parser/dotlottie';
 import { parseDotLottie, resolveDotLottieAnimation } from './parser/dotlottie';
 import { parseLottie } from './parser/lottie';
 import { Canvas2DRenderer } from './renderer/renderer';
@@ -933,7 +933,20 @@ export class DotLottieLite implements DotLottieAPI {
 
   private _loadDotLottie(buffer: ArrayBuffer): void {
     const container = parseDotLottie(buffer);
-    const entry = resolveDotLottieAnimation(container, this._requestedAnimationId);
+
+    let entry: DotLottieAnimation;
+
+    try {
+      entry = resolveDotLottieAnimation(container, this._requestedAnimationId);
+    } catch (error) {
+      // The WASM player tolerates an unknown animationId and plays the default
+      // animation; match that instead of failing the whole load.
+      if (!this._requestedAnimationId) throw error;
+
+      console.warn(`[dotlottie-web] ${error}. Falling back to the default animation.`);
+      entry = resolveDotLottieAnimation(container);
+    }
+
     const data = resolvePackagedImageAssets(entry.data, container.files);
     const animation = parseLottie(data);
 
