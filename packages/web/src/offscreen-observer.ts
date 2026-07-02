@@ -1,11 +1,17 @@
-import type { DotLottie } from './dotlottie';
-import type { DotLottieWorker } from './worker/dotlottie';
+/**
+ * Minimal structural contract required from observed player instances.
+ * Kept structural so any player implementation (wasm, worker, lite) can be observed.
+ */
+interface FreezablePlayer {
+  freeze(): void | Promise<void>;
+  unfreeze(): void | Promise<void>;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class OffscreenObserver {
   private static _observer: IntersectionObserver | null = null;
 
-  private static readonly _observedCanvases = new Map<HTMLCanvasElement, DotLottie | DotLottieWorker>();
+  private static readonly _observedCanvases = new Map<HTMLCanvasElement, FreezablePlayer>();
 
   private static _initializeObserver(): void {
     if (OffscreenObserver._observer) return;
@@ -29,7 +35,7 @@ export class OffscreenObserver {
     });
   }
 
-  public static observe(canvas: HTMLCanvasElement, dotLottieInstance: DotLottie | DotLottieWorker): void {
+  public static observe(canvas: HTMLCanvasElement, dotLottieInstance: FreezablePlayer): void {
     OffscreenObserver._initializeObserver();
 
     if (OffscreenObserver._observedCanvases.has(canvas)) return;

@@ -18,6 +18,7 @@ import type {
   Keyframe,
   LayerDefinition,
   LayerType,
+  MarkerDefinition,
   MaskDefinition,
   MaskMode,
   MergeShape,
@@ -58,24 +59,24 @@ const MAX_PARENT_GRADIENT_STROKE_WIDTH_SCALE = 6;
 let nextGeneratedShapeId = 0;
 
 export function parseLottie(data: Record<string, unknown>, slotOverrides?: Slots): Animation {
-  const parsedSlots = parseSlots(data.slots);
+  const parsedSlots = parseSlots(data['slots']);
   const slots =
     slotOverrides && Object.keys(slotOverrides).length > 0 ? { ...parsedSlots, ...slotOverrides } : parsedSlots;
   const resolvedData =
     Object.keys(slots).length > 0 ? (resolveSlotsInData(data, slots) as Record<string, unknown>) : data;
 
-  const version = String(resolvedData.v ?? '5.5.0');
-  const frameRate = Number(resolvedData.fr ?? 60);
-  const inPoint = Number(resolvedData.ip ?? 0);
-  const outPoint = Number(resolvedData.op ?? frameRate);
-  const width = Number(resolvedData.w ?? 512);
-  const height = Number(resolvedData.h ?? 512);
+  const version = String(resolvedData['v'] ?? '5.5.0');
+  const frameRate = Number(resolvedData['fr'] ?? 60);
+  const inPoint = Number(resolvedData['ip'] ?? 0);
+  const outPoint = Number(resolvedData['op'] ?? frameRate);
+  const width = Number(resolvedData['w'] ?? 512);
+  const height = Number(resolvedData['h'] ?? 512);
 
-  const imageAssets = parseImageAssets(resolvedData.assets);
-  const audioAssets = parseAudioAssets(resolvedData.assets);
-  const textGlyphs = parseTextGlyphs(resolvedData.chars);
-  const assets = parseAssets(resolvedData.assets, imageAssets, audioAssets, textGlyphs);
-  const layers = Array.isArray(resolvedData.layers) ? (resolvedData.layers as unknown[]) : [];
+  const imageAssets = parseImageAssets(resolvedData['assets']);
+  const audioAssets = parseAudioAssets(resolvedData['assets']);
+  const textGlyphs = parseTextGlyphs(resolvedData['chars']);
+  const assets = parseAssets(resolvedData['assets'], imageAssets, audioAssets, textGlyphs);
+  const layers = Array.isArray(resolvedData['layers']) ? (resolvedData['layers'] as unknown[]) : [];
   const parsedLayers = layers.map((layer, index) =>
     parseLayer(layer as Record<string, unknown>, index, imageAssets, audioAssets, textGlyphs),
   );
@@ -87,7 +88,7 @@ export function parseLottie(data: Record<string, unknown>, slotOverrides?: Slots
     const originalInd = parsed.ind;
     const layersForRoot = flattenPrecomp(parsed, assets, idContext);
     const syntheticInd = (layersForRoot as unknown as { syntheticInd?: number }).syntheticInd;
-    topOldToNew.set(originalInd, syntheticInd ?? layersForRoot[0].ind);
+    topOldToNew.set(originalInd, syntheticInd ?? layersForRoot[0]!.ind);
     flattenedLayers.push(...layersForRoot);
   }
 
@@ -109,8 +110,27 @@ export function parseLottie(data: Record<string, unknown>, slotOverrides?: Slots
     width,
     height,
     layers: flattenedLayers,
+    markers: parseMarkers(resolvedData['markers']),
     slots,
   };
+}
+
+function parseMarkers(data: unknown): MarkerDefinition[] {
+  if (!Array.isArray(data)) return [];
+
+  const markers: MarkerDefinition[] = [];
+  for (const item of data) {
+    if (!item || typeof item !== 'object') continue;
+    const record = item as Record<string, unknown>;
+    const name = String(record['cm'] ?? '');
+    if (!name) continue;
+    markers.push({
+      name,
+      time: Number(record['tm'] ?? 0),
+      duration: Number(record['dr'] ?? 0),
+    });
+  }
+  return markers;
 }
 
 function parseSlots(data: unknown): Slots {
@@ -119,13 +139,13 @@ function parseSlots(data: unknown): Slots {
   for (const [key, value] of Object.entries(data)) {
     if (!value || typeof value !== 'object') continue;
     const record = value as Record<string, unknown>;
-    const p = record.p;
+    const p = record['p'];
     if (!p || typeof p !== 'object') continue;
     const pRecord = p as Record<string, unknown>;
     slots[key] = {
       p: {
-        a: pRecord.a === 1 ? 1 : 0,
-        k: pRecord.k,
+        a: pRecord['a'] === 1 ? 1 : 0,
+        k: pRecord['k'],
       },
     };
   }
@@ -142,7 +162,7 @@ function resolveSlotsInData(data: unknown, slots: Slots): unknown {
   }
 
   const record = data as Record<string, unknown>;
-  const sid = record.sid;
+  const sid = record['sid'];
   if (typeof sid === 'string' && slots[sid]) {
     return resolveSlotsInData(slots[sid].p, slots);
   }
@@ -166,9 +186,9 @@ function parseAssets(
   for (const asset of data) {
     if (!asset || typeof asset !== 'object') continue;
     const record = asset as Record<string, unknown>;
-    const id = String(record.id ?? '');
+    const id = String(record['id'] ?? '');
     if (!id) continue;
-    const assetLayers = Array.isArray(record.layers) ? (record.layers as unknown[]) : [];
+    const assetLayers = Array.isArray(record['layers']) ? (record['layers'] as unknown[]) : [];
     assets.set(
       id,
       assetLayers.map((layer, index) =>
@@ -187,16 +207,16 @@ function parseImageAssets(data: unknown): ImageAssets {
   for (const asset of data) {
     if (!asset || typeof asset !== 'object') continue;
     const record = asset as Record<string, unknown>;
-    const id = String(record.id ?? '');
-    if (!id || record.layers !== undefined) continue;
-    if (record._t === 2) continue;
+    const id = String(record['id'] ?? '');
+    if (!id || record['layers'] !== undefined) continue;
+    if (record['_t'] === 2) continue;
 
-    const embedded = record.e === 1;
-    const path = String(record.p ?? '');
-    const basePath = String(record.u ?? '');
+    const embedded = record['e'] === 1;
+    const path = String(record['p'] ?? '');
+    const basePath = String(record['u'] ?? '');
     const src = embedded ? (path.startsWith('data:') ? path : `data:image/png;base64,${path}`) : `${basePath}${path}`;
-    const width = Number(record.w ?? 512);
-    const height = Number(record.h ?? 512);
+    const width = Number(record['w'] ?? 512);
+    const height = Number(record['h'] ?? 512);
 
     images.set(id, { src, width, height });
   }
@@ -211,12 +231,12 @@ function parseAudioAssets(data: unknown): AudioAssets {
   for (const asset of data) {
     if (!asset || typeof asset !== 'object') continue;
     const record = asset as Record<string, unknown>;
-    const id = String(record.id ?? '');
-    if (!id || record._t !== 2) continue;
+    const id = String(record['id'] ?? '');
+    if (!id || record['_t'] !== 2) continue;
 
-    const embedded = record.e === 1;
-    const path = String(record.p ?? '');
-    const basePath = String(record.u ?? '');
+    const embedded = record['e'] === 1;
+    const path = String(record['p'] ?? '');
+    const basePath = String(record['u'] ?? '');
     const src = embedded ? `data:audio;base64,${path}` : `${basePath}${path}`;
 
     audios.set(id, { src });
@@ -253,25 +273,25 @@ function flattenPrecomp(
     inPoint: layer.inPoint,
     outPoint: layer.outPoint,
     startTime: layer.startTime ?? 0,
-    transformStartTime: layer.transformStartTime,
+    ...(layer.transformStartTime !== undefined && { transformStartTime: layer.transformStartTime }),
     stretch: layer.stretch ?? 1,
-    timeRemap: layer.timeRemap,
-    parentId: layer.parentId,
+    ...(layer.timeRemap !== undefined && { timeRemap: layer.timeRemap }),
+    ...(layer.parentId !== undefined && { parentId: layer.parentId }),
     transform: layer.transform,
     shapes: [],
-    masks: layer.masks,
-    masksUseContentFrame: layer.isPrecompChildContent,
-    trackMatte: layer.trackMatte,
-    isMatte: layer.isMatte,
-    blendMode: layer.blendMode,
-    effects: layer.effects,
-    groupOpacity: layer.groupOpacity,
+    ...(layer.masks !== undefined && { masks: layer.masks }),
+    ...(layer.isPrecompChildContent !== undefined && { masksUseContentFrame: layer.isPrecompChildContent }),
+    ...(layer.trackMatte !== undefined && { trackMatte: layer.trackMatte }),
+    ...(layer.isMatte !== undefined && { isMatte: layer.isMatte }),
+    ...(layer.blendMode !== undefined && { blendMode: layer.blendMode }),
+    ...(layer.effects !== undefined && { effects: layer.effects }),
+    ...(layer.groupOpacity !== undefined && { groupOpacity: layer.groupOpacity }),
     isPrecompChildContent: false,
     // The synthetic precomp layer's placement transform lives on the parent
     // composition timeline and must follow the parent precomp's time remapping.
-    parentTimeRemap: layer.parentTimeRemap,
-    parentStartTime: layer.parentStartTime,
-    remappedSourceWindow: layer.remappedSourceWindow,
+    ...(layer.parentTimeRemap !== undefined && { parentTimeRemap: layer.parentTimeRemap }),
+    ...(layer.parentStartTime !== undefined && { parentStartTime: layer.parentStartTime }),
+    ...(layer.remappedSourceWindow !== undefined && { remappedSourceWindow: layer.remappedSourceWindow }),
     visible: layer.visible,
   };
 
@@ -283,7 +303,7 @@ function flattenPrecomp(
     const childLayers = flattenPrecomp(merged, assets, context);
     localMap.set(
       originalInd,
-      (childLayers as LayerDefinition[] & { syntheticInd?: number }).syntheticInd ?? childLayers[0].ind,
+      (childLayers as LayerDefinition[] & { syntheticInd?: number }).syntheticInd ?? childLayers[0]!.ind,
     );
     children.push(...childLayers);
   }
@@ -399,6 +419,19 @@ function mergePrecompLayer(
     ? Math.min(unclippedOutPoint, sourceWindowDuration)
     : unclippedOutPoint;
 
+  const blendMode = compLayer.blendMode ?? precomp.blendMode;
+  // Non-precomp children live on the precomp timeline, so their content
+  // must follow the precomp's time remapping. Precomp layers keep their own
+  // time remapping and inherit the parent's remapping separately.
+  const timeRemap =
+    compLayer.timeRemap ?? (compLayer.refId ? undefined : (precomp.timeRemap ?? precomp.parentTimeRemap));
+  // Transforms of precomp children are authored on the precomp timeline,
+  // so they must be evaluated using the parent precomp's time remapping.
+  const parentTimeRemap = precomp.timeRemap ?? precomp.parentTimeRemap;
+  const parentStartTime = precomp.remappedSourceWindow
+    ? precompStartTime - (precomp.transformStartTime ?? 0)
+    : precomp.parentStartTime;
+
   return {
     id: `${precomp.id}-comp-${index}`,
     name: `${precomp.name} > ${compLayer.name}`,
@@ -407,33 +440,26 @@ function mergePrecompLayer(
     ind: compLayer.ind,
     inPoint,
     outPoint,
-    refId: compLayer.refId,
+    ...(compLayer.refId !== undefined && { refId: compLayer.refId }),
     parentId,
     transform: compLayer.transform,
     shapes: compLayer.shapes,
-    image: compLayer.image,
-    audio: compLayer.audio,
-    text: compLayer.text,
-    masks: compLayer.masks,
-    trackMatte: compLayer.trackMatte,
-    isMatte: compLayer.isMatte,
-    blendMode: compLayer.blendMode ?? precomp.blendMode,
+    ...(compLayer.image !== undefined && { image: compLayer.image }),
+    ...(compLayer.audio !== undefined && { audio: compLayer.audio }),
+    ...(compLayer.text !== undefined && { text: compLayer.text }),
+    ...(compLayer.masks !== undefined && { masks: compLayer.masks }),
+    ...(compLayer.trackMatte !== undefined && { trackMatte: compLayer.trackMatte }),
+    ...(compLayer.isMatte !== undefined && { isMatte: compLayer.isMatte }),
+    ...(blendMode !== undefined && { blendMode }),
     startTime,
     transformStartTime: precompStartTime,
-    stretch: precomp.stretch,
-    // Non-precomp children live on the precomp timeline, so their content
-    // must follow the precomp's time remapping. Precomp layers keep their own
-    // time remapping and inherit the parent's remapping separately.
-    timeRemap: compLayer.timeRemap ?? (compLayer.refId ? undefined : (precomp.timeRemap ?? precomp.parentTimeRemap)),
-    // Transforms of precomp children are authored on the precomp timeline,
-    // so they must be evaluated using the parent precomp's time remapping.
-    parentTimeRemap: precomp.timeRemap ?? precomp.parentTimeRemap,
-    parentStartTime: precomp.remappedSourceWindow
-      ? precompStartTime - (precomp.transformStartTime ?? 0)
-      : precomp.parentStartTime,
+    ...(precomp.stretch !== undefined && { stretch: precomp.stretch }),
+    ...(timeRemap !== undefined && { timeRemap }),
+    ...(parentTimeRemap !== undefined && { parentTimeRemap }),
+    ...(parentStartTime !== undefined && { parentStartTime }),
     remappedSourceWindow: useSourceWindow,
-    sourceWindowParentInPoint,
-    sourceWindowParentOutPoint,
+    ...(sourceWindowParentInPoint !== undefined && { sourceWindowParentInPoint }),
+    ...(sourceWindowParentOutPoint !== undefined && { sourceWindowParentOutPoint }),
     effects: [...(precomp.effects ?? []), ...(compLayer.effects ?? [])],
     groupOpacity,
     isPrecompChildContent: true,
@@ -448,10 +474,10 @@ function parseLayer(
   audioAssets: AudioAssets,
   textGlyphs: Record<string, TextGlyph>,
 ): LayerDefinition {
-  const shapes = Array.isArray(data.shapes) ? (data.shapes as unknown[]) : [];
-  const layerType = Number(data.ty ?? 2);
+  const shapes = Array.isArray(data['shapes']) ? (data['shapes'] as unknown[]) : [];
+  const layerType = Number(data['ty'] ?? 2);
   const transform = parseLayerTransform(
-    data.ks as Record<string, unknown> | undefined,
+    data['ks'] as Record<string, unknown> | undefined,
     layerType === 1 ? 'destination' : 'segment-start',
   );
   const layerStyle: ShapeStyle = {
@@ -460,20 +486,20 @@ function parseLayer(
     layerTransformScale: transformScalePercent(evaluateTransform(transform, 0)) / 100,
   };
   const type = parseLayerType(layerType);
-  const refId = data.refId !== undefined ? String(data.refId) : undefined;
-  const ind = Number(data.ind ?? index);
-  const rawMasks = Array.isArray(data.masksProperties) ? data.masksProperties : undefined;
+  const refId = data['refId'] !== undefined ? String(data['refId']) : undefined;
+  const ind = Number(data['ind'] ?? index);
+  const rawMasks = Array.isArray(data['masksProperties']) ? data['masksProperties'] : undefined;
   const masks = rawMasks
-    ?.filter((mask) => String((mask as Record<string, unknown>).mode ?? '') !== 'n')
+    ?.filter((mask) => String((mask as Record<string, unknown>)['mode'] ?? '') !== 'n')
     .map((mask) => parseMask(mask as Record<string, unknown>));
-  const trackMatte = parseTrackMatte(data.tt);
-  const blendMode = parseBlendMode(data.bm);
-  const text = layerType === 5 ? parseTextDocument(data.t, rawMasks, textGlyphs) : undefined;
-  const stretch = Number(data.sr ?? 1);
-  const timeRemap = data.tm !== undefined ? parseAnimatableNumber(data.tm) : undefined;
-  const effects = parseEffects(data.ef);
+  const trackMatte = parseTrackMatte(data['tt']);
+  const blendMode = parseBlendMode(data['bm']);
+  const text = layerType === 5 ? parseTextDocument(data['t'], rawMasks, textGlyphs) : undefined;
+  const stretch = Number(data['sr'] ?? 1);
+  const timeRemap = data['tm'] !== undefined ? parseAnimatableNumber(data['tm']) : undefined;
+  const effects = parseEffects(data['ef']);
   const threeDRotation =
-    data.ddd === 1 ? parseThreeDRotation(data.ks as Record<string, unknown> | undefined) : undefined;
+    data['ddd'] === 1 ? parseThreeDRotation(data['ks'] as Record<string, unknown> | undefined) : undefined;
   const image = layerType === 2 && refId ? imageAssets.get(refId) : undefined;
   const audio = layerType === 6 && refId ? parseAudioLayer(data, audioAssets.get(refId)) : undefined;
 
@@ -483,60 +509,60 @@ function parseLayer(
 
   return {
     id: `layer-${index}`,
-    name: String(data.nm ?? `Layer ${index}`),
+    name: String(data['nm'] ?? `Layer ${index}`),
     type,
     index,
     ind,
-    inPoint: Number(data.ip ?? 0),
-    outPoint: Number(data.op ?? 60),
-    startTime: Number(data.st ?? 0),
-    refId: layerType === 0 ? refId : undefined,
-    parentId: data.parent !== undefined ? Number(data.parent) : undefined,
+    inPoint: Number(data['ip'] ?? 0),
+    outPoint: Number(data['op'] ?? 60),
+    startTime: Number(data['st'] ?? 0),
+    ...(layerType === 0 && refId !== undefined && { refId }),
+    ...(data['parent'] !== undefined && { parentId: Number(data['parent']) }),
     transform,
     shapes: layerShapes,
-    image,
-    audio,
-    masks,
-    trackMatte,
-    isMatte: data.td !== undefined,
-    blendMode,
-    text,
+    ...(image !== undefined && { image }),
+    ...(audio !== undefined && { audio }),
+    ...(masks !== undefined && { masks }),
+    ...(trackMatte !== undefined && { trackMatte }),
+    isMatte: data['td'] !== undefined,
+    ...(blendMode !== undefined && { blendMode }),
+    ...(text !== undefined && { text }),
     stretch,
-    timeRemap,
+    ...(timeRemap !== undefined && { timeRemap }),
     effects,
-    threeDRotation,
-    visible: data.hd !== true && layerType !== 3 && layerType !== 6,
+    ...(threeDRotation !== undefined && { threeDRotation }),
+    visible: data['hd'] !== true && layerType !== 3 && layerType !== 6,
   };
 }
 
 function parseThreeDRotation(data: Record<string, unknown> | undefined): ThreeDRotation {
   return {
-    x: parseAnimatableNumber(data?.rx),
-    y: parseAnimatableNumber(data?.ry),
+    x: parseAnimatableNumber(data?.['rx']),
+    y: parseAnimatableNumber(data?.['ry']),
   };
 }
 
 function parseAudioLayer(data: Record<string, unknown>, asset: { src: string } | undefined): AudioSource | undefined {
   if (!asset) return undefined;
-  const settings = data.au;
+  const settings = data['au'];
   const levels =
     settings && typeof settings === 'object'
-      ? parseAnimatableNumber((settings as Record<string, unknown>).lv, 100)
+      ? parseAnimatableNumber((settings as Record<string, unknown>)['lv'], 100)
       : 100;
 
   return {
     src: asset.src,
-    inPoint: Number(data.ip ?? 0),
-    outPoint: Number(data.op ?? 60),
-    startTime: Number(data.st ?? 0),
+    inPoint: Number(data['ip'] ?? 0),
+    outPoint: Number(data['op'] ?? 60),
+    startTime: Number(data['st'] ?? 0),
     levels,
   };
 }
 
 function buildSolidShapes(data: Record<string, unknown>, style: ShapeStyle): Shape[] {
-  const width = parseNumber(data.sw);
-  const height = parseNumber(data.sh);
-  const color = parseHexColor(data.sc);
+  const width = parseNumber(data['sw']);
+  const height = parseNumber(data['sh']);
+  const color = parseHexColor(data['sc']);
 
   const rectShape: RectShape = {
     id: generatedShapeId('solid'),
@@ -551,8 +577,8 @@ function buildSolidShapes(data: Record<string, unknown>, style: ShapeStyle): Sha
     size: { x: width, y: height },
     cornerRadius: 0,
     fill: { type: 'solid', color },
-    stroke: style.stroke,
-    trim: style.trim,
+    ...(style.stroke !== undefined && { stroke: style.stroke }),
+    ...(style.trim !== undefined && { trim: style.trim }),
   };
 
   return [rectShape];
@@ -578,11 +604,11 @@ function parseHexColor(data: unknown): Color {
 
 function parseMask(data: Record<string, unknown>): MaskDefinition {
   return {
-    path: parseAnimatablePathData(data.pt),
-    mode: parseMaskMode(data.mode),
-    inverted: data.inv === true,
-    opacity: parseAnimatableNumber(data.o),
-    expansion: parseNumber(data.x),
+    path: parseAnimatablePathData(data['pt']),
+    mode: parseMaskMode(data['mode']),
+    inverted: data['inv'] === true,
+    opacity: parseAnimatableNumber(data['o']),
+    expansion: parseNumber(data['x']),
   };
 }
 
@@ -618,7 +644,7 @@ function parseEffects(data: unknown): Effect[] {
   for (const item of data) {
     if (!item || typeof item !== 'object') continue;
     const effect = item as Record<string, unknown>;
-    const mn = String(effect.mn ?? '');
+    const mn = String(effect['mn'] ?? '');
     const parsed = parseEffectByMatchName(effect, mn);
     if (parsed) effects.push(parsed);
   }
@@ -693,7 +719,7 @@ function parseTintEffect(effect: Record<string, unknown>): TintEffect | null {
   const whiteColorData = findEffectProperty(effect, 'ADBE Tint-0002');
   const whiteColor = whiteColorData === undefined ? undefined : parseAnimatableShapeColor(whiteColorData);
   const amount = parseAnimatableEffectAmount(findEffectProperty(effect, 'ADBE Tint-0003'));
-  return { type: 'tint', color, whiteColor, amount };
+  return { type: 'tint', color, ...(whiteColor !== undefined && { whiteColor }), amount };
 }
 
 function parseTritoneEffect(effect: Record<string, unknown>): TintEffect | null {
@@ -722,10 +748,10 @@ function findEffectProperty(effect: Record<string, unknown>, matchName: string):
   while (queue.length > 0) {
     const current = queue.shift();
     if (!current) continue;
-    if (String(current.mn ?? '') === matchName) {
-      return current.v;
+    if (String(current['mn'] ?? '') === matchName) {
+      return current['v'];
     }
-    const children = current.ef;
+    const children = current['ef'];
     if (Array.isArray(children)) {
       for (const child of children) {
         if (child && typeof child === 'object') {
@@ -806,28 +832,29 @@ function parseTextDocument(
 ): TextDocument | undefined {
   if (!data || typeof data !== 'object') return undefined;
   const record = data as Record<string, unknown>;
-  const docData = record.d;
+  const docData = record['d'];
   if (!docData || typeof docData !== 'object') return undefined;
   const docRecord = docData as Record<string, unknown>;
-  let value = docRecord.k;
+  let value = docRecord['k'];
   if (Array.isArray(value) && value.length > 0) {
-    value = (value[0] as Record<string, unknown>).s;
+    value = (value[0] as Record<string, unknown>)['s'];
   }
   if (!value || typeof value !== 'object') return undefined;
   const doc = value as Record<string, unknown>;
-  const animator = parseTextRangeScaleAnimator(record.a);
-  const textPath = parseTextPath(record.p, masks);
+  const animator = parseTextRangeScaleAnimator(record['a']);
+  const textPath = parseTextPath(record['p'], masks);
+  const justification = parseJustification(doc['j']);
 
   return {
-    text: String(doc.t ?? ''),
-    fontFamily: String(doc.f ?? 'sans-serif'),
-    size: parseNumber(doc.s) || 24,
-    color: parseColor(doc.fc),
-    tracking: parseNumber(doc.tr),
-    justification: parseJustification(doc.j),
-    lineHeight: parseNumber(doc.lh),
+    text: String(doc['t'] ?? ''),
+    fontFamily: String(doc['f'] ?? 'sans-serif'),
+    size: parseNumber(doc['s']) || 24,
+    color: parseColor(doc['fc']),
+    tracking: parseNumber(doc['tr']),
+    ...(justification !== undefined && { justification }),
+    lineHeight: parseNumber(doc['lh']),
     ...animator,
-    textPath,
+    ...(textPath !== undefined && { textPath }),
     ...(Object.keys(glyphs).length > 0 ? { glyphs } : {}),
   };
 }
@@ -839,13 +866,13 @@ function parseTextGlyphs(data: unknown): Record<string, TextGlyph> {
   for (const item of data) {
     if (!item || typeof item !== 'object') continue;
     const record = item as Record<string, unknown>;
-    const ch = record.ch;
+    const ch = record['ch'];
     if (typeof ch !== 'string' || ch.length === 0) continue;
-    const paths = collectGlyphPaths(record.data);
+    const paths = collectGlyphPaths(record['data']);
     if (paths.length === 0) continue;
     glyphs[ch] = {
-      width: parseNumber(record.w),
-      size: parseNumber(record.size) || 100,
+      width: parseNumber(record['w']),
+      size: parseNumber(record['size']) || 100,
       paths,
     };
   }
@@ -855,16 +882,16 @@ function parseTextGlyphs(data: unknown): Record<string, TextGlyph> {
 function collectGlyphPaths(data: unknown): PathData[] {
   if (!data || typeof data !== 'object') return [];
   const record = data as Record<string, unknown>;
-  const shapes = Array.isArray(record.shapes) ? record.shapes : Array.isArray(record.it) ? record.it : [];
+  const shapes = Array.isArray(record['shapes']) ? record['shapes'] : Array.isArray(record['it']) ? record['it'] : [];
   const paths: PathData[] = [];
 
   for (const item of shapes) {
     if (!item || typeof item !== 'object') continue;
     const shape = item as Record<string, unknown>;
-    if (String(shape.ty) === 'sh') {
-      const path = parsePathDataValue((shape.ks as Record<string, unknown> | undefined)?.k);
+    if (String(shape['ty']) === 'sh') {
+      const path = parsePathDataValue((shape['ks'] as Record<string, unknown> | undefined)?.['k']);
       if (path) paths.push(path);
-    } else if (String(shape.ty) === 'gr') {
+    } else if (String(shape['ty']) === 'gr') {
       paths.push(...collectGlyphPaths(shape));
     }
   }
@@ -876,14 +903,14 @@ function parseTextPath(data: unknown, masks?: unknown[]): TextDocument['textPath
     return undefined;
   }
   const record = data as Record<string, unknown>;
-  if (record.f === undefined) return undefined;
-  const maskIndex = Math.max(0, Number(record.m ?? 0));
+  if (record['f'] === undefined) return undefined;
+  const maskIndex = Math.max(0, Number(record['m'] ?? 0));
   const mask = masks[maskIndex] as Record<string, unknown> | undefined;
-  const maskPath = mask?.pt;
+  const maskPath = mask?.['pt'];
   if (maskPath === undefined) return undefined;
   return {
     path: parseAnimatablePathData(maskPath),
-    firstMargin: parseAnimatableNumber(record.f),
+    firstMargin: parseAnimatableNumber(record['f']),
   };
 }
 
@@ -894,20 +921,20 @@ function parseTextRangeScaleAnimator(
   for (const item of data) {
     if (!item || typeof item !== 'object') continue;
     const animator = item as Record<string, unknown>;
-    const selector = animator.s;
-    const properties = animator.a;
+    const selector = animator['s'];
+    const properties = animator['a'];
     if (!selector || typeof selector !== 'object' || !properties || typeof properties !== 'object') {
       continue;
     }
     const selectorRecord = selector as Record<string, unknown>;
     const propertiesRecord = properties as Record<string, unknown>;
-    if (propertiesRecord.s === undefined || selectorRecord.e === undefined) {
+    if (propertiesRecord['s'] === undefined || selectorRecord['e'] === undefined) {
       continue;
     }
     return {
-      rangeSelectorScale: parseAnimatablePoint(propertiesRecord.s, { x: 100, y: 100 }),
-      rangeSelectorEnd: parseAnimatableNumber(selectorRecord.e, 100),
-      rangeSelectorShape: Number(selectorRecord.sh ?? 1),
+      rangeSelectorScale: parseAnimatablePoint(propertiesRecord['s'], { x: 100, y: 100 }),
+      rangeSelectorEnd: parseAnimatableNumber(selectorRecord['e'], 100),
+      rangeSelectorShape: Number(selectorRecord['sh'] ?? 1),
     };
   }
   return {};
@@ -925,13 +952,13 @@ function parseTransform(
 ): AnimatedTransform {
   const ks = data ?? {};
   return {
-    position: parseAnimatablePoint(ks.p),
-    anchor: parseAnimatablePoint(ks.a),
-    scale: parseAnimatablePoint(ks.s, { x: 100, y: 100 }),
-    rotation: parseAnimatableNumber(ks.r, 0),
-    opacity: parseAnimatableNumber(ks.o, 100, opacityIncomingTangentSource),
-    skew: ks.sk !== undefined ? parseAnimatableNumber(ks.sk, 0) : undefined,
-    skewAxis: ks.sa !== undefined ? parseAnimatableNumber(ks.sa, 0) : undefined,
+    position: parseAnimatablePoint(ks['p']),
+    anchor: parseAnimatablePoint(ks['a']),
+    scale: parseAnimatablePoint(ks['s'], { x: 100, y: 100 }),
+    rotation: parseAnimatableNumber(ks['r'], 0),
+    opacity: parseAnimatableNumber(ks['o'], 100, opacityIncomingTangentSource),
+    ...(ks['sk'] !== undefined && { skew: parseAnimatableNumber(ks['sk'], 0) }),
+    ...(ks['sa'] !== undefined && { skewAxis: parseAnimatableNumber(ks['sa'], 0) }),
   };
 }
 
@@ -961,8 +988,8 @@ function parseAnimatablePoint(data: unknown, defaultValue: Point = { x: 0, y: 0 
   if (isSeparateDimensions(data)) {
     const record = data as Record<string, unknown>;
     return {
-      x: parseAnimatableNumber(record.x, defaultValue.x),
-      y: parseAnimatableNumber(record.y, defaultValue.y),
+      x: parseAnimatableNumber(record['x'], defaultValue.x),
+      y: parseAnimatableNumber(record['y'], defaultValue.y),
     } as unknown as PointAnimatable;
   }
 
@@ -982,15 +1009,15 @@ function parseAnimatablePoint(data: unknown, defaultValue: Point = { x: 0, y: 0 
 
 function isSeparateDimensions(data: unknown): data is Record<string, unknown> {
   return (
-    typeof data === 'object' && data !== null && !Array.isArray(data) && (data as Record<string, unknown>).s === true
+    typeof data === 'object' && data !== null && !Array.isArray(data) && (data as Record<string, unknown>)['s'] === true
   );
 }
 
 function hasPerDimensionEasing(data: unknown): boolean {
   if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
   const record = data as Record<string, unknown>;
-  if (record.a !== 1) return false;
-  const keyframes = Array.isArray(record.k) ? (record.k as unknown[]) : [];
+  if (record['a'] !== 1) return false;
+  const keyframes = Array.isArray(record['k']) ? (record['k'] as unknown[]) : [];
   for (const raw of keyframes) {
     if (!raw || typeof raw !== 'object') continue;
     const kf = raw as Record<string, unknown>;
@@ -998,7 +1025,7 @@ function hasPerDimensionEasing(data: unknown): boolean {
       const tangent = kf[key];
       if (!tangent || typeof tangent !== 'object') continue;
       const tRecord = tangent as Record<string, unknown>;
-      if (Array.isArray(tRecord.x) || Array.isArray(tRecord.y)) {
+      if (Array.isArray(tRecord['x']) || Array.isArray(tRecord['y'])) {
         return true;
       }
     }
@@ -1023,29 +1050,30 @@ function parseAnimatableNumberDimension(data: unknown, dimension: number, defaul
   }
 
   const record = data as Record<string, unknown>;
-  const animated = record.a === 1;
+  const animated = record['a'] === 1;
 
   if (!animated) {
-    const parsed = parseDimensionValue(record.k, dimension);
+    const parsed = parseDimensionValue(record['k'], dimension);
     return parsed ?? defaultValue;
   }
 
-  const keyframes = Array.isArray(record.k) ? (record.k as unknown[]) : [];
-  const expression = typeof record.x === 'string' ? record.x : undefined;
+  const keyframes = Array.isArray(record['k']) ? (record['k'] as unknown[]) : [];
+  const expression = typeof record['x'] === 'string' ? record['x'] : undefined;
 
   const parsedKeyframes: Keyframe<number>[] = [];
   let previousRaw: Record<string, unknown> | undefined;
   for (let i = 0; i < keyframes.length; i++) {
     const raw = keyframes[i] as Record<string, unknown>;
-    const value = parseDimensionValue(raw.s, dimension);
+    const value = parseDimensionValue(raw['s'], dimension);
     if (value !== null) {
       const inTangent = parseSegmentDimensionInTangent(raw, previousRaw, dimension);
+      const outTangent = parseDimensionTangent(raw['o'], dimension);
       parsedKeyframes.push({
-        time: Number(raw.t ?? 0),
+        time: Number(raw['t'] ?? 0),
         value,
-        hold: raw.h === 1,
-        outTangent: parseDimensionTangent(raw.o, dimension),
-        inTangent,
+        hold: raw['h'] === 1,
+        ...(outTangent !== undefined && { outTangent }),
+        ...(inTangent !== undefined && { inTangent }),
       });
       previousRaw = raw;
       continue;
@@ -1053,21 +1081,23 @@ function parseAnimatableNumberDimension(data: unknown, dimension: number, defaul
 
     if (i === keyframes.length - 1 && i > 0) {
       const markerPreviousRaw = keyframes[i - 1] as Record<string, unknown>;
-      const markerValue = parseDimensionValue(markerPreviousRaw.e, dimension);
+      const markerValue = parseDimensionValue(markerPreviousRaw['e'], dimension);
       if (markerValue !== null) {
+        const outTangent = parseDimensionTangent(raw['o'], dimension);
+        const inTangent = parseSegmentDimensionInTangent(raw, markerPreviousRaw, dimension);
         parsedKeyframes.push({
-          time: Number(raw.t ?? 0),
+          time: Number(raw['t'] ?? 0),
           value: markerValue,
           hold: true,
-          outTangent: parseDimensionTangent(raw.o, dimension),
-          inTangent: parseSegmentDimensionInTangent(raw, markerPreviousRaw, dimension),
+          ...(outTangent !== undefined && { outTangent }),
+          ...(inTangent !== undefined && { inTangent }),
         });
       }
     }
     previousRaw = raw;
   }
 
-  return { keyframes: parsedKeyframes, expression };
+  return { keyframes: parsedKeyframes, ...(expression !== undefined && { expression }) };
 }
 
 function parseDimensionValue(data: unknown, dimension: number): number | null {
@@ -1082,8 +1112,8 @@ function parseDimensionValue(data: unknown, dimension: number): number | null {
 function parseDimensionTangent(data: unknown, dimension: number): Point | undefined {
   if (!data || typeof data !== 'object') return undefined;
   const record = data as Record<string, unknown>;
-  const xValue = Array.isArray(record.x) ? record.x[dimension] : record.x;
-  const yValue = Array.isArray(record.y) ? record.y[dimension] : record.y;
+  const xValue = Array.isArray(record['x']) ? record['x'][dimension] : record['x'];
+  const yValue = Array.isArray(record['y']) ? record['y'][dimension] : record['y'];
   if (typeof xValue === 'number' && typeof yValue === 'number') {
     return { x: xValue, y: yValue };
   }
@@ -1096,8 +1126,8 @@ function parseSegmentDimensionInTangent(
   dimension: number,
 ): Point | undefined {
   return previousData
-    ? (parseDimensionTangent(previousData.i, dimension) ?? parseDimensionTangent(data.i, dimension))
-    : parseDimensionTangent(data.i, dimension);
+    ? (parseDimensionTangent(previousData['i'], dimension) ?? parseDimensionTangent(data['i'], dimension))
+    : parseDimensionTangent(data['i'], dimension);
 }
 
 function isAnimatedPoint(value: PointAnimatable): boolean {
@@ -1139,15 +1169,15 @@ function parseAnimatable<T>(
   }
 
   const record = data as Record<string, unknown>;
-  const animated = record.a === 1;
+  const animated = record['a'] === 1;
 
   if (!animated) {
-    const parsed = parseStatic(record.k);
+    const parsed = parseStatic(record['k']);
     return parsed ?? defaultValue;
   }
 
-  const keyframes = Array.isArray(record.k) ? (record.k as unknown[]) : [];
-  const expression = typeof record.x === 'string' ? record.x : undefined;
+  const keyframes = Array.isArray(record['k']) ? (record['k'] as unknown[]) : [];
+  const expression = typeof record['x'] === 'string' ? record['x'] : undefined;
 
   const parsedKeyframes: Keyframe<T>[] = [];
   let previousRaw: Record<string, unknown> | undefined;
@@ -1165,14 +1195,16 @@ function parseAnimatable<T>(
     // property holds correctly past the preceding keyframe.
     if (i === keyframes.length - 1 && i > 0) {
       const markerPreviousRaw = keyframes[i - 1] as Record<string, unknown>;
-      const markerValue = parseStatic(markerPreviousRaw.e);
+      const markerValue = parseStatic(markerPreviousRaw['e']);
       if (markerValue !== null) {
+        const outTangent = parseTangent(raw['o']);
+        const inTangent = parseSegmentInTangent(raw, markerPreviousRaw, incomingTangentSource);
         parsedKeyframes.push({
-          time: Number(raw.t ?? 0),
+          time: Number(raw['t'] ?? 0),
           value: markerValue,
           hold: true,
-          outTangent: parseTangent(raw.o),
-          inTangent: parseSegmentInTangent(raw, markerPreviousRaw, incomingTangentSource),
+          ...(outTangent !== undefined && { outTangent }),
+          ...(inTangent !== undefined && { inTangent }),
         });
       }
     }
@@ -1181,7 +1213,7 @@ function parseAnimatable<T>(
 
   return {
     keyframes: parsedKeyframes,
-    expression,
+    ...(expression !== undefined && { expression }),
   };
 }
 
@@ -1191,18 +1223,23 @@ function parseKeyframe<T>(
   parseStatic: (value: unknown) => T | null,
   incomingTangentSource: IncomingTangentSource,
 ): Keyframe<T> | null {
-  const time = Number(data.t ?? 0);
-  const value = parseStatic(data.s);
+  const time = Number(data['t'] ?? 0);
+  const value = parseStatic(data['s']);
   if (value === null) return null;
+
+  const outTangent = parseTangent(data['o']);
+  const inTangent = parseSegmentInTangent(data, previousData, incomingTangentSource);
+  const to = parsePointValue(data['to']);
+  const ti = parsePointValue(data['ti']);
 
   return {
     time,
     value,
-    hold: data.h === 1,
-    outTangent: parseTangent(data.o),
-    inTangent: parseSegmentInTangent(data, previousData, incomingTangentSource),
-    to: parsePointValue(data.to) ?? undefined,
-    ti: parsePointValue(data.ti) ?? undefined,
+    hold: data['h'] === 1,
+    ...(outTangent !== undefined && { outTangent }),
+    ...(inTangent !== undefined && { inTangent }),
+    ...(to !== null && { to }),
+    ...(ti !== null && { ti }),
   };
 }
 
@@ -1212,16 +1249,16 @@ function parseSegmentInTangent(
   incomingTangentSource: IncomingTangentSource = 'segment-start',
 ): Point | undefined {
   if (incomingTangentSource === 'destination') {
-    return parseTangent(data.i) ?? (previousData ? parseTangent(previousData.i) : undefined);
+    return parseTangent(data['i']) ?? (previousData ? parseTangent(previousData['i']) : undefined);
   }
-  return previousData ? (parseTangent(previousData.i) ?? parseTangent(data.i)) : parseTangent(data.i);
+  return previousData ? (parseTangent(previousData['i']) ?? parseTangent(data['i'])) : parseTangent(data['i']);
 }
 
 function parseTangent(data: unknown): Point | undefined {
   if (!data || typeof data !== 'object') return undefined;
   const record = data as Record<string, unknown>;
-  const x = Array.isArray(record.x) ? record.x[0] : record.x;
-  const y = Array.isArray(record.y) ? record.y[0] : record.y;
+  const x = Array.isArray(record['x']) ? record['x'][0] : record['x'];
+  const y = Array.isArray(record['y']) ? record['y'][0] : record['y'];
   if (typeof x === 'number' && typeof y === 'number') {
     return { x, y };
   }
@@ -1246,18 +1283,18 @@ function parseNumberValue(data: unknown): number | null {
 function parseNumber(data: unknown): number {
   if (typeof data === 'number') return data;
   if (data && typeof data === 'object' && 'k' in data) {
-    return parseNumber((data as Record<string, unknown>).k);
+    return parseNumber((data as Record<string, unknown>)['k']);
   }
   return 0;
 }
 
 type ShapeStyle = {
   fill?: Fill;
-  stroke?: Stroke[];
+  stroke?: Stroke[] | undefined;
   trim?: TrimPath;
   cornerRadius?: Animatable<number>;
   offset?: Animatable<number>;
-  offsetLineJoin?: 'miter' | 'round' | 'bevel';
+  offsetLineJoin?: 'miter' | 'round' | 'bevel' | undefined;
   offsetMiterLimit?: number;
   /**
    * Combined scale (percent) of all ancestor group transforms that apply to the
@@ -1330,11 +1367,10 @@ function coalesceGroupPrimitives(children: Shape[]): Shape[] {
       type: 'merge',
       mode: 'merge',
       shapes: run,
-      fill: runFill,
-      stroke: runStroke,
-      trim: undefined,
-      transform: runTransform,
-      strokeWidthScale: runStrokeWidthScale,
+      ...(runFill !== undefined && { fill: runFill }),
+      ...(runStroke !== undefined && { stroke: runStroke }),
+      ...(runTransform !== undefined && { transform: runTransform }),
+      ...(runStrokeWidthScale !== undefined && { strokeWidthScale: runStrokeWidthScale }),
     } as MergeShape);
     run = [];
   }
@@ -1568,7 +1604,7 @@ function parseShapeChildren(children: unknown[], style: ShapeStyle): Shape[] {
 
   for (const child of children) {
     const childRecord = child as Record<string, unknown>;
-    const childType = String(childRecord.ty);
+    const childType = String(childRecord['ty']);
 
     if (childType === 'gr') {
       if (runStyled) resetRun();
@@ -1614,7 +1650,7 @@ function parseShapeChildren(children: unknown[], style: ShapeStyle): Shape[] {
       if (runStyled) resetRun();
       const operands: Shape[] = [];
       while (result.length > 0) {
-        const last = result[result.length - 1];
+        const last = result[result.length - 1]!;
         if (
           last.type === 'rect' ||
           last.type === 'ellipse' ||
@@ -1631,22 +1667,23 @@ function parseShapeChildren(children: unknown[], style: ShapeStyle): Shape[] {
       }
       if (operands.length > 0) {
         const mergeStroke = effectiveStroke();
+        const mergeFill = runFill ?? currentStyle.fill;
+        const mergeStrokeWidthScale = strokeWidthScaleFromStyle({
+          pathTransformScale: currentStyle.pathTransformScale,
+          strokeTransformScale: effectiveStrokeTransformScale(),
+          layerTransformScale: currentStyle.layerTransformScale,
+        });
         const merge: MergeShape = {
           id: generatedShapeId('merge'),
           type: 'merge',
-          mode: parseMergeMode(childRecord.mm),
+          mode: parseMergeMode(childRecord['mm']),
           shapes: operands,
-          fill: runFill ?? currentStyle.fill,
-          stroke: mergeStroke.length > 0 ? mergeStroke : undefined,
-          trim: currentStyle.trim,
-          offset: currentStyle.offset,
-          transform: undefined,
-          strokeWidthScale: strokeWidthScaleFromStyle({
-            pathTransformScale: currentStyle.pathTransformScale,
-            strokeTransformScale: effectiveStrokeTransformScale(),
-            layerTransformScale: currentStyle.layerTransformScale,
-          }),
-        } as MergeShape;
+          ...(mergeFill !== undefined && { fill: mergeFill }),
+          ...(mergeStroke.length > 0 && { stroke: mergeStroke }),
+          ...(currentStyle.trim !== undefined && { trim: currentStyle.trim }),
+          ...(currentStyle.offset !== undefined && { offset: currentStyle.offset }),
+          ...(mergeStrokeWidthScale !== undefined && { strokeWidthScale: mergeStrokeWidthScale }),
+        };
         run.length = 0;
         result.push(merge);
         run.push(merge);
@@ -1737,9 +1774,9 @@ function parseShapeChildren(children: unknown[], style: ShapeStyle): Shape[] {
     }
 
     if (childType === 'op') {
-      const offset = parseAnimatableNumber(childRecord.a);
-      const lineJoin = parseOffsetLineJoin(childRecord.lj);
-      const miterLimit = parseNumber(childRecord.ml);
+      const offset = parseAnimatableNumber(childRecord['a']);
+      const lineJoin = parseOffsetLineJoin(childRecord['lj']);
+      const miterLimit = parseNumber(childRecord['ml']);
       currentStyle.offset = offset;
       currentStyle.offsetLineJoin = lineJoin;
       currentStyle.offsetMiterLimit = miterLimit;
@@ -1750,7 +1787,7 @@ function parseShapeChildren(children: unknown[], style: ShapeStyle): Shape[] {
     }
 
     if (childType === 'rd') {
-      const cornerRadius = parseAnimatableNumber(childRecord.r);
+      const cornerRadius = parseAnimatableNumber(childRecord['r']);
       currentStyle.cornerRadius = cornerRadius;
       for (const shape of run) {
         applyCornerRadiusToShape(shape, cornerRadius);
@@ -1772,10 +1809,10 @@ function parseShapeChildren(children: unknown[], style: ShapeStyle): Shape[] {
 }
 
 function repeatShapes(shapes: Shape[], data: Record<string, unknown>): Shape[] {
-  const count = Math.max(0, Math.floor(parseNumber(data.c)));
-  if (count <= 1 || shapes.length === 0 || !data.tr || typeof data.tr !== 'object') return [];
+  const count = Math.max(0, Math.floor(parseNumber(data['c'])));
+  if (count <= 1 || shapes.length === 0 || !data['tr'] || typeof data['tr'] !== 'object') return [];
 
-  const transform = evaluateTransform(parseTransform(data.tr as Record<string, unknown>), 0);
+  const transform = evaluateTransform(parseTransform(data['tr'] as Record<string, unknown>), 0);
   const copies: Shape[] = [];
   for (let index = 1; index < count; index++) {
     for (const shape of shapes) {
@@ -1823,11 +1860,11 @@ function parseShape(
     layerTransformScale: 1,
   },
 ): Shape[] {
-  const type = String(data.ty);
+  const type = String(data['ty']);
 
   if (type === 'gr') {
     // Shape group: flatten children recursively, applying group-level styles.
-    const children = Array.isArray(data.it) ? (data.it as unknown[]) : [];
+    const children = Array.isArray(data['it']) ? (data['it'] as unknown[]) : [];
     const groupStyle: ShapeStyle = {
       ...style,
       stroke: style.stroke ? [...style.stroke] : undefined,
@@ -1835,7 +1872,7 @@ function parseShape(
     let groupTransform: AnimatedTransform | undefined;
     for (const child of children) {
       const childRecord = child as Record<string, unknown>;
-      if (String(childRecord.ty) === 'tr') {
+      if (String(childRecord['ty']) === 'tr') {
         groupTransform = parseShapeTransform(childRecord);
         break;
       }
@@ -1936,12 +1973,13 @@ function evaluateTransform(animated: AnimatedTransform, frame: number): Transfor
 }
 
 function parseRectShape(data: Record<string, unknown>, style: ShapeStyle, transform?: Transform): RectShape {
-  const position = parseAnimatablePoint(data.p);
-  const size = parseAnimatablePoint(data.s);
-  const cornerRadius = style.cornerRadius !== undefined ? style.cornerRadius : parseAnimatableNumber(data.r);
+  const position = parseAnimatablePoint(data['p']);
+  const size = parseAnimatablePoint(data['s']);
+  const cornerRadius = style.cornerRadius !== undefined ? style.cornerRadius : parseAnimatableNumber(data['r']);
 
   const staticPosition = evaluatePoint(position, 0);
   const staticSize = evaluatePoint(size, 0);
+  const strokeWidthScale = strokeWidthScaleFromStyle(style);
 
   return {
     id: generatedShapeId('rect'),
@@ -1955,75 +1993,78 @@ function parseRectShape(data: Record<string, unknown>, style: ShapeStyle, transf
     position,
     size,
     cornerRadius,
-    fill: style.fill,
-    stroke: style.stroke,
-    trim: style.trim,
-    offset: style.offset,
-    offsetLineJoin: style.offsetLineJoin,
-    offsetMiterLimit: style.offsetMiterLimit,
-    transform,
-    strokeWidthScale: strokeWidthScaleFromStyle(style),
+    ...(style.fill !== undefined && { fill: style.fill }),
+    ...(style.stroke !== undefined && { stroke: style.stroke }),
+    ...(style.trim !== undefined && { trim: style.trim }),
+    ...(style.offset !== undefined && { offset: style.offset }),
+    ...(style.offsetLineJoin !== undefined && { offsetLineJoin: style.offsetLineJoin }),
+    ...(style.offsetMiterLimit !== undefined && { offsetMiterLimit: style.offsetMiterLimit }),
+    ...(transform !== undefined && { transform }),
+    ...(strokeWidthScale !== undefined && { strokeWidthScale }),
   };
 }
 
 function parseEllipseShape(data: Record<string, unknown>, style: ShapeStyle, transform?: Transform): EllipseShape {
+  const strokeWidthScale = strokeWidthScaleFromStyle(style);
   return {
     id: generatedShapeId('ellipse'),
     type: 'ellipse',
-    center: parseAnimatablePoint(data.p),
-    radius: parseAnimatablePoint(data.s),
-    fill: style.fill,
-    stroke: style.stroke,
-    trim: style.trim,
-    offset: style.offset,
-    offsetLineJoin: style.offsetLineJoin,
-    offsetMiterLimit: style.offsetMiterLimit,
-    transform,
-    strokeWidthScale: strokeWidthScaleFromStyle(style),
+    center: parseAnimatablePoint(data['p']),
+    radius: parseAnimatablePoint(data['s']),
+    ...(style.fill !== undefined && { fill: style.fill }),
+    ...(style.stroke !== undefined && { stroke: style.stroke }),
+    ...(style.trim !== undefined && { trim: style.trim }),
+    ...(style.offset !== undefined && { offset: style.offset }),
+    ...(style.offsetLineJoin !== undefined && { offsetLineJoin: style.offsetLineJoin }),
+    ...(style.offsetMiterLimit !== undefined && { offsetMiterLimit: style.offsetMiterLimit }),
+    ...(transform !== undefined && { transform }),
+    ...(strokeWidthScale !== undefined && { strokeWidthScale }),
   };
 }
 
 function parsePathShape(data: Record<string, unknown>, style: ShapeStyle, transform?: Transform): PathShape {
-  const pathData = parseAnimatablePathData(data.ks);
+  const pathData = parseAnimatablePathData(data['ks']);
+  const strokeWidthScale = strokeWidthScaleFromStyle(style);
 
   return {
     id: generatedShapeId('path'),
     type: 'path',
     path: pathData,
-    fill: style.fill,
-    stroke: style.stroke,
-    trim: style.trim,
-    offset: style.offset,
-    offsetLineJoin: style.offsetLineJoin,
-    offsetMiterLimit: style.offsetMiterLimit,
-    transform,
-    strokeWidthScale: strokeWidthScaleFromStyle(style),
-    cornerRadius: style.cornerRadius,
+    ...(style.fill !== undefined && { fill: style.fill }),
+    ...(style.stroke !== undefined && { stroke: style.stroke }),
+    ...(style.trim !== undefined && { trim: style.trim }),
+    ...(style.offset !== undefined && { offset: style.offset }),
+    ...(style.offsetLineJoin !== undefined && { offsetLineJoin: style.offsetLineJoin }),
+    ...(style.offsetMiterLimit !== undefined && { offsetMiterLimit: style.offsetMiterLimit }),
+    ...(transform !== undefined && { transform }),
+    ...(strokeWidthScale !== undefined && { strokeWidthScale }),
+    ...(style.cornerRadius !== undefined && { cornerRadius: style.cornerRadius }),
   };
 }
 
 function parsePolystarShape(data: Record<string, unknown>, style: ShapeStyle, transform?: Transform): PolystarShape {
-  const center = parseAnimatablePoint(data.p);
-  const points = parseAnimatableNumber(data.pt);
-  const outerRadius = parseAnimatableNumber(data.or);
-  const innerRadius = parseAnimatableNumber(data.ir);
-  const outerRoundness = parseAnimatableNumber(data.os);
-  const innerRoundness = parseAnimatableNumber(data.is);
-  const rotation = parseAnimatableNumber(data.r);
+  const center = parseAnimatablePoint(data['p']);
+  const points = parseAnimatableNumber(data['pt']);
+  const outerRadius = parseAnimatableNumber(data['or']);
+  const innerRadius = parseAnimatableNumber(data['ir']);
+  const outerRoundness = parseAnimatableNumber(data['os']);
+  const innerRoundness = parseAnimatableNumber(data['is']);
+  const rotation = parseAnimatableNumber(data['r']);
   const cornerRadius = style.cornerRadius;
+  const strokeWidthScale = strokeWidthScaleFromStyle(style);
 
   return {
     id: generatedShapeId('polystar'),
     type: 'polystar',
     center: evaluatePoint(center, 0),
-    starType: Number(data.sy) === 2 ? 'polygon' : 'star',
+    starType: Number(data['sy']) === 2 ? 'polygon' : 'star',
     points: evaluateAnimatable(points, 0),
     outerRadius: evaluateAnimatable(outerRadius, 0),
     innerRadius: evaluateAnimatable(innerRadius, 0),
     outerRoundness: evaluateAnimatable(outerRoundness, 0),
     innerRoundness: evaluateAnimatable(innerRoundness, 0),
     rotation: evaluateAnimatable(rotation, 0),
-    cornerRadius,
+    ...(cornerRadius !== undefined && { cornerRadius }),
     animatedProperties: {
       center,
       points,
@@ -2034,14 +2075,14 @@ function parsePolystarShape(data: Record<string, unknown>, style: ShapeStyle, tr
       rotation,
       ...(cornerRadius !== undefined ? { cornerRadius } : {}),
     },
-    fill: style.fill,
-    stroke: style.stroke,
-    trim: style.trim,
-    offset: style.offset,
-    offsetLineJoin: style.offsetLineJoin,
-    offsetMiterLimit: style.offsetMiterLimit,
-    transform,
-    strokeWidthScale: strokeWidthScaleFromStyle(style),
+    ...(style.fill !== undefined && { fill: style.fill }),
+    ...(style.stroke !== undefined && { stroke: style.stroke }),
+    ...(style.trim !== undefined && { trim: style.trim }),
+    ...(style.offset !== undefined && { offset: style.offset }),
+    ...(style.offsetLineJoin !== undefined && { offsetLineJoin: style.offsetLineJoin }),
+    ...(style.offsetMiterLimit !== undefined && { offsetMiterLimit: style.offsetMiterLimit }),
+    ...(transform !== undefined && { transform }),
+    ...(strokeWidthScale !== undefined && { strokeWidthScale }),
   };
 }
 
@@ -2057,10 +2098,10 @@ function parsePathDataValue(data: unknown): PathData | null {
   if (!data || typeof data !== 'object') return null;
 
   const record = data as Record<string, unknown>;
-  const vertices = parsePointArray(record.v);
-  const inTangents = parsePointArray(record.i);
-  const outTangents = parsePointArray(record.o);
-  const closed = record.c === true;
+  const vertices = parsePointArray(record['v']);
+  const inTangents = parsePointArray(record['i']);
+  const outTangents = parsePointArray(record['o']);
+  const closed = record['c'] === true;
 
   if (vertices.length === 0) return null;
 
@@ -2084,26 +2125,28 @@ function emptyPathData(): PathData {
 }
 
 function parseFill(data: Record<string, unknown>): Fill {
-  const rule = Number(data.r) === 2 ? 'evenodd' : 'nonzero';
+  const rule = Number(data['r']) === 2 ? 'evenodd' : 'nonzero';
   return {
     type: 'solid',
-    color: parseAnimatableShapeColor(data.c),
-    opacity: parseAnimatableNumber(data.o, 100),
+    color: parseAnimatableShapeColor(data['c']),
+    opacity: parseAnimatableNumber(data['o'], 100),
     fillRule: rule,
   };
 }
 
 function parseGradientFill(data: Record<string, unknown>): GradientFill {
-  const rule = Number(data.r) === 2 ? 'evenodd' : 'nonzero';
+  const rule = Number(data['r']) === 2 ? 'evenodd' : 'nonzero';
+  const highlightLength = Number(data['h'] ?? 0) || undefined;
+  const highlightAngle = Number(data['a'] ?? 0) || undefined;
   return {
     type: 'gradient',
-    gradientType: Number(data.t) === 2 ? 'radial' : 'linear',
-    start: parseAnimatablePoint(data.s),
-    end: parseAnimatablePoint(data.e),
-    colors: parseAnimatableGradient(data.g),
-    highlightLength: Number(data.h ?? 0) || undefined,
-    highlightAngle: Number(data.a ?? 0) || undefined,
-    opacity: parseAnimatableNumber(data.o, 100),
+    gradientType: Number(data['t']) === 2 ? 'radial' : 'linear',
+    start: parseAnimatablePoint(data['s']),
+    end: parseAnimatablePoint(data['e']),
+    colors: parseAnimatableGradient(data['g']),
+    ...(highlightLength !== undefined && { highlightLength }),
+    ...(highlightAngle !== undefined && { highlightAngle }),
+    opacity: parseAnimatableNumber(data['o'], 100),
     fillRule: rule,
   };
 }
@@ -2116,10 +2159,10 @@ function parseAnimatableGradient(data: unknown): Animatable<ColorStop[]> {
   const record = data as Record<string, unknown>;
   // Gradient colors are sometimes wrapped in an extra object: g.k = { a, k }.
   const inner: Record<string, unknown> =
-    !Array.isArray(record.k) && record.k && typeof record.k === 'object'
-      ? (record.k as Record<string, unknown>)
+    !Array.isArray(record['k']) && record['k'] && typeof record['k'] === 'object'
+      ? (record['k'] as Record<string, unknown>)
       : record;
-  const stopCount = Number(record.p ?? 0);
+  const stopCount = Number(record['p'] ?? 0);
   return parseAnimatable(inner, [], (value) => parseGradientStops(value, stopCount));
 }
 
@@ -2191,7 +2234,7 @@ function parseInterleavedStops(
 
 function isMonotonicOffsets(stops: RawColorStop[] | RawAlphaStop[]): boolean {
   for (let i = 1; i < stops.length; i++) {
-    if (stops[i].offset < stops[i - 1].offset - 1e-6) return false;
+    if (stops[i]!.offset < stops[i - 1]!.offset - 1e-6) return false;
   }
   return stops.length > 0;
 }
@@ -2204,9 +2247,9 @@ function parseGradientStops(data: unknown, knownStopCount = 0): ColorStop[] | nu
     values = data;
   } else if (data && typeof data === 'object') {
     const record = data as Record<string, unknown>;
-    values = Array.isArray(record.k) ? (record.k as unknown[]) : undefined;
+    values = Array.isArray(record['k']) ? (record['k'] as unknown[]) : undefined;
     if (stopCount === 0) {
-      stopCount = Number(record.p ?? 0);
+      stopCount = Number(record['p'] ?? 0);
     }
   }
 
@@ -2271,25 +2314,25 @@ function parseGradientStops(data: unknown, knownStopCount = 0): ColorStop[] | nu
 
   const sampleAlpha = (offset: number): number => {
     if (alphas.length === 0) return 1;
-    if (offset <= alphas[0].offset) return alphas[0].a;
-    if (offset >= alphas[alphas.length - 1].offset) return alphas[alphas.length - 1].a;
+    if (offset <= alphas[0]!.offset) return alphas[0]!.a;
+    if (offset >= alphas[alphas.length - 1]!.offset) return alphas[alphas.length - 1]!.a;
     for (let i = 0; i < alphas.length - 1; i++) {
-      const a1 = alphas[i];
-      const a2 = alphas[i + 1];
+      const a1 = alphas[i]!;
+      const a2 = alphas[i + 1]!;
       if (offset >= a1.offset && offset <= a2.offset) {
         const t = a2.offset === a1.offset ? 0 : (offset - a1.offset) / (a2.offset - a1.offset);
         return a1.a + (a2.a - a1.a) * t;
       }
     }
-    return alphas[alphas.length - 1].a;
+    return alphas[alphas.length - 1]!.a;
   };
 
   const sampleColor = (offset: number): RawColorStop => {
-    if (offset <= colors[0].offset) return colors[0];
-    if (offset >= colors[colors.length - 1].offset) return colors[colors.length - 1];
+    if (offset <= colors[0]!.offset) return colors[0]!;
+    if (offset >= colors[colors.length - 1]!.offset) return colors[colors.length - 1]!;
     for (let i = 0; i < colors.length - 1; i++) {
-      const c1 = colors[i];
-      const c2 = colors[i + 1];
+      const c1 = colors[i]!;
+      const c2 = colors[i + 1]!;
       if (offset >= c1.offset && offset <= c2.offset) {
         const t = c2.offset === c1.offset ? 0 : (offset - c1.offset) / (c2.offset - c1.offset);
         return {
@@ -2300,7 +2343,7 @@ function parseGradientStops(data: unknown, knownStopCount = 0): ColorStop[] | nu
         };
       }
     }
-    return colors[colors.length - 1];
+    return colors[colors.length - 1]!;
   };
 
   const stops: ColorStop[] = [];
@@ -2321,46 +2364,48 @@ function parseGradientStops(data: unknown, knownStopCount = 0): ColorStop[] | nu
 }
 
 function parseStroke(data: Record<string, unknown>): SolidStroke {
-  const dash = parseDashPattern(data.d);
+  const dash = parseDashPattern(data['d']);
   return {
     type: 'solid',
-    color: parseAnimatableShapeColor(data.c),
-    width: parseAnimatableNumber(data.w, 1),
-    opacity: parseAnimatableNumber(data.o, 100),
-    lineCap: parseLineCap(data.lc),
-    lineJoin: parseLineJoin(data.lj),
-    miterLimit: Number(data.ml ?? 4),
-    dash: dash.dash,
-    dashOffset: dash.offset,
+    color: parseAnimatableShapeColor(data['c']),
+    width: parseAnimatableNumber(data['w'], 1),
+    opacity: parseAnimatableNumber(data['o'], 100),
+    lineCap: parseLineCap(data['lc']),
+    lineJoin: parseLineJoin(data['lj']),
+    miterLimit: Number(data['ml'] ?? 4),
+    ...(dash.dash !== undefined && { dash: dash.dash }),
+    ...(dash.offset !== undefined && { dashOffset: dash.offset }),
   };
 }
 
 function parseGradientStroke(data: Record<string, unknown>): GradientStroke {
-  const dash = parseDashPattern(data.d);
+  const dash = parseDashPattern(data['d']);
+  const highlightLength = Number(data['h'] ?? 0) || undefined;
+  const highlightAngle = Number(data['a'] ?? 0) || undefined;
   return {
     type: 'gradient',
-    gradientType: Number(data.t) === 2 ? 'radial' : 'linear',
-    start: parseAnimatablePoint(data.s),
-    end: parseAnimatablePoint(data.e),
-    colors: parseAnimatableGradient(data.g),
-    width: parseAnimatableNumber(data.w, 1),
-    opacity: parseAnimatableNumber(data.o, 100),
-    lineCap: parseLineCap(data.lc),
-    lineJoin: parseLineJoin(data.lj),
-    miterLimit: Number(data.ml ?? 4),
-    dash: dash.dash,
-    dashOffset: dash.offset,
-    highlightLength: Number(data.h ?? 0) || undefined,
-    highlightAngle: Number(data.a ?? 0) || undefined,
+    gradientType: Number(data['t']) === 2 ? 'radial' : 'linear',
+    start: parseAnimatablePoint(data['s']),
+    end: parseAnimatablePoint(data['e']),
+    colors: parseAnimatableGradient(data['g']),
+    width: parseAnimatableNumber(data['w'], 1),
+    opacity: parseAnimatableNumber(data['o'], 100),
+    lineCap: parseLineCap(data['lc']),
+    lineJoin: parseLineJoin(data['lj']),
+    miterLimit: Number(data['ml'] ?? 4),
+    ...(dash.dash !== undefined && { dash: dash.dash }),
+    ...(dash.offset !== undefined && { dashOffset: dash.offset }),
+    ...(highlightLength !== undefined && { highlightLength }),
+    ...(highlightAngle !== undefined && { highlightAngle }),
   };
 }
 
 function parseTrimPath(data: Record<string, unknown>): TrimPath {
   return {
-    start: parseAnimatableNumber(data.s),
-    end: parseAnimatableNumber(data.e),
-    offset: parseAnimatableNumber(data.o),
-    mode: Number(data.m) === 2 ? 'individual' : 'simultaneous',
+    start: parseAnimatableNumber(data['s']),
+    end: parseAnimatableNumber(data['e']),
+    offset: parseAnimatableNumber(data['o']),
+    mode: Number(data['m']) === 2 ? 'individual' : 'simultaneous',
     groupId: generatedShapeId('trim'),
   };
 }
@@ -2391,8 +2436,8 @@ function parseDashPattern(data: unknown): {
   for (const item of data) {
     if (!item || typeof item !== 'object') continue;
     const record = item as Record<string, unknown>;
-    const kind = String(record.n ?? '');
-    const value = parseAnimatableNumber(record.v);
+    const kind = String(record['n'] ?? '');
+    const value = parseAnimatableNumber(record['v']);
     if (kind === 'o') {
       offset = value;
     } else if (kind === 'd' || kind === 'g') {
@@ -2400,8 +2445,8 @@ function parseDashPattern(data: unknown): {
     }
   }
   return {
-    dash: dash.length > 0 ? dash : undefined,
-    offset,
+    ...(dash.length > 0 && { dash }),
+    ...(offset !== undefined && { offset }),
   };
 }
 
@@ -2415,7 +2460,7 @@ function parseColor(data: unknown): Color {
     };
   }
   if (data && typeof data === 'object' && 'k' in data) {
-    return parseColor((data as Record<string, unknown>).k);
+    return parseColor((data as Record<string, unknown>)['k']);
   }
   return { r: 0, g: 0, b: 0, a: 1 };
 }

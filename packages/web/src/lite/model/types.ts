@@ -464,6 +464,11 @@ export interface Slot {
   p: SlotValue;
 }
 export type Slots = Record<string, Slot>;
+export interface MarkerDefinition {
+  name: string;
+  time: number;
+  duration: number;
+}
 export interface Animation {
   version: string;
   frameRate: number;
@@ -473,6 +478,7 @@ export interface Animation {
   width: number;
   height: number;
   layers: LayerDefinition[];
+  markers?: MarkerDefinition[];
   slots?: Slots;
   expressionEvaluator?: ExpressionEvaluator;
 }

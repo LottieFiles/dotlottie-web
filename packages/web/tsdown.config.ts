@@ -64,4 +64,9 @@ export default [
       );
     },
   }),
+  // Lite variant: pure TypeScript, no WASM to copy.
+  defineConfig({
+    ...sharedConfig,
+    entry: { 'lite/index': './src/lite/index.ts' },
+  }),
 ];

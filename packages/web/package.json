@@ -53,6 +53,16 @@
         "default": "./dist/webgpu/index.cjs"
       }
     },
+    "./lite": {
+      "import": {
+        "types": "./dist/lite/index.d.ts",
+        "default": "./dist/lite/index.js"
+      },
+      "require": {
+        "types": "./dist/lite/index.d.cts",
+        "default": "./dist/lite/index.cjs"
+      }
+    },
     "./dotlottie-player.wasm": "./dist/dotlottie-player.wasm",
     "./webgl/dotlottie-player.wasm": "./dist/webgl/dotlottie-player.wasm",
     "./webgpu/dotlottie-player.wasm": "./dist/webgpu/dotlottie-player.wasm"
@@ -71,7 +81,7 @@
     "thorvg"
   ],
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && node scripts/check-lite-bundle-size.mjs",
     "dev": "tsdown --watch",
     "lint": "biome check --write .",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
