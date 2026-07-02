@@ -92,24 +92,24 @@ export function evaluateValue<T>(keyframes: Keyframe<T>[], frame: number): T {
     throw new Error('Cannot evaluate property with no keyframes');
   }
   if (keyframes.length === 1) {
-    return keyframes[0].value;
+    return keyframes[0]!.value;
   }
 
   // Before the first keyframe, hold the first value. After the last keyframe,
   // hold the last value.
-  if (frame <= keyframes[0].time) {
-    return keyframes[0].value;
+  if (frame <= keyframes[0]!.time) {
+    return keyframes[0]!.value;
   }
-  if (frame >= keyframes[keyframes.length - 1].time) {
-    return keyframes[keyframes.length - 1].value;
+  if (frame >= keyframes[keyframes.length - 1]!.time) {
+    return keyframes[keyframes.length - 1]!.value;
   }
 
   // Find the surrounding keyframes. Use half-open intervals so that the value
   // at a keyframe's exact time comes from the following segment. This makes
   // hold keyframes jump to the new value on the hold frame, matching dotLottie.
   for (let i = 0; i < keyframes.length - 1; i++) {
-    const k1 = keyframes[i];
-    const k2 = keyframes[i + 1];
+    const k1 = keyframes[i]!;
+    const k2 = keyframes[i + 1]!;
     if (frame >= k1.time && frame < k2.time) {
       if (k1.hold) return k1.value;
       // Scalar/color/path/point keyframes use temporal bezier easing when
@@ -126,7 +126,7 @@ export function evaluateValue<T>(keyframes: Keyframe<T>[], frame: number): T {
     }
   }
 
-  return keyframes[keyframes.length - 1].value;
+  return keyframes[keyframes.length - 1]!.value;
 }
 
 function interpolateValues<T>(a: T, b: T, u: number, k1: Keyframe<T>, k2: Keyframe<T>): T {
@@ -208,8 +208,8 @@ function interpolateValues<T>(a: T, b: T, u: number, k1: Keyframe<T>, k2: Keyfra
         ? cubicBezierAxis(u, from, from + oy * (to - from), from + iy * (to - from), to)
         : from + (to - from) * u;
     for (let i = 0; i < count; i++) {
-      const sa = a[i];
-      const sb = b[i];
+      const sa = a[i]!;
+      const sb = b[i]!;
       stops.push({
         offset: interpolateStopScalar(sa.offset, sb.offset),
         color: {
@@ -254,9 +254,9 @@ function spatialBezierParameterForProgress(p0: Point, p1: Point, p2: Point, p3: 
   if (total <= 1e-9) return progress;
   const target = Math.max(0, Math.min(1, progress)) * total;
   for (let i = 1; i < lengths.length; i++) {
-    if (lengths[i] >= target) {
-      const segment = lengths[i] - lengths[i - 1];
-      const t = segment <= 1e-9 ? 0 : (target - lengths[i - 1]) / segment;
+    if (lengths[i]! >= target) {
+      const segment = lengths[i]! - lengths[i - 1]!;
+      const t = segment <= 1e-9 ? 0 : (target - lengths[i - 1]!) / segment;
       return (i - 1 + t) / samples;
     }
   }
@@ -372,7 +372,7 @@ function interpolatePathData(a: PathData, b: PathData, t: number): PathData {
   const outTangents: PathData['outTangents'] = [];
 
   for (let i = 0; i < count; i++) {
-    vertices.push(interpolatePoint(a.vertices[i], b.vertices[i], t));
+    vertices.push(interpolatePoint(a.vertices[i]!, b.vertices[i]!, t));
     inTangents.push(interpolatePoint(a.inTangents[i] ?? { x: 0, y: 0 }, b.inTangents[i] ?? { x: 0, y: 0 }, t));
     outTangents.push(interpolatePoint(a.outTangents[i] ?? { x: 0, y: 0 }, b.outTangents[i] ?? { x: 0, y: 0 }, t));
   }
@@ -531,7 +531,7 @@ export function buildScene(animation: Animation, frame: number): Layer[] {
   const resolvedCache = new Map<number, Transform>();
   const context: EvaluationContext = {
     frameRate: animation.frameRate,
-    evaluator: animation.expressionEvaluator,
+    ...(animation.expressionEvaluator !== undefined && { evaluator: animation.expressionEvaluator }),
   };
 
   function evaluateTimeRemapFrame(timeRemap: Animatable<number>, parentStartTime = 0): number {
@@ -645,7 +645,7 @@ export function buildScene(animation: Animation, frame: number): Layer[] {
 
     let shapes = layer.shapes as Shape[];
     for (let index = 0; index < layer.shapes.length; index++) {
-      const shape = layer.shapes[index];
+      const shape = layer.shapes[index]!;
       const evaluated = evaluateShape(shape, contentFrame, context);
       if (evaluated !== shape && shapes === layer.shapes) {
         shapes = layer.shapes.slice(0, index) as Shape[];
@@ -655,22 +655,26 @@ export function buildScene(animation: Animation, frame: number): Layer[] {
       }
     }
 
+    // Destructure the unresolved (animatable) properties so the `...rest`
+    // spread does not leak their definition types into the resolved Layer.
+    const { text, effects, masks, matteChildren, ...rest } = layer;
     return {
-      ...layer,
+      ...rest,
       transform,
       inPoint,
       outPoint,
       timelineFrame,
       shapes,
-      text: layer.text ? evaluateText(layer.text, contentFrame, context) : undefined,
-      effects: layer.effects ? evaluateEffects(layer.effects, contentFrame, context) : undefined,
-      masks:
-        layer.masks?.map((mask) => ({
+      ...(text && { text: evaluateText(text, contentFrame, context) }),
+      ...(effects && { effects: evaluateEffects(effects, contentFrame, context) }),
+      ...(masks && {
+        masks: masks.map((mask) => ({
           ...mask,
           path: evaluateAnimatable(mask.path, maskFrame, context),
           opacity: evaluateAnimatable(mask.opacity, maskFrame, context),
-        })) ?? undefined,
-      matteChildren: layer.matteChildren?.map(evaluateLayer),
+        })),
+      }),
+      ...(matteChildren && { matteChildren: matteChildren.map(evaluateLayer) }),
       visible:
         layer.visible && parentWindowVisible && !hiddenByMovedZeroOpacityNullParent && !hiddenByEdgeOnThreeDProjection,
     };
@@ -727,11 +731,11 @@ function evaluateEffects(effects: Effect[], frame: number, context: EvaluationCo
         blurriness: evaluateAnimatable(blur.blurriness, frame, context),
       };
     }
-    const tint = effect as TintEffect;
+    const { whiteColor, ...tint } = effect as TintEffect;
     return {
       ...tint,
       color: evaluateAnimatable(tint.color, frame, context),
-      whiteColor: tint.whiteColor !== undefined ? evaluateAnimatable(tint.whiteColor, frame, context) : undefined,
+      ...(whiteColor !== undefined && { whiteColor: evaluateAnimatable(whiteColor, frame, context) }),
       amount: evaluateAnimatable(tint.amount, frame, context),
     };
   });
@@ -743,17 +747,18 @@ function evaluateText(text: TextDocument, frame: number, context: EvaluationCont
   }
   return {
     ...text,
-    rangeSelectorScale:
-      text.rangeSelectorScale !== undefined ? evaluatePoint(text.rangeSelectorScale, frame, context) : undefined,
-    rangeSelectorEnd:
-      text.rangeSelectorEnd !== undefined ? evaluateAnimatable(text.rangeSelectorEnd, frame, context) : undefined,
-    textPath:
-      text.textPath !== undefined
-        ? {
-            path: evaluateAnimatable(text.textPath.path, frame, context),
-            firstMargin: evaluateAnimatable(text.textPath.firstMargin, frame, context),
-          }
-        : undefined,
+    ...(text.rangeSelectorScale !== undefined && {
+      rangeSelectorScale: evaluatePoint(text.rangeSelectorScale, frame, context),
+    }),
+    ...(text.rangeSelectorEnd !== undefined && {
+      rangeSelectorEnd: evaluateAnimatable(text.rangeSelectorEnd, frame, context),
+    }),
+    ...(text.textPath !== undefined && {
+      textPath: {
+        path: evaluateAnimatable(text.textPath.path, frame, context),
+        firstMargin: evaluateAnimatable(text.textPath.firstMargin, frame, context),
+      },
+    }),
   };
 }
 
@@ -828,7 +833,7 @@ function evaluateShape(shape: Shape, frame: number, context: EvaluationContext):
     }
     let children = group.children;
     for (let index = 0; index < group.children.length; index++) {
-      const child = group.children[index];
+      const child = group.children[index]!;
       const evaluated = evaluateShape(child, frame, context);
       if (evaluated !== child && children === group.children) {
         children = group.children.slice(0, index);
@@ -940,7 +945,7 @@ function evaluateShape(shape: Shape, frame: number, context: EvaluationContext):
         end: evaluateAnimatable(result.trim.end, frame, context),
         offset: evaluateAnimatable(result.trim.offset, frame, context),
         mode: result.trim.mode,
-        groupId: result.trim.groupId,
+        ...(result.trim.groupId !== undefined && { groupId: result.trim.groupId }),
       },
     };
   }
@@ -953,7 +958,7 @@ function evaluateShape(shape: Shape, frame: number, context: EvaluationContext):
         end: evaluateAnimatable(trim.end, frame, context),
         offset: evaluateAnimatable(trim.offset, frame, context),
         mode: trim.mode,
-        groupId: trim.groupId,
+        ...(trim.groupId !== undefined && { groupId: trim.groupId }),
       })),
     };
   }
@@ -1007,9 +1012,10 @@ function evaluateShape(shape: Shape, frame: number, context: EvaluationContext):
             color: evaluateAnimatable(stroke.color, frame, context),
             width: evaluateAnimatable(stroke.width, frame, context),
             opacity: evaluateAnimatable(stroke.opacity, frame, context),
-            dash: stroke.dash?.map((value) => evaluateAnimatable(value, frame, context)),
-            dashOffset:
-              stroke.dashOffset !== undefined ? evaluateAnimatable(stroke.dashOffset, frame, context) : undefined,
+            ...(stroke.dash && { dash: stroke.dash.map((value) => evaluateAnimatable(value, frame, context)) }),
+            ...(stroke.dashOffset !== undefined && {
+              dashOffset: evaluateAnimatable(stroke.dashOffset, frame, context),
+            }),
           };
         }
         return {
@@ -1019,9 +1025,10 @@ function evaluateShape(shape: Shape, frame: number, context: EvaluationContext):
           colors: evaluateAnimatable(stroke.colors, frame, context),
           width: evaluateAnimatable(stroke.width, frame, context),
           opacity: evaluateAnimatable(stroke.opacity, frame, context),
-          dash: stroke.dash?.map((value) => evaluateAnimatable(value, frame, context)),
-          dashOffset:
-            stroke.dashOffset !== undefined ? evaluateAnimatable(stroke.dashOffset, frame, context) : undefined,
+          ...(stroke.dash && { dash: stroke.dash.map((value) => evaluateAnimatable(value, frame, context)) }),
+          ...(stroke.dashOffset !== undefined && {
+            dashOffset: evaluateAnimatable(stroke.dashOffset, frame, context),
+          }),
         };
       }),
     };
@@ -1066,8 +1073,8 @@ function sampleClosedPath(pathData: PathData, samplesPerSegment: number): Point[
   const count = pathData.vertices.length;
   for (let index = 0; index < count; index++) {
     const nextIndex = (index + 1) % count;
-    const from = pathData.vertices[index];
-    const to = pathData.vertices[nextIndex];
+    const from = pathData.vertices[index]!;
+    const to = pathData.vertices[nextIndex]!;
     const out = pathData.outTangents[index] ?? { x: 0, y: 0 };
     const incoming = pathData.inTangents[nextIndex] ?? { x: 0, y: 0 };
     const cp1 = { x: from.x + out.x, y: from.y + out.y };
@@ -1096,9 +1103,9 @@ function offsetClosedPolylineWithRoundJoins(points: Point[], offset: number): Po
   const arcSteps = 6;
 
   for (let index = 0; index < points.length; index++) {
-    const previous = points[(index - 1 + points.length) % points.length];
-    const point = points[index];
-    const next = points[(index + 1) % points.length];
+    const previous = points[(index - 1 + points.length) % points.length]!;
+    const point = points[index]!;
+    const next = points[(index + 1) % points.length]!;
     const previousNormal = edgeNormal(previous, point, outwardSign);
     const nextNormal = edgeNormal(point, next, outwardSign);
     const startAngle = Math.atan2(previousNormal.y, previousNormal.x);
@@ -1121,8 +1128,8 @@ function offsetClosedPolylineWithRoundJoins(points: Point[], offset: number): Po
 function signedPolylineArea(points: Point[]): number {
   let area = 0;
   for (let index = 0; index < points.length; index++) {
-    const current = points[index];
-    const next = points[(index + 1) % points.length];
+    const current = points[index]!;
+    const next = points[(index + 1) % points.length]!;
     area += current.x * next.y - next.x * current.y;
   }
   return area / 2;
@@ -1161,15 +1168,15 @@ function roundPathCorners(pathData: PathData, radius: number): PathData {
     const hasPrev = closed || i > 0;
     const hasNext = closed || i < count - 1;
     if (!hasPrev || !hasNext) {
-      vertices.push(pathData.vertices[i]);
-      inTangents.push(pathData.inTangents[i]);
-      outTangents.push(pathData.outTangents[i]);
+      vertices.push(pathData.vertices[i]!);
+      inTangents.push(pathData.inTangents[i]!);
+      outTangents.push(pathData.outTangents[i]!);
       continue;
     }
 
-    const curr = pathData.vertices[i];
-    const prev = pathData.vertices[i === 0 ? count - 1 : i - 1];
-    const next = pathData.vertices[i === count - 1 ? 0 : i + 1];
+    const curr = pathData.vertices[i]!;
+    const prev = pathData.vertices[i === 0 ? count - 1 : i - 1]!;
+    const next = pathData.vertices[i === count - 1 ? 0 : i + 1]!;
     const v1 = { x: prev.x - curr.x, y: prev.y - curr.y };
     const v2 = { x: next.x - curr.x, y: next.y - curr.y };
     const len1 = Math.hypot(v1.x, v1.y);
@@ -1177,16 +1184,16 @@ function roundPathCorners(pathData: PathData, radius: number): PathData {
 
     if (len1 === 0 || len2 === 0) {
       vertices.push(curr);
-      inTangents.push(pathData.inTangents[i]);
-      outTangents.push(pathData.outTangents[i]);
+      inTangents.push(pathData.inTangents[i]!);
+      outTangents.push(pathData.outTangents[i]!);
       continue;
     }
 
     const r = Math.min(radius, len1 / 2, len2 / 2);
     if (r <= 0.5) {
       vertices.push(curr);
-      inTangents.push(pathData.inTangents[i]);
-      outTangents.push(pathData.outTangents[i]);
+      inTangents.push(pathData.inTangents[i]!);
+      outTangents.push(pathData.outTangents[i]!);
       continue;
     }
 

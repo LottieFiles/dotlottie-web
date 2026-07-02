@@ -191,11 +191,11 @@ function inflateRaw(data: Uint8Array, expectedSize: number): Uint8Array {
       if (symbol === 256) break;
 
       const lengthIndex = symbol - 257;
-      const length = LENGTH_BASE[lengthIndex] + reader.bits(LENGTH_EXTRA[lengthIndex]);
+      const length = LENGTH_BASE[lengthIndex]! + reader.bits(LENGTH_EXTRA[lengthIndex]!);
       const distanceSymbol = decodeSymbol(reader, distanceTree);
-      const distance = DIST_BASE[distanceSymbol] + reader.bits(DIST_EXTRA[distanceSymbol]);
+      const distance = DIST_BASE[distanceSymbol]! + reader.bits(DIST_EXTRA[distanceSymbol]!);
       for (let i = 0; i < length; i++) {
-        output[out] = output[out - distance];
+        output[out] = output[out - distance]!;
         out++;
       }
     }
@@ -248,7 +248,7 @@ function dynamicTrees(reader: BitReader): [Huffman, Huffman] {
   const codeLengthCount = reader.bits(4) + 4;
   const codeLengths = new Array(19).fill(0);
   for (let i = 0; i < codeLengthCount; i++) {
-    codeLengths[CODE_LENGTH_ORDER[i]] = reader.bits(3);
+    codeLengths[CODE_LENGTH_ORDER[i]!] = reader.bits(3);
   }
   const codeLengthTree = buildHuffman(codeLengths);
   const lengths: number[] = [];
@@ -283,7 +283,7 @@ function buildHuffman(lengths: number[]): Huffman {
   for (let symbol = 0; symbol < lengths.length; symbol++) {
     const length = lengths[symbol];
     if (!length) continue;
-    const reversed = reverseBits(nextCode[length]++, length);
+    const reversed = reverseBits(nextCode[length]!++, length);
     const lengthTable = table[length] ?? {};
     table[length] = lengthTable;
     lengthTable[reversed] = symbol;
@@ -322,11 +322,11 @@ function findEndOfCentralDirectory(data: Uint8Array): number {
 }
 
 function readU16(data: Uint8Array, offset: number): number {
-  return data[offset] | (data[offset + 1] << 8);
+  return data[offset]! | (data[offset + 1]! << 8);
 }
 
 function readU32(data: Uint8Array, offset: number): number {
-  return (data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16) | (data[offset + 3] << 24)) >>> 0;
+  return (data[offset]! | (data[offset + 1]! << 8) | (data[offset + 2]! << 16) | (data[offset + 3]! << 24)) >>> 0;
 }
 
 const utf8Decoder = new TextDecoder();
@@ -341,7 +341,7 @@ function parseManifest(files: Record<string, Uint8Array>): DotLottieManifest {
   if (!manifestPath) {
     return {};
   }
-  return JSON.parse(decodeText(files[manifestPath])) as DotLottieManifest;
+  return JSON.parse(decodeText(files[manifestPath]!)) as DotLottieManifest;
 }
 
 function parseAnimations(
@@ -355,7 +355,7 @@ function parseAnimations(
     const resolved = findFilePath(files, path);
     if (!resolved) continue;
 
-    const text = decodeText(files[resolved]);
+    const text = decodeText(files[resolved]!);
     const data = JSON.parse(text) as Record<string, unknown>;
     result.push({ id, data, animation: parseLottie(data) });
   }
@@ -370,7 +370,7 @@ function parseThemes(files: Record<string, Uint8Array>, entries: DotLottieManife
     const resolved = findFilePath(files, path);
     if (!resolved) continue;
 
-    const text = decodeText(files[resolved]);
+    const text = decodeText(files[resolved]!);
     result.push({ id, data: JSON.parse(text) });
   }
   return result;
@@ -387,7 +387,7 @@ function parseStateMachines(
     const resolved = findFilePath(files, path);
     if (!resolved) continue;
 
-    const text = decodeText(files[resolved]);
+    const text = decodeText(files[resolved]!);
     result.push({ id, data: JSON.parse(text) });
   }
   return result;

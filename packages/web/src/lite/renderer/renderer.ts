@@ -268,13 +268,13 @@ export class Canvas2DRenderer implements Renderer {
         for (let sy = 0; sy < scale; sy++) {
           for (let sx = 0; sx < scale; sx++) {
             const sourceIndex = ((y * scale + sy) * source.width + x * scale + sx) * 4;
-            const alpha = source.data[sourceIndex + 3];
+            const alpha = source.data[sourceIndex + 3]!;
             alphaSum += alpha;
             if (alpha > maxAlpha) {
               maxAlpha = alpha;
-              red = source.data[sourceIndex];
-              green = source.data[sourceIndex + 1];
-              blue = source.data[sourceIndex + 2];
+              red = source.data[sourceIndex]!;
+              green = source.data[sourceIndex + 1]!;
+              blue = source.data[sourceIndex + 2]!;
             }
           }
         }
@@ -357,7 +357,7 @@ export class Canvas2DRenderer implements Renderer {
     // above its masked layer, so when iterating backward we encounter the
     // masked layer first and the matte layer next.
     for (let i = layers.length - 1; i >= 0; i--) {
-      const layer = layers[i];
+      const layer = layers[i]!;
       // Matte definition layers are never drawn directly; they are consumed by
       // the masked layer below them.
       if (layer.isMatte) {
@@ -372,11 +372,11 @@ export class Canvas2DRenderer implements Renderer {
       }
       if (layer.trackMatte) {
         let matteIndex = i - 1;
-        while (matteIndex >= 0 && !layers[matteIndex].isMatte) {
+        while (matteIndex >= 0 && !layers[matteIndex]!.isMatte) {
           matteIndex--;
         }
         if (matteIndex >= 0) {
-          const matteLayer = layers[matteIndex];
+          const matteLayer = layers[matteIndex]!;
           if (this.isLayerRenderable(matteLayer)) {
             this.renderTrackMattePair(ctx, matteLayer, layer, width, height);
           } else if (this.isInvertedTrackMatte(layer)) {
@@ -485,12 +485,12 @@ export class Canvas2DRenderer implements Renderer {
 
   private drawLayerShapes(ctx: RenderingContext2D, shapes: Shape[]): void {
     for (let i = shapes.length - 1; i >= 0; i--) {
-      const shape = shapes[i];
+      const shape = shapes[i]!;
       if (shape.trim?.mode === 'simultaneous' && shape.trim.groupId) {
         const group = [shape];
         let j = i - 1;
-        while (j >= 0 && shapes[j].trim?.groupId === shape.trim.groupId) {
-          group.push(shapes[j]);
+        while (j >= 0 && shapes[j]!.trim?.groupId === shape.trim.groupId) {
+          group.push(shapes[j]!);
           j--;
         }
         if (group.length > 1) {
@@ -529,11 +529,11 @@ export class Canvas2DRenderer implements Renderer {
     const image = ctx.getImageData(0, 0, width, height);
     const data = image.data;
     for (let index = 0; index < data.length; index += 4) {
-      const alpha = data[index + 3];
+      const alpha = data[index + 3]!;
       if (alpha === 0) continue;
-      const r = data[index];
-      const g = data[index + 1];
-      const b = data[index + 2];
+      const r = data[index]!;
+      const g = data[index + 1]!;
+      const b = data[index + 2]!;
       const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
       const mappedR = blackColor.r + (targetWhite.r - blackColor.r) * luminance;
       const mappedG = blackColor.g + (targetWhite.g - blackColor.g) * luminance;
@@ -608,7 +608,7 @@ export class Canvas2DRenderer implements Renderer {
 
     let charCursor = 0;
     for (let index = 0; index < lines.length; index++) {
-      const line = lines[index];
+      const line = lines[index]!;
       const lineStart = charCursor;
       const lineEnd = lineStart + line.length;
       charCursor = lineEnd;
@@ -649,14 +649,14 @@ export class Canvas2DRenderer implements Renderer {
       let x = text.justification === 'center' ? -totalWidth / 2 : text.justification === 'right' ? -totalWidth : 0;
 
       for (let index = 0; index < chars.length; index++) {
-        const char = chars[index];
+        const char = chars[index]!;
         const glyph = glyphs[char];
         const influence = triangleSelectorInfluence(charCursor + index + 0.5, options.selectedChars, 0.735) * 0.8;
         const scale = glyphScale * (1 - influence);
         if (glyph) {
           this.fillTextGlyph(ctx, glyph, x, y, scale);
         }
-        x += widths[index];
+        x += widths[index]!;
       }
 
       charCursor += chars.length + 1;
@@ -700,8 +700,8 @@ export class Canvas2DRenderer implements Renderer {
       let x = text.justification === 'center' ? -totalWidth / 2 : text.justification === 'right' ? -totalWidth : 0;
 
       for (let index = 0; index < chars.length; index++) {
-        const char = chars[index];
-        const width = widths[index];
+        const char = chars[index]!;
+        const width = widths[index]!;
         const influence = triangleSelectorInfluence(charCursor + index + 0.5, selectedChars);
         const fontSize = baseFontSize * (1 - influence);
         ctx.font = canvasFont(fontStyle, fontSize);
@@ -732,7 +732,7 @@ export class Canvas2DRenderer implements Renderer {
     if (points.length < 2) return;
 
     const lengths = cumulativeLengths(points);
-    const total = lengths[lengths.length - 1];
+    const total = lengths[lengths.length - 1]!;
     if (total <= 0) return;
 
     const chars = [...text.text];
@@ -1017,12 +1017,12 @@ export class Canvas2DRenderer implements Renderer {
       // a single cumulative length.
       let i = group.children.length - 1;
       while (i >= 0) {
-        const child = group.children[i];
+        const child = group.children[i]!;
         if (child.trim?.mode === 'simultaneous' && child.trim.groupId) {
           const run: Shape[] = [child];
           let j = i - 1;
-          while (j >= 0 && group.children[j].trim?.groupId === child.trim.groupId) {
-            run.push(group.children[j]);
+          while (j >= 0 && group.children[j]!.trim?.groupId === child.trim.groupId) {
+            run.push(group.children[j]!);
             j--;
           }
           // drawTrimmedShapeGroup expects the run in bottom-to-top order.
@@ -1110,7 +1110,7 @@ export class Canvas2DRenderer implements Renderer {
 
       maskCtx.fillStyle = '#ffffff';
       for (let i = 0; i < shape.shapes.length; i++) {
-        const operand = shape.shapes[i];
+        const operand = shape.shapes[i]!;
         const operandPath = this.operandPath(operand);
         if (i === 0) {
           maskCtx.globalCompositeOperation = 'source-over';
@@ -1377,9 +1377,9 @@ export class Canvas2DRenderer implements Renderer {
       const points = shapeToPoints(shape, 128);
       const lengths: number[] = [0];
       for (let i = 1; i < points.length; i++) {
-        lengths.push(lengths[i - 1] + distance(points[i - 1], points[i]));
+        lengths.push(lengths[i - 1]! + distance(points[i - 1]!, points[i]!));
       }
-      return { shape, points, lengths, length: lengths[lengths.length - 1] };
+      return { shape, points, lengths, length: lengths[lengths.length - 1]! };
     });
 
     const totalLength = shapeData.reduce((sum, data) => sum + data.length, 0);
@@ -1470,7 +1470,7 @@ function pathDataToPoints(path: PathData, segmentsPerCurve: number): Point[] {
   const points: Point[] = [];
   if (path.vertices.length === 0) return points;
 
-  points.push(path.vertices[0]);
+  points.push(path.vertices[0]!);
   for (let index = 0; index < path.vertices.length - 1; index++) {
     appendPathDataSegment(points, path, index, index + 1, segmentsPerCurve);
   }
@@ -1487,8 +1487,8 @@ function appendPathDataSegment(
   toIndex: number,
   segmentsPerCurve: number,
 ): void {
-  const from = path.vertices[fromIndex];
-  const to = path.vertices[toIndex];
+  const from = path.vertices[fromIndex]!;
+  const to = path.vertices[toIndex]!;
   const outTangent = path.outTangents[fromIndex] ?? { x: 0, y: 0 };
   const inTangent = path.inTangents[toIndex] ?? { x: 0, y: 0 };
   const isLine =
@@ -1520,24 +1520,24 @@ function cubicPoint(p0: Point, p1: Point, p2: Point, p3: Point, t: number): Poin
 function cumulativeLengths(points: Point[]): number[] {
   const lengths = [0];
   for (let index = 1; index < points.length; index++) {
-    lengths.push(lengths[index - 1] + distance(points[index - 1], points[index]));
+    lengths.push(lengths[index - 1]! + distance(points[index - 1]!, points[index]!));
   }
   return lengths;
 }
 
 function samplePath(points: Point[], lengths: number[], distanceAlongPath: number): { point: Point; angle: number } {
-  const total = lengths[lengths.length - 1];
+  const total = lengths[lengths.length - 1]!;
   const dist = Math.max(0, Math.min(distanceAlongPath, total));
   let index = lengths.findIndex((length) => length >= dist);
   if (index <= 0) index = 1;
   if (index >= points.length) index = points.length - 1;
 
-  const prevLength = lengths[index - 1];
-  const nextLength = lengths[index];
+  const prevLength = lengths[index - 1]!;
+  const nextLength = lengths[index]!;
   const segmentLength = nextLength - prevLength;
   const t = segmentLength > 0 ? (dist - prevLength) / segmentLength : 0;
-  const from = points[index - 1];
-  const to = points[index];
+  const from = points[index - 1]!;
+  const to = points[index]!;
   return {
     point: {
       x: from.x + (to.x - from.x) * t,

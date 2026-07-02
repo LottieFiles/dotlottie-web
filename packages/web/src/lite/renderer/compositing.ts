@@ -68,7 +68,7 @@ export function applyLumaMatteAlpha(ctx: RenderingContext2D, width: number, heig
   const imageData = ctx.getImageData(0, 0, width, height);
   const data = imageData.data;
   for (let i = 0; i < data.length; i += 4) {
-    const luminance = (0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]) / 255;
+    const luminance = (0.299 * data[i]! + 0.587 * data[i + 1]! + 0.114 * data[i + 2]!) / 255;
     const alpha = isInverted ? 1 - luminance : luminance;
     data[i] = 0;
     data[i + 1] = 0;

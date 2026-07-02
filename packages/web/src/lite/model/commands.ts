@@ -55,7 +55,7 @@ export function buildLayerCommands(layer: Layer, options: { includeBlendMode?: b
   // Shape arrays are exported top-to-bottom; render the bottom shape first so
   // later (top) shapes composite on top.
   for (let i = layer.shapes.length - 1; i >= 0; i--) {
-    commands.push({ type: 'drawShape', shape: layer.shapes[i] });
+    commands.push({ type: 'drawShape', shape: layer.shapes[i]! });
   }
 
   if (layer.image) {
@@ -75,7 +75,7 @@ export function buildLayerCommands(layer: Layer, options: { includeBlendMode?: b
       commands.push({
         type: 'tint',
         color: tint.color,
-        whiteColor: tint.whiteColor,
+        ...(tint.whiteColor !== undefined && { whiteColor: tint.whiteColor }),
         amount: tint.amount,
       });
     }

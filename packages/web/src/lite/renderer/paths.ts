@@ -67,7 +67,7 @@ export function trimmedEllipsePath(shape: EllipseShape, trim: TrimPath): Path2D 
     path.ellipse(center.x, center.y, rx, ry, 0, startAngle, endAngle);
   }
 
-  if (ranges.length === 1 && ranges[0][0] === 0 && ranges[0][1] === 1) {
+  if (ranges.length === 1 && ranges[0]![0] === 0 && ranges[0]![1] === 1) {
     path.closePath();
   }
 
@@ -81,12 +81,12 @@ export function buildPathFromPathData(data: PathData): Path2D {
     return path;
   }
 
-  const start = data.vertices[0];
+  const start = data.vertices[0]!;
   path.moveTo(start.x, start.y);
 
   for (let i = 0; i < data.vertices.length - 1; i++) {
-    const current = data.vertices[i];
-    const next = data.vertices[i + 1];
+    const current = data.vertices[i]!;
+    const next = data.vertices[i + 1]!;
     const outTangent = data.outTangents[i] ?? { x: 0, y: 0 };
     const inTangent = data.inTangents[i + 1] ?? { x: 0, y: 0 };
 
@@ -102,8 +102,8 @@ export function buildPathFromPathData(data: PathData): Path2D {
   }
 
   if (data.closed && data.vertices.length > 1) {
-    const last = data.vertices[data.vertices.length - 1];
-    const first = data.vertices[0];
+    const last = data.vertices[data.vertices.length - 1]!;
+    const first = data.vertices[0]!;
     const outTangent = data.outTangents[data.vertices.length - 1] ?? { x: 0, y: 0 };
     const inTangent = data.inTangents[0] ?? { x: 0, y: 0 };
 
@@ -182,7 +182,7 @@ export function getTrimVisibleRanges(trim: TrimPath): [number, number][] {
 
 export function isFullTrimPath(trim: TrimPath): boolean {
   const ranges = getTrimVisibleRanges(trim);
-  return ranges.length === 1 && ranges[0][0] === 0 && ranges[0][1] === 1;
+  return ranges.length === 1 && ranges[0]![0] === 0 && ranges[0]![1] === 1;
 }
 
 export function effectiveTrimPath(shape: Shape): TrimPath | undefined {
@@ -207,7 +207,7 @@ export function composeTrimPaths(trims: TrimPath[]): TrimPath | undefined {
       return trim;
     }
     const span = end - start;
-    const [rangeStart, rangeEnd] = ranges[0];
+    const [rangeStart, rangeEnd] = ranges[0]!;
     const nextStart = start + span * rangeStart;
     const nextEnd = start + span * rangeEnd;
     start = nextStart;
@@ -237,9 +237,9 @@ export function getTrimmedPath(shape: Shape, trim: TrimPath): Path2D {
 
   const lengths: number[] = [0];
   for (let i = 1; i < points.length; i++) {
-    lengths.push(lengths[i - 1] + distance(points[i - 1], points[i]));
+    lengths.push(lengths[i - 1]! + distance(points[i - 1]!, points[i]!));
   }
-  const total = lengths[lengths.length - 1];
+  const total = lengths[lengths.length - 1]!;
   if (total <= 0) return new Path2D();
 
   const ranges = getTrimVisibleRanges(trim);
@@ -250,7 +250,7 @@ export function getTrimmedPath(shape: Shape, trim: TrimPath): Path2D {
 
   // Close the path only when the trim covers the full perimeter so fills
   // behave as expected on closed shapes.
-  if (shapeIsClosed(shape) && ranges.length === 1 && ranges[0][0] === 0 && ranges[0][1] === 1) {
+  if (shapeIsClosed(shape) && ranges.length === 1 && ranges[0]![0] === 0 && ranges[0]![1] === 1) {
     path.closePath();
   }
 
@@ -258,20 +258,20 @@ export function getTrimmedPath(shape: Shape, trim: TrimPath): Path2D {
 }
 
 export function appendTrimmedSegment(path: Path2D, points: Point[], lengths: number[], from: number, to: number): void {
-  const total = lengths[lengths.length - 1];
+  const total = lengths[lengths.length - 1]!;
   const clampedFrom = Math.max(0, Math.min(from, total));
   const clampedTo = Math.max(0, Math.min(to, total));
   if (clampedFrom >= clampedTo) return;
 
   const interpolate = (dist: number): Point => {
     const index = lengths.findIndex((len) => len >= dist);
-    if (index <= 0) return points[0];
-    if (index >= points.length) return points[points.length - 1];
-    const prev = lengths[index - 1];
-    const segmentLength = lengths[index] - prev;
+    if (index <= 0) return points[0]!;
+    if (index >= points.length) return points[points.length - 1]!;
+    const prev = lengths[index - 1]!;
+    const segmentLength = lengths[index]! - prev;
     const t = segmentLength > 0 ? (dist - prev) / segmentLength : 0;
-    const a = points[index - 1];
-    const b = points[index];
+    const a = points[index - 1]!;
+    const b = points[index]!;
     return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
   };
 
@@ -280,8 +280,8 @@ export function appendTrimmedSegment(path: Path2D, points: Point[], lengths: num
 
   let i = lengths.findIndex((len) => len >= clampedFrom);
   if (i < 0) i = points.length;
-  while (i < points.length && lengths[i] < clampedTo) {
-    path.lineTo(points[i].x, points[i].y);
+  while (i < points.length && lengths[i]! < clampedTo) {
+    path.lineTo(points[i]!.x, points[i]!.y);
     i++;
   }
 
@@ -352,7 +352,7 @@ function buildPolystarPath(shape: PolystarShape): Path2D {
 
   const path = new Path2D();
   for (let i = 0; i < points.length; i++) {
-    const point = points[i];
+    const point = points[i]!;
     if (i === 0) {
       path.moveTo(point.x, point.y);
     } else {
@@ -415,7 +415,7 @@ function polystarVertexData(shape: PolystarShape): PolystarVertex[] {
 function closedPolylinePath(points: Point[]): Path2D {
   const path = new Path2D();
   for (let i = 0; i < points.length; i++) {
-    const point = points[i];
+    const point = points[i]!;
     if (i === 0) path.moveTo(point.x, point.y);
     else path.lineTo(point.x, point.y);
   }
@@ -430,9 +430,9 @@ function roundOffsetPolyline(points: Point[], offset: number): Point[] {
   const result: Point[] = [];
   const arcSteps = 6;
   for (let index = 0; index < points.length; index++) {
-    const previous = points[(index - 1 + points.length) % points.length];
-    const point = points[index];
-    const next = points[(index + 1) % points.length];
+    const previous = points[(index - 1 + points.length) % points.length]!;
+    const point = points[index]!;
+    const next = points[(index + 1) % points.length]!;
     const previousNormal = edgeNormalWithSign(previous, point, sign);
     const nextNormal = edgeNormalWithSign(point, next, sign);
     const startAngle = Math.atan2(previousNormal.y, previousNormal.x);
@@ -455,8 +455,8 @@ function roundOffsetPolyline(points: Point[], offset: number): Point[] {
 function signedArea(points: Point[]): number {
   let area = 0;
   for (let index = 0; index < points.length; index++) {
-    const current = points[index];
-    const next = points[(index + 1) % points.length];
+    const current = points[index]!;
+    const next = points[(index + 1) % points.length]!;
     area += current.x * next.y - next.x * current.y;
   }
   return area / 2;
@@ -488,17 +488,17 @@ function offsetPolystarVertices(vertices: PolystarVertex[], center: Point, offse
 
 function offsetClosedPolyline(points: Point[], center: Point, offset: number): Point[] {
   const normals = points.map((point, index) => {
-    const next = points[(index + 1) % points.length];
+    const next = points[(index + 1) % points.length]!;
     return outwardEdgeNormal(point, next, center);
   });
 
   return points.map((point, index) => {
     const prevIndex = (index - 1 + points.length) % points.length;
     const nextIndex = index;
-    const prev = points[prevIndex];
-    const next = points[(index + 1) % points.length];
-    const prevNormal = normals[prevIndex];
-    const nextNormal = normals[nextIndex];
+    const prev = points[prevIndex]!;
+    const next = points[(index + 1) % points.length]!;
+    const prevNormal = normals[prevIndex]!;
+    const nextNormal = normals[nextIndex]!;
     const prevLineStart = {
       x: prev.x + prevNormal.x * offset,
       y: prev.y + prevNormal.y * offset,
@@ -574,11 +574,11 @@ function cross(a: Point, b: Point): number {
 function roundedPolystarPath(vertices: PolystarVertex[]): Path2D {
   const path = new Path2D();
   if (vertices.length === 0) return path;
-  path.moveTo(vertices[0].point.x, vertices[0].point.y);
+  path.moveTo(vertices[0]!.point.x, vertices[0]!.point.y);
 
   for (let i = 0; i < vertices.length; i++) {
-    const current = vertices[i];
-    const next = vertices[(i + 1) % vertices.length];
+    const current = vertices[i]!;
+    const next = vertices[(i + 1) % vertices.length]!;
     const segmentLength = distance(current.point, next.point);
     if (segmentLength <= 1e-6) continue;
 
@@ -615,7 +615,7 @@ function roundedClosedPolylinePath(vertices: Point[], radius: number): Path2D {
   if (vertices.length === 0) return path;
   if (vertices.length < 3 || radius <= 0) {
     for (let i = 0; i < vertices.length; i++) {
-      const point = vertices[i];
+      const point = vertices[i]!;
       if (i === 0) path.moveTo(point.x, point.y);
       else path.lineTo(point.x, point.y);
     }
@@ -624,9 +624,9 @@ function roundedClosedPolylinePath(vertices: Point[], radius: number): Path2D {
   }
 
   for (let i = 0; i < vertices.length; i++) {
-    const prev = vertices[(i - 1 + vertices.length) % vertices.length];
-    const current = vertices[i];
-    const next = vertices[(i + 1) % vertices.length];
+    const prev = vertices[(i - 1 + vertices.length) % vertices.length]!;
+    const current = vertices[i]!;
+    const next = vertices[(i + 1) % vertices.length]!;
     const prevDistance = distance(prev, current);
     const nextDistance = distance(current, next);
     const cut = Math.min(radius, prevDistance / 2, nextDistance / 2);
@@ -716,7 +716,7 @@ function ellipseToPoints(shape: EllipseShape, segments = 64): Point[] {
 
 function polystarToPoints(shape: PolystarShape): Point[] {
   const points = polystarVertices(shape);
-  return points.length > 0 ? [...points, points[0]] : points;
+  return points.length > 0 ? [...points, points[0]!] : points;
 }
 
 function pathToPoints(shape: PathShape, segments = 64): Point[] {
@@ -727,8 +727,8 @@ function pathToPoints(shape: PathShape, segments = 64): Point[] {
   const samplesPerSegment = Math.max(2, Math.floor(segments / Math.max(1, vertexCount)));
 
   const sampleSegment = (fromIndex: number, toIndex: number) => {
-    const current = data.vertices[fromIndex];
-    const next = data.vertices[toIndex];
+    const current = data.vertices[fromIndex]!;
+    const next = data.vertices[toIndex]!;
     const outTangent = data.outTangents[fromIndex] ?? { x: 0, y: 0 };
     const inTangent = data.inTangents[toIndex] ?? { x: 0, y: 0 };
     const cp1 = { x: current.x + outTangent.x, y: current.y + outTangent.y };
@@ -739,7 +739,7 @@ function pathToPoints(shape: PathShape, segments = 64): Point[] {
     }
   };
 
-  points.push(data.vertices[0]);
+  points.push(data.vertices[0]!);
   for (let i = 0; i < vertexCount - 1; i++) {
     sampleSegment(i, i + 1);
   }

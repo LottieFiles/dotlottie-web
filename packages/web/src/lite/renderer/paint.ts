@@ -80,7 +80,7 @@ export function applyStrokes(
   // Stroke modifiers in Lottie are ordered top-to-bottom in the shape stack, so
   // the last modifier in the array is drawn first and the first is drawn last.
   for (let i = strokes.length - 1; i >= 0; i--) {
-    const s = strokes[i];
+    const s = strokes[i]!;
     const width = Number(s.width);
     const opacity = Number(s.opacity ?? 100) / 100;
     if (width <= 0 || opacity <= 0) {
@@ -166,7 +166,7 @@ function degenerateLinearGradientColor(start: Point, end: Point, colors: ColorSt
   if (Math.abs(start.x - end.x) > 1e-9 || Math.abs(start.y - end.y) > 1e-9) {
     return undefined;
   }
-  return colorToCss(colors[colors.length - 1].color);
+  return colorToCss(colors[colors.length - 1]!.color);
 }
 
 function createRadialGradient(
