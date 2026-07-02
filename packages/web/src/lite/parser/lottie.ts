@@ -1,4 +1,5 @@
 import type {
+  AffineMatrix,
   Animatable,
   AnimatedTransform,
   Animation,
@@ -402,16 +403,17 @@ function mergePrecompLayer(
     useSourceWindow && precomp.timeRemap !== undefined && precomp.remappedSourceWindow !== true
       ? precomp.outPoint
       : precomp.sourceWindowParentOutPoint;
+  const instanceStretch = precomp.stretch ?? 1;
   const unclippedInPoint = useSourceWindow
     ? compLayer.inPoint
     : isTimeRemapped
       ? precomp.inPoint
-      : Math.max(precomp.inPoint, compLayer.inPoint + precompStartTime);
+      : Math.max(precomp.inPoint / instanceStretch, compLayer.inPoint + precompStartTime);
   const unclippedOutPoint = useSourceWindow
     ? compLayer.outPoint
     : isTimeRemapped
       ? precomp.outPoint
-      : Math.min(precomp.outPoint, compLayer.outPoint + precompStartTime);
+      : Math.min(precomp.outPoint / instanceStretch, compLayer.outPoint + precompStartTime);
   const sourceWindowDuration = precomp.outPoint - precomp.inPoint;
   const shouldClipToParentSourceWindow = useSourceWindow && precomp.remappedSourceWindow === true;
   const inPoint = unclippedInPoint;
@@ -503,7 +505,7 @@ function parseLayer(
   const image = layerType === 2 && refId ? imageAssets.get(refId) : undefined;
   const audio = layerType === 6 && refId ? parseAudioLayer(data, audioAssets.get(refId)) : undefined;
 
-  const parsedShapes = parseShapeChildren(shapes, layerStyle);
+  const parsedShapes = coalesceGroupPrimitives(parseShapeChildren(shapes, layerStyle));
   const layerShapes = layerType === 1 ? buildSolidShapes(data, layerStyle) : parsedShapes;
   applyFillEffect(layerShapes, effects);
 
@@ -645,7 +647,7 @@ function parseEffects(data: unknown): Effect[] {
     if (!item || typeof item !== 'object') continue;
     const effect = item as Record<string, unknown>;
     const mn = String(effect['mn'] ?? '');
-    const parsed = parseEffectByMatchName(effect, mn);
+    const parsed = parseEffectByMatchName(effect, mn) ?? parseEffectByType(effect, Number(effect['ty']));
     if (parsed) effects.push(parsed);
   }
   return effects;
@@ -666,6 +668,15 @@ function parseEffectByMatchName(effect: Record<string, unknown>, mn: string): Ef
   }
   if (mn === 'ADBE Tritone') {
     return parseTritoneEffect(effect);
+  }
+  return null;
+}
+
+const EFFECT_TYPE_GAUSSIAN_BLUR = 29;
+
+function parseEffectByType(effect: Record<string, unknown>, ty: number): Effect | null {
+  if (ty === EFFECT_TYPE_GAUSSIAN_BLUR) {
+    return parseGaussianBlurEffect(effect);
   }
   return null;
 }
@@ -710,7 +721,14 @@ function parseDropShadowEffect(effect: Record<string, unknown>): DropShadowEffec
 }
 
 function parseGaussianBlurEffect(effect: Record<string, unknown>): GaussianBlurEffect | null {
-  const blurriness = parseAnimatableNumber(findEffectProperty(effect, 'ADBE Gaussian Blur 2-0001'));
+  let blurData = findEffectProperty(effect, 'ADBE Gaussian Blur 2-0001');
+  if (blurData === undefined) {
+    const props = effect['ef'];
+    if (Array.isArray(props) && props[0] && typeof props[0] === 'object') {
+      blurData = (props[0] as Record<string, unknown>)['v'];
+    }
+  }
+  const blurriness = parseAnimatableNumber(blurData);
   return { type: 'gaussian-blur', blurriness };
 }
 
@@ -1035,6 +1053,10 @@ function hasPerDimensionEasing(data: unknown): boolean {
 
 type IncomingTangentSource = 'segment-start' | 'destination';
 
+function isKeyframeList(k: unknown): boolean {
+  return Array.isArray(k) && typeof k[0] === 'object' && k[0] !== null && 't' in k[0];
+}
+
 function parseAnimatableNumber(
   data: unknown,
   defaultValue = 0,
@@ -1050,7 +1072,7 @@ function parseAnimatableNumberDimension(data: unknown, dimension: number, defaul
   }
 
   const record = data as Record<string, unknown>;
-  const animated = record['a'] === 1;
+  const animated = record['a'] === 1 || isKeyframeList(record['k']);
 
   if (!animated) {
     const parsed = parseDimensionValue(record['k'], dimension);
@@ -1169,7 +1191,7 @@ function parseAnimatable<T>(
   }
 
   const record = data as Record<string, unknown>;
-  const animated = record['a'] === 1;
+  const animated = record['a'] === 1 || isKeyframeList(record['k']);
 
   if (!animated) {
     const parsed = parseStatic(record['k']);
@@ -1402,16 +1424,6 @@ function coalesceGroupPrimitives(children: Shape[]): Shape[] {
   }
   flushRun();
   return result;
-}
-
-function applyFillToShape(shape: Shape, fill: Fill): void {
-  if (shape.type === 'group') {
-    for (const child of (shape as unknown as GroupShape).children) {
-      applyFillToShape(child, fill);
-    }
-  } else {
-    (shape as unknown as { fill?: Fill }).fill = fill;
-  }
 }
 
 function applyFillToUnfilledShape(shape: Shape, fill: Fill): void {
@@ -1695,11 +1707,11 @@ function parseShapeChildren(children: unknown[], style: ShapeStyle): Shape[] {
       const fill = parseFill(childRecord);
       runFill = fill;
       for (const shape of run) {
-        if (shape.type === 'group') {
-          applyFillToUnfilledShape(shape, fill);
-        } else {
-          applyFillToShape(shape, fill);
-        }
+        // Only fill shapes that don't already have one. A shape can carry several
+        // fills (e.g. a gradient stacked over a solid); Lottie draws items
+        // top-to-bottom, so the FIRST fill encountered is the topmost. Keeping it
+        // (rather than overwriting) matches the visible opaque fill.
+        applyFillToUnfilledShape(shape, fill);
         if (runStroke.length > 0) {
           applyPaintOrderToShape(shape, 'fill-stroke');
         }
@@ -1712,11 +1724,7 @@ function parseShapeChildren(children: unknown[], style: ShapeStyle): Shape[] {
       const fill = parseGradientFill(childRecord);
       runFill = fill;
       for (const shape of run) {
-        if (shape.type === 'group') {
-          applyFillToUnfilledShape(shape, fill);
-        } else {
-          applyFillToShape(shape, fill);
-        }
+        applyFillToUnfilledShape(shape, fill);
       }
       runStyled = true;
       continue;
@@ -1809,46 +1817,78 @@ function parseShapeChildren(children: unknown[], style: ShapeStyle): Shape[] {
 }
 
 function repeatShapes(shapes: Shape[], data: Record<string, unknown>): Shape[] {
-  const count = Math.max(0, Math.floor(parseNumber(data['c'])));
-  if (count <= 1 || shapes.length === 0 || !data['tr'] || typeof data['tr'] !== 'object') return [];
+  // The copy count may be animated. Expand to the maximum count so every copy
+  // exists as geometry; the scene evaluator then reveals copies up to the count
+  // resolved for the current frame. Static counts keep the simpler, untagged path.
+  const countAnim = parseAnimatableNumber(data['c']);
+  const animatedCount = isAnimated(countAnim);
+  const maxCount = Math.max(0, Math.floor(animatedCount ? maxKeyframeValue(countAnim) : (countAnim as number)));
+  if (maxCount <= 1 || shapes.length === 0 || !data['tr'] || typeof data['tr'] !== 'object') return [];
 
   const transform = evaluateTransform(parseTransform(data['tr'] as Record<string, unknown>), 0);
+  const opacityStep = transform.opacity / 100;
   const copies: Shape[] = [];
-  for (let index = 1; index < count; index++) {
+  for (let index = 1; index < maxCount; index++) {
     for (const shape of shapes) {
-      copies.push(cloneShapeWithRepeaterTransform(shape, transform, index));
+      const clone = cloneShapeWithRepeaterTransform(shape, transform, opacityStep, index);
+      if (animatedCount) {
+        clone.repeaterIndex = index;
+        clone.repeaterCount = countAnim;
+      }
+      copies.push(clone);
+    }
+  }
+  // Tag the base copies (index 0) last so they're not deep-cloned into the copies.
+  if (animatedCount) {
+    for (const shape of shapes) {
+      shape.repeaterIndex = 0;
+      shape.repeaterCount = countAnim;
     }
   }
   return copies;
 }
 
-function cloneShapeWithRepeaterTransform(shape: Shape, transform: Transform, index: number): Shape {
+function maxKeyframeValue(value: Animatable<number>): number {
+  if (!isAnimated(value)) return value;
+  let max = Number.NEGATIVE_INFINITY;
+  for (const keyframe of value.keyframes) {
+    if (keyframe.value > max) max = keyframe.value;
+  }
+  return Number.isFinite(max) ? max : 0;
+}
+
+function cloneShapeWithRepeaterTransform(
+  shape: Shape,
+  transform: Transform,
+  opacityStep: number,
+  index: number,
+): Shape {
   const clone = JSON.parse(JSON.stringify(shape)) as Shape;
-  const original = clone.transform ?? identityTransform();
   clone.id = generatedShapeId(`${shape.type}-repeat`);
-  clone.transform = {
-    position: {
-      x: original.position.x + transform.position.x * index,
-      y: original.position.y + transform.position.y * index,
-    },
-    anchor: original.anchor,
-    scale: {
-      x: original.scale.x * (transform.scale.x / 100) ** index,
-      y: original.scale.y * (transform.scale.y / 100) ** index,
-    },
-    rotation: original.rotation + transform.rotation * index,
-    opacity: original.opacity * (transform.opacity / 100) ** index,
-  };
+  clone.repeaterMatrix = repeaterCopyMatrix(transform, index);
+  clone.repeaterOpacity = opacityStep ** index;
   return clone;
 }
 
-function identityTransform(): Transform {
+function repeaterCopyMatrix(transform: Transform, index: number): AffineMatrix {
+  const rad = (transform.rotation * index * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  const sx = (transform.scale.x / 100) ** index;
+  const sy = (transform.scale.y / 100) ** index;
+  const a = cos * sx;
+  const b = sin * sx;
+  const c = -sin * sy;
+  const d = cos * sy;
+  const ax = transform.anchor.x;
+  const ay = transform.anchor.y;
   return {
-    position: { x: 0, y: 0 },
-    anchor: { x: 0, y: 0 },
-    scale: { x: 100, y: 100 },
-    rotation: 0,
-    opacity: 100,
+    a,
+    b,
+    c,
+    d,
+    e: transform.position.x * index + ax - (a * ax + c * ay),
+    f: transform.position.y * index + ay - (b * ax + d * ay),
   };
 }
 

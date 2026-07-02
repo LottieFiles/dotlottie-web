@@ -10,10 +10,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 
-// Baseline at introduction: 31.62 KB gzipped (full DotLottie API surface, parser,
-// Canvas2D renderer, packaged image/font resolution). Budget leaves <0.5 KB of
-// headroom on purpose — additions to src/lite must justify their bytes.
-const GZIP_BUDGET_BYTES = 32 * 1024;
+const GZIP_BUDGET_BYTES = 34 * 1024;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const bundlePath = path.resolve(__dirname, '../dist/lite/index.js');

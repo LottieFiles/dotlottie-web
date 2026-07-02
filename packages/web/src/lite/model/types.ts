@@ -184,6 +184,20 @@ export interface Shape {
    * renderers keep the legacy stroke-then-fill order.
    */
   paintOrder?: 'fill-stroke';
+  /**
+   * Repeater bookkeeping for an animated copy count. Copies are expanded to the
+   * maximum count at parse time; each carries its 0-based `repeaterIndex` and the
+   * animatable `repeaterCount`, and the scene evaluator hides (or fractionally
+   * fades) copies whose index exceeds the count resolved for the current frame.
+   */
+  repeaterIndex?: number;
+  repeaterCount?: Animatable<number>;
+  /**
+   * Per-copy repeater transform (pre-multiplied onto the shape's own, possibly
+   * animated, transform at evaluation time) and its opacity falloff factor.
+   */
+  repeaterMatrix?: { a: number; b: number; c: number; d: number; e: number; f: number };
+  repeaterOpacity?: number;
 }
 export interface RectShape extends Shape {
   type: 'rect';

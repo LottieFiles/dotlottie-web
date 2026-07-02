@@ -25,7 +25,8 @@ export function blendedLayerPaintAlpha(layer: Layer): number {
   // paint alpha again makes semi-transparent blend layers too faint.
   if (layer.blendMode === 'screen') return 1;
 
-  let alpha = 1;
+  let peak = 0;
+  let hasPaint = false;
   const visit = (shapes: Shape[]) => {
     for (const shape of shapes) {
       if (shape.type === 'group') {
@@ -38,13 +39,15 @@ export function blendedLayerPaintAlpha(layer: Layer): number {
       if (fill?.type === 'solid') {
         const color = fill.color as Color;
         if (isResolvedColor(color)) {
-          alpha = Math.min(alpha, color.a);
+          hasPaint = true;
+          peak = Math.max(peak, color.a);
         }
       } else if (fill?.type === 'gradient') {
         const stops = fill.colors as ColorStop[];
         if (Array.isArray(stops)) {
           for (const stop of stops) {
-            alpha = Math.min(alpha, stop.color.a);
+            hasPaint = true;
+            peak = Math.max(peak, stop.color.a);
           }
         }
       }
@@ -52,7 +55,7 @@ export function blendedLayerPaintAlpha(layer: Layer): number {
   };
 
   visit(layer.shapes);
-  return alpha;
+  return hasPaint ? peak : 1;
 }
 
 function isResolvedColor(color: Color): color is Color {

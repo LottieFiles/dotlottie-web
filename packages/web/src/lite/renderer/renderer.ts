@@ -1109,20 +1109,30 @@ export class Canvas2DRenderer implements Renderer {
       }
 
       maskCtx.fillStyle = '#ffffff';
+      const operandOp = (i: number): GlobalCompositeOperation => {
+        if (i === 0) return 'source-over';
+        if (mode === 'subtract') return 'destination-out';
+        if (mode === 'intersect') return 'destination-in';
+        return 'xor'; // exclude
+      };
       for (let i = 0; i < shape.shapes.length; i++) {
-        const operand = shape.shapes[i]!;
-        const operandPath = this.operandPath(operand);
+        const leaves = this.collectOperandLeafPaths(shape.shapes[i]!);
         if (i === 0) {
           maskCtx.globalCompositeOperation = 'source-over';
-        } else if (mode === 'subtract') {
-          maskCtx.globalCompositeOperation = 'destination-out';
-        } else if (mode === 'intersect') {
-          maskCtx.globalCompositeOperation = 'destination-in';
-        } else {
-          // exclude
-          maskCtx.globalCompositeOperation = 'xor';
+          for (const leaf of leaves) maskCtx.fill(leaf);
+          continue;
         }
-        maskCtx.fill(operandPath);
+        this.withOffscreenContext(canvas.width, canvas.height, ({ canvas: opBuffer, ctx: opCtx }) => {
+          opCtx.setTransform(baseMatrix);
+          if (hasShapeTransform) applyTransform(opCtx, shapeTransform);
+          opCtx.fillStyle = '#ffffff';
+          for (const leaf of leaves) opCtx.fill(leaf);
+          maskCtx.save();
+          maskCtx.setTransform(1, 0, 0, 1, 0, 0);
+          maskCtx.globalCompositeOperation = operandOp(i);
+          maskCtx.drawImage(opBuffer as CanvasImageSource, 0, 0);
+          maskCtx.restore();
+        });
       }
 
       if (hasShapeTransform) {
@@ -1204,6 +1214,24 @@ export class Canvas2DRenderer implements Renderer {
       : parentTransform;
     if (!transform) return path;
     return transformPath(path, transform);
+  }
+
+  /**
+   * Like {@link operandPath}, but returns each leaf sub-path separately instead
+   * of concatenating them into one winding-sensitive Path2D. Used by boolean
+   * merges to fill an operand as the union of its parts, so reverse-wound
+   * duplicate paths don't cancel under the nonzero rule.
+   */
+  private collectOperandLeafPaths(operand: Shape, parentTransform?: Transform): Path2D[] {
+    if (operand.type === 'group') {
+      const group = operand as GroupShape;
+      const combined =
+        group.transform && parentTransform
+          ? combineTransforms(parentTransform, group.transform)
+          : (group.transform ?? parentTransform);
+      return group.children.flatMap((child) => this.collectOperandLeafPaths(child, combined));
+    }
+    return [this.operandPath(operand, parentTransform)];
   }
 
   private drawMergedPath(ctx: RenderingContext2D, shape: Shape, path: Path2D): void {

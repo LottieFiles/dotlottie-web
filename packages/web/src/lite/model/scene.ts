@@ -550,10 +550,11 @@ export function buildScene(animation: Animation, frame: number): Layer[] {
       const remappedFrame = evaluateTimeRemapFrame(layer.parentTimeRemap, layer.parentStartTime ?? 0);
       return layer.remappedSourceWindow ? remappedFrame : remappedFrame - compLayerStartTime;
     }
-    if (layer.isPrecompChildContent) {
-      return (compFrame - transformStartTime) * (layer.stretch ?? 1);
-    }
-    return (compFrame - transformStartTime) * (layer.stretch ?? 1);
+    // Time stretch maps a source frame onto (source × sr) comp frames, so the
+    // source (content) frame is the comp frame DIVIDED by the stretch — matching
+    // the visibility timeline below. Multiplying here desynchronizes content from
+    // visibility and drifts progressively, blanking the tail of stretched precomps.
+    return (compFrame - transformStartTime) / (layer.stretch ?? 1);
   }
 
   function getResolvedTransform(ind: number): Transform {
@@ -1032,6 +1033,29 @@ function evaluateShape(shape: Shape, frame: number, context: EvaluationContext):
         };
       }),
     };
+  }
+
+  // Apply repeater bookkeeping: pre-multiply the per-copy matrix onto the shape's
+  // own (already-evaluated) transform, apply the copy's opacity falloff, and — for
+  // animated copy counts — reveal copies progressively (fading the boundary copy
+  // fractionally, matching ThorVG; copies past the count get opacity 0, which the
+  // renderer treats as a skip).
+  if (shape.repeaterMatrix !== undefined || shape.repeaterCount !== undefined) {
+    const base: Transform = result.transform ?? {
+      position: { x: 0, y: 0 },
+      anchor: { x: 0, y: 0 },
+      scale: { x: 100, y: 100 },
+      rotation: 0,
+      opacity: 100,
+    };
+    let opacity = base.opacity * (shape.repeaterOpacity ?? 1);
+    if (shape.repeaterCount !== undefined) {
+      const count = evaluateAnimatable(shape.repeaterCount, frame, context);
+      const index = shape.repeaterIndex ?? 0;
+      opacity *= index + 1 <= count ? 1 : index < count ? count - index : 0;
+    }
+    const matrix = shape.repeaterMatrix ? multiplyMatrices(shape.repeaterMatrix, transformToMatrix(base)) : base.matrix;
+    result = { ...result, transform: { ...base, opacity, ...(matrix && { matrix }) } };
   }
 
   return result;
