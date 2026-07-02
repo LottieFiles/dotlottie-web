@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 export const PlayerStates = ['idle', 'loading', 'playing', 'paused', 'stopped'] as const;
 
-export type Renderer = 'software' | 'webgl' | 'webgpu';
+export type Renderer = 'software' | 'webgl' | 'webgpu' | 'lite';
 
 interface AnimationSlice {
   src: string;

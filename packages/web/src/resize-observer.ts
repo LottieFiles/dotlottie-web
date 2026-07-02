@@ -1,5 +1,10 @@
-import type { DotLottie } from './dotlottie';
-import type { DotLottieWorker } from './worker/dotlottie';
+/**
+ * Minimal structural contract required from observed player instances.
+ * Kept structural so any player implementation (wasm, worker, lite) can be observed.
+ */
+interface ResizablePlayer {
+  resize(): void | Promise<void>;
+}
 
 export const RESIZE_DEBOUNCE_TIME = 100;
 
@@ -7,7 +12,7 @@ export const RESIZE_DEBOUNCE_TIME = 100;
 export class CanvasResizeObserver {
   private static _observer: ResizeObserver | null = null;
 
-  private static readonly _observedCanvases = new Map<HTMLCanvasElement, [DotLottie | DotLottieWorker, number]>();
+  private static readonly _observedCanvases = new Map<HTMLCanvasElement, [ResizablePlayer, number]>();
 
   private static _initializeObserver(): void {
     if (CanvasResizeObserver._observer) return;
@@ -33,7 +38,7 @@ export class CanvasResizeObserver {
     CanvasResizeObserver._observer = new ResizeObserver(resizeHandler);
   }
 
-  public static observe(canvas: HTMLCanvasElement, dotLottieInstance: DotLottie | DotLottieWorker): void {
+  public static observe(canvas: HTMLCanvasElement, dotLottieInstance: ResizablePlayer): void {
     CanvasResizeObserver._initializeObserver();
 
     if (CanvasResizeObserver._observedCanvases.has(canvas)) return;

@@ -1,0 +1,238 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>visual parity harness</title>
+  <style>
+    body { margin: 0; background: #666; font-family: monospace; }
+    #stage { position: fixed; left: -99999px; top: 0; }
+  </style>
+</head>
+<body>
+  <div id="stage"></div>
+  <script type="module">
+    // Three renderers under test. dotlottie-web (thorvg WASM software) is the
+    // reference; lite is the parity target; lottie-web is an independent oracle.
+    import { DotLottie as DotLottieWeb } from '/packages/web/dist/index.js';
+    import { DotLottie as DotLottieLite } from '/packages/web/dist/lite/index.js';
+    import lottie from '/vendor/lottie-web-canvas.mjs';
+
+    DotLottieWeb.setWasmUrl('/packages/web/dist/dotlottie-player.wasm');
+
+    const stage = document.getElementById('stage');
+    const nextFrame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const settle = (ms) => new Promise((r) => setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(r)), ms));
+
+    function makeCanvas(w, h) {
+      const c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      stage.appendChild(c);
+      return c;
+    }
+
+    function waitLoad(dl, timeoutMs = 15000) {
+      return new Promise((resolve, reject) => {
+        let settled = false;
+        const done = (ok) => {
+          if (settled) return;
+          settled = true;
+          ok ? resolve() : reject(new Error('load-failed'));
+        };
+        dl.addEventListener('load', () => done(true));
+        dl.addEventListener('loadError', () => done(false));
+        setTimeout(() => done(false), timeoutMs);
+      });
+    }
+
+    // Render a dotlottie-web / lite instance at each requested frame, returning
+    // the raw RGBA buffer per frame.
+    async function renderDotLottie(Ctor, data, frames, w, h) {
+      const canvas = makeCanvas(w, h);
+      const dl = new Ctor({ canvas, data: JSON.stringify(data), autoplay: false, loop: false, backgroundColor: '#00000000' });
+      const buffers = {};
+      try {
+        await waitLoad(dl);
+        const ctx = canvas.getContext('2d');
+        // Prime pass: the 'load' event fires before embedded images finish
+        // decoding, and the renderer skips redraw when the frame is unchanged.
+        // So render every frame once to trigger image loads, settle to let them
+        // decode, then capture on a second pass (each frame differs from the last
+        // primed frame, forcing a redraw with the now-decoded images).
+        for (const f of frames) {
+          dl.setFrame(f);
+          if (typeof dl.render === 'function') dl.render();
+          await nextFrame();
+        }
+        await settle(150);
+        for (const f of frames) {
+          dl.setFrame(f);
+          if (typeof dl.render === 'function') dl.render();
+          await nextFrame();
+          buffers[f] = ctx.getImageData(0, 0, w, h).data;
+        }
+      } finally {
+        try { dl.destroy?.(); } catch {}
+        canvas.remove();
+      }
+      return buffers;
+    }
+
+    async function renderLottieWeb(data, frames, w, h, ip) {
+      const canvas = makeCanvas(w, h);
+      const ctx = canvas.getContext('2d');
+      const anim = lottie.loadAnimation({
+        renderer: 'canvas',
+        loop: false,
+        autoplay: false,
+        animationData: JSON.parse(JSON.stringify(data)),
+        rendererSettings: { context: ctx, clearCanvas: true, preserveAspectRatio: 'xMidYMid meet' },
+      });
+      const buffers = {};
+      try {
+        await nextFrame();
+        // Prime pass so embedded images decode before capture (see renderDotLottie).
+        for (const f of frames) {
+          anim.goToAndStop(f - ip, true);
+          await nextFrame();
+        }
+        await settle(150);
+        for (const f of frames) {
+          // lottie-web frames are 0-based within [ip, op]; setFrame uses absolute-ip.
+          anim.goToAndStop(f - ip, true);
+          await nextFrame();
+          buffers[f] = ctx.getImageData(0, 0, w, h).data;
+        }
+      } finally {
+        try { anim.destroy(); } catch {}
+        canvas.remove();
+      }
+      return buffers;
+    }
+
+    // Compare two RGBA buffers: fraction of pixels differing beyond a small
+    // threshold, mean channel delta over those pixels, and coverage of each.
+    function diff(a, b, w, h) {
+      let diffPx = 0;
+      let sum = 0;
+      let aCov = 0;
+      let bCov = 0;
+      const total = w * h;
+      for (let i = 0; i < a.length; i += 4) {
+        if (a[i + 3] > 12) aCov++;
+        if (b[i + 3] > 12) bCov++;
+        const d = Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2]) + Math.abs(a[i + 3] - b[i + 3]);
+        if (d > 24) {
+          diffPx++;
+          sum += d;
+        }
+      }
+      return {
+        diffPct: +(100 * diffPx / total).toFixed(2),
+        avgDiff: diffPx ? +(sum / diffPx).toFixed(0) : 0,
+        aCovPct: +(100 * aCov / total).toFixed(1),
+        bCovPct: +(100 * bCov / total).toFixed(1),
+      };
+    }
+
+    // Small PNG thumbnail (data URL) from an RGBA buffer, for the HTML report.
+    function thumb(buf, w, h, tw) {
+      const src = new OffscreenCanvas(w, h);
+      src.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(buf), w, h), 0, 0);
+      const th = Math.max(1, Math.round((h / w) * tw));
+      const dst = document.createElement('canvas');
+      dst.width = tw;
+      dst.height = th;
+      const dctx = dst.getContext('2d');
+      // Checkerboard so transparency is visible.
+      dctx.fillStyle = '#ccc';
+      dctx.fillRect(0, 0, tw, th);
+      dctx.fillStyle = '#999';
+      for (let y = 0; y < th; y += 8) for (let x = 0; x < tw; x += 8) if (((x + y) / 8) % 2) dctx.fillRect(x, y, 8, 8);
+      dctx.drawImage(src, 0, 0, tw, th);
+      return dst.toDataURL('image/png');
+    }
+
+    function diffThumb(a, b, w, h, tw) {
+      const out = new Uint8ClampedArray(a.length);
+      for (let i = 0; i < a.length; i += 4) {
+        const d = Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2]) + Math.abs(a[i + 3] - b[i + 3]);
+        const v = Math.min(255, d);
+        out[i] = v; out[i + 1] = 0; out[i + 2] = v ? 255 - v : 0; out[i + 3] = 255;
+      }
+      return thumb(out, w, h, tw);
+    }
+
+    // Main entry called per-fixture by the Playwright driver.
+    window.runFixture = async function runFixture(cfg) {
+      const { src, maxDim = 240, sampleFrames = 5, thumbW = 130 } = cfg;
+      const data = await (await fetch(src)).json();
+      const w0 = data.w || 512;
+      const h0 = data.h || 512;
+      const scale = maxDim / Math.max(w0, h0);
+      const w = Math.max(1, Math.round(w0 * scale));
+      const h = Math.max(1, Math.round(h0 * scale));
+      const ip = Math.round(data.ip ?? 0);
+      const op = Math.round(data.op ?? 60);
+      // Use only INTEGER frames. ThorVG (dotlottie-web) may skip re-rendering a
+      // subframe when it is within ~0.001 of the previous frame (a performance
+      // optimization), so fractional frames yield spurious diffs. Also skip the
+      // exact end frame (op): engines resolve the loop boundary inconsistently
+      // (clamp vs wrap). Sample distinct integers across [ip, op-1].
+      const last = op - 1 > ip ? op - 1 : op;
+      const span = Math.max(1, last - ip);
+      const frameSet = new Set();
+      for (let k = 0; k < sampleFrames; k++) {
+        const t = sampleFrames === 1 ? 0.5 : k / (sampleFrames - 1);
+        frameSet.add(Math.round(ip + t * span));
+      }
+      const frames = [...frameSet];
+
+      const web = await renderDotLottie(DotLottieWeb, data, frames, w, h);
+      const lite = await renderDotLottie(DotLottieLite, data, frames, w, h);
+      let lw = null;
+      try { lw = await renderLottieWeb(data, frames, w, h, ip); } catch (_e) { lw = null; }
+
+      const perFrame = frames.map((f) => {
+        const liteVsWeb = diff(lite[f], web[f], w, h);
+        const lwVsWeb = lw ? diff(lw[f], web[f], w, h) : null;
+        const liteVsLw = lw ? diff(lite[f], lw[f], w, h) : null;
+        return { frame: +f.toFixed(2), liteVsWeb, lwVsWeb, liteVsLw };
+      });
+
+      // Rank by the worst lite-vs-web frame.
+      const worstIdx = perFrame.reduce((best, p, i, arr) => (p.liteVsWeb.diffPct > arr[best].liteVsWeb.diffPct ? i : best), 0);
+      const worstFrame = frames[worstIdx];
+      const maxLiteVsWeb = perFrame[worstIdx].liteVsWeb.diffPct;
+      const avgLiteVsWeb = +(perFrame.reduce((s, p) => s + p.liteVsWeb.diffPct, 0) / perFrame.length).toFixed(2);
+      const maxLwVsWeb = lw ? +Math.max(...perFrame.map((p) => p.lwVsWeb.diffPct)).toFixed(2) : null;
+
+      // lottie-web agrees with lite far more than with dotlottie-web ⇒ the
+      // reference is likely the outlier for this fixture (deprioritize for lite).
+      const referenceSuspect = lw != null && maxLiteVsWeb > 3 &&
+        perFrame[worstIdx].liteVsLw.diffPct * 2 < perFrame[worstIdx].liteVsWeb.diffPct &&
+        perFrame[worstIdx].lwVsWeb.diffPct > maxLiteVsWeb * 0.6;
+
+      return {
+        src,
+        w, h, ip, op,
+        hasLottieWeb: lw != null,
+        maxLiteVsWeb,
+        avgLiteVsWeb,
+        maxLwVsWeb,
+        referenceSuspect,
+        perFrame,
+        thumbs: {
+          web: thumb(web[worstFrame], w, h, thumbW),
+          lite: thumb(lite[worstFrame], w, h, thumbW),
+          lottieWeb: lw ? thumb(lw[worstFrame], w, h, thumbW) : null,
+          diff: diffThumb(lite[worstFrame], web[worstFrame], w, h, thumbW),
+          worstFrame: +worstFrame.toFixed(2),
+        },
+      };
+    };
+
+    window.__ready = true;
+  </script>
+</body>
+</html>

@@ -6,6 +6,6 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["*-example", "viewer"],
+  "ignore": ["*-example", "viewer", "visual-parity"],
   "prettier": false
 }

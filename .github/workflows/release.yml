@@ -5,6 +5,15 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      snapshot:
+        description: 'Publish a snapshot prerelease from this ref instead of re-running GPR release'
+        type: boolean
+        default: false
+      dist_tag:
+        description: 'npm dist-tag (and snapshot version suffix) for the snapshot prerelease'
+        type: string
+        default: alpha
 
 concurrency:
   group: release
@@ -163,6 +172,56 @@ jobs:
             gh api --method POST "/repos/LottieFiles/docs-content/dispatches" --input payload.json
           done
 
+  snapshot-release:
+    name: Snapshot Release
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      inputs.snapshot &&
+      github.repository == 'LottieFiles/dotlottie-web'
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: 🛡 Harden Runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: ⎔ Setup pnpm@v10
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
+      - name: ⎔ Setup Node@lts
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          cache: pnpm
+          node-version: lts/*
+          registry-url: https://registry.npmjs.org
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: 🔢 Version snapshot
+        env:
+          DIST_TAG: ${{ inputs.dist_tag }}
+        run: pnpm exec changeset version --snapshot "$DIST_TAG"
+
+      - name: 🏗 Build packages
+        run: pnpm clean && pnpm build:packages
+
+      - name: 🚀 Publish snapshot to NPM
+        env:
+          DIST_TAG: ${{ inputs.dist_tag }}
+        run: pnpm exec changeset publish --tag "$DIST_TAG" --no-git-tag
+
   gpr-release:
     name: GPR Release
     needs: npm-release
@@ -174,7 +233,7 @@ jobs:
       (
         needs.npm-release.outputs.published == 'true' ||
         needs.npm-release.result == 'failure' ||
-        github.event_name == 'workflow_dispatch'
+        (github.event_name == 'workflow_dispatch' && !inputs.snapshot)
       )
 
     permissions:
