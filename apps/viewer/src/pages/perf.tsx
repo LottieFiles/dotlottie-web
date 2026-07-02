@@ -127,6 +127,7 @@ const countOptions = [
 
 const playerOptions = [
   { id: 0, name: 'dotlottie-web' },
+  { id: 6, name: 'dotlottie-web/lite' },
   { id: 4, name: 'dotlottie-web/webgl' },
   { id: 5, name: 'dotlottie-web/webgpu' },
   { id: 1, name: 'dotlottie-web/worker' },
@@ -134,14 +135,15 @@ const playerOptions = [
   { id: 3, name: 'skia/skottie' },
 ];
 
-interface PerfGPUPlayerProps {
-  renderer: 'webgl' | 'webgpu';
+interface PerfVariantPlayerProps {
+  renderer: 'webgl' | 'webgpu' | 'lite';
   src: string;
   width: number;
   height: number;
+  useFrameInterpolation: boolean;
 }
 
-function PerfGPUPlayer({ renderer, src, width, height }: PerfGPUPlayerProps) {
+function PerfVariantPlayer({ renderer, src, width, height, useFrameInterpolation }: PerfVariantPlayerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -153,17 +155,22 @@ function PerfGPUPlayer({ renderer, src, width, height }: PerfGPUPlayerProps) {
 
     (async () => {
       try {
-        if (renderer === 'webgl') {
+        const config = { canvas, src, autoplay: true, loop: true, useFrameInterpolation };
+
+        if (renderer === 'lite') {
+          const { DotLottie } = await import('@lottiefiles/dotlottie-web/lite');
+          if (!destroyed) instance = new DotLottie(config);
+        } else if (renderer === 'webgl') {
           const { DotLottie } = await import('@lottiefiles/dotlottie-web/webgl');
           DotLottie.setWasmUrl(webglWasmUrl);
-          if (!destroyed) instance = new DotLottie({ canvas, src, autoplay: true, loop: true });
+          if (!destroyed) instance = new DotLottie(config);
         } else {
           const { DotLottie } = await import('@lottiefiles/dotlottie-web/webgpu');
           DotLottie.setWasmUrl(webgpuWasmUrl);
-          if (!destroyed) instance = new DotLottie({ canvas, src, autoplay: true, loop: true });
+          if (!destroyed) instance = new DotLottie(config);
         }
       } catch (err) {
-        console.error(`[PerfGPUPlayer] ${renderer} init failed:`, err);
+        console.error(`[PerfVariantPlayer] ${renderer} init failed:`, err);
       }
     })();
 
@@ -175,7 +182,7 @@ function PerfGPUPlayer({ renderer, src, width, height }: PerfGPUPlayerProps) {
         /* ignore GPU cleanup errors */
       }
     };
-  }, [renderer, src]);
+  }, [renderer, src, useFrameInterpolation]);
 
   return <canvas ref={canvasRef} width={width} height={height} style={{ width, height }} />;
 }
@@ -321,7 +328,7 @@ export const Perf = (): JSX.Element => {
               Set
             </button>
             <div className="flex mt-6 gap-x-4">
-              {(player.id === 0 || player.id === 1 || player.id === 4 || player.id === 5) && (
+              {(player.id === 0 || player.id === 1 || player.id === 4 || player.id === 5 || player.id === 6) && (
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -378,10 +385,31 @@ export const Perf = (): JSX.Element => {
               {player.id === 2 && <LottieWeb src={anim.lottieURL} style={size} loop autoplay />}
               {player.id === 3 && <SkottiePlayer lottieURL={anim.lottieURL} width={size.width} height={size.height} />}
               {player.id === 4 && (
-                <PerfGPUPlayer renderer="webgl" src={anim.lottieURL} width={size.width} height={size.height} />
+                <PerfVariantPlayer
+                  renderer="webgl"
+                  src={anim.lottieURL}
+                  width={size.width}
+                  height={size.height}
+                  useFrameInterpolation={useFrameInterpolation}
+                />
               )}
               {player.id === 5 && (
-                <PerfGPUPlayer renderer="webgpu" src={anim.lottieURL} width={size.width} height={size.height} />
+                <PerfVariantPlayer
+                  renderer="webgpu"
+                  src={anim.lottieURL}
+                  width={size.width}
+                  height={size.height}
+                  useFrameInterpolation={useFrameInterpolation}
+                />
+              )}
+              {player.id === 6 && (
+                <PerfVariantPlayer
+                  renderer="lite"
+                  src={anim.lottieURL}
+                  width={size.width}
+                  height={size.height}
+                  useFrameInterpolation={useFrameInterpolation}
+                />
               )}
               <h3 className="mt-6 text-lg font-semibold text-white">{anim.name}</h3>
               <p className="text-sm text-gray-500">{anim.location}</p>

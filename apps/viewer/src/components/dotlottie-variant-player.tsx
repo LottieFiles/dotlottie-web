@@ -4,7 +4,7 @@ import webglWasmUrl from '../../../../packages/web/src/webgl/dotlottie-player.wa
 import webgpuWasmUrl from '../../../../packages/web/src/webgpu/dotlottie-player.wasm?url';
 import type { Renderer } from '../store/viewer-slice';
 
-interface DotLottieGPUPlayerProps {
+interface DotLottieVariantPlayerProps {
   renderer: Exclude<Renderer, 'software'>;
   src: string;
   autoplay: boolean;
@@ -22,36 +22,10 @@ interface DotLottieGPUPlayerProps {
 }
 
 async function createDotLottieInstance(
-  renderer: 'webgl' | 'webgpu',
-  config: Omit<DotLottieGPUPlayerProps, 'renderer' | 'dotLottieRefCallback'> & { canvas: HTMLCanvasElement },
+  renderer: Exclude<Renderer, 'software'>,
+  config: Omit<DotLottieVariantPlayerProps, 'renderer' | 'dotLottieRefCallback'> & { canvas: HTMLCanvasElement },
 ): Promise<DotLottie> {
-  if (renderer === 'webgl') {
-    const { DotLottie: DotLottieWebGL } = await import('@lottiefiles/dotlottie-web/webgl');
-
-    DotLottieWebGL.setWasmUrl(webglWasmUrl);
-
-    return new DotLottieWebGL({
-      canvas: config.canvas,
-      src: config.src,
-      autoplay: config.autoplay,
-      loop: config.loop,
-      speed: config.speed,
-      mode: config.mode,
-      backgroundColor: config.backgroundColor,
-      useFrameInterpolation: config.useFrameInterpolation,
-      animationId: config.animationId || undefined,
-      themeId: config.themeId || undefined,
-      marker: config.marker || undefined,
-      segment: config.segment.length === 2 ? (config.segment as [number, number]) : undefined,
-      stateMachineId: config.stateMachineId || undefined,
-    }) as unknown as DotLottie;
-  }
-
-  const { DotLottie: DotLottieWebGPU } = await import('@lottiefiles/dotlottie-web/webgpu');
-
-  DotLottieWebGPU.setWasmUrl(webgpuWasmUrl);
-
-  return new DotLottieWebGPU({
+  const playerConfig = {
     canvas: config.canvas,
     src: config.src,
     autoplay: config.autoplay,
@@ -65,10 +39,30 @@ async function createDotLottieInstance(
     marker: config.marker || undefined,
     segment: config.segment.length === 2 ? (config.segment as [number, number]) : undefined,
     stateMachineId: config.stateMachineId || undefined,
-  }) as unknown as DotLottie;
+  };
+
+  if (renderer === 'lite') {
+    const { DotLottie: DotLottieLite } = await import('@lottiefiles/dotlottie-web/lite');
+
+    return new DotLottieLite(playerConfig) as unknown as DotLottie;
+  }
+
+  if (renderer === 'webgl') {
+    const { DotLottie: DotLottieWebGL } = await import('@lottiefiles/dotlottie-web/webgl');
+
+    DotLottieWebGL.setWasmUrl(webglWasmUrl);
+
+    return new DotLottieWebGL(playerConfig) as unknown as DotLottie;
+  }
+
+  const { DotLottie: DotLottieWebGPU } = await import('@lottiefiles/dotlottie-web/webgpu');
+
+  DotLottieWebGPU.setWasmUrl(webgpuWasmUrl);
+
+  return new DotLottieWebGPU(playerConfig) as unknown as DotLottie;
 }
 
-export default function DotLottieGPUPlayer({
+export default function DotLottieVariantPlayer({
   renderer,
   src,
   autoplay,
@@ -83,7 +77,7 @@ export default function DotLottieGPUPlayer({
   segment,
   stateMachineId,
   dotLottieRefCallback,
-}: DotLottieGPUPlayerProps) {
+}: DotLottieVariantPlayerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const instanceRef = useRef<DotLottie | null>(null);
   const rendererRef = useRef(renderer);
@@ -132,7 +126,7 @@ export default function DotLottieGPUPlayer({
       instanceRef.current = instance;
       dotLottieRefCallback(instance);
     } catch (error) {
-      console.error(`[DotLottieGPUPlayer] Failed to create ${renderer} player:`, error);
+      console.error(`[DotLottieVariantPlayer] Failed to create ${renderer} player:`, error);
     }
     // Only re-create on renderer or src change
     // eslint-disable-next-line react-hooks/exhaustive-deps
