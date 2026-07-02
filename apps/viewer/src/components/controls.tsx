@@ -101,6 +101,7 @@ export default function Controls() {
               { label: 'Software', value: 'software' },
               { label: 'WebGL', value: 'webgl' },
               { label: 'WebGPU', value: 'webgpu' },
+              { label: 'Lite', value: 'lite' },
             ]}
             value={renderer}
           />

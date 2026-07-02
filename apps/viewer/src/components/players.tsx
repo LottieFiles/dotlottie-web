@@ -24,7 +24,7 @@ import {
   setTotalFrames,
 } from '../store/viewer-slice';
 import DotLottieCDNPlayer from './dotlottie-cdn-player';
-import DotLottieGPUPlayer from './dotlottie-gpu-player';
+import DotLottieVariantPlayer from './dotlottie-variant-player';
 import LoadTime from './load-time';
 
 setDotLottieWasmUrl(dotLottieWasmUrl);
@@ -192,7 +192,7 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
                   src={src}
                 />
               ) : (
-                <DotLottieGPUPlayer
+                <DotLottieVariantPlayer
                   key={renderer}
                   renderer={renderer}
                   src={src}
