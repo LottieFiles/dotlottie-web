@@ -31,7 +31,7 @@ WASM_MANIFEST := $(DOTLOTTIE_RS_CRATE)/Cargo.toml
 WASM_ARTIFACT := $(DOTLOTTIE_RS_CRATE)/target/$(WASM_TARGET)/release/dotlottie_rs.wasm
 WASM_LOCKFILE := $(DOTLOTTIE_RS_CRATE)/Cargo.lock
 
-WASM_FEATURES_COMMON ?= tvg,tvg-cpu,tvg-png,tvg-jpg,tvg-webp,tvg-ttf,tvg-otf,tvg-lottie-expressions,dotlottie,theming,state-machines,wasm-bindgen-api
+WASM_FEATURES_COMMON ?= tvg,tvg-cpu,tvg-png,tvg-jpg,tvg-webp,tvg-ttf,tvg-otf,tvg-lottie-expressions,dotlottie,theming,state-machines,audio,wasm-bindgen-api
 WASM_FEATURES_SW     ?= $(WASM_FEATURES_COMMON)
 WASM_FEATURES_WEBGL  ?= $(WASM_FEATURES_COMMON),tvg-gl,webgl
 WASM_FEATURES_WEBGPU ?= $(WASM_FEATURES_COMMON),tvg-wg,webgpu
