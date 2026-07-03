@@ -454,12 +454,12 @@ export interface InitOutput {
   readonly _ZdlPvm: (a: number, b: number) => void;
   readonly _ZNSt3__25mutex6unlockEv: (a: number) => void;
   readonly __cxa_thread_atexit: (a: number, b: number, c: number) => number;
-  readonly __wbindgen_free_command_export: (a: number, b: number, c: number) => void;
-  readonly __wbindgen_exn_store_command_export: (a: number) => void;
-  readonly __externref_table_alloc_command_export: () => number;
-  readonly __wbindgen_export_3: WebAssembly.Table;
   readonly __wbindgen_malloc_command_export: (a: number, b: number) => number;
   readonly __wbindgen_realloc_command_export: (a: number, b: number, c: number, d: number) => number;
+  readonly __wbindgen_exn_store_command_export: (a: number) => void;
+  readonly __externref_table_alloc_command_export: () => number;
+  readonly __wbindgen_export_4: WebAssembly.Table;
+  readonly __wbindgen_free_command_export: (a: number, b: number, c: number) => void;
   readonly __wbindgen_start: () => void;
 }
 
