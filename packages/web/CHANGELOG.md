@@ -1,5 +1,10 @@
 # @lottiefiles/dotlottie-web
 
+## 0.76.0
+### Minor Changes
+
+- ed38eb1: Upgrade dotlottie-rs WASM bindings to be1d5cf and enable audio playback.
+
 ## 0.75.0
 ### Minor Changes
 

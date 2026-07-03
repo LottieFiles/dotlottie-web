@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-svelte
 
+## 0.10.6
+### Patch Changes
+
+- Updated dependencies [ed38eb1]
+  - @lottiefiles/dotlottie-web@0.76.0
+
 ## 0.10.5
 ### Patch Changes
 
