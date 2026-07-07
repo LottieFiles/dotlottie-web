@@ -51,7 +51,18 @@ function isSeparatePointAnimatable(value: unknown): value is SeparatePointAnimat
 }
 
 function isStaticPointAnimatable(value: PointAnimatable): boolean {
-  return !isAnimated(value as unknown as Animatable<Point>) && !isSeparatePointAnimatable(value);
+  if (isAnimated(value as unknown as Animatable<Point>)) return false;
+  // `isSeparatePointAnimatable` only checks for the presence of `x`/`y` keys,
+  // which a plain static `{x, y}` Point also has -- it cannot by itself tell
+  // "genuinely separate, per-axis-keyframed" apart from "already a plain
+  // static point". Only the latter is safe to treat as static here, so check
+  // each axis individually rather than trusting the coarser separate-point
+  // classification.
+  if (isSeparatePointAnimatable(value)) {
+    const separate = value as SeparatePointAnimatable;
+    return !isAnimated(separate.x) && !isAnimated(separate.y);
+  }
+  return true;
 }
 
 export function evaluateAnimatable<T>(value: Animatable<T>, frame: number, context?: EvaluationContext): T {
@@ -89,7 +100,11 @@ export function evaluatePoint(value: PointAnimatable, frame: number, context?: E
  */
 export function evaluateValue<T>(keyframes: Keyframe<T>[], frame: number): T {
   if (keyframes.length === 0) {
-    throw new Error('Cannot evaluate property with no keyframes');
+    // Defensive: parsers fall back to static defaults instead of emitting
+    // empty animated properties, but hand-built animation data can still
+    // reach here. Returning undefined instead of throwing keeps a malformed
+    // property from crashing the shared render loop.
+    return undefined as unknown as T;
   }
   if (keyframes.length === 1) {
     return keyframes[0]!.value;
@@ -139,16 +154,11 @@ function interpolateValues<T>(a: T, b: T, u: number, k1: Keyframe<T>, k2: Keyfra
       const dv = b - a;
       const oy = outTangent.y ?? 0;
       const iy = inTangent.y ?? 0;
-      // Some exporters emit extreme temporal bezier handles (e.g. |y| > 5) that
-      // would fling the eased value hundreds of pixels past the keyframe range.
-      // DotLottie appears to bound these overshoots. Cap control points so the
-      // curve never departs more than 50 px from the keyframe span.
-      const minV = Math.min(a, b);
-      const maxV = Math.max(a, b);
-      const maxOvershoot = 50;
-      const clampCp = (cp: number) => Math.max(minV - maxOvershoot, Math.min(maxV + maxOvershoot, cp));
-      const cp1 = clampCp(a + oy * dv);
-      const cp2 = clampCp(a + iy * dv);
+      // Use the raw temporal-bezier control points (no overshoot clamp): ThorVG
+      // evaluates the full cubic, so extreme handles must be allowed to overshoot
+      // the keyframe span to match (e.g. hourglass's rotation handle iy=-11.69).
+      const cp1 = a + oy * dv;
+      const cp2 = a + iy * dv;
       return cubicBezierAxis(u, a, cp1, cp2, b) as T;
     }
     return (a + (b - a) * u) as T;
@@ -550,11 +560,15 @@ export function buildScene(animation: Animation, frame: number): Layer[] {
       const remappedFrame = evaluateTimeRemapFrame(layer.parentTimeRemap, layer.parentStartTime ?? 0);
       return layer.remappedSourceWindow ? remappedFrame : remappedFrame - compLayerStartTime;
     }
-    // Time stretch maps a source frame onto (source × sr) comp frames, so the
-    // source (content) frame is the comp frame DIVIDED by the stretch — matching
-    // the visibility timeline below. Multiplying here desynchronizes content from
-    // visibility and drifts progressively, blanking the tail of stretched precomps.
-    return (compFrame - transformStartTime) / (layer.stretch ?? 1);
+    if (layer.isPrecompChildContent) {
+      // A precomp instance's time stretch (sr) compresses/expands its inner
+      // timeline: inner content advances at 1/sr per comp frame (sr=0.8 -> 1.25x).
+      // The child's start-time lives in the (already stretched) inner timeline, so
+      // apply the stretch to the comp frame first, THEN subtract the start-time —
+      // otherwise staggered clips inside a stretched comp land on the wrong frame.
+      return compFrame / (layer.stretch ?? 1) - transformStartTime;
+    }
+    return (compFrame - transformStartTime) * (layer.stretch ?? 1);
   }
 
   function getResolvedTransform(ind: number): Transform {
@@ -785,35 +799,86 @@ function nearlyEqual(a: number, b: number): boolean {
 function evaluateShape(shape: Shape, frame: number, context: EvaluationContext): Shape {
   let result: Shape = shape;
 
-  if (shape.type === 'path') {
-    const pathShape = shape as PathShape;
-    let path = evaluateAnimatable(pathShape.path, frame, context);
-    if (pathShape.offset !== undefined) {
-      const offset = evaluateAnimatable(pathShape.offset, frame, context);
-      if (offset !== 0) {
-        path = offsetClosedPath(path, offset);
-      }
+  if (shape.repeaterMatrix !== undefined) {
+    // Compose the static repeater matrix with the shape's PER-FRAME own transform
+    // (the group scale may animate 0→100, so baking at parse time collapses it),
+    // and fold in the per-copy fade + the animated-count visibility.
+    const base: Transform =
+      shape.animatedTransform !== undefined
+        ? evaluateTransform(shape.animatedTransform, frame, context)
+        : (shape.transform ?? {
+            position: { x: 0, y: 0 },
+            anchor: { x: 0, y: 0 },
+            scale: { x: 100, y: 100 },
+            rotation: 0,
+            opacity: 100,
+          });
+    let opacity = base.opacity * (shape.repeaterOpacityMult ?? 1);
+    if (shape.repeaterCount !== undefined) {
+      const count = evaluateAnimatable(shape.repeaterCount, frame, context);
+      opacity *= Math.max(0, Math.min(1, count - (shape.repeaterIndex ?? 0)));
     }
-    if (pathShape.cornerRadius !== undefined) {
-      const radius = evaluateAnimatable(pathShape.cornerRadius, frame, context);
+    const matrix = multiplyMatrices(shape.repeaterMatrix, transformToMatrix(base));
+    // Drop `animatedTransform` (via destructuring rather than an explicit
+    // `undefined`, for exactOptionalPropertyTypes): it has been folded into
+    // the resolved `transform` above and must not be evaluated again.
+    const { animatedTransform: _folded, ...rest } = result;
+    result = { ...rest, transform: { ...base, opacity, matrix } };
+  }
+
+  if (shape.type === 'path') {
+    // Read from `result`, not the original shape: the repeater block above may
+    // have composed a per-copy transform/opacity into `result`, which spreading
+    // the raw shape would silently discard (copies would pile up unfaded at the
+    // base position). Path fields are untouched by that block, so evaluation is
+    // unaffected.
+    const pathShape = result as PathShape;
+    const pathAnimated = isAnimated(pathShape.path);
+    const hasOffset = pathShape.offset !== undefined;
+    const offsetAnimated = hasOffset && isAnimated(pathShape.offset as Animatable<number>);
+    const hasCornerRadius = pathShape.cornerRadius !== undefined;
+    const cornerRadiusAnimated = hasCornerRadius && isAnimated(pathShape.cornerRadius as Animatable<number>);
+
+    let path = evaluateAnimatable(pathShape.path, frame, context);
+    const offset = hasOffset ? evaluateAnimatable(pathShape.offset as Animatable<number>, frame, context) : undefined;
+    if (offset !== undefined && offset !== 0) {
+      path = offsetClosedPath(path, offset);
+    }
+    if (hasCornerRadius) {
+      const radius = evaluateAnimatable(pathShape.cornerRadius as Animatable<number>, frame, context);
       if (radius > 0) {
         path = roundPathCorners(path, radius);
       }
     }
-    result = {
-      ...pathShape,
-      path,
-      offset: pathShape.offset !== undefined ? evaluateAnimatable(pathShape.offset, frame, context) : undefined,
-    } as PathShape;
+
+    // A static offset/cornerRadius still needs to be applied once (it can
+    // still transform `path` into a new object), so identity is only
+    // preserved when the computed path/offset actually match the raw
+    // fields -- not merely when nothing is animated.
+    if (
+      pathAnimated ||
+      offsetAnimated ||
+      cornerRadiusAnimated ||
+      path !== pathShape.path ||
+      offset !== pathShape.offset
+    ) {
+      result = {
+        ...pathShape,
+        path,
+        offset,
+      } as PathShape;
+    }
   }
 
   if (result.type === 'ellipse') {
     const ellipse = result as EllipseShape;
-    result = {
-      ...ellipse,
-      center: evaluatePoint(ellipse.center, frame, context),
-      radius: evaluatePoint(ellipse.radius, frame, context),
-    } as EllipseShape;
+    if (!isStaticPointAnimatable(ellipse.center) || !isStaticPointAnimatable(ellipse.radius)) {
+      result = {
+        ...ellipse,
+        center: evaluatePoint(ellipse.center, frame, context),
+        radius: evaluatePoint(ellipse.radius, frame, context),
+      } as EllipseShape;
+    }
   }
 
   if (result.type === 'merge') {
@@ -1033,29 +1098,6 @@ function evaluateShape(shape: Shape, frame: number, context: EvaluationContext):
         };
       }),
     };
-  }
-
-  // Apply repeater bookkeeping: pre-multiply the per-copy matrix onto the shape's
-  // own (already-evaluated) transform, apply the copy's opacity falloff, and — for
-  // animated copy counts — reveal copies progressively (fading the boundary copy
-  // fractionally, matching ThorVG; copies past the count get opacity 0, which the
-  // renderer treats as a skip).
-  if (shape.repeaterMatrix !== undefined || shape.repeaterCount !== undefined) {
-    const base: Transform = result.transform ?? {
-      position: { x: 0, y: 0 },
-      anchor: { x: 0, y: 0 },
-      scale: { x: 100, y: 100 },
-      rotation: 0,
-      opacity: 100,
-    };
-    let opacity = base.opacity * (shape.repeaterOpacity ?? 1);
-    if (shape.repeaterCount !== undefined) {
-      const count = evaluateAnimatable(shape.repeaterCount, frame, context);
-      const index = shape.repeaterIndex ?? 0;
-      opacity *= index + 1 <= count ? 1 : index < count ? count - index : 0;
-    }
-    const matrix = shape.repeaterMatrix ? multiplyMatrices(shape.repeaterMatrix, transformToMatrix(base)) : base.matrix;
-    result = { ...result, transform: { ...base, opacity, ...(matrix && { matrix }) } };
   }
 
   return result;

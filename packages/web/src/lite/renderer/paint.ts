@@ -42,6 +42,15 @@ function buildGaussianBlurFilter(effect: ResolvedGaussianBlurEffect, scale: numb
   return `blur(${(effect.blurriness * scale).toFixed(2)}px)`;
 }
 
+// A static gradient `Fill` keeps stable object identity across frames (scene
+// evaluation only clones a gradient fill when animated or opacity != 1), so
+// its `CanvasGradient` can be cached and reused instead of rebuilt every
+// frame. `CanvasGradient`s are bound to the context that created them, and a
+// single Canvas2DRenderer draws to more than one context (offscreen buffers
+// for masks/mattes/merge shapes are pooled and reused), so the cache is keyed
+// on both the `Fill` and the target context to avoid cross-context reuse.
+const fillGradientCache = new WeakMap<Fill, WeakMap<RenderingContext2D, CanvasGradient>>();
+
 export function applyFill(ctx: RenderingContext2D, fill: Fill): void {
   if (fill.type === 'solid') {
     ctx.fillStyle = colorToCss(fill.color as unknown as Color);
@@ -52,21 +61,35 @@ export function applyFill(ctx: RenderingContext2D, fill: Fill): void {
   const end = fill.end as unknown as Point;
   const colors = fill.colors as unknown as ColorStop[];
 
-  let gradient: CanvasGradient;
-  if (fill.gradientType === 'radial') {
-    gradient = createRadialGradient(ctx, start, end, fill.highlightLength, fill.highlightAngle);
-  } else {
+  if (fill.gradientType !== 'radial') {
     const fallback = degenerateLinearGradientColor(start, end, colors);
     if (fallback) {
       ctx.fillStyle = fallback;
       return;
     }
-    gradient = ctx.createLinearGradient(start.x, start.y, end.x, end.y);
   }
+
+  const cached = fillGradientCache.get(fill)?.get(ctx);
+  if (cached) {
+    ctx.fillStyle = cached;
+    return;
+  }
+
+  const gradient =
+    fill.gradientType === 'radial'
+      ? createRadialGradient(ctx, start, end, fill.highlightLength, fill.highlightAngle)
+      : ctx.createLinearGradient(start.x, start.y, end.x, end.y);
   for (const stop of colors) {
     gradient.addColorStop(stop.offset, colorToCss(stop.color));
   }
   ctx.fillStyle = gradient;
+
+  let byContext = fillGradientCache.get(fill);
+  if (!byContext) {
+    byContext = new WeakMap<RenderingContext2D, CanvasGradient>();
+    fillGradientCache.set(fill, byContext);
+  }
+  byContext.set(ctx, gradient);
 }
 
 export function applyStrokes(
@@ -110,16 +133,13 @@ export function applyStroke(
     if (stroke.gradientType === 'radial') {
       gradient = createRadialGradient(ctx, start, end, stroke.highlightLength, stroke.highlightAngle);
     } else {
-      const fallback = degenerateLinearGradientColor(
-        start,
-        end,
-        colors.map((stop) => ({
-          ...stop,
-          color: { ...stop.color, a: stop.color.a * opacity },
-        })),
-      );
-      if (fallback) {
-        ctx.strokeStyle = fallback;
+      // Cheap win: the degenerate-gradient check only needs the last stop's
+      // color, and only when start/end coincide. Check the (cheap) points
+      // first so the common non-degenerate case never clones the whole
+      // stop array just to compute a fallback it won't use.
+      if (colors.length > 0 && isDegenerateGradientPoints(start, end)) {
+        const lastColor = colors[colors.length - 1]!.color;
+        ctx.strokeStyle = colorToCss({ ...lastColor, a: lastColor.a * opacity });
         ctx.lineWidth = Number(stroke.width) / widthScale;
         ctx.lineCap = effectiveLineCap(stroke);
         ctx.lineJoin = stroke.lineJoin;
@@ -132,7 +152,8 @@ export function applyStroke(
       gradient = ctx.createLinearGradient(start.x, start.y, end.x, end.y);
     }
     for (const stop of colors) {
-      gradient.addColorStop(stop.offset, colorToCss({ ...stop.color, a: stop.color.a * opacity }));
+      const color = opacity === 1 ? stop.color : { ...stop.color, a: stop.color.a * opacity };
+      gradient.addColorStop(stop.offset, colorToCss(color));
     }
     ctx.strokeStyle = gradient;
   }
@@ -161,9 +182,13 @@ function effectiveLineCap(stroke: Stroke): CanvasLineCap {
   return stroke.lineCap;
 }
 
+function isDegenerateGradientPoints(start: Point, end: Point): boolean {
+  return Math.abs(start.x - end.x) <= 1e-9 && Math.abs(start.y - end.y) <= 1e-9;
+}
+
 function degenerateLinearGradientColor(start: Point, end: Point, colors: ColorStop[]): string | undefined {
   if (colors.length === 0) return undefined;
-  if (Math.abs(start.x - end.x) > 1e-9 || Math.abs(start.y - end.y) > 1e-9) {
+  if (!isDegenerateGradientPoints(start, end)) {
     return undefined;
   }
   return colorToCss(colors[colors.length - 1]!.color);

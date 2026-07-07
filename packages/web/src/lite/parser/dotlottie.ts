@@ -10,6 +10,12 @@ export interface DotLottieManifest {
   themes?: DotLottieThemeManifestEntry[];
   stateMachines?: DotLottieStateMachineManifestEntry[];
   states?: unknown[];
+  /**
+   * Experimental: custom shader source entries stored in the container at
+   * `shaders/<id>.frag`. Referenced from `com.lottiefiles.shaders` layer
+   * metadata via `source.ref`.
+   */
+  shaders?: DotLottieShaderManifestEntry[];
 }
 
 export interface DotLottieInitial {
@@ -38,10 +44,22 @@ export interface DotLottieStateMachineManifestEntry {
   path?: string;
 }
 
+export interface DotLottieShaderManifestEntry {
+  id: string;
+  name?: string;
+  path?: string;
+}
+
 export interface DotLottieAnimation {
   id: string;
   data: Record<string, unknown>;
   animation: Animation;
+  /**
+   * Experimental shader metadata attached to this animation. Populated from
+   * the vendor-prefixed extension `com.lottiefiles.shaders` in the Lottie
+   * JSON, with a `poc_shaders` fallback for internal prototypes.
+   */
+  shaders?: unknown;
 }
 
 export interface DotLottieTheme {
@@ -59,6 +77,11 @@ export interface ParsedDotLottie {
   animations: DotLottieAnimation[];
   themes: DotLottieTheme[];
   stateMachines: DotLottieStateMachine[];
+  /**
+   * Experimental: GLSL fragment sources keyed by shader id, extracted from
+   * `shaders/<id>.frag` entries listed in the manifest.
+   */
+  shaderSources: Record<string, string>;
   files: Record<string, Uint8Array>;
 }
 
@@ -74,8 +97,9 @@ export function parseDotLottie(data: Uint8Array | ArrayBuffer): ParsedDotLottie 
   const animations = parseAnimations(files, manifest.animations ?? []);
   const themes = parseThemes(files, manifest.themes ?? []);
   const stateMachines = parseStateMachines(files, manifest.stateMachines ?? []);
+  const shaderSources = parseShaderSources(files, manifest.shaders ?? []);
 
-  return { manifest, animations, themes, stateMachines, files };
+  return { manifest, animations, themes, stateMachines, shaderSources, files };
 }
 
 export function resolveDotLottieAnimation(
@@ -97,11 +121,23 @@ export function resolveDotLottieAnimation(
   return first;
 }
 
+// Decompression-bomb guards. Every size below comes from attacker-controlled
+// ZIP headers: a tiny archive can declare multi-GB uncompressed sizes, and
+// inflateRaw pre-allocates the declared size before decoding. Real .lottie
+// files are at most a few MB uncompressed, so these caps are generous.
+const MAX_ENTRIES = 4096;
+const MAX_ENTRY_UNCOMPRESSED_SIZE = 64 * 1024 * 1024; // 64 MiB per file
+const MAX_TOTAL_UNCOMPRESSED_SIZE = 256 * 1024 * 1024; // 256 MiB per archive
+
 function unzipDotLottie(data: Uint8Array): Record<string, Uint8Array> {
   const files: Record<string, Uint8Array> = {};
   const centralDirectoryOffset = findEndOfCentralDirectory(data);
   const entryCount = readU16(data, centralDirectoryOffset + 10);
+  if (entryCount > MAX_ENTRIES) {
+    throw new Error(`dotLottie archive has too many entries: ${entryCount} (max ${MAX_ENTRIES})`);
+  }
   let offset = readU32(data, centralDirectoryOffset + 16);
+  let totalUncompressed = 0;
 
   for (let i = 0; i < entryCount; i++) {
     if (readU32(data, offset) !== 0x02014b50) {
@@ -121,6 +157,18 @@ function unzipDotLottie(data: Uint8Array): Record<string, Uint8Array> {
 
     offset = nameStart + fileNameLength + extraLength + commentLength;
     if (name.endsWith('/')) continue;
+
+    if (uncompressedSize > MAX_ENTRY_UNCOMPRESSED_SIZE) {
+      throw new Error(
+        `dotLottie entry exceeds size limit: ${name} declares ${uncompressedSize} bytes (max ${MAX_ENTRY_UNCOMPRESSED_SIZE})`,
+      );
+    }
+    totalUncompressed += method === 8 ? uncompressedSize : compressedSize;
+    if (totalUncompressed > MAX_TOTAL_UNCOMPRESSED_SIZE) {
+      throw new Error(
+        `dotLottie archive exceeds total size limit (max ${MAX_TOTAL_UNCOMPRESSED_SIZE} bytes uncompressed)`,
+      );
+    }
 
     if (readU32(data, localHeaderOffset) !== 0x04034b50) {
       throw new Error('Invalid dotLottie local file header');
@@ -170,6 +218,9 @@ function inflateRaw(data: Uint8Array, expectedSize: number): Uint8Array {
       reader.align();
       const length = reader.bits(16);
       reader.bits(16);
+      if (out + length > output.length) {
+        throw new Error('dotLottie deflate output exceeds declared size');
+      }
       output.set(data.subarray(reader.byteOffset, reader.byteOffset + length), out);
       reader.byteOffset += length;
       out += length;
@@ -185,6 +236,9 @@ function inflateRaw(data: Uint8Array, expectedSize: number): Uint8Array {
     while (true) {
       const symbol = decodeSymbol(reader, literalTree);
       if (symbol < 256) {
+        if (out >= output.length) {
+          throw new Error('dotLottie deflate output exceeds declared size');
+        }
         output[out++] = symbol;
         continue;
       }
@@ -194,6 +248,9 @@ function inflateRaw(data: Uint8Array, expectedSize: number): Uint8Array {
       const length = LENGTH_BASE[lengthIndex]! + reader.bits(LENGTH_EXTRA[lengthIndex]!);
       const distanceSymbol = decodeSymbol(reader, distanceTree);
       const distance = DIST_BASE[distanceSymbol]! + reader.bits(DIST_EXTRA[distanceSymbol]!);
+      if (out + length > output.length) {
+        throw new Error('dotLottie deflate output exceeds declared size');
+      }
       for (let i = 0; i < length; i++) {
         output[out] = output[out - distance]!;
         out++;
@@ -357,7 +414,13 @@ function parseAnimations(
 
     const text = decodeText(files[resolved]!);
     const data = JSON.parse(text) as Record<string, unknown>;
-    result.push({ id, data, animation: parseLottie(data) });
+    const shaders = data['com.lottiefiles.shaders'] ?? data['poc_shaders'];
+    result.push({
+      id,
+      data,
+      animation: parseLottie(data),
+      ...(shaders !== undefined ? { shaders } : {}),
+    });
   }
   return result;
 }
@@ -393,14 +456,20 @@ function parseStateMachines(
   return result;
 }
 
-function findFilePath(files: Record<string, Uint8Array>, name: string): string | undefined {
-  const lower = name.toLowerCase();
-  for (const path of Object.keys(files)) {
-    if (path.toLowerCase() === lower) {
-      return path;
-    }
+function parseShaderSources(
+  files: Record<string, Uint8Array>,
+  entries: DotLottieManifest['shaders'],
+): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const entry of entries ?? []) {
+    const id = entry.id;
+    const path = entry.path ?? `shaders/${id}.frag`;
+    const resolved = findFilePath(files, path);
+    if (!resolved) continue;
+
+    result[id] = decodeText(files[resolved]!);
   }
-  return undefined;
+  return result;
 }
 
 function findFirstFilePath(
@@ -411,6 +480,16 @@ function findFirstFilePath(
     if (!candidate) continue;
     const resolved = findFilePath(files, candidate);
     if (resolved) return resolved;
+  }
+  return undefined;
+}
+
+function findFilePath(files: Record<string, Uint8Array>, name: string): string | undefined {
+  const lower = name.toLowerCase();
+  for (const path of Object.keys(files)) {
+    if (path.toLowerCase() === lower) {
+      return path;
+    }
   }
   return undefined;
 }

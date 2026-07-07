@@ -1,5 +1,4 @@
 import type {
-  AffineMatrix,
   Animatable,
   AnimatedTransform,
   Animation,
@@ -41,7 +40,7 @@ import type {
   Transform,
   TrimPath,
 } from '../model';
-import { evaluateAnimatable, evaluatePoint, isAnimated } from '../model';
+import { evaluateAnimatable, evaluatePoint, isAnimated, transformToMatrix } from '../model';
 
 /**
  * Parse a Lottie JSON object into the dotLottieLitePlayer runtime model.
@@ -57,7 +56,26 @@ type AudioAssets = Map<string, { src: string }>;
 
 type IdContext = { nextId: number };
 const MAX_PARENT_GRADIENT_STROKE_WIDTH_SCALE = 6;
+const MAX_PRECOMP_DEPTH = 64;
 let nextGeneratedShapeId = 0;
+let nextCompoundFillId = 0;
+
+// A single Lottie fill node fills all the sibling geometries that precede it as
+// one compound path (lottie-web/ThorVG combine the geometry and fill once), so an
+// opposite-wound inner contour cuts a hole (outlines, rings, letter "O"). Tag
+// such runs with a shared id so the renderer fills them together instead of one
+// path at a time (which fills the hole solid). Only path-like siblings without a
+// stroke qualify — strokes must still be applied per path.
+function markCompoundFill(run: Shape[]): void {
+  const pathLike = run.filter(
+    (s) =>
+      (s.type === 'path' || s.type === 'rect' || s.type === 'ellipse' || s.type === 'polystar') &&
+      s.stroke === undefined,
+  );
+  if (pathLike.length < 2) return;
+  const id = nextCompoundFillId++;
+  for (const shape of pathLike) shape.compoundFillId = id;
+}
 
 export function parseLottie(data: Record<string, unknown>, slotOverrides?: Slots): Animation {
   const parsedSlots = parseSlots(data['slots']);
@@ -100,7 +118,12 @@ export function parseLottie(data: Record<string, unknown>, slotOverrides?: Slots
         layer.parentId = newParentId;
       }
     }
+    if (layer.matteParentInd !== undefined && topOldToNew.has(layer.matteParentInd)) {
+      layer.matteParentInd = topOldToNew.get(layer.matteParentInd)!;
+    }
   }
+
+  const extensions = parseExtensions(resolvedData);
 
   return {
     version,
@@ -113,6 +136,7 @@ export function parseLottie(data: Record<string, unknown>, slotOverrides?: Slots
     layers: flattenedLayers,
     markers: parseMarkers(resolvedData['markers']),
     slots,
+    ...(extensions !== undefined && { extensions }),
   };
 }
 
@@ -134,6 +158,16 @@ function parseMarkers(data: unknown): MarkerDefinition[] {
   return markers;
 }
 
+function parseExtensions(data: Record<string, unknown>): Record<string, unknown> | undefined {
+  const extensions: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (key.includes('.') && value !== undefined) {
+      extensions[key] = value;
+    }
+  }
+  return Object.keys(extensions).length > 0 ? extensions : undefined;
+}
+
 function parseSlots(data: unknown): Slots {
   const slots: Slots = {};
   if (!data || typeof data !== 'object') return slots;
@@ -153,9 +187,9 @@ function parseSlots(data: unknown): Slots {
   return slots;
 }
 
-function resolveSlotsInData(data: unknown, slots: Slots): unknown {
+function resolveSlotsInData(data: unknown, slots: Slots, activeSids: Set<string> = new Set()): unknown {
   if (Array.isArray(data)) {
-    return data.map((item) => resolveSlotsInData(item, slots));
+    return data.map((item) => resolveSlotsInData(item, slots, activeSids));
   }
 
   if (!data || typeof data !== 'object') {
@@ -164,13 +198,18 @@ function resolveSlotsInData(data: unknown, slots: Slots): unknown {
 
   const record = data as Record<string, unknown>;
   const sid = record['sid'];
-  if (typeof sid === 'string' && slots[sid]) {
-    return resolveSlotsInData(slots[sid].p, slots);
+  // A sid already being resolved on this path is cyclic; leave it unresolved
+  // instead of substituting forever.
+  if (typeof sid === 'string' && slots[sid] && !activeSids.has(sid)) {
+    activeSids.add(sid);
+    const resolved = resolveSlotsInData(slots[sid].p, slots, activeSids);
+    activeSids.delete(sid);
+    return resolved;
   }
 
   const resolved: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(record)) {
-    resolved[key] = resolveSlotsInData(value, slots);
+    resolved[key] = resolveSlotsInData(value, slots, activeSids);
   }
   return resolved;
 }
@@ -254,9 +293,12 @@ function flattenPrecomp(
   layer: LayerDefinition,
   assets: Map<string, LayerDefinition[]>,
   context: IdContext,
+  activeRefIds: Set<string> = new Set(),
 ): LayerDefinition[] {
   const refId = layer.refId;
-  if (!refId || !assets.has(refId)) {
+  // Cyclic or absurdly deep refId chains degrade to the missing-asset path
+  // instead of recursing forever on malformed input.
+  if (!refId || !assets.has(refId) || activeRefIds.has(refId) || activeRefIds.size >= MAX_PRECOMP_DEPTH) {
     layer.ind = allocateId(context);
     return [layer];
   }
@@ -284,6 +326,7 @@ function flattenPrecomp(
     ...(layer.isPrecompChildContent !== undefined && { masksUseContentFrame: layer.isPrecompChildContent }),
     ...(layer.trackMatte !== undefined && { trackMatte: layer.trackMatte }),
     ...(layer.isMatte !== undefined && { isMatte: layer.isMatte }),
+    ...(layer.matteParentInd !== undefined && { matteParentInd: layer.matteParentInd }),
     ...(layer.blendMode !== undefined && { blendMode: layer.blendMode }),
     ...(layer.effects !== undefined && { effects: layer.effects }),
     ...(layer.groupOpacity !== undefined && { groupOpacity: layer.groupOpacity }),
@@ -298,16 +341,18 @@ function flattenPrecomp(
 
   const children: LayerDefinition[] = [];
 
+  activeRefIds.add(refId);
   for (const [index, compLayer] of compLayers.entries()) {
     const merged = mergePrecompLayer(layer, compLayer, index, compInds);
     const originalInd = merged.ind;
-    const childLayers = flattenPrecomp(merged, assets, context);
+    const childLayers = flattenPrecomp(merged, assets, context, activeRefIds);
     localMap.set(
       originalInd,
       (childLayers as LayerDefinition[] & { syntheticInd?: number }).syntheticInd ?? childLayers[0]!.ind,
     );
     children.push(...childLayers);
   }
+  activeRefIds.delete(refId);
 
   // A matte precomp must sit directly above the layer it masks in the flattened
   // list, so place its synthetic layer at the end of its block. For all other
@@ -336,6 +381,12 @@ function flattenPrecomp(
         // synthetic precomp layer's transform.
         l.parentId = precompLayer.ind;
       }
+    }
+    if (l.matteParentInd !== undefined) {
+      // Upstream intentionally clears the reference when the matte parent is not
+      // part of this precomp; widen the target type so the undefined assignment
+      // type-checks under exactOptionalPropertyTypes without changing behavior.
+      (l as { matteParentInd?: number | undefined }).matteParentInd = localMap.get(l.matteParentInd);
     }
   }
 
@@ -403,17 +454,16 @@ function mergePrecompLayer(
     useSourceWindow && precomp.timeRemap !== undefined && precomp.remappedSourceWindow !== true
       ? precomp.outPoint
       : precomp.sourceWindowParentOutPoint;
-  const instanceStretch = precomp.stretch ?? 1;
   const unclippedInPoint = useSourceWindow
     ? compLayer.inPoint
     : isTimeRemapped
       ? precomp.inPoint
-      : Math.max(precomp.inPoint / instanceStretch, compLayer.inPoint + precompStartTime);
+      : Math.max(precomp.inPoint, compLayer.inPoint + precompStartTime);
   const unclippedOutPoint = useSourceWindow
     ? compLayer.outPoint
     : isTimeRemapped
       ? precomp.outPoint
-      : Math.min(precomp.outPoint / instanceStretch, compLayer.outPoint + precompStartTime);
+      : Math.min(precomp.outPoint, compLayer.outPoint + precompStartTime);
   const sourceWindowDuration = precomp.outPoint - precomp.inPoint;
   const shouldClipToParentSourceWindow = useSourceWindow && precomp.remappedSourceWindow === true;
   const inPoint = unclippedInPoint;
@@ -421,6 +471,10 @@ function mergePrecompLayer(
     ? Math.min(unclippedOutPoint, sourceWindowDuration)
     : unclippedOutPoint;
 
+  const matteParentInd =
+    compLayer.matteParentInd !== undefined && compInds.has(compLayer.matteParentInd)
+      ? compLayer.matteParentInd
+      : undefined;
   const blendMode = compLayer.blendMode ?? precomp.blendMode;
   // Non-precomp children live on the precomp timeline, so their content
   // must follow the precomp's time remapping. Precomp layers keep their own
@@ -452,6 +506,7 @@ function mergePrecompLayer(
     ...(compLayer.masks !== undefined && { masks: compLayer.masks }),
     ...(compLayer.trackMatte !== undefined && { trackMatte: compLayer.trackMatte }),
     ...(compLayer.isMatte !== undefined && { isMatte: compLayer.isMatte }),
+    ...(matteParentInd !== undefined && { matteParentInd }),
     ...(blendMode !== undefined && { blendMode }),
     startTime,
     transformStartTime: precompStartTime,
@@ -505,7 +560,7 @@ function parseLayer(
   const image = layerType === 2 && refId ? imageAssets.get(refId) : undefined;
   const audio = layerType === 6 && refId ? parseAudioLayer(data, audioAssets.get(refId)) : undefined;
 
-  const parsedShapes = coalesceGroupPrimitives(parseShapeChildren(shapes, layerStyle));
+  const parsedShapes = parseShapeChildren(shapes, layerStyle);
   const layerShapes = layerType === 1 ? buildSolidShapes(data, layerStyle) : parsedShapes;
   applyFillEffect(layerShapes, effects);
 
@@ -527,6 +582,7 @@ function parseLayer(
     ...(masks !== undefined && { masks }),
     ...(trackMatte !== undefined && { trackMatte }),
     isMatte: data['td'] !== undefined,
+    ...(data['tp'] !== undefined && { matteParentInd: Number(data['tp']) }),
     ...(blendMode !== undefined && { blendMode }),
     ...(text !== undefined && { text }),
     stretch,
@@ -674,6 +730,7 @@ function parseEffectByMatchName(effect: Record<string, unknown>, mn: string): Ef
 
 const EFFECT_TYPE_GAUSSIAN_BLUR = 29;
 
+// Some exporters omit the `mn` match name; fall back to the numeric effect type.
 function parseEffectByType(effect: Record<string, unknown>, ty: number): Effect | null {
   if (ty === EFFECT_TYPE_GAUSSIAN_BLUR) {
     return parseGaussianBlurEffect(effect);
@@ -723,6 +780,7 @@ function parseDropShadowEffect(effect: Record<string, unknown>): DropShadowEffec
 function parseGaussianBlurEffect(effect: Record<string, unknown>): GaussianBlurEffect | null {
   let blurData = findEffectProperty(effect, 'ADBE Gaussian Blur 2-0001');
   if (blurData === undefined) {
+    // Match-name-less exports carry the blurriness as the first effect property.
     const props = effect['ef'];
     if (Array.isArray(props) && props[0] && typeof props[0] === 'object') {
       blurData = (props[0] as Record<string, unknown>)['v'];
@@ -1053,10 +1111,6 @@ function hasPerDimensionEasing(data: unknown): boolean {
 
 type IncomingTangentSource = 'segment-start' | 'destination';
 
-function isKeyframeList(k: unknown): boolean {
-  return Array.isArray(k) && typeof k[0] === 'object' && k[0] !== null && 't' in k[0];
-}
-
 function parseAnimatableNumber(
   data: unknown,
   defaultValue = 0,
@@ -1072,7 +1126,7 @@ function parseAnimatableNumberDimension(data: unknown, dimension: number, defaul
   }
 
   const record = data as Record<string, unknown>;
-  const animated = record['a'] === 1 || isKeyframeList(record['k']);
+  const animated = isAnimatedRecord(record);
 
   if (!animated) {
     const parsed = parseDimensionValue(record['k'], dimension);
@@ -1117,6 +1171,10 @@ function parseAnimatableNumberDimension(data: unknown, dimension: number, defaul
       }
     }
     previousRaw = raw;
+  }
+
+  if (parsedKeyframes.length === 0) {
+    return defaultValue;
   }
 
   return { keyframes: parsedKeyframes, ...(expression !== undefined && { expression }) };
@@ -1179,6 +1237,22 @@ function isAnimatedTransform(animated: AnimatedTransform): boolean {
   );
 }
 
+// A property is animated when `a === 1`, but some exporters omit the flag and
+// still provide a keyframe array (each element is an object carrying a `t` time).
+// Detecting that shape avoids parsing the keyframe list as a single static value
+// (which yields NaN and, for opacity, renders at full instead of the fade).
+function isAnimatedRecord(record: Record<string, unknown>): boolean {
+  if (record['a'] === 1) return true;
+  const k = record['k'];
+  return (
+    Array.isArray(k) &&
+    k.length > 0 &&
+    typeof k[0] === 'object' &&
+    k[0] !== null &&
+    't' in (k[0] as Record<string, unknown>)
+  );
+}
+
 function parseAnimatable<T>(
   data: unknown,
   defaultValue: T,
@@ -1191,7 +1265,7 @@ function parseAnimatable<T>(
   }
 
   const record = data as Record<string, unknown>;
-  const animated = record['a'] === 1 || isKeyframeList(record['k']);
+  const animated = isAnimatedRecord(record);
 
   if (!animated) {
     const parsed = parseStatic(record['k']);
@@ -1221,16 +1295,29 @@ function parseAnimatable<T>(
       if (markerValue !== null) {
         const outTangent = parseTangent(raw['o']);
         const inTangent = parseSegmentInTangent(raw, markerPreviousRaw, incomingTangentSource);
+        // The preceding keyframe's spatial in-tangent (`ti`) describes the curve
+        // arriving at this segment's end (the marker's value). The scene reads it
+        // from the destination keyframe, so carry it forward; otherwise the motion
+        // path into a marker-terminated spatial segment collapses to a straight line.
+        const ti = parsePointValue(markerPreviousRaw['ti']);
         parsedKeyframes.push({
           time: Number(raw['t'] ?? 0),
           value: markerValue,
           hold: true,
           ...(outTangent !== undefined && { outTangent }),
           ...(inTangent !== undefined && { inTangent }),
+          ...(ti !== null && { ti }),
         });
       }
     }
     previousRaw = raw;
+  }
+
+  // A malformed file can declare a property animated (a: 1) while providing
+  // no usable keyframes. Fall back to the static default so scene evaluation
+  // never sees an empty keyframe list.
+  if (parsedKeyframes.length === 0) {
+    return defaultValue;
   }
 
   return {
@@ -1246,13 +1333,24 @@ function parseKeyframe<T>(
   incomingTangentSource: IncomingTangentSource,
 ): Keyframe<T> | null {
   const time = Number(data['t'] ?? 0);
+  // A trailing marker keyframe carries no `s` of its own. Some parsers (colours)
+  // return a non-null default for missing input, which would wrongly bake that
+  // default (black) as the held value; treat "no s" as a marker so the caller
+  // falls back to the preceding keyframe's end value (`e`).
+  if (data['s'] === undefined) return null;
   const value = parseStatic(data['s']);
   if (value === null) return null;
 
   const outTangent = parseTangent(data['o']);
   const inTangent = parseSegmentInTangent(data, previousData, incomingTangentSource);
   const to = parsePointValue(data['to']);
-  const ti = parsePointValue(data['ti']);
+  // The spatial in-tangent for the segment arriving at this keyframe is stored
+  // on the PREVIOUS keyframe (`ti` is relative to that keyframe's end value =
+  // this keyframe's value), mirroring how the temporal in-tangent is sourced
+  // from the previous keyframe. Prefer the previous keyframe's `ti`; fall back
+  // to this keyframe's own `ti` for exports that store it on the destination
+  // (same precedence as the temporal in-tangent in parseSegmentInTangent).
+  const ti = parsePointValue(previousData?.['ti']) ?? parsePointValue(data['ti']);
 
   return {
     time,
@@ -1426,13 +1524,46 @@ function coalesceGroupPrimitives(children: Shape[]): Shape[] {
   return result;
 }
 
+// A Lottie shape group can stack several fills on the same geometry; each fill
+// redraws the shape, and group items stack with the EARLIEST (lowest-index) item
+// on top. So among several fills on one shape, the first non-transparent one is
+// the visible one (later fills sit underneath it). We keep a single fill per
+// shape, so we must keep that first opaque fill and ignore later ones — e.g.
+// frog_vr's background is `rect, gf(purple gradient), st, fl(cyan)`: the gradient
+// is on top and must win, not the cyan solid. A fully-transparent fill counts as
+// no fill, so a later visible fill may still replace it (fly_in_beaker:
+// `ellipse, fl o=100, st, fl o=0` keeps the o=100).
+function isFullyTransparentFill(fill: Fill): boolean {
+  return typeof fill.opacity === 'number' && fill.opacity <= 0;
+}
+
+function applyFillToShape(shape: Shape, fill: Fill): void {
+  if (shape.type === 'group') {
+    for (const child of (shape as unknown as GroupShape).children) {
+      applyFillToShape(child, fill);
+    }
+  } else {
+    const existing = (shape as unknown as { fill?: Fill }).fill;
+    if (existing !== undefined && !isFullyTransparentFill(existing)) {
+      return;
+    }
+    (shape as unknown as { fill?: Fill }).fill = fill;
+  }
+}
+
 function applyFillToUnfilledShape(shape: Shape, fill: Fill): void {
   if (shape.type === 'group') {
     for (const child of (shape as unknown as GroupShape).children) {
       applyFillToUnfilledShape(child, fill);
     }
-  } else if (shape.fill === undefined) {
-    (shape as unknown as { fill?: Fill }).fill = fill;
+  } else {
+    // A fully-transparent existing fill is visually "unfilled", so a visible
+    // group-level fill must be able to replace it (fly_in_beaker's full-frame
+    // background: inner `fl o=0` on the rect, outer group-level `fl o=100`).
+    const existing = (shape as unknown as { fill?: Fill }).fill;
+    if (existing === undefined || isFullyTransparentFill(existing)) {
+      (shape as unknown as { fill?: Fill }).fill = fill;
+    }
   }
 }
 
@@ -1707,15 +1838,16 @@ function parseShapeChildren(children: unknown[], style: ShapeStyle): Shape[] {
       const fill = parseFill(childRecord);
       runFill = fill;
       for (const shape of run) {
-        // Only fill shapes that don't already have one. A shape can carry several
-        // fills (e.g. a gradient stacked over a solid); Lottie draws items
-        // top-to-bottom, so the FIRST fill encountered is the topmost. Keeping it
-        // (rather than overwriting) matches the visible opaque fill.
-        applyFillToUnfilledShape(shape, fill);
+        if (shape.type === 'group') {
+          applyFillToUnfilledShape(shape, fill);
+        } else {
+          applyFillToShape(shape, fill);
+        }
         if (runStroke.length > 0) {
           applyPaintOrderToShape(shape, 'fill-stroke');
         }
       }
+      if (runStroke.length === 0) markCompoundFill(run);
       runStyled = true;
       continue;
     }
@@ -1724,8 +1856,13 @@ function parseShapeChildren(children: unknown[], style: ShapeStyle): Shape[] {
       const fill = parseGradientFill(childRecord);
       runFill = fill;
       for (const shape of run) {
-        applyFillToUnfilledShape(shape, fill);
+        if (shape.type === 'group') {
+          applyFillToUnfilledShape(shape, fill);
+        } else {
+          applyFillToShape(shape, fill);
+        }
       }
+      if (runStroke.length === 0) markCompoundFill(run);
       runStyled = true;
       continue;
     }
@@ -1816,80 +1953,89 @@ function parseShapeChildren(children: unknown[], style: ShapeStyle): Shape[] {
   return result;
 }
 
-function repeatShapes(shapes: Shape[], data: Record<string, unknown>): Shape[] {
-  // The copy count may be animated. Expand to the maximum count so every copy
-  // exists as geometry; the scene evaluator then reveals copies up to the count
-  // resolved for the current frame. Static counts keep the simpler, untagged path.
-  const countAnim = parseAnimatableNumber(data['c']);
-  const animatedCount = isAnimated(countAnim);
-  const maxCount = Math.max(0, Math.floor(animatedCount ? maxKeyframeValue(countAnim) : (countAnim as number)));
-  if (maxCount <= 1 || shapes.length === 0 || !data['tr'] || typeof data['tr'] !== 'object') return [];
+function maxRepeaterCount(data: unknown): number {
+  const record = data as Record<string, unknown> | undefined;
+  if (record?.['a'] === 1 && Array.isArray(record['k'])) {
+    let max = 0;
+    for (const kf of record['k'] as Array<{ s?: unknown }>) {
+      const s = (kf as { s?: unknown }).s;
+      const v = Array.isArray(s) ? Number(s[0]) : Number(s);
+      if (Number.isFinite(v)) max = Math.max(max, v);
+    }
+    return max;
+  }
+  return parseNumber(data);
+}
 
-  const transform = evaluateTransform(parseTransform(data['tr'] as Record<string, unknown>), 0);
-  const opacityStep = transform.opacity / 100;
-  const copies: Shape[] = [];
-  for (let index = 1; index < maxCount; index++) {
+// Per-copy matrix for repeater `iteration`: rotate/scale about the repeater anchor
+// (position = anchor + p*iteration makes transformToMatrix pivot there) accumulated
+// `iteration` times.
+function repeaterCopyMatrix(transform: Transform, iteration: number) {
+  return transformToMatrix({
+    position: {
+      x: transform.anchor.x + transform.position.x * iteration,
+      y: transform.anchor.y + transform.position.y * iteration,
+    },
+    anchor: transform.anchor,
+    scale: {
+      x: 100 * (transform.scale.x / 100) ** iteration,
+      y: 100 * (transform.scale.y / 100) ** iteration,
+    },
+    rotation: transform.rotation * iteration,
+    opacity: 100,
+  });
+}
+
+function repeatShapes(shapes: Shape[], data: Record<string, unknown>): Shape[] {
+  const isAnimated =
+    (data['c'] as Record<string, unknown> | undefined)?.['a'] === 1 &&
+    Array.isArray((data['c'] as Record<string, unknown>)['k']);
+  const animatedCount = isAnimated ? parseAnimatableNumber(data['c']) : undefined;
+  const count = Math.max(0, Math.floor(maxRepeaterCount(data['c'])));
+  const hasTr = data['tr'] !== undefined && typeof data['tr'] === 'object';
+  const transform = hasTr ? evaluateTransform(parseTransform(data['tr'] as Record<string, unknown>), 0) : undefined;
+  // Repeater offset shifts each copy's iteration (copy display-index i uses
+  // iteration i+offset). Display index 0 is the base shape itself.
+  const offset = Math.max(0, Math.floor(parseNumber(data['o']) || 0));
+
+  // Tag the base copy (display index 0): visibility when the count is animated, and
+  // a transform^offset matrix when the repeater has a non-zero offset. Static,
+  // offset-0 repeaters leave the base untouched (unchanged behaviour).
+  if (transform && (animatedCount !== undefined || offset !== 0)) {
+    const baseMatrix = repeaterCopyMatrix(transform, offset);
+    const baseOpacity = (transform.opacity / 100) ** offset;
     for (const shape of shapes) {
-      const clone = cloneShapeWithRepeaterTransform(shape, transform, opacityStep, index);
-      if (animatedCount) {
-        clone.repeaterIndex = index;
-        clone.repeaterCount = countAnim;
+      if (animatedCount !== undefined) {
+        shape.repeaterCount = animatedCount;
+        shape.repeaterIndex = 0;
       }
-      copies.push(clone);
+      shape.repeaterMatrix = baseMatrix;
+      shape.repeaterOpacityMult = baseOpacity;
     }
   }
-  // Tag the base copies (index 0) last so they're not deep-cloned into the copies.
-  if (animatedCount) {
+
+  if (count <= 1 || shapes.length === 0 || !transform) return [];
+
+  const copies: Shape[] = [];
+  for (let index = 1; index < count; index++) {
     for (const shape of shapes) {
-      shape.repeaterIndex = 0;
-      shape.repeaterCount = countAnim;
+      const clone = cloneShapeWithRepeaterTransform(shape, transform, index + offset);
+      clone.repeaterIndex = index;
+      if (animatedCount !== undefined) clone.repeaterCount = animatedCount;
+      copies.push(clone);
     }
   }
   return copies;
 }
 
-function maxKeyframeValue(value: Animatable<number>): number {
-  if (!isAnimated(value)) return value;
-  let max = Number.NEGATIVE_INFINITY;
-  for (const keyframe of value.keyframes) {
-    if (keyframe.value > max) max = keyframe.value;
-  }
-  return Number.isFinite(max) ? max : 0;
-}
-
-function cloneShapeWithRepeaterTransform(
-  shape: Shape,
-  transform: Transform,
-  opacityStep: number,
-  index: number,
-): Shape {
+function cloneShapeWithRepeaterTransform(shape: Shape, transform: Transform, iteration: number): Shape {
   const clone = JSON.parse(JSON.stringify(shape)) as Shape;
   clone.id = generatedShapeId(`${shape.type}-repeat`);
-  clone.repeaterMatrix = repeaterCopyMatrix(transform, index);
-  clone.repeaterOpacity = opacityStep ** index;
+  // Store ONLY the static repeater per-copy matrix; the scene composes it with the
+  // shape's own PER-FRAME transform so an animated group scale/position is honoured.
+  clone.repeaterMatrix = repeaterCopyMatrix(transform, iteration);
+  clone.repeaterOpacityMult = (transform.opacity / 100) ** iteration;
   return clone;
-}
-
-function repeaterCopyMatrix(transform: Transform, index: number): AffineMatrix {
-  const rad = (transform.rotation * index * Math.PI) / 180;
-  const cos = Math.cos(rad);
-  const sin = Math.sin(rad);
-  const sx = (transform.scale.x / 100) ** index;
-  const sy = (transform.scale.y / 100) ** index;
-  const a = cos * sx;
-  const b = sin * sx;
-  const c = -sin * sy;
-  const d = cos * sy;
-  const ax = transform.anchor.x;
-  const ay = transform.anchor.y;
-  return {
-    a,
-    b,
-    c,
-    d,
-    e: transform.position.x * index + ax - (a * ax + c * ay),
-    f: transform.position.y * index + ay - (b * ax + d * ay),
-  };
 }
 
 function parseShape(
@@ -2033,6 +2179,7 @@ function parseRectShape(data: Record<string, unknown>, style: ShapeStyle, transf
     position,
     size,
     cornerRadius,
+    reversed: Number(data['d']) === 3,
     ...(style.fill !== undefined && { fill: style.fill }),
     ...(style.stroke !== undefined && { stroke: style.stroke }),
     ...(style.trim !== undefined && { trim: style.trim }),
@@ -2051,6 +2198,7 @@ function parseEllipseShape(data: Record<string, unknown>, style: ShapeStyle, tra
     type: 'ellipse',
     center: parseAnimatablePoint(data['p']),
     radius: parseAnimatablePoint(data['s']),
+    reversed: Number(data['d']) === 3,
     ...(style.fill !== undefined && { fill: style.fill }),
     ...(style.stroke !== undefined && { stroke: style.stroke }),
     ...(style.trim !== undefined && { trim: style.trim }),
@@ -2070,6 +2218,7 @@ function parsePathShape(data: Record<string, unknown>, style: ShapeStyle, transf
     id: generatedShapeId('path'),
     type: 'path',
     path: pathData,
+    reversed: Number(data['d']) === 3,
     ...(style.fill !== undefined && { fill: style.fill }),
     ...(style.stroke !== undefined && { stroke: style.stroke }),
     ...(style.trim !== undefined && { trim: style.trim }),

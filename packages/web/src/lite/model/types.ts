@@ -185,19 +185,30 @@ export interface Shape {
    */
   paintOrder?: 'fill-stroke';
   /**
-   * Repeater bookkeeping for an animated copy count. Copies are expanded to the
-   * maximum count at parse time; each carries its 0-based `repeaterIndex` and the
-   * animatable `repeaterCount`, and the scene evaluator hides (or fractionally
-   * fades) copies whose index exceeds the count resolved for the current frame.
+   * Shared id for consecutive sibling paths that are filled by a single Lottie
+   * fill node. Such paths form one compound path (lottie-web/ThorVG combine their
+   * geometry and fill once), so an opposite-wound inner contour cuts a hole
+   * (outlines, rings, letter "O"). Renderers must fill same-id runs together
+   * rather than one path at a time, or the inner contour fills solid.
    */
-  repeaterIndex?: number;
-  repeaterCount?: Animatable<number>;
+  compoundFillId?: number;
   /**
-   * Per-copy repeater transform (pre-multiplied onto the shape's own, possibly
-   * animated, transform at evaluation time) and its opacity falloff factor.
+   * Lottie shape direction (`d`): `3` means the geometry is authored with
+   * reversed (counter-clockwise) winding. Reversed winding is what lets an inner
+   * contour cut a hole out of an outer one under non-zero fill (e.g. a window
+   * cut out of a wall). Builders must emit reversed geometry when this is set,
+   * or the contour fills solid instead of cutting.
+   */
+  reversed?: boolean;
+  repeaterCount?: Animatable<number>;
+  repeaterIndex?: number;
+  /**
+   * Static per-copy matrix from a repeater (rotate/scale about the repeater
+   * anchor, offset per index). Composed with the shape's OWN per-frame transform
+   * at scene-eval time so an animated group transform is honoured.
    */
   repeaterMatrix?: { a: number; b: number; c: number; d: number; e: number; f: number };
-  repeaterOpacity?: number;
+  repeaterOpacityMult?: number;
 }
 export interface RectShape extends Shape {
   type: 'rect';
@@ -282,6 +293,17 @@ export interface Layer {
   masks?: ResolvedMask[];
   trackMatte?: 'alpha' | 'alpha-inverted' | 'luma' | 'luma-inverted';
   isMatte?: boolean;
+  /**
+   * Layer index (`ind`) after flattening; used to resolve explicit matte
+   * source references.
+   */
+  ind?: number;
+  /**
+   * Explicit matte source reference (`tp`): the `ind` of the layer providing
+   * this layer's track matte. When absent, the matte is the nearest
+   * matte-source layer above in the stack.
+   */
+  matteParentInd?: number;
   blendMode?: string;
   text?: TextDocument;
   startTime?: number;
@@ -419,6 +441,12 @@ export interface LayerDefinition {
   masks?: MaskDefinition[];
   trackMatte?: 'alpha' | 'alpha-inverted' | 'luma' | 'luma-inverted';
   isMatte?: boolean;
+  /**
+   * Explicit matte source reference (`tp` in Lottie JSON): the `ind` of the
+   * layer that provides this layer's track matte. When absent, the matte is
+   * the nearest matte-source layer above in the stack.
+   */
+  matteParentInd?: number;
   blendMode?: string;
   text?: TextDocument;
   stretch?: number;
@@ -495,6 +523,13 @@ export interface Animation {
   markers?: MarkerDefinition[];
   slots?: Slots;
   expressionEvaluator?: ExpressionEvaluator;
+  /**
+   * Vendor-prefixed extension blocks from the source Lottie JSON (keys
+   * containing a dot, e.g. `com.lottiefiles.shaders`). These are preserved
+   * verbatim so renderers and tooling can opt into experimental features
+   * without polluting the core animation model.
+   */
+  extensions?: Record<string, unknown>;
 }
 export interface ImageSource {
   src: string;
@@ -663,6 +698,10 @@ export type PlayerEvent =
   | {
       type: 'render';
       frame: number;
+    }
+  | {
+      type: 'error';
+      error: unknown;
     };
 export type PlayerEventListener = (event: PlayerEvent) => void;
 /**

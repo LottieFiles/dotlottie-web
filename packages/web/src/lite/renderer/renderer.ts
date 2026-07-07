@@ -55,9 +55,35 @@ interface ScaledImageCacheEntry {
   pixels: number;
 }
 
+interface VectorContentClassification {
+  hasRasterContent: boolean;
+  hasHighQualityVectorContent: boolean;
+  hasTextContent: boolean;
+  hasComplexVectorContent: boolean;
+}
+
 export interface Canvas2DRendererOptions {
   contextAttributes?: CanvasRenderingContext2DSettings;
 }
+
+export interface Canvas2DRenderStats {
+  bufferedLayerMs: number;
+  directLayerMs: number;
+  downsampleMs: number;
+  layerListMs: number;
+  maskedLayerMs: number;
+  matteLayerMs: number;
+  offscreenBufferMs: number;
+  offscreenBufferUses: number;
+  pathBuildMs: number;
+  pixelReadWriteMs: number;
+  renderMs: number;
+  sceneBuildMs: number;
+  supersampleMs: number;
+  trimPathMs: number;
+}
+
+type Canvas2DRenderStatPhase = Exclude<keyof Canvas2DRenderStats, 'offscreenBufferUses'>;
 
 const MAX_SCALED_IMAGE_CACHE_PIXELS = 4_000_000;
 
@@ -65,21 +91,33 @@ const MAX_SCALED_IMAGE_CACHE_PIXELS = 4_000_000;
  * Canvas2D rendering backend for dotLottieLitePlayer.
  */
 export class Canvas2DRenderer implements Renderer {
-  private imageCache = new Map<string, HTMLImageElement>();
+  private imageCache = new Map<string, ImageBitmap>();
   private scaledImageCache = new Map<string, ScaledImageCacheEntry>();
   private scaledImageCachePixels = 0;
   private offscreenPool = new Map<string, OffscreenBuffer[]>();
   private pathDataCache = new WeakMap<PathData, Path2D>();
   private shapePathCache = new WeakMap<Shape, Path2D>();
   private animationDashPatternCache = new WeakMap<Animation, boolean>();
+  // Content classification used to decide small-canvas vector supersampling.
+  // Layer content is static per Animation object, so the recursive layer-tree
+  // walk only needs to run once instead of on every render() call.
+  private animationVectorContentCache = new WeakMap<Animation, VectorContentClassification>();
+  private downsampleOutputCache = new Map<string, ImageData>();
   private compFrame = 0;
   private renderScaleX = 1;
   private renderScaleY = 1;
   private renderHasDashPatterns = false;
+  private collectingStats = false;
+  private pendingRenderStats: Canvas2DRenderStats | null = null;
+  lastRenderStats: Canvas2DRenderStats | null = null;
 
   constructor(private readonly options: Canvas2DRendererOptions = {}) {}
 
   dispose(): void {
+    // Release decoded bitmap memory eagerly instead of waiting for GC.
+    for (const bitmap of this.imageCache.values()) {
+      bitmap.close?.();
+    }
     this.imageCache.clear();
     this.scaledImageCache.clear();
     this.scaledImageCachePixels = 0;
@@ -87,9 +125,78 @@ export class Canvas2DRenderer implements Renderer {
     this.pathDataCache = new WeakMap<PathData, Path2D>();
     this.shapePathCache = new WeakMap<Shape, Path2D>();
     this.animationDashPatternCache = new WeakMap<Animation, boolean>();
+    this.animationVectorContentCache = new WeakMap<Animation, VectorContentClassification>();
+    this.downsampleOutputCache.clear();
+    this.lastRenderStats = null;
+    this.pendingRenderStats = null;
+  }
+
+  collectStats(enabled = true): void {
+    this.collectingStats = enabled;
+    if (!enabled) {
+      this.lastRenderStats = null;
+      this.pendingRenderStats = null;
+    }
   }
 
   render(animation: Animation, frame: number, canvas: HTMLCanvasElement | OffscreenCanvas): void {
+    if (!this.collectingStats) {
+      this.renderWithoutStats(animation, frame, canvas);
+      return;
+    }
+
+    const renderStart = this.collectingStats ? now() : 0;
+    this.pendingRenderStats = createEmptyCanvas2DRenderStats();
+
+    const ctx = canvas.getContext('2d', this.options.contextAttributes) as RenderingContext2D | null;
+    if (!ctx) {
+      this.pendingRenderStats = null;
+      throw new Error('Could not get 2D context from canvas');
+    }
+
+    if (canvas.width <= 0 || canvas.height <= 0) {
+      canvas.width = animation.width;
+      canvas.height = animation.height;
+    }
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.filter = 'none';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    this.renderHasDashPatterns = this.animationHasDashPatterns(animation);
+
+    if (this.shouldSupersampleSmallCanvas(canvas)) {
+      const supersampleScale = smallCanvasSupersampleScale(animation);
+      if (this.pendingRenderStats) {
+        this.measurePhase('supersampleMs', () =>
+          this.renderSmallCanvasSupersample(animation, frame, canvas, ctx, supersampleScale),
+        );
+      } else {
+        this.renderSmallCanvasSupersample(animation, frame, canvas, ctx, supersampleScale);
+      }
+      this.finalizeRenderStats(renderStart);
+      return;
+    }
+
+    if (this.shouldSupersampleVectorCanvas(animation, canvas)) {
+      const supersampleScale = this.vectorCanvasSupersampleScale(animation);
+      if (this.pendingRenderStats) {
+        this.measurePhase('supersampleMs', () =>
+          this.renderVectorCanvasSupersample(animation, frame, canvas, ctx, supersampleScale),
+        );
+      } else {
+        this.renderVectorCanvasSupersample(animation, frame, canvas, ctx, supersampleScale);
+      }
+      this.finalizeRenderStats(renderStart);
+      return;
+    }
+
+    this.renderFrameToContext(animation, frame, ctx, canvas.width, canvas.height);
+    this.finalizeRenderStats(renderStart);
+  }
+
+  private renderWithoutStats(animation: Animation, frame: number, canvas: HTMLCanvasElement | OffscreenCanvas): void {
     const ctx = canvas.getContext('2d', this.options.contextAttributes) as RenderingContext2D | null;
     if (!ctx) {
       throw new Error('Could not get 2D context from canvas');
@@ -109,39 +216,17 @@ export class Canvas2DRenderer implements Renderer {
 
     if (this.shouldSupersampleSmallCanvas(canvas)) {
       const supersampleScale = smallCanvasSupersampleScale(animation);
-      this.withOffscreenContext(
-        canvas.width * supersampleScale,
-        canvas.height * supersampleScale,
-        ({ canvas: buffer, ctx: bufferCtx }) => {
-          this.renderFrameToContext(animation, frame, bufferCtx, buffer.width, buffer.height);
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-          ctx.drawImage(buffer as CanvasImageSource, 0, 0, canvas.width, canvas.height);
-        },
-      );
+      this.renderSmallCanvasSupersampleFast(animation, frame, canvas, ctx, supersampleScale);
       return;
     }
 
     if (this.shouldSupersampleVectorCanvas(animation, canvas)) {
       const supersampleScale = this.vectorCanvasSupersampleScale(animation);
-      this.withOffscreenContext(
-        canvas.width * supersampleScale,
-        canvas.height * supersampleScale,
-        ({ canvas: buffer, ctx: bufferCtx }) => {
-          this.renderFrameToContext(animation, frame, bufferCtx, buffer.width, buffer.height);
-          if (animation.layers.some((layer) => this.layerHasTextContent(layer))) {
-            this.downsampleTextSupersample(ctx, bufferCtx, canvas.width, canvas.height, supersampleScale);
-          } else {
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            ctx.drawImage(buffer as CanvasImageSource, 0, 0, canvas.width, canvas.height);
-          }
-        },
-      );
+      this.renderVectorCanvasSupersampleFast(animation, frame, canvas, ctx, supersampleScale);
       return;
     }
 
-    this.renderFrameToContext(animation, frame, ctx, canvas.width, canvas.height);
+    this.renderFrameToContextFast(animation, frame, ctx, canvas.width, canvas.height);
   }
 
   private shouldSupersampleSmallCanvas(canvas: HTMLCanvasElement | OffscreenCanvas): boolean {
@@ -149,11 +234,15 @@ export class Canvas2DRenderer implements Renderer {
   }
 
   private withOffscreenContext<T>(width: number, height: number, callback: (buffer: OffscreenBuffer) => T): T {
+    const stats = this.pendingRenderStats;
+    const phaseStart = stats ? now() : 0;
+    if (stats) stats.offscreenBufferUses++;
     const buffer = this.acquireOffscreenContext(width, height);
     try {
       return callback(buffer);
     } finally {
       this.releaseOffscreenContext(buffer);
+      if (stats) stats.offscreenBufferMs += now() - phaseStart;
     }
   }
 
@@ -187,16 +276,144 @@ export class Canvas2DRenderer implements Renderer {
     buffer.canvas.height = height;
   }
 
+  private measurePhase<T>(phase: Canvas2DRenderStatPhase, callback: () => T): T {
+    const stats = this.pendingRenderStats;
+    if (!stats) return callback();
+    const phaseStart = now();
+    try {
+      return callback();
+    } finally {
+      stats[phase] += now() - phaseStart;
+    }
+  }
+
+  private finalizeRenderStats(renderStart: number): void {
+    const stats = this.pendingRenderStats;
+    if (!stats) return;
+    stats.renderMs = now() - renderStart;
+    this.lastRenderStats = stats;
+    this.pendingRenderStats = null;
+  }
+
+  private renderSmallCanvasSupersample(
+    animation: Animation,
+    frame: number,
+    canvas: HTMLCanvasElement | OffscreenCanvas,
+    ctx: RenderingContext2D,
+    supersampleScale: number,
+  ): void {
+    this.withOffscreenContext(
+      canvas.width * supersampleScale,
+      canvas.height * supersampleScale,
+      ({ canvas: buffer, ctx: bufferCtx }) => {
+        this.renderFrameToContext(animation, frame, bufferCtx, buffer.width, buffer.height);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(buffer as CanvasImageSource, 0, 0, canvas.width, canvas.height);
+      },
+    );
+  }
+
+  private renderVectorCanvasSupersample(
+    animation: Animation,
+    frame: number,
+    canvas: HTMLCanvasElement | OffscreenCanvas,
+    ctx: RenderingContext2D,
+    supersampleScale: number,
+  ): void {
+    this.withOffscreenContext(
+      canvas.width * supersampleScale,
+      canvas.height * supersampleScale,
+      ({ canvas: buffer, ctx: bufferCtx }) => {
+        this.renderFrameToContext(animation, frame, bufferCtx, buffer.width, buffer.height);
+        if (this.vectorCanvasHasTextContent(animation)) {
+          this.downsampleTextSupersample(ctx, bufferCtx, canvas.width, canvas.height, supersampleScale);
+        } else {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(buffer as CanvasImageSource, 0, 0, canvas.width, canvas.height);
+        }
+      },
+    );
+  }
+
+  private renderSmallCanvasSupersampleFast(
+    animation: Animation,
+    frame: number,
+    canvas: HTMLCanvasElement | OffscreenCanvas,
+    ctx: RenderingContext2D,
+    supersampleScale: number,
+  ): void {
+    this.withOffscreenContext(
+      canvas.width * supersampleScale,
+      canvas.height * supersampleScale,
+      ({ canvas: buffer, ctx: bufferCtx }) => {
+        this.renderFrameToContextFast(animation, frame, bufferCtx, buffer.width, buffer.height);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(buffer as CanvasImageSource, 0, 0, canvas.width, canvas.height);
+      },
+    );
+  }
+
+  private renderVectorCanvasSupersampleFast(
+    animation: Animation,
+    frame: number,
+    canvas: HTMLCanvasElement | OffscreenCanvas,
+    ctx: RenderingContext2D,
+    supersampleScale: number,
+  ): void {
+    this.withOffscreenContext(
+      canvas.width * supersampleScale,
+      canvas.height * supersampleScale,
+      ({ canvas: buffer, ctx: bufferCtx }) => {
+        this.renderFrameToContextFast(animation, frame, bufferCtx, buffer.width, buffer.height);
+        if (this.vectorCanvasHasTextContent(animation)) {
+          this.downsampleTextSupersample(ctx, bufferCtx, canvas.width, canvas.height, supersampleScale);
+        } else {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(buffer as CanvasImageSource, 0, 0, canvas.width, canvas.height);
+        }
+      },
+    );
+  }
+
   private shouldSupersampleVectorCanvas(animation: Animation, canvas: HTMLCanvasElement | OffscreenCanvas): boolean {
     if (canvas.width > 512 || canvas.height > 512) return false;
-    if (animation.layers.some((layer) => this.layerHasRasterContent(layer))) return false;
-    return animation.layers.some((layer) => this.layerHasHighQualityVectorContent(layer));
+    const classification = this.classifyVectorContent(animation);
+    if (classification.hasRasterContent) return false;
+    return classification.hasHighQualityVectorContent;
   }
 
   private vectorCanvasSupersampleScale(animation: Animation): number {
-    if (animation.layers.some((layer) => this.layerHasTextContent(layer))) return 4;
+    const classification = this.classifyVectorContent(animation);
+    if (classification.hasTextContent) return 4;
     if (animation.layers.length >= 120) return 2;
-    return animation.layers.some((layer) => this.layerHasComplexVectorContent(layer)) ? 4 : 2;
+    return classification.hasComplexVectorContent ? 4 : 2;
+  }
+
+  private vectorCanvasHasTextContent(animation: Animation): boolean {
+    return this.classifyVectorContent(animation).hasTextContent;
+  }
+
+  /**
+   * Layer content is static per Animation object (parsed once, not mutated
+   * per frame), so this recursive tree walk only needs to run once per
+   * animation instead of on every render() call.
+   */
+  private classifyVectorContent(animation: Animation): VectorContentClassification {
+    const cached = this.animationVectorContentCache.get(animation);
+    if (cached) return cached;
+
+    const classification: VectorContentClassification = {
+      hasRasterContent: animation.layers.some((layer) => this.layerHasRasterContent(layer)),
+      hasHighQualityVectorContent: animation.layers.some((layer) => this.layerHasHighQualityVectorContent(layer)),
+      hasTextContent: animation.layers.some((layer) => this.layerHasTextContent(layer)),
+      hasComplexVectorContent: animation.layers.some((layer) => this.layerHasComplexVectorContent(layer)),
+    };
+    this.animationVectorContentCache.set(animation, classification);
+    return classification;
   }
 
   private layerHasRasterContent(layer: LayerDefinition): boolean {
@@ -254,39 +471,88 @@ export class Canvas2DRenderer implements Renderer {
     height: number,
     scale: number,
   ): void {
-    const source = sourceCtx.getImageData(0, 0, width * scale, height * scale);
-    const output = ctx.createImageData(width, height);
-    const samples = scale * scale;
+    if (this.pendingRenderStats) {
+      this.measurePhase('downsampleMs', () =>
+        this.downsampleTextSupersamplePixels(ctx, sourceCtx, width, height, scale),
+      );
+      return;
+    }
 
+    this.downsampleTextSupersamplePixels(ctx, sourceCtx, width, height, scale);
+  }
+
+  private downsampleTextSupersamplePixels(
+    ctx: RenderingContext2D,
+    sourceCtx: RenderingContext2D,
+    width: number,
+    height: number,
+    scale: number,
+  ): void {
+    const source = this.pendingRenderStats
+      ? this.measurePhase('pixelReadWriteMs', () => sourceCtx.getImageData(0, 0, width * scale, height * scale))
+      : sourceCtx.getImageData(0, 0, width * scale, height * scale);
+    const output = this.acquireDownsampleOutputBuffer(ctx, width, height);
+    const samples = scale * scale;
+    const sourceWidth = source.width;
+    const sourceData = source.data;
+    const outputData = output.data;
+
+    // Hoists the per-sample index arithmetic (identical math and iteration
+    // order to the original nested-multiply form, so output is unchanged;
+    // only redundant multiplication work is removed from the hot loop).
+    let outputIndex = 0;
     for (let y = 0; y < height; y++) {
+      const rowBase = y * scale * sourceWidth;
       for (let x = 0; x < width; x++) {
+        const colBase = x * scale;
         let alphaSum = 0;
         let maxAlpha = -1;
         let red = 0;
         let green = 0;
         let blue = 0;
         for (let sy = 0; sy < scale; sy++) {
+          let sourceIndex = (rowBase + sy * sourceWidth + colBase) * 4;
           for (let sx = 0; sx < scale; sx++) {
-            const sourceIndex = ((y * scale + sy) * source.width + x * scale + sx) * 4;
-            const alpha = source.data[sourceIndex + 3]!;
+            const alpha = sourceData[sourceIndex + 3]!;
             alphaSum += alpha;
             if (alpha > maxAlpha) {
               maxAlpha = alpha;
-              red = source.data[sourceIndex]!;
-              green = source.data[sourceIndex + 1]!;
-              blue = source.data[sourceIndex + 2]!;
+              red = sourceData[sourceIndex]!;
+              green = sourceData[sourceIndex + 1]!;
+              blue = sourceData[sourceIndex + 2]!;
             }
+            sourceIndex += 4;
           }
         }
-        const outputIndex = (y * width + x) * 4;
-        output.data[outputIndex] = red;
-        output.data[outputIndex + 1] = green;
-        output.data[outputIndex + 2] = blue;
-        output.data[outputIndex + 3] = Math.round(alphaSum / samples);
+        outputData[outputIndex] = red;
+        outputData[outputIndex + 1] = green;
+        outputData[outputIndex + 2] = blue;
+        outputData[outputIndex + 3] = Math.round(alphaSum / samples);
+        outputIndex += 4;
       }
     }
 
-    ctx.putImageData(output, 0, 0);
+    if (this.pendingRenderStats) {
+      this.measurePhase('pixelReadWriteMs', () => ctx.putImageData(output, 0, 0));
+    } else {
+      ctx.putImageData(output, 0, 0);
+    }
+  }
+
+  /**
+   * Reuses the downsample output ImageData across frames instead of
+   * allocating a fresh buffer every render(); every pixel is always
+   * overwritten by the loop above, so a stale previous frame's contents
+   * never leak through.
+   */
+  private acquireDownsampleOutputBuffer(ctx: RenderingContext2D, width: number, height: number): ImageData {
+    const key = `${width}x${height}`;
+    const cached = this.downsampleOutputCache.get(key);
+    if (cached) return cached;
+
+    const created = ctx.createImageData(width, height);
+    this.downsampleOutputCache.set(key, created);
+    return created;
   }
 
   private renderFrameToContext(
@@ -303,9 +569,36 @@ export class Canvas2DRenderer implements Renderer {
       ctx.setLineDash([]);
       ctx.lineDashOffset = 0;
     }
+    const layers = this.pendingRenderStats
+      ? this.measurePhase('sceneBuildMs', () => buildScene(animation, frame))
+      : buildScene(animation, frame);
+
+    if (this.pendingRenderStats) {
+      this.measurePhase('layerListMs', () => this.renderLayerList(ctx, layers, width, height));
+    } else {
+      this.renderLayerList(ctx, layers, width, height);
+    }
+    this.renderScaleX = 1;
+    this.renderScaleY = 1;
+  }
+
+  private renderFrameToContextFast(
+    animation: Animation,
+    frame: number,
+    ctx: RenderingContext2D,
+    width: number,
+    height: number,
+  ): void {
+    this.renderScaleX = width / animation.width;
+    this.renderScaleY = height / animation.height;
+    this.compFrame = frame + (animation.inPoint ?? 0);
+    if (!this.renderHasDashPatterns && typeof ctx.setLineDash === 'function') {
+      ctx.setLineDash([]);
+      ctx.lineDashOffset = 0;
+    }
     const layers = buildScene(animation, frame);
 
-    this.renderLayerList(ctx, layers, width, height);
+    this.renderLayerListFast(ctx, layers, width, height);
     this.renderScaleX = 1;
     this.renderScaleY = 1;
   }
@@ -338,7 +631,11 @@ export class Canvas2DRenderer implements Renderer {
       ctx.globalCompositeOperation = 'source-over';
       ctx.filter = 'none';
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      this.renderLayerList(ctx, layers, canvas.width, canvas.height);
+      if (this.pendingRenderStats) {
+        this.measurePhase('layerListMs', () => this.renderLayerList(ctx, layers, canvas.width, canvas.height));
+      } else {
+        this.renderLayerList(ctx, layers, canvas.width, canvas.height);
+      }
     } finally {
       this.renderScaleX = previousScaleX;
       this.renderScaleY = previousScaleY;
@@ -352,6 +649,11 @@ export class Canvas2DRenderer implements Renderer {
    * children of a masked precomp.
    */
   private renderLayerList(ctx: RenderingContext2D, layers: Layer[], width: number, height: number): void {
+    if (!this.pendingRenderStats) {
+      this.renderLayerListFast(ctx, layers, width, height);
+      return;
+    }
+
     // Layers are stored top-to-bottom. Render from the bottom of the stack
     // upward so later draws cover earlier ones. A matte layer sits directly
     // above its masked layer, so when iterating backward we encounter the
@@ -371,6 +673,106 @@ export class Canvas2DRenderer implements Renderer {
         continue;
       }
       if (layer.trackMatte) {
+        // Explicit matte reference (`tp`): the source can sit anywhere in the
+        // stack and be shared by several consumers, so pair without skipping
+        // the layers in between.
+        const explicitMatte = this.findExplicitMatteSource(layers, layer);
+        if (explicitMatte) {
+          if (this.isLayerRenderable(explicitMatte)) {
+            if (this.pendingRenderStats) {
+              this.measurePhase('matteLayerMs', () =>
+                this.renderTrackMattePair(ctx, explicitMatte, layer, width, height),
+              );
+            } else {
+              this.renderTrackMattePair(ctx, explicitMatte, layer, width, height);
+            }
+          } else if (this.isInvertedTrackMatte(layer)) {
+            if (this.pendingRenderStats) {
+              this.measurePhase('bufferedLayerMs', () => this.renderBufferedLayer(ctx, layer, width, height));
+            } else {
+              this.renderBufferedLayer(ctx, layer, width, height);
+            }
+          }
+          continue;
+        }
+        let matteIndex = i - 1;
+        while (matteIndex >= 0 && !layers[matteIndex]!.isMatte) {
+          matteIndex--;
+        }
+        if (matteIndex >= 0) {
+          const matteLayer = layers[matteIndex]!;
+          if (this.isLayerRenderable(matteLayer)) {
+            if (this.pendingRenderStats) {
+              this.measurePhase('matteLayerMs', () => this.renderTrackMattePair(ctx, matteLayer, layer, width, height));
+            } else {
+              this.renderTrackMattePair(ctx, matteLayer, layer, width, height);
+            }
+          } else if (this.isInvertedTrackMatte(layer)) {
+            if (this.pendingRenderStats) {
+              this.measurePhase('bufferedLayerMs', () => this.renderBufferedLayer(ctx, layer, width, height));
+            } else {
+              this.renderBufferedLayer(ctx, layer, width, height);
+            }
+          }
+          i = matteIndex;
+          continue;
+        }
+      }
+
+      if (layer.masks && layer.masks.length > 0) {
+        if (this.pendingRenderStats) {
+          this.measurePhase('maskedLayerMs', () => this.renderMaskedLayer(ctx, layer, width, height));
+        } else {
+          this.renderMaskedLayer(ctx, layer, width, height);
+        }
+      } else if (this.canRenderLayerDirectly(layer)) {
+        if (this.pendingRenderStats) {
+          this.measurePhase('directLayerMs', () => this.renderLayerContent(ctx, layer));
+        } else {
+          this.renderLayerContent(ctx, layer);
+        }
+      } else {
+        if (this.pendingRenderStats) {
+          this.measurePhase('bufferedLayerMs', () => this.renderBufferedLayer(ctx, layer, width, height));
+        } else {
+          this.renderBufferedLayer(ctx, layer, width, height);
+        }
+      }
+    }
+  }
+
+  private renderLayerListFast(ctx: RenderingContext2D, layers: Layer[], width: number, height: number): void {
+    // Layers are stored top-to-bottom. Render from the bottom of the stack
+    // upward so later draws cover earlier ones. A matte layer sits directly
+    // above its masked layer, so when iterating backward we encounter the
+    // masked layer first and the matte layer next.
+    for (let i = layers.length - 1; i >= 0; i--) {
+      const layer = layers[i]!;
+      // Matte definition layers are never drawn directly; they are consumed by
+      // the masked layer below them.
+      if (layer.isMatte) {
+        continue;
+      }
+
+      if (!this.isLayerRenderable(layer)) {
+        continue;
+      }
+      if (layer.transform && layerCompositeAlpha(layer) <= 0) {
+        continue;
+      }
+      if (layer.trackMatte) {
+        // Explicit matte reference (`tp`): the source can sit anywhere in the
+        // stack and be shared by several consumers, so pair without skipping
+        // the layers in between.
+        const explicitMatte = this.findExplicitMatteSource(layers, layer);
+        if (explicitMatte) {
+          if (this.isLayerRenderable(explicitMatte)) {
+            this.renderTrackMattePair(ctx, explicitMatte, layer, width, height);
+          } else if (this.isInvertedTrackMatte(layer)) {
+            this.renderBufferedLayer(ctx, layer, width, height);
+          }
+          continue;
+        }
         let matteIndex = i - 1;
         while (matteIndex >= 0 && !layers[matteIndex]!.isMatte) {
           matteIndex--;
@@ -404,6 +806,21 @@ export class Canvas2DRenderer implements Renderer {
 
   private isInvertedTrackMatte(layer: Layer): boolean {
     return layer.trackMatte === 'alpha-inverted' || layer.trackMatte === 'luma-inverted';
+  }
+
+  /**
+   * Resolve an explicit matte source reference (`tp`). Returns undefined when
+   * the layer uses the classic above-layer matte convention or the referenced
+   * layer is not in this list (callers then fall back to the adjacent scan).
+   */
+  private findExplicitMatteSource(layers: Layer[], layer: Layer): Layer | undefined {
+    if (layer.matteParentInd === undefined) return undefined;
+    for (const candidate of layers) {
+      if (candidate.ind === layer.matteParentInd) {
+        return candidate;
+      }
+    }
+    return undefined;
   }
 
   private canRenderLayerDirectly(layer: Layer): boolean {
@@ -499,8 +916,56 @@ export class Canvas2DRenderer implements Renderer {
           continue;
         }
       }
+      if (shape.compoundFillId !== undefined) {
+        const run = this.collectCompoundFillRun(shapes, i);
+        if (run) {
+          this.drawCompoundFill(ctx, run.shapes);
+          i = run.lowIndex;
+          continue;
+        }
+      }
       this.drawShape(ctx, shape);
     }
+  }
+
+  // Gather a maximal run of consecutive sibling paths that share a compoundFillId
+  // (they came from one Lottie fill node) so the renderer can fill them as a
+  // single compound path. Returns null unless every shape in the run is a plain,
+  // directly-fillable path (no per-shape transform, stroke, or active trim) — in
+  // that case the caller falls back to drawing each shape on its own.
+  private collectCompoundFillRun(shapes: Shape[], startIndex: number): { shapes: Shape[]; lowIndex: number } | null {
+    const id = shapes[startIndex]!.compoundFillId;
+    if (id === undefined) return null;
+    const run: Shape[] = [];
+    let j = startIndex;
+    while (j >= 0 && shapes[j]!.compoundFillId === id) {
+      const shape = shapes[j]!;
+      if (
+        shape.type === 'group' ||
+        shape.type === 'merge' ||
+        shape.transform !== undefined ||
+        shape.stroke !== undefined
+      ) {
+        return null;
+      }
+      const trim = effectiveTrimPath(shape);
+      if (trim && !isFullTrimPath(trim)) return null;
+      run.push(shape);
+      j--;
+    }
+    if (run.length < 2) return null;
+    return { shapes: run, lowIndex: j + 1 };
+  }
+
+  private drawCompoundFill(ctx: RenderingContext2D, run: Shape[]): void {
+    const fill = run[0]!.fill;
+    if (!fill || !this.fillIsVisible(fill)) return;
+    const combined = new Path2D();
+    for (const shape of run) {
+      appendPath(combined, this.shapeToCachedPath(shape));
+    }
+    applyFill(ctx, fill);
+    ctx.fill(combined, fill.fillRule ?? 'nonzero');
   }
 
   private applyColorOverlay(ctx: RenderingContext2D, color: Color, amount: number): void {
@@ -526,7 +991,9 @@ export class Canvas2DRenderer implements Renderer {
 
     const targetWhite = whiteColor ?? { r: 255, g: 255, b: 255, a: 1 };
     const mix = Math.max(0, Math.min(1, amount));
-    const image = ctx.getImageData(0, 0, width, height);
+    const image = this.pendingRenderStats
+      ? this.measurePhase('pixelReadWriteMs', () => ctx.getImageData(0, 0, width, height))
+      : ctx.getImageData(0, 0, width, height);
     const data = image.data;
     for (let index = 0; index < data.length; index += 4) {
       const alpha = data[index + 3]!;
@@ -542,7 +1009,11 @@ export class Canvas2DRenderer implements Renderer {
       data[index + 1] = Math.round(g + (mappedG - g) * mix);
       data[index + 2] = Math.round(b + (mappedB - b) * mix);
     }
-    ctx.putImageData(image, 0, 0);
+    if (this.pendingRenderStats) {
+      this.measurePhase('pixelReadWriteMs', () => ctx.putImageData(image, 0, 0));
+    } else {
+      ctx.putImageData(image, 0, 0);
+    }
   }
 
   private renderText(ctx: RenderingContext2D, text: TextDocument): void {
@@ -591,6 +1062,17 @@ export class Canvas2DRenderer implements Renderer {
       return;
     }
 
+    // When the animation embeds glyph outlines (fonts.chars), render those exact
+    // paths instead of the system-font fillText fallback. ThorVG rasterises the
+    // embedded glyphs, so a font that isn't installed locally (e.g. Baloo Bhai)
+    // otherwise renders with the wrong shape.
+    if (text.glyphs && Object.keys(text.glyphs).length > 0) {
+      ctx.save();
+      this.renderGlyphText(ctx, text, lines, lineHeight);
+      ctx.restore();
+      return;
+    }
+
     ctx.save();
     ctx.scale(textScaleX, 1);
     ctx.translate((fontStyle.offsetX * text.size) / textScaleX, 0);
@@ -625,6 +1107,32 @@ export class Canvas2DRenderer implements Renderer {
     ctx.restore();
   }
 
+  private renderGlyphText(ctx: RenderingContext2D, text: TextDocument, lines: string[], lineHeight: number): void {
+    const glyphs = text.glyphs;
+    if (!glyphs) return;
+    const glyphScale = text.size / 100;
+    // Lottie tracking (`tr`) is in 1/1000 em; the per-character advance in pixels
+    // is tr/1000 * fontSize. Embedded-glyph text previously ignored tracking
+    // entirely (unlike the non-glyph path), packing characters too tightly.
+    const trackingPx = ((text.tracking ?? 0) / 1000) * text.size;
+    let y = 0;
+    for (const line of lines) {
+      const chars = [...line];
+      // Glyph widths are per-100-em units (scaled by size/100); a glyph missing
+      // from fonts.chars advances one em (width 100), not text.size units,
+      // which would grow quadratically with font size.
+      const widths = chars.map((char) => (glyphs[char]?.width ?? 100) * glyphScale);
+      const totalWidth = widths.reduce((sum, width) => sum + width, 0) + Math.max(0, chars.length - 1) * trackingPx;
+      let x = text.justification === 'center' ? -totalWidth / 2 : text.justification === 'right' ? -totalWidth : 0;
+      for (let index = 0; index < chars.length; index++) {
+        const glyph = glyphs[chars[index]!];
+        if (glyph) this.fillTextGlyph(ctx, glyph, x, y, glyphScale);
+        x += widths[index]! + trackingPx;
+      }
+      y += lineHeight;
+    }
+  }
+
   private renderTriangleRangeGlyphText(
     ctx: RenderingContext2D,
     text: TextDocument,
@@ -644,7 +1152,10 @@ export class Canvas2DRenderer implements Renderer {
 
     for (const line of lines) {
       const chars = [...line];
-      const widths = chars.map((char) => (glyphs[char]?.width ?? text.size) * glyphScale);
+      // Glyph widths are per-100-em units (scaled by size/100); a glyph missing
+      // from fonts.chars advances one em (width 100), not text.size units,
+      // which would grow quadratically with font size.
+      const widths = chars.map((char) => (glyphs[char]?.width ?? 100) * glyphScale);
       const totalWidth = widths.reduce((sum, width) => sum + width, 0);
       let x = text.justification === 'center' ? -totalWidth / 2 : text.justification === 'right' ? -totalWidth : 0;
 
@@ -669,9 +1180,17 @@ export class Canvas2DRenderer implements Renderer {
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(scale, scale);
+    // Combine the glyph's contours into ONE path and fill once so the fill rule
+    // cuts counters (the hole in 0/o/a/e). Filling each contour separately fills
+    // the inner hole solid.
+    const combined = new Path2D();
     for (const path of glyph.paths) {
-      ctx.fill(buildPathFromPathData(path), 'nonzero');
+      const built = this.pendingRenderStats
+        ? this.measurePhase('pathBuildMs', () => buildPathFromPathData(path))
+        : buildPathFromPathData(path);
+      appendPath(combined, built);
     }
+    ctx.fill(combined, 'nonzero');
     ctx.restore();
   }
 
@@ -788,7 +1307,7 @@ export class Canvas2DRenderer implements Renderer {
 
   private scaledImageFor(
     src: string,
-    image: HTMLImageElement,
+    image: ImageBitmap,
     width: number,
     height: number,
   ): HTMLCanvasElement | OffscreenCanvas | null {
@@ -1028,6 +1547,15 @@ export class Canvas2DRenderer implements Renderer {
           // drawTrimmedShapeGroup expects the run in bottom-to-top order.
           this.drawTrimmedShapeGroup(ctx, run.reverse(), child.trim as TrimPath, childMatrix);
           i = j;
+        } else if (child.compoundFillId !== undefined) {
+          const compound = this.collectCompoundFillRun(group.children, i);
+          if (compound) {
+            this.drawCompoundFill(ctx, compound.shapes);
+            i = compound.lowIndex - 1;
+          } else {
+            this.drawShape(ctx, child, undefined, childMatrix);
+            i--;
+          }
         } else {
           this.drawShape(ctx, child, undefined, childMatrix);
           i--;
@@ -1053,7 +1581,12 @@ export class Canvas2DRenderer implements Renderer {
 
     const trim = effectiveTrimPath(shape);
     const shapePath =
-      path ?? (trim && !isFullTrimPath(trim) ? getTrimmedPath(shape, trim) : this.shapeToCachedPath(shape));
+      path ??
+      (trim && !isFullTrimPath(trim)
+        ? this.pendingRenderStats
+          ? this.measurePhase('trimPathMs', () => getTrimmedPath(shape, trim))
+          : getTrimmedPath(shape, trim)
+        : this.shapeToCachedPath(shape));
     const strokeWidthScale = (shape.strokeWidthScale ?? 1) * strokeScale(shape.transform);
     const fillBeforeStroke = shape.paintOrder === 'fill-stroke' && shape.stroke !== undefined;
     if (!fillBeforeStroke && shape.stroke) {
@@ -1075,11 +1608,17 @@ export class Canvas2DRenderer implements Renderer {
   private drawMergeShape(ctx: RenderingContext2D, shape: MergeShape): void {
     const mode = shape.mode;
 
-    // For merge/add modes, combine all operand geometries into a single Path2D
-    // and fill/stroke it once. This preserves holes created by overlapping paths
-    // with opposite winding, which is essential for the Lottie merge-path union
-    // behavior.
-    if (mode === 'merge' || mode === 'add') {
+    // Combine all operand geometries into a single Path2D and fill/stroke it
+    // once. This preserves holes created by overlapping paths with opposite
+    // winding, which is essential for the Lottie merge-path union behavior.
+    //
+    // `intersect` is composited here as a union, not a true geometric
+    // intersection: the reference renderer (dotLottie/ThorVG, matching
+    // lottie-web) does not perform boolean intersection for Merge Paths — it
+    // composites the operands together. Illustrator-exported compound shapes
+    // routinely carry mode `intersect` over disjoint sub-paths, where a true
+    // intersection is empty and would drop the whole shape (see a_mountain).
+    if (mode === 'merge' || mode === 'add' || mode === 'intersect') {
       const combined = new Path2D();
       for (const operand of shape.shapes) {
         const operandPath = this.operandPath(operand);
@@ -1089,10 +1628,11 @@ export class Canvas2DRenderer implements Renderer {
       return;
     }
 
-    // Subtract / intersect / exclude require boolean set operations. Build an
-    // alpha mask from the operand geometries in an offscreen buffer, then fill
-    // the union of the operands on another buffer and mask it. Strokes are
-    // omitted because they cannot be derived from the boolean silhouette.
+    // Subtract / exclude require boolean set operations. Build an alpha mask
+    // from the operand geometries in an offscreen buffer, then fill the union of
+    // the operands on another buffer and mask it. Strokes are omitted because
+    // they cannot be derived from the boolean silhouette. (Intersect is handled
+    // above as a union, matching the reference renderer.)
     const canvas = ctx.canvas;
     this.withOffscreenContext(canvas.width, canvas.height, ({ canvas: maskBuffer, ctx: maskCtx }) => {
       // Boolean shapes live inside the current scene-graph transform. Apply it
@@ -1109,30 +1649,18 @@ export class Canvas2DRenderer implements Renderer {
       }
 
       maskCtx.fillStyle = '#ffffff';
-      const operandOp = (i: number): GlobalCompositeOperation => {
-        if (i === 0) return 'source-over';
-        if (mode === 'subtract') return 'destination-out';
-        if (mode === 'intersect') return 'destination-in';
-        return 'xor'; // exclude
-      };
       for (let i = 0; i < shape.shapes.length; i++) {
-        const leaves = this.collectOperandLeafPaths(shape.shapes[i]!);
+        const operand = shape.shapes[i]!;
+        const operandPath = this.operandPath(operand);
         if (i === 0) {
           maskCtx.globalCompositeOperation = 'source-over';
-          for (const leaf of leaves) maskCtx.fill(leaf);
-          continue;
+        } else if (mode === 'subtract') {
+          maskCtx.globalCompositeOperation = 'destination-out';
+        } else {
+          // exclude
+          maskCtx.globalCompositeOperation = 'xor';
         }
-        this.withOffscreenContext(canvas.width, canvas.height, ({ canvas: opBuffer, ctx: opCtx }) => {
-          opCtx.setTransform(baseMatrix);
-          if (hasShapeTransform) applyTransform(opCtx, shapeTransform);
-          opCtx.fillStyle = '#ffffff';
-          for (const leaf of leaves) opCtx.fill(leaf);
-          maskCtx.save();
-          maskCtx.setTransform(1, 0, 0, 1, 0, 0);
-          maskCtx.globalCompositeOperation = operandOp(i);
-          maskCtx.drawImage(opBuffer as CanvasImageSource, 0, 0);
-          maskCtx.restore();
-        });
+        maskCtx.fill(operandPath);
       }
 
       if (hasShapeTransform) {
@@ -1205,8 +1733,26 @@ export class Canvas2DRenderer implements Renderer {
       return path;
     }
 
+    // A merge can itself be an operand of an outer merge (stacked Merge Paths
+    // modifiers, e.g. `merge` then `intersect`). Combine its operands the same
+    // way drawMergeShape does; otherwise it falls through to shapeToPath, which
+    // returns an empty path for merge shapes and silently drops the geometry.
+    if (operand.type === 'merge') {
+      const merge = operand as MergeShape;
+      const path = new Path2D();
+      for (const child of merge.shapes) {
+        appendPath(path, this.operandPath(child, parentTransform));
+      }
+      return path;
+    }
+
     const trim = effectiveTrimPath(operand);
-    const path = trim && !isFullTrimPath(trim) ? getTrimmedPath(operand, trim) : this.shapeToCachedPath(operand);
+    const path =
+      trim && !isFullTrimPath(trim)
+        ? this.pendingRenderStats
+          ? this.measurePhase('trimPathMs', () => getTrimmedPath(operand, trim))
+          : getTrimmedPath(operand, trim)
+        : this.shapeToCachedPath(operand);
     const transform = operand.transform
       ? parentTransform
         ? combineTransforms(parentTransform, operand.transform)
@@ -1214,24 +1760,6 @@ export class Canvas2DRenderer implements Renderer {
       : parentTransform;
     if (!transform) return path;
     return transformPath(path, transform);
-  }
-
-  /**
-   * Like {@link operandPath}, but returns each leaf sub-path separately instead
-   * of concatenating them into one winding-sensitive Path2D. Used by boolean
-   * merges to fill an operand as the union of its parts, so reverse-wound
-   * duplicate paths don't cancel under the nonzero rule.
-   */
-  private collectOperandLeafPaths(operand: Shape, parentTransform?: Transform): Path2D[] {
-    if (operand.type === 'group') {
-      const group = operand as GroupShape;
-      const combined =
-        group.transform && parentTransform
-          ? combineTransforms(parentTransform, group.transform)
-          : (group.transform ?? parentTransform);
-      return group.children.flatMap((child) => this.collectOperandLeafPaths(child, combined));
-    }
-    return [this.operandPath(operand, parentTransform)];
   }
 
   private drawMergedPath(ctx: RenderingContext2D, shape: Shape, path: Path2D): void {
@@ -1264,12 +1792,16 @@ export class Canvas2DRenderer implements Renderer {
   }
 
   private shapeToCachedPath(shape: Shape): Path2D {
-    if (shape.type === 'path') {
+    // Reversed path shapes (Lottie direction d=3) must go through shapeToPath so
+    // the winding is flipped; the PathData-keyed fast path would ignore it.
+    if (shape.type === 'path' && !shape.reversed) {
       const data = (shape as PathShape).path as PathData;
       const cached = this.pathDataCache.get(data);
       if (cached) return cached;
 
-      const path = buildPathFromPathData(data);
+      const path = this.pendingRenderStats
+        ? this.measurePhase('pathBuildMs', () => buildPathFromPathData(data))
+        : buildPathFromPathData(data);
       this.pathDataCache.set(data, path);
       return path;
     }
@@ -1277,7 +1809,9 @@ export class Canvas2DRenderer implements Renderer {
     const cached = this.shapePathCache.get(shape);
     if (cached) return cached;
 
-    const path = shapeToPath(shape);
+    const path = this.pendingRenderStats
+      ? this.measurePhase('pathBuildMs', () => shapeToPath(shape))
+      : shapeToPath(shape);
     this.shapePathCache.set(shape, path);
     return path;
   }
@@ -1401,14 +1935,25 @@ export class Canvas2DRenderer implements Renderer {
       return;
     }
 
-    const shapeData = shapes.map((shape) => {
-      const points = shapeToPoints(shape, 128);
-      const lengths: number[] = [0];
-      for (let i = 1; i < points.length; i++) {
-        lengths.push(lengths[i - 1]! + distance(points[i - 1]!, points[i]!));
-      }
-      return { shape, points, lengths, length: lengths[lengths.length - 1]! };
-    });
+    const shapeData = this.pendingRenderStats
+      ? this.measurePhase('trimPathMs', () =>
+          shapes.map((shape) => {
+            const points = shapeToPoints(shape, 128);
+            const lengths: number[] = [0];
+            for (let i = 1; i < points.length; i++) {
+              lengths.push(lengths[i - 1]! + distance(points[i - 1]!, points[i]!));
+            }
+            return { shape, points, lengths, length: lengths[lengths.length - 1]! };
+          }),
+        )
+      : shapes.map((shape) => {
+          const points = shapeToPoints(shape, 128);
+          const lengths: number[] = [0];
+          for (let i = 1; i < points.length; i++) {
+            lengths.push(lengths[i - 1]! + distance(points[i - 1]!, points[i]!));
+          }
+          return { shape, points, lengths, length: lengths[lengths.length - 1]! };
+        });
 
     const totalLength = shapeData.reduce((sum, data) => sum + data.length, 0);
     if (totalLength <= 0) {
@@ -1579,4 +2124,27 @@ function triangleSelectorInfluence(charPosition: number, selectedChars: number, 
   if (selectedChars <= 0 || charPosition < 0 || charPosition > selectedChars) return 0;
   const t = charPosition / selectedChars;
   return t <= peak ? t / peak : (1 - t) / (1 - peak);
+}
+
+function createEmptyCanvas2DRenderStats(): Canvas2DRenderStats {
+  return {
+    bufferedLayerMs: 0,
+    directLayerMs: 0,
+    downsampleMs: 0,
+    layerListMs: 0,
+    maskedLayerMs: 0,
+    matteLayerMs: 0,
+    offscreenBufferMs: 0,
+    offscreenBufferUses: 0,
+    pathBuildMs: 0,
+    pixelReadWriteMs: 0,
+    renderMs: 0,
+    sceneBuildMs: 0,
+    supersampleMs: 0,
+    trimPathMs: 0,
+  };
+}
+
+function now(): number {
+  return globalThis.performance?.now?.() ?? Date.now();
 }

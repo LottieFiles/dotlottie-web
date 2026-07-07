@@ -10,7 +10,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 
-const GZIP_BUDGET_BYTES = 34 * 1024;
+// 35 KB since the 2026-07 upstream sync (34.69 KB actual): compound-fill holes,
+// explicit track mattes (tp), repeater rework, supersample fast paths, zip-bomb
+// guards, and parsed-source caching. Renderer stats instrumentation accounts for
+// only ~0.6 KB of that — candidate for an upstream tree-shakeable split.
+const GZIP_BUDGET_BYTES = 35 * 1024;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const bundlePath = path.resolve(__dirname, '../dist/lite/index.js');

@@ -147,8 +147,8 @@ export function shapeToPoints(shape: Shape, segments = 64): Point[] {
 }
 
 export function getTrimVisibleRanges(trim: TrimPath): [number, number][] {
-  const start = Number(trim.start ?? 0) / 100;
-  const end = Number(trim.end ?? 100) / 100;
+  let start = Number(trim.start ?? 0) / 100;
+  let end = Number(trim.end ?? 100) / 100;
   // Lottie trim offset is defined on a 0-360 scale, not 0-100.
   const offset = Number(trim.offset ?? 0) / 360;
 
@@ -160,6 +160,16 @@ export function getTrimVisibleRanges(trim: TrimPath): [number, number][] {
   }
   if (Math.abs(end - start) <= 1e-6) {
     return [];
+  }
+  // A native start > end (before offset) is a degenerate/converging window, not
+  // an offset-driven wrap-around. Swap to the small forward segment (matching
+  // lottie-web) so a trim that retracts by animating start past end collapses to
+  // a thin sliver instead of wrapping around to ~full. Offset-driven wraps keep
+  // start < end here and are handled by the from/to normalization below.
+  if (end < start) {
+    const swap = start;
+    start = end;
+    end = swap;
   }
 
   const normalize = (value: number, preserveOne = false): number => {
@@ -293,6 +303,20 @@ function buildRectPath(shape: RectShape): Path2D {
   const { x, y, width, height } = shape.rect;
   const r = Math.min(numericAnimatable(shape.cornerRadius), width / 2, height / 2);
   const path = new Path2D();
+  if (shape.reversed) {
+    // Counter-clockwise traversal (Lottie direction d=3). Reversed winding lets
+    // this rect cut a hole out of a same-group outer contour under non-zero fill.
+    path.moveTo(x + r, y);
+    path.arcTo(x, y, x, y + r, r);
+    path.lineTo(x, y + height - r);
+    path.arcTo(x, y + height, x + r, y + height, r);
+    path.lineTo(x + width - r, y + height);
+    path.arcTo(x + width, y + height, x + width, y + height - r, r);
+    path.lineTo(x + width, y + r);
+    path.arcTo(x + width, y, x + width - r, y, r);
+    path.closePath();
+    return path;
+  }
   path.moveTo(x + r, y);
   path.lineTo(x + width - r, y);
   path.arcTo(x + width, y, x + width, y + r, r);
@@ -310,14 +334,32 @@ function buildEllipsePath(shape: EllipseShape): Path2D {
   const center = shape.center as Point;
   const radius = shape.radius as Point;
   const path = new Path2D();
-  // Lottie ellipses are clockwise starting at the top-center.
-  path.ellipse(center.x, center.y, radius.x / 2, radius.y / 2, 0, -Math.PI / 2, Math.PI * 1.5);
+  // Lottie ellipses are clockwise starting at the top-center; direction d=3
+  // reverses the winding so an inner ellipse cuts a hole under non-zero fill.
+  if (shape.reversed) {
+    path.ellipse(center.x, center.y, radius.x / 2, radius.y / 2, 0, -Math.PI / 2, -Math.PI / 2 - Math.PI * 2, true);
+  } else {
+    path.ellipse(center.x, center.y, radius.x / 2, radius.y / 2, 0, -Math.PI / 2, Math.PI * 1.5);
+  }
   path.closePath();
   return path;
 }
 
+// Reverse a closed bezier contour's winding: reverse the vertex order and swap
+// the in/out tangents (the tangent leaving a vertex in the reversed traversal is
+// its original arriving tangent, and vice-versa).
+export function reversePathData(data: PathData): PathData {
+  return {
+    ...data,
+    vertices: [...data.vertices].reverse(),
+    inTangents: [...data.outTangents].reverse(),
+    outTangents: [...data.inTangents].reverse(),
+  };
+}
+
 function buildPathPath(shape: PathShape): Path2D {
-  return buildPathFromPathData(shape.path as PathData);
+  const data = shape.path as PathData;
+  return buildPathFromPathData(shape.reversed ? reversePathData(data) : data);
 }
 
 function buildPolystarPath(shape: PolystarShape): Path2D {
@@ -371,6 +413,11 @@ interface PolystarVertex {
   point: Point;
   radius: number;
   roundness: number;
+  // Angle of the vertex around the center (radians) and the roundness tangent
+  // length (perimSegment * roundness), used to build lottie-web/ThorVG-matching
+  // rounded points: tangents are perpendicular to the radius, not chord-aligned.
+  angle: number;
+  tangentLength: number;
 }
 
 function polystarVertexData(shape: PolystarShape): PolystarVertex[] {
@@ -386,10 +433,15 @@ function polystarVertexData(shape: PolystarShape): PolystarVertex[] {
       const angle = rotationRad + i * step - Math.PI / 2;
       const x = center.x + outerRadius * Math.cos(angle);
       const y = center.y + outerRadius * Math.sin(angle);
+      const roundness = Math.max(0, shape.outerRoundness);
       vertices.push({
         point: { x, y },
         radius: outerRadius,
-        roundness: Math.max(0, shape.outerRoundness),
+        roundness,
+        angle,
+        // lottie-web/ThorVG polygon handles: perimSegment = 2πr/(numPts*4),
+        // i.e. a quarter of the adjacent-vertex arc (step * r / 4).
+        tangentLength: (step * outerRadius * (roundness / 100)) / 4,
       });
     }
     return offsetPolystarVertices(vertices, center, numericAnimatable(shape.offset));
@@ -403,10 +455,15 @@ function polystarVertexData(shape: PolystarShape): PolystarVertex[] {
     const angle = rotationRad + i * step - Math.PI / 2;
     const x = center.x + radius * Math.cos(angle);
     const y = center.y + radius * Math.sin(angle);
+    const roundness = Math.max(0, isOuter ? shape.outerRoundness : shape.innerRoundness);
     vertices.push({
       point: { x, y },
       radius,
-      roundness: Math.max(0, isOuter ? shape.outerRoundness : shape.innerRoundness),
+      roundness,
+      angle,
+      // lottie-web/ThorVG star handles: perimSegment = 2πr/(numPts*2) with
+      // numPts = 2*points, i.e. half the adjacent-vertex arc (step * r / 2).
+      tangentLength: (step * radius * (roundness / 100)) / 2,
     });
   }
   return offsetPolystarVertices(vertices, center, numericAnimatable(shape.offset));
@@ -479,11 +536,18 @@ function offsetPolystarVertices(vertices: PolystarVertex[], center: Point, offse
   }
   const points = vertices.map((vertex) => vertex.point);
   const offsetPoints = offsetClosedPolyline(points, center, offset);
-  return vertices.map((vertex, index) => ({
-    ...vertex,
-    point: offsetPoints[index] ?? vertex.point,
-    radius: distance(offsetPoints[index] ?? vertex.point, center),
-  }));
+  return vertices.map((vertex, index) => {
+    const point = offsetPoints[index] ?? vertex.point;
+    const radius = distance(point, center);
+    return {
+      ...vertex,
+      point,
+      radius,
+      // Roundness handles are proportional to the vertex radius, so rescale
+      // them with the offset radius (they were computed pre-offset).
+      tangentLength: vertex.radius > 1e-9 ? vertex.tangentLength * (radius / vertex.radius) : vertex.tangentLength,
+    };
+  });
 }
 
 function offsetClosedPolyline(points: Point[], center: Point, offset: number): Point[] {
@@ -579,31 +643,23 @@ function roundedPolystarPath(vertices: PolystarVertex[]): Path2D {
   for (let i = 0; i < vertices.length; i++) {
     const current = vertices[i]!;
     const next = vertices[(i + 1) % vertices.length]!;
-    const segmentLength = distance(current.point, next.point);
-    if (segmentLength <= 1e-6) continue;
-
-    const currentHandle = polystarHandleLength(current, segmentLength);
-    const nextHandle = polystarHandleLength(next, segmentLength);
-    const ux = (next.point.x - current.point.x) / segmentLength;
-    const uy = (next.point.y - current.point.y) / segmentLength;
+    // Tangents are perpendicular to the radius (the CCW tangent of the circle at
+    // each vertex), length = perimSegment * roundness. This matches lottie-web /
+    // ThorVG, which a chord-aligned handle only approximates — the difference is
+    // large at high roundness (e.g. polystar_anim's 200%+ inner/outer roundness).
     const cp1 = {
-      x: current.point.x + ux * currentHandle,
-      y: current.point.y + uy * currentHandle,
+      x: current.point.x - Math.sin(current.angle) * current.tangentLength,
+      y: current.point.y + Math.cos(current.angle) * current.tangentLength,
     };
     const cp2 = {
-      x: next.point.x - ux * nextHandle,
-      y: next.point.y - uy * nextHandle,
+      x: next.point.x + Math.sin(next.angle) * next.tangentLength,
+      y: next.point.y - Math.cos(next.angle) * next.tangentLength,
     };
     path.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, next.point.x, next.point.y);
   }
 
   path.closePath();
   return path;
-}
-
-function polystarHandleLength(vertex: PolystarVertex, segmentLength: number): number {
-  const roundedness = Math.max(0, vertex.roundness) / 100;
-  return Math.min(segmentLength / 2, vertex.radius * roundedness * 0.47829);
 }
 
 function numericAnimatable(value: unknown): number {
@@ -724,7 +780,12 @@ function pathToPoints(shape: PathShape, segments = 64): Point[] {
   if (data.vertices.length === 0) return [];
   const points: Point[] = [];
   const vertexCount = data.vertices.length;
-  const samplesPerSegment = Math.max(2, Math.floor(segments / Math.max(1, vertexCount)));
+  // `segments` is a total budget; dividing it by the vertex count starves each
+  // bezier segment on complex paths (a 43-vertex path got 2 samples/segment,
+  // rendering curved strokes as jagged polylines). Enforce a per-segment minimum
+  // so curves stay smooth regardless of path complexity — more samples only bring
+  // the point-sampled trim closer to ThorVG's exact bezier trim.
+  const samplesPerSegment = Math.max(16, Math.floor(segments / Math.max(1, vertexCount)));
 
   const sampleSegment = (fromIndex: number, toIndex: number) => {
     const current = data.vertices[fromIndex]!;
