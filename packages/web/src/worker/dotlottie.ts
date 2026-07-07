@@ -19,7 +19,7 @@ import type {
   Transform,
   VectorSlotValue,
 } from '../types';
-import { getDefaultDPR, getPointerPosition, handleOpenUrl, isElementInViewport } from '../utils';
+import { getDefaultDPR, getPointerPosition, handleOpenUrl, isElementInViewport, resolveImageSlotSrc } from '../utils';
 
 import type { MethodParamsMap, MethodResultMap, RpcRequest, RpcResponse } from './types';
 import { WorkerManager } from './worker-manager';
@@ -875,10 +875,22 @@ export class DotLottieWorker {
     return this._sendMessage('setTextSlot', { instanceId: this._id, slotId, value });
   }
 
+  /**
+   * Set an image slot to a custom source.
+   *
+   * `http(s)://` URLs are fetched on the main thread and inlined as a `data:` URI before being
+   * sent to the worker, since the WASM renderer can only decode embedded images. `data:` URIs
+   * and package-relative file names are passed through unchanged.
+   * @param slotId - The image slot ID to set
+   * @param src - The image source: a `data:` URI, an `http(s)://` URL, or a package `i/` file name
+   * @returns true if successful
+   */
   public async setImageSlot(slotId: string, src: string): Promise<boolean> {
     if (!this._created) return false;
 
-    return this._sendMessage('setImageSlot', { instanceId: this._id, slotId, src });
+    const resolvedSrc = await resolveImageSlotSrc(src);
+
+    return this._sendMessage('setImageSlot', { instanceId: this._id, slotId, src: resolvedSrc });
   }
 
   public async resetSlot(slotId: string): Promise<boolean> {

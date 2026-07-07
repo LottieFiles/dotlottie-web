@@ -1588,16 +1588,10 @@ describe.each([
       await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), { timeout: 5000 });
     };
 
-    test('returns true when setting a known image slot', async () => {
-      await loadImageAnimation();
-
-      expect(await dotLottie.setImageSlot('sun_img', MAGENTA_PNG)).toBe(true);
-    });
-
-    // Pixel readback only works on the main-thread canvas; the worker canvas is transferred offscreen.
-    (isWorker ? test.skip : test)('swapping the image slot changes the rendered output', async () => {
-      await loadImageAnimation();
-
+    // Total absolute per-channel difference the swap produces across a few frames of the timeline.
+    // Pixel readback only works on the main-thread canvas (the worker canvas is transferred offscreen),
+    // so callers of this helper are guarded with isWorker.
+    const measureSwapDiff = async (swap: () => Promise<boolean>): Promise<number> => {
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
       const total = dotLottie.totalFrames;
       // Sample a few frames across the timeline — the slotted sun rises through the frame.
@@ -1609,25 +1603,77 @@ describe.each([
         return ctx.getImageData(0, 0, canvas.width, canvas.height).data;
       };
 
-      const before: Uint8ClampedArray[] = [];
+      const baseline: Array<{ frame: number; pixels: Uint8ClampedArray }> = [];
       for (const frame of frames) {
-        before.push(await readFrame(frame));
+        baseline.push({ frame, pixels: await readFrame(frame) });
       }
 
-      expect(await dotLottie.setImageSlot('sun_img', MAGENTA_PNG)).toBe(true);
+      expect(await swap()).toBe(true);
 
       let totalDiff = 0;
-      for (let i = 0; i < frames.length; i += 1) {
-        const after = await readFrame(frames[i]);
-        const original = before[i];
+      for (const { frame, pixels } of baseline) {
+        const after = await readFrame(frame);
 
         for (let p = 0; p < after.length; p += 1) {
-          totalDiff += Math.abs(after[p] - original[p]);
+          totalDiff += Math.abs((after[p] ?? 0) - (pixels[p] ?? 0));
         }
       }
 
+      return totalDiff;
+    };
+
+    test('returns true when setting a known image slot', async () => {
+      await loadImageAnimation();
+
+      expect(await dotLottie.setImageSlot('sun_img', MAGENTA_PNG)).toBe(true);
+    });
+
+    // Runs for both DotLottie and DotLottieWorker: the http(s) fetch happens on the main thread in
+    // both, so the worker only ever receives an inlined data: URI.
+    test('resolves an http(s) src via fetch before handing it to the core', async () => {
+      await loadImageAnimation();
+
+      const pngBytes = Uint8Array.from(atob(MAGENTA_PNG.split(',')[1] ?? ''), (char) => char.charCodeAt(0));
+      const fetchSpy = vi
+        .spyOn(window, 'fetch')
+        .mockImplementation(
+          async () => new Response(pngBytes, { headers: { 'content-type': 'image/png' }, status: 200 }),
+        );
+
+      const url = 'https://example.com/sun.png';
+
+      expect(await dotLottie.setImageSlot('sun_img', url)).toBe(true);
+      expect(fetchSpy).toHaveBeenCalledWith(url);
+
+      fetchSpy.mockRestore();
+    });
+
+    (isWorker ? test.skip : test)('swapping the image slot changes the rendered output', async () => {
+      await loadImageAnimation();
+
       // Replacing the detailed sun with solid magenta over a large area must shift many pixels.
+      expect(await measureSwapDiff(() => dotLottie.setImageSlot('sun_img', MAGENTA_PNG))).toBeGreaterThan(1000);
+    });
+
+    (isWorker ? test.skip : test)('fetches an http(s) src and inlines it before rendering', async () => {
+      await loadImageAnimation();
+
+      // The WASM renderer cannot fetch remote images (and crashes on a non-embedded slot),
+      // so the wrapper must fetch the URL itself and inline it as a data: URI.
+      const pngBytes = Uint8Array.from(atob(MAGENTA_PNG.split(',')[1] ?? ''), (char) => char.charCodeAt(0));
+      const fetchSpy = vi
+        .spyOn(window, 'fetch')
+        .mockImplementation(
+          async () => new Response(pngBytes, { headers: { 'content-type': 'image/png' }, status: 200 }),
+        );
+
+      const url = 'https://example.com/sun.png';
+      const totalDiff = await measureSwapDiff(() => dotLottie.setImageSlot('sun_img', url));
+
+      expect(fetchSpy).toHaveBeenCalledWith(url);
       expect(totalDiff).toBeGreaterThan(1000);
+
+      fetchSpy.mockRestore();
     });
   });
 
