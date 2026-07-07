@@ -40,6 +40,100 @@ interface PendingLoad {
 }
 
 /**
+ * Canvas2D renderer shared by all lite player instances. The renderer is
+ * stateless per render() call but holds per-animation caches (decoded images,
+ * Path2D caches, offscreen buffers); sharing it lets many small players reuse
+ * those caches, which is the primary lite use case.
+ */
+const sharedRenderer = new Canvas2DRenderer();
+
+/**
+ * Dispose the caches (decoded images, scaled bitmaps, offscreen buffers,
+ * Path2D caches) of the Canvas2D renderer shared by all lite players. Safe to
+ * call at any time: live players keep working and rebuild caches on demand.
+ * Call after destroying all players to release memory in long-lived apps.
+ */
+export function disposeSharedCanvasRenderer(): void {
+  sharedRenderer.dispose();
+}
+
+type CachedSource =
+  | { kind: 'json'; animation: Animation }
+  | { kind: 'dotlottie'; container: ParsedDotLottie; animations: Map<string, Animation> };
+
+const parsedSourceCache = new Map<string, Promise<CachedSource>>();
+const MAX_PARSED_SOURCE_CACHE_ENTRIES = 64;
+
+function sourceCacheKey(src: string): string {
+  try {
+    return new URL(src, globalThis.location?.href).href;
+  } catch {
+    return src;
+  }
+}
+
+function evictParsedSourceCache(): void {
+  while (parsedSourceCache.size > MAX_PARSED_SOURCE_CACHE_ENTRIES) {
+    const firstKey = parsedSourceCache.keys().next().value;
+
+    if (!firstKey) return;
+    parsedSourceCache.delete(firstKey);
+  }
+}
+
+async function fetchAnimationData(src: string): Promise<string | ArrayBuffer> {
+  const response = await fetch(src);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch animation data from URL: ${src}. ${response.status}: ${response.statusText}`);
+  }
+
+  const data = await response.arrayBuffer();
+
+  if (isDotLottie(data)) {
+    return data;
+  }
+
+  return new TextDecoder().decode(data);
+}
+
+async function loadParsedSource(src: string): Promise<CachedSource> {
+  const data = await fetchAnimationData(src);
+
+  if (typeof data === 'string') {
+    if (!isLottie(data)) {
+      throw new Error('Invalid Lottie JSON string: The provided string does not conform to the Lottie JSON format.');
+    }
+
+    return { kind: 'json', animation: parseLottie(JSON.parse(data) as Record<string, unknown>) };
+  }
+
+  return { kind: 'dotlottie', container: parseDotLottie(data), animations: new Map() };
+}
+
+/**
+ * Fetch and parse a source URL, caching the parsed result so many players
+ * pointing at the same source share one fetch, one parse, and one Animation
+ * object (which also lets the shared renderer's per-animation caches hit).
+ */
+function loadCachedSource(src: string): Promise<CachedSource> {
+  const key = sourceCacheKey(src);
+  const cached = parsedSourceCache.get(key);
+
+  if (cached) return cached;
+
+  const loadPromise = loadParsedSource(src).catch((error: unknown) => {
+    parsedSourceCache.delete(key);
+    throw error;
+  });
+
+  parsedSourceCache.set(key, loadPromise);
+  evictParsedSourceCache();
+
+  return loadPromise;
+}
+
+/**
  * Pure-TypeScript dotLottie player (experimental).
  *
  * Drop-in replacement for the WASM-backed DotLottie player targeting
@@ -53,7 +147,7 @@ export class DotLottieLite implements DotLottieAPI {
 
   private readonly _frameManager = new AnimationFrameManager();
 
-  private readonly _renderer = new Canvas2DRenderer();
+  private readonly _renderer = sharedRenderer;
 
   private readonly _boundAnimationLoop: (time: number) => void;
 
@@ -116,6 +210,10 @@ export class DotLottieLite implements DotLottieAPI {
   private _animationFrameId: number | null = null;
 
   private _lastFrameTime: number | null = null;
+
+  // Incremented on every load()/destroy() so in-flight async loads from a
+  // previous request are discarded instead of clobbering the newer animation.
+  private _loadToken = 0;
 
   public constructor(config: Config) {
     this._canvas = config.canvas ?? null;
@@ -305,6 +403,7 @@ export class DotLottieLite implements DotLottieAPI {
   public load(config: Omit<Config, 'canvas'>): void {
     if (!this.isReady) return;
 
+    this._loadToken += 1;
     this._stopAnimationLoop();
     this._cleanupCanvas();
     this._isFrozen = false;
@@ -629,6 +728,7 @@ export class DotLottieLite implements DotLottieAPI {
   }
 
   public destroy(): void {
+    this._loadToken += 1;
     this._stopAnimationLoop();
 
     this._cleanupCanvas();
@@ -636,8 +736,8 @@ export class DotLottieLite implements DotLottieAPI {
     unregisterPackagedFonts(this._fonts);
     this._fonts = [];
 
-    this._renderer.dispose();
-
+    // The renderer is shared by all lite players; its caches stay alive for
+    // other instances. Use disposeSharedCanvasRenderer() to release them.
     this._animation = null;
     this._dotLottie = null;
     this._layoutBuffer = null;
@@ -854,26 +954,39 @@ export class DotLottieLite implements DotLottieAPI {
     this._eventManager.dispatch({ type: 'loadError', error: new Error(message) });
   }
 
-  private async _fetchData(src: string): Promise<string | ArrayBuffer> {
-    const response = await fetch(src);
+  private _loadFromSrc(src: string): void {
+    const token = (this._loadToken += 1);
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch animation data from URL: ${src}. ${response.status}: ${response.statusText}`);
-    }
+    loadCachedSource(src)
+      .then((source) => {
+        if (this._destroyed || token !== this._loadToken) return;
 
-    const data = await response.arrayBuffer();
+        this._applyCachedSource(source);
+      })
+      .catch((error) => {
+        if (this._destroyed || token !== this._loadToken) return;
 
-    if (isDotLottie(data)) {
-      return data;
-    }
-
-    return new TextDecoder().decode(data);
+        this._dispatchError(`Failed to load animation data from URL: ${src}. ${error}`);
+      });
   }
 
-  private _loadFromSrc(src: string): void {
-    this._fetchData(src)
-      .then((data) => this._loadFromData(data))
-      .catch((error) => this._dispatchError(`Failed to load animation data from URL: ${src}. ${error}`));
+  private _applyCachedSource(source: CachedSource): void {
+    if (!this._canvas) {
+      console.warn('[dotlottie-web] Cannot load animation without canvas. Call setCanvas() first.');
+
+      return;
+    }
+
+    try {
+      if (source.kind === 'json') {
+        this._dotLottie = null;
+        this._setAnimation(source.animation, undefined, { applyAutoplay: true });
+      } else {
+        this._loadDotLottieContainer(source.container, source.animations);
+      }
+    } catch (error) {
+      this._dispatchError(`Failed to load animation data. ${error}`);
+    }
   }
 
   private _loadFromData(data: Data): void {
@@ -932,8 +1045,10 @@ export class DotLottieLite implements DotLottieAPI {
   }
 
   private _loadDotLottie(buffer: ArrayBuffer): void {
-    const container = parseDotLottie(buffer);
+    this._loadDotLottieContainer(parseDotLottie(buffer));
+  }
 
+  private _loadDotLottieContainer(container: ParsedDotLottie, animationCache?: Map<string, Animation>): void {
     let entry: DotLottieAnimation;
 
     try {
@@ -947,8 +1062,14 @@ export class DotLottieLite implements DotLottieAPI {
       entry = resolveDotLottieAnimation(container);
     }
 
-    const data = resolvePackagedImageAssets(entry.data, container.files);
-    const animation = parseLottie(data);
+    // Cached containers keep one parsed Animation per animation id so players
+    // sharing a source also share Animation objects (and renderer caches).
+    let animation = animationCache?.get(entry.id);
+
+    if (!animation) {
+      animation = parseLottie(resolvePackagedImageAssets(entry.data, container.files));
+      animationCache?.set(entry.id, animation);
+    }
 
     this._dotLottie = container;
 
@@ -1123,6 +1244,10 @@ export class DotLottieLite implements DotLottieAPI {
       }
     } catch (error) {
       console.error('Error in animation frame:', error);
+
+      // A crashing tick must not report the player as still playing: the loop
+      // stops here, so reflect that in the state and allow a later play() retry.
+      this._state = 'paused';
 
       this._eventManager.dispatch({ type: 'renderError', error: error as unknown as Error });
     }
