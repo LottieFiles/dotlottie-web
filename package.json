@@ -7,6 +7,8 @@
     "build:apps": "turbo run build --filter='./apps/*'",
     "build:examples": "turbo run build --filter='./examples/*'",
     "build": "turbo run build",
+    "bench": "node apps/lab/bench.mjs",
+    "parity": "node apps/lab/run.mjs",
     "changelog": "changeset add",
     "changelog:check": "changeset status --since=main",
     "clean": "node scripts/remove-dev.mjs && turbo run clean",

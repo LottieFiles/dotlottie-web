@@ -1,0 +1,476 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>dotLottie Lab — visual parity (live)</title>
+		<style>
+			:root {
+				--bg: #0e0e11;
+				--panel: #16161c;
+				--line: #26262c;
+				--muted: #8a8a94;
+				--text: #e6e6e6;
+				--accent: #4ea1ff;
+				--good: #3ddc84;
+				--warn: #e0a83a;
+				--bad: #ff5a7a;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				background: var(--bg);
+				color: var(--text);
+				font:
+					13px/1.45 -apple-system,
+					system-ui,
+					sans-serif;
+			}
+			header {
+				position: sticky;
+				top: 0;
+				z-index: 5;
+				background: var(--panel);
+				border-bottom: 1px solid var(--line);
+				padding: 14px 20px;
+			}
+			h1 {
+				margin: 0 0 2px;
+				font-size: 15px;
+				font-weight: 650;
+			}
+			.sub {
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.progouter {
+				margin-top: 10px;
+				height: 10px;
+				border-radius: 6px;
+				background: #23232a;
+				overflow: hidden;
+			}
+			.proginner {
+				height: 100%;
+				width: 0;
+				background: linear-gradient(90deg, var(--accent), #7ad);
+				transition: width 0.2s ease;
+			}
+			.progmeta {
+				display: flex;
+				justify-content: space-between;
+				gap: 12px;
+				margin-top: 6px;
+				font-size: 12px;
+				color: var(--muted);
+				flex-wrap: wrap;
+			}
+			.progmeta b {
+				color: var(--text);
+				font-variant-numeric: tabular-nums;
+			}
+			.current {
+				color: var(--accent);
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				max-width: 60vw;
+			}
+			.stats {
+				display: flex;
+				gap: 8px;
+				padding: 12px 20px;
+				flex-wrap: wrap;
+			}
+			.stat {
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-radius: 8px;
+				padding: 8px 12px;
+				min-width: 92px;
+			}
+			.stat .n {
+				font-size: 20px;
+				font-weight: 700;
+				font-variant-numeric: tabular-nums;
+			}
+			.stat .l {
+				color: var(--muted);
+				font-size: 11px;
+			}
+			.recent {
+				display: flex;
+				gap: 8px;
+				padding: 0 20px 12px;
+				overflow-x: auto;
+			}
+			.recent figure {
+				margin: 0;
+				flex: 0 0 auto;
+				text-align: center;
+			}
+			.recent img {
+				width: 64px;
+				height: 64px;
+				object-fit: contain;
+				border: 1px solid var(--line);
+				border-radius: 4px;
+				background: #000;
+			}
+			.recent figcaption {
+				font-size: 10px;
+				color: var(--muted);
+				margin-top: 2px;
+				max-width: 64px;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			table {
+				border-collapse: collapse;
+				width: 100%;
+			}
+			th {
+				text-align: left;
+				color: var(--muted);
+				font-weight: 500;
+				font-size: 11px;
+				padding: 6px 12px;
+				position: sticky;
+				top: 112px;
+				background: var(--bg);
+			}
+			td {
+				border-bottom: 1px solid #20202722;
+				padding: 8px 12px;
+				vertical-align: top;
+			}
+			tr.suspect {
+				background: #1b1710;
+			}
+			.score .num {
+				font-size: 18px;
+				font-weight: 700;
+				font-variant-numeric: tabular-nums;
+			}
+			.score .avg {
+				color: var(--muted);
+				font-size: 11px;
+			}
+			.tag {
+				margin-top: 3px;
+				font-size: 10px;
+				color: var(--warn);
+				border: 1px solid #6a531a;
+				border-radius: 3px;
+				padding: 0 4px;
+				display: inline-block;
+			}
+			.name {
+				font-weight: 600;
+				max-width: 220px;
+				word-break: break-all;
+			}
+			.name .meta {
+				color: var(--muted);
+				font-weight: 400;
+				font-size: 11px;
+				margin-top: 2px;
+			}
+			.thumbs {
+				display: flex;
+				gap: 6px;
+			}
+			.thumbs figure {
+				margin: 0;
+				text-align: center;
+			}
+			.thumbs img {
+				display: block;
+				width: 96px;
+				border: 1px solid #33333c;
+				border-radius: 4px;
+				background: #000;
+			}
+			.thumbs figcaption {
+				color: var(--muted);
+				font-size: 10px;
+				margin-top: 2px;
+			}
+			.frames {
+				color: #c7c7cf;
+				font-size: 11px;
+				white-space: nowrap;
+			}
+			.lw {
+				color: #6f9fd8;
+			}
+			.bar {
+				display: inline-block;
+				width: 120px;
+				height: 8px;
+				border-radius: 4px;
+				background: #23232a;
+				overflow: hidden;
+				vertical-align: middle;
+				margin-left: 6px;
+			}
+			.bar > i {
+				display: block;
+				height: 100%;
+			}
+			.done-banner {
+				background: #0f2417;
+				border: 1px solid #1f5133;
+				color: #8ee6b0;
+				padding: 8px 20px;
+				font-size: 13px;
+			}
+			.done-banner a {
+				color: #9fe;
+			}
+			a {
+				color: var(--accent);
+			}
+			.idle {
+				padding: 40px 20px;
+				color: var(--muted);
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<h1>
+				dotLottie Lab · visual parity
+				<span class="sub"
+					>— dotlottie-web/lite vs dotlottie-web (live)</span
+				>
+			</h1>
+			<div class="progouter"><div class="proginner" id="prog"></div></div>
+			<div class="progmeta">
+				<span
+					><b id="doneCount">0</b> / <b id="totalCount">0</b> fixtures
+					· <b id="pct">0</b>%</span
+				>
+				<span class="current" id="current">waiting for run…</span>
+				<span
+					>elapsed <b id="elapsed">0s</b> · ETA <b id="eta">–</b> ·
+					<b id="rate">0</b>/s</span
+				>
+			</div>
+		</header>
+
+		<div id="banner"></div>
+
+		<div class="stats" id="stats"></div>
+		<div class="recent" id="recent"></div>
+
+		<table>
+			<thead>
+				<tr>
+					<th>worst lite↔web</th>
+					<th>fixture</th>
+					<th>reference · lite · lottie-web · diff</th>
+					<th>per-frame</th>
+				</tr>
+			</thead>
+			<tbody id="rows">
+				<tr>
+					<td colspan="4" class="idle" id="idle">Connecting…</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<script>
+			const $ = (id) => document.getElementById(id);
+			const state = {
+				total: 0,
+				startTime: 0,
+				done: false,
+				results: [],
+				current: null,
+				reportUrl: null,
+				meta: {},
+			};
+			const TOP = 50;
+
+			const color = (v) =>
+				v < 3 ? "var(--good)" : v < 10 ? "var(--warn)" : "var(--bad)";
+			const fmtDur = (ms) => {
+				const s = Math.round(ms / 1000);
+				return s < 60
+					? `${s}s`
+					: `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, "0")}s`;
+			};
+
+			const es = new EventSource("/__events");
+			es.onmessage = (m) => {
+				const e = JSON.parse(m.data);
+				if (e.type === "init") {
+					Object.assign(state, {
+						total: e.total,
+						startTime: e.startTime,
+						done: e.done,
+						results: e.results || [],
+						meta: e.meta || {},
+						reportUrl: e.reportUrl,
+					});
+				} else if (e.type === "start") {
+					Object.assign(state, {
+						total: e.total,
+						startTime: e.startTime,
+						done: false,
+						results: [],
+						reportUrl: null,
+						meta: e.meta || {},
+					});
+				} else if (e.type === "progress") {
+					state.current = e.src;
+				} else if (e.type === "result") {
+					state.results.push(e.r);
+					state.current = null;
+				} else if (e.type === "done") {
+					state.done = true;
+					state.reportUrl = e.reportUrl;
+					state.elapsedMs = e.elapsedMs;
+				}
+				if (e.type === "init") state.elapsedMs = e.elapsedMs;
+				schedule();
+			};
+			es.onerror = () => {
+				$("current").textContent =
+					"disconnected — is the run still going?";
+			};
+
+			let raf = 0;
+			function schedule() {
+				if (!raf)
+					raf = requestAnimationFrame(() => {
+						raf = 0;
+						render();
+					});
+			}
+			setInterval(() => {
+				if (!state.done && state.startTime) schedule();
+			}, 1000); // tick elapsed/ETA
+
+			function render() {
+				const done = state.results.length;
+				const total = state.total || done;
+				const pct = total ? Math.round((100 * done) / total) : 0;
+				$("prog").style.width = pct + "%";
+				$("doneCount").textContent = done;
+				$("totalCount").textContent = total;
+				$("pct").textContent = pct;
+				$("current").textContent = state.done
+					? "done"
+					: state.current
+						? `rendering ${state.current.replace(/^\/fixtures\//, "")} …`
+						: "waiting…";
+
+				const elapsed =
+					state.done && state.elapsedMs != null
+						? state.elapsedMs
+						: state.startTime
+							? Date.now() - state.startTime
+							: 0;
+				$("elapsed").textContent = fmtDur(elapsed);
+				const rate = elapsed > 0 ? done / (elapsed / 1000) : 0;
+				$("rate").textContent = rate.toFixed(1);
+				$("eta").textContent = state.done
+					? "–"
+					: rate > 0 && total > done
+						? fmtDur(((total - done) / rate) * 1000)
+						: "–";
+
+				// Stats over completed (non-error) results.
+				const ok = state.results.filter(
+					(r) => r && !r.error && r.maxLiteVsWeb >= 0,
+				);
+				const vals = ok
+					.map((r) => r.maxLiteVsWeb)
+					.sort((a, b) => a - b);
+				const median = vals.length
+					? vals[Math.floor(vals.length / 2)]
+					: 0;
+				const failed = state.results.filter((r) => r?.error).length;
+				const bucket = (lo, hi) =>
+					ok.filter(
+						(r) => r.maxLiteVsWeb >= lo && r.maxLiteVsWeb < hi,
+					).length;
+				$("stats").innerHTML = [
+					["median", median.toFixed(2) + "%", "var(--text)"],
+					["&lt; 5%", bucket(0, 5), "var(--good)"],
+					["5–10%", bucket(5, 10), "var(--warn)"],
+					["10–20%", bucket(10, 20), "var(--warn)"],
+					[
+						"≥ 20%",
+						ok.filter((r) => r.maxLiteVsWeb >= 20).length,
+						"var(--bad)",
+					],
+					["failed", failed, failed ? "var(--bad)" : "var(--muted)"],
+				]
+					.map(
+						([l, n, c]) =>
+							`<div class=stat><div class=n style="color:${c}">${n}</div><div class=l>${l}</div></div>`,
+					)
+					.join("");
+
+				// Recent strip: last 8 completed, newest first.
+				const recent = state.results.slice(-8).reverse();
+				$("recent").innerHTML = recent
+					.map((r) => {
+						const name = (r.src || "").split("/").pop();
+						const img = r.thumbs?.lite || r.thumbs?.web;
+						const v = r.maxLiteVsWeb;
+						return img
+							? `<figure><img src="${img}"><figcaption style="color:${v >= 0 ? color(v) : "var(--bad)"}">${v >= 0 ? v + "%" : "FAIL"}<br>${name}</figcaption></figure>`
+							: `<figure><figcaption>${v >= 0 ? v + "%" : "FAIL"}<br>${name}</figcaption></figure>`;
+					})
+					.join("");
+
+				// Banner on done.
+				$("banner").innerHTML = state.done
+					? `<div class=done-banner>✓ Run complete — ${done} fixtures in ${fmtDur(elapsed)}. <a href="/__parity.html" target="_blank">Open full report ↗</a> · <a href="/__parity.json" target="_blank">JSON</a></div>`
+					: "";
+
+				// Leaderboard: worst-first, top N with thumbnails.
+				const ranked = ok
+					.slice()
+					.sort((a, b) => b.maxLiteVsWeb - a.maxLiteVsWeb)
+					.slice(0, TOP);
+				if (!ranked.length) {
+					$("rows").innerHTML =
+						`<tr><td colspan=4 class=idle>${done ? "no results yet" : "Waiting for the first fixture…"}</td></tr>`;
+					return;
+				}
+				const img = (u, label) =>
+					u
+						? `<figure><img src="${u}"><figcaption>${label}</figcaption></figure>`
+						: `<figure><figcaption>${label}<br>n/a</figcaption></figure>`;
+				$("rows").innerHTML = ranked
+					.map((r) => {
+						const t = r.thumbs || {};
+						const frameCells = (r.perFrame || [])
+							.map(
+								(p) =>
+									`${p.frame}: <b>${p.liteVsWeb.diffPct}%</b>${p.lwVsWeb ? ` <span class=lw>(lw ${p.lwVsWeb.diffPct}%)</span>` : ""}`,
+							)
+							.join("<br>");
+						return `<tr class="${r.referenceSuspect ? "suspect" : ""}">
+          <td class=score><div class=num style="color:${color(r.maxLiteVsWeb)}">${r.maxLiteVsWeb}%</div>
+            <div class=bar><i style="width:${Math.min(100, r.maxLiteVsWeb)}%;background:${color(r.maxLiteVsWeb)}"></i></div>
+            <div class=avg>avg ${r.avgLiteVsWeb}%</div>${r.referenceSuspect ? "<div class=tag>ref-suspect</div>" : ""}</td>
+          <td class=name>${(r.src || "").replace(/^\//, "")}<div class=meta>${r.w}×${r.h} · frame ${t.worstFrame}</div></td>
+          <td class=thumbs>${img(t.web, "web")}${img(t.lite, "lite")}${img(t.lottieWeb, "lottie-web")}${img(t.diff, "diff")}</td>
+          <td class=frames>${frameCells}</td>
+        </tr>`;
+					})
+					.join("");
+			}
+			render();
+		</script>
+	</body>
+</html>

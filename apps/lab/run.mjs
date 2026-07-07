@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 // Visual-parity harness: renders every Lottie fixture in three engines
 // (dotlottie-web software, dotlottie-web/lite, lottie-web), diffs lite against
 // the dotlottie-web reference, and emits a report ranked worst-first so the
@@ -7,34 +6,36 @@ import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from '
 // lite matches lottie-web but both differ from dotlottie-web, the reference is
 // the likely outlier.
 //
-// Usage:
-//   pnpm --filter visual-parity parity [--filter=sub] [--frames=5] [--maxDim=240]
-//                                      [--top=40] [--limit=N] [--port=8823]
-import { createServer } from 'node:http';
-import { createRequire } from 'node:module';
-import { dirname, extname, join, relative, resolve } from 'node:path';
+// Usage (from the repo root):
+//   pnpm parity [-- --filter=sub --frames=5 --maxDim=240 --top=40 --limit=N
+//                  --port=8823 --serve --no-serve --no-open --no-build]
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { collectFixtures, ensureFreshBuild, openInBrowser, parseArgs, REPO } from './lib.mjs';
+import { startServer } from './server.mjs';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
-const REPO = resolve(HERE, '../..');
-const FIXTURES = resolve(REPO, 'fixtures');
 
-// Resolve lottie-web's canvas ESM build without hardcoding the (version- and
-// package-manager-specific) node_modules layout; served at a stable route below.
-const require = createRequire(import.meta.url);
-const LOTTIE_WEB_CANVAS = join(
-  dirname(require.resolve('lottie-web/package.json')),
-  'build/player/esm/lottie_canvas.min.js',
-);
-const LOTTIE_WEB_ROUTE = '/vendor/lottie-web-canvas.mjs';
+const DASHBOARD_ROUTE = '/__live';
+const EVENTS_ROUTE = '/__events';
+const REPORT_HTML_ROUTE = '/__parity.html';
+const REPORT_JSON_ROUTE = '/__parity.json';
 
-const args = Object.fromEntries(
-  process.argv.slice(2).map((a) => {
-    const m = a.match(/^--([^=]+)(?:=(.*))?$/);
-    return m ? [m[1], m[2] ?? true] : [a, true];
-  }),
-);
+// Live dashboard state, streamed to connected browsers over Server-Sent Events.
+const sseClients = new Set();
+const liveState = { total: 0, startTime: 0, done: false, results: [], meta: {}, reportUrl: null };
+function broadcast(event) {
+  const payload = `data: ${JSON.stringify(event)}\n\n`;
+  for (const res of sseClients) {
+    try {
+      res.write(payload);
+    } catch {}
+  }
+}
+
+const args = parseArgs();
 const FILTER = typeof args.filter === 'string' ? args.filter : null;
 const FRAMES = Number(args.frames ?? 5);
 const MAXDIM = Number(args.maxDim ?? 240);
@@ -42,110 +43,101 @@ const TOP = Number(args.top ?? 40);
 const LIMIT = args.limit ? Number(args.limit) : Infinity;
 const PORT = Number(args.port ?? 8823);
 
-const MIME = {
-  '.html': 'text/html',
-  '.js': 'text/javascript',
-  '.mjs': 'text/javascript',
-  '.json': 'application/json',
-  '.wasm': 'application/wasm',
-  '.lottie': 'application/zip',
-  '.map': 'application/json',
-  '.css': 'text/css',
-};
-
-function startServer() {
-  return new Promise((res) => {
-    const server = createServer((req, resp) => {
-      try {
-        const urlPath = decodeURIComponent(req.url.split('?')[0]);
-        if (urlPath === LOTTIE_WEB_ROUTE) {
-          resp.writeHead(200, { 'Content-Type': 'text/javascript', 'Access-Control-Allow-Origin': '*' });
-          resp.end(readFileSync(LOTTIE_WEB_CANVAS));
-          return;
-        }
-        const filePath = join(REPO, urlPath);
-        if (!filePath.startsWith(REPO) || !existsSync(filePath) || statSync(filePath).isDirectory()) {
-          resp.writeHead(404);
-          resp.end('nope');
-          return;
-        }
-        resp.writeHead(200, {
-          'Content-Type': MIME[extname(filePath)] || 'application/octet-stream',
-          'Access-Control-Allow-Origin': '*',
-          'Cross-Origin-Opener-Policy': 'same-origin',
-          'Cross-Origin-Embedder-Policy': 'require-corp',
-        });
-        resp.end(readFileSync(filePath));
-      } catch {
-        resp.writeHead(500);
-        resp.end('err');
-      }
-    });
-    server.listen(PORT, () => res(server));
-  });
+function serveDashboard(_req, resp) {
+  resp.writeHead(200, { 'Content-Type': 'text/html' });
+  resp.end(readFileSync(join(HERE, 'dashboard.html')));
+  return true;
 }
 
-function isLottieJson(file) {
-  try {
-    const d = JSON.parse(readFileSync(file, 'utf8'));
-    return d && typeof d === 'object' && Array.isArray(d.layers) && typeof d.w === 'number';
-  } catch {
-    return false;
-  }
-}
-
-function collectFixtures(dir) {
-  const out = [];
-  for (const name of readdirSync(dir)) {
-    if (name.startsWith('.')) continue;
-    const full = join(dir, name);
-    const st = statSync(full);
-    if (st.isDirectory()) {
-      out.push(...collectFixtures(full));
-    } else if (extname(full) === '.json' && isLottieJson(full)) {
-      out.push(full);
+function serveReport(file, type) {
+  return (_req, resp) => {
+    const reportFile = join(HERE, file);
+    if (!existsSync(reportFile)) {
+      resp.writeHead(404);
+      resp.end('report not generated yet');
+      return true;
     }
-  }
-  return out;
+    resp.writeHead(200, { 'Content-Type': type });
+    resp.end(readFileSync(reportFile));
+    return true;
+  };
 }
 
-function bar(pct, width = 24) {
-  const n = Math.round((Math.min(100, pct) / 100) * width);
-  return '█'.repeat(n) + '·'.repeat(width - n);
+function serveEvents(req, resp) {
+  resp.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+  });
+  resp.write('retry: 2000\n\n');
+  resp.write(`data: ${JSON.stringify({ type: 'init', ...liveState })}\n\n`);
+  sseClients.add(resp);
+  req.on('close', () => sseClients.delete(resp));
+  return true;
 }
 
 async function main() {
-  const server = await startServer();
-  let fixtures = collectFixtures(FIXTURES).sort();
+  ensureFreshBuild(args);
+
+  const server = await startServer({
+    port: PORT,
+    routes: {
+      '/': serveDashboard,
+      [DASHBOARD_ROUTE]: serveDashboard,
+      [EVENTS_ROUTE]: serveEvents,
+      [REPORT_HTML_ROUTE]: serveReport('parity-report.html', 'text/html'),
+      [REPORT_JSON_ROUTE]: serveReport('parity-report.json', 'application/json'),
+    },
+  });
+
+  let fixtures = collectFixtures().sort();
   if (FILTER) fixtures = fixtures.filter((f) => f.includes(FILTER));
   fixtures = fixtures.slice(0, LIMIT);
-  console.log(`visual-parity: ${fixtures.length} fixtures · ${FRAMES} frames · maxDim ${MAXDIM}px\n`);
+
+  const interactive = process.stdout.isTTY === true;
+  const serve = args.serve !== undefined || (interactive && args['no-serve'] === undefined);
+  const dashboardUrl = `http://localhost:${PORT}${DASHBOARD_ROUTE}`;
+
+  liveState.total = fixtures.length;
+  liveState.startTime = Date.now();
+  liveState.done = false;
+  liveState.results = [];
+  liveState.reportUrl = null;
+  liveState.meta = { frames: FRAMES, maxDim: MAXDIM };
+  broadcast({ type: 'start', total: fixtures.length, startTime: liveState.startTime, meta: liveState.meta });
+
+  console.log(`lab · visual parity: ${fixtures.length} fixtures · ${FRAMES} frames · maxDim ${MAXDIM}px`);
+  console.log(`live dashboard: ${dashboardUrl}\n`);
+  if (interactive && args['no-open'] === undefined) openInBrowser(dashboardUrl);
 
   const browser = await chromium.launch();
   const page = await browser.newPage({ deviceScaleFactor: 1 });
   page.on('pageerror', (e) => console.error('  page error:', e.message));
-  await page.goto(`http://localhost:${PORT}/apps/visual-parity/compare.html`, { waitUntil: 'load' });
+  await page.goto(`http://localhost:${PORT}/apps/lab/compare.html`, { waitUntil: 'load' });
   await page.waitForFunction('window.__ready === true', { timeout: 30000 });
 
-  const results = [];
+  const results = liveState.results;
   let i = 0;
   for (const file of fixtures) {
     i++;
     const src = `/${relative(REPO, file).split('\\').join('/')}`;
+    broadcast({ type: 'progress', i, total: fixtures.length, src });
     process.stdout.write(`[${i}/${fixtures.length}] ${src} … `);
+    let r;
     try {
-      const r = await page.evaluate((cfg) => window.runFixture(cfg), { src, maxDim: MAXDIM, sampleFrames: FRAMES });
-      results.push(r);
+      r = await page.evaluate((cfg) => window.runFixture(cfg), { src, maxDim: MAXDIM, sampleFrames: FRAMES });
       const oracle = r.hasLottieWeb ? ` (lw↔web ${r.maxLwVsWeb}%)` : ' (lw n/a)';
       console.log(`lite↔web max ${r.maxLiteVsWeb}%${r.referenceSuspect ? ' [ref-suspect]' : ''}${oracle}`);
     } catch (e) {
+      r = { src, error: String(e.message), maxLiteVsWeb: -1, perFrame: [] };
       console.log(`FAILED: ${e.message}`);
-      results.push({ src, error: String(e.message), maxLiteVsWeb: -1, perFrame: [] });
     }
+    results.push(r);
+    broadcast({ type: 'result', i, total: fixtures.length, r, elapsed: Date.now() - liveState.startTime });
   }
 
   await browser.close();
-  server.close();
 
   const ranked = results.filter((r) => !r.error).sort((a, b) => b.maxLiteVsWeb - a.maxLiteVsWeb);
   const failed = results.filter((r) => r.error);
@@ -161,14 +153,35 @@ async function main() {
     console.log('\nFailed to render:', failed.map((f) => f.src).join(', '));
   }
 
-  const outDir = HERE;
   writeFileSync(
-    join(outDir, 'report.json'),
+    join(HERE, 'parity-report.json'),
     JSON.stringify({ generatedFrames: FRAMES, maxDim: MAXDIM, ranked, failed }, null, 2),
   );
-  writeFileSync(join(outDir, 'report.html'), renderHtml(ranked, failed, { FRAMES, MAXDIM }));
-  console.log(`\nreport: ${join(outDir, 'report.html')}`);
-  console.log(`json:   ${join(outDir, 'report.json')}`);
+  writeFileSync(join(HERE, 'parity-report.html'), renderHtml(ranked, failed, { FRAMES, MAXDIM }));
+
+  liveState.done = true;
+  liveState.reportUrl = REPORT_HTML_ROUTE;
+  liveState.elapsedMs = Date.now() - liveState.startTime;
+  broadcast({ type: 'done', reportUrl: REPORT_HTML_ROUTE, elapsedMs: liveState.elapsedMs });
+
+  console.log(`\nreport: ${join(HERE, 'parity-report.html')}`);
+  console.log(`json:   ${join(HERE, 'parity-report.json')}`);
+
+  if (serve) {
+    console.log(`\n🖥  live dashboard + report: ${dashboardUrl}  (press Ctrl+C to stop)`);
+    process.on('SIGINT', () => {
+      server.close();
+      process.exit(0);
+    });
+    // The open server keeps the process alive so the report stays viewable.
+  } else {
+    server.close();
+  }
+}
+
+function bar(pct, width = 24) {
+  const n = Math.round((Math.min(100, pct) / 100) * width);
+  return '█'.repeat(n) + '·'.repeat(width - n);
 }
 
 function renderHtml(ranked, failed, meta) {
@@ -194,7 +207,7 @@ function renderHtml(ranked, failed, meta) {
     })
     .join('\n');
 
-  return `<!doctype html><meta charset=utf-8><title>Lottie visual parity</title>
+  return `<!doctype html><meta charset=utf-8><title>dotLottie Lab — visual parity</title>
 <style>
   body{font:13px/1.4 -apple-system,system-ui,sans-serif;margin:0;background:#0e0e11;color:#e6e6e6}
   header{padding:16px 20px;border-bottom:1px solid #26262c;position:sticky;top:0;background:#141418;z-index:2}
@@ -218,7 +231,7 @@ function renderHtml(ranked, failed, meta) {
   .legend{color:#8a8a94;font-size:11px;margin-top:6px}
 </style>
 <header>
-  <h1>Lottie visual parity — dotlottie-web/lite vs dotlottie-web</h1>
+  <h1>dotLottie Lab · visual parity — dotlottie-web/lite vs dotlottie-web</h1>
   <div class=sub>${ranked.length} fixtures · ${meta.FRAMES} frames each · ${meta.MAXDIM}px · ranked by worst lite↔web frame diff</div>
   <div class=legend>columns: dotlottie-web (reference) · lite (target) · lottie-web (oracle) · diff heatmap (pink = mismatch). <b>ref-suspect</b> = lite agrees with lottie-web, so dotlottie-web may be the outlier.${failed.length ? ` · ${failed.length} failed: ${failed.map((f) => f.src).join(', ')}` : ''}</div>
 </header>

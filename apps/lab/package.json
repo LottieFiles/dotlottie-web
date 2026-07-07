@@ -1,12 +1,13 @@
 {
-  "name": "visual-parity",
+  "name": "dotlottie-lab",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
   "type": "module",
-  "description": "Visual-parity harness: renders every Lottie fixture in dotlottie-web, dotlottie-web/lite, and lottie-web, then ranks lite's divergence from the dotlottie-web reference worst-first.",
+  "description": "dotLottie Lab: test suite for visual parity and render performance/memory across dotlottie-web, dotlottie-web/lite, and lottie-web. Run `pnpm parity` or `pnpm bench` from the repo root.",
   "scripts": {
     "parity": "node run.mjs",
+    "bench": "node bench.mjs",
     "start": "node run.mjs"
   },
   "devDependencies": {

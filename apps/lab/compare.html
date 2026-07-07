@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>visual parity harness</title>
+  <title>dotLottie Lab — parity driver</title>
   <style>
     body { margin: 0; background: #666; font-family: monospace; }
     #stage { position: fixed; left: -99999px; top: 0; }
@@ -78,7 +78,7 @@
       return buffers;
     }
 
-    async function renderLottieWeb(data, frames, w, h, ip) {
+    async function renderLottieWeb(data, frames, w, h) {
       const canvas = makeCanvas(w, h);
       const ctx = canvas.getContext('2d');
       const anim = lottie.loadAnimation({
@@ -93,13 +93,14 @@
         await nextFrame();
         // Prime pass so embedded images decode before capture (see renderDotLottie).
         for (const f of frames) {
-          anim.goToAndStop(f - ip, true);
+          anim.goToAndStop(f, true);
           await nextFrame();
         }
         await settle(150);
         for (const f of frames) {
-          // lottie-web frames are 0-based within [ip, op]; setFrame uses absolute-ip.
-          anim.goToAndStop(f - ip, true);
+          // All engines share one 0-based frame coordinate; lottie-web's
+          // goToAndStop(0) is likewise the in-point.
+          anim.goToAndStop(f, true);
           await nextFrame();
           buffers[f] = ctx.getImageData(0, 0, w, h).data;
         }
@@ -174,24 +175,28 @@
       const h = Math.max(1, Math.round(h0 * scale));
       const ip = Math.round(data.ip ?? 0);
       const op = Math.round(data.op ?? 60);
+      // Frame coordinates are 0-based within [0, totalFrames-1], matching the
+      // dotLottie player API: setFrame(0) is the in-point and totalFrames === op-ip.
       // Use only INTEGER frames. ThorVG (dotlottie-web) may skip re-rendering a
       // subframe when it is within ~0.001 of the previous frame (a performance
-      // optimization), so fractional frames yield spurious diffs. Also skip the
-      // exact end frame (op): engines resolve the loop boundary inconsistently
-      // (clamp vs wrap). Sample distinct integers across [ip, op-1].
-      const last = op - 1 > ip ? op - 1 : op;
-      const span = Math.max(1, last - ip);
+      // optimization), so fractional frames yield spurious diffs. Never sample the
+      // end frame (totalFrames): the player clamps playback to totalFrames-1, so
+      // that frame does not exist, and engines resolve the loop boundary
+      // (clamp vs wrap) inconsistently. Sample distinct integers across
+      // [0, totalFrames-1] and hand the same 0-based frame to every engine.
+      const totalFrames = Math.max(1, op - ip);
+      const lastFrame = Math.max(0, totalFrames - 1);
       const frameSet = new Set();
       for (let k = 0; k < sampleFrames; k++) {
         const t = sampleFrames === 1 ? 0.5 : k / (sampleFrames - 1);
-        frameSet.add(Math.round(ip + t * span));
+        frameSet.add(Math.round(t * lastFrame));
       }
       const frames = [...frameSet];
 
       const web = await renderDotLottie(DotLottieWeb, data, frames, w, h);
       const lite = await renderDotLottie(DotLottieLite, data, frames, w, h);
       let lw = null;
-      try { lw = await renderLottieWeb(data, frames, w, h, ip); } catch (_e) { lw = null; }
+      try { lw = await renderLottieWeb(data, frames, w, h); } catch (_e) { lw = null; }
 
       const perFrame = frames.map((f) => {
         const liteVsWeb = diff(lite[f], web[f], w, h);

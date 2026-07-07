@@ -1,0 +1,270 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>dotLottie Lab — bench driver</title>
+  <style>
+    body { margin: 0; background: #666; font-family: monospace; }
+    #stage { position: fixed; left: -99999px; top: 0; }
+  </style>
+</head>
+<body>
+  <div id="stage"></div>
+  <script type="module">
+    // Performance + memory benchmark harness. Renders each fixture in all three
+    // engines and measures render cost (ms/frame, derived FPS) and steady-state
+    // memory. Sibling to compare.html, which measures visual parity.
+    import { DotLottie as DotLottieWeb } from '/packages/web/dist/index.js';
+    import { DotLottie as DotLottieLite } from '/packages/web/dist/lite/index.js';
+    import lottie from '/vendor/lottie-web-canvas.mjs';
+
+    DotLottieWeb.setWasmUrl('/packages/web/dist/dotlottie-player.wasm');
+
+    const stage = document.getElementById('stage');
+    const raf = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const settle = (ms) => new Promise((r) => setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(r)), ms));
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    function makeCanvas(w, h) {
+      const c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      stage.appendChild(c);
+      return c;
+    }
+
+    function waitLoad(dl, timeoutMs = 15000) {
+      return new Promise((resolve, reject) => {
+        let settled = false;
+        const done = (ok) => {
+          if (settled) return;
+          settled = true;
+          ok ? resolve() : reject(new Error('load-failed'));
+        };
+        dl.addEventListener('load', () => done(true));
+        dl.addEventListener('loadError', () => done(false));
+        setTimeout(() => done(false), timeoutMs);
+      });
+    }
+
+    // --- Memory --------------------------------------------------------------
+    // performance.measureUserAgentSpecificMemory() is accurate (it forces a GC
+    // and reports total agent memory, including WASM linear memory) but only
+    // available under cross-origin isolation — which the server enables via
+    // COOP/COEP. Fall back to the coarse JS-heap counter otherwise.
+    const MEMORY_API = typeof performance.measureUserAgentSpecificMemory === 'function' && self.crossOriginIsolated;
+
+    async function forceGc() {
+      if (typeof window.gc === 'function') {
+        window.gc();
+        await sleep(20);
+        window.gc();
+        await sleep(20);
+      }
+    }
+
+    async function measureMemoryBytes() {
+      await forceGc();
+      if (MEMORY_API) {
+        try {
+          const m = await performance.measureUserAgentSpecificMemory();
+          return m.bytes;
+        } catch {
+          /* fall through */
+        }
+      }
+      if (performance.memory) return performance.memory.usedJSHeapSize;
+      return null;
+    }
+
+    // --- Stats ---------------------------------------------------------------
+    function stats(samples) {
+      const s = [...samples].sort((a, b) => a - b);
+      const n = s.length;
+      const median = n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2;
+      const mean = samples.reduce((a, b) => a + b, 0) / n;
+      const p95 = s[Math.min(n - 1, Math.floor(n * 0.95))];
+      return {
+        median: +median.toFixed(3),
+        mean: +mean.toFixed(3),
+        p95: +p95.toFixed(3),
+        min: +s[0].toFixed(3),
+        max: +s[n - 1].toFixed(3),
+        samples: n,
+      };
+    }
+
+    // --- Engine adapters -----------------------------------------------------
+    // Each adapter exposes: create() -> handle, render(handle, frame), destroy(handle).
+    function dotLottieAdapter(Ctor) {
+      return {
+        async create(data, w, h) {
+          const canvas = makeCanvas(w, h);
+          const dl = new Ctor({
+            canvas,
+            data: JSON.stringify(data),
+            autoplay: false,
+            loop: false,
+            backgroundColor: '#00000000',
+          });
+          await waitLoad(dl);
+          return { dl, canvas };
+        },
+        render(handle, frame) {
+          handle.dl.setFrame(frame);
+          if (typeof handle.dl.render === 'function') handle.dl.render();
+        },
+        destroy(handle) {
+          try {
+            handle.dl.destroy?.();
+          } catch {}
+          handle.canvas.remove();
+        },
+      };
+    }
+
+    function lottieWebAdapter() {
+      return {
+        async create(data, w, h, ip) {
+          const canvas = makeCanvas(w, h);
+          const ctx = canvas.getContext('2d');
+          const anim = lottie.loadAnimation({
+            renderer: 'canvas',
+            loop: false,
+            autoplay: false,
+            animationData: JSON.parse(JSON.stringify(data)),
+            rendererSettings: { context: ctx, clearCanvas: true, preserveAspectRatio: 'xMidYMid meet' },
+          });
+          await raf();
+          return { anim, canvas, ip };
+        },
+        render(handle, frame) {
+          // lottie-web frames are 0-based within [ip, op].
+          handle.anim.goToAndStop(frame - handle.ip, true);
+        },
+        destroy(handle) {
+          try {
+            handle.anim.destroy();
+          } catch {}
+          handle.canvas.remove();
+        },
+      };
+    }
+
+    const ENGINES = [
+      { key: 'web', name: 'dotlottie-web', adapter: dotLottieAdapter(DotLottieWeb) },
+      { key: 'lite', name: 'lite', adapter: dotLottieAdapter(DotLottieLite) },
+      { key: 'lottieWeb', name: 'lottie-web', adapter: lottieWebAdapter() },
+    ];
+
+    // Measure one engine end to end: load, prime (so embedded images decode),
+    // capture steady-state memory, then time repeated renders across the frame
+    // set. Frames are cycled so consecutive renders differ, defeating any
+    // "skip redraw if the frame is unchanged" optimization.
+    async function benchEngine(engine, data, frames, w, h, ip, cfg) {
+      const { adapter } = engine;
+
+      const baseline = await measureMemoryBytes();
+
+      const tCreate = performance.now();
+      const handle = await adapter.create(data, w, h, ip);
+      // Prime pass: force image decode, then settle and render once more.
+      for (const f of frames) {
+        adapter.render(handle, f);
+        await raf();
+      }
+      await settle(150);
+      for (const f of frames) adapter.render(handle, f);
+      const loadMs = +(performance.now() - tCreate).toFixed(2);
+
+      const afterLoad = await measureMemoryBytes();
+      const memoryBytes = baseline != null && afterLoad != null ? Math.max(0, afterLoad - baseline) : null;
+
+      // Warmup (JIT, caches) — not timed.
+      for (let w0 = 0; w0 < cfg.warmup; w0++) {
+        for (const f of frames) adapter.render(handle, f);
+      }
+
+      // Timed: render each frame, iterations times, collecting per-render ms.
+      const samples = [];
+      for (let it = 0; it < cfg.iterations; it++) {
+        for (const f of frames) {
+          const t0 = performance.now();
+          adapter.render(handle, f);
+          samples.push(performance.now() - t0);
+        }
+      }
+
+      adapter.destroy(handle);
+      await forceGc();
+
+      const st = stats(samples);
+      return {
+        loadMs,
+        memoryBytes,
+        render: st,
+        fps: +(1000 / st.median).toFixed(1),
+      };
+    }
+
+    // Main entry called per-fixture by the Playwright driver.
+    window.runBench = async function runBench(cfg) {
+      const { src, maxDim = 240, sampleFrames = 8, iterations = 30, warmup = 5 } = cfg;
+      const data = await (await fetch(src)).json();
+      const w0 = data.w || 512;
+      const h0 = data.h || 512;
+      const scale = maxDim / Math.max(w0, h0);
+      const w = Math.max(1, Math.round(w0 * scale));
+      const h = Math.max(1, Math.round(h0 * scale));
+      const ip = Math.round(data.ip ?? 0);
+      const op = Math.round(data.op ?? 60);
+
+      // Distinct integer frames across [ip, op-1] (same rationale as the visual
+      // harness: fractional/end frames are unstable across engines).
+      const last = op - 1 > ip ? op - 1 : op;
+      const span = Math.max(1, last - ip);
+      const frameSet = new Set();
+      for (let k = 0; k < sampleFrames; k++) {
+        const t = sampleFrames === 1 ? 0.5 : k / (sampleFrames - 1);
+        frameSet.add(Math.round(ip + t * span));
+      }
+      const frames = [...frameSet];
+
+      const engines = {};
+      const errors = {};
+      for (const engine of ENGINES) {
+        try {
+          engines[engine.key] = await benchEngine(engine, data, frames, w, h, ip, { iterations, warmup });
+        } catch (e) {
+          engines[engine.key] = null;
+          errors[engine.key] = String(e?.message ?? e);
+        }
+      }
+
+      // Speedups relative to the reference (dotlottie-web), by median ms.
+      const refMs = engines.web?.render.median ?? null;
+      const speedup = {};
+      for (const engine of ENGINES) {
+        const m = engines[engine.key]?.render.median;
+        speedup[engine.key] = refMs && m ? +(refMs / m).toFixed(2) : null;
+      }
+
+      return {
+        src,
+        w,
+        h,
+        ip,
+        op,
+        frames,
+        frameCount: frames.length,
+        memoryApi: MEMORY_API ? 'measureUserAgentSpecificMemory' : performance.memory ? 'usedJSHeapSize' : 'none',
+        engines,
+        speedup,
+        ...(Object.keys(errors).length ? { errors } : {}),
+      };
+    };
+
+    window.__ready = true;
+  </script>
+</body>
+</html>
