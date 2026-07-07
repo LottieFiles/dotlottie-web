@@ -1831,6 +1831,23 @@ export class DotLottie {
   }
 
   /**
+   * Set an image slot to a custom source
+   * @param slotId - The image slot ID to set
+   * @param src - The image source: a `data:` URI, an `http(s)://` URL, or a package `i/` file name
+   * @returns true if successful
+   */
+  public setImageSlot(slotId: string, src: string): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    const result = this._dotLottieCore.set_image_slot(slotId, src);
+
+    this._dotLottieCore.render();
+    this._draw();
+
+    return result;
+  }
+
+  /**
    * Reset a slot to its original value
    * @param slotId - The slot ID to reset
    * @returns true if successful

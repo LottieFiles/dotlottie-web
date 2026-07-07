@@ -136,6 +136,11 @@ export interface MethodParamsMap {
     slotId: string;
     value: TextSlotValue;
   };
+  setImageSlot: {
+    instanceId: string;
+    slotId: string;
+    src: string;
+  };
   resetSlot: {
     instanceId: string;
     slotId: string;
@@ -471,6 +476,7 @@ export interface MethodResultMap {
   setVectorSlot: boolean;
   setGradientSlot: boolean;
   setTextSlot: boolean;
+  setImageSlot: boolean;
   resetSlot: boolean;
   clearSlot: boolean;
   resetSlots: boolean;

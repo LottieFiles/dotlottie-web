@@ -16,6 +16,7 @@ const jsonSrc = new URL('../../../fixtures/test.json', import.meta.url).href;
 const src = new URL('../../../fixtures/test.lottie', import.meta.url).href;
 const smSrc = new URL('../../../fixtures/sm/all-inputs.json', import.meta.url).href;
 const textAnimSrc = new URL('../../../fixtures/text.json', import.meta.url).href;
+const imageSlotSrc = new URL('../../../fixtures/image.json', import.meta.url).href;
 const impactFontUrl = new URL('../../../fixtures/fonts/Impact.ttf', import.meta.url).href;
 
 DotLottieClass.setWasmUrl(wasmUrl);
@@ -1569,6 +1570,64 @@ describe.each([
       expect(dotLottie.isPlaying).toBe(true);
 
       expect(onUnfreeze).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('setImageSlot', () => {
+    // 24x24 solid magenta PNG (data URI) — same asset the dotlottie-rs image_slot example uses.
+    const MAGENTA_PNG =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAAAH0lEQVR42mO4pjGNKohh1KBRg0YNGjVo1KBRgwbeIADJIY0uOOudVwAAAABJRU5ErkJggg==';
+
+    // image.json declares an image slot with id "sun_img" on the rising-sun asset.
+    const loadImageAnimation = async (): Promise<void> => {
+      const onLoad = vi.fn();
+
+      dotLottie = new DotLottie({ autoplay: false, canvas, src: imageSlotSrc });
+      dotLottie.addEventListener('load', onLoad);
+
+      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), { timeout: 5000 });
+    };
+
+    test('returns true when setting a known image slot', async () => {
+      await loadImageAnimation();
+
+      expect(await dotLottie.setImageSlot('sun_img', MAGENTA_PNG)).toBe(true);
+    });
+
+    // Pixel readback only works on the main-thread canvas; the worker canvas is transferred offscreen.
+    (isWorker ? test.skip : test)('swapping the image slot changes the rendered output', async () => {
+      await loadImageAnimation();
+
+      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+      const total = dotLottie.totalFrames;
+      // Sample a few frames across the timeline — the slotted sun rises through the frame.
+      const frames = [0.3, 0.5, 0.7].map((fraction) => Math.round(total * fraction));
+
+      const readFrame = async (frame: number): Promise<Uint8ClampedArray> => {
+        await dotLottie.setFrame(frame);
+
+        return ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      };
+
+      const before: Uint8ClampedArray[] = [];
+      for (const frame of frames) {
+        before.push(await readFrame(frame));
+      }
+
+      expect(await dotLottie.setImageSlot('sun_img', MAGENTA_PNG)).toBe(true);
+
+      let totalDiff = 0;
+      for (let i = 0; i < frames.length; i += 1) {
+        const after = await readFrame(frames[i]);
+        const original = before[i];
+
+        for (let p = 0; p < after.length; p += 1) {
+          totalDiff += Math.abs(after[p] - original[p]);
+        }
+      }
+
+      // Replacing the detailed sun with solid magenta over a large area must shift many pixels.
+      expect(totalDiff).toBeGreaterThan(1000);
     });
   });
 

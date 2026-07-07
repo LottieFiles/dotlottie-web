@@ -1075,6 +1075,17 @@ const commands: {
 
     return instance.setTextSlot(request.params.slotId, request.params.value);
   },
+  setImageSlot: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.setImageSlot(request.params.slotId, request.params.src);
+  },
   resetSlot: (request) => {
     const instanceId = request.params.instanceId;
 

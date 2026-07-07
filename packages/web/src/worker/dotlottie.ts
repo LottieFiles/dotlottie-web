@@ -875,6 +875,12 @@ export class DotLottieWorker {
     return this._sendMessage('setTextSlot', { instanceId: this._id, slotId, value });
   }
 
+  public async setImageSlot(slotId: string, src: string): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('setImageSlot', { instanceId: this._id, slotId, src });
+  }
+
   public async resetSlot(slotId: string): Promise<boolean> {
     if (!this._created) return false;
 
