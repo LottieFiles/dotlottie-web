@@ -86,6 +86,7 @@ export const dotlottieplayerwasm_set_color_slot: (
   f: number,
 ) => number;
 export const dotlottieplayerwasm_set_frame: (a: number, b: number) => number;
+export const dotlottieplayerwasm_set_image_slot: (a: number, b: number, c: number, d: number, e: number) => number;
 export const dotlottieplayerwasm_set_layout: (a: number, b: number, c: number, d: number, e: number) => number;
 export const dotlottieplayerwasm_set_loop: (a: number, b: number) => void;
 export const dotlottieplayerwasm_set_loop_count: (a: number, b: number) => void;
