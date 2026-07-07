@@ -582,6 +582,9 @@ importers:
       esbuild:
         specifier: ^0.28.0
         version: 0.28.0
+      fflate:
+        specifier: ^0.8.2
+        version: 0.8.2
       tsdown:
         specifier: ^0.21.10
         version: 0.21.10(publint@0.3.18)(typescript@6.0.3)

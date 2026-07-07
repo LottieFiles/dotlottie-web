@@ -4,6 +4,7 @@ import type {
   Animatable,
   Animation,
   ColorStop,
+  EllipseShape,
   GroupShape,
   LayerDefinition,
   PathData,
@@ -457,6 +458,308 @@ describe('scene', () => {
     expect(evaluated.cornerRadius).toBeLessThan(30);
   });
 
+  it('preserves shape identity for a static ellipse across frames', () => {
+    const ellipse: EllipseShape = {
+      id: 'ellipse',
+      type: 'ellipse',
+      center: { x: 0, y: 0 },
+      radius: { x: 50, y: 50 },
+    };
+    const animation: Animation = {
+      version: '5.5.0',
+      frameRate: 30,
+      inPoint: 0,
+      outPoint: 60,
+      duration: 60,
+      width: 200,
+      height: 200,
+      layers: [
+        {
+          id: 'shape',
+          name: 'Shape',
+          type: 'shape',
+          index: 0,
+          ind: 1,
+          inPoint: 0,
+          outPoint: 60,
+          transform: {
+            position: { x: 0, y: 0 },
+            anchor: { x: 0, y: 0 },
+            scale: { x: 100, y: 100 },
+            rotation: 0,
+            opacity: 100,
+          },
+          shapes: [ellipse],
+          visible: true,
+        },
+      ],
+    };
+
+    const sceneAtFrame0 = buildScene(animation, 0);
+    const sceneAtFrame30 = buildScene(animation, 30);
+
+    expect(sceneAtFrame0[0]!.shapes[0]).toBe(ellipse);
+    expect(sceneAtFrame30[0]!.shapes[0]).toBe(ellipse);
+  });
+
+  it('still updates an animated ellipse center/radius between frames', () => {
+    const ellipse: EllipseShape = {
+      id: 'ellipse',
+      type: 'ellipse',
+      center: {
+        keyframes: [
+          { time: 0, value: { x: 0, y: 0 } },
+          { time: 30, value: { x: 100, y: 100 } },
+        ],
+      },
+      radius: { x: 50, y: 50 },
+    };
+    const animation: Animation = {
+      version: '5.5.0',
+      frameRate: 30,
+      inPoint: 0,
+      outPoint: 60,
+      duration: 60,
+      width: 200,
+      height: 200,
+      layers: [
+        {
+          id: 'shape',
+          name: 'Shape',
+          type: 'shape',
+          index: 0,
+          ind: 1,
+          inPoint: 0,
+          outPoint: 60,
+          transform: {
+            position: { x: 0, y: 0 },
+            anchor: { x: 0, y: 0 },
+            scale: { x: 100, y: 100 },
+            rotation: 0,
+            opacity: 100,
+          },
+          shapes: [ellipse],
+          visible: true,
+        },
+      ],
+    };
+
+    const at0 = buildScene(animation, 0)[0]!.shapes[0] as EllipseShape;
+    const at30 = buildScene(animation, 30)[0]!.shapes[0] as EllipseShape;
+
+    expect(at0).not.toBe(ellipse);
+    expect(at0.center).toEqual({ x: 0, y: 0 });
+    expect(at30.center).toEqual({ x: 100, y: 100 });
+  });
+
+  it('preserves shape identity for a static path shape across frames', () => {
+    const path: PathShape = {
+      id: 'path',
+      type: 'path',
+      path: {
+        vertices: [
+          { x: -10, y: 0 },
+          { x: 0, y: -10 },
+          { x: 10, y: 0 },
+          { x: 0, y: 10 },
+        ],
+        inTangents: [
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+        ],
+        outTangents: [
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+        ],
+        closed: true,
+      },
+    };
+    const animation: Animation = {
+      version: '5.5.0',
+      frameRate: 30,
+      inPoint: 0,
+      outPoint: 60,
+      duration: 60,
+      width: 200,
+      height: 200,
+      layers: [
+        {
+          id: 'shape',
+          name: 'Shape',
+          type: 'shape',
+          index: 0,
+          ind: 1,
+          inPoint: 0,
+          outPoint: 60,
+          transform: {
+            position: { x: 0, y: 0 },
+            anchor: { x: 0, y: 0 },
+            scale: { x: 100, y: 100 },
+            rotation: 0,
+            opacity: 100,
+          },
+          shapes: [path],
+          visible: true,
+        },
+      ],
+    };
+
+    const sceneAtFrame0 = buildScene(animation, 0);
+    const sceneAtFrame30 = buildScene(animation, 30);
+
+    expect(sceneAtFrame0[0]!.shapes[0]).toBe(path);
+    expect(sceneAtFrame30[0]!.shapes[0]).toBe(path);
+  });
+
+  it('still applies a static non-zero offset on an otherwise-static path shape', () => {
+    const path: PathShape = {
+      id: 'path',
+      type: 'path',
+      path: {
+        vertices: [
+          { x: -10, y: 0 },
+          { x: 0, y: -10 },
+          { x: 10, y: 0 },
+          { x: 0, y: 10 },
+        ],
+        inTangents: [
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+        ],
+        outTangents: [
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+        ],
+        closed: true,
+      },
+      offset: 5,
+    };
+    const animation: Animation = {
+      version: '5.5.0',
+      frameRate: 30,
+      inPoint: 0,
+      outPoint: 60,
+      duration: 60,
+      width: 200,
+      height: 200,
+      layers: [
+        {
+          id: 'shape',
+          name: 'Shape',
+          type: 'shape',
+          index: 0,
+          ind: 1,
+          inPoint: 0,
+          outPoint: 60,
+          transform: {
+            position: { x: 0, y: 0 },
+            anchor: { x: 0, y: 0 },
+            scale: { x: 100, y: 100 },
+            rotation: 0,
+            opacity: 100,
+          },
+          shapes: [path],
+          visible: true,
+        },
+      ],
+    };
+
+    const evaluated = buildScene(animation, 0)[0]!.shapes[0] as PathShape;
+
+    // A static-but-non-zero offset must still be applied by the identity
+    // guard (it transforms `path` into a new object even though nothing is
+    // animated) -- the guard must not mistake "static" for "no-op".
+    expect(evaluated).not.toBe(path);
+    expect(evaluated.offset).toBe(5);
+    const offsetPath = evaluated.path as PathData;
+    expect(Math.min(...offsetPath.vertices.map((point) => point.x))).toBeLessThan(-10);
+    expect(Math.max(...offsetPath.vertices.map((point) => point.x))).toBeGreaterThan(10);
+    expect(Math.min(...offsetPath.vertices.map((point) => point.y))).toBeLessThan(-10);
+    expect(Math.max(...offsetPath.vertices.map((point) => point.y))).toBeGreaterThan(10);
+  });
+
+  it('keeps repeater transform and fade on paths that re-evaluate per frame', () => {
+    const path: PathShape = {
+      id: 'repeated-path',
+      type: 'path',
+      fill: { type: 'solid', color: { r: 1, g: 0, b: 0, a: 1 } },
+      path: {
+        vertices: [
+          { x: -10, y: -10 },
+          { x: 10, y: -10 },
+          { x: 10, y: 10 },
+          { x: -10, y: 10 },
+        ],
+        inTangents: [
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+        ],
+        outTangents: [
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+          { x: 0, y: 0 },
+        ],
+        closed: true,
+      },
+      // A non-zero offset forces the path block to rebuild the shape object,
+      // which must preserve the repeater output, not spread the raw shape.
+      offset: 5,
+      repeaterMatrix: { a: 1, b: 0, c: 0, d: 1, e: 50, f: 0 },
+      repeaterOpacityMult: 0.5,
+      repeaterIndex: 1,
+    };
+    const animation: Animation = {
+      version: '5.5.0',
+      frameRate: 30,
+      inPoint: 0,
+      outPoint: 60,
+      duration: 60,
+      width: 200,
+      height: 200,
+      layers: [
+        {
+          id: 'shape',
+          name: 'Shape',
+          type: 'shape',
+          index: 0,
+          ind: 1,
+          inPoint: 0,
+          outPoint: 60,
+          transform: {
+            position: { x: 0, y: 0 },
+            anchor: { x: 0, y: 0 },
+            scale: { x: 100, y: 100 },
+            rotation: 0,
+            opacity: 100,
+          },
+          shapes: [path],
+          visible: true,
+        },
+      ],
+    };
+
+    const evaluated = buildScene(animation, 0)[0]!.shapes[0] as PathShape;
+
+    // The path was rebuilt (offset applied)...
+    expect(evaluated).not.toBe(path);
+    expect(evaluated.path).not.toBe(path.path);
+    // ...and the repeater's per-copy matrix and fade survived the rebuild.
+    expect(evaluated.transform?.matrix?.e).toBe(50);
+    expect(evaluated.transform?.opacity).toBe(50);
+    expect(evaluated.animatedTransform).toBeUndefined();
+  });
+
   it('applies temporal bezier easing to animated gradient stops', () => {
     const value: Animatable<ColorStop[]> = {
       keyframes: [
@@ -638,8 +941,8 @@ describe('scene', () => {
     };
 
     const scene = buildScene(animation, 30);
-    const layer = scene[0];
-    expect(layer!.transform.opacity).toBe(100);
+    const layer = scene[0]!;
+    expect(layer.transform.opacity).toBe(100);
   });
 
   it('evaluates layer content at the time-remapped frame', () => {
@@ -675,8 +978,8 @@ describe('scene', () => {
     };
 
     const scene = buildScene(animation, 0);
-    const layer = scene[0];
-    expect(layer!.transform.opacity).toBe(100);
+    const layer = scene[0]!;
+    expect(layer.transform.opacity).toBe(100);
   });
 
   it('checks parent-remapped precomp child visibility on the source comp timeline', () => {
@@ -721,11 +1024,11 @@ describe('scene', () => {
     };
 
     const scene = buildScene(animation, 0);
-    const layer = scene[0];
-    expect(layer!.timelineFrame).toBe(20);
-    expect(layer!.inPoint).toBe(15);
-    expect(layer!.outPoint).toBe(25);
-    expect(layer!.transform.position).toEqual({ x: 100, y: 0 });
+    const layer = scene[0]!;
+    expect(layer.timelineFrame).toBe(20);
+    expect(layer.inPoint).toBe(15);
+    expect(layer.outPoint).toBe(25);
+    expect(layer.transform.position).toEqual({ x: 100, y: 0 });
   });
 
   it('honors numeric zero parent time-remap values', () => {
@@ -770,10 +1073,10 @@ describe('scene', () => {
       ],
     };
 
-    const layer = buildScene(animation, 20)[0];
+    const layer = buildScene(animation, 20)[0]!;
 
-    expect(layer!.timelineFrame).toBe(1);
-    expect(layer!.transform.position).toEqual({ x: 10, y: 0 });
+    expect(layer.timelineFrame).toBe(1);
+    expect(layer.transform.position).toEqual({ x: 10, y: 0 });
   });
 
   it('offsets inherited parent remapping by the owning precomp start time', () => {
@@ -819,9 +1122,9 @@ describe('scene', () => {
     };
 
     const scene = buildScene(animation, 0);
-    const layer = scene[0];
-    expect(layer!.timelineFrame).toBe(10);
-    expect(layer!.transform.position).toEqual({ x: 100, y: 0 });
+    const layer = scene[0]!;
+    expect(layer.timelineFrame).toBe(10);
+    expect(layer.transform.position).toEqual({ x: 100, y: 0 });
   });
 
   it('does not subtract child start time from source-window transform frames', () => {
@@ -867,9 +1170,9 @@ describe('scene', () => {
     };
 
     const scene = buildScene(animation, 0);
-    const layer = scene[0];
-    expect(layer!.timelineFrame).toBe(20);
-    expect(layer!.transform.position).toEqual({ x: 20, y: 0 });
+    const layer = scene[0]!;
+    expect(layer.timelineFrame).toBe(20);
+    expect(layer.transform.position).toEqual({ x: 20, y: 0 });
   });
 
   it('honors parent comp visibility for top-level time-remapped source-window children', () => {
@@ -911,9 +1214,9 @@ describe('scene', () => {
     };
 
     expect(buildScene(animation, 0)[0]!.visible).toBe(false);
-    const activeLayer = buildScene(animation, 20)[0];
-    expect(activeLayer!.visible).toBe(true);
-    expect(activeLayer!.timelineFrame).toBe(20);
+    const activeLayer = buildScene(animation, 20)[0]!;
+    expect(activeLayer.visible).toBe(true);
+    expect(activeLayer.timelineFrame).toBe(20);
   });
 
   it('can evaluate synthetic precomp masks on the nested source timeline', () => {

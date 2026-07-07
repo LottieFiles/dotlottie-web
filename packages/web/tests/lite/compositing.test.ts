@@ -27,7 +27,6 @@ function layerWithFill(blendMode: string | undefined, alpha: number): Layer {
         },
       },
     ],
-    // Spread conditionally to satisfy exactOptionalPropertyTypes in this repo's tsconfig.
     ...(blendMode === undefined ? {} : { blendMode }),
     visible: true,
   };

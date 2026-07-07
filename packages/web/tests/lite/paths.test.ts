@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import type { PolystarShape, RectShape } from '../../src/lite/model';
-import { composeTrimPaths, getTrimVisibleRanges, shapeToPath, shapeToPoints } from '../../src/lite/renderer/paths';
+import type { PathData, PolystarShape, RectShape } from '../../src/lite/model';
+import {
+  composeTrimPaths,
+  getTrimVisibleRanges,
+  reversePathData,
+  shapeToPath,
+  shapeToPoints,
+} from '../../src/lite/renderer/paths';
 
 describe('paths', () => {
   it('treats floating point near-full trim spans as full paths', () => {
@@ -166,8 +172,8 @@ describe('paths', () => {
       offset: 10,
     } as PolystarShape);
 
-    const innerPoint = points[1];
-    const innerRadius = Math.hypot(innerPoint!.x, innerPoint!.y);
+    const innerPoint = points[1]!;
+    const innerRadius = Math.hypot(innerPoint.x, innerPoint.y);
 
     expect(innerRadius).toBeGreaterThan(30);
   });
@@ -214,7 +220,9 @@ describe('paths', () => {
     expect(curve).toBeDefined();
     const handleLength = Math.hypot(Number(curve?.[1]) - Number(move?.[1]), Number(curve?.[2]) - Number(move?.[2]));
 
-    expect(handleLength).toBeGreaterThan(50 * 0.2 * 0.47829);
+    // Must exceed the handle computed from the UN-offset outer radius
+    // (star perimSegment = step*r/2), proving the offset radius was used.
+    expect(handleLength).toBeGreaterThan(((Math.PI / 5) * 50 * 0.2) / 2);
   });
 
   it('uses round offset joins for rounded polystars when requested by Offset Paths', () => {
@@ -293,5 +301,89 @@ describe('paths', () => {
 
     expect(points).toHaveLength(6);
     expect(points[0]).toEqual(points[5]);
+  });
+
+  it('reverses a path contour winding (Lottie direction d=3)', () => {
+    const data: PathData = {
+      vertices: [
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+      ],
+      inTangents: [
+        { x: -1, y: 0 },
+        { x: -2, y: 0 },
+        { x: -3, y: 0 },
+      ],
+      outTangents: [
+        { x: 1, y: 0 },
+        { x: 2, y: 0 },
+        { x: 3, y: 0 },
+      ],
+      closed: true,
+    };
+
+    const reversed = reversePathData(data);
+
+    // Vertices traverse in reverse order.
+    expect(reversed.vertices).toEqual([
+      { x: 10, y: 10 },
+      { x: 10, y: 0 },
+      { x: 0, y: 0 },
+    ]);
+    // The tangent leaving a vertex in the reversed traversal is its original
+    // arriving (in) tangent, and vice-versa.
+    expect(reversed.outTangents).toEqual([
+      { x: -3, y: 0 },
+      { x: -2, y: 0 },
+      { x: -1, y: 0 },
+    ]);
+    expect(reversed.inTangents).toEqual([
+      { x: 3, y: 0 },
+      { x: 2, y: 0 },
+      { x: 1, y: 0 },
+    ]);
+    expect(reversed.closed).toBe(true);
+    // Original data is not mutated.
+    expect(data.vertices[0]).toEqual({ x: 0, y: 0 });
+  });
+
+  it('rounds polystar points with radius-perpendicular tangents (lottie-web formula)', () => {
+    const previousPath2D = globalThis.Path2D;
+    const beziers: number[][] = [];
+    class MockPath2D {
+      moveTo() {}
+      lineTo() {}
+      closePath() {}
+      bezierCurveTo(...args: number[]) {
+        beziers.push(args);
+      }
+    }
+    globalThis.Path2D = MockPath2D as unknown as typeof Path2D;
+    try {
+      // Square polygon, radius 100, 100% roundness. First vertex is at the top
+      // (0,-100); its outgoing tangent must be horizontal (perpendicular to the
+      // vertical radius), length = perimSegment * 1 where lottie-web's polygon
+      // perimSegment = 2πr/(numPts*4) = (2π*100)/(4*4) ≈ 39.27.
+      shapeToPath({
+        id: 'rounded-square',
+        type: 'polystar',
+        starType: 'polygon',
+        center: { x: 0, y: 0 },
+        points: 4,
+        outerRadius: 100,
+        innerRadius: 0,
+        outerRoundness: 100,
+        innerRoundness: 0,
+        rotation: 0,
+      } as PolystarShape);
+    } finally {
+      globalThis.Path2D = previousPath2D;
+    }
+    expect(beziers.length).toBeGreaterThan(0);
+    // cp1 of the first segment leaves the top vertex (0,-100) horizontally.
+    const [cp1x, cp1y] = beziers[0]!;
+    expect(cp1x).toBeCloseTo((2 * Math.PI * 100) / (4 * 4), 1);
+    expect(cp1y).toBeCloseTo(-100, 5);
   });
 });

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type {
+  Animatable,
   Color,
   DropShadowEffect,
   FillEffect,
@@ -15,6 +16,7 @@ import type {
   Stroke,
   TintEffect,
 } from '../../src/lite/model';
+import { evaluateAnimatable, isAnimated } from '../../src/lite/model';
 import { parseLottie } from '../../src/lite/parser/lottie';
 
 describe('parseLottie', () => {
@@ -58,6 +60,45 @@ describe('parseLottie', () => {
     expect(animation.layers).toHaveLength(1);
     expect(animation.layers[0]!.name).toBe('Shape');
     expect(animation.layers[0]!.shapes).toHaveLength(1);
+  });
+
+  it('preserves vendor-prefixed top-level extensions', () => {
+    const lottie = {
+      v: '5.5.0',
+      fr: 60,
+      ip: 0,
+      op: 60,
+      w: 512,
+      h: 512,
+      layers: [],
+      'com.lottiefiles.shaders': {
+        overlays: [{ shader: 'grain', opacity: 0.2 }],
+      },
+      'com.example.custom': { enabled: true },
+    };
+
+    const animation = parseLottie(lottie as unknown as Record<string, unknown>);
+    expect(animation.extensions).toEqual({
+      'com.lottiefiles.shaders': {
+        overlays: [{ shader: 'grain', opacity: 0.2 }],
+      },
+      'com.example.custom': { enabled: true },
+    });
+  });
+
+  it('omits extensions when no vendor-prefixed top-level keys exist', () => {
+    const lottie = {
+      v: '5.5.0',
+      fr: 60,
+      ip: 0,
+      op: 60,
+      w: 512,
+      h: 512,
+      layers: [],
+    };
+
+    const animation = parseLottie(lottie as unknown as Record<string, unknown>);
+    expect(animation.extensions).toBeUndefined();
   });
 
   it('normalizes animated group skew axes for scene evaluation', () => {
@@ -220,11 +261,11 @@ describe('parseLottie', () => {
     const animation = parseLottie(lottie as unknown as Record<string, unknown>);
 
     expect(animation.layers).toHaveLength(1);
-    const layer = animation.layers[0];
-    expect(layer!.shapes).toHaveLength(1);
+    const layer = animation.layers[0]!;
+    expect(layer.shapes).toHaveLength(1);
 
-    const shape = layer!.shapes[0];
-    expect(shape!.type).toBe('rect');
+    const shape = layer.shapes[0]!;
+    expect(shape.type).toBe('rect');
 
     const rectShape = shape as RectShape;
     expect(rectShape.rect).toEqual({
@@ -234,7 +275,58 @@ describe('parseLottie', () => {
       height: 100,
     });
 
-    expect(shape!.fill?.type).toBe('solid');
+    expect(shape.fill?.type).toBe('solid');
+  });
+
+  it('marks a rect with reversed direction (d=3) so it cuts holes under non-zero fill', () => {
+    const makeLottie = (d: number) => ({
+      v: '5.5.0',
+      fr: 60,
+      ip: 0,
+      op: 60,
+      w: 512,
+      h: 512,
+      layers: [
+        {
+          ddd: 0,
+          ind: 1,
+          ty: 4,
+          nm: 'Shape',
+          ip: 0,
+          op: 60,
+          ks: {
+            o: { a: 0, k: 100 },
+            r: { a: 0, k: 0 },
+            p: { a: 0, k: [100, 100, 0] },
+            a: { a: 0, k: [0, 0, 0] },
+            s: { a: 0, k: [100, 100, 100] },
+          },
+          shapes: [
+            {
+              ty: 'gr',
+              it: [
+                {
+                  ty: 'rc',
+                  d,
+                  p: { a: 0, k: [0, 0] },
+                  s: { a: 0, k: [50, 50] },
+                  r: { a: 0, k: 0 },
+                },
+                { ty: 'fl', c: { a: 0, k: [1, 0, 0, 1] }, o: { a: 0, k: 100 } },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const groupChild = (shape: unknown): RectShape => (shape as { children: RectShape[] }).children[0]!;
+
+    const reversed = parseLottie(makeLottie(3) as unknown as Record<string, unknown>);
+    expect(groupChild(reversed.layers[0]!.shapes[0]).reversed).toBe(true);
+
+    const normal = parseLottie(makeLottie(1) as unknown as Record<string, unknown>);
+    expect(groupChild(normal.layers[0]!.shapes[0]).reversed).toBe(false);
   });
 
   it('preserves animated rectangle corner radius for scene evaluation', () => {
@@ -338,8 +430,8 @@ describe('parseLottie', () => {
     const group = animation.layers[0]!.shapes[0] as GroupShape;
     expect(group.type).toBe('group');
     expect(group.children).toHaveLength(1);
-    const shape = group.children[0];
-    expect(shape!.type).toBe('polystar');
+    const shape = group.children[0]!;
+    expect(shape.type).toBe('polystar');
 
     const star = shape as PolystarShape;
     expect(star.starType).toBe('star');
@@ -580,9 +672,9 @@ describe('parseLottie', () => {
     const group = animation.layers[0]!.shapes[0] as GroupShape;
     expect(group.type).toBe('group');
     expect(group.children).toHaveLength(1);
-    const shape = group.children[0];
-    expect(Array.isArray(shape!.stroke)).toBe(true);
-    expect((shape!.stroke as Stroke[])[0]!.type).toBe('gradient');
+    const shape = group.children[0]!;
+    expect(Array.isArray(shape.stroke)).toBe(true);
+    expect((shape.stroke as Stroke[])[0]!.type).toBe('gradient');
   });
 
   it('preserves animated stroke dash and offset properties', () => {
@@ -645,12 +737,12 @@ describe('parseLottie', () => {
 
     const animation = parseLottie(lottie as unknown as Record<string, unknown>);
     const shapeStroke = animation.layers[0]!.shapes[0]!.stroke as Stroke | Stroke[];
-    const stroke = Array.isArray(shapeStroke) ? shapeStroke[0] : shapeStroke;
+    const stroke = Array.isArray(shapeStroke) ? shapeStroke[0]! : shapeStroke;
 
-    expect(stroke!.dash).toHaveLength(2);
-    expect(typeof stroke!.dash?.[0]).toBe('object');
-    expect(stroke!.dash?.[1]).toBe(5);
-    expect(typeof stroke!.dashOffset).toBe('object');
+    expect(stroke.dash).toHaveLength(2);
+    expect(typeof stroke.dash?.[0]).toBe('object');
+    expect(stroke.dash?.[1]).toBe(5);
+    expect(typeof stroke.dashOffset).toBe('object');
   });
 
   it('applies parent-level strokes to preceding shape groups', () => {
@@ -721,12 +813,12 @@ describe('parseLottie', () => {
 
     const animation = parseLottie(lottie as unknown as Record<string, unknown>);
     const group = animation.layers[0]!.shapes[0] as GroupShape;
-    const path = group.children[0];
+    const path = group.children[0]!;
 
     expect(group.type).toBe('group');
-    expect(path!.fill?.type).toBe('solid');
-    expect(Array.isArray(path!.stroke)).toBe(true);
-    const strokes = path!.stroke as Stroke[];
+    expect(path.fill?.type).toBe('solid');
+    expect(Array.isArray(path.stroke)).toBe(true);
+    const strokes = path.stroke as Stroke[];
     expect(strokes).toHaveLength(2);
     expect(strokes[0]!.lineCap).toBe('butt');
     expect(strokes[1]!.lineCap).toBe('round');
@@ -869,13 +961,13 @@ describe('parseLottie', () => {
 
     const animation = parseLottie(lottie as unknown as Record<string, unknown>);
     const firstGroup = animation.layers[0]!.shapes[0] as GroupShape;
-    const firstPath = firstGroup.children[0];
-    const firstFill = firstPath!.fill as Extract<NonNullable<typeof firstPath>['fill'], { type: 'solid' }>;
+    const firstPath = firstGroup.children[0]!;
+    const firstFill = firstPath.fill as Extract<typeof firstPath.fill, { type: 'solid' }>;
     expect(firstFill.color).toEqual({ r: 0, g: 255, b: 0, a: 1 });
 
     const secondGroup = animation.layers[0]!.shapes[1] as GroupShape;
-    const secondPath = secondGroup.children[0];
-    const secondFill = secondPath!.fill as Extract<NonNullable<typeof secondPath>['fill'], { type: 'solid' }>;
+    const secondPath = secondGroup.children[0]!;
+    const secondFill = secondPath.fill as Extract<typeof secondPath.fill, { type: 'solid' }>;
     expect(secondFill.color).toEqual({ r: 255, g: 0, b: 0, a: 1 });
   });
 
@@ -918,9 +1010,9 @@ describe('parseLottie', () => {
 
     const animation = parseLottie(lottie as unknown as Record<string, unknown>);
     const group = animation.layers[0]!.shapes[0] as GroupShape;
-    const shape = group.children[0];
-    const fill = shape!.fill as Extract<NonNullable<typeof shape>['fill'], { type: 'solid' }>;
-    const strokes = Array.isArray(shape!.stroke) ? shape!.stroke : [shape!.stroke as Stroke];
+    const shape = group.children[0]!;
+    const fill = shape.fill as Extract<typeof shape.fill, { type: 'solid' }>;
+    const strokes = Array.isArray(shape.stroke) ? shape.stroke : [shape.stroke as Stroke];
     const stroke = strokes[0];
 
     expect(fill.color).toEqual({ r: 63.75, g: 127.5, b: 255, a: 1 });
@@ -994,16 +1086,16 @@ describe('parseLottie', () => {
 
     const animation = parseLottie(lottie as unknown as Record<string, unknown>);
     const group = animation.layers[0]!.shapes[0] as GroupShape;
-    const path = group.children[0];
+    const path = group.children[0]!;
 
     expect(group.type).toBe('group');
-    expect(path!.fill?.type).toBe('gradient');
-    expect(Array.isArray(path!.stroke)).toBe(true);
-    const strokes = path!.stroke as Stroke[];
+    expect(path.fill?.type).toBe('gradient');
+    expect(Array.isArray(path.stroke)).toBe(true);
+    const strokes = path.stroke as Stroke[];
     expect(strokes).toHaveLength(1);
     expect(strokes[0]!.type).toBe('solid');
     expect(strokes[0]!.width).toBe(16);
-    expect(path!.strokeWidthScale).toBe(2);
+    expect(path.strokeWidthScale).toBe(2);
   });
 
   it('uses group scale for extreme parent-level gradient stroke compensation', () => {
@@ -1068,10 +1160,10 @@ describe('parseLottie', () => {
 
     const animation = parseLottie(lottie as unknown as Record<string, unknown>);
     const group = animation.layers[0]!.shapes[0] as GroupShape;
-    const path = group.children[0];
+    const path = group.children[0]!;
 
-    expect(path!.fill?.type).toBe('gradient');
-    expect(path!.strokeWidthScale).toBeCloseTo(5.12);
+    expect(path.fill?.type).toBe('gradient');
+    expect(path.strokeWidthScale).toBeCloseTo(5.12);
   });
 
   it('uses group scale for moderate parent-level gradient stroke compensation', () => {
@@ -1136,10 +1228,10 @@ describe('parseLottie', () => {
 
     const animation = parseLottie(lottie as unknown as Record<string, unknown>);
     const group = animation.layers[0]!.shapes[0] as GroupShape;
-    const path = group.children[0];
+    const path = group.children[0]!;
 
-    expect(path!.fill?.type).toBe('gradient');
-    expect(path!.strokeWidthScale).toBeCloseTo(5.12);
+    expect(path.fill?.type).toBe('gradient');
+    expect(path.strokeWidthScale).toBeCloseTo(5.12);
   });
 
   it('compensates parent-level strokes applied to scaled shape groups', () => {
@@ -1215,10 +1307,10 @@ describe('parseLottie', () => {
 
     const animation = parseLottie(lottie as unknown as Record<string, unknown>);
     const group = animation.layers[0]!.shapes[0] as GroupShape;
-    const path = group.children[0];
+    const path = group.children[0]!;
 
     expect(group.type).toBe('group');
-    expect(path!.strokeWidthScale).toBe(4);
+    expect(path.strokeWidthScale).toBe(4);
   });
 
   it('preserves animated gradient timing metadata', () => {
@@ -1286,8 +1378,8 @@ describe('parseLottie', () => {
 
     const animation = parseLottie(lottie as unknown as Record<string, unknown>);
     const group = animation.layers[0]!.shapes[0] as GroupShape;
-    const shape = group.children[0];
-    const fill = shape!.fill as GradientFill;
+    const shape = group.children[0]!;
+    const fill = shape.fill as GradientFill;
     expect(fill.type).toBe('gradient');
     expect('keyframes' in fill.colors).toBe(true);
     if (!('keyframes' in fill.colors)) return;
@@ -1776,11 +1868,11 @@ describe('parseLottie', () => {
     };
 
     const animation = parseLottie(lottie as unknown as Record<string, unknown>);
-    const textLayer = animation.layers[0];
+    const textLayer = animation.layers[0]!;
 
-    expect(textLayer!.masks).toEqual([]);
-    expect(textLayer!.text?.textPath?.firstMargin).toBe(12);
-    expect(textLayer!.text?.textPath?.path).toMatchObject({
+    expect(textLayer.masks).toEqual([]);
+    expect(textLayer.text?.textPath?.firstMargin).toBe(12);
+    expect(textLayer.text?.textPath?.path).toMatchObject({
       vertices: [
         { x: 0, y: 0 },
         { x: 100, y: 0 },
@@ -2003,11 +2095,11 @@ describe('parseLottie', () => {
     };
 
     const animation = parseLottie(lottie as unknown as Record<string, unknown>);
-    const precomp = animation.layers[0];
+    const precomp = animation.layers[0]!;
     const child = animation.layers.find((layer) => layer.name === 'Difference Precomp > Default Blend Child');
 
-    expect(precomp!.blendMode).toBe('difference');
-    expect(precomp!.matteChildren?.[0]?.blendMode).toBe('source-over');
+    expect(precomp.blendMode).toBe('difference');
+    expect(precomp.matteChildren?.[0]?.blendMode).toBe('source-over');
     expect(child?.blendMode).toBe('source-over');
     expect(child?.visible).toBe(false);
     expect(child?.hiddenByPrecompComposite).toBe(true);
@@ -2144,15 +2236,15 @@ describe('parseLottie', () => {
     };
 
     const animation = parseLottie(lottie as unknown as Record<string, unknown>);
-    const layer = animation.layers[0];
-    expect(layer!.effects).toHaveLength(4);
+    const layer = animation.layers[0]!;
+    expect(layer.effects).toHaveLength(4);
 
-    const fill = layer!.effects?.[0] as FillEffect;
+    const fill = layer.effects?.[0] as FillEffect;
     expect(fill.type).toBe('fill');
     expect(fill.color).toEqual({ r: 0, g: 0, b: 255, a: 1 });
     expect(fill.opacity).toBeCloseTo(175 / 255);
 
-    const shadow = layer!.effects?.[1] as DropShadowEffect;
+    const shadow = layer.effects?.[1] as DropShadowEffect;
     expect(shadow.type).toBe('drop-shadow');
     expect(shadow.color).toEqual({ r: 0, g: 0, b: 0, a: 1 });
     expect(shadow.opacity).toBe(0.75);
@@ -2160,20 +2252,20 @@ describe('parseLottie', () => {
     expect(shadow.distance).toBe(10);
     expect(shadow.softness).toBe(8);
 
-    const blur = layer!.effects?.[2] as GaussianBlurEffect;
+    const blur = layer.effects?.[2] as GaussianBlurEffect;
     expect(blur.type).toBe('gaussian-blur');
     expect(blur.blurriness).toBe(12);
 
-    const tint = layer!.effects?.[3] as TintEffect;
+    const tint = layer.effects?.[3] as TintEffect;
     expect(tint.type).toBe('tint');
     expect(tint.color).toEqual({ r: 255, g: 0, b: 0, a: 1 });
     expect(tint.whiteColor).toBeUndefined();
     expect(tint.amount).toBe(0.6);
 
-    const group = layer!.shapes[0] as GroupShape;
-    const shape = group.children[0];
-    expect(shape!.fill).toBeDefined();
-    const solidFill = shape!.fill as Extract<NonNullable<typeof shape>['fill'], { type: 'solid' }>;
+    const group = layer.shapes[0] as GroupShape;
+    const shape = group.children[0]!;
+    expect(shape.fill).toBeDefined();
+    const solidFill = shape.fill as Extract<typeof shape.fill, { type: 'solid' }>;
     const effectColor = solidFill.color as Color;
     expect(effectColor.b).toBe(255);
     expect(solidFill.opacity).toBeCloseTo((175 / 255) * 100);
@@ -2227,8 +2319,8 @@ describe('parseLottie', () => {
     expect(defaultAnimation.slots?.['primary']).toBeDefined();
     const defaultGroup = defaultAnimation.layers[0]!.shapes[0] as GroupShape;
     expect(defaultGroup.type).toBe('group');
-    const defaultShape = defaultGroup.children[0];
-    const defaultFill = defaultShape!.fill as Extract<NonNullable<typeof defaultShape>['fill'], { type: 'solid' }>;
+    const defaultShape = defaultGroup.children[0]!;
+    const defaultFill = defaultShape.fill as Extract<typeof defaultShape.fill, { type: 'solid' }>;
     const defaultColor = defaultFill.color as Color;
     expect(defaultColor.r).toBe(255);
 
@@ -2238,8 +2330,8 @@ describe('parseLottie', () => {
     const themedAnimation = parseLottie(lottie as unknown as Record<string, unknown>, overrides);
     const themedGroup = themedAnimation.layers[0]!.shapes[0] as GroupShape;
     expect(themedGroup.type).toBe('group');
-    const themedShape = themedGroup.children[0];
-    const themedFill = themedShape!.fill as Extract<NonNullable<typeof themedShape>['fill'], { type: 'solid' }>;
+    const themedShape = themedGroup.children[0]!;
+    const themedFill = themedShape.fill as Extract<typeof themedShape.fill, { type: 'solid' }>;
     const themedColor = themedFill.color as Color;
     expect(themedColor.g).toBe(255);
   });
@@ -2737,5 +2829,372 @@ describe('parseLottie', () => {
     expect(matteLeaf).toBeDefined();
     expect(shadow?.parentId).toBe(matte?.ind);
     expect(shadow?.parentId).not.toBe(matteLeaf?.ind);
+  });
+
+  it('parses and remaps explicit matte references (tp) through flattening', () => {
+    const transform = {
+      o: { a: 0, k: 100 },
+      r: { a: 0, k: 0 },
+      p: { a: 0, k: [0, 0, 0] },
+      a: { a: 0, k: [0, 0, 0] },
+      s: { a: 0, k: [100, 100, 100] },
+    };
+    const baseLayer = { ddd: 0, ty: 4, ip: 0, op: 60, st: 0, ks: transform, shapes: [] };
+    const lottie = {
+      v: '5.5.0',
+      fr: 60,
+      ip: 0,
+      op: 60,
+      w: 512,
+      h: 512,
+      assets: [
+        {
+          id: 'glasses',
+          layers: [
+            // Two consumers share one non-adjacent matte source, with an
+            // unrelated layer in between (the modern Creator export shape).
+            { ...baseLayer, ind: 1, nm: 'Lens A', tt: 1, tp: 3 },
+            { ...baseLayer, ind: 2, nm: 'Frame' },
+            { ...baseLayer, ind: 3, nm: 'Eye Matte', td: 1 },
+            { ...baseLayer, ind: 4, nm: 'Lens B', tt: 1, tp: 3 },
+          ],
+        },
+      ],
+      layers: [
+        { ...baseLayer, ind: 10, nm: 'Root Matte', td: 1 },
+        { ...baseLayer, ind: 11, nm: 'Root Plain' },
+        { ...baseLayer, ind: 12, nm: 'Root Consumer', tt: 1, tp: 10 },
+        {
+          ddd: 0,
+          ind: 13,
+          ty: 0,
+          nm: 'Glasses',
+          refId: 'glasses',
+          ip: 0,
+          op: 60,
+          st: 0,
+          ks: transform,
+        },
+      ],
+    };
+
+    const animation = parseLottie(lottie as unknown as Record<string, unknown>);
+    const rootMatte = animation.layers.find((layer) => layer.name === 'Root Matte');
+    const rootConsumer = animation.layers.find((layer) => layer.name === 'Root Consumer');
+    expect(rootConsumer?.trackMatte).toBe('alpha');
+    expect(rootConsumer?.matteParentInd).toBe(rootMatte?.ind);
+
+    const eyeMatte = animation.layers.find((layer) => layer.name === 'Glasses > Eye Matte');
+    const lensA = animation.layers.find((layer) => layer.name === 'Glasses > Lens A');
+    const lensB = animation.layers.find((layer) => layer.name === 'Glasses > Lens B');
+    expect(eyeMatte?.isMatte).toBe(true);
+    expect(lensA?.matteParentInd).toBe(eyeMatte?.ind);
+    expect(lensB?.matteParentInd).toBe(eyeMatte?.ind);
+  });
+
+  it('parses an animated property with no keyframes to its static default', () => {
+    const lottie = {
+      v: '5.5.0',
+      fr: 60,
+      ip: 0,
+      op: 60,
+      w: 512,
+      h: 512,
+      layers: [
+        {
+          ddd: 0,
+          ind: 1,
+          ty: 4,
+          nm: 'Shape',
+          ip: 0,
+          op: 60,
+          ks: {
+            o: { a: 1, k: [] },
+            r: { a: 0, k: 0 },
+            p: { a: 0, k: [100, 100, 0] },
+            a: { a: 0, k: [0, 0, 0] },
+            s: { a: 0, k: [100, 100, 100] },
+          },
+          shapes: [],
+        },
+      ],
+    };
+
+    const animation = parseLottie(lottie as unknown as Record<string, unknown>);
+    const opacity = animation.layers[0]!.transform.opacity;
+    expect(isAnimated(opacity)).toBe(false);
+    expect(opacity).toBe(100);
+    expect(evaluateAnimatable(opacity, 0)).toBe(100);
+  });
+
+  it('parses an animated property whose keyframes all fail to parse to its static default', () => {
+    const lottie = {
+      v: '5.5.0',
+      fr: 60,
+      ip: 0,
+      op: 60,
+      w: 512,
+      h: 512,
+      layers: [
+        {
+          ddd: 0,
+          ind: 1,
+          ty: 4,
+          nm: 'Shape',
+          ip: 0,
+          op: 60,
+          ks: {
+            o: { a: 1, k: [{ t: 0 }] },
+            r: { a: 0, k: 0 },
+            p: { a: 0, k: [100, 100, 0] },
+            a: { a: 0, k: [0, 0, 0] },
+            s: { a: 0, k: [100, 100, 100] },
+          },
+          shapes: [],
+        },
+      ],
+    };
+
+    const animation = parseLottie(lottie as unknown as Record<string, unknown>);
+    const opacity = animation.layers[0]!.transform.opacity;
+    expect(isAnimated(opacity)).toBe(false);
+    expect(opacity).toBe(100);
+  });
+
+  it('evaluates a hand-built animated property with no keyframes without throwing', () => {
+    // Guards the parser<->scene contract: even if an empty animated property
+    // slips past parsing, evaluation must not throw inside the render loop.
+    const value = { keyframes: [] } as unknown as Animatable<number>;
+    expect(() => evaluateAnimatable(value, 0)).not.toThrow();
+    expect(evaluateAnimatable(value, 0)).toBeUndefined();
+  });
+
+  it('does not overflow on a self-referential precomp asset', () => {
+    const transform = {
+      o: { a: 0, k: 100 },
+      r: { a: 0, k: 0 },
+      p: { a: 0, k: [0, 0, 0] },
+      a: { a: 0, k: [0, 0, 0] },
+      s: { a: 0, k: [100, 100, 100] },
+    };
+    const lottie = {
+      v: '5.5.0',
+      fr: 60,
+      ip: 0,
+      op: 60,
+      w: 512,
+      h: 512,
+      assets: [
+        {
+          id: 'comp_0',
+          layers: [
+            {
+              ddd: 0,
+              ind: 1,
+              ty: 0,
+              nm: 'Self',
+              refId: 'comp_0',
+              ip: 0,
+              op: 60,
+              st: 0,
+              ks: transform,
+            },
+          ],
+        },
+      ],
+      layers: [{ ddd: 0, ind: 1, ty: 0, nm: 'Root', refId: 'comp_0', ip: 0, op: 60, st: 0, ks: transform }],
+    };
+
+    const animation = parseLottie(lottie as unknown as Record<string, unknown>);
+    expect(animation.layers).toHaveLength(2);
+    expect(animation.layers.map((layer) => layer.name)).toContain('Root > Self');
+  });
+
+  it('does not overflow on mutually referencing precomp assets', () => {
+    const transform = {
+      o: { a: 0, k: 100 },
+      r: { a: 0, k: 0 },
+      p: { a: 0, k: [0, 0, 0] },
+      a: { a: 0, k: [0, 0, 0] },
+      s: { a: 0, k: [100, 100, 100] },
+    };
+    const lottie = {
+      v: '5.5.0',
+      fr: 60,
+      ip: 0,
+      op: 60,
+      w: 512,
+      h: 512,
+      assets: [
+        {
+          id: 'comp_a',
+          layers: [
+            {
+              ddd: 0,
+              ind: 1,
+              ty: 0,
+              nm: 'ToB',
+              refId: 'comp_b',
+              ip: 0,
+              op: 60,
+              st: 0,
+              ks: transform,
+            },
+          ],
+        },
+        {
+          id: 'comp_b',
+          layers: [
+            {
+              ddd: 0,
+              ind: 1,
+              ty: 0,
+              nm: 'ToA',
+              refId: 'comp_a',
+              ip: 0,
+              op: 60,
+              st: 0,
+              ks: transform,
+            },
+          ],
+        },
+      ],
+      layers: [{ ddd: 0, ind: 1, ty: 0, nm: 'Root', refId: 'comp_a', ip: 0, op: 60, st: 0, ks: transform }],
+    };
+
+    const animation = parseLottie(lottie as unknown as Record<string, unknown>);
+    expect(animation.layers).toHaveLength(3);
+    expect(animation.layers.map((layer) => layer.name)).toContain('Root > ToB > ToA');
+  });
+
+  it('does not overflow on a self-referential slot', () => {
+    const lottie = {
+      v: '5.5.0',
+      fr: 60,
+      ip: 0,
+      op: 60,
+      w: 512,
+      h: 512,
+      slots: {
+        primary: { p: { a: 0, k: { sid: 'primary' } } },
+      },
+      layers: [
+        {
+          ddd: 0,
+          ind: 1,
+          ty: 4,
+          nm: 'Shape',
+          ip: 0,
+          op: 60,
+          ks: {
+            o: { a: 0, k: 100 },
+            r: { a: 0, k: 0 },
+            p: { a: 0, k: [256, 256, 0] },
+            a: { a: 0, k: [0, 0, 0] },
+            s: { a: 0, k: [100, 100, 100] },
+          },
+          shapes: [
+            {
+              ty: 'gr',
+              it: [
+                {
+                  ty: 'rc',
+                  p: { a: 0, k: [0, 0] },
+                  s: { a: 0, k: [100, 100] },
+                  r: { a: 0, k: 0 },
+                },
+                { ty: 'fl', c: { sid: 'primary' }, o: { a: 0, k: 100 } },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const animation = parseLottie(lottie as unknown as Record<string, unknown>);
+    expect(animation.layers).toHaveLength(1);
+    expect(animation.slots?.['primary']).toBeDefined();
+  });
+
+  it('still expands an acyclic asset referenced by two sibling layers', () => {
+    const transform = {
+      o: { a: 0, k: 100 },
+      r: { a: 0, k: 0 },
+      p: { a: 0, k: [0, 0, 0] },
+      a: { a: 0, k: [0, 0, 0] },
+      s: { a: 0, k: [100, 100, 100] },
+    };
+    const lottie = {
+      v: '5.5.0',
+      fr: 60,
+      ip: 0,
+      op: 60,
+      w: 512,
+      h: 512,
+      assets: [
+        {
+          id: 'leaf',
+          layers: [
+            {
+              ddd: 0,
+              ind: 1,
+              ty: 4,
+              nm: 'LeafShape',
+              ip: 0,
+              op: 60,
+              st: 0,
+              ks: transform,
+              shapes: [],
+            },
+          ],
+        },
+        {
+          id: 'comp_root',
+          layers: [
+            {
+              ddd: 0,
+              ind: 1,
+              ty: 0,
+              nm: 'UseA',
+              refId: 'leaf',
+              ip: 0,
+              op: 60,
+              st: 0,
+              ks: transform,
+            },
+            {
+              ddd: 0,
+              ind: 2,
+              ty: 0,
+              nm: 'UseB',
+              refId: 'leaf',
+              ip: 0,
+              op: 60,
+              st: 0,
+              ks: transform,
+            },
+          ],
+        },
+      ],
+      layers: [
+        {
+          ddd: 0,
+          ind: 1,
+          ty: 0,
+          nm: 'Root',
+          refId: 'comp_root',
+          ip: 0,
+          op: 60,
+          st: 0,
+          ks: transform,
+        },
+      ],
+    };
+
+    const animation = parseLottie(lottie as unknown as Record<string, unknown>);
+    expect(animation.layers).toHaveLength(5);
+    const names = animation.layers.map((layer) => layer.name);
+    expect(names).toContain('Root > UseA > LeafShape');
+    expect(names).toContain('Root > UseB > LeafShape');
   });
 });

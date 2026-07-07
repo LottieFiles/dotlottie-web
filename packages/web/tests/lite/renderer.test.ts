@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { Animation } from '../../src/lite/model';
 import {
   FILL_ONLY_SMALL_CANVAS_SUPERSAMPLE_SCALE,
   SMALL_CANVAS_SUPERSAMPLE_SCALE,
@@ -12,6 +13,46 @@ describe('Canvas2DRenderer', () => {
   it('can be instantiated', () => {
     const renderer = new Canvas2DRenderer();
     expect(renderer).toBeDefined();
+  });
+
+  it('records phase-level render stats when enabled', () => {
+    const renderer = new Canvas2DRenderer();
+    const canvas = {
+      width: 256,
+      height: 256,
+      getContext: () => ({
+        clearRect: () => {},
+        filter: 'none',
+        globalAlpha: 1,
+        globalCompositeOperation: 'source-over',
+        setTransform: () => {},
+      }),
+    } as unknown as HTMLCanvasElement;
+    const animation: Animation = {
+      duration: 60,
+      frameRate: 60,
+      height: 256,
+      inPoint: 0,
+      layers: [],
+      outPoint: 60,
+      version: '5.5.0',
+      width: 256,
+    };
+
+    renderer.collectStats(true);
+    renderer.render(animation, 0, canvas);
+
+    expect(renderer.lastRenderStats).toEqual(
+      expect.objectContaining({
+        bufferedLayerMs: expect.any(Number),
+        layerListMs: expect.any(Number),
+        renderMs: expect.any(Number),
+        sceneBuildMs: expect.any(Number),
+      }),
+    );
+    expect(renderer.lastRenderStats?.renderMs).toBeGreaterThanOrEqual(0);
+    renderer.collectStats(false);
+    expect(renderer.lastRenderStats).toBeNull();
   });
 
   it('clears renderer-owned caches on dispose', () => {
@@ -65,15 +106,14 @@ describe('Canvas2DRenderer', () => {
         image: { src: string; width: number; height: number },
       ) => void;
     };
-    const image = { complete: true, naturalWidth: 10 };
+    const image = { complete: true, naturalWidth: 2500 };
     const calls: Array<[string, ...unknown[]]> = [];
 
-    // The source repo ran this test in Node, where scaledImageFor() bails out early because
-    // OffscreenCanvas and document are undefined, so drawImage() always took the direct-draw
-    // path. In browser mode OffscreenCanvas is real and would reject the mock image, so we use
-    // dimensions above MAX_SCALED_IMAGE_CACHE_PIXELS (4M) to reach the same direct-draw path
-    // that applies the ThorVG vertical sampling offset.
     renderer.imageCache.set('asset.png', image);
+    // Dimensions above the scaled-image cache pixel cap force the direct draw
+    // path; in this browser test environment the cache path would hand the fake
+    // image object to a real OffscreenCanvas context (upstream runs this test in
+    // Node, where the cache path is unavailable and skips itself).
     renderer.drawImage(
       {
         clip: () => calls.push(['clip']),
@@ -82,14 +122,14 @@ describe('Canvas2DRenderer', () => {
         restore: () => calls.push(['restore']),
         save: () => calls.push(['save']),
       },
-      { src: 'asset.png', width: 4000, height: 2000 },
+      { src: 'asset.png', width: 2500, height: 2000 },
     );
 
     expect(calls).toEqual([
       ['save'],
-      ['rect', 0, 0, 4000, 2000],
+      ['rect', 0, 0, 2500, 2000],
       ['clip'],
-      ['drawImage', image, 0, -0.5, 4000, 2000],
+      ['drawImage', image, 0, -0.5, 2500, 2000],
       ['restore'],
     ]);
   });
@@ -375,6 +415,73 @@ describe('Canvas2DRenderer', () => {
     expect(strokeCtx.lineDashOffset).toBe(12);
   });
 
+  it('reuses a cached CanvasGradient for a static gradient fill across frames', () => {
+    let createLinearGradientCalls = 0;
+    let createRadialGradientCalls = 0;
+    const ctx = {
+      fillStyle: '' as string | CanvasGradient,
+      createLinearGradient: () => {
+        createLinearGradientCalls++;
+        return { addColorStop: () => {} } as unknown as CanvasGradient;
+      },
+      createRadialGradient: () => {
+        createRadialGradientCalls++;
+        return { addColorStop: () => {} } as unknown as CanvasGradient;
+      },
+    };
+
+    const fill = {
+      type: 'gradient',
+      gradientType: 'linear',
+      start: { x: 0, y: 0 },
+      end: { x: 100, y: 0 },
+      colors: [
+        { offset: 0, color: { r: 255, g: 0, b: 0, a: 1 } },
+        { offset: 1, color: { r: 0, g: 0, b: 255, a: 1 } },
+      ],
+    };
+
+    // Same `Fill` object identity (as scene evaluation preserves for a
+    // static gradient), drawn across several simulated frames.
+    for (let frame = 0; frame < 5; frame++) {
+      applyFill(ctx as never, fill as never);
+    }
+
+    expect(createLinearGradientCalls).toBe(1);
+    expect(createRadialGradientCalls).toBe(0);
+    expect(ctx.fillStyle).toBeDefined();
+  });
+
+  it('does not reuse a cached gradient across different rendering contexts', () => {
+    let createLinearGradientCalls = 0;
+    const makeCtx = () => ({
+      fillStyle: '' as string | CanvasGradient,
+      createLinearGradient: () => {
+        createLinearGradientCalls++;
+        return { addColorStop: () => {} } as unknown as CanvasGradient;
+      },
+    });
+
+    const fill = {
+      type: 'gradient',
+      gradientType: 'linear',
+      start: { x: 0, y: 0 },
+      end: { x: 100, y: 0 },
+      colors: [
+        { offset: 0, color: { r: 255, g: 0, b: 0, a: 1 } },
+        { offset: 1, color: { r: 0, g: 0, b: 255, a: 1 } },
+      ],
+    };
+
+    // Two distinct contexts (e.g. the main canvas and a pooled offscreen
+    // buffer) must each build and own their own CanvasGradient -- a
+    // `CanvasGradient` cannot be reused across contexts.
+    applyFill(makeCtx() as never, fill as never);
+    applyFill(makeCtx() as never, fill as never);
+
+    expect(createLinearGradientCalls).toBe(2);
+  });
+
   it('uses square caps for dashed butt-cap strokes to match ThorVG stroke coverage', () => {
     const strokeCtx = {
       strokeStyle: '',
@@ -614,6 +721,66 @@ describe('Canvas2DRenderer', () => {
     expect(glyphScales[1]![1]).toBeCloseTo(0.091, 3);
     expect(pathCalls).toContainEqual(['moveTo', 0, 0]);
     expect(pathCalls).toContainEqual(['lineTo', 10, 0]);
+  });
+
+  it('applies Lottie tracking (tr/1000 * size) when advancing embedded glyphs', () => {
+    const previousPath2D = globalThis.Path2D;
+    class MockPath2D {
+      moveTo() {}
+      lineTo() {}
+      bezierCurveTo() {}
+      closePath() {}
+    }
+    const renderer = new Canvas2DRenderer() as unknown as {
+      renderText: (ctx: Record<string, unknown>, text: unknown) => void;
+    };
+    const translates: number[] = [];
+    const ctx = {
+      fillStyle: '',
+      fill: () => {},
+      restore: () => {},
+      save: () => {},
+      scale: () => {},
+      translate: (x: number) => translates.push(x),
+    };
+    const glyph = {
+      width: 50,
+      size: 100,
+      paths: [
+        {
+          vertices: [
+            { x: 0, y: 0 },
+            { x: 10, y: 0 },
+          ],
+          inTangents: [
+            { x: 0, y: 0 },
+            { x: 0, y: 0 },
+          ],
+          outTangents: [
+            { x: 0, y: 0 },
+            { x: 0, y: 0 },
+          ],
+          closed: true,
+        },
+      ],
+    };
+    globalThis.Path2D = MockPath2D as unknown as typeof Path2D;
+    try {
+      renderer.renderText(ctx, {
+        text: 'AB',
+        fontFamily: 'AvertaStd-Black',
+        size: 100,
+        // tracking 100 (1/1000 em) at size 100 => 10px between glyphs
+        tracking: 100,
+        color: { r: 0, g: 0, b: 0, a: 1 },
+        justification: 'left',
+        glyphs: { A: glyph, B: glyph },
+      });
+    } finally {
+      globalThis.Path2D = previousPath2D;
+    }
+    // First glyph at x=0, second at width(50) + tracking(10) = 60.
+    expect(translates).toEqual([0, 60]);
   });
 
   it('draws text-path glyphs along the sampled path with ThorVG baseline offset', () => {

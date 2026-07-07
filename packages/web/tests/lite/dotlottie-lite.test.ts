@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { DotLottie } from '../../src/lite';
+import { DotLottie, disposeSharedCanvasRenderer } from '../../src/lite';
 import { createCanvas, sleep } from '../test-utils';
 
 const jsonSrc = new URL('../../../../fixtures/test.json', import.meta.url).href;
@@ -318,5 +318,60 @@ describe('DotLottieLite', () => {
     // Statics exist for drop-in compatibility.
     expect(DotLottie.setWasmUrl).toBeTypeOf('function');
     await expect(DotLottie.registerFont('font', new ArrayBuffer(0))).resolves.toBe(false);
+  });
+
+  test('players with the same src share one fetch and one parsed animation', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    // A unique query string keys a fresh entry in the module-level source cache.
+    const dedupSrc = `${jsonSrc}?dedup-test`;
+    const secondCanvas = createCanvas();
+    const onLoadA = vi.fn();
+    const onLoadB = vi.fn();
+
+    dotLottie = new DotLottie({ canvas, src: dedupSrc });
+    const second = new DotLottie({ canvas: secondCanvas, src: dedupSrc });
+
+    dotLottie.addEventListener('load', onLoadA);
+    second.addEventListener('load', onLoadB);
+
+    try {
+      await vi.waitFor(() => {
+        expect(onLoadA).toHaveBeenCalledTimes(1);
+        expect(onLoadB).toHaveBeenCalledTimes(1);
+      });
+
+      const dedupFetches = fetchSpy.mock.calls.filter(([input]) => String(input).includes('dedup-test'));
+
+      expect(dedupFetches).toHaveLength(1);
+      expect(dotLottie.totalFrames).toBe(second.totalFrames);
+    } finally {
+      second.destroy();
+      secondCanvas.remove();
+      fetchSpy.mockRestore();
+    }
+  });
+
+  test('disposing the shared renderer keeps live players working', async () => {
+    const onLoad = vi.fn();
+    const onFrame = vi.fn();
+
+    dotLottie = new DotLottie({ canvas, src });
+
+    dotLottie.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    disposeSharedCanvasRenderer();
+
+    dotLottie.addEventListener('frame', onFrame);
+    dotLottie.setFrame(Math.floor(dotLottie.totalFrames / 2));
+
+    await vi.waitFor(() => {
+      expect(onFrame).toHaveBeenCalledTimes(1);
+    });
+
+    expect(dotLottie.currentFrame).toBeGreaterThan(0);
   });
 });
