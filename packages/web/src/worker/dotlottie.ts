@@ -1244,6 +1244,18 @@ export class DotLottieWorker {
 
   /**
    * @experimental
+   * Set the seed used by the state machine's random number generator
+   * @param seed - The seed value to use
+   * @returns true if the seed was set successfully
+   */
+  public async stateMachineSetSeed(seed: number): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('stateMachineSetSeed', { instanceId: this._id, seed });
+  }
+
+  /**
+   * @experimental
    * Get a specific state machine by ID
    * @param stateMachineId - The ID of the state machine to get
    * @returns The state machine data as a string

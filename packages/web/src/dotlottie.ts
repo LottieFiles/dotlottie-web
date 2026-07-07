@@ -2110,6 +2110,16 @@ export class DotLottie {
 
   /**
    * @experimental
+   * Set the seed used by the state machine's random number generator
+   * @param seed - The seed value to use
+   * @returns true if the seed was set successfully
+   */
+  public stateMachineSetSeed(seed: number): boolean {
+    return this._dotLottieCore?.sm_set_seed(BigInt(seed)) ?? false;
+  }
+
+  /**
+   * @experimental
    * Get a specific state machine by ID
    * @param stateMachineId - The ID of the state machine to get
    * @returns The state machine data as a string

@@ -307,6 +307,10 @@ export interface MethodParamsMap {
     name: string;
     value: number;
   };
+  stateMachineSetSeed: {
+    instanceId: string;
+    seed: number;
+  };
   stateMachineSetStringInput: {
     instanceId: string;
     name: string;
@@ -509,6 +513,7 @@ export interface MethodResultMap {
   stateMachineSetBooleanInput: boolean;
   stateMachineSetConfig: undefined;
   stateMachineSetNumericInput: boolean;
+  stateMachineSetSeed: boolean;
   stateMachineSetStringInput: boolean;
   stateMachineStart: boolean;
   stateMachineStop: boolean;

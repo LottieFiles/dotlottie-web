@@ -758,6 +758,18 @@ const commands: {
 
     return instance.stateMachineOverrideState(state, immediate);
   },
+  stateMachineSetSeed: (request) => {
+    const instanceId = request.params.instanceId;
+    const seed = request.params.seed;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.stateMachineSetSeed(seed);
+  },
   stateMachineGet: (request) => {
     const instanceId = request.params.instanceId;
     const stateMachineId = request.params.stateMachineId;
