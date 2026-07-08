@@ -2141,7 +2141,7 @@ export class DotLottie {
    * @returns true if the seed was set successfully
    */
   public stateMachineSetSeed(seed: number): boolean {
-    return this._dotLottieCore?.sm_set_seed(BigInt(seed)) ?? false;
+    return this._dotLottieCore?.sm_set_seed(BigInt(Math.trunc(seed))) ?? false;
   }
 
   /**
