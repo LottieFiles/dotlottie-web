@@ -136,6 +136,11 @@ export interface MethodParamsMap {
     slotId: string;
     value: TextSlotValue;
   };
+  setImageSlot: {
+    instanceId: string;
+    slotId: string;
+    src: string;
+  };
   resetSlot: {
     instanceId: string;
     slotId: string;
@@ -307,6 +312,10 @@ export interface MethodParamsMap {
     name: string;
     value: number;
   };
+  stateMachineSetSeed: {
+    instanceId: string;
+    seed: number;
+  };
   stateMachineSetStringInput: {
     instanceId: string;
     name: string;
@@ -467,6 +476,7 @@ export interface MethodResultMap {
   setVectorSlot: boolean;
   setGradientSlot: boolean;
   setTextSlot: boolean;
+  setImageSlot: boolean;
   resetSlot: boolean;
   clearSlot: boolean;
   resetSlots: boolean;
@@ -509,6 +519,7 @@ export interface MethodResultMap {
   stateMachineSetBooleanInput: boolean;
   stateMachineSetConfig: undefined;
   stateMachineSetNumericInput: boolean;
+  stateMachineSetSeed: boolean;
   stateMachineSetStringInput: boolean;
   stateMachineStart: boolean;
   stateMachineStop: boolean;

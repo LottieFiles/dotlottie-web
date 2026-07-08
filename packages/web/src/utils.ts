@@ -154,6 +154,35 @@ export function getPointerPosition(event: MouseEvent | PointerEvent): { x: numbe
   return null;
 }
 
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onerror = (): void => reject(reader.error ?? new Error('Failed to read image slot source'));
+    reader.onload = (): void => resolve(reader.result as string);
+    reader.readAsDataURL(blob);
+  });
+}
+
+/**
+ * Resolve an image-slot source for the WASM renderer, which can only decode embedded images.
+ * `http(s)://` URLs are fetched here and converted to a `data:` URI; `data:` URIs and
+ * package-relative file names are passed through unchanged for the core to resolve.
+ */
+export async function resolveImageSlotSrc(src: string): Promise<string> {
+  if (!/^https?:\/\//i.test(src)) {
+    return src;
+  }
+
+  const response = await fetch(src);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image slot source from URL: ${src}. ${response.status}: ${response.statusText}`);
+  }
+
+  return blobToDataUrl(await response.blob());
+}
+
 export function handleOpenUrl(message: string): void {
   const content = message.replace('OpenUrl: ', '');
 

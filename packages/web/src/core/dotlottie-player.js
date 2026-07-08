@@ -671,6 +671,21 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
+     * Set an image slot from a source string (a `data:` URI, an `http(s)://`
+     * URL, or a file in the package `i/` folder referenced by name).
+     * @param {string} id
+     * @param {string} src
+     * @returns {boolean}
+     */
+    set_image_slot(id, src) {
+        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(src, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_set_image_slot(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+        return ret !== 0;
+    }
+    /**
      * @param {number} n
      */
     set_loop_count(n) {

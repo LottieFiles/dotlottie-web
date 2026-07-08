@@ -34,6 +34,7 @@ import {
   isDotLottie,
   isElementInViewport,
   isLottie,
+  resolveImageSlotSrc,
 } from './utils';
 import { createWasmLoader } from './wasm-loader';
 
@@ -1831,6 +1832,31 @@ export class DotLottie {
   }
 
   /**
+   * Set an image slot to a custom source.
+   *
+   * The WASM renderer can only decode embedded images, so `http(s)://` URLs are fetched
+   * and inlined as a `data:` URI before being handed to the core. `data:` URIs and
+   * package-relative file names are passed through unchanged.
+   * @param slotId - The image slot ID to set
+   * @param src - The image source: a `data:` URI, an `http(s)://` URL, or a package `i/` file name
+   * @returns true if successful
+   */
+  public async setImageSlot(slotId: string, src: string): Promise<boolean> {
+    if (this._dotLottieCore === null) return false;
+
+    const resolvedSrc = await resolveImageSlotSrc(src);
+
+    if (this._dotLottieCore === null) return false;
+
+    const result = this._dotLottieCore.set_image_slot(slotId, resolvedSrc);
+
+    this._dotLottieCore.render();
+    this._draw();
+
+    return result;
+  }
+
+  /**
    * Reset a slot to its original value
    * @param slotId - The slot ID to reset
    * @returns true if successful
@@ -2106,6 +2132,16 @@ export class DotLottie {
    */
   public stateMachineOverrideState(state: string, immediate: boolean = false): boolean {
     return this._dotLottieCore?.sm_override_current_state(state, immediate) ?? false;
+  }
+
+  /**
+   * @experimental
+   * Set the seed used by the state machine's random number generator
+   * @param seed - The seed value to use
+   * @returns true if the seed was set successfully
+   */
+  public stateMachineSetSeed(seed: number): boolean {
+    return this._dotLottieCore?.sm_set_seed(BigInt(Math.trunc(seed))) ?? false;
   }
 
   /**

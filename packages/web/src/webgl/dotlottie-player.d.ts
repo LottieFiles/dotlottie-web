@@ -137,6 +137,11 @@ export class DotLottiePlayerWasm {
    * Set a color slot (`r`, `g`, `b` in [0, 1]).
    */
   set_color_slot(id: string, r: number, g: number, b: number): boolean;
+  /**
+   * Set an image slot from a source string (a `data:` URI, an `http(s)://`
+   * URL, or a file in the package `i/` folder referenced by name).
+   */
+  set_image_slot(id: string, src: string): boolean;
   set_loop_count(n: number): void;
   set_theme_data(data: string): boolean;
   sm_reset_input(key: string): void;
@@ -370,6 +375,7 @@ export interface InitOutput {
     f: number,
   ) => number;
   readonly dotlottieplayerwasm_set_frame: (a: number, b: number) => number;
+  readonly dotlottieplayerwasm_set_image_slot: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly dotlottieplayerwasm_set_layout: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly dotlottieplayerwasm_set_loop: (a: number, b: number) => void;
   readonly dotlottieplayerwasm_set_loop_count: (a: number, b: number) => void;
