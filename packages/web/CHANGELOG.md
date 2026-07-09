@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-web
 
+## 0.77.0
+### Minor Changes
+
+- be7b01c: Add `setImageSlot` to `DotLottie` and `DotLottieWorker` for replacing an animation's image slot with a custom source. Accepts a `data:` URI or an `http(s)://` URL (fetched and inlined automatically, since the WASM renderer can only decode embedded images); returns a `Promise<boolean>`.
+- be7b01c: Add `stateMachineSetSeed` to `DotLottie` and `DotLottieWorker` for seeding the state machine's RNG.
+- be7b01c: Upgrade dotlottie-rs WASM bindings to c4357c5.
+
 ## 0.76.0
 ### Minor Changes
 
