@@ -1,5 +1,10 @@
 # @lottiefiles/dotlottie-web
 
+## 0.77.1
+### Patch Changes
+
+- 7af326d: Fix `setImageSlot()` trapping the WASM module and rendering nothing.
+
 ## 0.77.0
 ### Minor Changes
 
