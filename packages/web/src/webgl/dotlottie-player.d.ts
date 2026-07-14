@@ -13,19 +13,11 @@ export enum Mode {
   Bounce = 2,
   ReverseBounce = 3,
 }
-/**
- * Current status of the animation player.
- */
-export enum Status {
-  Idle = 0,
-  Playing = 1,
-  Paused = 2,
-  Stopped = 3,
-  Tweening = 4,
-}
 export class DotLottiePlayerWasm {
   free(): void;
   clear_slot(id: string): boolean;
+  is_playing(): boolean;
+  is_stopped(): boolean;
   layout_fit(): string;
   loop_count(): number;
   /**
@@ -48,6 +40,7 @@ export class DotLottiePlayerWasm {
   set_marker(name: string): void;
   clear_slots(): boolean;
   is_complete(): boolean;
+  is_tweening(): boolean;
   /**
    * Reset all slots to their default values from the animation.
    */
@@ -256,7 +249,6 @@ export class DotLottiePlayerWasm {
    * Render the current frame without advancing time.
    */
   render(): boolean;
-  status(): Status;
   /**
    * Returns an array of `{ name, start, end }` objects.
    */
@@ -283,6 +275,8 @@ export class DotLottiePlayerWasm {
    */
   sm_start(require_user_interaction: boolean, whitelist: any[]): boolean;
   theme_id(): string | undefined;
+  is_loaded(): boolean;
+  is_paused(): boolean;
   load_font(name: string, data: Uint8Array): boolean;
   set_frame(no: number): boolean;
   set_speed(speed: number): void;
@@ -340,6 +334,11 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_get_transform: (a: number) => any;
   readonly dotlottieplayerwasm_height: (a: number) => number;
   readonly dotlottieplayerwasm_is_complete: (a: number) => number;
+  readonly dotlottieplayerwasm_is_loaded: (a: number) => number;
+  readonly dotlottieplayerwasm_is_paused: (a: number) => number;
+  readonly dotlottieplayerwasm_is_playing: (a: number) => number;
+  readonly dotlottieplayerwasm_is_stopped: (a: number) => number;
+  readonly dotlottieplayerwasm_is_tweening: (a: number) => number;
   readonly dotlottieplayerwasm_layout_align_x: (a: number) => number;
   readonly dotlottieplayerwasm_layout_align_y: (a: number) => number;
   readonly dotlottieplayerwasm_layout_fit: (a: number) => [number, number];
@@ -428,7 +427,6 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_state_machine_load: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_state_machine_load_from_id: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_state_machine_unload: (a: number) => void;
-  readonly dotlottieplayerwasm_status: (a: number) => number;
   readonly dotlottieplayerwasm_stop: (a: number) => number;
   readonly dotlottieplayerwasm_theme_id: (a: number) => [number, number];
   readonly dotlottieplayerwasm_tick: (a: number, b: number) => number;
