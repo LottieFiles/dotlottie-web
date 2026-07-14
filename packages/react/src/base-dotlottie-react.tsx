@@ -76,6 +76,11 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   const dotLottieRef = useRef<T | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dotLottieRefCallbackRef = useRef<RefCallback<T | null> | undefined>(dotLottieRefCallback);
+  const pendingDestroyRef = useRef<{
+    canvas: HTMLCanvasElement;
+    instance: T;
+    timer: ReturnType<typeof setTimeout>;
+  } | null>(null);
 
   const config: Omit<Config, 'canvas'> & {
     workerId?: T extends DotLottieWorker ? string : undefined;
@@ -109,13 +114,42 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     canvasRef.current = canvas;
 
     if (canvas) {
-      dotLottieRef.current = createDotLottie({
-        ...configRef.current,
-        canvas,
-      });
-    } else {
-      dotLottieRef.current?.destroy();
+      const pending = pendingDestroyRef.current;
+
+      if (pending && pending.canvas === canvas) {
+        // StrictMode detach → reattach on the same canvas: reclaim the live instance
+        clearTimeout(pending.timer);
+        pendingDestroyRef.current = null;
+        dotLottieRef.current = pending.instance;
+      } else if (dotLottieRef.current?.canvas !== canvas) {
+        dotLottieRef.current = createDotLottie({
+          ...configRef.current,
+          canvas,
+        });
+      }
+      // else: React 19 StrictMode double attach without detach — reuse the live instance
+    } else if (dotLottieRef.current) {
+      const instance = dotLottieRef.current;
+      const instanceCanvas = instance.canvas;
+
       dotLottieRef.current = null;
+
+      if (instanceCanvas instanceof HTMLCanvasElement) {
+        // Defer destroy one macrotask so a StrictMode remount (which runs synchronously
+        // within the commit) can reclaim the instance.
+        pendingDestroyRef.current = {
+          canvas: instanceCanvas,
+          instance,
+          timer: setTimeout(() => {
+            if (pendingDestroyRef.current?.instance === instance) {
+              pendingDestroyRef.current = null;
+            }
+            instance.destroy();
+          }, 0),
+        };
+      } else {
+        instance.destroy();
+      }
     }
 
     dotLottieRefCallbackRef.current?.(dotLottieRef.current);
