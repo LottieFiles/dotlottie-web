@@ -295,6 +295,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      packages: write
       pull-requests: write
 
     steps:
@@ -346,6 +347,22 @@ jobs:
 
       - name: 🚀 Publish dev release to NPM
         run: pnpm changeset publish --no-git-tag --tag dev
+
+      # Consumers that route the @lottiefiles scope to GPR resolve *every* package
+      # in the scope from GPR, so a snapshot that only exists on npmjs is
+      # unreachable for them. Mirror it, exactly as real releases are mirrored.
+      - name: 🚀 Publish dev release to GitHub Packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NPMRC=$(mktemp)
+          trap 'rm -f "$NPMRC"' EXIT
+          {
+            echo "@lottiefiles:registry=https://npm.pkg.github.com/"
+            echo '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}'
+          } > "$NPMRC"
+          NPM_CONFIG_USERCONFIG="$NPMRC" pnpm changeset publish --no-git-tag --tag dev
 
       - name: 📋 Report published version
         env:

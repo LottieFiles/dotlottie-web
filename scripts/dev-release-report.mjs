@@ -72,7 +72,12 @@ function renderComment(packages, version) {
 
   const runUrl = `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
 
-  lines.push(`Built from \`${GITHUB_REF_NAME}\` @ \`${GITHUB_SHA}\` · [run](${runUrl})`);
+  lines.push(
+    'Published to both npmjs and GitHub Packages, so it resolves regardless of which',
+    'registry your `.npmrc` points the `@lottiefiles` scope at.',
+    '',
+    `Built from \`${GITHUB_REF_NAME}\` @ \`${GITHUB_SHA}\` · [run](${runUrl})`,
+  );
 
   return lines.join('\n');
 }
