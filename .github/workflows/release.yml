@@ -320,9 +320,6 @@ jobs:
       - name: 📥 Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: 🏗 Build packages
-        run: pnpm build:packages
-
       - name: 📝 Create ephemeral changeset
         run: |
           cat > .changeset/zz-dev-release.md <<'EOF'
@@ -341,5 +338,23 @@ jobs:
       - name: 🔖 Version snapshot
         run: pnpm changeset version --snapshot dev
 
+      # Must run after `changeset version`: the build inlines `__PACKAGE_VERSION__`
+      # from package.json into the default WASM CDN URLs.
+      - name: 🏗 Build packages
+        run: pnpm build:packages
+
       - name: 🚀 Publish dev release to NPM
         run: pnpm changeset publish --no-git-tag --tag dev
+
+      - name: 📋 Summary
+        run: |
+          VERSION=$(jq -r '.version' ./packages/web/package.json)
+          {
+            echo "### Dev release published"
+            echo
+            echo '```sh'
+            echo "npm i @lottiefiles/dotlottie-web@$VERSION"
+            echo '```'
+            echo
+            echo "Also available under the \`dev\` dist-tag: \`npm i @lottiefiles/dotlottie-web@dev\`"
+          } >> "$GITHUB_STEP_SUMMARY"
