@@ -27,6 +27,7 @@ WEB_SRC_WEBGL  := src/webgl
 WEB_SRC_WEBGPU := src/webgpu
 
 WASM_TARGET := wasm32-unknown-unknown
+WASM_MAX_MEMORY ?= 2147483648
 WASM_MANIFEST := $(DOTLOTTIE_RS_CRATE)/Cargo.toml
 WASM_ARTIFACT := $(DOTLOTTIE_RS_CRATE)/target/$(WASM_TARGET)/release/dotlottie_rs.wasm
 WASM_LOCKFILE := $(DOTLOTTIE_RS_CRATE)/Cargo.lock
@@ -104,7 +105,7 @@ setup:
 # $(4) = web src directory (e.g. $(WEB_SRC_CORE))
 define wasm_build
 	@mkdir -p $(3)
-	CC=$(WASM_CC) CXX=$(WASM_CXX) RUSTFLAGS="$(2)" \
+	CC=$(WASM_CC) CXX=$(WASM_CXX) RUSTFLAGS="$(2) -C link-arg=--max-memory=$(WASM_MAX_MEMORY)" \
 		cargo rustc \
 			--manifest-path $(WASM_MANIFEST) \
 			--crate-type cdylib \
