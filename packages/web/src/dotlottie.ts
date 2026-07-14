@@ -1,7 +1,12 @@
 /* eslint-disable no-warning-comments */
 import { AnimationFrameManager } from './animation-frame-manager';
 import { BYTES_PER_PIXEL, IS_BROWSER, PACKAGE_NAME, PACKAGE_VERSION } from './constants';
-import init, { Mode as CoreMode, DotLottiePlayerWasm, register_font } from './core/dotlottie-player';
+import init, {
+  Mode as CoreMode,
+  Status as CoreStatus,
+  DotLottiePlayerWasm,
+  register_font,
+} from './core/dotlottie-player';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
@@ -348,7 +353,7 @@ export class DotLottie {
           queueMicrotask(() => {
             this._isStateMachineRunning = false;
             this._eventManager.dispatch({ type: 'stateMachineStop' });
-            if (!this._dotLottieCore?.is_playing()) {
+            if (!this._isCorePlaying()) {
               this._stopAnimationLoop();
             }
           });
@@ -562,7 +567,7 @@ export class DotLottie {
             this._startAnimationLoop();
           }
         }
-      } else if (this._dotLottieCore.is_playing()) {
+      } else if (this._isCorePlaying()) {
         this._startAnimationLoop();
       }
 
@@ -753,11 +758,28 @@ export class DotLottie {
   }
 
   /**
+   * The core replaced its is_playing/is_paused/is_stopped/is_loaded/is_tweening flags with a
+   * single Status enum. The flags used to be independent — a tween overlapped with whatever the
+   * playback state was — whereas Status.Tweening now *replaces* Status.Playing for the duration
+   * of the tween. Counting a tween as playing keeps the previous behaviour: frames are advancing,
+   * so the render loop must keep running and `isPlaying` must stay true across a tweened
+   * transition.
+   */
+  protected _isCorePlaying(): boolean {
+    const status = this._dotLottieCore?.status();
+
+    return status === CoreStatus.Playing || status === CoreStatus.Tweening;
+  }
+
+  /**
    * Indicates whether an animation has been successfully loaded and is ready for playback.
    * Check this before calling play() or other playback methods to ensure the animation is ready.
    */
   public get isLoaded(): boolean {
-    return this._dotLottieCore?.is_loaded() ?? false;
+    // The core is Idle until an animation loads, and lands on Stopped once one has.
+    const status = this._dotLottieCore?.status();
+
+    return status !== undefined && status !== CoreStatus.Idle;
   }
 
   /**
@@ -765,7 +787,7 @@ export class DotLottie {
    * True when animation is actively playing, false when paused, stopped, or not started.
    */
   public get isPlaying(): boolean {
-    return this._dotLottieCore?.is_playing() ?? false;
+    return this._isCorePlaying();
   }
 
   /**
@@ -773,7 +795,7 @@ export class DotLottie {
    * True when pause() has been called and animation is not playing or stopped.
    */
   public get isPaused(): boolean {
-    return this._dotLottieCore?.is_paused() ?? false;
+    return this._dotLottieCore?.status() === CoreStatus.Paused;
   }
 
   /**
@@ -781,7 +803,7 @@ export class DotLottie {
    * True when stop() has been called or animation hasn't started yet.
    */
   public get isStopped(): boolean {
-    return this._dotLottieCore?.is_stopped() ?? false;
+    return this._dotLottieCore?.status() === CoreStatus.Stopped;
   }
 
   /**
@@ -1039,7 +1061,7 @@ export class DotLottie {
       this._animationFrameId === null &&
       this._dotLottieCore &&
       !this._isFrozen &&
-      (this._dotLottieCore.is_playing() || this._isStateMachineRunning)
+      (this._isCorePlaying() || this._isStateMachineRunning)
     ) {
       this._animationFrameId = this._frameManager.requestAnimationFrame(this._boundAnimationLoop);
     }
@@ -1053,7 +1075,7 @@ export class DotLottie {
     }
 
     // Continue the loop if either the animation is playing OR the state machine is running
-    if (!this._dotLottieCore.is_playing() && !this._isStateMachineRunning) {
+    if (!this._isCorePlaying() && !this._isStateMachineRunning) {
       this._stopAnimationLoop();
 
       return;
@@ -1103,7 +1125,7 @@ export class DotLottie {
     this._drainPlayerEvents();
 
     // Always unfreeze and start animation loop if core is playing, regardless of play() return value
-    if (playing || this._dotLottieCore.is_playing()) {
+    if (playing || this._isCorePlaying()) {
       this._isFrozen = false;
       this._startAnimationLoop();
     }
@@ -2088,7 +2110,7 @@ export class DotLottie {
       this._cleanupStateMachineListeners();
 
       // Stop animation loop if animation is not playing
-      if (!this._dotLottieCore.is_playing()) {
+      if (!this._isCorePlaying()) {
         this._stopAnimationLoop();
       }
     }

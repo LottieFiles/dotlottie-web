@@ -1,3 +1,5 @@
+import * as __wbg_star0 from 'env';
+
 let wasm;
 
 let cachedUint8ArrayMemory0 = null;
@@ -248,6 +250,17 @@ export const Mode = Object.freeze({
     Bounce: 2, "2": "Bounce",
     ReverseBounce: 3, "3": "ReverseBounce",
 });
+/**
+ * Current status of the animation player.
+ * @enum {0 | 1 | 2 | 3 | 4}
+ */
+export const Status = Object.freeze({
+    Idle: 0, "0": "Idle",
+    Playing: 1, "1": "Playing",
+    Paused: 2, "2": "Paused",
+    Stopped: 3, "3": "Stopped",
+    Tweening: 4, "4": "Tweening",
+});
 
 const DotLottiePlayerWasmFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
@@ -274,20 +287,6 @@ export class DotLottiePlayerWasm {
         const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.dotlottieplayerwasm_clear_slot(this.__wbg_ptr, ptr0, len0);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    is_playing() {
-        const ret = wasm.dotlottieplayerwasm_is_playing(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    is_stopped() {
-        const ret = wasm.dotlottieplayerwasm_is_stopped(this.__wbg_ptr);
         return ret !== 0;
     }
     /**
@@ -369,13 +368,6 @@ export class DotLottiePlayerWasm {
      */
     is_complete() {
         const ret = wasm.dotlottieplayerwasm_is_complete(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    is_tweening() {
-        const ret = wasm.dotlottieplayerwasm_is_tweening(this.__wbg_ptr);
         return ret !== 0;
     }
     /**
@@ -1207,6 +1199,13 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
+     * @returns {Status}
+     */
+    status() {
+        const ret = wasm.dotlottieplayerwasm_status(this.__wbg_ptr);
+        return ret;
+    }
+    /**
      * Returns an array of `{ name, start, end }` objects.
      * @returns {any}
      */
@@ -1292,20 +1291,6 @@ export class DotLottiePlayerWasm {
             wasm.__wbindgen_free_command_export(ret[0], ret[1] * 1, 1);
         }
         return v1;
-    }
-    /**
-     * @returns {boolean}
-     */
-    is_loaded() {
-        const ret = wasm.dotlottieplayerwasm_is_loaded(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    is_paused() {
-        const ret = wasm.dotlottieplayerwasm_is_paused(this.__wbg_ptr);
-        return ret !== 0;
     }
     /**
      * @param {string} name
@@ -1775,6 +1760,7 @@ function __wbg_get_imports() {
     imports.wbg.__wbindgen_throw = function(arg0, arg1) {
         throw new Error(getStringFromWasm0(arg0, arg1));
     };
+    imports['env'] = __wbg_star0;
 
     return imports;
 }
