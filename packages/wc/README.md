@@ -21,6 +21,7 @@
   * [Attributes](#attributes)
 * [RenderConfig](#renderconfig)
   * [Properties](#properties)
+  * [Custom WASM URL](#custom-wasm-url)
 * [Development](#development)
   * [Setup](#setup)
   * [Dev](#dev)
@@ -109,6 +110,28 @@ The `dotlottie-wc` exposes the following properties:
 | Property name | Type        | Description                                                                                                                                                         |
 | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `dotLottie`   | `DotLottie` | The dotLottie instance from [`DotLottie`](../web/README.md#documentation)  , allowing you to call methods and listen to events for more control over the animation. |
+
+### Custom WASM URL
+
+By default, the player's WebAssembly file is loaded from a CDN. If you need to serve it from your own host (e.g. environments where CDN access is restricted), use `setWasmUrl` before any animation loads:
+
+```js
+import { setWasmUrl } from '@lottiefiles/dotlottie-wc';
+
+setWasmUrl('/js/dotlottie/dotlottie-player.wasm');
+```
+
+The function is also exported from the CDN bundles, so it works when loading `dist/dotlottie-wc.js` or `dist/dotlottie-worker-wc.js` directly:
+
+```html
+<script type="module">
+  import { setWasmUrl } from 'https://unpkg.com/@lottiefiles/dotlottie-wc@latest/dist/dotlottie-wc.js';
+
+  setWasmUrl('/js/dotlottie/dotlottie-player.wasm');
+</script>
+```
+
+You can find the matching `dotlottie-player.wasm` for your installed version inside the `@lottiefiles/dotlottie-web` package (`dist/dotlottie-player.wasm`) or on a npm CDN, e.g. `https://unpkg.com/@lottiefiles/dotlottie-web@x.y.z/dist/dotlottie-player.wasm`.
 
 ## Development
 
