@@ -295,6 +295,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      pull-requests: write
 
     steps:
       - name: 🛡 Harden Runner
@@ -346,15 +347,59 @@ jobs:
       - name: 🚀 Publish dev release to NPM
         run: pnpm changeset publish --no-git-tag --tag dev
 
-      - name: 📋 Summary
+      - name: 📋 Report published version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          MARKER: '<!-- dev-release-snapshot -->'
         run: |
           VERSION=$(jq -r '.version' ./packages/web/package.json)
+
           {
-            echo "### Dev release published"
+            echo "$MARKER"
+            echo "### 🚀 Dev release published"
+            echo
+            echo "All packages published at \`$VERSION\` under the \`dev\` dist-tag."
             echo
             echo '```sh'
             echo "npm i @lottiefiles/dotlottie-web@$VERSION"
             echo '```'
             echo
-            echo "Also available under the \`dev\` dist-tag: \`npm i @lottiefiles/dotlottie-web@dev\`"
-          } >> "$GITHUB_STEP_SUMMARY"
+            echo "<details><summary>Other packages</summary>"
+            echo
+            echo '```sh'
+            for PKG in react vue svelte solid wc; do
+              echo "npm i @lottiefiles/dotlottie-$PKG@$VERSION"
+            done
+            echo '```'
+            echo
+            echo "</details>"
+            echo
+            echo "Built from \`$BRANCH\` @ \`$GITHUB_SHA\` · [run]($RUN_URL)"
+          } > comment.md
+
+          cat comment.md >> "$GITHUB_STEP_SUMMARY"
+
+          PR=$(gh pr list --repo "$REPO" --head "$BRANCH" --state open \
+                 --json number --jq '.[0].number // empty')
+          if [ -z "$PR" ]; then
+            echo "No open PR for '$BRANCH' — published, but nothing to comment on."
+            exit 0
+          fi
+
+          # Reuse our own previous comment so repeated dev releases don't pile up.
+          COMMENT_ID=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq "[.[] | select(.user.login == \"github-actions[bot]\")
+                       | select(.body | startswith(\"$MARKER\"))] | .[0].id // empty" \
+            | head -n 1)
+
+          if [ -n "$COMMENT_ID" ]; then
+            gh api --method PATCH "repos/$REPO/issues/comments/$COMMENT_ID" \
+              --field body=@comment.md >/dev/null
+            echo "Updated comment $COMMENT_ID on PR #$PR"
+          else
+            gh pr comment "$PR" --repo "$REPO" --body-file comment.md
+            echo "Commented on PR #$PR"
+          fi
