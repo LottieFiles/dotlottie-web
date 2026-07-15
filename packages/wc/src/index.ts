@@ -1,5 +1,4 @@
 export * from './dotlottie-wc';
 export * from './dotlottie-worker-wc';
-// Explicit re-export: the per-entry setWasmUrl exports conflict under `export *`,
-// and the combined entry should configure both players with one call.
+// Explicit: the per-entry setWasmUrl exports conflict under `export *`; this one sets both players.
 export { setWasmUrl } from './set-wasm-url';

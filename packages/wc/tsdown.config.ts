@@ -14,14 +14,13 @@ const config: UserConfig = {
   tsconfig: 'tsconfig.build.json',
 };
 
-// set-wasm-url is not an entry: a self-contained copy would configure its own
-// module state, not the copies inside the player bundles. index.ts inlines it.
+// set-wasm-url is not an entry: a self-contained copy would configure its own module
+// state, not the player bundles'. index.ts inlines it.
 const ENTRIES = ['base-dotlottie-wc', 'dotlottie-wc', 'dotlottie-worker-wc', 'index'];
 
 export default defineConfig([
-  // One self-contained bundle per entry (usable via CDN): building entries together
-  // would hoist everything either element needs into a shared chunk, forcing the
-  // DotLottie-only bundle to carry the worker code too.
+  // One self-contained bundle per entry: a combined build hoists shared code into one
+  // chunk, putting worker code in the DotLottie-only bundle.
   ...ENTRIES.map((entry) => ({
     ...config,
     entry: [`./src/${entry}.ts`],
