@@ -53,7 +53,6 @@ export function pluginInlineWorker(pkg: { name: string; version: string }): Roll
             throw new Error('Too many files built for worker bundle.');
           }
 
-          // A string literal is ~3.7x smaller than a decimal byte-array encoding.
           const { text } = outputFiles[0]!;
 
           return {

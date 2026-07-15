@@ -7,8 +7,7 @@ import { pluginInlineWorker } from '../rolldown-plugins/plugin-inline-worker';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// The browser suite never runs this plugin (Vite handles ?worker&inline itself),
-// so the emitted module is guarded here.
+// The browser suite never runs this plugin (Vite builds the test worker itself).
 describe('pluginInlineWorker', () => {
   test('embeds the worker as a parseable, byte-faithful string literal', async () => {
     const plugin = pluginInlineWorker({ name: '@lottiefiles/dotlottie-web', version: '0.0.0-test' });
