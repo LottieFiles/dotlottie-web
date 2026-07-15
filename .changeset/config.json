@@ -7,5 +7,9 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": ["*-example", "viewer"],
-  "prettier": false
+  "prettier": false,
+  "snapshot": {
+    "useCalculatedVersion": false,
+    "prereleaseTemplate": "{tag}-{datetime}-{commit}"
+  }
 }
