@@ -497,8 +497,7 @@ export class DotLottie {
     if (typeof data === 'string') {
       loaded = this._dotLottieCore.load_animation(data);
 
-      // isLottie() is a full JSON.parse of the animation; run it only on failure,
-      // to pick the more specific error message.
+      // isLottie() is a full JSON.parse; run it only on failure to pick the specific error message.
       if (!loaded && !isLottie(data)) {
         this._discardPlayerEvents();
         this._dispatchError(
