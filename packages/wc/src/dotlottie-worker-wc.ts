@@ -5,6 +5,8 @@ import { customElement } from 'lit/decorators.js';
 
 import { BaseDotLottieWC } from './base-dotlottie-wc';
 
+export { setWasmUrl } from './set-wasm-url';
+
 @customElement('dotlottie-worker-wc')
 export class DotLottieWorkerWC extends BaseDotLottieWC<DotLottieWorker> {
   protected override _createDotLottieInstance(config: Config & { workerId?: string }): DotLottieWorker {
