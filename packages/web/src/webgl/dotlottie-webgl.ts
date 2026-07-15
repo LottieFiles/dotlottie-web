@@ -7,11 +7,18 @@ import { createWasmLoader } from '../wasm-loader';
 
 import init, { DotLottiePlayerWasm } from './dotlottie-player';
 
-const webGLWasmLoader = createWasmLoader(
-  init,
-  `https://cdn.jsdelivr.net/npm/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/webgl/dotlottie-player.wasm`,
-  `https://unpkg.com/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/webgl/dotlottie-player.wasm`,
-);
+let webGLWasmLoaderSingleton: ReturnType<typeof createWasmLoader> | null = null;
+
+// Lazy: a module-scope call is a side effect that blocks consumer tree-shaking.
+function webGLWasmLoader(): ReturnType<typeof createWasmLoader> {
+  webGLWasmLoaderSingleton ??= createWasmLoader(
+    init,
+    `https://cdn.jsdelivr.net/npm/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/webgl/dotlottie-player.wasm`,
+    `https://unpkg.com/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/webgl/dotlottie-player.wasm`,
+  );
+
+  return webGLWasmLoaderSingleton;
+}
 
 export class DotLottieWebGL extends DotLottie {
   // biome-ignore lint/complexity/noUselessConstructor: narrows canvas to HTMLCanvasElement (WebGLConfig vs Config)
@@ -20,7 +27,7 @@ export class DotLottieWebGL extends DotLottie {
   }
 
   protected override async _initWasm(): Promise<void> {
-    return webGLWasmLoader.load();
+    return webGLWasmLoader().load();
   }
 
   protected override _createCore(): CoreDotLottiePlayerWasm {
@@ -88,6 +95,6 @@ export class DotLottieWebGL extends DotLottie {
   }
 
   public static override setWasmUrl(url: string): void {
-    webGLWasmLoader.setWasmUrl(url);
+    webGLWasmLoader().setWasmUrl(url);
   }
 }

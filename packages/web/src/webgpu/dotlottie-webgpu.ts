@@ -7,11 +7,18 @@ import { createWasmLoader } from '../wasm-loader';
 
 import init, { DotLottiePlayerWasm } from './dotlottie-player';
 
-const webGPUWasmLoader = createWasmLoader(
-  init,
-  `https://cdn.jsdelivr.net/npm/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/webgpu/dotlottie-player.wasm`,
-  `https://unpkg.com/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/webgpu/dotlottie-player.wasm`,
-);
+let webGPUWasmLoaderSingleton: ReturnType<typeof createWasmLoader> | null = null;
+
+// Lazy: a module-scope call is a side effect that blocks consumer tree-shaking.
+function webGPUWasmLoader(): ReturnType<typeof createWasmLoader> {
+  webGPUWasmLoaderSingleton ??= createWasmLoader(
+    init,
+    `https://cdn.jsdelivr.net/npm/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/webgpu/dotlottie-player.wasm`,
+    `https://unpkg.com/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/webgpu/dotlottie-player.wasm`,
+  );
+
+  return webGPUWasmLoaderSingleton;
+}
 
 export class DotLottieWebGPU extends DotLottie {
   private _gpuDevice: GPUDevice | null = null;
@@ -28,7 +35,7 @@ export class DotLottieWebGPU extends DotLottie {
   }
 
   protected override async _initWasm(): Promise<void> {
-    await webGPUWasmLoader.load();
+    await webGPUWasmLoader().load();
 
     // Auto-initialize GPUDevice if user didn't provide one
     if (!this._userDevice) {
@@ -174,6 +181,6 @@ export class DotLottieWebGPU extends DotLottie {
   }
 
   public static override setWasmUrl(url: string): void {
-    webGPUWasmLoader.setWasmUrl(url);
+    webGPUWasmLoader().setWasmUrl(url);
   }
 }

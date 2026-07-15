@@ -38,11 +38,18 @@ import {
 } from './utils';
 import { createWasmLoader } from './wasm-loader';
 
-const dotLottieWasmLoader = createWasmLoader(
-  init,
-  `https://cdn.jsdelivr.net/npm/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/dotlottie-player.wasm`,
-  `https://unpkg.com/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/dotlottie-player.wasm`,
-);
+let dotLottieWasmLoaderSingleton: ReturnType<typeof createWasmLoader> | null = null;
+
+// Lazy: a module-scope call is a side effect that blocks consumer tree-shaking.
+function dotLottieWasmLoader(): ReturnType<typeof createWasmLoader> {
+  dotLottieWasmLoaderSingleton ??= createWasmLoader(
+    init,
+    `https://cdn.jsdelivr.net/npm/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/dotlottie-player.wasm`,
+    `https://unpkg.com/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/dotlottie-player.wasm`,
+  );
+
+  return dotLottieWasmLoaderSingleton;
+}
 
 // ── Mode conversion helpers ──────────────────────────────────────────────────
 
@@ -243,7 +250,7 @@ export class DotLottie {
   // ── Override hooks for subclasses ─────────────────────────────────────
 
   protected async _initWasm(): Promise<void> {
-    return dotLottieWasmLoader.load();
+    return dotLottieWasmLoader().load();
   }
 
   protected _createCore(): DotLottiePlayerWasm {
@@ -1952,7 +1959,7 @@ export class DotLottie {
    * @param url - URL pointing to the dotlottie WASM file
    */
   public static setWasmUrl(url: string): void {
-    dotLottieWasmLoader.setWasmUrl(url);
+    dotLottieWasmLoader().setWasmUrl(url);
   }
 
   /**
@@ -1964,7 +1971,7 @@ export class DotLottie {
    */
   public static async registerFont(fontName: string, fontSource: string | ArrayBuffer | Uint8Array): Promise<boolean> {
     try {
-      await dotLottieWasmLoader.load();
+      await dotLottieWasmLoader().load();
 
       let fontData: Uint8Array;
 
