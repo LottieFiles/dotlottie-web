@@ -830,7 +830,28 @@ describe.each([
 
       expect(fetch).toHaveBeenCalledTimes(1);
 
-      expect(fetch).toHaveBeenNthCalledWith(1, src);
+      expect(fetch).toHaveBeenNthCalledWith(1, src, { signal: expect.any(AbortSignal) });
+    });
+
+    // Skip in worker environment: the worker fetches in its own thread, away from this spy
+    (isWorker ? test.skip : test)('aborts the src prefetch on destroy()', () => {
+      const fetch = vi.spyOn(window, 'fetch');
+
+      fetch.mockClear();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+      });
+
+      const signal = (fetch.mock.calls[0]?.[1] as RequestInit | undefined)?.signal;
+
+      expect(signal).toBeInstanceOf(AbortSignal);
+      expect(signal?.aborted).toBe(false);
+
+      dotLottie.destroy();
+
+      expect(signal?.aborted).toBe(true);
     });
 
     test('loads lottie json file', async () => {
