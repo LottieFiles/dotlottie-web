@@ -38,7 +38,7 @@ To get started with `@lottiefiles/dotlottie-web`, follow the [documentation here
 
 ## Faster First Frame
 
-The player's WASM engine (~500 KB compressed) is fetched from a CDN when the first player is constructed. To take that download off your first animation's critical path:
+The player's WASM engine (\~500 KB compressed) is fetched from a CDN when the first player is constructed. To take that download off your first animation's critical path:
 
 ```js
 import { DotLottie } from '@lottiefiles/dotlottie-web';
