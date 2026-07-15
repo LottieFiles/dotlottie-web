@@ -9,7 +9,6 @@ import init, { DotLottiePlayerWasm } from './dotlottie-player';
 
 let webGPUWasmLoaderSingleton: ReturnType<typeof createWasmLoader> | null = null;
 
-// Lazy: a module-scope call is a side effect that blocks consumer tree-shaking.
 function webGPUWasmLoader(): ReturnType<typeof createWasmLoader> {
   webGPUWasmLoaderSingleton ??= createWasmLoader(
     init,

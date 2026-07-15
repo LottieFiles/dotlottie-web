@@ -40,7 +40,6 @@ import { createWasmLoader } from './wasm-loader';
 
 let dotLottieWasmLoaderSingleton: ReturnType<typeof createWasmLoader> | null = null;
 
-// Lazy: a module-scope call is a side effect that blocks consumer tree-shaking.
 function dotLottieWasmLoader(): ReturnType<typeof createWasmLoader> {
   dotLottieWasmLoaderSingleton ??= createWasmLoader(
     init,
