@@ -97,4 +97,12 @@ export class DotLottieWebGL extends DotLottie {
   public static override setWasmUrl(url: string): void {
     webGLWasmLoader().setWasmUrl(url);
   }
+
+  /**
+   * Starts fetching and compiling the WASM module before any player is constructed.
+   * Call this at app or route load to take the WASM download off the first animation's critical path.
+   */
+  public static override preload(): Promise<void> {
+    return webGLWasmLoader().load();
+  }
 }

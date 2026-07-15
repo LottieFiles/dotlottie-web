@@ -1987,6 +1987,14 @@ export class DotLottie {
   }
 
   /**
+   * Starts fetching and compiling the WASM module before any player is constructed.
+   * Call this at app or route load to take the WASM download off the first animation's critical path.
+   */
+  public static preload(): Promise<void> {
+    return dotLottieWasmLoader().load();
+  }
+
+  /**
    * @experimental
    * Register a custom font for use in animations
    * @param fontName - The name of the font to register
