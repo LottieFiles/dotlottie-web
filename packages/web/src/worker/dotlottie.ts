@@ -70,8 +70,7 @@ export interface DotLottieInstanceState {
   useFrameInterpolation: boolean;
 }
 
-// Lazy, not a static field: ES2020 down-levels static fields to top-level side
-// effects, which blocks consumers from tree-shaking the inlined worker away.
+// Not static fields: ES2020 down-levels those to top-level side effects, breaking tree-shaking.
 let workerManagerSingleton: WorkerManager | null = null;
 
 function workerManager(): WorkerManager {

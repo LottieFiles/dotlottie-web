@@ -40,7 +40,6 @@ import { createWasmLoader } from './wasm-loader';
 
 let dotLottieWasmLoaderSingleton: ReturnType<typeof createWasmLoader> | null = null;
 
-// Lazy: a module-scope call is a side effect that blocks consumer tree-shaking.
 function dotLottieWasmLoader(): ReturnType<typeof createWasmLoader> {
   dotLottieWasmLoaderSingleton ??= createWasmLoader(
     init,
@@ -498,8 +497,7 @@ export class DotLottie {
     if (typeof data === 'string') {
       loaded = this._dotLottieCore.load_animation(data);
 
-      // isLottie() is a full JSON.parse of the animation; run it only on failure,
-      // to pick the more specific error message.
+      // isLottie() is a full JSON.parse; run it only on failure to pick the specific error message.
       if (!loaded && !isLottie(data)) {
         this._discardPlayerEvents();
         this._dispatchError(
