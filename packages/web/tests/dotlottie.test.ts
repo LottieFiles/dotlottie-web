@@ -801,6 +801,21 @@ describe.each([
   });
 
   describe('load', () => {
+    // preload() exists on the main-thread player only
+    (isWorker ? test.skip : test)('preload() warms the wasm module before construction', async () => {
+      await expect(DotLottieClass.preload()).resolves.toBeUndefined();
+
+      const onReady = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src,
+      });
+      dotLottie.addEventListener('ready', onReady);
+
+      await vi.waitFor(() => expect(onReady).toHaveBeenCalledTimes(1));
+    });
+
     // Skip this test in worker environment because it's not possible to mock the fetch error in worker environment
     (isWorker ? test.skip : test)('loads animation from a valid source', async () => {
       const fetch = vi.spyOn(window, 'fetch');
