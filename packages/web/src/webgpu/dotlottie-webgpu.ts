@@ -7,11 +7,17 @@ import { createWasmLoader } from '../wasm-loader';
 
 import init, { DotLottiePlayerWasm } from './dotlottie-player';
 
-const webGPUWasmLoader = createWasmLoader(
-  init,
-  `https://cdn.jsdelivr.net/npm/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/webgpu/dotlottie-player.wasm`,
-  `https://unpkg.com/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/webgpu/dotlottie-player.wasm`,
-);
+let webGPUWasmLoaderSingleton: ReturnType<typeof createWasmLoader> | null = null;
+
+function webGPUWasmLoader(): ReturnType<typeof createWasmLoader> {
+  webGPUWasmLoaderSingleton ??= createWasmLoader(
+    init,
+    `https://cdn.jsdelivr.net/npm/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/webgpu/dotlottie-player.wasm`,
+    `https://unpkg.com/${PACKAGE_NAME}@${PACKAGE_VERSION}/dist/webgpu/dotlottie-player.wasm`,
+  );
+
+  return webGPUWasmLoaderSingleton;
+}
 
 export class DotLottieWebGPU extends DotLottie {
   private _gpuDevice: GPUDevice | null = null;
@@ -28,7 +34,7 @@ export class DotLottieWebGPU extends DotLottie {
   }
 
   protected override async _initWasm(): Promise<void> {
-    await webGPUWasmLoader.load();
+    await webGPUWasmLoader().load();
 
     // Auto-initialize GPUDevice if user didn't provide one
     if (!this._userDevice) {
@@ -174,6 +180,14 @@ export class DotLottieWebGPU extends DotLottie {
   }
 
   public static override setWasmUrl(url: string): void {
-    webGPUWasmLoader.setWasmUrl(url);
+    webGPUWasmLoader().setWasmUrl(url);
+  }
+
+  /**
+   * Starts fetching and compiling the WASM module before any player is constructed.
+   * Call this at app or route load to take the WASM download off the first animation's critical path.
+   */
+  public static override preload(): Promise<void> {
+    return webGPUWasmLoader().load();
   }
 }

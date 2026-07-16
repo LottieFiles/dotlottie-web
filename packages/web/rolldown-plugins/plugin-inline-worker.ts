@@ -53,18 +53,24 @@ export function pluginInlineWorker(pkg: { name: string; version: string }): Roll
             throw new Error('Too many files built for worker bundle.');
           }
 
-          const { contents } = outputFiles[0]!;
-          const uint8Array = new Uint8Array(contents);
+          const { text } = outputFiles[0]!;
 
+          // Two constraints on the emitted code:
+          // - Keep the worker source a single string literal. Encoding it as a
+          //   Uint8Array byte literal creates one AST node per byte, slowing consumer
+          //   builds and bloating bundles (#344).
+          // - Pass `new Worker()` a variable, not a string/data-URL literal. Parcel
+          //   statically analyzes literal Worker() arguments and fails the build (#333).
           return {
             code: `
               "use client";
+              const workerCode = ${JSON.stringify(text)};
               class InlineWorker {
                 constructor() {
                   if (typeof Worker === 'undefined') {
                     throw new Error('Worker is not supported in this environment.');
                   }
-                  const blob = new Blob([new Uint8Array([${uint8Array.join(',')}])], { type: 'application/javascript' });
+                  const blob = new Blob([workerCode], { type: 'application/javascript' });
                   const url = URL.createObjectURL(blob);
                   const worker = new Worker(url);
                   URL.revokeObjectURL(url);

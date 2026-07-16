@@ -70,14 +70,23 @@ export interface DotLottieInstanceState {
   useFrameInterpolation: boolean;
 }
 
+// Not static fields: ES2020 down-levels those to top-level side effects, breaking tree-shaking.
+let workerManagerSingleton: WorkerManager | null = null;
+
+function workerManager(): WorkerManager {
+  workerManagerSingleton ??= new WorkerManager();
+
+  return workerManagerSingleton;
+}
+
+let workerWasmUrl = '';
+
 /**
  * Worker-based DotLottie player that offloads animation processing to a Web Worker thread.
  * Use this for better performance when rendering multiple animations or to keep the main thread responsive.
  * All methods are async (return Promises) due to worker communication. Requires HTMLCanvasElement or OffscreenCanvas.
  */
 export class DotLottieWorker {
-  private static readonly _workerManager = new WorkerManager();
-
   private readonly _eventManager = new EventManager();
 
   private readonly _id: string;
@@ -114,8 +123,6 @@ export class DotLottieWorker {
     isReady: false,
     manifest: null,
   };
-
-  private static _wasmUrl: string = '';
 
   private _created: boolean = false;
 
@@ -156,12 +163,12 @@ export class DotLottieWorker {
     const workerId = config.workerId || 'defaultWorker';
 
     // creates or gets the worker
-    this._worker = DotLottieWorker._workerManager.getWorker(workerId);
+    this._worker = workerManager().getWorker(workerId);
 
-    DotLottieWorker._workerManager.assignAnimationToWorker(this._id, workerId);
+    workerManager().assignAnimationToWorker(this._id, workerId);
 
-    if (DotLottieWorker._wasmUrl) {
-      this._sendMessage('setWasmUrl', { url: DotLottieWorker._wasmUrl });
+    if (workerWasmUrl) {
+      this._sendMessage('setWasmUrl', { url: workerWasmUrl });
     }
 
     const fullConfig = {
@@ -182,7 +189,7 @@ export class DotLottieWorker {
       this._pendingConfig = null;
     }
 
-    DotLottieWorker._workerManager.registerEventHandler(
+    workerManager().registerEventHandler(
       this._id,
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       this._handleWorkerEvent.bind(this),
@@ -768,8 +775,8 @@ export class DotLottieWorker {
 
     this._cleanupStateMachineListeners();
 
-    DotLottieWorker._workerManager.unregisterEventHandler(this._id);
-    DotLottieWorker._workerManager.unassignAnimationFromWorker(this._id);
+    workerManager().unregisterEventHandler(this._id);
+    workerManager().unassignAnimationFromWorker(this._id);
     this._eventManager.removeAllEventListeners();
 
     if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
@@ -984,8 +991,8 @@ export class DotLottieWorker {
     };
 
     return new Promise((resolve, reject) => {
-      DotLottieWorker._workerManager.registerRpcReplyHandler(rpcRequest.id, (event: MessageEvent) => {
-        DotLottieWorker._workerManager.unregisterRpcReplyHandler(rpcRequest.id);
+      workerManager().registerRpcReplyHandler(rpcRequest.id, (event: MessageEvent) => {
+        workerManager().unregisterRpcReplyHandler(rpcRequest.id);
 
         const rpcResponse: RpcResponse<T> = event.data;
 
@@ -1009,7 +1016,7 @@ export class DotLottieWorker {
   }
 
   public static setWasmUrl(url: string): void {
-    DotLottieWorker._wasmUrl = url;
+    workerWasmUrl = url;
   }
 
   /**
@@ -1024,7 +1031,7 @@ export class DotLottieWorker {
     try {
       const id = generateUniqueId();
 
-      DotLottieWorker._workerManager.broadcastMessage({
+      workerManager().broadcastMessage({
         id,
         method: 'registerFont',
         params: {

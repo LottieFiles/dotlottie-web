@@ -15,6 +15,7 @@
 * [Introduction](#introduction)
   * [What is dotLottie?](#what-is-dotlottie)
 * [Documentation](#documentation)
+* [Faster First Frame](#faster-first-frame)
 * [Supported Platforms](#supported-platforms)
   * [Browser Requirements](#browser-requirements)
 * [Live Examples](#live-examples)
@@ -34,6 +35,31 @@ dotLottie is an open-source file format that bundles one or more Lottie animatio
 ## Documentation
 
 To get started with `@lottiefiles/dotlottie-web`, follow the [documentation here](https://developers.lottiefiles.com/docs/dotlottie-player/dotlottie-web/).
+
+## Faster First Frame
+
+The player's WASM engine (\~500 KB compressed) is fetched from a CDN when the first player is constructed. To take that download off your first animation's critical path:
+
+```js
+import { DotLottie } from '@lottiefiles/dotlottie-web';
+
+// At app or route load, before any player is constructed:
+DotLottie.preload();
+```
+
+Or let the browser start the download even earlier (`crossorigin` is required — without it the preloaded response can't be reused and the file downloads twice):
+
+```html
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link
+  rel="preload"
+  as="fetch"
+  crossorigin
+  href="https://cdn.jsdelivr.net/npm/@lottiefiles/dotlottie-web@0.77.1/dist/dotlottie-player.wasm"
+/>
+```
+
+The version in the URL must match your installed package version — the player fetches a version-pinned URL, and a mismatch means the preload can't be reused. If you use `setWasmUrl()`, call it before `preload()` and point the preload tag at the same URL.
 
 ## Supported Platforms
 
