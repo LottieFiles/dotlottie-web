@@ -5,7 +5,9 @@ import { customElement } from 'lit/decorators.js';
 
 import { BaseDotLottieWC } from './base-dotlottie-wc';
 
-export { setWasmUrl } from './set-wasm-url';
+export const setWasmUrl = (url: string): void => {
+  DotLottie.setWasmUrl(url);
+};
 
 @customElement('dotlottie-wc')
 export class DotLottieWC extends BaseDotLottieWC<DotLottie> {
