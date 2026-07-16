@@ -114,7 +114,9 @@ const fitToString = (fit: string): Fit => {
 export class DotLottie {
   protected _canvas: HTMLCanvasElement | OffscreenCanvas | RenderSurface | null = null;
 
-  private _pendingLoad: { data?: Data; src?: string } | null = null;
+  private _pendingLoad: { data?: Data; dataPromise?: Promise<string | ArrayBuffer> | null; src?: string } | null = null;
+
+  private _srcFetchAbort: AbortController | null = null;
 
   protected _context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
 
@@ -187,6 +189,15 @@ export class DotLottie {
       freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
     };
 
+    let srcPrefetch: Promise<string | ArrayBuffer> | null = null;
+
+    if (config.src && !config.data) {
+      this._srcFetchAbort = new AbortController();
+      srcPrefetch = this._fetchData(config.src, this._srcFetchAbort.signal);
+      // Errors surface via _loadFromSrc after 'ready'; this only avoids an unhandled rejection.
+      srcPrefetch.catch(() => {});
+    }
+
     this._initWasm()
       .then(() => {
         this._dotLottieCore = this._createCore();
@@ -227,9 +238,9 @@ export class DotLottie {
           }
         } else if (config.src) {
           if (this._canvas) {
-            this._loadFromSrc(config.src);
+            this._loadFromSrc(config.src, srcPrefetch);
           } else {
-            this._pendingLoad = { src: config.src };
+            this._pendingLoad = { src: config.src, dataPromise: srcPrefetch };
           }
         }
 
@@ -238,6 +249,7 @@ export class DotLottie {
         }
       })
       .catch((error) => {
+        this._srcFetchAbort?.abort();
         console.error('[dotlottie-web] Initialization failed:', error);
         this._eventManager.dispatch({
           type: 'loadError',
@@ -320,6 +332,12 @@ export class DotLottie {
         default:
           break;
       }
+    }
+  }
+
+  private _discardPlayerEvents(): void {
+    while (this._dotLottieCore?.poll_event() != null) {
+      // Drop stale core events already reported with a more specific message.
     }
   }
 
@@ -445,8 +463,8 @@ export class DotLottie {
     this._eventManager.dispatch({ type: 'loadError', error: new Error(message) });
   }
 
-  private async _fetchData(src: string): Promise<string | ArrayBuffer> {
-    const response = await fetch(src);
+  private async _fetchData(src: string, signal: AbortSignal | null = null): Promise<string | ArrayBuffer> {
+    const response = await fetch(src, { signal });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch animation data from URL: ${src}. ${response.status}: ${response.statusText}`);
@@ -471,22 +489,23 @@ export class DotLottie {
       return;
     }
 
-    const width = this._canvas.width;
-    const height = this._canvas.height;
-
-    this._setupTarget(width, height);
+    this._syncCanvasSize();
+    this._setupTarget(this._canvas.width, this._canvas.height);
 
     let loaded = false;
 
     if (typeof data === 'string') {
-      if (!isLottie(data)) {
+      loaded = this._dotLottieCore.load_animation(data);
+
+      // isLottie() is a full JSON.parse; run it only on failure to pick the specific error message.
+      if (!loaded && !isLottie(data)) {
+        this._discardPlayerEvents();
         this._dispatchError(
           'Invalid Lottie JSON string: The provided string does not conform to the Lottie JSON format.',
         );
 
         return;
       }
-      loaded = this._dotLottieCore.load_animation(data);
     } else if (data instanceof ArrayBuffer) {
       if (!isDotLottie(data)) {
         this._dispatchError(
@@ -520,10 +539,6 @@ export class DotLottie {
     if (loaded) {
       if (this._renderConfig.quality !== undefined) {
         this._dotLottieCore.set_quality(this._renderConfig.quality);
-      }
-
-      if (IS_BROWSER) {
-        this.resize();
       }
 
       // Drain any events produced by loading (Load/LoadError).
@@ -592,8 +607,8 @@ export class DotLottie {
     }
   }
 
-  private _loadFromSrc(src: string): void {
-    this._fetchData(src)
+  private _loadFromSrc(src: string, prefetched?: Promise<string | ArrayBuffer> | null): void {
+    (prefetched ?? this._fetchData(src))
       .then((data) => this._loadFromData(data))
       .catch((error) => this._dispatchError(`Failed to load animation data from URL: ${src}. ${error}`));
   }
@@ -1283,6 +1298,10 @@ export class DotLottie {
 
     this._cleanupCanvas();
 
+    this._srcFetchAbort?.abort();
+    this._srcFetchAbort = null;
+    this._pendingLoad = null;
+
     const core = this._dotLottieCore;
 
     this._dotLottieCore = null;
@@ -1336,19 +1355,23 @@ export class DotLottie {
    * Recalculates and updates canvas dimensions based on current size.
    * Call this when the canvas container size changes to maintain proper rendering. Usually handled by autoResize.
    */
+  private _syncCanvasSize(): void {
+    if (!(IS_BROWSER && this._canvas instanceof HTMLCanvasElement)) return;
+
+    const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
+
+    const { height: clientHeight, width: clientWidth } = this._canvas.getBoundingClientRect();
+
+    if (clientHeight !== 0 && clientWidth !== 0) {
+      this._canvas.width = clientWidth * dpr;
+      this._canvas.height = clientHeight * dpr;
+    }
+  }
+
   public resize(): void {
     if (!this._dotLottieCore || !this.isLoaded || !this._canvas) return;
 
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
-      const dpr = this._renderConfig.devicePixelRatio || window.devicePixelRatio || 1;
-
-      const { height: clientHeight, width: clientWidth } = this._canvas.getBoundingClientRect();
-
-      if (clientHeight !== 0 && clientWidth !== 0) {
-        this._canvas.width = clientWidth * dpr;
-        this._canvas.height = clientHeight * dpr;
-      }
-    }
+    this._syncCanvasSize();
 
     const resized = this._setupTarget(this._canvas.width, this._canvas.height);
 
@@ -1383,7 +1406,7 @@ export class DotLottie {
       if (pending.data) {
         this._loadFromData(pending.data);
       } else if (pending.src) {
-        this._loadFromSrc(pending.src);
+        this._loadFromSrc(pending.src, pending.dataPromise);
       }
     }
   }
@@ -1507,6 +1530,7 @@ export class DotLottie {
   public loadAnimation(animationId: string): void {
     if (this._dotLottieCore === null || this._dotLottieCore.animation_id() === animationId || !this._canvas) return;
 
+    this._syncCanvasSize();
     this._setupTarget(this._canvas.width, this._canvas.height);
     const loaded = this._dotLottieCore.load_animation_from_id(animationId);
 
@@ -1514,7 +1538,6 @@ export class DotLottie {
       if (this._renderConfig.quality !== undefined) {
         this._dotLottieCore.set_quality(this._renderConfig.quality);
       }
-      this.resize();
       this._drainPlayerEvents();
 
       this._dotLottieCore.render();
@@ -1959,6 +1982,14 @@ export class DotLottie {
    */
   public static setWasmUrl(url: string): void {
     dotLottieWasmLoader().setWasmUrl(url);
+  }
+
+  /**
+   * Starts fetching and compiling the WASM module before any player is constructed.
+   * Call this at app or route load to take the WASM download off the first animation's critical path.
+   */
+  public static preload(): Promise<void> {
+    return dotLottieWasmLoader().load();
   }
 
   /**
