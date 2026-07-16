@@ -24,9 +24,22 @@ export default [
     import: '*',
   },
   {
+    name: '@lottiefiles/dotlottie-web (DotLottie only)',
+    path: 'packages/web/dist/index.js',
+    import: '{ DotLottie }',
+  },
+  {
     name: '@lottiefiles/dotlottie-wc',
     path: 'packages/wc/dist/index.js',
     import: '*',
+  },
+  {
+    name: '@lottiefiles/dotlottie-wc CDN',
+    path: 'packages/wc/dist/dotlottie-wc.js',
+  },
+  {
+    name: '@lottiefiles/dotlottie-wc worker CDN',
+    path: 'packages/wc/dist/dotlottie-worker-wc.js',
   },
   {
     name: '@lottiefiles/dotlottie-svelte',
