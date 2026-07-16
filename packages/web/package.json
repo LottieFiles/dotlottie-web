@@ -71,7 +71,7 @@
     "thorvg"
   ],
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && node scripts/verify-dist.mjs",
     "dev": "tsdown --watch",
     "lint": "biome check --write .",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",

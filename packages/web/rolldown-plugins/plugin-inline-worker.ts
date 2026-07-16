@@ -55,6 +55,13 @@ export function pluginInlineWorker(pkg: { name: string; version: string }): Roll
 
           const { text } = outputFiles[0]!;
 
+          // Encoding invariants — each was violated once and caused a consumer regression:
+          // 1. Embed the worker source as ONE string literal, never an element-per-byte
+          //    Uint8Array literal: bundlers allocate an AST node per element, which blew up
+          //    consumer build times and bundle sizes (issue #344).
+          // 2. `new Worker()` must receive a variable, never a string/data-URL literal:
+          //    Parcel statically analyzes literal Worker() arguments and fails the build
+          //    (issue #333).
           return {
             code: `
               "use client";
