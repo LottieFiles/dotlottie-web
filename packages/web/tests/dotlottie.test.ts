@@ -1042,7 +1042,7 @@ describe.each([
 
       dotLottie = new DotLottie({
         canvas,
-        data: JSON.stringify({}),
+        data: 'not a lottie animation',
       });
 
       dotLottie.addEventListener('loadError', onLoadError);
@@ -1055,6 +1055,23 @@ describe.each([
         type: 'loadError',
         error: new Error('Invalid Lottie JSON string: The provided string does not conform to the Lottie JSON format.'),
       });
+
+      expect(dotLottie.isLoaded).toBe(false);
+    });
+
+    test('emit loadError event when loading valid JSON that is not a lottie animation', async () => {
+      const onLoadError = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        data: JSON.stringify({}),
+      });
+
+      dotLottie.addEventListener('loadError', onLoadError);
+
+      expect(dotLottie.isLoaded).toBe(false);
+
+      await vi.waitFor(() => expect(onLoadError).toHaveBeenCalledTimes(1));
 
       expect(dotLottie.isLoaded).toBe(false);
     });

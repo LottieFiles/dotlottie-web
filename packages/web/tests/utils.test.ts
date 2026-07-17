@@ -79,10 +79,17 @@ describe('isLottie', () => {
 
   test.each([
     [validLottieJSON, true],
-    [invalidLottieJSON, false],
+    [invalidLottieJSON, true],
+    ['{not even valid json}', true],
+    ['  \n\t {"v":"5.5.9"} \n ', true],
     [validLottieObject, true],
     [invalidLottieObject, false],
     ['invalid string', false],
+    ['[0, 1, 2]', false],
+    ['<!DOCTYPE html><html><body>404</body></html>', false],
+    ['', false],
+    ['   ', false],
+    ['{', false],
   ])('returns %s for %s', (fileData, expected) => {
     expect(isLottie(fileData)).toBe(expected);
   });

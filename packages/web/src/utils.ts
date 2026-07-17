@@ -80,21 +80,17 @@ export function isLottieJSON(json: Record<string, unknown>): boolean {
 }
 
 /**
- * Detects if data is a valid Lottie animation by checking for required JSON fields.
- * Accepts either a JSON string or a parsed object.
+ * Detects if data is likely a Lottie animation. Strings are only checked for JSON-object shape;
+ * full parsing and validation is left to the core.
  * @param fileData - Lottie data as JSON string or parsed object
- * @returns True if data contains required Lottie fields, false otherwise
+ * @returns True if data looks like Lottie JSON, false otherwise
  */
 export function isLottie(fileData: string | Record<string, unknown>): boolean {
   if (typeof fileData === 'string') {
-    try {
-      return isLottieJSON(JSON.parse(fileData));
-    } catch (_e) {
-      return false;
-    }
-  } else {
-    return isLottieJSON(fileData);
+    return /^\s*\{/u.test(fileData) && /\}\s*$/u.test(fileData);
   }
+
+  return isLottieJSON(fileData);
 }
 
 /**
