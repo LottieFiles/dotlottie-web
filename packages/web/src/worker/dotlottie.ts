@@ -43,6 +43,13 @@ function generateUniqueId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 }
 
+interface CanvasRegistryEntry {
+  destroyTimer: ReturnType<typeof setTimeout> | null;
+  facade: DotLottieWorker;
+  instanceId: string;
+  workerId: string;
+}
+
 export interface DotLottieInstanceState {
   activeAnimationId: string | undefined;
   activeThemeId: string | undefined;
@@ -81,6 +88,8 @@ function workerManager(): WorkerManager {
 
 let workerWasmUrl = '';
 
+const canvasRegistry = new Map<HTMLCanvasElement, CanvasRegistryEntry>();
+
 /**
  * Worker-based DotLottie player that offloads animation processing to a Web Worker thread.
  * Use this for better performance when rendering multiple animations or to keep the main thread responsive.
@@ -89,7 +98,9 @@ let workerWasmUrl = '';
 export class DotLottieWorker {
   private readonly _eventManager = new EventManager();
 
-  private readonly _id: string;
+  private _id: string;
+
+  private readonly _workerId: string;
 
   private readonly _worker: Worker;
 
@@ -126,6 +137,8 @@ export class DotLottieWorker {
 
   private _created: boolean = false;
 
+  private _retired: boolean = false;
+
   // Bound event listeners for state machine
   private _boundOnClick: ((event: MouseEvent) => void) | null = null;
 
@@ -160,12 +173,12 @@ export class DotLottieWorker {
     this._canvas = (config.canvas as HTMLCanvasElement | OffscreenCanvas) ?? null;
 
     this._id = `dotlottie-${generateUniqueId()}`;
-    const workerId = config.workerId || 'defaultWorker';
+    this._workerId = config.workerId || 'defaultWorker';
 
     // creates or gets the worker
-    this._worker = workerManager().getWorker(workerId);
+    this._worker = workerManager().getWorker(this._workerId);
 
-    workerManager().assignAnimationToWorker(this._id, workerId);
+    workerManager().assignAnimationToWorker(this._id, this._workerId);
 
     if (workerWasmUrl) {
       this._sendMessage('setWasmUrl', { url: workerWasmUrl });
@@ -396,7 +409,24 @@ export class DotLottieWorker {
     let offscreen: OffscreenCanvas;
 
     if (this._canvas instanceof HTMLCanvasElement) {
+      const entry = canvasRegistry.get(this._canvas);
+
+      if (entry && entry.workerId === this._workerId) {
+        await this._adopt(entry, config);
+
+        return;
+      }
+
+      // A registered canvas with a different workerId falls through: an OffscreenCanvas
+      // cannot move between workers, so the transfer below throws as before.
       offscreen = this._canvas.transferControlToOffscreen();
+
+      canvasRegistry.set(this._canvas, {
+        destroyTimer: null,
+        facade: this,
+        instanceId: this._id,
+        workerId: this._workerId,
+      });
     } else {
       offscreen = this._canvas;
     }
@@ -418,9 +448,61 @@ export class DotLottieWorker {
       throw new Error('Instance ID mismatch');
     }
 
+    // Another facade may have adopted this worker-side instance while the create RPC
+    // was in flight.
+    if (this._retired) return;
+
     this._created = true;
 
     await this._updateDotLottieInstanceState();
+  }
+
+  /*
+    Takes over the worker-side instance registered for this canvas instead of
+    re-transferring the canvas (impossible per spec). Reuses the previous instanceId,
+    so the constructor's registerEventHandler call overwrites the previous facade's
+    handler in WorkerManager.
+  */
+  private async _adopt(entry: CanvasRegistryEntry, config: Config): Promise<void> {
+    if (entry.destroyTimer !== null) {
+      clearTimeout(entry.destroyTimer);
+      entry.destroyTimer = null;
+    } else {
+      entry.facade._retire();
+    }
+
+    workerManager().unassignAnimationFromWorker(this._id);
+    this._id = entry.instanceId;
+    workerManager().assignAnimationToWorker(this._id, this._workerId);
+    entry.facade = this;
+
+    this._created = true;
+
+    const { canvas: _adoptedCanvas, ...loadConfig } = config;
+
+    await this._sendMessage('load', { config: loadConfig, instanceId: this._id });
+    await this._updateDotLottieInstanceState();
+  }
+
+  /*
+    Makes this facade inert without touching the worker-side instance. Dispatches a
+    synthetic 'destroy' event so listeners still observe it.
+  */
+  private _retire(): void {
+    this._retired = true;
+
+    if (!this._created) return;
+
+    this._created = false;
+
+    this._cleanupStateMachineListeners();
+    this._eventManager.dispatch({ type: 'destroy' });
+    this._eventManager.removeAllEventListeners();
+
+    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
+      OffscreenObserver.unobserve(this._canvas);
+      CanvasResizeObserver.unobserve(this._canvas);
+    }
   }
 
   public get loopCount(): number {
@@ -763,26 +845,33 @@ export class DotLottieWorker {
 
   /**
    * Cleans up and destroys the player instance in the worker thread, releasing resources.
-   * Awaits worker response before resolving. Stops playback and removes event listeners.
-   * @returns Promise that resolves when cleanup has completed
+   * The facade becomes inert immediately; the worker-side teardown is deferred one
+   * macrotask so an immediate re-create on the same canvas (React StrictMode remount)
+   * can adopt the worker-side instance instead of re-transferring the canvas.
+   * @returns Promise that resolves when the facade has been made inert
    */
   public async destroy(): Promise<void> {
     if (!this._created) return;
 
-    this._created = false;
+    const canvas = this._canvas;
+    const entry = canvas instanceof HTMLCanvasElement ? canvasRegistry.get(canvas) : undefined;
 
-    await this._sendMessage('destroy', { instanceId: this._id });
+    this._retire();
 
-    this._cleanupStateMachineListeners();
+    if (entry && entry.facade === this) {
+      entry.destroyTimer = setTimeout(() => {
+        canvasRegistry.delete(canvas as HTMLCanvasElement);
+        void this._finalizeDestroy();
+      }, 0);
+    } else {
+      await this._finalizeDestroy();
+    }
+  }
 
+  private async _finalizeDestroy(): Promise<void> {
     workerManager().unregisterEventHandler(this._id);
     workerManager().unassignAnimationFromWorker(this._id);
-    this._eventManager.removeAllEventListeners();
-
-    if (IS_BROWSER && this._canvas instanceof HTMLCanvasElement) {
-      OffscreenObserver.unobserve(this._canvas);
-      CanvasResizeObserver.unobserve(this._canvas);
-    }
+    await this._sendMessage('destroy', { instanceId: this._id });
   }
 
   public async freeze(): Promise<void> {

@@ -1748,8 +1748,11 @@ describe.each([
 
       await dotLottie.setFrame(10);
 
-      // After setFrame, verify the currentFrame property is set
-      expect(dotLottie.currentFrame).toBe(10);
+      // After setFrame, verify the currentFrame property is set.
+      // For the worker, the state snapshot is a second round-trip, so the
+      // render loop may advance the frame past 10 before it is captured.
+      expect(dotLottie.currentFrame).toBeGreaterThanOrEqual(10);
+      expect(dotLottie.currentFrame).toBeLessThan(12);
 
       // Wait until a frame event with the target frame appears
       // (pending animation loop callbacks may fire stale frames first)

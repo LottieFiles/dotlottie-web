@@ -1,6 +1,7 @@
 import { DotLottie, DotLottieWorker } from '@lottiefiles/dotlottie-web';
 import { userEvent } from '@testing-library/user-event';
 import type React from 'react';
+import { StrictMode } from 'react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import type { ComponentRenderOptions, RenderResult } from 'vitest-browser-react';
 import { cleanup, render as vitestRender } from 'vitest-browser-react';
@@ -70,6 +71,72 @@ describe.each([
       expect(onDestroy).toHaveBeenCalledTimes(1);
     });
   });
+
+  test('supports React StrictMode: one instance, controllable, destroyed on real unmount', async () => {
+    const dotLottieRefCallback = vi.fn();
+    const onDestroy = vi.fn();
+
+    // Render WITHOUT this file's `render` helper: vitest-browser-react's `wrapper`
+    // option defers StrictMode's ref double-invoke indefinitely, and the double-invoke
+    // must actually happen for this test to guard the regression.
+    const { unmount } = await vitestRender(
+      <StrictMode>
+        <Component src={dotLottieSrc} autoplay loop dotLottieRefCallback={dotLottieRefCallback} />
+      </StrictMode>,
+    );
+
+    // Wait for StrictMode's detach signal (ref callback invoked with null) so the
+    // one-instance assertion below cannot pass trivially before the double-invoke ran.
+    // Boolean asserts avoid serializing DotLottie instances into failure diffs, which
+    // exceeds vitest's websocket message limit.
+    await vi.waitFor(
+      () => {
+        expect(dotLottieRefCallback.mock.calls.some((call) => call[0] === null)).toBe(true);
+      },
+      { timeout: 5000 },
+    );
+    await new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    });
+
+    // Every non-null callback value must be the same instance: only one is ever created.
+    const instances = new Set(dotLottieRefCallback.mock.calls.map((call) => call[0]).filter(Boolean));
+
+    expect(instances.size).toBe(1);
+
+    const dotLottie = [...instances][0];
+
+    // The latest callback value is the live instance, not null (#893).
+    expect(dotLottieRefCallback.mock.calls.at(-1)?.[0] === dotLottie).toBe(true);
+
+    await vi.waitFor(
+      () => {
+        expect(dotLottie.isLoaded).toBe(true);
+      },
+      { timeout: 5000 },
+    );
+
+    await vi.waitFor(
+      () => {
+        expect(dotLottie.isPlaying).toBe(true);
+      },
+      { timeout: 5000 },
+    );
+
+    await dotLottie.pause();
+
+    await vi.waitFor(() => {
+      expect(dotLottie.isPlaying).toBe(false);
+    });
+
+    dotLottie.addEventListener('destroy', onDestroy);
+
+    unmount();
+
+    await vi.waitFor(() => {
+      expect(onDestroy).toHaveBeenCalledTimes(1);
+    });
+  }, 30000);
 
   test('calls dotLottie.setLoop when loop prop changes', async () => {
     const onLoad = vi.fn();
