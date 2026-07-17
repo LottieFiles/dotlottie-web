@@ -1,5 +1,9 @@
 # @lottiefiles/dotlottie-solid
 
+> [!TIP]
+> Looking for animations to use with this player? Browse **[100,000+ free Lottie animations](https://lottiefiles.com/free-animations?utm_source=npm&utm_medium=readme)** and grab any of them as `.lottie` or `.json`, or create your own with [Lottie Creator](https://lottiefiles.com/lottie-creator?utm_source=npm&utm_medium=readme).
+
+
 <p align="center">
   <img src="https://lottie.host/43f43646-b018-4d72-a96b-02a929cd9727/gARxdIetbE.svg" alt="dotLottie Web" width="550" />
 </p>
