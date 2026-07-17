@@ -1,5 +1,17 @@
 # @lottiefiles/dotlottie-react
 
+## 0.19.10
+### Patch Changes
+
+- 3d2be0b: fix: support React StrictMode (#439, #893, #326)
+- Updated dependencies [6e8c2d7]
+- Updated dependencies [6e8c2d7]
+- Updated dependencies [6818ad9]
+- Updated dependencies [3d2be0b]
+- Updated dependencies [696416a]
+- Updated dependencies [6e8c2d7]
+  - @lottiefiles/dotlottie-web@0.78.0
+
 ## 0.19.9
 ### Patch Changes
 

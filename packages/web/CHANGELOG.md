@@ -1,5 +1,18 @@
 # @lottiefiles/dotlottie-web
 
+## 0.78.0
+### Minor Changes
+
+- 6e8c2d7: added `DotLottie.preload()` to start the WASM download before the first player is constructed
+
+### Patch Changes
+
+- 6e8c2d7: faster first frame: the animation now downloads in parallel with the WASM module instead of after it, the load path renders once instead of twice, and animation JSON is no longer parsed twice
+- 6e8c2d7: fixed bundlers not being able to tree-shake `DotLottieWorker`: apps that only use `DotLottie` no longer ship the inlined worker code (\~37.6 KB → \~11.9 KB gzip)
+- 6818ad9: refactor: replace `JSON.parse` in `isLottie` with a cheap shape check
+- 3d2be0b: fix: support React StrictMode (#439, #893, #326)
+- 696416a: Declare a 2GB WASM memory maximum so Safari grows memory in place, fixing iOS 15 freezes.
+
 ## 0.77.1
 ### Patch Changes
 

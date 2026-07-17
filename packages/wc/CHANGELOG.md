@@ -1,5 +1,18 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.9.22
+### Patch Changes
+
+- 8e64c16: each CDN bundle is now self-contained: `dotlottie-wc.js` no longer downloads the worker code (one \~19 KB gzip file instead of \~36 KB across three)
+- 1f68270: re-export `setWasmUrl` from the `dotlottie-wc` and `dotlottie-worker-wc` CDN bundles
+- Updated dependencies [6e8c2d7]
+- Updated dependencies [6e8c2d7]
+- Updated dependencies [6818ad9]
+- Updated dependencies [3d2be0b]
+- Updated dependencies [696416a]
+- Updated dependencies [6e8c2d7]
+  - @lottiefiles/dotlottie-web@0.78.0
+
 ## 0.9.21
 ### Patch Changes
 
