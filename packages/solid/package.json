@@ -8,7 +8,7 @@
     "url": "git+https://github.com/LottieFiles/dotlottie-web.git",
     "directory": "packages/solid"
   },
-  "homepage": "https://github.com/LottieFiles/dotlottie-web#readme",
+  "homepage": "https://developers.lottiefiles.com/docs/dotlottie-player/?utm_source=npm&utm_medium=package",
   "bugs": "https://github.com/LottieFiles/dotlottie-web/issues",
   "author": "LottieFiles",
   "contributors": [],
