@@ -1,5 +1,10 @@
 # @lottiefiles/dotlottie-web
 
+## 0.78.1
+### Patch Changes
+
+- 9eaf3f6: Update dotlottie-rs WASM bindings to `74e376b`.
+
 ## 0.78.0
 ### Minor Changes
 
