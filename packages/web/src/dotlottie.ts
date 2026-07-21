@@ -1,7 +1,12 @@
 /* eslint-disable no-warning-comments */
 import { AnimationFrameManager } from './animation-frame-manager';
 import { BYTES_PER_PIXEL, IS_BROWSER, PACKAGE_NAME, PACKAGE_VERSION } from './constants';
-import init, { Mode as CoreMode, DotLottiePlayerWasm, register_font } from './core/dotlottie-player';
+import init, {
+  Mode as CoreMode,
+  Status as CoreStatus,
+  DotLottiePlayerWasm,
+  register_font,
+} from './core/dotlottie-player';
 import type { EventListener, EventType } from './event-manager';
 import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
@@ -372,7 +377,7 @@ export class DotLottie {
           queueMicrotask(() => {
             this._isStateMachineRunning = false;
             this._eventManager.dispatch({ type: 'stateMachineStop' });
-            if (!this._dotLottieCore?.is_playing()) {
+            if (this._dotLottieCore?.status() !== CoreStatus.Playing) {
               this._stopAnimationLoop();
             }
           });
@@ -582,7 +587,7 @@ export class DotLottie {
             this._startAnimationLoop();
           }
         }
-      } else if (this._dotLottieCore.is_playing()) {
+      } else if (this._dotLottieCore.status() === CoreStatus.Playing) {
         this._startAnimationLoop();
       }
 
@@ -777,7 +782,7 @@ export class DotLottie {
    * Check this before calling play() or other playback methods to ensure the animation is ready.
    */
   public get isLoaded(): boolean {
-    return this._dotLottieCore?.is_loaded() ?? false;
+    return (this._dotLottieCore?.status() ?? CoreStatus.Idle) !== CoreStatus.Idle;
   }
 
   /**
@@ -785,7 +790,7 @@ export class DotLottie {
    * True when animation is actively playing, false when paused, stopped, or not started.
    */
   public get isPlaying(): boolean {
-    return this._dotLottieCore?.is_playing() ?? false;
+    return this._dotLottieCore?.status() === CoreStatus.Playing;
   }
 
   /**
@@ -793,7 +798,7 @@ export class DotLottie {
    * True when pause() has been called and animation is not playing or stopped.
    */
   public get isPaused(): boolean {
-    return this._dotLottieCore?.is_paused() ?? false;
+    return this._dotLottieCore?.status() === CoreStatus.Paused;
   }
 
   /**
@@ -801,7 +806,7 @@ export class DotLottie {
    * True when stop() has been called or animation hasn't started yet.
    */
   public get isStopped(): boolean {
-    return this._dotLottieCore?.is_stopped() ?? false;
+    return this._dotLottieCore?.status() === CoreStatus.Stopped;
   }
 
   /**
@@ -1059,7 +1064,7 @@ export class DotLottie {
       this._animationFrameId === null &&
       this._dotLottieCore &&
       !this._isFrozen &&
-      (this._dotLottieCore.is_playing() || this._isStateMachineRunning)
+      (this._dotLottieCore.status() === CoreStatus.Playing || this._isStateMachineRunning)
     ) {
       this._animationFrameId = this._frameManager.requestAnimationFrame(this._boundAnimationLoop);
     }
@@ -1073,7 +1078,7 @@ export class DotLottie {
     }
 
     // Continue the loop if either the animation is playing OR the state machine is running
-    if (!this._dotLottieCore.is_playing() && !this._isStateMachineRunning) {
+    if (this._dotLottieCore.status() !== CoreStatus.Playing && !this._isStateMachineRunning) {
       this._stopAnimationLoop();
 
       return;
@@ -1123,7 +1128,7 @@ export class DotLottie {
     this._drainPlayerEvents();
 
     // Always unfreeze and start animation loop if core is playing, regardless of play() return value
-    if (playing || this._dotLottieCore.is_playing()) {
+    if (playing || this._dotLottieCore.status() === CoreStatus.Playing) {
       this._isFrozen = false;
       this._startAnimationLoop();
     }
@@ -2124,7 +2129,7 @@ export class DotLottie {
       this._cleanupStateMachineListeners();
 
       // Stop animation loop if animation is not playing
-      if (!this._dotLottieCore.is_playing()) {
+      if (this._dotLottieCore.status() !== CoreStatus.Playing) {
         this._stopAnimationLoop();
       }
     }
