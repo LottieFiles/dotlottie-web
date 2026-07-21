@@ -229,6 +229,17 @@ export const Mode = Object.freeze({
     Bounce: 2, "2": "Bounce",
     ReverseBounce: 3, "3": "ReverseBounce",
 });
+/**
+ * Current status of the animation player.
+ * @enum {0 | 1 | 2 | 3 | 4}
+ */
+export const Status = Object.freeze({
+    Idle: 0, "0": "Idle",
+    Playing: 1, "1": "Playing",
+    Paused: 2, "2": "Paused",
+    Stopped: 3, "3": "Stopped",
+    Tweening: 4, "4": "Tweening",
+});
 
 const __wbindgen_enum_GpuAddressMode = ["clamp-to-edge", "repeat", "mirror-repeat"];
 
@@ -303,20 +314,6 @@ export class DotLottiePlayerWasm {
         const ptr0 = passStringToWasm0(id, wasm.__wbindgen_malloc_command_export, wasm.__wbindgen_realloc_command_export);
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.dotlottieplayerwasm_clear_slot(this.__wbg_ptr, ptr0, len0);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    is_playing() {
-        const ret = wasm.dotlottieplayerwasm_is_playing(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    is_stopped() {
-        const ret = wasm.dotlottieplayerwasm_is_stopped(this.__wbg_ptr);
         return ret !== 0;
     }
     /**
@@ -398,13 +395,6 @@ export class DotLottiePlayerWasm {
      */
     is_complete() {
         const ret = wasm.dotlottieplayerwasm_is_complete(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    is_tweening() {
-        const ret = wasm.dotlottieplayerwasm_is_tweening(this.__wbg_ptr);
         return ret !== 0;
     }
     /**
@@ -1241,6 +1231,13 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
+     * @returns {Status}
+     */
+    status() {
+        const ret = wasm.dotlottieplayerwasm_status(this.__wbg_ptr);
+        return ret;
+    }
+    /**
      * Returns an array of `{ name, start, end }` objects.
      * @returns {any}
      */
@@ -1326,20 +1323,6 @@ export class DotLottiePlayerWasm {
             wasm.__wbindgen_free_command_export(ret[0], ret[1] * 1, 1);
         }
         return v1;
-    }
-    /**
-     * @returns {boolean}
-     */
-    is_loaded() {
-        const ret = wasm.dotlottieplayerwasm_is_loaded(this.__wbg_ptr);
-        return ret !== 0;
-    }
-    /**
-     * @returns {boolean}
-     */
-    is_paused() {
-        const ret = wasm.dotlottieplayerwasm_is_paused(this.__wbg_ptr);
-        return ret !== 0;
     }
     /**
      * @param {string} name
@@ -1430,10 +1413,6 @@ async function __wbg_load(module, imports) {
 function __wbg_get_imports() {
     const imports = {};
     imports.wbg = {};
-    imports.wbg.__wbg_beginComputePass_ce58248c78ea4f0b = function(arg0, arg1) {
-        const ret = arg0.beginComputePass(arg1);
-        return ret;
-    };
     imports.wbg.__wbg_beginRenderPass_509df70c967b895c = function() { return handleError(function (arg0, arg1) {
         const ret = arg0.beginRenderPass(arg1);
         return ret;
@@ -1505,19 +1484,10 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_destroy_c1bd9f1fd447bebf = function(arg0) {
         arg0.destroy();
     };
-    imports.wbg.__wbg_dispatchWorkgroups_6b7a05edf9c2b474 = function(arg0, arg1, arg2, arg3) {
-        arg0.dispatchWorkgroups(arg1 >>> 0, arg2 >>> 0, arg3 >>> 0);
-    };
     imports.wbg.__wbg_drawIndexed_0d27b49d3d541ca9 = function(arg0, arg1, arg2, arg3, arg4, arg5) {
         arg0.drawIndexed(arg1 >>> 0, arg2 >>> 0, arg3 >>> 0, arg4, arg5 >>> 0);
     };
-    imports.wbg.__wbg_draw_afac1827162db569 = function(arg0, arg1, arg2, arg3, arg4) {
-        arg0.draw(arg1 >>> 0, arg2 >>> 0, arg3 >>> 0, arg4 >>> 0);
-    };
     imports.wbg.__wbg_end_5f3989c200fa79e9 = function(arg0) {
-        arg0.end();
-    };
-    imports.wbg.__wbg_end_e9ed158432136036 = function(arg0) {
         arg0.end();
     };
     imports.wbg.__wbg_ended_b873fb75d0c13ca7 = function(arg0) {
@@ -1613,23 +1583,14 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_revokeObjectURL_27267efebeb457c7 = function() { return handleError(function (arg0, arg1) {
         URL.revokeObjectURL(getStringFromWasm0(arg0, arg1));
     }, arguments) };
-    imports.wbg.__wbg_setBindGroup_03656750a7c9f7c6 = function(arg0, arg1, arg2) {
-        arg0.setBindGroup(arg1 >>> 0, arg2);
-    };
     imports.wbg.__wbg_setBindGroup_438462565faaa01c = function(arg0, arg1, arg2) {
         arg0.setBindGroup(arg1 >>> 0, arg2);
-    };
-    imports.wbg.__wbg_setBindGroup_8ec97340dd95cb9c = function(arg0, arg1, arg2, arg3) {
-        arg0.setBindGroup(arg1 >>> 0, arg2, arg3);
     };
     imports.wbg.__wbg_setBindGroup_beb777273edc100f = function(arg0, arg1, arg2, arg3) {
         arg0.setBindGroup(arg1 >>> 0, arg2, arg3);
     };
     imports.wbg.__wbg_setIndexBuffer_1e94798fafd75b38 = function(arg0, arg1, arg2, arg3, arg4) {
         arg0.setIndexBuffer(arg1, __wbindgen_enum_GpuIndexFormat[arg2], arg3, arg4);
-    };
-    imports.wbg.__wbg_setPipeline_4cd9468d332cf0cb = function(arg0, arg1) {
-        arg0.setPipeline(arg1);
     };
     imports.wbg.__wbg_setPipeline_a48ed1de5bcb914a = function(arg0, arg1) {
         arg0.setPipeline(arg1);
@@ -1700,9 +1661,6 @@ function __wbg_get_imports() {
         arg0.baseMipLevel = arg1 >>> 0;
     };
     imports.wbg.__wbg_setbeginningofpasswriteindex_449cbd524b33366d = function(arg0, arg1) {
-        arg0.beginningOfPassWriteIndex = arg1 >>> 0;
-    };
-    imports.wbg.__wbg_setbeginningofpasswriteindex_645ab3ba9029ac4a = function(arg0, arg1) {
         arg0.beginningOfPassWriteIndex = arg1 >>> 0;
     };
     imports.wbg.__wbg_setbindgrouplayouts_b74aac632f5e0cd3 = function(arg0, arg1) {
@@ -1823,9 +1781,6 @@ function __wbg_get_imports() {
         arg0.dstFactor = __wbindgen_enum_GpuBlendFactor[arg1];
     };
     imports.wbg.__wbg_setendofpasswriteindex_6923ba50f58bb0df = function(arg0, arg1) {
-        arg0.endOfPassWriteIndex = arg1 >>> 0;
-    };
-    imports.wbg.__wbg_setendofpasswriteindex_832ce3e1b3972fae = function(arg0, arg1) {
         arg0.endOfPassWriteIndex = arg1 >>> 0;
     };
     imports.wbg.__wbg_setentries_545836ca7979d0c3 = function(arg0, arg1) {
@@ -1975,9 +1930,6 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_setqueryset_0351509707c5cd51 = function(arg0, arg1) {
         arg0.querySet = arg1;
     };
-    imports.wbg.__wbg_setqueryset_c4a0351a777cdfbd = function(arg0, arg1) {
-        arg0.querySet = arg1;
-    };
     imports.wbg.__wbg_setr_732e149cd5493a75 = function(arg0, arg1) {
         arg0.r = arg1;
     };
@@ -2058,9 +2010,6 @@ function __wbg_get_imports() {
     };
     imports.wbg.__wbg_settexture_a8c8df2623f6e670 = function(arg0, arg1) {
         arg0.texture = arg1;
-    };
-    imports.wbg.__wbg_settimestampwrites_65e353db5011b652 = function(arg0, arg1) {
-        arg0.timestampWrites = arg1;
     };
     imports.wbg.__wbg_settimestampwrites_c48f0b3db52a9119 = function(arg0, arg1) {
         arg0.timestampWrites = arg1;

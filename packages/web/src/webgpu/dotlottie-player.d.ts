@@ -13,11 +13,19 @@ export enum Mode {
   Bounce = 2,
   ReverseBounce = 3,
 }
+/**
+ * Current status of the animation player.
+ */
+export enum Status {
+  Idle = 0,
+  Playing = 1,
+  Paused = 2,
+  Stopped = 3,
+  Tweening = 4,
+}
 export class DotLottiePlayerWasm {
   free(): void;
   clear_slot(id: string): boolean;
-  is_playing(): boolean;
-  is_stopped(): boolean;
   layout_fit(): string;
   loop_count(): number;
   /**
@@ -40,7 +48,6 @@ export class DotLottiePlayerWasm {
   set_marker(name: string): void;
   clear_slots(): boolean;
   is_complete(): boolean;
-  is_tweening(): boolean;
   /**
    * Reset all slots to their default values from the animation.
    */
@@ -251,6 +258,7 @@ export class DotLottiePlayerWasm {
    * Render the current frame without advancing time.
    */
   render(): boolean;
+  status(): Status;
   /**
    * Returns an array of `{ name, start, end }` objects.
    */
@@ -277,8 +285,6 @@ export class DotLottiePlayerWasm {
    */
   sm_start(require_user_interaction: boolean, whitelist: any[]): boolean;
   theme_id(): string | undefined;
-  is_loaded(): boolean;
-  is_paused(): boolean;
   load_font(name: string, data: Uint8Array): boolean;
   set_frame(no: number): boolean;
   set_speed(speed: number): void;
@@ -308,9 +314,7 @@ export interface InitOutput {
   readonly asinhf: (a: number) => number;
   readonly atanh: (a: number) => number;
   readonly atanhf: (a: number) => number;
-  readonly atoi: (a: number) => number;
   readonly bsearch: (a: number, b: number, c: number, d: number, e: number) => number;
-  readonly calloc: (a: number, b: number) => number;
   readonly dotlottieplayerwasm_animation_id: (a: number) => [number, number];
   readonly dotlottieplayerwasm_animation_size: (a: number) => any;
   readonly dotlottieplayerwasm_audio_volume: (a: number) => number;
@@ -336,11 +340,6 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_get_transform: (a: number) => any;
   readonly dotlottieplayerwasm_height: (a: number) => number;
   readonly dotlottieplayerwasm_is_complete: (a: number) => number;
-  readonly dotlottieplayerwasm_is_loaded: (a: number) => number;
-  readonly dotlottieplayerwasm_is_paused: (a: number) => number;
-  readonly dotlottieplayerwasm_is_playing: (a: number) => number;
-  readonly dotlottieplayerwasm_is_stopped: (a: number) => number;
-  readonly dotlottieplayerwasm_is_tweening: (a: number) => number;
   readonly dotlottieplayerwasm_layout_align_x: (a: number) => number;
   readonly dotlottieplayerwasm_layout_align_y: (a: number) => number;
   readonly dotlottieplayerwasm_layout_fit: (a: number) => [number, number];
@@ -430,6 +429,7 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_state_machine_load: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_state_machine_load_from_id: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_state_machine_unload: (a: number) => void;
+  readonly dotlottieplayerwasm_status: (a: number) => number;
   readonly dotlottieplayerwasm_stop: (a: number) => number;
   readonly dotlottieplayerwasm_theme_id: (a: number) => [number, number];
   readonly dotlottieplayerwasm_tick: (a: number, b: number) => number;
@@ -437,40 +437,20 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_unload_font: (a: number, b: number) => number;
   readonly dotlottieplayerwasm_use_frame_interpolation: (a: number) => number;
   readonly dotlottieplayerwasm_width: (a: number) => number;
-  readonly free: (a: number) => void;
-  readonly isdigit: (a: number) => number;
-  readonly isspace: (a: number) => number;
   readonly longjmp: (a: number, b: number) => void;
-  readonly malloc: (a: number) => number;
   readonly modff: (a: number, b: number) => number;
   readonly nextafter: (a: number, b: number) => number;
   readonly rand: () => number;
-  readonly realloc: (a: number, b: number) => number;
   readonly register_font: (a: number, b: number, c: number, d: number) => number;
   readonly setjmp: (a: number) => number;
-  readonly strcat: (a: number, b: number) => number;
-  readonly strchr: (a: number, b: number) => number;
-  readonly strcmp: (a: number, b: number) => number;
-  readonly strcpy: (a: number, b: number) => number;
   readonly strdup: (a: number) => number;
-  readonly strncasecmp: (a: number, b: number, c: number) => number;
-  readonly strncmp: (a: number, b: number, c: number) => number;
-  readonly strstr: (a: number, b: number) => number;
-  readonly strtol: (a: number, b: number, c: number) => number;
   readonly tolower: (a: number) => number;
-  readonly wgpuAdapterRelease: (a: number) => void;
-  readonly wgpuAdapterRequestDevice: (a: number, b: number) => number;
+  readonly wgpuBindGroupLayoutRelease: (a: number) => void;
   readonly wgpuBufferDestroy: (a: number) => void;
   readonly wgpuBufferGetSize: (a: number) => bigint;
-  readonly wgpuCommandEncoderBeginComputePass: (a: number, b: number) => number;
   readonly wgpuCommandEncoderBeginRenderPass: (a: number, b: number) => number;
   readonly wgpuCommandEncoderCopyTextureToTexture: (a: number, b: number, c: number, d: number) => void;
   readonly wgpuCommandEncoderFinish: (a: number, b: number) => number;
-  readonly wgpuComputePassEncoderDispatchWorkgroups: (a: number, b: number, c: number, d: number) => void;
-  readonly wgpuComputePassEncoderEnd: (a: number) => void;
-  readonly wgpuComputePassEncoderSetBindGroup: (a: number, b: number, c: number, d: number, e: number) => void;
-  readonly wgpuComputePassEncoderSetPipeline: (a: number, b: number) => void;
-  readonly wgpuCreateInstance: (a: number) => number;
   readonly wgpuDeviceCreateBindGroup: (a: number, b: number) => number;
   readonly wgpuDeviceCreateBindGroupLayout: (a: number, b: number) => number;
   readonly wgpuDeviceCreateBuffer: (a: number, b: number) => number;
@@ -485,7 +465,6 @@ export interface InitOutput {
   readonly wgpuQueueSubmit: (a: number, b: number, c: number) => void;
   readonly wgpuQueueWriteBuffer: (a: number, b: number, c: bigint, d: number, e: number) => void;
   readonly wgpuQueueWriteTexture: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
-  readonly wgpuRenderPassEncoderDraw: (a: number, b: number, c: number, d: number, e: number) => void;
   readonly wgpuRenderPassEncoderDrawIndexed: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
   readonly wgpuRenderPassEncoderEnd: (a: number) => void;
   readonly wgpuRenderPassEncoderSetBindGroup: (a: number, b: number, c: number, d: number, e: number) => void;
@@ -494,7 +473,9 @@ export interface InitOutput {
   readonly wgpuRenderPassEncoderSetScissorRect: (a: number, b: number, c: number, d: number, e: number) => void;
   readonly wgpuRenderPassEncoderSetStencilReference: (a: number, b: number) => void;
   readonly wgpuRenderPassEncoderSetVertexBuffer: (a: number, b: number, c: number, d: bigint, e: bigint) => void;
+  readonly wgpuSurfaceCapabilitiesFreeMembers: (a: number) => void;
   readonly wgpuSurfaceConfigure: (a: number, b: number) => void;
+  readonly wgpuSurfaceGetCapabilities: (a: number, b: number, c: number) => number;
   readonly wgpuSurfaceGetCurrentTexture: (a: number, b: number) => void;
   readonly wgpuSurfaceUnconfigure: (a: number) => void;
   readonly wgpuTextureCreateView: (a: number, b: number) => number;
@@ -502,14 +483,30 @@ export interface InitOutput {
   readonly wgpuTextureGetFormat: (a: number) => number;
   readonly wgpuTextureGetHeight: (a: number) => number;
   readonly wgpuTextureGetWidth: (a: number) => number;
-  readonly _ZdlPvm: (a: number, b: number) => void;
+  readonly atoi: (a: number) => number;
+  readonly calloc: (a: number, b: number) => number;
+  readonly free: (a: number) => void;
+  readonly isdigit: (a: number) => number;
+  readonly isspace: (a: number) => number;
+  readonly malloc: (a: number) => number;
+  readonly realloc: (a: number, b: number) => number;
+  readonly strcat: (a: number, b: number) => number;
+  readonly strchr: (a: number, b: number) => number;
+  readonly strcmp: (a: number, b: number) => number;
+  readonly strcpy: (a: number, b: number) => number;
+  readonly strncasecmp: (a: number, b: number, c: number) => number;
+  readonly strncmp: (a: number, b: number, c: number) => number;
+  readonly strstr: (a: number, b: number) => number;
+  readonly strtol: (a: number, b: number, c: number) => number;
+  readonly tinyrlibc_itoa: (a: bigint, b: number, c: number, d: number) => number;
+  readonly tinyrlibc_rand_r: (a: number) => number;
+  readonly tinyrlibc_strtoul: (a: number, b: number, c: number) => number;
+  readonly tinyrlibc_utoa: (a: bigint, b: number, c: number, d: number) => number;
   readonly _ZNSt3__25mutex6unlockEv: (a: number) => void;
-  readonly wgpuBindGroupLayoutRelease: (a: number) => void;
   readonly wgpuBindGroupRelease: (a: number) => void;
   readonly wgpuBufferRelease: (a: number) => void;
   readonly wgpuCommandBufferRelease: (a: number) => void;
   readonly wgpuCommandEncoderRelease: (a: number) => void;
-  readonly wgpuComputePassEncoderRelease: (a: number) => void;
   readonly wgpuComputePipelineRelease: (a: number) => void;
   readonly wgpuPipelineLayoutRelease: (a: number) => void;
   readonly wgpuQueueRelease: (a: number) => void;
@@ -519,6 +516,7 @@ export interface InitOutput {
   readonly wgpuShaderModuleRelease: (a: number) => void;
   readonly wgpuTextureRelease: (a: number) => void;
   readonly wgpuTextureViewRelease: (a: number) => void;
+  readonly _ZdlPvm: (a: number, b: number) => void;
   readonly __cxa_thread_atexit: (a: number, b: number, c: number) => number;
   readonly __wbindgen_exn_store_command_export: (a: number) => void;
   readonly __externref_table_alloc_command_export: () => number;
