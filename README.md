@@ -15,7 +15,7 @@
   <b>dotLottie</b> (<code>.lottie</code>) animations on the web — a Rust + WASM core
   powered by <a href="https://github.com/thorvg/thorvg">ThorVG</a>, with Software,
   WebGL2, and WebGPU rendering backends and full
-  <a href="https://dotlottie.io/">dotLottie v2</a> support (theming, state machines,
+  <a href="https://lottiefiles.com/dotlottie">dotLottie v2</a> support (theming, state machines,
   and audio).
 </p>
 
@@ -28,7 +28,7 @@
 
 # Why dotLottie Web
 
-* 📦 **Lottie + dotLottie, one player** — point `src` at a classic Lottie [`.json`](https://lottiefiles.github.io/lottie-docs/) or a [`.lottie`](https://dotlottie.io/) archive. The `.lottie` format bundles multiple animations, themes, state machines, and embedded assets into a single compressed file.
+* 📦 **Lottie + dotLottie, one player** — point `src` at a classic Lottie [`.json`](https://lottiefiles.github.io/lottie-docs/) or a [`.lottie`](https://lottiefiles.com/dotlottie) archive. The `.lottie` format bundles multiple animations, themes, state machines, and embedded assets into a single compressed file.
 * 🦀 **Rust + WASM core** — powered by [`dotlottie-rs`](https://github.com/LottieFiles/dotlottie-rs), the same engine that ships in iOS, Android, and native dotLottie players. One battle-tested implementation across every platform.
 * 🎨 **ThorVG renderer** — an industrial-grade vector graphics engine with the broadest Lottie feature coverage of any web renderer. See the [ThorVG Lottie support matrix](https://github.com/thorvg/thorvg/wiki/Lottie-Support).
 * ⚡ **Three rendering backends** — Software (Canvas2D), WebGL2, and WebGPU (experimental). Switch with a one-line import change — same `DotLottie` class everywhere.

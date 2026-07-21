@@ -30,13 +30,13 @@
 
 ## Introduction
 
-A Vue library for rendering [lottie](https://lottiefiles.github.io/lottie-docs/) and [dotLottie](https://dotlottie.io) animations in the browser.
+A Vue library for rendering [lottie](https://lottiefiles.github.io/lottie-docs/) and [dotLottie](https://lottiefiles.com/dotlottie) animations in the browser.
 
 ### What is dotLottie?
 
 dotLottie is an open-source file format that aggregates one or more Lottie files and their associated resources into a single file. They are ZIP archives compressed with the Deflate compression method and carry the file extension of ".lottie".
 
-[Learn more about dotLottie](https://dotlottie.io/).
+[Learn more about dotLottie](https://lottiefiles.com/dotlottie).
 
 ## Installation
 

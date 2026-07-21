@@ -33,13 +33,13 @@
 
 ## Introduction
 
-A web component for rendering and playing [Lottie](https://lottiefiles.github.io/lottie-docs/) and [DotLottie](https://dotlottie.io) animations in web applications.
+A web component for rendering and playing [Lottie](https://lottiefiles.github.io/lottie-docs/) and [DotLottie](https://lottiefiles.com/dotlottie) animations in web applications.
 
 ### What is dotLottie?
 
 dotLottie is an open-source file format that aggregates one or more Lottie files and their associated resources into a single file. They are ZIP archives compressed with the Deflate compression method and carry the file extension of ".lottie".
 
-[Learn more about dotLottie](https://dotlottie.io/).
+[Learn more about dotLottie](https://lottiefiles.com/dotlottie).
 
 ## Installation
 
