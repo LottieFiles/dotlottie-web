@@ -8,7 +8,7 @@
     "url": "git+https://github.com/LottieFiles/dotlottie-web.git",
     "directory": "packages/vue"
   },
-  "homepage": "https://developers.lottiefiles.com/docs/dotlottie-player/dotlottie-vue/?utm_source=npm&utm_medium=package",
+  "homepage": "https://docs.lottiefiles.com/en/runtimes/distributions/vue?utm_source=npm&utm_medium=package",
   "bugs": "https://github.com/LottieFiles/dotlottie-web/issues",
   "author": "LottieFiles",
   "contributors": [

@@ -31,13 +31,13 @@
 
 ## Introduction
 
-A Svelte component for rendering [Lottie](https://lottiefiles.github.io/lottie-docs/) and [dotLottie](https://dotlottie.io) animations. It acts as a wrapper around the [`dotLottie`](../web/README.md) web player.
+A Svelte component for rendering [Lottie](https://lottiefiles.github.io/lottie-docs/) and [dotLottie](https://lottiefiles.com/dotlottie) animations. It acts as a wrapper around the [`dotLottie`](../web/README.md) web player.
 
 ### What is dotLottie?
 
 dotLottie is an open-source file format that aggregates one or more Lottie files and their associated resources into a single file. They are ZIP archives compressed with the Deflate compression method and carry the file extension of ".lottie".
 
-[Learn more about dotLottie](https://dotlottie.io/).
+[Learn more about dotLottie](https://lottiefiles.com/dotlottie).
 
 ## Installation
 

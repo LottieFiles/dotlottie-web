@@ -28,13 +28,13 @@
 
 ## Introduction
 
-`@lottiefiles/dotlottie-web` is a JavaScript library for rendering [Lottie](https://lottiefiles.github.io/lottie-docs/) and [dotLottie](https://dotlottie.io) animations in Node.js and web environments. It provides a simple and intuitive API for loading, playing, and controlling animations, as well as advanced features like interactivity and theming.
+`@lottiefiles/dotlottie-web` is a JavaScript library for rendering [Lottie](https://lottiefiles.github.io/lottie-docs/) and [dotLottie](https://lottiefiles.com/dotlottie) animations in Node.js and web environments. It provides a simple and intuitive API for loading, playing, and controlling animations, as well as advanced features like interactivity and theming.
 
 ### What is dotLottie?
 
 dotLottie is an open-source file format that bundles one or more Lottie animations along with their assets into a single, compressed .lottie file. It uses ZIP compression for efficient storage and distribution. The format also supports advanced features like interactivity and theming, making it a powerful tool for creating dynamic and interactive animations.
 
-[Learn more about dotLottie](https://dotlottie.io/).
+[Learn more about dotLottie](https://lottiefiles.com/dotlottie).
 
 ## Documentation
 

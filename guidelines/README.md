@@ -52,5 +52,5 @@ Found an issue or want to improve the guidelines? PRs welcome!
 
 * [dotLottie Documentation](https://developers.lottiefiles.com/docs/dotlottie-player)
 * [dotlottie-web GitHub](https://github.com/LottieFiles/dotlottie-web)
-* [dotLottie Format](https://dotlottie.io)
+* [dotLottie Format](https://lottiefiles.com/dotlottie)
 * [LottieFiles Creator](https://creators.lottiefiles.com)
