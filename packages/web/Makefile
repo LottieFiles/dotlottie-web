@@ -31,6 +31,8 @@ WASM_MAX_MEMORY ?= 2147483648
 WASM_MANIFEST := $(DOTLOTTIE_RS_CRATE)/Cargo.toml
 WASM_ARTIFACT := $(DOTLOTTIE_RS_CRATE)/target/$(WASM_TARGET)/release/dotlottie_rs.wasm
 WASM_LOCKFILE := $(DOTLOTTIE_RS_CRATE)/Cargo.lock
+WASM_RUSTFLAGS := -C target-feature=+bulk-memory
+WASM_OPT_FLAGS := --enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals
 
 WASM_FEATURES_COMMON ?= tvg,tvg-cpu,tvg-png,tvg-jpg,tvg-webp,tvg-ttf,tvg-otf,tvg-lottie-expressions,dotlottie,theming,state-machines,audio,wasm-bindgen-api
 WASM_FEATURES_SW     ?= $(WASM_FEATURES_COMMON)
@@ -105,7 +107,7 @@ setup:
 # $(4) = web src directory (e.g. $(WEB_SRC_CORE))
 define wasm_build
 	@mkdir -p $(3)
-	CC=$(WASM_CC) CXX=$(WASM_CXX) RUSTFLAGS="$(2) -C link-arg=--max-memory=$(WASM_MAX_MEMORY)" \
+	CC=$(WASM_CC) CXX=$(WASM_CXX) RUSTFLAGS="$(WASM_RUSTFLAGS) $(2) -C link-arg=--max-memory=$(WASM_MAX_MEMORY)" \
 		cargo rustc \
 			--manifest-path $(WASM_MANIFEST) \
 			--crate-type cdylib \
@@ -118,7 +120,7 @@ define wasm_build
 		--target web \
 		--typescript
 	@if command -v wasm-opt >/dev/null 2>&1; then \
-		wasm-opt $(3)/dotlottie_rs_bg.wasm -o $(3)/dotlottie_rs_bg.wasm -O3; \
+		wasm-opt $(3)/dotlottie_rs_bg.wasm -o $(3)/dotlottie_rs_bg.wasm -O3 $(WASM_OPT_FLAGS); \
 	fi
 	@# Replace import.meta.url fallback — bundlers (webpack/Next.js) try to resolve
 	@# the .wasm path at build time.  DotLottieWasmLoader always provides a URL.
