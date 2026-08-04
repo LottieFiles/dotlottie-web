@@ -10,7 +10,7 @@ import { ExampleSelector } from '../components/playground/example-selector';
 import { PreviewIframe } from '../components/playground/preview-iframe';
 import { ResizableSplit } from '../components/playground/resizable-split';
 import { type Theme, ThemeProvider, useTheme } from '../context/theme-context';
-import { defaultExample, type PlaygroundExample } from '../data/playground-examples';
+import { defaultExample, type PlaygroundExample, playgroundExamples } from '../data/playground-examples';
 import { getCodeFromUrl, getEmbedHtml, getPlaygroundUrl } from '../utils/url-compression';
 
 // Theme toggle icons
@@ -119,13 +119,22 @@ function PlaygroundContent(): JSX.Element {
     consoleIdRef.current = 0;
   }, []);
 
-  // Load code from URL on mount
+  // Load code from URL on mount — compressed code takes priority, then ?example=<id>
   useEffect(() => {
     const codeFromUrl = getCodeFromUrl();
     if (codeFromUrl) {
       setEditorCode(codeFromUrl);
       runCode(codeFromUrl);
       setSelectedExampleId(''); // Clear selection since it's custom code
+      return;
+    }
+
+    const exampleId = new URLSearchParams(window.location.search).get('example');
+    const example = playgroundExamples.find((ex) => ex.id === exampleId);
+    if (example) {
+      setEditorCode(example.code);
+      runCode(example.code);
+      setSelectedExampleId(example.id);
     }
   }, [runCode]);
 
@@ -196,8 +205,8 @@ function PlaygroundContent(): JSX.Element {
       runCode(example.code);
       setSelectedExampleId(example.id);
       setError(null);
-      // Clear URL when selecting an example
-      window.history.replaceState(null, '', `${import.meta.env.BASE_URL}playground`);
+      // Reflect the selection in the URL so examples are deep-linkable
+      window.history.replaceState(null, '', `${import.meta.env.BASE_URL}playground?example=${example.id}`);
     },
     [runCode],
   );

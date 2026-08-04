@@ -1,5 +1,6 @@
 import { type JSX, useEffect, useState } from 'react';
-import { defaultExample } from '../data/playground-examples';
+import { defaultExample, playgroundExamples } from '../data/playground-examples';
+import { PLAYGROUND_RUNTIME_HEAD } from '../playground/runtime-head';
 import { getCodeFromUrl, getPlaygroundUrl } from '../utils/url-compression';
 
 type ResolvedTheme = 'light' | 'dark';
@@ -25,6 +26,7 @@ function generateSrcdoc(code: string, theme: ResolvedTheme): string {
 <html>
 <head>
   <meta charset="utf-8">
+  ${PLAYGROUND_RUNTIME_HEAD}
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -92,9 +94,15 @@ export const Embed = (): JSX.Element => {
     }
 
     const codeFromUrl = getCodeFromUrl();
+    const exampleFromUrl = playgroundExamples.find(
+      (ex) => ex.id === new URLSearchParams(window.location.search).get('example'),
+    );
     if (codeFromUrl) {
       setCode(codeFromUrl);
       setPlaygroundUrl(getPlaygroundUrl(codeFromUrl));
+    } else if (exampleFromUrl) {
+      setCode(exampleFromUrl.code);
+      setPlaygroundUrl(`${import.meta.env.BASE_URL}playground?example=${exampleFromUrl.id}`);
     } else {
       setPlaygroundUrl(getPlaygroundUrl(defaultExample.code));
     }
