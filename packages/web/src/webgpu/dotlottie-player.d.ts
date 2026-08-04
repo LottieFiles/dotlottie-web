@@ -34,6 +34,7 @@ export class DotLottiePlayerWasm {
    * payload fields (`frameNo`, `loopCount`).
    */
   poll_event(): any;
+  reset_node(target: string): boolean;
   /**
    * Reset a slot to its default value from the animation.
    */
@@ -48,6 +49,8 @@ export class DotLottiePlayerWasm {
   set_marker(name: string): void;
   clear_slots(): boolean;
   is_complete(): boolean;
+  remove_node(name: string): boolean;
+  reset_nodes(): boolean;
   /**
    * Reset all slots to their default values from the animation.
    */
@@ -88,6 +91,10 @@ export class DotLottiePlayerWasm {
   set_slot_str(id: string, json: string): boolean;
   set_viewport(x: number, y: number, w: number, h: number): boolean;
   total_frames(): number;
+  /**
+   * Animate a raw value on the driver clock; read with `animation_value`.
+   */
+  animate_value(from: number, to: number, options: any): number;
   clear_segment(): boolean;
   current_frame(): number;
   /**
@@ -102,6 +109,11 @@ export class DotLottiePlayerWasm {
    * Returns the current affine transform as a flat `Float32Array`.
    */
   get_transform(): Float32Array;
+  /**
+   * True while any `animate`/`animate_value` track is live (including delayed
+   * ones) — keep the tick loop running while this holds, even when paused.
+   */
+  motion_active(): boolean;
   segment_start(): number;
   /**
    * Set multiple slots at once from a JSON string.
@@ -123,10 +135,15 @@ export class DotLottiePlayerWasm {
    * `[width, height]` of the animation in its native coordinate space.
    */
   animation_size(): Float32Array;
+  animation_stop(id: number): void;
   /**
    * Name of the currently active marker, or `undefined` if none.
    */
   current_marker(): string | undefined;
+  /**
+   * Deep-copy a named layer at its current pose into the node namespace.
+   */
+  duplicate_node(source: string, as_name: string): boolean;
   layout_align_x(): number;
   layout_align_y(): number;
   /**
@@ -152,6 +169,8 @@ export class DotLottiePlayerWasm {
   set_loop_count(n: number): void;
   set_theme_data(data: string): boolean;
   sm_reset_input(key: string): void;
+  animation_pause(id: number): void;
+  animation_value(id: number): number;
   /**
    * Returns the animation manifest as a JSON string, or empty string if unavailable.
    */
@@ -162,6 +181,8 @@ export class DotLottiePlayerWasm {
    * Set up (or resize) the WebGPU rendering target.
    */
   setup_wg_target(width: number, height: number): boolean;
+  animation_cancel(id: number): void;
+  animation_resume(id: number): void;
   /**
    * Set the global audio volume multiplier (clamped to [0.0, 1.0]).
    */
@@ -199,6 +220,7 @@ export class DotLottiePlayerWasm {
    * with via the `sm_*` methods.
    */
   state_machine_load(definition: string): boolean;
+  animation_set_speed(id: number, speed: number): void;
   /**
    * Load a .lottie archive from raw bytes.
    *
@@ -254,11 +276,18 @@ export class DotLottiePlayerWasm {
   speed(): number;
   width(): number;
   height(): number;
+  layers(): string[];
   /**
    * Render the current frame without advancing time.
    */
   render(): boolean;
   status(): Status;
+  /**
+   * `animate("arm", { rotate: 30, x: [0, 40] }, { type: "spring", bounce: 0.3 })`
+   * Returns an animation id for the `animation_*` controls; a `MotionComplete`
+   * event carries the id when every property settles.
+   */
+  animate(target: string, keyframes: any, options: any): number;
   /**
    * Returns an array of `{ name, start, end }` objects.
    */
@@ -278,8 +307,16 @@ export class DotLottiePlayerWasm {
   sm_tick(dt: number): boolean;
   autoplay(): boolean;
   duration(): number;
+  /**
+   * Current override props as a plain object, or null when none are set.
+   */
+  get_node(target: string): any;
   set_loop(v: boolean): void;
   set_mode(mode: Mode): void;
+  /**
+   * Instantly set override props: `set_node("arm", { rotate: 30, opacity: 0.5 })`.
+   */
+  set_node(target: string, props: any): boolean;
   /**
    * Start the state machine with an open-URL policy.
    */
@@ -303,6 +340,7 @@ export interface InitOutput {
   readonly _ZNSt3__25mutex4lockEv: (a: number) => void;
   readonly _ZNSt3__25mutexD1Ev: (a: number) => number;
   readonly _ZdaPvm: (a: number, b: number) => void;
+  readonly free: (a: number) => void;
   readonly __assert_fail: (a: number, b: number, c: number, d: number) => void;
   readonly __cxa_atexit: (a: number, b: number, c: number) => number;
   readonly __cxa_pure_virtual: () => void;
@@ -315,8 +353,16 @@ export interface InitOutput {
   readonly atanh: (a: number) => number;
   readonly atanhf: (a: number) => number;
   readonly bsearch: (a: number, b: number, c: number, d: number, e: number) => number;
-  readonly dotlottieplayerwasm_animation_id: (a: number) => [number, number];
-  readonly dotlottieplayerwasm_animation_size: (a: number) => any;
+  readonly dotlottieplayerwasm_animate: (a: number, b: number, c: number, d: number, e: number) => number;
+  readonly dotlottieplayerwasm_animate_value: (a: number, b: number, c: number, d: number) => number;
+  readonly dotlottieplayerwasm_animation_cancel: (a: number, b: number) => void;
+  readonly dotlottieplayerwasm_animation_id: (a: number, b: number) => void;
+  readonly dotlottieplayerwasm_animation_pause: (a: number, b: number) => void;
+  readonly dotlottieplayerwasm_animation_resume: (a: number, b: number) => void;
+  readonly dotlottieplayerwasm_animation_set_speed: (a: number, b: number, c: number) => void;
+  readonly dotlottieplayerwasm_animation_size: (a: number) => number;
+  readonly dotlottieplayerwasm_animation_stop: (a: number, b: number) => void;
+  readonly dotlottieplayerwasm_animation_value: (a: number, b: number) => number;
   readonly dotlottieplayerwasm_audio_volume: (a: number) => number;
   readonly dotlottieplayerwasm_autoplay: (a: number) => number;
   readonly dotlottieplayerwasm_background_a: (a: number) => number;
@@ -329,36 +375,43 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_clear_slots: (a: number) => number;
   readonly dotlottieplayerwasm_current_frame: (a: number) => number;
   readonly dotlottieplayerwasm_current_loop_count: (a: number) => number;
-  readonly dotlottieplayerwasm_current_marker: (a: number) => [number, number];
+  readonly dotlottieplayerwasm_current_marker: (a: number, b: number) => void;
+  readonly dotlottieplayerwasm_duplicate_node: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly dotlottieplayerwasm_duration: (a: number) => number;
   readonly dotlottieplayerwasm_emit_on_loop: (a: number) => void;
-  readonly dotlottieplayerwasm_get_slot_ids: (a: number) => any;
-  readonly dotlottieplayerwasm_get_slot_str: (a: number, b: number, c: number) => [number, number];
-  readonly dotlottieplayerwasm_get_slot_type: (a: number, b: number, c: number) => [number, number];
-  readonly dotlottieplayerwasm_get_slots_str: (a: number) => [number, number];
-  readonly dotlottieplayerwasm_get_state_machine: (a: number, b: number, c: number) => [number, number];
-  readonly dotlottieplayerwasm_get_transform: (a: number) => any;
+  readonly dotlottieplayerwasm_get_node: (a: number, b: number, c: number) => number;
+  readonly dotlottieplayerwasm_get_slot_ids: (a: number) => number;
+  readonly dotlottieplayerwasm_get_slot_str: (a: number, b: number, c: number, d: number) => void;
+  readonly dotlottieplayerwasm_get_slot_type: (a: number, b: number, c: number, d: number) => void;
+  readonly dotlottieplayerwasm_get_slots_str: (a: number, b: number) => void;
+  readonly dotlottieplayerwasm_get_state_machine: (a: number, b: number, c: number, d: number) => void;
+  readonly dotlottieplayerwasm_get_transform: (a: number) => number;
   readonly dotlottieplayerwasm_height: (a: number) => number;
   readonly dotlottieplayerwasm_is_complete: (a: number) => number;
+  readonly dotlottieplayerwasm_layers: (a: number, b: number) => void;
   readonly dotlottieplayerwasm_layout_align_x: (a: number) => number;
   readonly dotlottieplayerwasm_layout_align_y: (a: number) => number;
-  readonly dotlottieplayerwasm_layout_fit: (a: number) => [number, number];
+  readonly dotlottieplayerwasm_layout_fit: (a: number, b: number) => void;
   readonly dotlottieplayerwasm_load_animation: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_load_animation_from_id: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_load_dotlottie_data: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_load_font: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly dotlottieplayerwasm_loop_animation: (a: number) => number;
   readonly dotlottieplayerwasm_loop_count: (a: number) => number;
-  readonly dotlottieplayerwasm_manifest_string: (a: number) => [number, number];
-  readonly dotlottieplayerwasm_marker_names: (a: number) => any;
-  readonly dotlottieplayerwasm_markers: (a: number) => any;
+  readonly dotlottieplayerwasm_manifest_string: (a: number, b: number) => void;
+  readonly dotlottieplayerwasm_marker_names: (a: number) => number;
+  readonly dotlottieplayerwasm_markers: (a: number) => number;
   readonly dotlottieplayerwasm_mode: (a: number) => number;
+  readonly dotlottieplayerwasm_motion_active: (a: number) => number;
   readonly dotlottieplayerwasm_new: () => number;
   readonly dotlottieplayerwasm_pause: (a: number) => number;
   readonly dotlottieplayerwasm_play: (a: number) => number;
-  readonly dotlottieplayerwasm_poll_event: (a: number) => any;
+  readonly dotlottieplayerwasm_poll_event: (a: number) => number;
+  readonly dotlottieplayerwasm_remove_node: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_render: (a: number) => number;
   readonly dotlottieplayerwasm_reset_current_loop_count: (a: number) => void;
+  readonly dotlottieplayerwasm_reset_node: (a: number, b: number, c: number) => number;
+  readonly dotlottieplayerwasm_reset_nodes: (a: number) => number;
   readonly dotlottieplayerwasm_reset_slot: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_reset_slots: (a: number) => number;
   readonly dotlottieplayerwasm_reset_theme: (a: number) => number;
@@ -382,6 +435,7 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_set_loop_count: (a: number, b: number) => void;
   readonly dotlottieplayerwasm_set_marker: (a: number, b: number, c: number) => void;
   readonly dotlottieplayerwasm_set_mode: (a: number, b: number) => void;
+  readonly dotlottieplayerwasm_set_node: (a: number, b: number, c: number, d: number) => number;
   readonly dotlottieplayerwasm_set_position_slot: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly dotlottieplayerwasm_set_quality: (a: number, b: number) => number;
   readonly dotlottieplayerwasm_set_scalar_slot: (a: number, b: number, c: number, d: number) => number;
@@ -396,19 +450,19 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_set_use_frame_interpolation: (a: number, b: number) => void;
   readonly dotlottieplayerwasm_set_vector_slot: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly dotlottieplayerwasm_set_viewport: (a: number, b: number, c: number, d: number, e: number) => number;
-  readonly dotlottieplayerwasm_set_webgpu_device: (a: number, b: any) => void;
-  readonly dotlottieplayerwasm_set_webgpu_surface: (a: number, b: any) => void;
+  readonly dotlottieplayerwasm_set_webgpu_device: (a: number, b: number) => void;
+  readonly dotlottieplayerwasm_set_webgpu_surface: (a: number, b: number) => void;
   readonly dotlottieplayerwasm_setup_wg_target: (a: number, b: number, c: number) => number;
-  readonly dotlottieplayerwasm_sm_current_state: (a: number) => [number, number];
+  readonly dotlottieplayerwasm_sm_current_state: (a: number, b: number) => void;
   readonly dotlottieplayerwasm_sm_fire: (a: number, b: number, c: number) => number;
-  readonly dotlottieplayerwasm_sm_framework_setup: (a: number) => any;
+  readonly dotlottieplayerwasm_sm_framework_setup: (a: number) => number;
   readonly dotlottieplayerwasm_sm_get_boolean_input: (a: number, b: number, c: number) => number;
-  readonly dotlottieplayerwasm_sm_get_inputs: (a: number) => any;
+  readonly dotlottieplayerwasm_sm_get_inputs: (a: number) => number;
   readonly dotlottieplayerwasm_sm_get_numeric_input: (a: number, b: number, c: number) => number;
-  readonly dotlottieplayerwasm_sm_get_string_input: (a: number, b: number, c: number) => [number, number];
+  readonly dotlottieplayerwasm_sm_get_string_input: (a: number, b: number, c: number, d: number) => void;
   readonly dotlottieplayerwasm_sm_override_current_state: (a: number, b: number, c: number, d: number) => number;
-  readonly dotlottieplayerwasm_sm_poll_event: (a: number) => any;
-  readonly dotlottieplayerwasm_sm_poll_internal_event: (a: number) => any;
+  readonly dotlottieplayerwasm_sm_poll_event: (a: number) => number;
+  readonly dotlottieplayerwasm_sm_poll_internal_event: (a: number) => number;
   readonly dotlottieplayerwasm_sm_post_click: (a: number, b: number, c: number) => void;
   readonly dotlottieplayerwasm_sm_post_pointer_down: (a: number, b: number, c: number) => void;
   readonly dotlottieplayerwasm_sm_post_pointer_enter: (a: number, b: number, c: number) => void;
@@ -421,17 +475,17 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_sm_set_seed: (a: number, b: bigint) => number;
   readonly dotlottieplayerwasm_sm_set_string_input: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly dotlottieplayerwasm_sm_start: (a: number, b: number, c: number, d: number) => number;
-  readonly dotlottieplayerwasm_sm_status: (a: number) => [number, number];
+  readonly dotlottieplayerwasm_sm_status: (a: number, b: number) => void;
   readonly dotlottieplayerwasm_sm_stop: (a: number) => number;
   readonly dotlottieplayerwasm_sm_tick: (a: number, b: number) => number;
   readonly dotlottieplayerwasm_speed: (a: number) => number;
-  readonly dotlottieplayerwasm_state_machine_id: (a: number) => [number, number];
+  readonly dotlottieplayerwasm_state_machine_id: (a: number, b: number) => void;
   readonly dotlottieplayerwasm_state_machine_load: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_state_machine_load_from_id: (a: number, b: number, c: number) => number;
   readonly dotlottieplayerwasm_state_machine_unload: (a: number) => void;
   readonly dotlottieplayerwasm_status: (a: number) => number;
   readonly dotlottieplayerwasm_stop: (a: number) => number;
-  readonly dotlottieplayerwasm_theme_id: (a: number) => [number, number];
+  readonly dotlottieplayerwasm_theme_id: (a: number, b: number) => void;
   readonly dotlottieplayerwasm_tick: (a: number, b: number) => number;
   readonly dotlottieplayerwasm_total_frames: (a: number) => number;
   readonly dotlottieplayerwasm_unload_font: (a: number, b: number) => number;
@@ -485,7 +539,6 @@ export interface InitOutput {
   readonly wgpuTextureGetWidth: (a: number) => number;
   readonly atoi: (a: number) => number;
   readonly calloc: (a: number, b: number) => number;
-  readonly free: (a: number) => void;
   readonly isdigit: (a: number) => number;
   readonly isspace: (a: number) => number;
   readonly malloc: (a: number) => number;
@@ -499,10 +552,9 @@ export interface InitOutput {
   readonly strstr: (a: number, b: number) => number;
   readonly strtol: (a: number, b: number, c: number) => number;
   readonly tinyrlibc_itoa: (a: bigint, b: number, c: number, d: number) => number;
+  readonly tinyrlibc_utoa: (a: bigint, b: number, c: number, d: number) => number;
   readonly tinyrlibc_rand_r: (a: number) => number;
   readonly tinyrlibc_strtoul: (a: number, b: number, c: number) => number;
-  readonly tinyrlibc_utoa: (a: bigint, b: number, c: number, d: number) => number;
-  readonly _ZNSt3__25mutex6unlockEv: (a: number) => void;
   readonly wgpuBindGroupRelease: (a: number) => void;
   readonly wgpuBufferRelease: (a: number) => void;
   readonly wgpuCommandBufferRelease: (a: number) => void;
@@ -516,15 +568,14 @@ export interface InitOutput {
   readonly wgpuShaderModuleRelease: (a: number) => void;
   readonly wgpuTextureRelease: (a: number) => void;
   readonly wgpuTextureViewRelease: (a: number) => void;
+  readonly _ZNSt3__25mutex6unlockEv: (a: number) => void;
   readonly _ZdlPvm: (a: number, b: number) => void;
   readonly __cxa_thread_atexit: (a: number, b: number, c: number) => number;
-  readonly __wbindgen_exn_store_command_export: (a: number) => void;
-  readonly __externref_table_alloc_command_export: () => number;
-  readonly __wbindgen_export_2: WebAssembly.Table;
-  readonly __wbindgen_malloc_command_export: (a: number, b: number) => number;
-  readonly __wbindgen_realloc_command_export: (a: number, b: number, c: number, d: number) => number;
-  readonly __wbindgen_free_command_export: (a: number, b: number, c: number) => void;
-  readonly __wbindgen_start: () => void;
+  readonly __wbindgen_export_0: (a: number) => void;
+  readonly __wbindgen_export_1: (a: number, b: number) => number;
+  readonly __wbindgen_export_2: (a: number, b: number, c: number, d: number) => number;
+  readonly __wbindgen_export_3: (a: number, b: number, c: number) => void;
+  readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
 }
 
 export type SyncInitInput = BufferSource | WebAssembly.Module;

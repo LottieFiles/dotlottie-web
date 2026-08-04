@@ -656,3 +656,131 @@ export interface Theme {
   /** Array of rules defining property overrides */
   rules: ThemeRule[];
 }
+
+// ── Motion API ───────────────────────────────────────────────────────────────
+
+/**
+ * Easing for motion tweens: a named preset or a cubic-bezier control-point array.
+ */
+export type MotionEase = 'linear' | 'easeIn' | 'easeOut' | 'easeInOut' | [number, number, number, number];
+
+/**
+ * Spring transition options. Shape the spring either perceptually
+ * (`bounce`/`visualDuration`) or physically (`stiffness`/`damping`/`mass`);
+ * the perceptual pair wins when both are present.
+ */
+export interface MotionSpringOptions {
+  /** Bounciness from 0 (no overshoot) to 1 (very bouncy). Default 0.2 */
+  bounce?: number;
+  /** Damping coefficient of the spring. Default 10 */
+  damping?: number;
+  /** Delay in seconds before the animation starts. Default 0 */
+  delay?: number;
+  /** Mass of the spring. Default 1 */
+  mass?: number;
+  /** Stiffness of the spring. Default 100 */
+  stiffness?: number;
+  type: 'spring';
+  /** Perceived duration in seconds of the main movement. Default 0.5 */
+  visualDuration?: number;
+}
+
+/**
+ * Tween transition options (the default transition when `type` is omitted).
+ */
+export interface MotionTweenOptions {
+  /** Delay in seconds before the animation starts. Default 0 */
+  delay?: number;
+  /** Duration in seconds. Default 0.3 */
+  duration?: number;
+  /** Easing preset or cubic-bezier array. Default an ease-like curve */
+  ease?: MotionEase;
+  type?: 'tween';
+}
+
+export type MotionOptions = MotionSpringOptions | MotionTweenOptions;
+
+/**
+ * A motion keyframe entry: a target value, or an array of waypoints.
+ * For tweens, a multi-value array's first element is an explicit start;
+ * springs use the first element as start and the last as target.
+ */
+export type MotionKeyframeValue = number | number[];
+
+/**
+ * Animatable properties for `animate()`. Transform props are offsets composed
+ * on top of the authored animation (`x`/`y` in composition units, `rotate` in
+ * degrees, `scale` a multiplier). Dotted keys drive stage compositing effects.
+ */
+export interface MotionKeyframes {
+  blur?: MotionKeyframeValue;
+  'clip.cx'?: MotionKeyframeValue;
+  'clip.cy'?: MotionKeyframeValue;
+  'clip.r'?: MotionKeyframeValue;
+  opacity?: MotionKeyframeValue;
+  rotate?: MotionKeyframeValue;
+  /** Uniform scale sugar — lowers to both scaleX and scaleY */
+  scale?: MotionKeyframeValue;
+  scaleX?: MotionKeyframeValue;
+  scaleY?: MotionKeyframeValue;
+  'spot.cx'?: MotionKeyframeValue;
+  'spot.cy'?: MotionKeyframeValue;
+  'spot.feather'?: MotionKeyframeValue;
+  'spot.r'?: MotionKeyframeValue;
+  'tint.intensity'?: MotionKeyframeValue;
+  x?: MotionKeyframeValue;
+  y?: MotionKeyframeValue;
+}
+
+export type MotionBlendMode =
+  | 'normal'
+  | 'multiply'
+  | 'screen'
+  | 'overlay'
+  | 'darken'
+  | 'lighten'
+  | 'colorDodge'
+  | 'colorBurn'
+  | 'hardLight'
+  | 'softLight'
+  | 'difference'
+  | 'exclusion'
+  | 'hue'
+  | 'saturation'
+  | 'color'
+  | 'luminosity'
+  | 'add';
+
+/**
+ * Instant override props for `setNode()`. Targets are named layers or
+ * `"@stage"` for the whole animation. `spot`/`clip` coordinates are in canvas
+ * pixels; `x`/`y` offsets are in composition units.
+ */
+export interface MotionNodeProps {
+  /** Anchor point override in composition units */
+  anchor?: { x: number; y: number };
+  blend?: MotionBlendMode;
+  /** Gaussian blur radius in pixels */
+  blur?: number;
+  /** Clip region: circle (default) or rounded rect */
+  clip?:
+    | { cx: number; cy: number; r: number; type?: 'circle' }
+    | { h: number; r?: number; type: 'rect'; w: number; x: number; y: number };
+  /** Opacity multiplier 0–1 */
+  opacity?: number;
+  /** Rotation offset in degrees */
+  rotate?: number;
+  /** Uniform scale sugar — lowers to both scaleX and scaleY */
+  scale?: number;
+  scaleX?: number;
+  scaleY?: number;
+  /** Feathered alpha spotlight mask */
+  spot?: { cx: number; cy: number; feather?: number; r: number };
+  /** Duotone tint: hex colors mapped to black/white, blended by intensity */
+  tint?: { black?: string; intensity?: number; white?: string };
+  visible?: boolean;
+  /** Horizontal offset in composition units */
+  x?: number;
+  /** Vertical offset in composition units */
+  y?: number;
+}

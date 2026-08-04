@@ -9,6 +9,13 @@ interface PreviewIframeProps {
   onConsoleClear?: () => void;
 }
 
+// The workspace build of dotlottie-web, served by this app. In dev the Vite
+// server transforms the TS module on demand; in prod it's a stable-named entry
+// chunk (see vite.config.ts).
+const LOCAL_DOTLOTTIE_MODULE_URL = import.meta.env.DEV
+  ? '/src/playground/local-dotlottie.ts'
+  : `${import.meta.env.BASE_URL}playground-local-dotlottie.js`;
+
 function generateSrcdoc(code: string, theme: ResolvedTheme): string {
   const bgColor = theme === 'dark' ? '#1e1e1e' : '#f5f5f5';
 
@@ -16,6 +23,14 @@ function generateSrcdoc(code: string, theme: ResolvedTheme): string {
 <html>
 <head>
   <meta charset="utf-8">
+  <script type="importmap">
+    {
+      "imports": {
+        "@lottiefiles/dotlottie-web": "${LOCAL_DOTLOTTIE_MODULE_URL}",
+        "https://esm.sh/@lottiefiles/dotlottie-web": "${LOCAL_DOTLOTTIE_MODULE_URL}"
+      }
+    }
+  </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {

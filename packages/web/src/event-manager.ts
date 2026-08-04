@@ -27,7 +27,8 @@ export type EventType =
   | 'stateMachineNumericInputValueChange'
   | 'stateMachineStringInputValueChange'
   | 'stateMachineInputFired'
-  | 'stateMachineInternalMessage';
+  | 'stateMachineInternalMessage'
+  | 'motionComplete';
 
 /**
  * Maps an event type string to its respective event interface.
@@ -201,6 +202,16 @@ export interface StateMachineInternalMessage extends BaseEvent {
 }
 
 /**
+ * Event fired when a motion animation started via `animate`/`animateValue` settles.
+ * Carries the animation id returned by the starting call. Interrupted animations
+ * (redirected by a later `animate` on the same property) do not fire this event.
+ */
+export interface MotionCompleteEvent extends BaseEvent {
+  animationId: number;
+  type: 'motionComplete';
+}
+
+/**
  * Type representing all possible event types.
  */
 export type Event =
@@ -229,7 +240,8 @@ export type Event =
   | StateMachineNumericInputValueChangeEvent
   | StateMachineStringInputValueChangeEvent
   | StateMachineInputFiredEvent
-  | StateMachineInternalMessage;
+  | StateMachineInternalMessage
+  | MotionCompleteEvent;
 
 export type EventListener<T extends EventType> = (event: EventByType<T>) => void;
 

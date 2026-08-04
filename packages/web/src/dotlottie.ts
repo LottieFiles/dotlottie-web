@@ -21,6 +21,9 @@ import type {
   Manifest,
   Marker,
   Mode,
+  MotionKeyframes,
+  MotionNodeProps,
+  MotionOptions,
   RenderConfig,
   RenderSurface,
   ScalarSlotValue,
@@ -291,7 +294,7 @@ export class DotLottie {
     let evt: unknown;
 
     while ((evt = this._dotLottieCore.poll_event()) !== null && evt !== undefined) {
-      const event = evt as { type: string; frameNo?: number; loopCount?: number };
+      const event = evt as { animationId?: number; frameNo?: number; loopCount?: number; type: string };
 
       switch (event.type) {
         case 'Load':
@@ -332,6 +335,12 @@ export class DotLottie {
 
         case 'Complete':
           queueMicrotask(() => this._eventManager.dispatch({ type: 'complete' }));
+          break;
+
+        case 'MotionComplete':
+          queueMicrotask(() =>
+            this._eventManager.dispatch({ type: 'motionComplete', animationId: event.animationId ?? 0 }),
+          );
           break;
 
         default:
@@ -1059,12 +1068,15 @@ export class DotLottie {
   private _startAnimationLoop(): void {
     // Start if we don't already have an active loop and either:
     // 1. The animation should be playing, OR
-    // 2. The state machine is running
+    // 2. The state machine is running, OR
+    // 3. Motion animations (animate/animateValue) are live — they tick even while paused
     if (
       this._animationFrameId === null &&
       this._dotLottieCore &&
       !this._isFrozen &&
-      (this._dotLottieCore.status() === CoreStatus.Playing || this._isStateMachineRunning)
+      (this._dotLottieCore.status() === CoreStatus.Playing ||
+        this._isStateMachineRunning ||
+        this._dotLottieCore.motion_active())
     ) {
       this._animationFrameId = this._frameManager.requestAnimationFrame(this._boundAnimationLoop);
     }
@@ -1077,8 +1089,13 @@ export class DotLottie {
       return;
     }
 
-    // Continue the loop if either the animation is playing OR the state machine is running
-    if (this._dotLottieCore.status() !== CoreStatus.Playing && !this._isStateMachineRunning) {
+    // Continue the loop while the animation is playing, the state machine is
+    // running, or motion animations are still live (they run while paused)
+    if (
+      this._dotLottieCore.status() !== CoreStatus.Playing &&
+      !this._isStateMachineRunning &&
+      !this._dotLottieCore.motion_active()
+    ) {
       this._stopAnimationLoop();
 
       return;
@@ -1646,6 +1663,165 @@ export class DotLottie {
 
     return themeLoaded;
   }
+
+  // #region Motion API
+
+  /**
+   * Redraws immediately when no animation loop is running (paused/stopped
+   * player); a running loop picks the change up on its next tick anyway.
+   */
+  private _redrawIfIdle(): void {
+    if (this._animationFrameId === null && this._dotLottieCore) {
+      this._dotLottieCore.render();
+      this._draw();
+    }
+  }
+
+  /**
+   * Animates properties of a named layer (or `"@stage"` for the whole
+   * animation) on top of the authored animation, motion.dev style.
+   * Springs redirect mid-flight with velocity handoff.
+   *
+   * ```ts
+   * dotLottie.animate('arm', { rotate: 30, x: [0, 40] }, { type: 'spring', bounce: 0.3 });
+   * ```
+   *
+   * @param target - Layer name from `layers()`, or `"@stage"`
+   * @param keyframes - Properties to animate; arrays are waypoints
+   * @param options - Spring or tween transition options
+   * @experimental Unstable API — may change between releases.
+   * @returns An animation id; a `motionComplete` event carries it when every property settles
+   */
+  public animate(target: string, keyframes: MotionKeyframes, options: MotionOptions = {}): number {
+    if (this._dotLottieCore === null) return 0;
+
+    const id = this._dotLottieCore.animate(target, keyframes, options);
+
+    this._startAnimationLoop();
+
+    return id;
+  }
+
+  /**
+   * Animates a raw number on the player's clock — route it to counters, CSS,
+   * or anything outside the canvas. Read the latest sample with `animationValue()`.
+   * @experimental Unstable API — may change between releases.
+   * @returns An animation id; a `motionComplete` event carries it when the value settles
+   */
+  public animateValue(from: number, to: number, options: MotionOptions = {}): number {
+    if (this._dotLottieCore === null) return 0;
+
+    const id = this._dotLottieCore.animate_value(from, to, options);
+
+    this._startAnimationLoop();
+
+    return id;
+  }
+
+  /**
+   * Latest sample of an `animateValue()` animation, or NaN for an unknown id.
+   * @experimental Unstable API — may change between releases.
+   */
+  public animationValue(id: number): number {
+    if (this._dotLottieCore === null) return NaN;
+
+    return this._dotLottieCore.animation_value(id);
+  }
+
+  /**
+   * Instantly sets override props on a named layer or `"@stage"` — the write
+   * composes on top of the authored animation until reset.
+   * @returns True if the target exists and the props were applied
+   * @experimental Unstable API — may change between releases.
+   */
+  public setNode(target: string, props: MotionNodeProps): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    const ok = this._dotLottieCore.set_node(target, props);
+
+    if (ok) this._redrawIfIdle();
+
+    return ok;
+  }
+
+  /**
+   * Current override props of a node, or null when none are set.
+   * @experimental Unstable API — may change between releases.
+   */
+  public getNode(target: string): MotionNodeProps | null {
+    if (this._dotLottieCore === null) return null;
+
+    return (this._dotLottieCore.get_node(target) as MotionNodeProps | null | undefined) ?? null;
+  }
+
+  /**
+   * Clears every override on a node, reverting it to the authored animation.
+   * @experimental Unstable API — may change between releases.
+   */
+  public resetNode(target: string): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    const ok = this._dotLottieCore.reset_node(target);
+
+    if (ok) this._redrawIfIdle();
+
+    return ok;
+  }
+
+  /**
+   * Clears all node overrides, reverting the scene to the authored animation.
+   * @experimental Unstable API — may change between releases.
+   */
+  public resetNodes(): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    const ok = this._dotLottieCore.reset_nodes();
+
+    if (ok) this._redrawIfIdle();
+
+    return ok;
+  }
+
+  /**
+   * Names of every addressable layer — each is a live `animate()`/`setNode()` target.
+   * @experimental Unstable API — may change between releases.
+   */
+  public layers(): string[] {
+    if (this._dotLottieCore === null) return [];
+
+    return this._dotLottieCore.layers();
+  }
+
+  /**
+   * Deep-copies a layer at its current pose under a new name — the copy is a
+   * full `animate()`/`setNode()` target. Remove it with `removeNode()`.
+   * @experimental Unstable API — may change between releases.
+   */
+  public duplicateNode(source: string, asName: string): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    const ok = this._dotLottieCore.duplicate_node(source, asName);
+
+    if (ok) this._redrawIfIdle();
+
+    return ok;
+  }
+
+  /**
+   * Removes a layer added with `duplicateNode()`.
+   * @experimental Unstable API — may change between releases.
+   */
+  public removeNode(name: string): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    const ok = this._dotLottieCore.remove_node(name);
+
+    if (ok) this._redrawIfIdle();
+
+    return ok;
+  }
+
+  // #endregion Motion API
 
   /**
    * Sets multiple slot values at once for parameterized animations.
