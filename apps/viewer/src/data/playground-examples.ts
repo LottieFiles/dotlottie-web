@@ -3,6 +3,7 @@ import basicCode from './playground-examples/basic.js?raw';
 import dynamicLoadingCode from './playground-examples/dynamic-loading.js?raw';
 import eventListenersCode from './playground-examples/event-listeners.js?raw';
 import interactiveHoverCode from './playground-examples/interactive-hover.js?raw';
+import motionBellCode from './playground-examples/motion-bell.js?raw';
 import motionDragCode from './playground-examples/motion-drag.js?raw';
 import motionGhostTrailsCode from './playground-examples/motion-ghost-trails.js?raw';
 import motionKeyframesCode from './playground-examples/motion-keyframes.js?raw';
@@ -57,6 +58,12 @@ export const playgroundExamples: PlaygroundExample[] = [
     name: 'Interactive (Hover)',
     description: 'Play on hover interaction',
     code: interactiveHoverCode,
+  },
+  {
+    id: 'motion-bell',
+    name: 'Motion: Notification Bell',
+    description: 'Full micro-interaction — springs over a static, keyframe-less asset',
+    code: motionBellCode,
   },
   {
     id: 'motion-spring-hover',
