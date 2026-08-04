@@ -1,5 +1,3 @@
-import { DotLottie } from 'https://esm.sh/@lottiefiles/dotlottie-web';
-
 // Motion API — async sequencing
 // animate() returns an animation id and a "motionComplete" event fires when it
 // settles — wrap that in a promise and choreograph multi-step sequences with

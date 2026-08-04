@@ -1,5 +1,3 @@
-import { DotLottie } from 'https://esm.sh/@lottiefiles/dotlottie-web';
-
 // Motion API — spring hover
 // animate() drives named layers at runtime, on top of the authored animation.
 // Springs redirect mid-flight with velocity handoff, so fast hover in/out never snaps.

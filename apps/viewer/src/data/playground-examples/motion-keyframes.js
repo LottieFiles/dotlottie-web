@@ -1,5 +1,3 @@
-import { DotLottie } from 'https://esm.sh/@lottiefiles/dotlottie-web';
-
 // Motion API — keyframe waypoints
 // Pass an array of values to animate() and it tweens through each waypoint,
 // just like motion.dev keyframes: scale [1, 1.4, 1] pops out and back in one call.

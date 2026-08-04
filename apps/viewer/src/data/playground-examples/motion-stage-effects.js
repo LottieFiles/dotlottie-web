@@ -1,5 +1,3 @@
-import { DotLottie } from 'https://esm.sh/@lottiefiles/dotlottie-web';
-
 // Motion API — stage compositing effects
 // "@stage" targets the whole animation. Three effects Lottie can't author:
 //   clip — an animatable circular clip (iris reveal)

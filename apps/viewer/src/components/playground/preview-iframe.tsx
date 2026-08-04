@@ -31,6 +31,15 @@ function generateSrcdoc(code: string, theme: ResolvedTheme): string {
       }
     }
   </script>
+  <script type="module">
+    // Expose the local dotlottie-web build globally — example code can use
+    // DotLottie (etc.) directly, no import needed. Module scripts run in
+    // document order, so globals are set before user code executes.
+    import * as dotLottieWeb from '@lottiefiles/dotlottie-web';
+    for (const [key, value] of Object.entries(dotLottieWeb)) {
+      if (!(key in window)) window[key] = value;
+    }
+  </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {

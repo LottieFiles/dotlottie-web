@@ -1,5 +1,3 @@
-import { DotLottie } from 'https://esm.sh/@lottiefiles/dotlottie-web';
-
 // Create canvas element
 const canvas = document.createElement('canvas');
 canvas.style.width = '400px';

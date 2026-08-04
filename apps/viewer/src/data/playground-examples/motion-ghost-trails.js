@@ -1,5 +1,3 @@
-import { DotLottie } from 'https://esm.sh/@lottiefiles/dotlottie-web';
-
 // Motion API — ghost trails with runtime node duplication
 // duplicateNode() deep-copies a layer at its current pose — animate the copy
 // out (additive blend, fading, scaling up) and remove it when it settles.

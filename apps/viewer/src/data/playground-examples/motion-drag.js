@@ -1,5 +1,3 @@
-import { DotLottie } from 'https://esm.sh/@lottiefiles/dotlottie-web';
-
 // Motion API — drag with spring return
 // A gesture loop: setNode() writes the layer offset on every pointer move,
 // and on release a spring takes over from the drop position and settles home.

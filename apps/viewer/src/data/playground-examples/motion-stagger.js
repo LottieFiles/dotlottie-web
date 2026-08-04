@@ -1,5 +1,3 @@
-import { DotLottie } from 'https://esm.sh/@lottiefiles/dotlottie-web';
-
 // Motion API — stagger entrance
 // setNode() instantly writes override props, animate() springs them back —
 // add an increasing delay per layer and you get a stagger, motion.dev style.

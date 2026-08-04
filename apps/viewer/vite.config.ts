@@ -13,6 +13,9 @@ const config = defineConfig(({ mode }) => ({
   },
   build: {
     rollupOptions: {
+      // Vite's app build defaults to preserveEntrySignatures: false, which
+      // strips the playground runtime entry's `export *` — keep entry exports.
+      preserveEntrySignatures: 'exports-only' as const,
       input: {
         index: resolve(__dirname, 'index.html'),
         // Playground runtime: the workspace dotlottie-web build the preview

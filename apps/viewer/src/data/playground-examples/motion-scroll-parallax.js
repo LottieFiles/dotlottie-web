@@ -1,5 +1,3 @@
-import { DotLottie } from 'https://esm.sh/@lottiefiles/dotlottie-web';
-
 // Motion API — scroll-linked parallax + layer discovery
 // Scroll scrubs the authored timeline (setFrame) while setNode() layers
 // parallax offsets on top — two motion sources composing on the same scene.
