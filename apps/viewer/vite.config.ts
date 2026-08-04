@@ -6,6 +6,12 @@ import { defineConfig } from 'vite';
 // https://vitejs.dev/config/
 const config = defineConfig(({ mode }) => ({
   plugins: [react()],
+  define: {
+    // Cache-buster for the stable-named playground runtime chunk: GH Pages
+    // caches with max-age=600, so a bare URL can serve a stale chunk from a
+    // previous deploy right after publishing (mixed-version breakage).
+    __PLAYGROUND_RUNTIME_VERSION__: JSON.stringify(Date.now().toString(36)),
+  },
   base: mode === 'development' ? '/' : '/dotlottie-web/',
   publicDir: '../../fixtures',
   resolve: {

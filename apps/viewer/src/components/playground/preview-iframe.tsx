@@ -14,7 +14,7 @@ interface PreviewIframeProps {
 // chunk (see vite.config.ts).
 const LOCAL_DOTLOTTIE_MODULE_URL = import.meta.env.DEV
   ? '/src/playground/local-dotlottie.ts'
-  : `${import.meta.env.BASE_URL}playground-local-dotlottie.js`;
+  : `${import.meta.env.BASE_URL}playground-local-dotlottie.js?v=${__PLAYGROUND_RUNTIME_VERSION__}`;
 
 function generateSrcdoc(code: string, theme: ResolvedTheme): string {
   const bgColor = theme === 'dark' ? '#1e1e1e' : '#f5f5f5';
