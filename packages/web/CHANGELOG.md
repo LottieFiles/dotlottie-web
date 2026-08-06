@@ -1,5 +1,24 @@
 # @lottiefiles/dotlottie-web
 
+## 0.79.0
+### Minor Changes
+
+- efec4ac: Add an `assetResolver` config option for supplying assets an animation references but does not embed.
+  
+  ```ts
+  new DotLottie({
+    canvas,
+    src: 'animation.json',
+    assetResolver: (src) => assets.get(src) ?? null, // src e.g. '/images/img_0.png'
+  });
+  ```
+  
+  Must return bytes synchronously (`Uint8Array` or `ArrayBuffer`), or `null` to leave the asset unresolved. Not supported by `DotLottieWorker`.
+
+### Patch Changes
+
+- efec4ac: Update dotlottie-rs WASM bindings to `9883651`. Images that fail to resolve now render a gray placeholder instead of nothing.
+
 ## 0.78.2
 ### Patch Changes
 
