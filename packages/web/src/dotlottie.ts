@@ -290,10 +290,12 @@ export class DotLottie {
   private _drainPlayerEvents({ skipFrame = false }: { skipFrame?: boolean } = {}): void {
     if (!this._dotLottieCore) return;
 
-    let evt: unknown;
+    // Deferred callbacks must not read `event`: SWC <= 1.3.25 (Next.js 13.0.x) inlined the old
+    // function-scoped `let evt` alias into them, so they read the loop's null terminator. See #932.
+    for (;;) {
+      const event = this._dotLottieCore.poll_event() as { type: string; frameNo?: number; loopCount?: number } | null;
 
-    while ((evt = this._dotLottieCore.poll_event()) !== null && evt !== undefined) {
-      const event = evt as { type: string; frameNo?: number; loopCount?: number };
+      if (event == null) break;
 
       switch (event.type) {
         case 'Load':
@@ -316,21 +318,30 @@ export class DotLottie {
           queueMicrotask(() => this._eventManager.dispatch({ type: 'stop' }));
           break;
 
-        case 'Frame':
+        case 'Frame': {
+          const currentFrame = event.frameNo ?? 0;
+
           if (!skipFrame) {
-            queueMicrotask(() => this._eventManager.dispatch({ type: 'frame', currentFrame: event.frameNo ?? 0 }));
+            queueMicrotask(() => this._eventManager.dispatch({ type: 'frame', currentFrame }));
           }
           break;
+        }
 
-        case 'Render':
+        case 'Render': {
+          const currentFrame = event.frameNo ?? 0;
+
           if (!skipFrame) {
-            queueMicrotask(() => this._eventManager.dispatch({ type: 'render', currentFrame: event.frameNo ?? 0 }));
+            queueMicrotask(() => this._eventManager.dispatch({ type: 'render', currentFrame }));
           }
           break;
+        }
 
-        case 'Loop':
-          queueMicrotask(() => this._eventManager.dispatch({ type: 'loop', loopCount: event.loopCount ?? 0 }));
+        case 'Loop': {
+          const loopCount = event.loopCount ?? 0;
+
+          queueMicrotask(() => this._eventManager.dispatch({ type: 'loop', loopCount }));
           break;
+        }
 
         case 'Complete':
           queueMicrotask(() => this._eventManager.dispatch({ type: 'complete' }));
@@ -352,10 +363,8 @@ export class DotLottie {
     if (!this._dotLottieCore) return;
 
     // Drain state machine events
-    let evt: unknown;
-
-    while ((evt = this._dotLottieCore.sm_poll_event()) !== null && evt !== undefined) {
-      const event = evt as {
+    for (;;) {
+      const event = this._dotLottieCore.sm_poll_event() as {
         type: string;
         previousState?: string;
         newState?: string;
@@ -364,7 +373,9 @@ export class DotLottie {
         name?: string;
         oldValue?: unknown;
         newValue?: unknown;
-      };
+      } | null;
+
+      if (event == null) break;
 
       switch (event.type) {
         case 'Start':
@@ -446,10 +457,10 @@ export class DotLottie {
     }
 
     // Drain internal events
-    let internal: unknown;
+    for (;;) {
+      const internalEvt = this._dotLottieCore.sm_poll_internal_event() as { type: string; message?: string } | null;
 
-    while ((internal = this._dotLottieCore.sm_poll_internal_event()) !== null && internal !== undefined) {
-      const internalEvt = internal as { type: string; message?: string };
+      if (internalEvt == null) break;
 
       if (internalEvt.type === 'Message') {
         const message = internalEvt.message ?? '';
