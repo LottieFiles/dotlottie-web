@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.9.25
+### Patch Changes
+
+- Updated dependencies [efec4ac]
+- Updated dependencies [efec4ac]
+  - @lottiefiles/dotlottie-web@0.79.0
+
 ## 0.9.24
 ### Patch Changes
 

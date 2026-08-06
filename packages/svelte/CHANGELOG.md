@@ -1,5 +1,12 @@
 # @lottiefiles/dotlottie-svelte
 
+## 0.10.12
+### Patch Changes
+
+- Updated dependencies [efec4ac]
+- Updated dependencies [efec4ac]
+  - @lottiefiles/dotlottie-web@0.79.0
+
 ## 0.10.11
 ### Patch Changes
 
