@@ -115,6 +115,24 @@ The `dotlottie-wc` exposes the following properties:
 | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `dotLottie`   | `DotLottie` | The dotLottie instance from [`DotLottie`](../web/README.md#documentation)  , allowing you to call methods and listen to events for more control over the animation. |
 
+Every attribute above is also a live property on the element: reads go through to the player once it
+is ready, and writes are forwarded to it — so framework property bindings (`.speed=${}` in Lit,
+`:speed` in Vue) work the same as attributes:
+
+```js
+const element = document.querySelector('dotlottie-wc');
+
+element.dotLottie.setSpeed(3);
+element.speed; // 3
+element.mode; // 'forward' — the player default, even with no `mode` attribute
+
+element.speed = 2; // same as element.dotLottie.setSpeed(2)
+```
+
+Two exceptions: `loopCount` reports the configured maximum you passed in, not
+`dotLottie.loopCount` (the number of loops completed so far), and reloading via a changed `src` or
+`data` attribute always re-applies the values declared in your markup, not the live player state.
+
 ### Custom WASM URL
 
 By default, the player's WebAssembly file is loaded from a CDN. If you need to serve it from your own host (e.g. environments where CDN access is restricted), use `setWasmUrl` before any animation loads:
