@@ -12,6 +12,7 @@ import { EventManager } from './event-manager';
 import { OffscreenObserver } from './offscreen-observer';
 import { CanvasResizeObserver } from './resize-observer';
 import type {
+  AssetResolver,
   ColorSlotValue,
   Config,
   Data,
@@ -227,6 +228,7 @@ export class DotLottie {
           config.layout?.align?.[0] ?? 0.5,
           config.layout?.align?.[1] ?? 0.5,
         );
+        this._applyAssetResolver(config.assetResolver ?? null);
 
         this._stateMachineId = config.stateMachineId ?? '';
         this._stateMachineConfig = config.stateMachineConfig ?? null;
@@ -890,6 +892,7 @@ export class DotLottie {
       config.layout?.align?.[0] ?? 0.5,
       config.layout?.align?.[1] ?? 0.5,
     );
+    this._applyAssetResolver(config.assetResolver ?? null);
 
     if (config.data) {
       if (this._canvas) {
@@ -1268,6 +1271,30 @@ export class DotLottie {
     if (this._dotLottieCore === null) return;
 
     this._dotLottieCore.set_use_frame_interpolation(useFrameInterpolation);
+  }
+
+  /**
+   * Hands the resolver to the core, wrapped so a throw is logged and leaves the asset unresolved.
+   * @param resolver - The resolver, or null to clear it
+   */
+  private _applyAssetResolver(resolver: AssetResolver | null): void {
+    if (this._dotLottieCore === null) return;
+
+    if (resolver === null) {
+      this._dotLottieCore.set_asset_resolver(null);
+
+      return;
+    }
+
+    this._dotLottieCore.set_asset_resolver((src: string) => {
+      try {
+        return resolver(src) ?? null;
+      } catch (error) {
+        console.error(`[dotlottie-web] assetResolver threw for "${src}":`, error);
+
+        return null;
+      }
+    });
   }
 
   /**

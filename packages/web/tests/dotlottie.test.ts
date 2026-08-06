@@ -3,7 +3,7 @@
 /* eslint-disable require-atomic-updates */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import type { Config, Layout, Mode } from '../src';
+import type { AssetResolver, Config, Layout, Mode } from '../src';
 import { DotLottie as DotLottieClass, DotLottieWorker as DotLottieWorkerClass } from '../src';
 import { BYTES_PER_PIXEL } from '../src/constants';
 import type { DotLottiePlayerWasm as DotLottiePlayer } from '../src/core';
@@ -1147,6 +1147,152 @@ describe.each([
 
       fetch.mockRestore();
     });
+  });
+
+  describe('assetResolver', () => {
+    // 16x16 solid red PNG
+    const RED_PNG_BASE64 =
+      'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGUlEQVR42mP4z8DwnxLMMGrAqAGjBgwXAwAwxP4QisZM5QAAAABJRU5ErkJggg==';
+
+    const redPng = (): Uint8Array => Uint8Array.from(atob(RED_PNG_BASE64), (char) => char.charCodeAt(0));
+
+    // A raw JSON animation whose only layer references a non-embedded (`e: 0`) image,
+    // so the resolver is the only way those bytes can arrive.
+    const externalAssetAnimation = JSON.stringify({
+      v: '5.7.4',
+      fr: 30,
+      ip: 0,
+      op: 30,
+      w: 100,
+      h: 100,
+      assets: [{ id: 'img0', w: 16, h: 16, u: 'images/', p: 'img_0.png', e: 0 }],
+      layers: [
+        {
+          ddd: 0,
+          ind: 1,
+          ty: 2,
+          nm: 'img',
+          refId: 'img0',
+          ks: {
+            o: { a: 0, k: 100 },
+            r: { a: 0, k: 0 },
+            p: { a: 0, k: [50, 50, 0] },
+            a: { a: 0, k: [8, 8, 0] },
+            s: { a: 0, k: [500, 500, 100] },
+          },
+          ip: 0,
+          op: 30,
+          st: 0,
+        },
+      ],
+    });
+
+    const renderWith = async (assetResolver: AssetResolver): Promise<Uint8ClampedArray> => {
+      const onLoad = vi.fn();
+
+      dotLottie = new DotLottieClass({
+        canvas,
+        data: externalAssetAnimation,
+        autoplay: false,
+        assetResolver,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+
+      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
+
+      await sleep(300);
+
+      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+      dotLottie.destroy();
+
+      return data;
+    };
+
+    const countRedPixels = (data: Uint8ClampedArray): number => {
+      let red = 0;
+
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i]! > 200 && data[i + 1]! < 60 && data[i + 2]! < 60 && data[i + 3]! > 200) red += 1;
+      }
+
+      return red;
+    };
+
+    (isWorker ? test.skip : test)('is called with the referenced asset path and its bytes are rasterised', async () => {
+      const seen: string[] = [];
+
+      const resolved = await renderWith((assetSrc) => {
+        seen.push(assetSrc);
+
+        return assetSrc.endsWith('.png') ? redPng() : null;
+      });
+
+      expect(seen).toEqual(['/images/img_0.png']);
+
+      const unresolved = await renderWith(() => null);
+
+      expect(countRedPixels(resolved)).toBeGreaterThan(1000);
+      expect(countRedPixels(unresolved)).toBe(0);
+    });
+
+    (isWorker ? test.skip : test)('accepts an ArrayBuffer as well as a Uint8Array', async () => {
+      const data = await renderWith(() => redPng().buffer as ArrayBuffer);
+
+      expect(countRedPixels(data)).toBeGreaterThan(1000);
+    });
+
+    (isWorker ? test.skip : test)(
+      'a throwing resolver leaves the asset unresolved without breaking the load',
+      async () => {
+        const data = await renderWith(() => {
+          throw new Error('resolver blew up');
+        });
+
+        expect(countRedPixels(data)).toBe(0);
+      },
+    );
+
+    // Functions are not structured-cloneable, so the resolver must be dropped before
+    // postMessage — otherwise the worker rejects with DataCloneError and never loads.
+    (isWorker ? test : test.skip)(
+      'warns and still loads when given an assetResolver',
+      async () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+        const rejections: unknown[] = [];
+        const onRejection = (event: PromiseRejectionEvent): void => {
+          rejections.push(event.reason);
+        };
+
+        window.addEventListener('unhandledrejection', onRejection);
+
+        try {
+          const onLoad = vi.fn();
+
+          dotLottie = new DotLottie({
+            canvas,
+            data: externalAssetAnimation,
+            autoplay: false,
+            assetResolver: () => redPng(),
+          });
+
+          dotLottie.addEventListener('load', onLoad);
+
+          await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), { timeout: 15000 });
+
+          expect(rejections.map(String).join('\n')).not.toContain('DataCloneError');
+          expect(warn).toHaveBeenCalledWith(
+            expect.stringContaining('`assetResolver` is not supported by DotLottieWorker'),
+          );
+        } finally {
+          window.removeEventListener('unhandledrejection', onRejection);
+          warn.mockRestore();
+        }
+      },
+      30000,
+    );
   });
 
   describe('stop', () => {

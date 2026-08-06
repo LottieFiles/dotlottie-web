@@ -88,6 +88,14 @@ export interface RenderSurface {
 }
 
 /**
+ * Resolves an asset the animation references but does not embed.
+ * Called synchronously while the animation loads, so the bytes must already be in memory.
+ * @param src - The asset path as referenced by the animation, e.g. `/images/img_0.png`
+ * @returns The asset bytes, or `null`/`undefined` to leave the asset unresolved
+ */
+export type AssetResolver = (src: string) => ArrayBuffer | Uint8Array | null | undefined;
+
+/**
  * Main configuration object for initializing a DotLottie player.
  * Specifies the animation source, playback behavior, rendering options, and canvas target.
  */
@@ -97,6 +105,11 @@ export interface Config {
    * Leave undefined for single-animation files or to play the default animation.
    */
   animationId?: string;
+  /**
+   * Resolves assets the animation references but does not embed.
+   * `load()` reconfigures from its config, so pass it on every `load()` that needs it.
+   */
+  assetResolver?: AssetResolver;
   /**
    * Automatically start playback once the animation is loaded.
    * Set to true for animations that should play immediately without user interaction.

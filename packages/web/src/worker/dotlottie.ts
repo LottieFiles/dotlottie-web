@@ -90,6 +90,29 @@ let workerWasmUrl = '';
 
 const canvasRegistry = new Map<HTMLCanvasElement, CanvasRegistryEntry>();
 
+let warnedAboutAssetResolver = false;
+
+/**
+ * Functions are not structured-cloneable, so an `assetResolver` crossing the worker
+ * boundary would throw `DataCloneError` and the animation would never load.
+ * @param config - The config about to cross the worker boundary
+ * @returns The config without `assetResolver`, warning once when one was dropped
+ */
+function stripAssetResolver<T extends { assetResolver?: unknown }>(config: T): Omit<T, 'assetResolver'> {
+  const { assetResolver, ...rest } = config;
+
+  if (assetResolver !== undefined && !warnedAboutAssetResolver) {
+    warnedAboutAssetResolver = true;
+    console.warn(
+      '[dotlottie-web] `assetResolver` is not supported by DotLottieWorker and has been ignored: ' +
+        'a resolver must run synchronously, which is not possible across the worker boundary. ' +
+        'Use `DotLottie` instead if the animation references assets it does not embed.',
+    );
+  }
+
+  return rest;
+}
+
 /**
  * Worker-based DotLottie player that offloads animation processing to a Web Worker thread.
  * Use this for better performance when rendering multiple animations or to keep the main thread responsive.
@@ -436,7 +459,7 @@ export class DotLottieWorker {
       {
         instanceId: this._id,
         config: {
-          ...config,
+          ...stripAssetResolver(config),
           canvas: offscreen as unknown as HTMLCanvasElement,
         },
         ...getCanvasSize(this._canvas, config.renderConfig?.devicePixelRatio || getDefaultDPR()),
@@ -478,7 +501,7 @@ export class DotLottieWorker {
 
     this._created = true;
 
-    const { canvas: _adoptedCanvas, ...loadConfig } = config;
+    const { canvas: _adoptedCanvas, ...loadConfig } = stripAssetResolver(config);
 
     await this._sendMessage('load', { config: loadConfig, instanceId: this._id });
     await this._updateDotLottieInstanceState();
@@ -801,7 +824,7 @@ export class DotLottieWorker {
       return;
     }
 
-    await this._sendMessage('load', { config, instanceId: this._id });
+    await this._sendMessage('load', { config: stripAssetResolver(config), instanceId: this._id });
     await this._updateDotLottieInstanceState();
   }
 
