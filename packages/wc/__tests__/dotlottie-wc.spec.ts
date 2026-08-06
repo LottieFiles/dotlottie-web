@@ -99,6 +99,137 @@ describe.each([
     expect(element.themeId).toBe('dark');
   });
 
+  test('getters read through to live dotLottie state after imperative changes', async () => {
+    const { element } = render(elementName, { src, loop: 'true', speed: '2' });
+
+    const dotLottie = element.dotLottie as DotLottie | DotLottieWorker;
+
+    await vi.waitFor(
+      () => {
+        expect(dotLottie.isLoaded).toBe(true);
+      },
+      { timeout: 5000 },
+    );
+
+    expect(element.autoplay).toBe(false);
+    expect(element.mode).toBe('forward');
+    expect(element.useFrameInterpolation).toBe(true);
+    expect(element.animationId).toBe('test');
+
+    dotLottie.setSpeed(3);
+    dotLottie.setLoop(false);
+    dotLottie.setMode('reverse');
+    dotLottie.setBackgroundColor('#00ff00');
+    dotLottie.setUseFrameInterpolation(false);
+    dotLottie.setMarker('Marker_1');
+
+    await vi.waitFor(
+      () => {
+        expect(element.speed).toBe(3);
+        expect(element.loop).toBe(false);
+        expect(element.mode).toBe('reverse');
+        expect(element.backgroundColor).toBe('#00ff00');
+        expect(element.useFrameInterpolation).toBe(false);
+        expect(element.marker).toBe('Marker_1');
+        expect(element.renderConfig).toEqual(dotLottie.renderConfig);
+      },
+      { timeout: 5000 },
+    );
+
+    // Checked separately: setMarker() overwrites the segment.
+    dotLottie.setSegment(0, 10);
+
+    await vi.waitFor(
+      () => {
+        expect(element.segment).toEqual([0, 10]);
+      },
+      { timeout: 5000 },
+    );
+  });
+
+  test('property writes are forwarded to the player and read back', async () => {
+    const { element } = render(elementName, { src, loop: 'true' });
+
+    const dotLottie = element.dotLottie as DotLottie | DotLottieWorker;
+
+    await vi.waitFor(
+      () => {
+        expect(dotLottie.isLoaded).toBe(true);
+      },
+      { timeout: 5000 },
+    );
+
+    const fullRange = dotLottie.segment;
+
+    element.loop = false;
+    element.speed = 3;
+    element.mode = 'reverse';
+    element.segment = [0, 10];
+
+    await vi.waitFor(
+      () => {
+        expect(dotLottie.loop).toBe(false);
+        expect(dotLottie.speed).toBe(3);
+        expect(dotLottie.mode).toBe('reverse');
+        expect(dotLottie.segment).toEqual([0, 10]);
+      },
+      { timeout: 5000 },
+    );
+
+    expect(element.loop).toBe(false);
+    expect(element.speed).toBe(3);
+
+    element.segment = undefined;
+
+    await vi.waitFor(
+      () => {
+        expect(dotLottie.segment).toEqual(fullRange);
+      },
+      { timeout: 5000 },
+    );
+  });
+
+  test('getters return declared attribute values after unmount destroys the instance', () => {
+    const { element, unmount } = render(elementName, { src, loop: 'true', speed: '2' });
+
+    unmount();
+
+    expect(element.dotLottie).toBeNull();
+    expect(element.loop).toBe(true);
+    expect(element.speed).toBe(2);
+  });
+
+  test('changing src reloads with declared attribute values, not mutated player state (issue #419)', async () => {
+    const { element, rerender } = render(elementName, { src, loop: 'true' });
+
+    const dotLottie = element.dotLottie as DotLottie | DotLottieWorker;
+
+    await vi.waitFor(
+      () => {
+        expect(dotLottie.isLoaded).toBe(true);
+      },
+      { timeout: 5000 },
+    );
+
+    dotLottie.setLoop(false);
+
+    await vi.waitFor(
+      () => {
+        expect(element.loop).toBe(false);
+      },
+      { timeout: 5000 },
+    );
+
+    rerender({ src: lottieSrc, loop: 'true' });
+
+    await vi.waitFor(
+      () => {
+        expect(element.loop).toBe(true);
+      },
+      { timeout: 5000 },
+    );
+  });
+
   test('calls dotLottie.destroy on unmount', async () => {
     const { element, unmount } = render(elementName, { src });
 
