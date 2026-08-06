@@ -1221,6 +1221,20 @@ describe.each([
       return red;
     };
 
+    // The core paints unresolvable images as a neutral-gray placeholder. Counting only
+    // light-to-mid grays excludes both an opaque background (255) and the red PNG.
+    const countPlaceholderPixels = (data: Uint8ClampedArray): number => {
+      let gray = 0;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const [r, g, b, a] = [data[i]!, data[i + 1]!, data[i + 2]!, data[i + 3]!];
+
+        if (a > 200 && r === g && g === b && r >= 160 && r <= 240) gray += 1;
+      }
+
+      return gray;
+    };
+
     (isWorker ? test.skip : test)('is called with the referenced asset path and its bytes are rasterised', async () => {
       const seen: string[] = [];
 
@@ -1245,6 +1259,17 @@ describe.each([
     });
 
     (isWorker ? test.skip : test)(
+      'an image the resolver cannot supply renders a placeholder instead of nothing',
+      async () => {
+        const unresolved = await renderWith(() => null);
+        const resolved = await renderWith(() => redPng());
+
+        expect(countPlaceholderPixels(unresolved)).toBeGreaterThan(1000);
+        expect(countPlaceholderPixels(resolved)).toBe(0);
+      },
+    );
+
+    (isWorker ? test.skip : test)(
       'a throwing resolver leaves the asset unresolved without breaking the load',
       async () => {
         const data = await renderWith(() => {
@@ -1252,6 +1277,7 @@ describe.each([
         });
 
         expect(countRedPixels(data)).toBe(0);
+        expect(countPlaceholderPixels(data)).toBeGreaterThan(1000);
       },
     );
 
