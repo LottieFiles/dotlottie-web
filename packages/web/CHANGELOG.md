@@ -1,5 +1,11 @@
 # @lottiefiles/dotlottie-web
 
+## 0.79.1
+### Patch Changes
+
+- fe796d9: fix: read player event payloads synchronously so old SWC builds don't throw `null.frameNo` every frame
+- 605e8c7: Update dotlottie-rs WASM bindings to `3bb9d23`.
+
 ## 0.79.0
 ### Minor Changes
 

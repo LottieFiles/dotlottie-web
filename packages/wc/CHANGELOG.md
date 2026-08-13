@@ -1,5 +1,13 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.9.26
+### Patch Changes
+
+- 1c59f0c: fix(wc): element properties read through to the live player and property writes are forwarded to it
+- Updated dependencies [fe796d9]
+- Updated dependencies [605e8c7]
+  - @lottiefiles/dotlottie-web@0.79.1
+
 ## 0.9.25
 ### Patch Changes
 
