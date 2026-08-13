@@ -510,6 +510,9 @@ export interface InitOutput {
   readonly tinyrlibc_utoa: (a: bigint, b: number, c: number, d: number) => number;
   readonly tinyrlibc_rand_r: (a: number) => number;
   readonly tinyrlibc_strtoul: (a: number, b: number, c: number) => number;
+  readonly _ZNSt3__25mutex6unlockEv: (a: number) => void;
+  readonly _ZdlPvm: (a: number, b: number) => void;
+  readonly __cxa_thread_atexit: (a: number, b: number, c: number) => number;
   readonly wgpuBindGroupRelease: (a: number) => void;
   readonly wgpuBufferRelease: (a: number) => void;
   readonly wgpuCommandBufferRelease: (a: number) => void;
@@ -523,9 +526,6 @@ export interface InitOutput {
   readonly wgpuShaderModuleRelease: (a: number) => void;
   readonly wgpuTextureRelease: (a: number) => void;
   readonly wgpuTextureViewRelease: (a: number) => void;
-  readonly _ZNSt3__25mutex6unlockEv: (a: number) => void;
-  readonly _ZdlPvm: (a: number, b: number) => void;
-  readonly __cxa_thread_atexit: (a: number, b: number, c: number) => number;
   readonly __wbindgen_export_0: (a: number) => void;
   readonly __wbindgen_export_1: (a: number, b: number) => number;
   readonly __wbindgen_export_2: (a: number, b: number, c: number, d: number) => number;
