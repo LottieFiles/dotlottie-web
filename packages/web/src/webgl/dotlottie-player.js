@@ -1631,10 +1631,6 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_enable_51114837e05ee280 = function(arg0, arg1) {
         getObject(arg0).enable(arg1 >>> 0);
     };
-    imports.wbg.__wbg_ended_b873fb75d0c13ca7 = function(arg0) {
-        const ret = getObject(arg0).ended;
-        return ret;
-    };
     imports.wbg.__wbg_error_7534b8e9a36f1ab4 = function(arg0, arg1) {
         let deferred0_0;
         let deferred0_1;
@@ -1763,6 +1759,9 @@ function __wbg_get_imports() {
     };
     imports.wbg.__wbg_setindex_4e73afdcd9bb95cd = function(arg0, arg1, arg2) {
         getObject(arg0)[arg1 >>> 0] = arg2;
+    };
+    imports.wbg.__wbg_setplaybackRate_f5c3b8896f82425e = function(arg0, arg1) {
+        getObject(arg0).playbackRate = arg1;
     };
     imports.wbg.__wbg_settype_39ed370d3edd403c = function(arg0, arg1, arg2) {
         getObject(arg0).type = getStringFromWasm0(arg1, arg2);

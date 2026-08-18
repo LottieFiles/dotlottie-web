@@ -1601,10 +1601,6 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_end_5f3989c200fa79e9 = function(arg0) {
         getObject(arg0).end();
     };
-    imports.wbg.__wbg_ended_b873fb75d0c13ca7 = function(arg0) {
-        const ret = getObject(arg0).ended;
-        return ret;
-    };
     imports.wbg.__wbg_error_7534b8e9a36f1ab4 = function(arg0, arg1) {
         let deferred0_0;
         let deferred0_1;
@@ -2041,6 +2037,9 @@ function __wbg_get_imports() {
     };
     imports.wbg.__wbg_setpassop_8767e1a56e3c30da = function(arg0, arg1) {
         getObject(arg0).passOp = __wbindgen_enum_GpuStencilOperation[arg1];
+    };
+    imports.wbg.__wbg_setplaybackRate_f5c3b8896f82425e = function(arg0, arg1) {
+        getObject(arg0).playbackRate = arg1;
     };
     imports.wbg.__wbg_setprimitive_491591635926383f = function(arg0, arg1) {
         getObject(arg0).primitive = getObject(arg1);
