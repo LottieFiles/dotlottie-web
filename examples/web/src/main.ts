@@ -20,6 +20,7 @@ app.innerHTML = `
   <canvas data-src="https://lottie.host/e2a24b6f-df7f-4fc5-94ea-30f0846f85dc/1RLOR2g0m3.lottie"></canvas>
   <canvas data-src="https://lottie.host/35326116-a8ca-4219-81ca-df9ce56a3f22/zCGFevEA23.lottie"></canvas>
   <canvas data-src="https://lottie.host/f315768c-a29b-41fd-b5a8-a1c1dfb36cd2/CRiiNg8fqQ.lottie"></canvas>
+  <canvas data-src="${baseUrl}/video.lottie"></canvas>
   <canvas data-src="${baseUrl}/down.json"></canvas>
   <canvas data-src="${baseUrl}/editor.json"></canvas>
   <canvas data-src="${baseUrl}/growup.json"></canvas>

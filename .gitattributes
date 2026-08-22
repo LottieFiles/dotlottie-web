@@ -7,3 +7,7 @@
 
 *.wasm binary
 *.gif binary
+*.lottie binary
+*.mp4 binary
+*.ttf binary
+*.otf binary
