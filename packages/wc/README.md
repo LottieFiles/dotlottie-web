@@ -143,6 +143,8 @@ import { setWasmUrl } from '@lottiefiles/dotlottie-wc';
 setWasmUrl('/js/dotlottie/dotlottie-player.wasm');
 ```
 
+Setting an explicit URL disables the jsdelivr/unpkg fallback: a wrong path fails with `loadError` instead of silently loading from a CDN. Relative paths are resolved against the page before being handed to the worker.
+
 The function is also exported from the CDN bundles, so it works when loading `dist/dotlottie-wc.js` or `dist/dotlottie-worker-wc.js` directly:
 
 ```html

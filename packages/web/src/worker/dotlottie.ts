@@ -86,6 +86,14 @@ function workerManager(): WorkerManager {
   return workerManagerSingleton;
 }
 
+function createRpcRequest<T extends keyof MethodParamsMap>(method: T, params: MethodParamsMap[T]): RpcRequest<T> {
+  return {
+    id: `dotlottie-request-${generateUniqueId()}`,
+    method,
+    params,
+  };
+}
+
 let workerWasmUrl = '';
 
 const canvasRegistry = new Map<HTMLCanvasElement, CanvasRegistryEntry>();
@@ -1096,11 +1104,7 @@ export class DotLottieWorker {
     params: MethodParamsMap[T],
     transfer?: Transferable[],
   ): Promise<MethodResultMap[T]> {
-    const rpcRequest: RpcRequest<T> = {
-      id: `dotlottie-request-${generateUniqueId()}`,
-      method,
-      params,
-    };
+    const rpcRequest = createRpcRequest(method, params);
 
     return new Promise((resolve, reject) => {
       workerManager().registerRpcReplyHandler(rpcRequest.id, (event: MessageEvent) => {
@@ -1127,8 +1131,24 @@ export class DotLottieWorker {
     this._eventManager.removeEventListener(type, listener);
   }
 
+  /**
+   * Configures the URL the worker loads the WASM module from.
+   * Call this before constructing any `DotLottieWorker` instance.
+   *
+   * An explicit URL disables the built-in jsdelivr/unpkg fallback, so a failure to load
+   * from it surfaces as a `loadError`. Relative URLs are resolved against the page.
+   * @param url - URL pointing to the dotlottie WASM file
+   */
   public static setWasmUrl(url: string): void {
-    workerWasmUrl = url;
+    if (typeof url !== 'string' || url.trim() === '') {
+      throw new TypeError('setWasmUrl() expects a non-empty URL string');
+    }
+
+    // The worker runs from a blob: URL, where `new URL('/js/player.wasm', 'blob:…')` throws.
+    workerWasmUrl = typeof document === 'undefined' ? url : new URL(url, document.baseURI).href;
+
+    // The constructor only forwards this to workers created after the call.
+    workerManager().broadcastMessage(createRpcRequest('setWasmUrl', { url: workerWasmUrl }));
   }
 
   /**
@@ -1141,16 +1161,7 @@ export class DotLottieWorker {
    */
   public static async registerFont(fontName: string, fontSource: string | ArrayBuffer | Uint8Array): Promise<boolean> {
     try {
-      const id = generateUniqueId();
-
-      workerManager().broadcastMessage({
-        id,
-        method: 'registerFont',
-        params: {
-          fontName,
-          fontSource,
-        },
-      });
+      workerManager().broadcastMessage(createRpcRequest('registerFont', { fontName, fontSource }));
 
       // Note: we can't easily wait for responses from all workers in a broadcast,
       // so we return true if the broadcast was sent successfully

@@ -341,6 +341,9 @@ export interface RpcRequest<T extends keyof MethodParamsMap> {
   params: MethodParamsMap[T];
 }
 
+// Keeps `method` and `params` correlated at call sites that aren't generic over T.
+export type AnyRpcRequest = { [K in keyof MethodParamsMap]: RpcRequest<K> }[keyof MethodParamsMap];
+
 export interface MethodResultMap {
   animationSize: {
     height: number;

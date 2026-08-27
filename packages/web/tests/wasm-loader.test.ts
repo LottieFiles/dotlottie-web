@@ -137,23 +137,24 @@ describe('createWasmLoader', () => {
     expect(initFn).toHaveBeenCalledTimes(1); // streaming primary succeeds on retry
   });
 
-  it('snapshots URLs at load() start so mid-flight setWasmUrl does not redirect retries', async () => {
+  it('mid-flight setWasmUrl keeps the in-flight primary but blocks CDN attempts not yet started', async () => {
     initFn.mockRejectedValueOnce(new Error('primary-stream'));
-    initFn.mockRejectedValueOnce(new Error('backup-stream'));
     initFn.mockResolvedValueOnce(undefined);
     fetchMock.mockResolvedValueOnce(okResponse());
 
     const loader = createWasmLoader(initFn, PRIMARY, BACKUP);
     const loadPromise = loader.load();
 
-    // Concurrent caller mutates the URL while the IIFE is suspended on its first await.
     loader.setWasmUrl('https://changed.example.com/player.wasm');
 
     await expect(loadPromise).resolves.toBeUndefined();
 
-    // Buffered fallback must use the URL captured at load() start, not the changed one.
+    // Primary is snapshotted: the buffered retry still targets it.
     expect(fetchMock).toHaveBeenCalledWith(PRIMARY);
     expect(fetchMock).not.toHaveBeenCalledWith(expect.stringContaining('changed'));
+    // The backup is read live, so the streaming-backup step was skipped.
+    expect(initFn).toHaveBeenCalledTimes(2);
+    expect(initFn).not.toHaveBeenCalledWith({ module_or_path: BACKUP });
   });
 
   it('setWasmUrl() with a new URL resets the loader', async () => {
@@ -167,13 +168,120 @@ describe('createWasmLoader', () => {
     expect(initFn).toHaveBeenNthCalledWith(2, { module_or_path: NEW_URL });
   });
 
-  it('setWasmUrl() with the same URL is a no-op', async () => {
+  it('setWasmUrl() with the same URL keeps the resolved load instead of re-initializing', async () => {
     initFn.mockResolvedValue(undefined);
     const loader = createWasmLoader(initFn, PRIMARY, BACKUP);
     await loader.load();
     loader.setWasmUrl(PRIMARY);
     await loader.load();
     expect(initFn).toHaveBeenCalledTimes(1);
+  });
+
+  describe('setWasmUrl() opts out of the CDN backup', () => {
+    const SELF_HOSTED = '/assets/player.wasm';
+
+    it('never streams from the backup once an explicit URL is set', async () => {
+      initFn.mockRejectedValueOnce(new Error('self-hosted-fail'));
+      fetchMock.mockResolvedValueOnce(okResponse());
+      initFn.mockResolvedValueOnce(undefined);
+
+      const loader = createWasmLoader(initFn, PRIMARY, BACKUP);
+      loader.setWasmUrl(SELF_HOSTED);
+      await expect(loader.load()).resolves.toBeUndefined();
+
+      // streaming (fails) → buffered (succeeds); backup skipped.
+      expect(initFn).toHaveBeenCalledTimes(2);
+      expect(initFn).toHaveBeenNthCalledWith(1, { module_or_path: SELF_HOSTED });
+      expect(initFn).not.toHaveBeenCalledWith({ module_or_path: BACKUP });
+      expect(console.warn).not.toHaveBeenCalledWith(expect.stringContaining(BACKUP));
+    });
+
+    it('never fetches the backup in the buffered path either', async () => {
+      initFn.mockRejectedValue(new Error('init-fail'));
+      fetchMock.mockResolvedValue(okResponse());
+
+      const loader = createWasmLoader(initFn, PRIMARY, BACKUP);
+      loader.setWasmUrl(SELF_HOSTED);
+      await expect(loader.load()).rejects.toThrow('WASM loading failed from all sources.');
+
+      expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([SELF_HOSTED]);
+    });
+
+    it('drops the backup even when the explicit URL equals the current primary', async () => {
+      initFn.mockRejectedValueOnce(new Error('primary-fail'));
+      fetchMock.mockRejectedValue(new Error('offline'));
+
+      const loader = createWasmLoader(initFn, PRIMARY, BACKUP);
+      loader.setWasmUrl(PRIMARY);
+      await expect(loader.load()).rejects.toThrow('WASM loading failed from all sources.');
+
+      expect(initFn).not.toHaveBeenCalledWith({ module_or_path: BACKUP });
+      expect(fetchMock).not.toHaveBeenCalledWith(BACKUP);
+    });
+
+    it('rejects empty and non-string URLs without touching the loader', async () => {
+      initFn.mockRejectedValueOnce(new Error('primary-fail'));
+      initFn.mockResolvedValueOnce(undefined);
+      const loader = createWasmLoader(initFn, PRIMARY, BACKUP);
+
+      expect(() => loader.setWasmUrl('')).toThrow(TypeError);
+      expect(() => loader.setWasmUrl('   ')).toThrow(TypeError);
+      expect(() => loader.setWasmUrl(undefined as unknown as string)).toThrow(TypeError);
+
+      // Fallback still armed — the rejected calls must not have opted out.
+      await expect(loader.load()).resolves.toBeUndefined();
+      expect(initFn).toHaveBeenNthCalledWith(2, { module_or_path: BACKUP });
+    });
+
+    it("a stale attempt's failure does not clear a successor started after setWasmUrl()", async () => {
+      const deferred = <T>() => {
+        let resolve!: (value: T) => void;
+        let reject!: (reason: unknown) => void;
+        const promise = new Promise<T>((res, rej) => {
+          resolve = res;
+          reject = rej;
+        });
+
+        return { promise, resolve, reject };
+      };
+
+      const first = deferred<void>();
+      const second = deferred<void>();
+
+      initFn.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+      fetchMock.mockRejectedValue(new Error('offline'));
+
+      const loader = createWasmLoader(initFn, PRIMARY, BACKUP);
+      const stale = loader.load();
+
+      loader.setWasmUrl(SELF_HOSTED); // resets initPromise; `stale` keeps running
+      const successor = loader.load();
+
+      expect(successor).not.toBe(stale);
+
+      // Stale attempt exhausts its ladder.
+      first.reject(new Error('stale-primary'));
+      await expect(stale).rejects.toThrow('WASM loading failed from all sources.');
+
+      // The successor must still be the cached promise, not a third concurrent init.
+      expect(loader.load()).toBe(successor);
+
+      second.resolve();
+      await expect(successor).resolves.toBeUndefined();
+      expect(initFn).toHaveBeenCalledTimes(2);
+    });
+
+    it('omits the backup line from the final error report', async () => {
+      initFn.mockRejectedValue(new Error('init-fail'));
+      fetchMock.mockRejectedValue(new Error('network-fail'));
+
+      const loader = createWasmLoader(initFn, PRIMARY, BACKUP);
+      loader.setWasmUrl(SELF_HOSTED);
+      await expect(loader.load()).rejects.toThrow();
+
+      expect(console.error).toHaveBeenCalledTimes(2);
+      expect(console.error).not.toHaveBeenCalledWith(expect.stringContaining('Backup WASM URL failed'));
+    });
   });
 
   it('logs warn with primary URL and backup notice on primary failure', async () => {
