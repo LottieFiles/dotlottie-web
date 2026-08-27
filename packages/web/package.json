@@ -19,39 +19,20 @@
     "node": ">=18.17.0",
     "npm": ">=9.5.0"
   },
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
-      }
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./webgl": {
-      "import": {
-        "types": "./dist/webgl/index.d.ts",
-        "default": "./dist/webgl/index.js"
-      },
-      "require": {
-        "types": "./dist/webgl/index.d.cts",
-        "default": "./dist/webgl/index.cjs"
-      }
+      "types": "./dist/webgl/index.d.ts",
+      "default": "./dist/webgl/index.js"
     },
     "./webgpu": {
-      "import": {
-        "types": "./dist/webgpu/index.d.ts",
-        "default": "./dist/webgpu/index.js"
-      },
-      "require": {
-        "types": "./dist/webgpu/index.d.cts",
-        "default": "./dist/webgpu/index.cjs"
-      }
+      "types": "./dist/webgpu/index.d.ts",
+      "default": "./dist/webgpu/index.js"
     },
     "./dotlottie-player.wasm": "./dist/dotlottie-player.wasm",
     "./webgl/dotlottie-player.wasm": "./dist/webgl/dotlottie-player.wasm",
