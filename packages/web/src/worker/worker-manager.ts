@@ -1,6 +1,6 @@
 // resolved to a Worker constructor by plugin-inline-worker
 import DotLottieWebWorker from './dotlottie.worker?worker&inline';
-import type { MethodParamsMap, RpcRequest } from './types';
+import type { AnyRpcRequest } from './types';
 
 type WorkerMessageHandler = (event: MessageEvent) => void;
 
@@ -35,11 +35,11 @@ export class WorkerManager {
     this._animationWorkerMap.delete(animationId);
   }
 
-  public sendMessage(workerId: string, message: RpcRequest<keyof MethodParamsMap>, transfer?: Transferable[]): void {
+  public sendMessage(workerId: string, message: AnyRpcRequest, transfer?: Transferable[]): void {
     this.getWorker(workerId).postMessage(message, transfer || []);
   }
 
-  public broadcastMessage(message: RpcRequest<keyof MethodParamsMap>, transfer?: Transferable[]): void {
+  public broadcastMessage(message: AnyRpcRequest, transfer?: Transferable[]): void {
     this._workers.forEach((worker) => {
       worker.postMessage(message, transfer || []);
     });

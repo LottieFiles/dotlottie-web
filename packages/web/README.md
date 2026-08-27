@@ -63,7 +63,7 @@ Or let the browser start the download even earlier (`crossorigin` is required �
 />
 ```
 
-The version in the URL must match your installed package version — the player fetches a version-pinned URL, and a mismatch means the preload can't be reused. If you use `setWasmUrl()`, call it before `preload()` and point the preload tag at the same URL.
+The version in the URL must match your installed package version — the player fetches a version-pinned URL, and a mismatch means the preload can't be reused. If you use `setWasmUrl()`, call it before `preload()` and point the preload tag at the same URL. An explicit URL also disables the jsdelivr/unpkg fallback, so a wrong path now fails with `loadError` instead of silently loading from a CDN.
 
 ## Supported Platforms
 

@@ -2019,7 +2019,12 @@ export class DotLottie {
 
   /**
    * Configures the URL for loading the WASM module.
-   * Call this before creating any player instances to load the WASM from a custom CDN or local path.
+   * Call this before creating any player instances or calling `preload()` to load the WASM
+   * from a custom CDN or local path.
+   *
+   * Setting an explicit URL also disables the built-in jsdelivr/unpkg fallback: a failure
+   * to load from your URL surfaces as an error instead of falling through to a CDN.
+   * A load that is already in flight when this is called keeps the URLs it started with.
    * @param url - URL pointing to the dotlottie WASM file
    */
   public static setWasmUrl(url: string): void {

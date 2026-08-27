@@ -1,5 +1,5 @@
 /* eslint-disable node/no-unsupported-features/node-builtins */
-import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest';
 
 import { DotLottieWorker } from '../src';
 
@@ -7,6 +7,7 @@ import { addWasmCSPPolicy, createCanvas, sleep } from './test-utils';
 
 const wasmUrl = new URL('../src/core/dotlottie-player.wasm', import.meta.url).href;
 const src = new URL('../../../fixtures/test.lottie', import.meta.url).href;
+const UNREACHABLE = 'https://127.0.0.1:1/does-not-exist.wasm';
 
 DotLottieWorker.setWasmUrl(wasmUrl);
 
@@ -19,6 +20,19 @@ beforeAll(() => {
 afterAll(() => {
   cleanupWasmCSPPolicy();
 });
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  // setWasmUrl is process-global.
+  DotLottieWorker.setWasmUrl(wasmUrl);
+});
+
+type PostMessageSpy = { mock: { calls: Array<[unknown, ...unknown[]]> } };
+
+const setWasmUrlPosts = (spy: PostMessageSpy): Array<{ params: { url: string } }> =>
+  spy.mock.calls
+    .map((call) => call[0] as { method?: string; params: { url: string } })
+    .filter((msg) => msg.method === 'setWasmUrl');
 
 describe('DotLottieWorker canvas adoption (React StrictMode pattern)', () => {
   test('destroy → immediate re-create on the same canvas adopts the worker-side instance', async () => {
@@ -168,5 +182,69 @@ describe('DotLottieWorker canvas adoption (React StrictMode pattern)', () => {
       window.removeEventListener('unhandledrejection', suppressRejection);
       canvas.remove();
     }
+  });
+});
+
+describe('DotLottieWorker.setWasmUrl', () => {
+  // A canvas-less facade spins the worker up but defers the WASM load until setCanvas() —
+  // the window the broadcast has to cover.
+  test('reaches a worker that exists but has not started loading yet', async () => {
+    const facade = new DotLottieWorker({ src, workerId: 'late-url' });
+    const errors: string[] = [];
+
+    facade.addEventListener('loadError', (event) => {
+      errors.push(event.error.message);
+    });
+
+    DotLottieWorker.setWasmUrl(UNREACHABLE);
+
+    await facade.setCanvas(createCanvas());
+
+    await vi.waitFor(
+      () => {
+        expect(errors).toHaveLength(1);
+      },
+      { timeout: 10000 },
+    );
+
+    expect(errors[0]).toContain('WASM loading failed from all sources');
+  });
+
+  test('resolves a relative path against the page so the blob worker can fetch it', async () => {
+    const facade = new DotLottieWorker({ src, workerId: 'relative-url' });
+    const postSpy = vi.spyOn(Worker.prototype, 'postMessage');
+    const relative = new URL(wasmUrl).pathname;
+
+    DotLottieWorker.setWasmUrl(relative);
+
+    const posts = setWasmUrlPosts(postSpy);
+
+    expect(posts.length).toBeGreaterThan(0);
+
+    for (const post of posts) {
+      expect(post.params.url).toBe(new URL(relative, document.baseURI).href);
+    }
+
+    // Without resolution this would be loadError: `fetch('/…')` throws in a blob: worker.
+    await facade.setCanvas(createCanvas());
+
+    await vi.waitFor(
+      () => {
+        expect(facade.isLoaded).toBe(true);
+      },
+      { timeout: 10000 },
+    );
+  });
+
+  test('rejects empty and non-string URLs without touching existing workers', () => {
+    // A worker must exist for an erroneous broadcast to be observable.
+    void new DotLottieWorker({ src, workerId: 'validation' });
+    const postSpy = vi.spyOn(Worker.prototype, 'postMessage');
+
+    expect(() => DotLottieWorker.setWasmUrl('')).toThrow(TypeError);
+    expect(() => DotLottieWorker.setWasmUrl('   ')).toThrow(TypeError);
+    expect(() => DotLottieWorker.setWasmUrl(undefined as unknown as string)).toThrow(TypeError);
+
+    expect(setWasmUrlPosts(postSpy)).toHaveLength(0);
   });
 });
