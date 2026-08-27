@@ -1,5 +1,14 @@
 # @lottiefiles/dotlottie-web
 
+## 0.80.0
+### Minor Changes
+
+- 0874fae: feat: add experimental support for MP4 video assets in dotLottie files
+
+### Patch Changes
+
+- 727add3: fix: `setWasmUrl()` disables the jsdelivr/unpkg fallback instead of still reaching unpkg when the configured URL fails; `DotLottieWorker.setWasmUrl()` resolves relative URLs against the page (the blob worker can't) and reaches workers that exist but haven't started loading
+
 ## 0.79.2
 ### Patch Changes
 
