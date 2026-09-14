@@ -1,6 +1,7 @@
 ---
 '@lottiefiles/dotlottie-web': minor
 '@lottiefiles/dotlottie-react': minor
+'@lottiefiles/dotlottie-wc': minor
 ---
 
 feat: add `DotLottieWorker.setWorkerUrl()` for CSP-compatible worker loading

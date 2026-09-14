@@ -22,3 +22,4 @@ declare module '*?worker&inline' {
 
 declare var __PACKAGE_NAME__: string;
 declare var __PACKAGE_VERSION__: string;
+declare var __dotLottieWorkerUrl: string | undefined;

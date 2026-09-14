@@ -2,10 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import * as esbuild from 'esbuild';
 import { defineConfig, type UserConfig } from 'tsdown';
 
-import { pluginInlineWorker } from './rolldown-plugins/plugin-inline-worker.ts';
+import { buildWorkerCode, pluginInlineWorker } from './rolldown-plugins/plugin-inline-worker.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf-8'));
@@ -39,26 +38,9 @@ export default [
       );
 
       // Build the worker script as a standalone file for CSP-compatible self-hosting.
-      const { outputFiles } = await esbuild.build({
-        entryPoints: [path.resolve(__dirname, 'src/worker/dotlottie.worker.ts')],
-        bundle: true,
-        write: false,
-        format: 'iife',
-        minify: true,
-        target: ['es2020'],
-        outdir: '.tmp',
-        define: {
-          __PACKAGE_NAME__: JSON.stringify(pkg.name),
-          __PACKAGE_VERSION__: JSON.stringify(pkg.version),
-        },
-      });
+      const workerCode = await buildWorkerCode(path.resolve(__dirname, 'src/worker/dotlottie.worker.ts'), pkg);
 
-      if (outputFiles[0]) {
-        await fs.promises.writeFile(
-          path.resolve(dir, 'dotlottie.worker.js'),
-          outputFiles[0].text,
-        );
-      }
+      await fs.promises.writeFile(path.resolve(dir, 'dotlottie.worker.js'), workerCode);
     },
   }),
   defineConfig({

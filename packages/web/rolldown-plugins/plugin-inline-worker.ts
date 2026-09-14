@@ -11,6 +11,28 @@ interface RolldownPlugin {
   load?: (id: string) => Promise<{ code: string; moduleSideEffects: boolean } | null> | null;
 }
 
+export async function buildWorkerCode(entryPoint: string, pkg: { name: string; version: string }): Promise<string> {
+  const { outputFiles } = await esbuild.build({
+    entryPoints: [entryPoint],
+    bundle: true,
+    write: false,
+    format: 'iife',
+    minify: true,
+    target: ['es2020'],
+    outdir: '.tmp',
+    define: {
+      __PACKAGE_NAME__: JSON.stringify(pkg.name),
+      __PACKAGE_VERSION__: JSON.stringify(pkg.version),
+    },
+  });
+
+  if (outputFiles.length !== 1) {
+    throw new Error('Too many files built for worker bundle.');
+  }
+
+  return outputFiles[0]!.text;
+}
+
 export function pluginInlineWorker(pkg: { name: string; version: string }): RolldownPlugin {
   return {
     name: 'inline-worker',
@@ -35,25 +57,7 @@ export function pluginInlineWorker(pkg: { name: string; version: string }): Roll
 
       for (const candidate of candidates) {
         try {
-          const { outputFiles } = await esbuild.build({
-            entryPoints: [candidate],
-            bundle: true,
-            write: false,
-            format: 'iife',
-            minify: true,
-            target: ['es2020'],
-            outdir: '.tmp',
-            define: {
-              __PACKAGE_NAME__: JSON.stringify(pkg.name),
-              __PACKAGE_VERSION__: JSON.stringify(pkg.version),
-            },
-          });
-
-          if (outputFiles.length !== 1) {
-            throw new Error('Too many files built for worker bundle.');
-          }
-
-          const { text } = outputFiles[0]!;
+          const text = await buildWorkerCode(candidate, pkg);
 
           // Two constraints on the emitted code:
           // - Keep the worker source a single string literal. Encoding it as a

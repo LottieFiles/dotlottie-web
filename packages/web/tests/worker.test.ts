@@ -251,13 +251,13 @@ describe('DotLottieWorker.setWasmUrl', () => {
 
 describe('DotLottieWorker.setWorkerUrl', () => {
   afterEach(() => {
-    delete (globalThis as Record<string, unknown>).__dotLottieWorkerUrl;
+    globalThis.__dotLottieWorkerUrl = undefined;
   });
 
   test('sets globalThis.__dotLottieWorkerUrl so the InlineWorker uses a static URL', () => {
     DotLottieWorker.setWorkerUrl('/workers/dotlottie.worker.js');
 
-    expect((globalThis as Record<string, unknown>).__dotLottieWorkerUrl).toBe('/workers/dotlottie.worker.js');
+    expect(globalThis.__dotLottieWorkerUrl).toBe('/workers/dotlottie.worker.js');
   });
 
   test('rejects empty and non-string URLs', () => {
@@ -266,13 +266,13 @@ describe('DotLottieWorker.setWorkerUrl', () => {
     expect(() => DotLottieWorker.setWorkerUrl(undefined as unknown as string)).toThrow(TypeError);
     expect(() => DotLottieWorker.setWorkerUrl(42 as unknown as string)).toThrow(TypeError);
 
-    expect((globalThis as Record<string, unknown>).__dotLottieWorkerUrl).toBeUndefined();
+    expect(globalThis.__dotLottieWorkerUrl).toBeUndefined();
   });
 
   test('overwrites a previously set URL', () => {
     DotLottieWorker.setWorkerUrl('/first.js');
     DotLottieWorker.setWorkerUrl('/second.js');
 
-    expect((globalThis as Record<string, unknown>).__dotLottieWorkerUrl).toBe('/second.js');
+    expect(globalThis.__dotLottieWorkerUrl).toBe('/second.js');
   });
 });

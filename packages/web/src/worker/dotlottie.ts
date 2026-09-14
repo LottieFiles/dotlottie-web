@@ -95,7 +95,6 @@ function createRpcRequest<T extends keyof MethodParamsMap>(method: T, params: Me
 }
 
 let workerWasmUrl = '';
-let workerScriptUrl = '';
 
 const canvasRegistry = new Map<HTMLCanvasElement, CanvasRegistryEntry>();
 
@@ -1161,7 +1160,7 @@ export class DotLottieWorker {
    * instances — workers already running are unaffected.
    *
    * The file is shipped as `@lottiefiles/dotlottie-web/dotlottie.worker.js`
-   * and can be copied to any origin the CSP permits.
+   * and must be served from the same origin as the page.
    *
    * @param url - URL pointing to the self-hosted worker script
    */
@@ -1170,8 +1169,7 @@ export class DotLottieWorker {
       throw new TypeError('setWorkerUrl() expects a non-empty URL string');
     }
 
-    workerScriptUrl = url;
-    (globalThis as Record<string, unknown>).__dotLottieWorkerUrl = url;
+    globalThis.__dotLottieWorkerUrl = url;
   }
 
   /**
