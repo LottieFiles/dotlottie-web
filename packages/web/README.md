@@ -1,8 +1,7 @@
 # @lottiefiles/dotlottie-web
 
-> [!TIP]
-> Looking for animations to use with this player? Browse **[100,000+ free Lottie animations](https://lottiefiles.com/free-animations?utm_source=npm&utm_medium=readme)** and grab any of them as `.lottie` or `.json`, or create your own with [Lottie Creator](https://lottiefiles.com/lottie-creator?utm_source=npm&utm_medium=readme).
-
+> \[!TIP]
+> Looking for animations to use with this player? Browse **[100,000+ free Lottie animations](https://lottiefiles.com/free-animations?utm_source=npm\&utm_medium=readme)** and grab any of them as `.lottie` or `.json`, or create your own with [Lottie Creator](https://lottiefiles.com/lottie-creator?utm_source=npm\&utm_medium=readme).
 
 ![npm](https://img.shields.io/npm/v/@lottiefiles/dotlottie-web)
 ![npm bundle size](https://img.shields.io/bundlephobia/minzip/@lottiefiles/dotlottie-web)
@@ -20,6 +19,7 @@
   * [What is dotLottie?](#what-is-dotlottie)
 * [Documentation](#documentation)
 * [Faster First Frame](#faster-first-frame)
+* [Strict Content-Security-Policy](#strict-content-security-policy)
 * [Supported Platforms](#supported-platforms)
   * [Browser Requirements](#browser-requirements)
 * [Live Examples](#live-examples)
@@ -64,6 +64,19 @@ Or let the browser start the download even earlier (`crossorigin` is required â€
 ```
 
 The version in the URL must match your installed package version â€” the player fetches a version-pinned URL, and a mismatch means the preload can't be reused. If you use `setWasmUrl()`, call it before `preload()` and point the preload tag at the same URL. An explicit URL also disables the jsdelivr/unpkg fallback, so a wrong path now fails with `loadError` instead of silently loading from a CDN.
+
+## Strict Content-Security-Policy
+
+`DotLottieWorker` starts its worker from a `blob:` URL by default, which needs `worker-src blob:`. If your CSP forbids that, self-host the worker script shipped at `@lottiefiles/dotlottie-web/dotlottie.worker.js` and point the player at it before constructing any instance:
+
+```js
+import { DotLottieWorker } from '@lottiefiles/dotlottie-web';
+
+DotLottieWorker.setWorkerUrl('/js/dotlottie/dotlottie.worker.js');
+DotLottieWorker.setWasmUrl('/js/dotlottie/dotlottie-player.wasm');
+```
+
+The worker URL must be same-origin; browsers refuse cross-origin workers regardless of CSP. A URL-hosted worker inherits the page's CSP, so pair it with `setWasmUrl()` unless `connect-src` allows the jsdelivr/unpkg CDNs. Copy both files from the installed package on every upgrade so they match the runtime.
 
 ## Supported Platforms
 

@@ -1,8 +1,7 @@
 # @lottiefiles/dotlottie-wc
 
-> [!TIP]
-> Looking for animations to use with this player? Browse **[100,000+ free Lottie animations](https://lottiefiles.com/free-animations?utm_source=npm&utm_medium=readme)** and grab any of them as `.lottie` or `.json`, or create your own with [Lottie Creator](https://lottiefiles.com/lottie-creator?utm_source=npm&utm_medium=readme).
-
+> \[!TIP]
+> Looking for animations to use with this player? Browse **[100,000+ free Lottie animations](https://lottiefiles.com/free-animations?utm_source=npm\&utm_medium=readme)** and grab any of them as `.lottie` or `.json`, or create your own with [Lottie Creator](https://lottiefiles.com/lottie-creator?utm_source=npm\&utm_medium=readme).
 
 ![npm](https://img.shields.io/npm/v/@lottiefiles/dotlottie-wc)
 ![npm bundle size](https://img.shields.io/bundlephobia/minzip/%40lottiefiles%2Fdotlottie-wc)
@@ -26,6 +25,7 @@
 * [RenderConfig](#renderconfig)
   * [Properties](#properties)
   * [Custom WASM URL](#custom-wasm-url)
+  * [Strict Content-Security-Policy](#strict-content-security-policy)
 * [Development](#development)
   * [Setup](#setup)
   * [Dev](#dev)
@@ -156,6 +156,19 @@ The function is also exported from the CDN bundles, so it works when loading `di
 ```
 
 You can find the matching `dotlottie-player.wasm` for your installed version inside the `@lottiefiles/dotlottie-web` package (`dist/dotlottie-player.wasm`) or on a npm CDN, e.g. `https://unpkg.com/@lottiefiles/dotlottie-web@x.y.z/dist/dotlottie-player.wasm`.
+
+### Strict Content-Security-Policy
+
+`dotlottie-worker-wc` starts its worker from a `blob:` URL, which needs `worker-src blob:`. If your CSP forbids that, copy `dotlottie.worker.js` from `@lottiefiles/dotlottie-web/dist` to your own origin and call `setWorkerUrl` before any animation loads. Pair it with `setWasmUrl`, since a URL-hosted worker inherits the page's CSP:
+
+```js
+import { setWasmUrl, setWorkerUrl } from '@lottiefiles/dotlottie-wc';
+
+setWorkerUrl('/js/dotlottie/dotlottie.worker.js');
+setWasmUrl('/js/dotlottie/dotlottie-player.wasm');
+```
+
+`setWorkerUrl` is also exported from `dist/dotlottie-worker-wc.js`. The worker URL must be same-origin.
 
 ## Development
 

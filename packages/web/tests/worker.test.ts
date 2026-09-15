@@ -249,6 +249,31 @@ describe('DotLottieWorker.setWasmUrl', () => {
   });
 });
 
+describe('DotLottieWorker relative src', () => {
+  test('resolves a relative src against the page before posting it to the worker', async () => {
+    const postSpy = vi.spyOn(Worker.prototype, 'postMessage');
+    const relative = new URL(src).pathname;
+    const facade = new DotLottieWorker({ src: relative, canvas: createCanvas(), workerId: 'relative-src' });
+
+    const postedSrcs = postSpy.mock.calls
+      .map((call) => (call[0] as { params?: { config?: { src?: string } } }).params?.config?.src)
+      .filter((value): value is string => typeof value === 'string');
+
+    expect(postedSrcs.length).toBeGreaterThan(0);
+
+    for (const posted of postedSrcs) {
+      expect(posted).toBe(new URL(relative, document.baseURI).href);
+    }
+
+    await vi.waitFor(
+      () => {
+        expect(facade.isLoaded).toBe(true);
+      },
+      { timeout: 10000 },
+    );
+  });
+});
+
 describe('DotLottieWorker.setWorkerUrl', () => {
   afterEach(() => {
     globalThis.__dotLottieWorkerUrl = undefined;

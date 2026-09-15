@@ -100,13 +100,24 @@ const canvasRegistry = new Map<HTMLCanvasElement, CanvasRegistryEntry>();
 
 let warnedAboutAssetResolver = false;
 
+// A blob: worker has no usable base URL, so relative paths must be resolved here.
+function resolveUrl(url: string): string {
+  if (typeof document === 'undefined') return url;
+
+  try {
+    return new URL(url, document.baseURI).href;
+  } catch {
+    return url;
+  }
+}
+
 /**
  * Functions are not structured-cloneable, so an `assetResolver` crossing the worker
  * boundary would throw `DataCloneError` and the animation would never load.
  * @param config - The config about to cross the worker boundary
  * @returns The config without `assetResolver`, warning once when one was dropped
  */
-function stripAssetResolver<T extends { assetResolver?: unknown }>(config: T): Omit<T, 'assetResolver'> {
+function toWorkerConfig<T extends { assetResolver?: unknown; src?: string }>(config: T): Omit<T, 'assetResolver'> {
   const { assetResolver, ...rest } = config;
 
   if (assetResolver !== undefined && !warnedAboutAssetResolver) {
@@ -116,6 +127,10 @@ function stripAssetResolver<T extends { assetResolver?: unknown }>(config: T): O
         'a resolver must run synchronously, which is not possible across the worker boundary. ' +
         'Use `DotLottie` instead if the animation references assets it does not embed.',
     );
+  }
+
+  if (typeof rest.src === 'string') {
+    return { ...rest, src: resolveUrl(rest.src) };
   }
 
   return rest;
@@ -467,7 +482,7 @@ export class DotLottieWorker {
       {
         instanceId: this._id,
         config: {
-          ...stripAssetResolver(config),
+          ...toWorkerConfig(config),
           canvas: offscreen as unknown as HTMLCanvasElement,
         },
         ...getCanvasSize(this._canvas, config.renderConfig?.devicePixelRatio || getDefaultDPR()),
@@ -509,7 +524,7 @@ export class DotLottieWorker {
 
     this._created = true;
 
-    const { canvas: _adoptedCanvas, ...loadConfig } = stripAssetResolver(config);
+    const { canvas: _adoptedCanvas, ...loadConfig } = toWorkerConfig(config);
 
     await this._sendMessage('load', { config: loadConfig, instanceId: this._id });
     await this._updateDotLottieInstanceState();
@@ -832,7 +847,7 @@ export class DotLottieWorker {
       return;
     }
 
-    await this._sendMessage('load', { config: stripAssetResolver(config), instanceId: this._id });
+    await this._sendMessage('load', { config: toWorkerConfig(config), instanceId: this._id });
     await this._updateDotLottieInstanceState();
   }
 
@@ -1144,8 +1159,7 @@ export class DotLottieWorker {
       throw new TypeError('setWasmUrl() expects a non-empty URL string');
     }
 
-    // The worker runs from a blob: URL, where `new URL('/js/player.wasm', 'blob:…')` throws.
-    workerWasmUrl = typeof document === 'undefined' ? url : new URL(url, document.baseURI).href;
+    workerWasmUrl = resolveUrl(url);
 
     // The constructor only forwards this to workers created after the call.
     workerManager().broadcastMessage(createRpcRequest('setWasmUrl', { url: workerWasmUrl }));
@@ -1160,7 +1174,9 @@ export class DotLottieWorker {
    * instances — workers already running are unaffected.
    *
    * The file is shipped as `@lottiefiles/dotlottie-web/dotlottie.worker.js`
-   * and must be served from the same origin as the page.
+   * and must be served from the same origin as the page. A URL-hosted worker
+   * inherits the page's CSP, so pair this with `setWasmUrl()` unless
+   * `connect-src` allows the jsdelivr/unpkg CDNs.
    *
    * @param url - URL pointing to the self-hosted worker script
    */
