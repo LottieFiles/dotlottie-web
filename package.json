@@ -59,7 +59,10 @@
       "playwright",
       "svelte-preprocess"
     ],
-    "trustPolicy": "no-downgrade"
+    "trustPolicy": "no-downgrade",
+    "overrides": {
+      "playwright": "$playwright"
+    }
   },
   "packageManager": "pnpm@10.29.3"
 }
