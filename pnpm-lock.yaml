@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  playwright: ^1.60.0
+  playwright: 1.60.0
 
 importers:
 
@@ -42,7 +42,7 @@ importers:
         specifier: 19.3.2
         version: 19.3.2
       playwright:
-        specifier: ^1.60.0
+        specifier: 1.60.0
         version: 1.60.0
       remark-cli:
         specifier: 11.0.0
@@ -3031,7 +3031,7 @@ packages:
   '@vitest/browser-playwright@4.0.18':
     resolution: {integrity: sha512-gfajTHVCiwpxRj1qh0Sh/5bbGLG4F/ZH/V9xvFVoFddpITfMta9YGow0W6ZpTTORv2vdJuz9TnrNSmjKvpOf4g==}
     peerDependencies:
-      playwright: ^1.60.0
+      playwright: 1.60.0
       vitest: 4.0.18
 
   '@vitest/browser@4.0.18':
