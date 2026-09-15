@@ -53,6 +53,7 @@
         "default": "./dist/webgpu/index.cjs"
       }
     },
+    "./dotlottie.worker.js": "./dist/dotlottie.worker.js",
     "./dotlottie-player.wasm": "./dist/dotlottie-player.wasm",
     "./webgl/dotlottie-player.wasm": "./dist/webgl/dotlottie-player.wasm",
     "./webgpu/dotlottie-player.wasm": "./dist/webgpu/dotlottie-player.wasm"

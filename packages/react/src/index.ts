@@ -10,3 +10,7 @@ export const setWasmUrl = (url: string): void => {
   DotLottieWorker.setWasmUrl(url);
   DotLottie.setWasmUrl(url);
 };
+
+export const setWorkerUrl = (url: string): void => {
+  DotLottieWorker.setWorkerUrl(url);
+};

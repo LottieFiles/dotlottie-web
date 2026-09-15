@@ -248,3 +248,56 @@ describe('DotLottieWorker.setWasmUrl', () => {
     expect(setWasmUrlPosts(postSpy)).toHaveLength(0);
   });
 });
+
+describe('DotLottieWorker relative src', () => {
+  test('resolves a relative src against the page before posting it to the worker', async () => {
+    const postSpy = vi.spyOn(Worker.prototype, 'postMessage');
+    const relative = new URL(src).pathname;
+    const facade = new DotLottieWorker({ src: relative, canvas: createCanvas(), workerId: 'relative-src' });
+
+    const postedSrcs = postSpy.mock.calls
+      .map((call) => (call[0] as { params?: { config?: { src?: string } } }).params?.config?.src)
+      .filter((value): value is string => typeof value === 'string');
+
+    expect(postedSrcs.length).toBeGreaterThan(0);
+
+    for (const posted of postedSrcs) {
+      expect(posted).toBe(new URL(relative, document.baseURI).href);
+    }
+
+    await vi.waitFor(
+      () => {
+        expect(facade.isLoaded).toBe(true);
+      },
+      { timeout: 10000 },
+    );
+  });
+});
+
+describe('DotLottieWorker.setWorkerUrl', () => {
+  afterEach(() => {
+    globalThis.__dotLottieWorkerUrl = undefined;
+  });
+
+  test('sets globalThis.__dotLottieWorkerUrl so the InlineWorker uses a static URL', () => {
+    DotLottieWorker.setWorkerUrl('/workers/dotlottie.worker.js');
+
+    expect(globalThis.__dotLottieWorkerUrl).toBe('/workers/dotlottie.worker.js');
+  });
+
+  test('rejects empty and non-string URLs', () => {
+    expect(() => DotLottieWorker.setWorkerUrl('')).toThrow(TypeError);
+    expect(() => DotLottieWorker.setWorkerUrl('   ')).toThrow(TypeError);
+    expect(() => DotLottieWorker.setWorkerUrl(undefined as unknown as string)).toThrow(TypeError);
+    expect(() => DotLottieWorker.setWorkerUrl(42 as unknown as string)).toThrow(TypeError);
+
+    expect(globalThis.__dotLottieWorkerUrl).toBeUndefined();
+  });
+
+  test('overwrites a previously set URL', () => {
+    DotLottieWorker.setWorkerUrl('/first.js');
+    DotLottieWorker.setWorkerUrl('/second.js');
+
+    expect(globalThis.__dotLottieWorkerUrl).toBe('/second.js');
+  });
+});

@@ -9,6 +9,10 @@ export const setWasmUrl = (url: string): void => {
   DotLottieWorker.setWasmUrl(url);
 };
 
+export const setWorkerUrl = (url: string): void => {
+  DotLottieWorker.setWorkerUrl(url);
+};
+
 @customElement('dotlottie-worker-wc')
 export class DotLottieWorkerWC extends BaseDotLottieWC<DotLottieWorker> {
   protected override _createDotLottieInstance(config: Config & { workerId?: string }): DotLottieWorker {
