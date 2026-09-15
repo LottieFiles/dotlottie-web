@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import { defineConfig, type UserConfig } from 'tsdown';
 
-import { pluginInlineWorker } from './rolldown-plugins/plugin-inline-worker.ts';
+import { buildWorkerCode, pluginInlineWorker } from './rolldown-plugins/plugin-inline-worker.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf-8'));
@@ -36,6 +36,11 @@ export default [
         path.resolve(__dirname, 'src/core/dotlottie-player.wasm'),
         path.resolve(dir, 'dotlottie-player.wasm'),
       );
+
+      // Build the worker script as a standalone file for CSP-compatible self-hosting.
+      const workerCode = await buildWorkerCode(path.resolve(__dirname, 'src/worker/dotlottie.worker.ts'), pkg);
+
+      await fs.promises.writeFile(path.resolve(dir, 'dotlottie.worker.js'), workerCode);
     },
   }),
   defineConfig({
