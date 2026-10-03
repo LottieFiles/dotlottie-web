@@ -75,6 +75,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
 }): ReactNode => {
   const dotLottieRef = useRef<T | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const previousSrcRef = useRef(src);
   const dotLottieRefCallbackRef = useRef<RefCallback<T | null> | undefined>(dotLottieRefCallback);
   const pendingDestroyRef = useRef<{
     canvas: HTMLCanvasElement;
@@ -224,6 +225,11 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   }, [data]);
 
   useEffect(() => {
+    // The instance created in setCanvasRef already received the initial src.
+    if (src === previousSrcRef.current) return;
+
+    previousSrcRef.current = src;
+
     if (typeof src !== 'string') return;
 
     dotLottieRef.current?.load({
