@@ -1620,7 +1620,11 @@ export class DotLottie {
     const markers = this._dotLottieCore?.markers();
 
     if (markers && Array.isArray(markers)) {
-      return markers as Marker[];
+      return (markers as { name: string; start: number; end: number }[]).map(({ name, start, end }) => ({
+        name,
+        time: start,
+        duration: end - start,
+      }));
     }
 
     return [];
