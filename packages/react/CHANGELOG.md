@@ -1,5 +1,20 @@
 # @lottiefiles/dotlottie-react
 
+## 0.20.0
+### Minor Changes
+
+- e46482e: feat: add `DotLottieWorker.setWorkerUrl()` for CSP-compatible worker loading
+  
+  Ship `dist/dotlottie.worker.js` as a standalone file and add `setWorkerUrl(url)` so consumers can self-host the worker script, avoiding `worker-src: blob:` in Content-Security-Policy.
+  
+  Relative `src` paths are now resolved against the page before reaching the worker.
+
+### Patch Changes
+
+- 629eb6c: Avoid loading the initial `src` twice when the React player is mounted. Both the regular and worker players now rely on their constructor to load the first animation, while later `src` changes still call `load`.
+- Updated dependencies [e46482e]
+  - @lottiefiles/dotlottie-web@0.81.0
+
 ## 0.19.16
 ### Patch Changes
 
