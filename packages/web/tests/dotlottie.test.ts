@@ -2446,6 +2446,128 @@ describe.each([
     });
   });
 
+  describe('themeId config', () => {
+    const themedSrc = new URL('../../../fixtures/multi_themes.lottie', import.meta.url).href;
+
+    test('applies themeId from the constructor config on load', async () => {
+      const onLoad = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: themedSrc,
+        themeId: 'dark',
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+
+      expect(dotLottie.activeThemeId).toBe('dark');
+    });
+
+    test('applies themeId passed to load()', async () => {
+      const onLoad = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: themedSrc,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+
+      expect(dotLottie.activeThemeId).toBeFalsy();
+
+      dotLottie.load({ src: themedSrc, themeId: 'sky' });
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(2);
+      });
+
+      expect(dotLottie.activeThemeId).toBe('sky');
+
+      dotLottie.load({ src: themedSrc });
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(3);
+      });
+
+      expect(dotLottie.activeThemeId).toBeFalsy();
+    });
+  });
+
+  describe('animationId config', () => {
+    const multiAnimationSrc = 'https://lottie.host/294b684d-d6b4-4116-ab35-85ef566d4379/VkGHcqcMUI.lottie';
+
+    test('loads the animationId from the constructor config', async () => {
+      const onLoad = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: multiAnimationSrc,
+        animationId: 'wink',
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+
+      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), {
+        timeout: 10000,
+      });
+
+      expect(dotLottie.activeAnimationId).toBe('wink');
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    test('loads the animationId passed to load()', async () => {
+      const onLoad = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: multiAnimationSrc,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+
+      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), {
+        timeout: 10000,
+      });
+
+      expect(dotLottie.activeAnimationId).toBe('anger');
+
+      dotLottie.load({ src: multiAnimationSrc, animationId: 'yummy' });
+
+      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(2), {
+        timeout: 10000,
+      });
+
+      expect(dotLottie.activeAnimationId).toBe('yummy');
+    });
+
+    test('emits loadError for an unknown animationId', async () => {
+      const onLoadError = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: multiAnimationSrc,
+        animationId: 'invalid',
+      });
+
+      dotLottie.addEventListener('loadError', onLoadError);
+
+      await vi.waitFor(() => expect(onLoadError).toHaveBeenCalledTimes(1), {
+        timeout: 10000,
+      });
+    });
+  });
+
   describe('layout', () => {
     test('default layout', async () => {
       const onLoad = vi.fn();
