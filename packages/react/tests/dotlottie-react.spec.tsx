@@ -72,6 +72,24 @@ describe.each([
     });
   });
 
+  test('does not reload the initial src after creating the player', async () => {
+    const load = vi.spyOn(instanceType.prototype, 'load');
+    const dotLottieRefCallback = vi.fn();
+
+    try {
+      const { unmount } = await render(<Component src={dotLottieSrc} dotLottieRefCallback={dotLottieRefCallback} />);
+
+      await vi.waitFor(() => {
+        expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+      });
+
+      expect(load).not.toHaveBeenCalled();
+      unmount();
+    } finally {
+      load.mockRestore();
+    }
+  });
+
   test('supports React StrictMode: one instance, controllable, destroyed on real unmount', async () => {
     const dotLottieRefCallback = vi.fn();
     const onDestroy = vi.fn();
