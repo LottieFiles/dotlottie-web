@@ -1,5 +1,14 @@
 # @lottiefiles/dotlottie-web
 
+## 0.81.0
+### Minor Changes
+
+- e46482e: feat: add `DotLottieWorker.setWorkerUrl()` for CSP-compatible worker loading
+  
+  Ship `dist/dotlottie.worker.js` as a standalone file and add `setWorkerUrl(url)` so consumers can self-host the worker script, avoiding `worker-src: blob:` in Content-Security-Policy.
+  
+  Relative `src` paths are now resolved against the page before reaching the worker.
+
 ## 0.80.0
 ### Minor Changes
 
