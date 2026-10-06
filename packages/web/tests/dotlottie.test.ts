@@ -2205,7 +2205,12 @@ describe.each([
 
       const markers = dotLottie.markers();
 
-      expect(markers.length).toBeGreaterThan(0);
+      expect(markers).toEqual([
+        { name: 'Marker_1', time: 0, duration: 10 },
+        { name: 'Marker_2', time: 10, duration: 10 },
+        { name: 'Marker_3', time: 20, duration: 10 },
+        { name: 'Marker_4', time: 30, duration: 12 },
+      ]);
     });
 
     test('loads an animation and play a specific marker', async () => {
