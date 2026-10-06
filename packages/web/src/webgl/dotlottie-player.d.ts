@@ -321,13 +321,6 @@ export interface InitOutput {
   readonly atanh: (a: number) => number;
   readonly atanhf: (a: number) => number;
   readonly bsearch: (a: number, b: number, c: number, d: number, e: number) => number;
-  readonly dlMediaClose: (a: number) => void;
-  readonly dlMediaOpen: (a: number, b: number) => number;
-  readonly dlMediaSeek: (a: number, b: number) => void;
-  readonly dlMediaSetMute: (a: number, b: number) => void;
-  readonly dlMediaSetPlaying: (a: number, b: number) => void;
-  readonly dlMediaSetVolume: (a: number, b: number) => void;
-  readonly dlMediaSync: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
   readonly dotlottieplayerwasm_animation_id: (a: number, b: number) => void;
   readonly dotlottieplayerwasm_animation_size: (a: number) => number;
   readonly dotlottieplayerwasm_audio_volume: (a: number) => number;
@@ -547,6 +540,7 @@ export interface InitOutput {
   readonly nextafter: (a: number, b: number) => number;
   readonly rand: () => number;
   readonly register_font: (a: number, b: number, c: number, d: number) => number;
+  readonly remainderf: (a: number, b: number) => number;
   readonly setjmp: (a: number) => number;
   readonly strdup: (a: number) => number;
   readonly tolower: (a: number) => number;
@@ -564,10 +558,10 @@ export interface InitOutput {
   readonly strncmp: (a: number, b: number, c: number) => number;
   readonly strstr: (a: number, b: number) => number;
   readonly strtol: (a: number, b: number, c: number) => number;
+  readonly strtoul: (a: number, b: number, c: number) => number;
   readonly tinyrlibc_itoa: (a: bigint, b: number, c: number, d: number) => number;
   readonly tinyrlibc_utoa: (a: bigint, b: number, c: number, d: number) => number;
   readonly tinyrlibc_rand_r: (a: number) => number;
-  readonly tinyrlibc_strtoul: (a: number, b: number, c: number) => number;
   readonly _ZNSt3__25mutex6unlockEv: (a: number) => void;
   readonly _ZdlPvm: (a: number, b: number) => void;
   readonly __cxa_thread_atexit: (a: number, b: number, c: number) => number;
@@ -575,9 +569,7 @@ export interface InitOutput {
   readonly __wbindgen_export_1: (a: number, b: number) => number;
   readonly __wbindgen_export_2: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_export_3: (a: number, b: number, c: number) => void;
-  readonly __wbindgen_export_4: WebAssembly.Table;
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
-  readonly __wbindgen_export_5: (a: number, b: number, c: number) => void;
 }
 
 export type SyncInitInput = BufferSource | WebAssembly.Module;
