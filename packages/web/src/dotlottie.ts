@@ -138,6 +138,10 @@ export class DotLottie {
 
   private _stateMachineId: string = '';
 
+  private _themeId: string = '';
+
+  private _animationId: string = '';
+
   private _stateMachineConfig: StateMachineConfig | null = null;
 
   private _isStateMachineRunning: boolean = false;
@@ -231,6 +235,8 @@ export class DotLottie {
         this._applyAssetResolver(config.assetResolver ?? null);
 
         this._stateMachineId = config.stateMachineId ?? '';
+        this._themeId = config.themeId ?? '';
+        this._animationId = config.animationId ?? '';
         this._stateMachineConfig = config.stateMachineConfig ?? null;
 
         this._onCoreCreated();
@@ -532,6 +538,12 @@ export class DotLottie {
         return;
       }
       loaded = this._dotLottieCore.load_dotlottie_data(new Uint8Array(data));
+
+      // The core always loads the default animation, so switch after.
+      if (loaded && this._animationId && this._dotLottieCore.animation_id() !== this._animationId) {
+        this._discardPlayerEvents();
+        loaded = this._dotLottieCore.load_animation_from_id(this._animationId);
+      }
     } else if (typeof data === 'object') {
       if (!isLottie(data as Record<string, unknown>)) {
         this._dispatchError(
@@ -556,6 +568,11 @@ export class DotLottie {
     if (loaded) {
       if (this._renderConfig.quality !== undefined) {
         this._dotLottieCore.set_quality(this._renderConfig.quality);
+      }
+
+      // The core clears the theme on every load.
+      if (this._themeId) {
+        this._dotLottieCore.set_theme(this._themeId);
       }
 
       // Drain any events produced by loading (Load/LoadError).
@@ -898,6 +915,8 @@ export class DotLottie {
     } else {
       this._dotLottieCore.clear_marker();
     }
+    this._themeId = config.themeId ?? '';
+    this._animationId = config.animationId ?? '';
     this._dotLottieCore.set_layout(
       config.layout?.fit ?? 'contain',
       config.layout?.align?.[0] ?? 0.5,
