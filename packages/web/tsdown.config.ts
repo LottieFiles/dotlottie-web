@@ -10,7 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf-8'));
 
 const sharedConfig: UserConfig = {
-  format: ['esm', 'cjs'],
+  format: ['esm'],
   dts: true,
   minify: true,
   sourcemap: true,
