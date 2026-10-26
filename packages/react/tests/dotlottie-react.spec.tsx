@@ -697,11 +697,10 @@ describe.each([
   });
 
   test('does not call dotLottie.loadAnimation on rerender with same animationId', async () => {
-    const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
     const { rerender } = await render(
-      <Component src={smSrc} autoplay animationId="Animation_1" dotLottieRefCallback={dotLottieRefCallback} />,
+      <Component src={smSrc} autoplay animationId="Main Scene" dotLottieRefCallback={dotLottieRefCallback} />,
     );
 
     await vi.waitFor(() => {
@@ -710,16 +709,16 @@ describe.each([
 
     const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
 
-    dotLottie?.addEventListener('load', onLoad);
-
     await vi.waitFor(() => {
-      expect(onLoad).toHaveBeenCalledTimes(1);
+      expect(dotLottie?.isLoaded).toBe(true);
     });
+
+    expect(dotLottie?.activeAnimationId).toBe('Main Scene');
 
     const loadAnimation = vi.spyOn(dotLottie, 'loadAnimation');
 
     // rerender with same animationId - simulates StrictMode double render
-    rerender(<Component src={smSrc} autoplay animationId="Animation_1" dotLottieRefCallback={dotLottieRefCallback} />);
+    rerender(<Component src={smSrc} autoplay animationId="Main Scene" dotLottieRefCallback={dotLottieRefCallback} />);
 
     // give it time to potentially fire
     await new Promise((resolve) => setTimeout(resolve, 100));
