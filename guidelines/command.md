@@ -461,7 +461,7 @@ dotLottie.play();
 
 ```typescript
 const markers = dotLottie.markers();
-// Returns: [{ name: 'intro', time: 0, duration: 60 }, ...]
+// Returns: [{ name: 'intro', start: 0, end: 60 }, ...]
 ```
 
 ## Event Handling

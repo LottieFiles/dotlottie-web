@@ -1631,9 +1631,9 @@ export class DotLottie {
   }
 
   /**
-   * Gets all markers defined in the animation with their time and duration.
+   * Gets all markers defined in the animation with their start and end frames.
    * Markers represent named sections that can be played using setMarker().
-   * @returns Array of marker objects with name, time, and duration properties
+   * @returns Array of marker objects with name, start, and end properties
    */
   public markers(): Marker[] {
     const markers = this._dotLottieCore?.markers();
