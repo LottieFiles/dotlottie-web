@@ -10,8 +10,8 @@ export type Transform = [number, number, number, number, number, number, number,
  */
 export interface Marker {
   name: string;
-  time: number;
-  duration: number;
+  start: number;
+  end: number;
 }
 
 /**
