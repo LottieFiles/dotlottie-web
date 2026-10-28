@@ -246,6 +246,7 @@ export const calloc: (a: number, b: number) => number;
 export const isdigit: (a: number) => number;
 export const isspace: (a: number) => number;
 export const malloc: (a: number) => number;
+export const qsort: (a: number, b: number, c: number, d: number) => void;
 export const realloc: (a: number, b: number) => number;
 export const strcat: (a: number, b: number) => number;
 export const strchr: (a: number, b: number) => number;
