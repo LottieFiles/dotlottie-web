@@ -549,6 +549,7 @@ export interface InitOutput {
   readonly isdigit: (a: number) => number;
   readonly isspace: (a: number) => number;
   readonly malloc: (a: number) => number;
+  readonly qsort: (a: number, b: number, c: number, d: number) => void;
   readonly realloc: (a: number, b: number) => number;
   readonly strcat: (a: number, b: number) => number;
   readonly strchr: (a: number, b: number) => number;
