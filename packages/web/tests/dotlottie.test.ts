@@ -18,6 +18,7 @@ const smSrc = new URL('../../../fixtures/sm/all-inputs.json', import.meta.url).h
 const textAnimSrc = new URL('../../../fixtures/text.json', import.meta.url).href;
 const imageSlotSrc = new URL('../../../fixtures/image.json', import.meta.url).href;
 const impactFontUrl = new URL('../../../fixtures/fonts/Impact.ttf', import.meta.url).href;
+const audioSrc = new URL('../../../fixtures/audio.json', import.meta.url).href;
 
 DotLottieClass.setWasmUrl(wasmUrl);
 DotLottieWorkerClass.setWasmUrl(wasmUrl);
@@ -1539,6 +1540,67 @@ describe.each([
       await dotLottie.setMode(mode);
 
       expect(dotLottie.mode).toBe(mode);
+    });
+  });
+
+  describe('setVolume', () => {
+    test('clamps the volume and ignores NaN', async () => {
+      const onLoad = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: audioSrc,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+
+      expect(dotLottie.volume).toBe(1);
+
+      await dotLottie.setVolume(0.5);
+      expect(dotLottie.volume).toBe(0.5);
+
+      await dotLottie.setVolume(2);
+      expect(dotLottie.volume).toBe(1);
+
+      await dotLottie.setVolume(-1);
+      expect(dotLottie.volume).toBe(0);
+
+      await dotLottie.setVolume(Number.NaN);
+      expect(dotLottie.volume).toBe(0);
+    });
+
+    // a worker has no HTMLMediaElement, so audio only plays on the main thread
+    (isWorker ? test.skip : test)('applies a volume set before load to the audio', async () => {
+      const volumes: number[] = [];
+      const setter = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'volume')?.set;
+      const spy = vi.spyOn(HTMLMediaElement.prototype, 'volume', 'set').mockImplementation(function (
+        this: HTMLMediaElement,
+        value: number,
+      ) {
+        volumes.push(value);
+        setter?.call(this, value);
+      });
+      // headless Chrome rejects play() without a user gesture
+      const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: audioSrc,
+        autoplay: true,
+      });
+
+      await dotLottie.setVolume(0.5);
+
+      await vi.waitFor(() => {
+        expect(volumes).toContain(0.5);
+      });
+
+      spy.mockRestore();
+      play.mockRestore();
     });
   });
 

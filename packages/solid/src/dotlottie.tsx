@@ -19,6 +19,7 @@ export const DotLottieSolid = (props: DotLottieSolidProps): JSX.Element => {
     'loop',
     'loopCount',
     'speed',
+    'volume',
     'marker',
     'segment',
     'themeId',

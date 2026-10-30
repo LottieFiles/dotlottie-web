@@ -9,6 +9,8 @@ interface AnimationSlice {
   isJson: boolean;
   theme: string;
   speed: number;
+  volume: number;
+  muted: boolean;
   autoplay: boolean;
   loop: boolean;
   backgroundColor: string;
@@ -45,6 +47,8 @@ const initialState: AnimationSlice = {
   isJson: true,
   theme: '',
   speed: 1,
+  volume: 1,
+  muted: false,
   autoplay: true,
   loop: true,
   backgroundColor: '#F3F6F8',
@@ -99,6 +103,13 @@ export const animationSlice = createSlice({
     },
     setSpeed: (state, action) => {
       state.speed = action.payload;
+    },
+    setVolume: (state, action) => {
+      state.volume = action.payload;
+      state.muted = false;
+    },
+    setMuted: (state, action) => {
+      state.muted = action.payload;
     },
     setAutoplay: (state, action) => {
       state.autoplay = action.payload;
@@ -198,6 +209,8 @@ export const {
   setSrc,
   setTheme,
   setSpeed,
+  setVolume,
+  setMuted,
   setAutoplay,
   setLoop,
   setBackgroundColor,

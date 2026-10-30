@@ -40,6 +40,7 @@ export const DotLottieVue = defineComponent({
       required: false,
     },
     speed: { type: Number as PropType<DotLottieVueProps['speed']>, required: false },
+    volume: { type: Number as PropType<DotLottieVueProps['volume']>, required: false },
     src: { type: String as PropType<DotLottieVueProps['src']>, required: false },
     useFrameInterpolation: { type: Boolean as PropType<DotLottieVueProps['useFrameInterpolation']>, required: false },
     marker: { type: String as PropType<DotLottieVueProps['marker']>, required: false },
@@ -71,6 +72,7 @@ export const DotLottieVue = defineComponent({
       stateMachineId,
       themeId,
       useFrameInterpolation,
+      volume,
     } = toRefs(props);
     let dotLottie: DotLottie | null = null;
     const shouldAutoplay = computed(() => {
@@ -172,6 +174,14 @@ export const DotLottieVue = defineComponent({
       (newVal) => {
         if (dotLottie && typeof newVal !== 'undefined') {
           dotLottie.setSpeed(newVal);
+        }
+      },
+    );
+    watch(
+      () => volume?.value,
+      (newVal) => {
+        if (dotLottie && typeof newVal !== 'undefined') {
+          dotLottie.setVolume(newVal);
         }
       },
     );

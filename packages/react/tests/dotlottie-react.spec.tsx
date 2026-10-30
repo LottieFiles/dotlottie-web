@@ -293,6 +293,36 @@ describe.each([
     });
   });
 
+  test('applies the volume prop and its changes', async () => {
+    const dotLottieRefCallback = vi.fn();
+
+    const { rerender } = await render(
+      <Component src={dotLottieSrc} volume={0.5} dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    await vi.waitFor(() => {
+      expect(dotLottie?.volume).toBe(0.5);
+    });
+
+    rerender(<Component src={dotLottieSrc} volume={0.2} dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(dotLottie?.volume).toBe(0.2);
+    });
+
+    rerender(<Component src={dotLottieSrc} dotLottieRefCallback={dotLottieRefCallback} />);
+
+    await vi.waitFor(() => {
+      expect(dotLottie?.volume).toBe(1);
+    });
+  });
+
   test('calls dotLottie.setMode when mode prop changes', async () => {
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();

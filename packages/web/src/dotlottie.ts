@@ -152,6 +152,8 @@ export class DotLottie {
 
   private _backgroundColor: string | null = null;
 
+  private _volume: number = 1;
+
   private _lastFrameTime: number | null = null;
 
   // Bound event listeners for state machine
@@ -198,6 +200,8 @@ export class DotLottie {
       // freezeOnOffscreen is true by default to prevent unnecessary rendering when the canvas is offscreen
       freezeOnOffscreen: config.renderConfig?.freezeOnOffscreen ?? true,
     };
+
+    if (config.volume !== undefined) this.setVolume(config.volume);
 
     let srcPrefetch: Promise<string | ArrayBuffer> | null = null;
 
@@ -305,6 +309,8 @@ export class DotLottie {
 
       switch (event.type) {
         case 'Load':
+          // the core drops a volume set before its first load
+          this._dotLottieCore.set_audio_volume(this._volume);
           setTimeout(() => this._eventManager.dispatch({ type: 'load' }), 0);
           break;
 
@@ -800,6 +806,13 @@ export class DotLottie {
   }
 
   /**
+   * Gets the audio volume, from 0 (muted) to 1 (full).
+   */
+  public get volume(): number {
+    return this._volume;
+  }
+
+  /**
    * Indicates whether the WASM module and core player have been initialized.
    * Check this before performing operations that require the player to be ready.
    */
@@ -1248,6 +1261,17 @@ export class DotLottie {
     if (this._dotLottieCore === null) return;
 
     this._dotLottieCore.set_speed(speed);
+  }
+
+  /**
+   * Sets the audio volume for animations with sound. Kept across loads.
+   * @param volume - From 0 (muted) to 1 (full); values outside are clamped
+   */
+  public setVolume(volume: number): void {
+    if (Number.isNaN(volume)) return;
+
+    this._volume = Math.min(Math.max(volume, 0), 1);
+    this._dotLottieCore?.set_audio_volume(this._volume);
   }
 
   /**

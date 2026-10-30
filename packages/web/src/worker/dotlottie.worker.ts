@@ -434,6 +434,7 @@ const commands: {
       loop: instance.loop,
       mode: instance.mode,
       speed: instance.speed,
+      volume: instance.volume,
       currentFrame: instance.currentFrame,
       totalFrames: instance.totalFrames,
       duration: instance.duration,
@@ -1200,6 +1201,18 @@ const commands: {
     }
 
     instance.setSpeed(speed);
+  },
+  setVolume: (request) => {
+    const instanceId = request.params.instanceId;
+    const volume = request.params.volume;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.setVolume(volume);
   },
   setUseFrameInterpolation: (request) => {
     const instanceId = request.params.instanceId;

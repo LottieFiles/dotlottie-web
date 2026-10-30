@@ -6,7 +6,7 @@ import {
   setWasmUrl as setDotLottieWasmUrl,
 } from '@lottiefiles/dotlottie-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FaPause, FaPlay } from 'react-icons/fa';
+import { FaPause, FaPlay, FaVolumeMute, FaVolumeUp } from 'react-icons/fa';
 import { GiNextButton, GiPreviousButton } from 'react-icons/gi';
 import { ImLoop } from 'react-icons/im';
 import { getTrackBackground, Range } from 'react-range';
@@ -19,9 +19,11 @@ import {
   setCurrentState,
   setLoop,
   setMarkers,
+  setMuted,
   setStateMachines,
   setThemes,
   setTotalFrames,
+  setVolume,
 } from '../store/viewer-slice';
 import DotLottieCDNPlayer from './dotlottie-cdn-player';
 import DotLottieGPUPlayer from './dotlottie-gpu-player';
@@ -47,6 +49,8 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
   const src = useAppSelector((state) => state.viewer.src);
   const backgroundColor = useAppSelector((state) => state.viewer.backgroundColor);
   const speed = useAppSelector((state) => state.viewer.speed);
+  const volume = useAppSelector((state) => state.viewer.volume);
+  const muted = useAppSelector((state) => state.viewer.muted);
   const autoplay = useAppSelector((state) => state.viewer.autoplay);
   const loop = useAppSelector((state) => state.viewer.loop);
   const totalFrames = useAppSelector((state) => state.viewer.totalFrames);
@@ -136,6 +140,12 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
       dotLottie.removeEventListener('pause', onPause);
     };
   }, [dotLottie, onLoad, onRender, onStop, onPlay, onPause]);
+
+  useEffect(() => {
+    // published versions older than setVolume don't have it
+    if (typeof dotLottie?.setVolume !== 'function') return;
+    dotLottie.setVolume(muted ? 0 : volume);
+  }, [dotLottie, volume, muted]);
 
   useEffect(() => {
     if (!dotLottie) return;
@@ -346,6 +356,53 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
         <button className="cursor-pointer" onClick={() => dispatch(setLoop(!loop))}>
           <ImLoop className={`${!loop ? 'text-gray-500' : ''}`} />
         </button>
+        <button className="cursor-pointer" title={muted ? 'Unmute' : 'Mute'} onClick={() => dispatch(setMuted(!muted))}>
+          {muted || volume === 0 ? <FaVolumeMute className="text-gray-500" /> : <FaVolumeUp />}
+        </button>
+        <Range
+          label="Volume"
+          min={0}
+          max={1}
+          step={0.05}
+          values={[muted ? 0 : volume]}
+          onChange={(values) => dispatch(setVolume(values[0]))}
+          renderTrack={({ props, children }) => (
+            <div
+              onMouseDown={props.onMouseDown}
+              onTouchStart={props.onTouchStart}
+              className="flex w-20 h-[20px] shrink-0"
+              style={props.style}
+            >
+              <div
+                ref={props.ref}
+                className="self-center w-full h-[4px] rounded-lg"
+                style={{
+                  background: getTrackBackground({
+                    values: [muted ? 0 : volume],
+                    colors: ['#80cec8', '#ccc'],
+                    min: 0,
+                    max: 1,
+                  }),
+                }}
+              >
+                {children}
+              </div>
+            </div>
+          )}
+          renderThumb={({ props: { key, ...thumbProps } }) => (
+            <div
+              key={key}
+              {...thumbProps}
+              style={{
+                ...thumbProps.style,
+                height: '14px',
+                width: '14px',
+                backgroundColor: '#019D91',
+                borderRadius: '50%',
+              }}
+            />
+          )}
+        />
       </div>
     </div>
   );

@@ -12,6 +12,7 @@
 		renderConfig?: Config['renderConfig'];
 		segment?: Config['segment'];
 		speed?: Config['speed'];
+		volume?: Config['volume'];
 		src?: Config['src'];
 		useFrameInterpolation?: Config['useFrameInterpolation'];
 		marker?: Config['marker'];
@@ -35,6 +36,7 @@
 		renderConfig = undefined,
 		segment = undefined,
 		speed = 1,
+		volume = 1,
 		src = undefined,
 		useFrameInterpolation = true,
 		marker = undefined,
@@ -68,6 +70,7 @@
 				loop,
 				loopCount,
 				speed,
+				volume,
 				data,
 				renderConfig,
 				segment,
@@ -134,6 +137,13 @@
 		const currentSpeed = speed;
 		if (dotLottie && typeof currentSpeed === 'number') {
 			dotLottie.setSpeed(currentSpeed);
+		}
+	});
+
+	$effect(() => {
+		const currentVolume = volume;
+		if (dotLottie && typeof currentVolume === 'number') {
+			dotLottie.setVolume(currentVolume);
 		}
 	});
 
