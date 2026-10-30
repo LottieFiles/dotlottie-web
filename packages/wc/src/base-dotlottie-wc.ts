@@ -17,6 +17,8 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
 
   private _speed: Config['speed'];
 
+  private _volume: Config['volume'];
+
   private _segment: Config['segment'];
 
   private _mode: Config['mode'];
@@ -92,6 +94,16 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
   public set speed(value: Config['speed']) {
     this._speed = value;
     this.dotLottie?.setSpeed(value ?? 1);
+  }
+
+  @property({ type: Number })
+  public get volume(): Config['volume'] {
+    return this._isPlayerReady() ? this.dotLottie?.volume : this._volume;
+  }
+
+  public set volume(value: Config['volume']) {
+    this._volume = value;
+    this.dotLottie?.setVolume(value ?? 1);
   }
 
   @property({ type: Array })
@@ -207,6 +219,7 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
       loopCount: this._loopCount,
       autoplay: this._autoplay,
       speed: this._speed,
+      volume: this._volume,
       segment: this._segment,
       marker: this._marker,
       mode: this._mode,

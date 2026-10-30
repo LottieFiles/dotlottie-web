@@ -75,6 +75,7 @@ export interface DotLottieInstanceState {
   speed: number;
   totalFrames: number;
   useFrameInterpolation: boolean;
+  volume: number;
 }
 
 // Not static fields: ES2020 down-levels those to top-level side effects, breaking tree-shaking.
@@ -163,6 +164,7 @@ export class DotLottieWorker {
     mode: 'forward',
     segment: [0, 0],
     speed: 1,
+    volume: 1,
     totalFrames: 0,
     isLoaded: false,
     isPlaying: false,
@@ -591,6 +593,10 @@ export class DotLottieWorker {
     return this._dotLottieInstanceState.speed;
   }
 
+  public get volume(): number {
+    return this._dotLottieInstanceState.volume;
+  }
+
   public get duration(): number {
     return this._dotLottieInstanceState.duration;
   }
@@ -737,6 +743,18 @@ export class DotLottieWorker {
     if (!this._created) return;
 
     await this._sendMessage('setSpeed', { instanceId: this._id, speed });
+    await this._updateDotLottieInstanceState();
+  }
+
+  /**
+   * Sets the audio volume in the worker thread. Kept across loads.
+   * @param volume - From 0 (muted) to 1 (full); values outside are clamped
+   * @returns Promise that resolves when the volume has been updated
+   */
+  public async setVolume(volume: number): Promise<void> {
+    if (!this._created) return;
+
+    await this._sendMessage('setVolume', { instanceId: this._id, volume });
     await this._updateDotLottieInstanceState();
   }
 

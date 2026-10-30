@@ -68,6 +68,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   themeData,
   themeId,
   useFrameInterpolation,
+  volume,
   workerId,
   ...props
 }: BaseDotLottieProps<T> & {
@@ -87,6 +88,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     workerId?: T extends DotLottieWorker ? string : undefined;
   } = {
     speed,
+    volume,
     mode,
     loop,
     loopCount,
@@ -181,6 +183,10 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   useEffect(() => {
     dotLottieRef.current?.setSpeed(speed ?? 1);
   }, [speed]);
+
+  useEffect(() => {
+    dotLottieRef.current?.setVolume(volume ?? 1);
+  }, [volume]);
 
   useEffect(() => {
     dotLottieRef.current?.setMode(mode ?? 'forward');

@@ -194,6 +194,10 @@ export interface MethodParamsMap {
     instanceId: string;
     speed: number;
   };
+  setVolume: {
+    instanceId: string;
+    volume: number;
+  };
   setTheme: {
     instanceId: string;
     themeId: string;
@@ -494,6 +498,7 @@ export interface MethodResultMap {
   setSegment: undefined;
   resetSegment: undefined;
   setSpeed: undefined;
+  setVolume: undefined;
   setTheme: boolean;
   setThemeData: boolean;
   setTransform: boolean;

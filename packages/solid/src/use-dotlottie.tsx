@@ -116,6 +116,16 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
       dotLottieInstance.setSpeed(config.speed);
     }
   });
+  // volume
+  createEffect(() => {
+    const dotLottieInstance = dotLottie();
+
+    if (!dotLottieInstance) return;
+
+    if (typeof config.volume === 'number' && config.volume !== dotLottieInstance.volume) {
+      dotLottieInstance.setVolume(config.volume);
+    }
+  });
   // mode
   createEffect(() => {
     const dotLottieInstance = dotLottie();

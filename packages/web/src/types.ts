@@ -172,6 +172,11 @@ export interface Config {
    */
   speed?: number;
   /**
+   * Audio volume for animations with sound, from 0 (muted) to 1 (full).
+   * Defaults to 1.
+   */
+  volume?: number;
+  /**
    * URL to fetch the animation from.
    * Use this to load .lottie or .json files from a remote or local path.
    */
