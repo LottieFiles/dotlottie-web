@@ -1,5 +1,20 @@
 # @lottiefiles/dotlottie-web
 
+## 0.82.0
+### Minor Changes
+
+- bbf324c: Add audio volume control: a `volume` config option, `setVolume()` and a `volume` getter on `DotLottie` and `DotLottieWorker`, and a `volume` prop on the React, Vue, Svelte, Solid and web component players. It goes from 0 (muted) to 1 (full), defaults to 1, and is kept across loads.
+- d8a4e9e: chore: remove experimental MP4 video asset support and bump thorvg to v1.1.2
+  
+  fix: text glyphs dropped when multiple players share an embedded font (#877)
+
+### Patch Changes
+
+- 3011b70: fix: apply the `themeId` and `animationId` config options on load
+- 211d271: fix: `Marker` type is now `{ name, start, end }`
+- bbf324c: Update dotlottie-rs WASM bindings to `e09b196`. Audio now plays WAV, FLAC, Ogg and M4A, uses the left channel of a layer's volume (static `[100, 0]` levels were silent), and a volume above 100% or below 0 no longer breaks the player.
+- ea7250c: Update dotlottie-rs WASM bindings to v0.1.60 (thorvg v1.1.3). Themes now support `BezierPath` rules and skip unknown rule types instead of failing.
+
 ## 0.81.0
 ### Minor Changes
 

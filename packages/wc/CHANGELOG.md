@@ -1,5 +1,20 @@
 # @lottiefiles/dotlottie-wc
 
+## 0.11.0
+### Minor Changes
+
+- bbf324c: Add audio volume control: a `volume` config option, `setVolume()` and a `volume` getter on `DotLottie` and `DotLottieWorker`, and a `volume` prop on the React, Vue, Svelte, Solid and web component players. It goes from 0 (muted) to 1 (full), defaults to 1, and is kept across loads.
+
+### Patch Changes
+
+- Updated dependencies [bbf324c]
+- Updated dependencies [d8a4e9e]
+- Updated dependencies [3011b70]
+- Updated dependencies [211d271]
+- Updated dependencies [bbf324c]
+- Updated dependencies [ea7250c]
+  - @lottiefiles/dotlottie-web@0.82.0
+
 ## 0.10.0
 ### Minor Changes
 
