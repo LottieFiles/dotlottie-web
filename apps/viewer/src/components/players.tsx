@@ -9,8 +9,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { FaPause, FaPlay, FaVolumeMute, FaVolumeUp } from 'react-icons/fa';
 import { GiNextButton, GiPreviousButton } from 'react-icons/gi';
 import { ImLoop } from 'react-icons/im';
+import { TbZoomIn, TbZoomOut, TbZoomReset } from 'react-icons/tb';
 import { getTrackBackground, Range } from 'react-range';
 import dotLottieWasmUrl from '../../../../packages/web/src/core/dotlottie-player.wasm?url';
+import { useCamera } from '../hooks/use-camera';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   setActiveAnimationId,
@@ -70,6 +72,8 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
   const version = useAppSelector((state) => state.viewer.version);
   const availableVersions = useAppSelector((state) => state.viewer.availableVersions);
   const dispatch = useAppDispatch();
+  // dragging would steal a state machine's pointer input
+  const camera = useCamera(dotLottie, !activeStateMachineId);
 
   const coreVersion = availableVersions.find((v) => v.reactVersion === version)?.coreVersion;
 
@@ -164,7 +168,7 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
             title="dotLottie Web"
           />
           <div className="flex items-center justify-center flex-grow p-4">
-            <div style={{ width: '350px', height: '350px' }}>
+            <div className="relative" style={{ width: '350px', height: '350px' }}>
               {version !== 'local' ? (
                 <DotLottieCDNPlayer
                   key={version}
@@ -220,6 +224,18 @@ export default function Players({ onDotLottieChange }: PlayersProps) {
                   dotLottieRefCallback={setDotLottie}
                 />
               )}
+              <div className="absolute flex items-center gap-1 p-1 text-xs bg-white border rounded-lg shadow-sm bottom-2 right-2">
+                <button className="p-1 rounded hover:bg-subtle" title="Zoom out" onClick={camera.zoomOut}>
+                  <TbZoomOut />
+                </button>
+                <span className="w-10 text-center tabular-nums">{Math.round(camera.zoom * 100)}%</span>
+                <button className="p-1 rounded hover:bg-subtle" title="Zoom in" onClick={camera.zoomIn}>
+                  <TbZoomIn />
+                </button>
+                <button className="p-1 rounded hover:bg-subtle" title="Reset view" onClick={camera.reset}>
+                  <TbZoomReset />
+                </button>
+              </div>
             </div>
           </div>
         </div>
