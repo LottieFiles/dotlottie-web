@@ -260,6 +260,47 @@ describe('isElementInViewport', () => {
 
     expect(isElementInViewport(mockElement)).toBe(true);
   });
+
+  test('returns false for an element that is not rendered, even if its rect is inside the viewport', () => {
+    const mockElement = {
+      checkVisibility: () => false,
+      getBoundingClientRect: () => ({
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+      }),
+    } as unknown as HTMLElement;
+
+    expect(isElementInViewport(mockElement)).toBe(false);
+  });
+
+  test('returns true for a rendered 0x0 element inside the viewport', () => {
+    const mockElement = {
+      checkVisibility: () => true,
+      getBoundingClientRect: () => ({
+        top: 100,
+        left: 100,
+        bottom: 100,
+        right: 100,
+      }),
+    } as unknown as HTMLElement;
+
+    expect(isElementInViewport(mockElement)).toBe(true);
+  });
+
+  test('returns false for an element inside a display: none ancestor', () => {
+    const wrapper = document.createElement('div');
+    const element = document.createElement('div');
+
+    wrapper.style.display = 'none';
+    wrapper.appendChild(element);
+    document.body.appendChild(wrapper);
+
+    expect(isElementInViewport(element)).toBe(false);
+
+    wrapper.remove();
+  });
 });
 
 describe('getPointerPosition', () => {
