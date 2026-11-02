@@ -108,9 +108,17 @@ export function getDefaultDPR(): number {
  * Checks if an HTML element is currently visible within the browser viewport.
  * Used to determine when to freeze/unfreeze rendering for performance optimization.
  * @param element - HTMLElement to check visibility for
+ * An element that isn't rendered (for example inside a `display: none` ancestor) is not visible, even though
+ * its 0x0 bounding rect at (0, 0) falls inside the viewport.
+ * @param element - HTMLElement to check visibility for
  * @returns True if element is at least partially visible in viewport, false otherwise
  */
 export function isElementInViewport(element: HTMLElement): boolean {
+  // Element.checkVisibility() isn't available in Safari before 17.4, which keeps the rect-only check
+  if (typeof element.checkVisibility === 'function' && !element.checkVisibility()) {
+    return false;
+  }
+
   const rect = element.getBoundingClientRect();
   const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
   const viewportWidth = window.innerWidth || document.documentElement.clientWidth;

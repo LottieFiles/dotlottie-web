@@ -2954,6 +2954,65 @@ describe.each([
     });
   });
 
+  // setRenderConfig() before load observes the canvas early, so the observer's only "not visible" entry arrives
+  // before the animation loop starts and freeze() ignores it. The load-time viewport check is then the only guard,
+  // which is what these tests exercise (DotLottieReact always calls setRenderConfig() on mount).
+  describe('freezeOnOffscreen with setRenderConfig() before load', () => {
+    test('freeze when the canvas is inside a display: none ancestor', async () => {
+      const wrapper = document.createElement('div');
+      const onLoad = vi.fn();
+
+      wrapper.style.display = 'none';
+      wrapper.appendChild(canvas);
+      document.body.appendChild(wrapper);
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: jsonSrc,
+        autoplay: true,
+        loop: true,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+      await dotLottie.setRenderConfig({});
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+
+      await vi.waitFor(() => {
+        expect(dotLottie.isFrozen).toBe(true);
+      });
+
+      wrapper.remove();
+    });
+
+    test('keep playing when the canvas is visible but 0x0', async () => {
+      const onLoad = vi.fn();
+
+      canvas.style.width = '0px';
+      canvas.style.height = '0px';
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: jsonSrc,
+        autoplay: true,
+        loop: true,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+      await dotLottie.setRenderConfig({});
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+
+      await sleep(500);
+
+      expect(dotLottie.isFrozen).toBe(false);
+    });
+  });
+
   describe('stateMachineGetInputs', () => {
     test('gets all inputs correctly', async () => {
       canvas.style.display = 'none';
