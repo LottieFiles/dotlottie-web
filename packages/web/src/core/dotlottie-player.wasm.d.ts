@@ -72,6 +72,18 @@ export const dotlottieplayerwasm_set_asset_resolver: (a: number, b: number) => v
 export const dotlottieplayerwasm_set_audio_volume: (a: number, b: number) => void;
 export const dotlottieplayerwasm_set_autoplay: (a: number, b: number) => void;
 export const dotlottieplayerwasm_set_background: (a: number, b: number, c: number, d: number, e: number) => number;
+export const dotlottieplayerwasm_set_bezier_path_slot: (
+  a: number,
+  b: number,
+  c: number,
+  d: number,
+  e: number,
+  f: number,
+  g: number,
+  h: number,
+  i: number,
+  j: number,
+) => number;
 export const dotlottieplayerwasm_set_color_slot: (
   a: number,
   b: number,

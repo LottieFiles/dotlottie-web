@@ -4,6 +4,7 @@ import { EventManager } from '../event-manager';
 import { OffscreenObserver } from '../offscreen-observer';
 import { CanvasResizeObserver } from '../resize-observer';
 import type {
+  BezierPathSlotValue,
   ColorSlotValue,
   Config,
   GradientSlotValue,
@@ -1029,6 +1030,12 @@ export class DotLottieWorker {
     return this._sendMessage('setGradientSlot', { instanceId: this._id, slotId, value, colorStopCount });
   }
 
+  public async setBezierPathSlot(slotId: string, value: BezierPathSlotValue): Promise<boolean> {
+    if (!this._created) return false;
+
+    return this._sendMessage('setBezierPathSlot', { instanceId: this._id, slotId, value });
+  }
+
   public async setTextSlot(slotId: string, value: TextSlotValue): Promise<boolean> {
     if (!this._created) return false;
 
@@ -1443,6 +1450,17 @@ export class DotLottieWorker {
     if (!this._created) return false;
 
     return this._sendMessage('stateMachineOverrideState', { instanceId: this._id, state, immediate });
+  }
+
+  /**
+   * @experimental
+   * Reset a state machine input to the initial value from its definition
+   * @param name - The name of the input to reset
+   */
+  public async stateMachineResetInput(name: string): Promise<void> {
+    if (!this._created) return;
+
+    await this._sendMessage('stateMachineResetInput', { instanceId: this._id, name });
   }
 
   /**

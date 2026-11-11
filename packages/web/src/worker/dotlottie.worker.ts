@@ -759,6 +759,17 @@ const commands: {
 
     return instance.stateMachineOverrideState(state, immediate);
   },
+  stateMachineResetInput: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    instance.stateMachineResetInput(request.params.name);
+  },
   stateMachineSetSeed: (request) => {
     const instanceId = request.params.instanceId;
     const seed = request.params.seed;
@@ -1064,6 +1075,17 @@ const commands: {
     }
 
     return instance.setGradientSlot(request.params.slotId, request.params.value, request.params.colorStopCount);
+  },
+  setBezierPathSlot: (request) => {
+    const instanceId = request.params.instanceId;
+
+    const instance = instancesMap.get(instanceId);
+
+    if (!instance) {
+      throw new Error(`Instance with id ${instanceId} does not exist.`);
+    }
+
+    return instance.setBezierPathSlot(request.params.slotId, request.params.value);
   },
   setTextSlot: (request) => {
     const instanceId = request.params.instanceId;

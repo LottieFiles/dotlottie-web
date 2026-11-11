@@ -19,6 +19,7 @@ const textAnimSrc = new URL('../../../fixtures/text.json', import.meta.url).href
 const imageSlotSrc = new URL('../../../fixtures/image.json', import.meta.url).href;
 const impactFontUrl = new URL('../../../fixtures/fonts/Impact.ttf', import.meta.url).href;
 const audioSrc = new URL('../../../fixtures/audio.json', import.meta.url).href;
+const bezierPathSrc = new URL('../../../fixtures/bezier_path.json', import.meta.url).href;
 
 DotLottieClass.setWasmUrl(wasmUrl);
 DotLottieWorkerClass.setWasmUrl(wasmUrl);
@@ -1860,6 +1861,144 @@ describe.each([
     });
   });
 
+  describe('setBezierPathSlot', () => {
+    // bezier_path.json exposes a triangle path under the slot id "shape_path".
+    const loadBezierAnimation = async (): Promise<void> => {
+      const onLoad = vi.fn();
+
+      dotLottie = new DotLottie({ autoplay: false, canvas, src: bezierPathSrc });
+      dotLottie.addEventListener('load', onLoad);
+
+      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1), { timeout: 5000 });
+    };
+
+    test('reports the bezier_path slot type', async () => {
+      await loadBezierAnimation();
+
+      expect(await dotLottie.getSlotType('shape_path')).toBe('bezier_path');
+    });
+
+    test('sets a static path and fills omitted tangents with zeros', async () => {
+      await loadBezierAnimation();
+
+      expect(
+        await dotLottie.setBezierPathSlot('shape_path', {
+          v: [
+            [-80, -80],
+            [80, -80],
+            [80, 80],
+            [-80, 80],
+          ],
+          c: true,
+        }),
+      ).toBe(true);
+
+      expect(await dotLottie.getSlot('shape_path')).toEqual({
+        a: 0,
+        k: {
+          i: [
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+          ],
+          o: [
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+          ],
+          v: [
+            [-80, -80],
+            [80, -80],
+            [80, 80],
+            [-80, 80],
+          ],
+          c: true,
+        },
+      });
+    });
+
+    test('sets a keyframed path', async () => {
+      await loadBezierAnimation();
+
+      expect(
+        await dotLottie.setBezierPathSlot('shape_path', [
+          {
+            t: 0,
+            s: {
+              v: [
+                [-20, -20],
+                [20, -20],
+                [0, 20],
+              ],
+              c: true,
+            },
+          },
+          {
+            t: 60,
+            s: {
+              v: [
+                [-90, -90],
+                [90, -90],
+                [0, 90],
+              ],
+              c: true,
+            },
+          },
+        ]),
+      ).toBe(true);
+
+      const slot = (await dotLottie.getSlot('shape_path')) as { a: number; k: Array<{ t: number }> };
+
+      expect(slot.a).toBe(1);
+      expect(slot.k.map((keyframe) => keyframe.t)).toEqual([0, 60]);
+    });
+
+    test('returns false for a path whose tangents do not match its vertices', async () => {
+      await loadBezierAnimation();
+
+      expect(
+        await dotLottie.setBezierPathSlot('shape_path', {
+          v: [
+            [0, 0],
+            [10, 0],
+          ],
+          i: [[0, 0]],
+        }),
+      ).toBe(false);
+    });
+
+    // Pixel readback only works on the main-thread canvas (the worker canvas is transferred offscreen).
+    (isWorker ? test.skip : test)('changing the path changes the rendered output', async () => {
+      await loadBezierAnimation();
+
+      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+      const before = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+      expect(
+        await dotLottie.setBezierPathSlot('shape_path', {
+          v: [
+            [-90, -90],
+            [90, -90],
+            [90, 90],
+            [-90, 90],
+          ],
+          c: true,
+        }),
+      ).toBe(true);
+
+      const after = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let totalDiff = 0;
+
+      for (let p = 0; p < after.length; p += 1) {
+        totalDiff += Math.abs((after[p] ?? 0) - (before[p] ?? 0));
+      }
+
+      expect(totalDiff).toBeGreaterThan(1000);
+    });
+  });
+
   describe('setImageSlot', () => {
     // 24x24 solid magenta PNG (data URI) — same asset the dotlottie-rs image_slot example uses.
     const MAGENTA_PNG =
@@ -3010,6 +3149,35 @@ describe.each([
       await sleep(500);
 
       expect(dotLottie.isFrozen).toBe(false);
+    });
+  });
+
+  describe('stateMachineResetInput', () => {
+    test('restores an input to the initial value from the definition', async () => {
+      canvas.style.display = 'none';
+
+      const onLoad = vi.fn();
+
+      dotLottie = new DotLottie({ canvas, src, autoplay: true });
+      dotLottie.addEventListener('load', onLoad);
+
+      await vi.waitFor(() => expect(onLoad).toHaveBeenCalledTimes(1));
+
+      const response = await fetch(smSrc);
+      const smData = await response.json();
+
+      await dotLottie.stateMachineLoadData(JSON.stringify(smData));
+      await dotLottie.stateMachineStart();
+
+      // all-inputs.json declares the string input "b_exited" with the initial value "lorem ipsum".
+      expect(await dotLottie.stateMachineGetStringInput('b_exited')).toBe('lorem ipsum');
+
+      expect(await dotLottie.stateMachineSetStringInput('b_exited', 'changed')).toBe(true);
+      expect(await dotLottie.stateMachineGetStringInput('b_exited')).toBe('changed');
+
+      await dotLottie.stateMachineResetInput('b_exited');
+
+      expect(await dotLottie.stateMachineGetStringInput('b_exited')).toBe('lorem ipsum');
     });
   });
 

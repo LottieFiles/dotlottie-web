@@ -389,9 +389,33 @@ export interface TextDocument {
 export type TextSlotValue = TextDocument;
 
 /**
+ * Bezier path in Lottie's native shape format, the geometry of a path (`ty: "sh"`) property.
+ * Tangents are relative to the vertex at the same index.
+ * @see https://lottiefiles.github.io/lottie-docs/values/#bezier
+ */
+export interface BezierPath {
+  /** Whether the path is closed. Defaults to false */
+  c?: boolean;
+  /** Incoming tangent per vertex. Defaults to zero tangents (straight segments) */
+  i?: Array<[number, number]>;
+  /** Outgoing tangent per vertex. Defaults to zero tangents (straight segments) */
+  o?: Array<[number, number]>;
+  /** Vertices of the path */
+  v: Array<[number, number]>;
+}
+
+/**
+ * Bezier path slot value - static path or array of keyframes.
+ * Keyframed paths only morph when every keyframe has the same vertex count.
+ * @example Static: \{ v: [[0, -80], [80, 80], [-80, 80]], c: true \}
+ * @example Animated: [\{ t: 0, s: \{ v: [[0, 0], [10, 0]] \} \}, \{ t: 60, s: \{ v: [[0, 0], [50, 0]] \} \}]
+ */
+export type BezierPathSlotValue = BezierPath | Array<Keyframe<BezierPath>>;
+
+/**
  * Slot type string as returned by the core
  */
-export type SlotType = 'color' | 'gradient' | 'image' | 'text' | 'scalar' | 'vector';
+export type SlotType = 'color' | 'gradient' | 'image' | 'text' | 'scalar' | 'vector' | 'position' | 'bezier_path';
 
 // =============================================================================
 // THEME TYPES (dotLottie v2.0 Specification)
