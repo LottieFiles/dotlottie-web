@@ -32,6 +32,7 @@ export const DotLottieSolid = (props: DotLottieSolidProps): JSX.Element => {
     'useFrameInterpolation',
     'stateMachineId',
     'stateMachineConfig',
+    'assetResolver',
   ]);
 
   const { DotLottieComponent, dotLottie } = useDotLottie(dotLottieProps);

@@ -13,6 +13,7 @@
 		segment?: Config['segment'];
 		speed?: Config['speed'];
 		volume?: Config['volume'];
+		assetResolver?: Config['assetResolver'];
 		src?: Config['src'];
 		useFrameInterpolation?: Config['useFrameInterpolation'];
 		marker?: Config['marker'];
@@ -37,6 +38,7 @@
 		segment = undefined,
 		speed = 1,
 		volume = 1,
+		assetResolver = undefined,
 		src = undefined,
 		useFrameInterpolation = true,
 		marker = undefined,
@@ -80,7 +82,8 @@
 				animationId,
 				themeId,
 				stateMachineId,
-				stateMachineConfig
+				stateMachineConfig,
+				assetResolver
 			}))
 		);
 
@@ -222,7 +225,8 @@
 					animationId,
 					themeId,
 					stateMachineId,
-					stateMachineConfig
+					stateMachineConfig,
+					assetResolver
 				}))
 			});
 		}
@@ -254,7 +258,8 @@
 					animationId,
 					themeId,
 					stateMachineId,
-					stateMachineConfig
+					stateMachineConfig,
+					assetResolver
 				}))
 			});
 		}

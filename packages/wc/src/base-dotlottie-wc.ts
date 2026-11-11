@@ -198,6 +198,12 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
   @property({ type: Object })
   public stateMachineConfig: Config['stateMachineConfig'];
 
+  /**
+   * Supplies bytes for assets the player cannot load itself. Set it as a property before `src` or `data`.
+   */
+  @property({ attribute: false })
+  public assetResolver: Config['assetResolver'];
+
   @state()
   public dotLottie: T | null = null;
 
@@ -229,6 +235,7 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
       backgroundColor: this._backgroundColor,
       stateMachineConfig: this.stateMachineConfig,
       stateMachineId: this.stateMachineId,
+      assetResolver: this.assetResolver,
     };
   }
 
