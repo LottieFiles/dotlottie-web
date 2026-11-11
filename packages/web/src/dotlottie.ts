@@ -13,6 +13,8 @@ import { OffscreenObserver } from './offscreen-observer';
 import { CanvasResizeObserver } from './resize-observer';
 import type {
   AssetResolver,
+  BezierPath,
+  BezierPathSlotValue,
   ColorSlotValue,
   Config,
   Data,
@@ -1905,6 +1907,34 @@ export class DotLottie {
   }
 
   /**
+   * Set a bezier path slot value, replacing the geometry of a path (`ty: "sh"`) property
+   * @param slotId - The slot ID to set
+   * @param value - Static path or array of keyframes. Omitted tangents default to zero
+   * @returns true if successful
+   */
+  public setBezierPathSlot(slotId: string, value: BezierPathSlotValue): boolean {
+    if (this._dotLottieCore === null) return false;
+
+    const toLottiePath = (path: BezierPath): Record<string, unknown> => {
+      const zeroTangents = path.v.map(() => [0, 0]);
+
+      return { i: path.i ?? zeroTangents, o: path.o ?? zeroTangents, v: path.v, c: path.c ?? false };
+    };
+
+    // Lottie wraps a keyframed path value in a single-element array.
+    const slotJson = Array.isArray(value)
+      ? JSON.stringify({ a: 1, k: value.map((keyframe) => ({ ...keyframe, s: [toLottiePath(keyframe.s)] })) })
+      : JSON.stringify({ a: 0, k: toLottiePath(value) });
+
+    const result = this._dotLottieCore.set_slot_str(slotId, slotJson);
+
+    this._dotLottieCore.render();
+    this._draw();
+
+    return result;
+  }
+
+  /**
    * Set a text slot value (always static - text documents don't support animation)
    * Supports partial updates - only provided properties will be changed, others inherit from existing value
    * @param slotId - The slot ID to set
@@ -2373,6 +2403,15 @@ export class DotLottie {
     }
 
     return [];
+  }
+
+  /**
+   * @experimental
+   * Reset a state machine input to the initial value from its definition
+   * @param name - The name of the input to reset
+   */
+  public stateMachineResetInput(name: string): void {
+    this._dotLottieCore?.sm_reset_input(name);
   }
 
   /**

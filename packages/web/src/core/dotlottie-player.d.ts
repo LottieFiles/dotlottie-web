@@ -214,6 +214,17 @@ export class DotLottiePlayerWasm {
   load_dotlottie_data(data: Uint8Array): boolean;
   sm_get_string_input(key: string): string | undefined;
   sm_set_string_input(key: string, value: string): boolean;
+  /**
+   * Set a bezier path slot. Arrays are flat `[x0, y0, x1, y1, ...]`;
+   * tangents are relative to their vertex and default to zero when omitted.
+   */
+  set_bezier_path_slot(
+    id: string,
+    vertices: Float32Array,
+    closed: boolean,
+    in_tangents?: Float32Array | null,
+    out_tangents?: Float32Array | null,
+  ): boolean;
   sm_get_boolean_input(key: string): boolean | undefined;
   sm_get_numeric_input(key: string): number | undefined;
   sm_post_pointer_down(x: number, y: number): void;
@@ -377,6 +388,18 @@ export interface InitOutput {
   readonly dotlottieplayerwasm_set_audio_volume: (a: number, b: number) => void;
   readonly dotlottieplayerwasm_set_autoplay: (a: number, b: number) => void;
   readonly dotlottieplayerwasm_set_background: (a: number, b: number, c: number, d: number, e: number) => number;
+  readonly dotlottieplayerwasm_set_bezier_path_slot: (
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+    e: number,
+    f: number,
+    g: number,
+    h: number,
+    i: number,
+    j: number,
+  ) => number;
   readonly dotlottieplayerwasm_set_color_slot: (
     a: number,
     b: number,

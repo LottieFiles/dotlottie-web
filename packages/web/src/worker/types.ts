@@ -27,6 +27,7 @@ import type {
   UnfreezeEvent,
 } from '../event-manager';
 import type {
+  BezierPathSlotValue,
   ColorSlotValue,
   Config,
   GradientSlotValue,
@@ -130,6 +131,11 @@ export interface MethodParamsMap {
     instanceId: string;
     slotId: string;
     value: GradientSlotValue;
+  };
+  setBezierPathSlot: {
+    instanceId: string;
+    slotId: string;
+    value: BezierPathSlotValue;
   };
   setTextSlot: {
     instanceId: string;
@@ -316,6 +322,10 @@ export interface MethodParamsMap {
     name: string;
     value: number;
   };
+  stateMachineResetInput: {
+    instanceId: string;
+    name: string;
+  };
   stateMachineSetSeed: {
     instanceId: string;
     seed: number;
@@ -482,6 +492,7 @@ export interface MethodResultMap {
   setScalarSlot: boolean;
   setVectorSlot: boolean;
   setGradientSlot: boolean;
+  setBezierPathSlot: boolean;
   setTextSlot: boolean;
   setImageSlot: boolean;
   resetSlot: boolean;
@@ -527,6 +538,7 @@ export interface MethodResultMap {
   stateMachineSetBooleanInput: boolean;
   stateMachineSetConfig: undefined;
   stateMachineSetNumericInput: boolean;
+  stateMachineResetInput: undefined;
   stateMachineSetSeed: boolean;
   stateMachineSetStringInput: boolean;
   stateMachineStart: boolean;

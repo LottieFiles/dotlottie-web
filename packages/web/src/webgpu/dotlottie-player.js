@@ -1117,6 +1117,28 @@ export class DotLottiePlayerWasm {
         return ret !== 0;
     }
     /**
+     * Set a bezier path slot. Arrays are flat `[x0, y0, x1, y1, ...]`;
+     * tangents are relative to their vertex and default to zero when omitted.
+     * @param {string} id
+     * @param {Float32Array} vertices
+     * @param {boolean} closed
+     * @param {Float32Array | null} [in_tangents]
+     * @param {Float32Array | null} [out_tangents]
+     * @returns {boolean}
+     */
+    set_bezier_path_slot(id, vertices, closed, in_tangents, out_tangents) {
+        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_export_1, wasm.__wbindgen_export_2);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArrayF32ToWasm0(vertices, wasm.__wbindgen_export_1);
+        const len1 = WASM_VECTOR_LEN;
+        var ptr2 = isLikeNone(in_tangents) ? 0 : passArrayF32ToWasm0(in_tangents, wasm.__wbindgen_export_1);
+        var len2 = WASM_VECTOR_LEN;
+        var ptr3 = isLikeNone(out_tangents) ? 0 : passArrayF32ToWasm0(out_tangents, wasm.__wbindgen_export_1);
+        var len3 = WASM_VECTOR_LEN;
+        const ret = wasm.dotlottieplayerwasm_set_bezier_path_slot(this.__wbg_ptr, ptr0, len0, ptr1, len1, closed, ptr2, len2, ptr3, len3);
+        return ret !== 0;
+    }
+    /**
      * @param {string} key
      * @returns {boolean | undefined}
      */

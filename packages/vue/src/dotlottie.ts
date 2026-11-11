@@ -50,12 +50,14 @@ export const DotLottieVue = defineComponent({
     layout: { type: Object as PropType<DotLottieVueProps['layout']>, required: false },
     stateMachineId: { type: String as PropType<DotLottieVueProps['stateMachineId']>, required: false },
     stateMachineConfig: { type: Object as PropType<DotLottieVueProps['stateMachineConfig']>, required: false },
+    assetResolver: { type: Function as PropType<DotLottieVueProps['assetResolver']>, required: false },
   },
 
   setup(props: DotLottieVueProps, { attrs, expose }: SetupContext): () => VNode {
     const canvas: Ref<HTMLCanvasElement | undefined> = ref(undefined);
     const {
       animationId,
+      assetResolver,
       backgroundColor,
       data,
       layout,
@@ -95,6 +97,7 @@ export const DotLottieVue = defineComponent({
 
       dotLottie.load({
         animationId: animationId?.value,
+        assetResolver: assetResolver?.value,
         backgroundColor: backgroundColor?.value,
         data: data?.value,
         layout: layout?.value,

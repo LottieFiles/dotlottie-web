@@ -47,6 +47,7 @@ export type BaseDotLottieProps<T extends DotLottie | DotLottieWorker> = Omit<Con
 
 export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   animationId,
+  assetResolver,
   autoplay,
   backgroundColor,
   className,
@@ -89,6 +90,7 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   } = {
     speed,
     volume,
+    assetResolver,
     mode,
     loop,
     loopCount,

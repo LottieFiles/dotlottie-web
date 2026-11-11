@@ -20,7 +20,8 @@ permissions: {}
 jobs:
   validate:
     name: Validate
-    runs-on: ubuntu-latest
+    # Playwright 1.60 has no browser build for ubuntu-latest (26.04) yet.
+    runs-on: ubuntu-24.04
     if: github.event_name == 'push'
 
     permissions:

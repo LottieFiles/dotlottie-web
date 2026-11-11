@@ -323,6 +323,49 @@ describe.each([
     });
   });
 
+  // The worker cannot take a resolver: functions do not cross the worker boundary.
+  (instanceType === DotLottieWorker ? test.skip : test)('passes assetResolver to the player', async () => {
+    // A raw JSON animation whose only layer references a non-embedded (`e: 0`) image,
+    // so the resolver is the only way those bytes can arrive.
+    const externalAssetAnimation = JSON.stringify({
+      v: '5.7.4',
+      fr: 30,
+      ip: 0,
+      op: 30,
+      w: 100,
+      h: 100,
+      assets: [{ id: 'img0', w: 16, h: 16, u: 'images/', p: 'img_0.png', e: 0 }],
+      layers: [
+        {
+          ddd: 0,
+          ind: 1,
+          ty: 2,
+          nm: 'img',
+          refId: 'img0',
+          ks: {
+            o: { a: 0, k: 100 },
+            r: { a: 0, k: 0 },
+            p: { a: 0, k: [50, 50, 0] },
+            a: { a: 0, k: [8, 8, 0] },
+            s: { a: 0, k: [500, 500, 100] },
+          },
+          ip: 0,
+          op: 30,
+          st: 0,
+        },
+      ],
+    });
+    const assetResolver = vi.fn(() => null);
+
+    const { container } = await render(<Component data={externalAssetAnimation} assetResolver={assetResolver} />);
+
+    await vi.waitFor(() => {
+      expect(assetResolver).toHaveBeenCalledWith(expect.stringContaining('images/img_0.png'));
+    });
+
+    expect(container.querySelector('canvas')?.hasAttribute('assetresolver')).toBe(false);
+  });
+
   test('calls dotLottie.setMode when mode prop changes', async () => {
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
