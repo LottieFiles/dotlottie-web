@@ -1,5 +1,15 @@
 # @lottiefiles/dotlottie-web
 
+## 0.83.0
+### Minor Changes
+
+- ec77c1a: Add `setBezierPathSlot()` to `DotLottie` and `DotLottieWorker`. It replaces the geometry of a path tagged with a slot id, with a static path or keyframes, and tangents you leave out default to zero. `getSlotType()` can now return `position` and `bezier_path`.
+- ec77c1a: Add `stateMachineResetInput()` to `DotLottie` and `DotLottieWorker`. It puts a state machine input back to the initial value from its definition.
+
+### Patch Changes
+
+- ec77c1a: Update dotlottie-rs WASM bindings to `02a6113`. State machines now skip states, transitions, guards, actions and interactions they do not know instead of failing to load, and an event fired while a tween is running is kept until the tween ends.
+
 ## 0.82.1
 ### Patch Changes
 

@@ -1,5 +1,17 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.8.0
+### Minor Changes
+
+- ec77c1a: Pass `assetResolver` through to the player. The React, Vue, Svelte and Solid components take it as a prop, and the web component as a property. Before, it was dropped, so external assets could only be resolved with `DotLottie` directly. The worker players still ignore it.
+
+### Patch Changes
+
+- Updated dependencies [ec77c1a]
+- Updated dependencies [ec77c1a]
+- Updated dependencies [ec77c1a]
+  - @lottiefiles/dotlottie-web@0.83.0
+
 ## 0.7.1
 ### Patch Changes
 
