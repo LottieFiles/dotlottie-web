@@ -1511,6 +1511,9 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_setindex_4e73afdcd9bb95cd = function(arg0, arg1, arg2) {
         getObject(arg0)[arg1 >>> 0] = arg2;
     };
+    imports.wbg.__wbg_setmuted_e93fc48340c43e67 = function(arg0, arg1) {
+        getObject(arg0).muted = arg1 !== 0;
+    };
     imports.wbg.__wbg_setplaybackRate_f5c3b8896f82425e = function(arg0, arg1) {
         getObject(arg0).playbackRate = arg1;
     };
