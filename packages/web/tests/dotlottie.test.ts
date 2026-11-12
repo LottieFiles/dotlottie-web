@@ -1655,6 +1655,52 @@ describe.each([
 
       play.mockRestore();
     });
+
+    // iOS Safari ignores volume writes, so volume 0 has to mute
+    test('mutes the audio at volume 0', async () => {
+      const muted: boolean[] = [];
+      const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(function (this: HTMLMediaElement) {
+        muted.push(this.muted);
+
+        return Promise.resolve();
+      });
+      const onLoad = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: audioSrc,
+        loop: true,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+
+      dotLottie.setVolume(0);
+      dotLottie.play();
+
+      await vi.waitFor(() => {
+        expect(muted.length).toBeGreaterThan(0);
+      });
+
+      // each of these starts a new audio element
+      dotLottie.setFrame(0);
+      dotLottie.stop();
+      dotLottie.play();
+
+      expect(muted.length).toBeGreaterThanOrEqual(3);
+      expect(muted).not.toContain(false);
+
+      dotLottie.setVolume(0.5);
+      dotLottie.stop();
+      dotLottie.play();
+
+      expect(muted.at(-1)).toBe(false);
+
+      play.mockRestore();
+    });
   });
 
   describe('loopCount', () => {
