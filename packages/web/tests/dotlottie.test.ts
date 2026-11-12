@@ -1605,6 +1605,58 @@ describe.each([
     });
   });
 
+  // a worker has no HTMLMediaElement, so audio only plays on the main thread
+  (isWorker ? describe.skip : describe)('audio', () => {
+    test('replays an audio layer that spans the whole animation', async () => {
+      // headless Chrome rejects play() without a user gesture
+      const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
+      const onLoad = vi.fn();
+      const onLoop = vi.fn();
+
+      dotLottie = new DotLottie({
+        canvas,
+        src: audioSrc,
+        loop: true,
+      });
+
+      dotLottie.addEventListener('load', onLoad);
+      dotLottie.addEventListener('loop', onLoop);
+
+      await vi.waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+
+      // starting off a whole frame used to leave the clip a hair after 0, so it never restarted
+      dotLottie.setFrame(1.2);
+      dotLottie.play();
+
+      await vi.waitFor(() => {
+        expect(play).toHaveBeenCalled();
+      });
+
+      let plays = play.mock.calls.length;
+
+      dotLottie.setFrame(0);
+      expect(play.mock.calls.length).toBeGreaterThan(plays);
+      plays = play.mock.calls.length;
+
+      dotLottie.stop();
+      dotLottie.play();
+      expect(play.mock.calls.length).toBeGreaterThan(plays);
+      plays = play.mock.calls.length;
+
+      await vi.waitFor(
+        () => {
+          expect(onLoop).toHaveBeenCalled();
+        },
+        { timeout: 5000 },
+      );
+      expect(play.mock.calls.length).toBeGreaterThan(plays);
+
+      play.mockRestore();
+    });
+  });
+
   describe('loopCount', () => {
     test('loops for 2 times', async () => {
       const onLoad = vi.fn();
