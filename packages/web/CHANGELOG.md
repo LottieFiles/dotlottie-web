@@ -1,5 +1,10 @@
 # @lottiefiles/dotlottie-web
 
+## 0.83.1
+### Patch Changes
+
+- e8750c7: fix(web): replay an audio layer that spans the whole animation on loop, seek and stop
+
 ## 0.83.0
 ### Minor Changes
 
