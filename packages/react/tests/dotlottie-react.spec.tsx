@@ -616,16 +616,19 @@ describe.each([
 
     await vi.waitFor(() => {
       expect(dotLottie?.isLoaded).toBe(true);
+      expect(onLoad).toHaveBeenCalledTimes(1);
     });
 
     const setThemeData = vi.spyOn(dotLottie, 'setThemeData');
+
+    setThemeData.mockClear();
 
     rerender(
       <Component src={dotLottieSrc} autoplay themeData={themeData} dotLottieRefCallback={dotLottieRefCallback} />,
     );
 
     await vi.waitFor(() => {
-      expect(onLoad).toHaveBeenCalledTimes(1);
+      expect(onLoad).toHaveBeenCalledTimes(2);
     });
 
     await vi.waitFor(() => {
