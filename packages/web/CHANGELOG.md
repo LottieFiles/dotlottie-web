@@ -1,5 +1,10 @@
 # @lottiefiles/dotlottie-web
 
+## 0.83.2
+### Patch Changes
+
+- ddb5bf0: fix(web): `setVolume(0)` now mutes the audio on iOS Safari, which ignores volume changes
+
 ## 0.83.1
 ### Patch Changes
 
