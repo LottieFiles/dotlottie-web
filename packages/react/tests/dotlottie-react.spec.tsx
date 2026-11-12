@@ -597,6 +597,42 @@ describe.each([
     expect(dotLottie?.segment).toEqual([0, dotLottie.totalFrames - 1]);
   });
 
+  test('re-applies themeData after src changes', async () => {
+    const dotLottieRefCallback = vi.fn();
+    const themeData = JSON.stringify({ c0: { p: { a: 0, k: [1, 0, 1] } } });
+
+    const { rerender } = await render(
+      <Component src={lottieSrc} autoplay themeData={themeData} dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(dotLottieRefCallback).toHaveBeenCalledTimes(1);
+    });
+
+    const dotLottie = dotLottieRefCallback.mock.calls[0]?.[0];
+    const onLoad = vi.fn();
+
+    dotLottie?.addEventListener('load', onLoad);
+
+    await vi.waitFor(() => {
+      expect(dotLottie?.isLoaded).toBe(true);
+    });
+
+    const setThemeData = vi.spyOn(dotLottie, 'setThemeData');
+
+    rerender(
+      <Component src={dotLottieSrc} autoplay themeData={themeData} dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    await vi.waitFor(() => {
+      expect(setThemeData).toHaveBeenCalledWith(themeData);
+    });
+  });
+
   test.todo('calls dotLottie.setTheme & dotLottie.resetTheme when themeId prop changes', async () => {
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();

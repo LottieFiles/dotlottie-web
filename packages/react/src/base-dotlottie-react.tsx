@@ -109,10 +109,12 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     stateMachineId,
   };
 
+  const themeDataRef = useRef(themeData);
   const configRef = useRef<Omit<BaseDotLottieProps<T>, 'createDotLottie' | 'dotLottieRefCallback'> | undefined>(config);
 
   dotLottieRefCallbackRef.current = dotLottieRefCallback;
   configRef.current = config;
+  themeDataRef.current = themeData;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: DotLottie instance must only be created once per canvas mount
   const setCanvasRef = useCallback((canvas: HTMLCanvasElement | null) => {
@@ -268,6 +270,25 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   useEffect(() => {
     dotLottieRef.current?.setThemeData(themeData ?? '');
   }, [themeData]);
+
+  useEffect(() => {
+    const instance = dotLottieRef.current;
+
+    if (!instance) return undefined;
+
+    // The core clears theme data on every load (e.g. when `src` changes), so re-apply it.
+    const reapplyThemeData = (): void => {
+      if (themeDataRef.current) {
+        instance.setThemeData(themeDataRef.current);
+      }
+    };
+
+    instance.addEventListener('load', reapplyThemeData);
+
+    return () => {
+      instance.removeEventListener('load', reapplyThemeData);
+    };
+  }, []);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: granular property deps avoid unnecessary setLayout calls when layout object reference changes
   useEffect(() => {
