@@ -621,6 +621,10 @@ describe.each([
       expect(onLoad).toHaveBeenCalledTimes(1);
     });
 
+    if (!dotLottie) {
+      throw new Error('expected a player instance');
+    }
+
     const setThemeData = vi.spyOn(dotLottie, 'setThemeData');
 
     await vi.waitFor(async () => {
@@ -660,7 +664,12 @@ describe.each([
 
     instance.addEventListener('load', onLoad);
     rerender(
-      <Component src={`${themedSrc}?reload=1`} themeId="dark" themeData={themeData} dotLottieRefCallback={dotLottieRefCallback} />,
+      <Component
+        src={`${themedSrc}?reload=1`}
+        themeId="dark"
+        themeData={themeData}
+        dotLottieRefCallback={dotLottieRefCallback}
+      />,
     );
     await vi.waitFor(() => {
       expect(onLoad).toHaveBeenCalledTimes(1);
