@@ -598,8 +598,10 @@ describe.each([
   });
 
   test('re-applies themeData after src changes', async () => {
-    const dotLottieRefCallback = vi.fn();
-    const themeData = JSON.stringify({ c0: { p: { a: 0, k: [1, 0, 1] } } });
+    const dotLottieRefCallback = vi.fn((instance: DotLottie | DotLottieWorker | null) => {
+      if (instance) vi.spyOn(instance, 'setThemeData');
+    });
+    const themeData = JSON.stringify({ rules: [{ id: 'c0', type: 'Color', value: [1, 0, 1] }] });
 
     const { rerender } = await render(
       <Component src={lottieSrc} autoplay themeData={themeData} dotLottieRefCallback={dotLottieRefCallback} />,
@@ -621,6 +623,9 @@ describe.each([
 
     const setThemeData = vi.spyOn(dotLottie, 'setThemeData');
 
+    await vi.waitFor(async () => {
+      expect(await setThemeData.mock.results.at(-1)?.value).toBe(true);
+    });
     setThemeData.mockClear();
 
     rerender(
@@ -631,9 +636,37 @@ describe.each([
       expect(onLoad).toHaveBeenCalledTimes(2);
     });
 
-    await vi.waitFor(() => {
+    await vi.waitFor(async () => {
       expect(setThemeData).toHaveBeenCalledWith(themeData);
+      expect(await setThemeData.mock.results.at(-1)?.value).toBe(true);
     });
+  });
+
+  test('preserves themeId when themeData is also provided on reload', async () => {
+    const themedSrc = new URL('../../../fixtures/multi_themes.lottie', import.meta.url).href;
+    const themeData = JSON.stringify({ rules: [{ id: 'c0', type: 'Color', value: [1, 0, 1] }] });
+    const dotLottieRefCallback = vi.fn();
+    const { rerender } = await render(
+      <Component src={themedSrc} themeId="dark" themeData={themeData} dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+    const instance = dotLottieRefCallback.mock.calls[0]?.[0];
+
+    await vi.waitFor(() => {
+      expect(instance?.isLoaded).toBe(true);
+      expect(instance?.activeThemeId).toBe('dark');
+    });
+    const setThemeData = vi.spyOn(instance, 'setThemeData');
+    const onLoad = vi.fn();
+
+    instance.addEventListener('load', onLoad);
+    rerender(
+      <Component src={`${themedSrc}?reload=1`} themeId="dark" themeData={themeData} dotLottieRefCallback={dotLottieRefCallback} />,
+    );
+    await vi.waitFor(() => {
+      expect(onLoad).toHaveBeenCalledTimes(1);
+      expect(instance.activeThemeId).toBe('dark');
+    });
+    expect(setThemeData).not.toHaveBeenCalled();
   });
 
   test.todo('calls dotLottie.setTheme & dotLottie.resetTheme when themeId prop changes', async () => {

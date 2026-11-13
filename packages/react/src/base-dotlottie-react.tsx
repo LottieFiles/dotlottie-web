@@ -133,6 +133,15 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
           ...configRef.current,
           canvas,
         });
+        const instance = dotLottieRef.current;
+
+        // The core clears theme data on every load. Attach to each new instance,
+        // including instances created after the canvas detaches and reattaches.
+        instance.addEventListener('load', () => {
+          if (themeDataRef.current && !configRef.current?.themeId) {
+            instance.setThemeData(themeDataRef.current);
+          }
+        });
       }
       // else: React 19 StrictMode double attach without detach — reuse the live instance
     } else if (dotLottieRef.current) {
@@ -270,25 +279,6 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
   useEffect(() => {
     dotLottieRef.current?.setThemeData(themeData ?? '');
   }, [themeData]);
-
-  useEffect(() => {
-    const instance = dotLottieRef.current;
-
-    if (!instance) return undefined;
-
-    // The core clears theme data on every load (e.g. when `src` changes), so re-apply it.
-    const reapplyThemeData = (): void => {
-      if (themeDataRef.current) {
-        instance.setThemeData(themeDataRef.current);
-      }
-    };
-
-    instance.addEventListener('load', reapplyThemeData);
-
-    return () => {
-      instance.removeEventListener('load', reapplyThemeData);
-    };
-  }, []);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: granular property deps avoid unnecessary setLayout calls when layout object reference changes
   useEffect(() => {
