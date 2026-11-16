@@ -2068,6 +2068,9 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_setmultisampled_f7f0562151e1ff91 = function(arg0, arg1) {
         getObject(arg0).multisampled = arg1 !== 0;
     };
+    imports.wbg.__wbg_setmuted_e93fc48340c43e67 = function(arg0, arg1) {
+        getObject(arg0).muted = arg1 !== 0;
+    };
     imports.wbg.__wbg_setocclusionqueryset_a2a4abf338fb3441 = function(arg0, arg1) {
         getObject(arg0).occlusionQuerySet = getObject(arg1);
     };
