@@ -109,10 +109,12 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
     stateMachineId,
   };
 
+  const themeDataRef = useRef(themeData);
   const configRef = useRef<Omit<BaseDotLottieProps<T>, 'createDotLottie' | 'dotLottieRefCallback'> | undefined>(config);
 
   dotLottieRefCallbackRef.current = dotLottieRefCallback;
   configRef.current = config;
+  themeDataRef.current = themeData;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: DotLottie instance must only be created once per canvas mount
   const setCanvasRef = useCallback((canvas: HTMLCanvasElement | null) => {
@@ -130,6 +132,15 @@ export const BaseDotLottieReact = <T extends DotLottie | DotLottieWorker>({
         dotLottieRef.current = createDotLottie({
           ...configRef.current,
           canvas,
+        });
+        const instance = dotLottieRef.current;
+
+        // The core clears theme data on every load. Attach to each new instance,
+        // including instances created after the canvas detaches and reattaches.
+        instance.addEventListener('load', () => {
+          if (themeDataRef.current && !configRef.current?.themeId) {
+            instance.setThemeData(themeDataRef.current);
+          }
         });
       }
       // else: React 19 StrictMode double attach without detach — reuse the live instance
