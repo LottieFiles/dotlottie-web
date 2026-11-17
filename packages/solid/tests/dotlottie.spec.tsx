@@ -1,15 +1,16 @@
 import type { Config } from '@lottiefiles/dotlottie-web';
 import { createRoot } from 'solid-js';
 import { describe, expect, it, vi } from 'vitest';
+import type { DotLottieSolidProps } from '../src/dotlottie';
 
-const captured: { canvasProps?: Record<string, unknown>; playerProps?: Record<string, unknown> } = {};
+const captured: { canvasProps?: DotLottieSolidProps; playerProps?: DotLottieSolidProps } = {};
 
 vi.mock('../src/use-dotlottie', () => ({
-  useDotLottie: (props: Record<string, unknown>) => {
+  useDotLottie: (props: DotLottieSolidProps) => {
     captured.playerProps = { ...props };
 
     return {
-      DotLottieComponent: (canvasProps: Record<string, unknown>) => {
+      DotLottieComponent: (canvasProps: DotLottieSolidProps) => {
         captured.canvasProps = { ...canvasProps };
 
         return null;
