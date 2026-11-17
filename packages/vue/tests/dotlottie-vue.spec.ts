@@ -1,10 +1,9 @@
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { createApp, h, nextTick, reactive } from 'vue';
 import type { App } from 'vue';
-
-import { DotLottieVue } from '../src';
+import { createApp, h, nextTick, reactive } from 'vue';
 import type { DotLottieVueInstance } from '../src';
+import { DotLottieVue } from '../src';
 
 // eslint-disable-next-line node/no-unsupported-features/node-builtins
 const lottieSrc = new URL('../../../fixtures/test.json', import.meta.url).href;
