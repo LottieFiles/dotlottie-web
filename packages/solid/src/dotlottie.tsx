@@ -33,6 +33,8 @@ export const DotLottieSolid = (props: DotLottieSolidProps): JSX.Element => {
     'stateMachineId',
     'stateMachineConfig',
     'assetResolver',
+    'backgroundColor',
+    'layout',
   ]);
 
   const { DotLottieComponent, dotLottie } = useDotLottie(dotLottieProps);

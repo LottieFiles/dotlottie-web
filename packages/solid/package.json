@@ -38,6 +38,7 @@
     "build": "tsdown",
     "dev": "tsdown --watch",
     "lint": "biome check --write .",
+    "test": "vitest run",
     "stats:ts": "tsc -p tsconfig.build.json --extendedDiagnostics",
     "type-check": "tsc --noEmit"
   },
