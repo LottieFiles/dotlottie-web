@@ -322,6 +322,16 @@ export const DotLottieVue = defineComponent({
         autoplay: shouldAutoplay.value,
       });
 
+      // The core clears theme data on every load, so apply `themeData` after each load,
+      // including the initial one and reloads triggered by a `src` change.
+      const instance = dotLottie;
+
+      instance.addEventListener('load', () => {
+        if (props.themeData && !themeId?.value) {
+          instance.setThemeData(props.themeData);
+        }
+      });
+
       if (playOnHover?.value) {
         canvas.value.addEventListener('mouseenter', hoverHandler);
         canvas.value.addEventListener('mouseleave', hoverHandler);
