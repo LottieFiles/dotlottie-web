@@ -1,5 +1,10 @@
 # @lottiefiles/dotlottie-solid
 
+## 0.8.3
+### Patch Changes
+
+- 3a2674e: fix: forward `backgroundColor` and `layout` to the player instead of spreading them onto the canvas element
+
 ## 0.8.2
 ### Patch Changes
 

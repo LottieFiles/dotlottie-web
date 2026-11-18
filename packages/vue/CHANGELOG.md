@@ -1,5 +1,10 @@
 # @lottiefiles/dotlottie-vue
 
+## 0.13.3
+### Patch Changes
+
+- 20a28e7: fix: apply `themeData` after the animation loads, so the initial value and later `src` changes keep the custom theme
+
 ## 0.13.2
 ### Patch Changes
 

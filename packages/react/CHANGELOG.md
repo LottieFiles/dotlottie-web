@@ -1,5 +1,10 @@
 # @lottiefiles/dotlottie-react
 
+## 0.22.3
+### Patch Changes
+
+- 9aa07ff: fix: re-apply `themeData` after the animation is reloaded (e.g. when `src` changes)
+
 ## 0.22.2
 ### Patch Changes
 
