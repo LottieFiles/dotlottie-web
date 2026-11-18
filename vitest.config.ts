@@ -20,6 +20,7 @@ export default defineConfig({
       'packages/react/vitest.config.ts',
       'packages/wc/vitest.config.ts',
       'packages/vue/vitest.config.ts',
+      'packages/solid/vitest.config.ts',
     ],
   },
 });
