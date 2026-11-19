@@ -735,4 +735,49 @@ describe.each([
     expect(stateMachineSetConfig).toHaveBeenCalledTimes(1);
     expect(stateMachineSetConfig).toHaveBeenCalledWith(config);
   });
+
+  test('calls stateMachineLoad and stateMachineStart when the stateMachineId property is set', async () => {
+    const { element } = render(elementName, { src: smSrc });
+
+    const dotLottie = element.dotLottie as DotLottie | DotLottieWorker;
+
+    await vi.waitFor(() => {
+      expect(dotLottie.isLoaded).toBe(true);
+    });
+
+    const stateMachineLoad = vi.spyOn(dotLottie, 'stateMachineLoad').mockReturnValue(true);
+    const stateMachineStart = vi.spyOn(dotLottie, 'stateMachineStart');
+    const stateMachineStop = vi.spyOn(dotLottie, 'stateMachineStop');
+
+    element.stateMachineId = 'testSM';
+
+    expect(stateMachineLoad).toHaveBeenCalledTimes(1);
+    expect(stateMachineLoad).toHaveBeenCalledWith('testSM');
+    expect(stateMachineStart).toHaveBeenCalledTimes(1);
+    expect(element.stateMachineId).toBe('testSM');
+
+    element.stateMachineId = undefined;
+
+    expect(stateMachineStop).toHaveBeenCalledTimes(1);
+  });
+
+  test('calls stateMachineSetConfig when the stateMachineConfig property is set', async () => {
+    const { element } = render(elementName, { src: smSrc });
+
+    const dotLottie = element.dotLottie as DotLottie | DotLottieWorker;
+
+    await vi.waitFor(() => {
+      expect(dotLottie.isLoaded).toBe(true);
+    });
+
+    const stateMachineSetConfig = vi.spyOn(dotLottie, 'stateMachineSetConfig');
+
+    const config = { openUrlPolicy: { whitelist: ['*'] } };
+
+    element.stateMachineConfig = config;
+
+    expect(stateMachineSetConfig).toHaveBeenCalledTimes(1);
+    expect(stateMachineSetConfig).toHaveBeenCalledWith(config);
+    expect(element.stateMachineConfig).toEqual(config);
+  });
 });

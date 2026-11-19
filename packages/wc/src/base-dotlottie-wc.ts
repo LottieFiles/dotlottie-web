@@ -33,6 +33,10 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
 
   private _themeId: Config['themeId'];
 
+  private _stateMachineId: Config['stateMachineId'];
+
+  private _stateMachineConfig: Config['stateMachineConfig'];
+
   private _isPlayerReady(): boolean {
     return this.dotLottie?.isReady ?? false;
   }
@@ -193,10 +197,35 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
   public workerId?: string;
 
   @property({ type: String })
-  public stateMachineId: Config['stateMachineId'];
+  public get stateMachineId(): Config['stateMachineId'] {
+    return this._stateMachineId;
+  }
+
+  public set stateMachineId(value: Config['stateMachineId']) {
+    this._stateMachineId = value;
+
+    if (!this.dotLottie?.isLoaded) {
+      return;
+    }
+
+    if (value) {
+      if (this.dotLottie.stateMachineLoad(value)) {
+        this.dotLottie.stateMachineStart();
+      }
+    } else {
+      this.dotLottie.stateMachineStop();
+    }
+  }
 
   @property({ type: Object })
-  public stateMachineConfig: Config['stateMachineConfig'];
+  public get stateMachineConfig(): Config['stateMachineConfig'] {
+    return this._stateMachineConfig;
+  }
+
+  public set stateMachineConfig(value: Config['stateMachineConfig']) {
+    this._stateMachineConfig = value;
+    this.dotLottie?.stateMachineSetConfig(value ?? null);
+  }
 
   /**
    * Supplies bytes for assets the player cannot load itself. Set it as a property before `src` or `data`.
@@ -233,8 +262,8 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
       useFrameInterpolation: this._useFrameInterpolation,
       themeId: this._themeId,
       backgroundColor: this._backgroundColor,
-      stateMachineConfig: this.stateMachineConfig,
-      stateMachineId: this.stateMachineId,
+      stateMachineConfig: this._stateMachineConfig,
+      stateMachineId: this._stateMachineId,
       assetResolver: this.assetResolver,
     };
   }
@@ -295,24 +324,6 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
         data: value,
         animationId: this._animationId,
       });
-    }
-
-    if (name === 'statemachineid') {
-      if (this.dotLottie.isLoaded) {
-        if (value) {
-          const smLoaded = this.dotLottie.stateMachineLoad(value);
-
-          if (smLoaded) {
-            this.dotLottie.stateMachineStart();
-          }
-        } else {
-          this.dotLottie.stateMachineStop();
-        }
-      }
-    }
-
-    if (name === 'statemachineconfig') {
-      this.dotLottie.stateMachineSetConfig(value ? JSON.parse(value) : null);
     }
   }
 
