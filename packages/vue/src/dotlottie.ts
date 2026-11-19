@@ -42,7 +42,11 @@ export const DotLottieVue = defineComponent({
     speed: { type: Number as PropType<DotLottieVueProps['speed']>, required: false },
     volume: { type: Number as PropType<DotLottieVueProps['volume']>, required: false },
     src: { type: String as PropType<DotLottieVueProps['src']>, required: false },
-    useFrameInterpolation: { type: Boolean as PropType<DotLottieVueProps['useFrameInterpolation']>, required: false },
+    useFrameInterpolation: {
+      type: Boolean as PropType<DotLottieVueProps['useFrameInterpolation']>,
+      required: false,
+      default: undefined,
+    },
     marker: { type: String as PropType<DotLottieVueProps['marker']>, required: false },
     playOnHover: { type: Boolean as PropType<DotLottieVueProps['playOnHover']>, required: false },
     themeData: { type: String as PropType<DotLottieVueProps['themeData']>, required: false },

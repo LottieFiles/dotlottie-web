@@ -75,3 +75,33 @@ describe('DotLottieVue themeData', () => {
     });
   });
 });
+
+describe('DotLottieVue useFrameInterpolation', () => {
+  let app: App | undefined;
+
+  afterEach(() => {
+    app?.unmount();
+    app = undefined;
+  });
+
+  test('keeps the core default (true) when the prop is omitted', async () => {
+    let component: DotLottieVueInstance | null = null;
+
+    app = createApp({
+      render: () =>
+        h(DotLottieVue, {
+          src: lottieSrc,
+          ref: (el: unknown) => {
+            component = el as DotLottieVueInstance | null;
+          },
+        }),
+    });
+    app.mount(document.body.appendChild(document.createElement('div')));
+
+    await vi.waitFor(() => {
+      expect(component?.getDotLottieInstance()?.isLoaded).toBe(true);
+    });
+
+    expect(component?.getDotLottieInstance()?.useFrameInterpolation).toBe(true);
+  });
+});
