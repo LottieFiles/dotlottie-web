@@ -202,6 +202,8 @@ export abstract class BaseDotLottieWC<T extends DotLottie | DotLottieWorker> ext
   }
 
   public set stateMachineId(value: Config['stateMachineId']) {
+    if (value === this._stateMachineId) return;
+
     this._stateMachineId = value;
 
     if (!this.dotLottie?.isLoaded) {

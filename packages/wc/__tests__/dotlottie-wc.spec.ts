@@ -761,6 +761,25 @@ describe.each([
     expect(stateMachineStop).toHaveBeenCalledTimes(1);
   });
 
+  test('does not restart the state machine when the stateMachineId property is set to the same value', async () => {
+    const { element } = render(elementName, { src: smSrc });
+
+    const dotLottie = element.dotLottie as DotLottie | DotLottieWorker;
+
+    await vi.waitFor(() => {
+      expect(dotLottie.isLoaded).toBe(true);
+    });
+
+    const stateMachineLoad = vi.spyOn(dotLottie, 'stateMachineLoad').mockReturnValue(true);
+    const stateMachineStart = vi.spyOn(dotLottie, 'stateMachineStart');
+
+    element.stateMachineId = 'testSM';
+    element.stateMachineId = 'testSM';
+
+    expect(stateMachineLoad).toHaveBeenCalledTimes(1);
+    expect(stateMachineStart).toHaveBeenCalledTimes(1);
+  });
+
   test('calls stateMachineSetConfig when the stateMachineConfig property is set', async () => {
     const { element } = render(elementName, { src: smSrc });
 
