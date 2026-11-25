@@ -176,11 +176,14 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
 
     if (!dotLottieInstance) return;
 
-    if (typeof config.segment === 'object' && Array.isArray(config.segment) && dotLottieInstance.isLoaded) {
-      const startFrame = config.segment[0];
-      const endFrame = config.segment[1];
+    const segment = config.segment;
+
+    if (Array.isArray(segment) && dotLottieInstance.isLoaded) {
+      const [startFrame, endFrame] = segment;
 
       dotLottieInstance.setSegment(startFrame, endFrame);
+    } else if (segment === undefined) {
+      dotLottieInstance.resetSegment();
     }
   });
   // background color

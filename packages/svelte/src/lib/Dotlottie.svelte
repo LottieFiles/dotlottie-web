@@ -168,6 +168,8 @@
 		) {
 			const [start, end] = currentSegment;
 			dotLottie.setSegment(start, end);
+		} else if (currentSegment === undefined) {
+			dotLottie?.resetSegment();
 		}
 	});
 
