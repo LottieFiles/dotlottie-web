@@ -61,6 +61,31 @@ describe('DotLottieSvelte', () => {
     });
   });
 
+  test('resets the segment when the segment prop is cleared', async () => {
+    const dotLottieRefCallback = vi.fn<(player: DotLottie) => void>();
+    const props = { src: dotLottieSrc, dotLottieRefCallback };
+    const { rerender } = render(DotLottieSvelte, props);
+
+    const player = await vi.waitFor(() => {
+      const instance = dotLottieRefCallback.mock.calls[0]?.[0];
+
+      if (!instance?.isLoaded) throw new Error('expected a loaded player');
+
+      return instance;
+    });
+    const setSegment = vi.spyOn(player, 'setSegment');
+    const resetSegment = vi.spyOn(player, 'resetSegment');
+
+    await rerender({ ...props, segment: [0, 10] });
+
+    expect(setSegment).toHaveBeenCalledWith(0, 10);
+
+    await rerender({ ...props, segment: undefined });
+
+    expect(resetSegment).toHaveBeenCalledTimes(1);
+    expect(player.segment).toEqual([0, player.totalFrames - 1]);
+  });
+
   test('calls dotLottie.setLoop when loop prop changes', async () => {
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();

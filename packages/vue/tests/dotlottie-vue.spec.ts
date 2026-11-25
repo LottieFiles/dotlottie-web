@@ -12,7 +12,7 @@ const dotLottieSrc = new URL('../../../fixtures/test.lottie', import.meta.url).h
 
 const themeData = JSON.stringify({ rules: [{ id: 'c0', type: 'Color', value: [1, 0, 1] }] });
 
-describe('DotLottieVue themeData', () => {
+describe('DotLottieVue', () => {
   let app: App | undefined;
 
   afterEach(() => {
@@ -73,5 +73,28 @@ describe('DotLottieVue themeData', () => {
       expect(setThemeData).toHaveBeenCalledTimes(2);
       expect(setThemeData).toHaveBeenLastCalledWith(themeData);
     });
+  });
+
+  test('resets the segment when the segment prop is cleared', async () => {
+    const props = reactive<{ src: string; segment?: [number, number] }>({ src: dotLottieSrc });
+    const { instance } = mount(props);
+
+    await vi.waitFor(() => expect(instance().isLoaded).toBe(true));
+
+    const player = instance();
+    const setSegment = vi.spyOn(player, 'setSegment');
+    const resetSegment = vi.spyOn(player, 'resetSegment');
+
+    props.segment = [0, 10];
+    await nextTick();
+
+    expect(setSegment).toHaveBeenCalledWith(0, 10);
+    expect(player.segment).toEqual([0, 10]);
+
+    props.segment = undefined;
+    await nextTick();
+
+    expect(resetSegment).toHaveBeenCalledTimes(1);
+    expect(player.segment).toEqual([0, player.totalFrames - 1]);
   });
 });
