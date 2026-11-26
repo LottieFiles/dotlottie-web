@@ -68,6 +68,35 @@ describe('DotLottieWorker canvas adoption (React StrictMode pattern)', () => {
     canvas.remove();
   });
 
+  test('destroy before the create reply releases the worker-side instance', async () => {
+    const canvas = createCanvas();
+    const postSpy = vi.spyOn(Worker.prototype, 'postMessage');
+    const player = new DotLottieWorker({ canvas, src, autoplay: true });
+
+    try {
+      const createRequest = postSpy.mock.calls
+        .map(([message]) => message as { method: string; params: { instanceId: string } })
+        .find((message) => message.method === 'create');
+
+      expect(createRequest).toBeDefined();
+      await player.destroy();
+
+      await vi.waitFor(() => {
+        expect(postSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ method: 'destroy', params: { instanceId: createRequest?.params.instanceId } }),
+          [],
+        );
+      });
+
+      postSpy.mockClear();
+      await player.play();
+      expect(postSpy.mock.calls.some(([message]) => message.method === 'play')).toBe(false);
+    } finally {
+      await player.destroy();
+      canvas.remove();
+    }
+  });
+
   test('destroy after load → immediate re-create cancels the pending teardown and adopts', async () => {
     const canvas = createCanvas();
     const transferSpy = vi.spyOn(canvas, 'transferControlToOffscreen');

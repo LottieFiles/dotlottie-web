@@ -186,6 +186,8 @@ export class DotLottieWorker {
 
   private _created: boolean = false;
 
+  private _creating: boolean = false;
+
   private _retired: boolean = false;
 
   // Bound event listeners for state machine
@@ -259,6 +261,8 @@ export class DotLottieWorker {
   }
 
   private async _handleWorkerEvent(event: MessageEvent): Promise<void> {
+    if (this._retired) return;
+
     const rpcResponse: RpcResponse<
       | 'onComplete'
       | 'onLoad'
@@ -480,6 +484,7 @@ export class DotLottieWorker {
       offscreen = this._canvas;
     }
 
+    this._creating = true;
     const { instanceId } = await this._sendMessage(
       'create',
       {
@@ -491,14 +496,15 @@ export class DotLottieWorker {
         ...getCanvasSize(this._canvas, config.renderConfig?.devicePixelRatio || getDefaultDPR()),
       },
       [offscreen],
-    );
+    ).finally(() => {
+      this._creating = false;
+    });
 
     if (instanceId !== this._id) {
       throw new Error('Instance ID mismatch');
     }
 
-    // Another facade may have adopted this worker-side instance while the create RPC
-    // was in flight.
+    // This facade may have been destroyed or replaced while the create RPC was in flight.
     if (this._retired) return;
 
     this._created = true;
@@ -630,7 +636,7 @@ export class DotLottieWorker {
       throw new Error('Worker-based DotLottie requires HTMLCanvasElement or OffscreenCanvas');
     }
 
-    if (this._canvas === canvas) return;
+    if (this._retired || this._canvas === canvas) return;
 
     if (this._created && this._canvas !== null) {
       throw new Error('Cannot change canvas after worker instance is already created with a different canvas.');
@@ -916,7 +922,10 @@ export class DotLottieWorker {
    * @returns Promise that resolves when the facade has been made inert
    */
   public async destroy(): Promise<void> {
-    if (!this._created) return;
+    if (this._retired || (!this._created && !this._creating)) return;
+
+    // The worker handles create synchronously, so a destroy posted to the same
+    // worker runs after create even if its reply has not arrived yet.
 
     const canvas = this._canvas;
     const entry = canvas instanceof HTMLCanvasElement ? canvasRegistry.get(canvas) : undefined;
