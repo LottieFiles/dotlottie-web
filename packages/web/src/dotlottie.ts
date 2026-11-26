@@ -126,6 +126,8 @@ export class DotLottie {
 
   private _srcFetchAbort: AbortController | null = null;
 
+  private _loadGeneration = 0;
+
   protected _context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
 
   private readonly _eventManager: EventManager;
@@ -205,6 +207,7 @@ export class DotLottie {
 
     if (config.volume !== undefined) this.setVolume(config.volume);
 
+    const loadGeneration = this._loadGeneration;
     let srcPrefetch: Promise<string | ArrayBuffer> | null = null;
 
     if (config.src && !config.data) {
@@ -216,6 +219,8 @@ export class DotLottie {
 
     this._initWasm()
       .then(() => {
+        if (loadGeneration !== this._loadGeneration) return;
+
         this._dotLottieCore = this._createCore();
 
         // Apply config via individual setters
@@ -249,6 +254,9 @@ export class DotLottie {
 
         this._eventManager.dispatch({ type: 'ready' });
 
+        // A ready listener can replace the initial animation or destroy the player.
+        if (loadGeneration !== this._loadGeneration) return;
+
         if (config.data) {
           if (this._canvas) {
             this._loadFromData(config.data);
@@ -268,7 +276,9 @@ export class DotLottie {
         }
       })
       .catch((error) => {
-        this._srcFetchAbort?.abort();
+        if (loadGeneration !== this._loadGeneration) return;
+
+        this._invalidateAnimationLoad();
         console.error('[dotlottie-web] Initialization failed:', error);
         this._eventManager.dispatch({
           type: 'loadError',
@@ -649,10 +659,32 @@ export class DotLottie {
     }
   }
 
+  private _invalidateAnimationLoad(): void {
+    const previousFetch = this._srcFetchAbort;
+
+    this._loadGeneration += 1;
+    this._pendingLoad = null;
+    this._srcFetchAbort = null;
+    previousFetch?.abort();
+  }
+
   private _loadFromSrc(src: string, prefetched?: Promise<string | ArrayBuffer> | null): void {
-    (prefetched ?? this._fetchData(src))
-      .then((data) => this._loadFromData(data))
-      .catch((error) => this._dispatchError(`Failed to load animation data from URL: ${src}. ${error}`));
+    const loadGeneration = this._loadGeneration;
+    const controller = prefetched ? this._srcFetchAbort : new AbortController();
+
+    this._srcFetchAbort = controller;
+    (prefetched ?? this._fetchData(src, controller?.signal))
+      .then((data) => {
+        if (loadGeneration === this._loadGeneration) this._loadFromData(data);
+      })
+      .catch((error) => {
+        if (loadGeneration === this._loadGeneration) {
+          this._dispatchError(`Failed to load animation data from URL: ${src}. ${error}`);
+        }
+      })
+      .finally(() => {
+        if (loadGeneration === this._loadGeneration) this._srcFetchAbort = null;
+      });
   }
 
   /**
@@ -899,10 +931,13 @@ export class DotLottie {
   /**
    * Dynamically loads a new animation, replacing the current one if any.
    * Stops current playback, cleans up resources, and loads from the provided src or data.
+   * A newer animation load supersedes an earlier request that is still pending.
    * @param config - Configuration for the new animation (all Config properties except canvas)
    */
   public load(config: Omit<Config, 'canvas'>): void {
     if (this._dotLottieCore === null) return;
+
+    if (config.data || config.src) this._invalidateAnimationLoad();
 
     this._stopAnimationLoop();
 
@@ -1378,16 +1413,13 @@ export class DotLottie {
    * Stops playback, removes event listeners, and frees WASM memory. Call when the player is no longer needed.
    */
   public destroy(): void {
+    this._invalidateAnimationLoad();
     this._stopAnimationLoop();
 
     // Reset state machine status
     this._isStateMachineRunning = false;
 
     this._cleanupCanvas();
-
-    this._srcFetchAbort?.abort();
-    this._srcFetchAbort = null;
-    this._pendingLoad = null;
 
     const core = this._dotLottieCore;
 
