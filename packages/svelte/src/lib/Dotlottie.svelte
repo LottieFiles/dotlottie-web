@@ -210,7 +210,7 @@
 			dotLottie.load({
 				src,
 				...untrack(() => ({
-					autoplay,
+					autoplay: autoplay && !playOnHover,
 					loop,
 					loopCount,
 					speed,
@@ -244,7 +244,7 @@
 				data,
 				...untrack(() => ({
 					src,
-					autoplay,
+					autoplay: autoplay && !playOnHover,
 					loop,
 					loopCount,
 					speed,

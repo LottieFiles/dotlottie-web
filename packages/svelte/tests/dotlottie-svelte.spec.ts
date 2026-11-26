@@ -520,7 +520,7 @@ describe('DotLottieSvelte', () => {
     expect(dotLottie?.renderConfig).toEqual(defaultRenderConfig);
   });
 
-  test('calls dotLottie.load when data prop changes', async () => {
+  test.each([false, true])('calls dotLottie.load when data changes with playOnHover=%s', async (playOnHover) => {
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
@@ -530,6 +530,7 @@ describe('DotLottieSvelte', () => {
     const { rerender } = render(DotLottieSvelte, {
       data: animationData,
       autoplay: true,
+      playOnHover,
       dotLottieRefCallback,
     });
 
@@ -550,7 +551,14 @@ describe('DotLottieSvelte', () => {
     response = await fetch(dotLottieSrc);
     const dotLottieAnimationData = await response.arrayBuffer();
 
-    rerender({ data: dotLottieAnimationData, autoplay: true, loop: true, speed: 2, dotLottieRefCallback });
+    rerender({
+      data: dotLottieAnimationData,
+      autoplay: true,
+      playOnHover,
+      loop: true,
+      speed: 2,
+      dotLottieRefCallback,
+    });
 
     await vi.waitFor(() => {
       expect(load).toHaveBeenCalledTimes(1);
@@ -560,19 +568,20 @@ describe('DotLottieSvelte', () => {
       expect.objectContaining({
         data: dotLottieAnimationData,
         loop: true,
-        autoplay: true,
+        autoplay: !playOnHover,
         speed: 2,
       }),
     );
   });
 
-  test('calls dotLottie.load when src prop changes', async () => {
+  test.each([false, true])('calls dotLottie.load when src changes with playOnHover=%s', async (playOnHover) => {
     const onLoad = vi.fn();
     const dotLottieRefCallback = vi.fn();
 
     const { rerender } = render(DotLottieSvelte, {
       src: dotLottieSrc,
       autoplay: true,
+      playOnHover,
       dotLottieRefCallback,
     });
 
@@ -590,7 +599,14 @@ describe('DotLottieSvelte', () => {
 
     const load = vi.spyOn(dotLottie, 'load');
 
-    rerender({ src: lottieSrc, autoplay: true, loop: true, speed: 2, dotLottieRefCallback });
+    rerender({
+      src: lottieSrc,
+      autoplay: true,
+      playOnHover,
+      loop: true,
+      speed: 2,
+      dotLottieRefCallback,
+    });
 
     await vi.waitFor(() => {
       expect(load).toHaveBeenCalledTimes(1);
@@ -600,7 +616,7 @@ describe('DotLottieSvelte', () => {
       expect.objectContaining({
         src: lottieSrc,
         loop: true,
-        autoplay: true,
+        autoplay: !playOnHover,
         speed: 2,
       }),
     );
