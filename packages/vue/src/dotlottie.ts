@@ -169,6 +169,8 @@ export const DotLottieVue = defineComponent({
 
         if (typeof startFrame === 'number' && typeof endFrame === 'number') {
           dotLottie.setSegment(startFrame, endFrame);
+        } else if (newVal === undefined) {
+          dotLottie.resetSegment();
         }
       },
     );
