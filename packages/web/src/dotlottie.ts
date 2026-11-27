@@ -252,6 +252,11 @@ export class DotLottie {
 
         this._onCoreCreated();
 
+        // Apply the default before ready listeners can load a replacement with its own color.
+        if (config.backgroundColor) {
+          this.setBackgroundColor(config.backgroundColor);
+        }
+
         this._eventManager.dispatch({ type: 'ready' });
 
         // A ready listener can replace the initial animation or destroy the player.
@@ -270,19 +275,23 @@ export class DotLottie {
             this._pendingLoad = { src: config.src, dataPromise: srcPrefetch };
           }
         }
-
-        if (config.backgroundColor) {
-          this.setBackgroundColor(config.backgroundColor);
-        }
       })
       .catch((error) => {
-        if (loadGeneration !== this._loadGeneration) return;
+        const superseded = loadGeneration !== this._loadGeneration;
 
-        this._invalidateAnimationLoad();
-        console.error('[dotlottie-web] Initialization failed:', error);
+        // A destroyed player is silent, but a replacement load may still be running.
+        if (superseded && this._dotLottieCore === null) return;
+
+        if (!superseded) this._invalidateAnimationLoad();
+
+        const message = superseded ? 'Ready listener failed' : 'Failed to load wasm module';
+        console.error(
+          superseded ? '[dotlottie-web] Ready listener failed:' : '[dotlottie-web] Initialization failed:',
+          error,
+        );
         this._eventManager.dispatch({
           type: 'loadError',
-          error: new Error(`Failed to load wasm module: ${error}`),
+          error: new Error(`${message}: ${error}`),
         });
       });
   }
