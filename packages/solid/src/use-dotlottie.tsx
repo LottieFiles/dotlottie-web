@@ -216,7 +216,7 @@ export const useDotLottie = (config: DotLottieConfig): UseDotLottieReturn => {
 
         if (!dotLottieInstance) return;
 
-        if (typeof config.data === 'string') {
+        if (config.data !== undefined) {
           dotLottieInstance.load({
             data: config.data,
             ...config,
