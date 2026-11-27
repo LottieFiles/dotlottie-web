@@ -35,7 +35,7 @@ WASM_RUSTFLAGS := -C target-feature=+bulk-memory
 WASM_OPT_FLAGS := --enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals
 
 # Release profile for the engine build.
-WASM_CARGO_PROFILE ?= CARGO_PROFILE_RELEASE_OPT_LEVEL=2 CARGO_PROFILE_RELEASE_LTO=fat CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1 CARGO_PROFILE_RELEASE_PANIC=abort
+WASM_CARGO_PROFILE ?= CARGO_PROFILE_RELEASE_OPT_LEVEL=2 CARGO_PROFILE_RELEASE_LTO=fat CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1 CARGO_PROFILE_RELEASE_PANIC=abort CARGO_PROFILE_RELEASE_STRIP=symbols
 
 WASM_FEATURES_COMMON ?= tvg,tvg-cpu,tvg-png,tvg-jpg,tvg-webp,tvg-ttf,tvg-otf,tvg-lottie-expressions,dotlottie,theming,state-machines,audio,audio-wav,audio-flac,audio-ogg,audio-m4a,wasm-bindgen-api
 WASM_FEATURES_SW     ?= $(WASM_FEATURES_COMMON)
