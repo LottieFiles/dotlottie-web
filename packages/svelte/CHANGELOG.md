@@ -1,5 +1,10 @@
 # @lottiefiles/dotlottie-svelte
 
+## 0.12.3
+### Patch Changes
+
+- 93b68a7: Preserve hover-only playback when the animation source or data changes.
+
 ## 0.12.2
 ### Patch Changes
 
